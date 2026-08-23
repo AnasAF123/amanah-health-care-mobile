@@ -1,0 +1,68 @@
+import 'package:flutter/material.dart';
+import 'package:smooth_app/generic_lib/animations/rive_animation_player.dart';
+import 'package:smooth_app/generic_lib/bottom_sheets/smooth_bottom_sheet.dart';
+import 'package:smooth_app/generic_lib/design_constants.dart';
+import 'package:smooth_app/l10n/app_localizations.dart';
+import 'package:smooth_app/resources/app_icons.dart' as icons;
+import 'package:smooth_app/widgets/smooth_indicator_icon.dart';
+import 'package:smooth_app/widgets/text/text_highlighter.dart';
+
+class PinchToZoomExplainer extends StatelessWidget {
+  const PinchToZoomExplainer({this.backgroundColor, this.customBorder});
+
+  final Color? backgroundColor;
+  final ShapeBorder? customBorder;
+
+  @override
+  Widget build(BuildContext context) {
+    final AppLocalizations appLocalizations = AppLocalizations.of(context);
+
+    return ExcludeSemantics(
+      child: Tooltip(
+        message: appLocalizations
+            .edit_product_form_item_ingredients_pinch_to_zoom_tooltip,
+        child: InkWell(
+          customBorder: customBorder ?? const CircleBorder(),
+          onTap: () {
+            showSmoothModalSheet(
+              context: context,
+              builder: (BuildContext context) {
+                final double width = MediaQuery.sizeOf(context).width * 0.5;
+
+                return SmoothModalSheet(
+                  title: appLocalizations
+                      .edit_product_form_item_ingredients_pinch_to_zoom_title,
+                  prefixIndicator: true,
+                  body: SafeArea(
+                    child: Column(
+                      children: <Widget>[
+                        TextWithBoldParts(
+                          text: appLocalizations
+                              .edit_product_form_item_ingredients_pinch_to_zoom_message,
+                          textStyle: const TextStyle(fontSize: 15.0),
+                        ),
+                        const SizedBox(height: LARGE_SPACE),
+                        ExcludeSemantics(
+                          child: RiveAnimationPlayer(
+                            'assets/animations/explanations.riv',
+                            artboard: 'pinch-to-zoom',
+                            size: Size(width, (width * 172.0) / 247.0),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+          child: SmoothIndicatorIcon(
+            customBorder: customBorder,
+            backgroundColor: backgroundColor,
+            icon: const icons.PinchToZoom(),
+          ),
+        ),
+      ),
+    );
+  }
+}
