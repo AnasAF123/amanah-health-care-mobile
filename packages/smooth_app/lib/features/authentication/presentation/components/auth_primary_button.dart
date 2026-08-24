@@ -18,6 +18,7 @@ class AuthPrimaryButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final Color backgroundColor = theme.colorScheme.primary;
     final Color foregroundColor = theme.colorScheme.onPrimary;
+    final bool disabled = onPressed == null && !loading;
 
     return SizedBox(
       width: double.infinity,
@@ -31,8 +32,12 @@ class AuthPrimaryButton extends StatelessWidget {
             elevation: 0,
             backgroundColor: backgroundColor,
             foregroundColor: foregroundColor,
-            disabledBackgroundColor: backgroundColor.withValues(alpha: 0.72),
-            disabledForegroundColor: foregroundColor.withValues(alpha: 0.72),
+            disabledBackgroundColor: disabled
+                ? theme.colorScheme.onSurface.withValues(alpha: 0.12)
+                : backgroundColor.withValues(alpha: 0.72),
+            disabledForegroundColor: disabled
+                ? theme.colorScheme.onSurface.withValues(alpha: 0.42)
+                : foregroundColor.withValues(alpha: 0.72),
             shape: const RoundedRectangleBorder(
               borderRadius: CIRCULAR_BORDER_RADIUS,
             ),
@@ -49,13 +54,29 @@ class AuthPrimaryButton extends StatelessWidget {
                       color: foregroundColor,
                     ),
                   )
-                : Text(
-                    label,
+                : Row(
                     key: const ValueKey<String>('label'),
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: foregroundColor,
-                      fontWeight: FontWeight.w900,
-                    ),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Flexible(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: foregroundColor,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: SMALL_SPACE),
+                      Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 19,
+                        color: foregroundColor,
+                      ),
+                    ],
                   ),
           ),
         ),

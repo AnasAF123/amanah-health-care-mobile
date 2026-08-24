@@ -15,7 +15,6 @@ class SignUpContent extends StatelessWidget {
     required this.phoneController,
     required this.passwordController,
     required this.confirmPasswordController,
-    required this.onAppleAuth,
     required this.onGoogleAuth,
     required this.onCreateAccount,
     required this.onSwitchToSignIn,
@@ -29,7 +28,6 @@ class SignUpContent extends StatelessWidget {
   final TextEditingController phoneController;
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
-  final VoidCallback onAppleAuth;
   final VoidCallback onGoogleAuth;
   final VoidCallback onCreateAccount;
   final VoidCallback onSwitchToSignIn;
@@ -106,13 +104,6 @@ class SignUpContent extends StatelessWidget {
             label: 'Daftar',
             loading: loadingProvider == AuthProviderType.email,
             onPressed: onCreateAccount,
-          ),
-          const SizedBox(height: MEDIUM_SPACE),
-          SocialAuthButton(
-            provider: AuthProviderType.apple,
-            label: 'Lanjutkan dengan Apple',
-            loading: loadingProvider == AuthProviderType.apple,
-            onPressed: onAppleAuth,
           ),
           const SizedBox(height: LARGE_SPACE),
           const AuthDivider(),

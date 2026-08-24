@@ -33,9 +33,9 @@ class AuthInputField extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Color borderColor = theme.colorScheme.outlineVariant.withValues(
-      alpha: 0.86,
+      alpha: 0.56,
     );
-    final Color iconColor = theme.colorScheme.onSurface.withValues(alpha: 0.54);
+    final Color iconColor = theme.colorScheme.onSurface.withValues(alpha: 0.46);
 
     return Semantics(
       label: label,
@@ -57,13 +57,15 @@ class AuthInputField extends StatelessWidget {
           constraints: const BoxConstraints(minHeight: 52),
           hintText: hintText,
           hintStyle: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.44),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
             fontWeight: FontWeight.w500,
           ),
           prefixIcon: Icon(leadingIcon, size: 20, color: iconColor),
           suffixIcon: trailing,
           filled: true,
-          fillColor: theme.colorScheme.surface,
+          fillColor: theme.brightness == Brightness.dark
+              ? theme.colorScheme.surface
+              : const Color(0xFFFFFFFF),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: LARGE_SPACE,
             vertical: 14,
@@ -79,8 +81,8 @@ class AuthInputField extends StatelessWidget {
           focusedBorder: OutlineInputBorder(
             borderRadius: CIRCULAR_BORDER_RADIUS,
             borderSide: BorderSide(
-              color: theme.colorScheme.primary,
-              width: 1.4,
+              color: theme.colorScheme.primary.withValues(alpha: 0.78),
+              width: 1.2,
             ),
           ),
           errorBorder: OutlineInputBorder(

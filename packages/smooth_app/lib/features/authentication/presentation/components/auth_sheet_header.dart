@@ -32,9 +32,9 @@ class AuthSheetHeader extends StatelessWidget {
               onPressed: onDismiss,
               style: IconButton.styleFrom(
                 fixedSize: const Size(MINIMUM_TOUCH_SIZE, MINIMUM_TOUCH_SIZE),
-                backgroundColor: theme.colorScheme.secondary.withValues(
-                  alpha: 0.68,
-                ),
+                backgroundColor: theme.brightness == Brightness.dark
+                    ? theme.colorScheme.secondary.withValues(alpha: 0.36)
+                    : const Color(0xFFF3F7FB),
                 foregroundColor: theme.colorScheme.onSurface,
               ),
               icon: const Icon(Icons.close_rounded, size: 20),
@@ -55,19 +55,19 @@ class AuthSheetHeader extends StatelessWidget {
           ),
           style: theme.textTheme.headlineSmall?.copyWith(
             color: theme.colorScheme.onSurface,
-            fontSize: 26,
+            fontSize: 28,
             fontWeight: FontWeight.w900,
-            height: 1.08,
+            height: 1.04,
           ),
         ),
-        const SizedBox(height: SMALL_SPACE),
+        const SizedBox(height: MEDIUM_SPACE),
         Text(
           description,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.62),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.58),
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            height: 1.42,
+            height: 1.38,
           ),
         ),
       ],

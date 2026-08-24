@@ -6,6 +6,10 @@ import 'package:smooth_app/features/authentication/domain/amanah_auth_user.dart'
 import 'package:smooth_app/features/authentication/presentation/components/auth_sheet_container.dart';
 import 'package:smooth_app/features/authentication/presentation/components/auth_sheet_header.dart';
 import 'package:smooth_app/features/authentication/presentation/components/social_auth_button.dart';
+import 'package:smooth_app/features/authentication/presentation/organisms/change_password_content.dart';
+import 'package:smooth_app/features/authentication/presentation/organisms/forgot_password_content.dart';
+import 'package:smooth_app/features/authentication/presentation/organisms/otp_verification_content.dart';
+import 'package:smooth_app/features/authentication/presentation/organisms/password_changed_success_content.dart';
 import 'package:smooth_app/features/authentication/presentation/organisms/sign_in_content.dart';
 import 'package:smooth_app/features/authentication/presentation/organisms/sign_up_content.dart';
 import 'package:smooth_app/features/authentication/presentation/state/auth_ui_state.dart';
@@ -30,6 +34,8 @@ class AuthBottomSheetScreen extends StatefulWidget {
 class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
   final GlobalKey<FormState> _signInFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _signUpFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _forgotPasswordFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _changePasswordFormKey = GlobalKey<FormState>();
   final TextEditingController _identifierController = TextEditingController(
     text: 'dokter@amanah.health',
   );
@@ -42,6 +48,13 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+  final TextEditingController _resetEmailController = TextEditingController();
+  final TextEditingController _resetPasswordController =
+      TextEditingController();
+  final TextEditingController _resetConfirmPasswordController =
+      TextEditingController();
+  final List<TextEditingController> _otpControllers =
+      List<TextEditingController>.generate(6, (_) => TextEditingController());
 
   AuthSheetMode _mode = AuthSheetMode.signIn;
   AuthProviderType? _loadingProvider;
@@ -58,6 +71,12 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     _phoneController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
+    _resetEmailController.dispose();
+    _resetPasswordController.dispose();
+    _resetConfirmPasswordController.dispose();
+    for (final TextEditingController controller in _otpControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -103,21 +122,26 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
           builder: (BuildContext sheetContext) {
             return StatefulBuilder(
               builder: (BuildContext context, StateSetter sheetSetState) {
+                final bool showHeader =
+                    _mode != AuthSheetMode.passwordChangedSuccess;
                 return AuthSheetContainer(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      AuthSheetHeader(
-                        titlePrefix: _headerTitlePrefix,
-                        brand: _headerBrand,
-                        description: _headerDescription,
-                        onDismiss: () => Navigator.of(sheetContext).pop(),
-                      ),
-                      const SizedBox(height: VERY_LARGE_SPACE),
-                      _buildContent(sheetContext, sheetSetState),
-                    ],
-                  ),
+                  centerContent: _mode == AuthSheetMode.passwordChangedSuccess,
+                  child: showHeader
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            AuthSheetHeader(
+                              titlePrefix: _headerTitlePrefix,
+                              brand: _headerBrand,
+                              description: _headerDescription,
+                              onDismiss: () => Navigator.of(sheetContext).pop(),
+                            ),
+                            const SizedBox(height: VERY_LARGE_SPACE),
+                            _buildContent(sheetContext, sheetSetState),
+                          ],
+                        )
+                      : _buildContent(sheetContext, sheetSetState),
                 );
               },
             );
@@ -145,9 +169,15 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
         loadingProvider: _loadingProvider,
         statusMessage: _statusMessage,
         statusIsError: _statusIsError,
-        onForgotPassword: () => _handleForgotPassword(sheetSetState),
-        onAppleAuth: () =>
-            _handleProviderAuth(AuthProviderType.apple, sheetSetState),
+        onForgotPassword: () {
+          final String identifier = _identifierController.text.trim();
+          if (identifier.contains('@')) {
+            _resetEmailController.text = identifier;
+          }
+          Navigator.of(
+            sheetContext,
+          ).pop(const _AuthSheetResult(AuthSheetMode.forgotPassword));
+        },
         onEmailAuth: () => _handleCredentialSignIn(sheetSetState),
         onGoogleAuth: () =>
             _handleProviderAuth(AuthProviderType.google, sheetSetState),
@@ -163,13 +193,38 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
         passwordController: _newPasswordController,
         confirmPasswordController: _confirmPasswordController,
         loadingProvider: _loadingProvider,
-        onAppleAuth: () =>
-            _handleProviderAuth(AuthProviderType.apple, sheetSetState),
         onGoogleAuth: () =>
             _handleProviderAuth(AuthProviderType.google, sheetSetState),
         onCreateAccount: () =>
             _handleCreateAccount(sheetContext, sheetSetState),
         onSwitchToSignIn: () => Navigator.of(
+          sheetContext,
+        ).pop(const _AuthSheetResult(AuthSheetMode.signIn)),
+      ),
+      AuthSheetMode.forgotPassword => ForgotPasswordContent(
+        formKey: _forgotPasswordFormKey,
+        emailController: _resetEmailController,
+        loadingProvider: _loadingProvider,
+        onSubmit: () => _handleRequestPasswordOtp(sheetContext, sheetSetState),
+      ),
+      AuthSheetMode.otpVerification => OtpVerificationContent(
+        controllers: _otpControllers,
+        loadingProvider: _loadingProvider,
+        statusMessage: _statusMessage,
+        statusIsError: _statusIsError,
+        onVerify: () => _handleVerifyOtp(sheetContext, sheetSetState),
+      ),
+      AuthSheetMode.changePassword => ChangePasswordContent(
+        formKey: _changePasswordFormKey,
+        passwordController: _resetPasswordController,
+        confirmPasswordController: _resetConfirmPasswordController,
+        loadingProvider: _loadingProvider,
+        statusMessage: _statusMessage,
+        statusIsError: _statusIsError,
+        onSubmit: () => _handleChangePassword(sheetContext, sheetSetState),
+      ),
+      AuthSheetMode.passwordChangedSuccess => PasswordChangedSuccessContent(
+        onSignIn: () => Navigator.of(
           sheetContext,
         ).pop(const _AuthSheetResult(AuthSheetMode.signIn)),
       ),
@@ -180,6 +235,10 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     return switch (_mode) {
       AuthSheetMode.signIn => 'Halo, selamat datang',
       AuthSheetMode.signUp => 'Buat akun Kamu',
+      AuthSheetMode.forgotPassword => 'Lupa password',
+      AuthSheetMode.otpVerification => 'Masukkan kode',
+      AuthSheetMode.changePassword => 'Ganti password',
+      AuthSheetMode.passwordChangedSuccess => '',
     };
   }
 
@@ -187,13 +246,25 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     return switch (_mode) {
       AuthSheetMode.signIn => '',
       AuthSheetMode.signUp => '',
+      AuthSheetMode.forgotPassword => '',
+      AuthSheetMode.otpVerification => '',
+      AuthSheetMode.changePassword => '',
+      AuthSheetMode.passwordChangedSuccess => '',
     };
   }
 
   String get _headerDescription {
+    final String resetTarget = _resetEmailController.text.trim();
     return switch (_mode) {
       AuthSheetMode.signIn => 'Yuk, masuk untuk mengakses layanan klinik Anda.',
       AuthSheetMode.signUp => 'Lengkapi data dibawah ini untuk melanjutkan',
+      AuthSheetMode.forgotPassword =>
+        'Masukkan emailmu, kita akan mengirim OTP ke sana',
+      AuthSheetMode.otpVerification =>
+        'Kode OTP telah dikirimkan ke ${resetTarget.isEmpty ? 'emailmu' : resetTarget}',
+      AuthSheetMode.changePassword =>
+        'Silakan masukkan password baru kamu di bawah ini.',
+      AuthSheetMode.passwordChangedSuccess => '',
     };
   }
 
@@ -256,7 +327,6 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     }
 
     final String providerName = switch (provider) {
-      AuthProviderType.apple => 'Apple',
       AuthProviderType.google => 'Google',
       AuthProviderType.email => 'email',
     };
@@ -300,12 +370,107 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     }
   }
 
-  void _handleForgotPassword(StateSetter sheetSetState) {
+  Future<void> _handleRequestPasswordOtp(
+    BuildContext sheetContext,
+    StateSetter sheetSetState,
+  ) async {
     FocusManager.instance.primaryFocus?.unfocus();
-    _statusMessage =
-        'Alur reset password belum terhubung. Untuk demo, gunakan credential JSON yang tersedia.';
+    if (!(_forgotPasswordFormKey.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    _loadingProvider = AuthProviderType.email;
+    _statusMessage = null;
     _statusIsError = false;
     _refreshSheet(sheetSetState);
+
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+
+    if (!mounted) {
+      return;
+    }
+
+    for (final TextEditingController controller in _otpControllers) {
+      controller.clear();
+    }
+    _loadingProvider = null;
+    if (sheetContext.mounted) {
+      Navigator.of(
+        sheetContext,
+      ).pop(const _AuthSheetResult(AuthSheetMode.otpVerification));
+    }
+  }
+
+  Future<void> _handleVerifyOtp(
+    BuildContext sheetContext,
+    StateSetter sheetSetState,
+  ) async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    final String code = _otpControllers
+        .map((TextEditingController controller) => controller.text.trim())
+        .join();
+    if (code.length != 6) {
+      _statusMessage = 'Masukkan 6 digit kode OTP.';
+      _statusIsError = true;
+      _refreshSheet(sheetSetState);
+      return;
+    }
+
+    _loadingProvider = AuthProviderType.email;
+    _statusMessage = null;
+    _statusIsError = false;
+    _refreshSheet(sheetSetState);
+
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+
+    if (!mounted) {
+      return;
+    }
+
+    _loadingProvider = null;
+    _resetPasswordController.clear();
+    _resetConfirmPasswordController.clear();
+    _statusMessage = null;
+    _statusIsError = false;
+    _refreshSheet(sheetSetState);
+    if (sheetContext.mounted) {
+      Navigator.of(
+        sheetContext,
+      ).pop(const _AuthSheetResult(AuthSheetMode.changePassword));
+    }
+  }
+
+  Future<void> _handleChangePassword(
+    BuildContext sheetContext,
+    StateSetter sheetSetState,
+  ) async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    if (!(_changePasswordFormKey.currentState?.validate() ?? false)) {
+      return;
+    }
+
+    _loadingProvider = AuthProviderType.email;
+    _statusMessage = null;
+    _statusIsError = false;
+    _refreshSheet(sheetSetState);
+
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+
+    if (!mounted) {
+      return;
+    }
+
+    _loadingProvider = null;
+    _passwordController.text = _resetPasswordController.text;
+    _identifierController.text = _resetEmailController.text;
+    _statusMessage = null;
+    _statusIsError = false;
+    _refreshSheet(sheetSetState);
+    if (sheetContext.mounted) {
+      Navigator.of(
+        sheetContext,
+      ).pop(const _AuthSheetResult(AuthSheetMode.passwordChangedSuccess));
+    }
   }
 }
 

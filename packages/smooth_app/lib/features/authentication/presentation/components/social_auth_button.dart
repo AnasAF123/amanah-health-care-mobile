@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
-enum AuthProviderType { apple, google, email }
+enum AuthProviderType { google, email }
 
 class SocialAuthButton extends StatelessWidget {
   const SocialAuthButton({
@@ -21,15 +21,10 @@ class SocialAuthButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final bool filled = provider == AuthProviderType.apple;
-    final Color backgroundColor = filled
-        ? const Color(0xFF111827)
-        : provider == AuthProviderType.email
+    final Color backgroundColor = provider == AuthProviderType.email
         ? theme.colorScheme.secondary.withValues(alpha: 0.72)
         : theme.colorScheme.surface;
-    final Color foregroundColor = filled
-        ? Colors.white
-        : theme.colorScheme.onSurface;
+    final Color foregroundColor = theme.colorScheme.onSurface;
     final Color borderColor = theme.colorScheme.outlineVariant.withValues(
       alpha: 0.9,
     );
@@ -50,9 +45,7 @@ class SocialAuthButton extends StatelessWidget {
             disabledForegroundColor: foregroundColor.withValues(alpha: 0.72),
             shape: RoundedRectangleBorder(
               borderRadius: CIRCULAR_BORDER_RADIUS,
-              side: filled
-                  ? BorderSide.none
-                  : BorderSide(color: borderColor, width: 1),
+              side: BorderSide(color: borderColor, width: 1),
             ),
           ),
           child: AnimatedSwitcher(
@@ -103,7 +96,6 @@ class _ProviderIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (provider) {
-      AuthProviderType.apple => const Icon(Icons.apple_rounded, size: 22),
       AuthProviderType.email => Icon(
         Icons.mail_outline_rounded,
         size: 21,

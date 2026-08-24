@@ -15,7 +15,6 @@ class SignInContent extends StatelessWidget {
     required this.identifierController,
     required this.passwordController,
     required this.onForgotPassword,
-    required this.onAppleAuth,
     required this.onEmailAuth,
     required this.onGoogleAuth,
     required this.onSwitchToSignUp,
@@ -29,7 +28,6 @@ class SignInContent extends StatelessWidget {
   final TextEditingController identifierController;
   final TextEditingController passwordController;
   final VoidCallback onForgotPassword;
-  final VoidCallback onAppleAuth;
   final VoidCallback onEmailAuth;
   final VoidCallback onGoogleAuth;
   final VoidCallback onSwitchToSignUp;
@@ -78,13 +76,6 @@ class SignInContent extends StatelessWidget {
             label: 'Masuk',
             loading: loadingProvider == AuthProviderType.email,
             onPressed: onEmailAuth,
-          ),
-          const SizedBox(height: MEDIUM_SPACE),
-          SocialAuthButton(
-            provider: AuthProviderType.apple,
-            label: 'Lanjutkan dengan Apple',
-            loading: loadingProvider == AuthProviderType.apple,
-            onPressed: onAppleAuth,
           ),
           const SizedBox(height: LARGE_SPACE),
           const AuthDivider(),
