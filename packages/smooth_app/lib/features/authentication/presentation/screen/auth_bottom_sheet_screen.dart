@@ -13,6 +13,7 @@ import 'package:smooth_app/features/authentication/presentation/organisms/passwo
 import 'package:smooth_app/features/authentication/presentation/organisms/sign_in_content.dart';
 import 'package:smooth_app/features/authentication/presentation/organisms/sign_up_content.dart';
 import 'package:smooth_app/features/authentication/presentation/state/auth_ui_state.dart';
+import 'package:smooth_app/features/home/presentation/screen/amanah_home_shell.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class AuthBottomSheetScreen extends StatefulWidget {
@@ -61,6 +62,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
   String? _statusMessage;
   bool _statusIsError = false;
   bool _sheetOpen = false;
+  AmanahAuthUser? _authenticatedUser;
 
   @override
   void dispose() {
@@ -82,6 +84,11 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AmanahAuthUser? user = _authenticatedUser;
+    if (user != null) {
+      return AmanahHomeShell(user: user);
+    }
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Stack(
@@ -178,7 +185,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
             sheetContext,
           ).pop(const _AuthSheetResult(AuthSheetMode.forgotPassword));
         },
-        onEmailAuth: () => _handleCredentialSignIn(sheetSetState),
+        onEmailAuth: () => _handleCredentialSignIn(sheetContext, sheetSetState),
         onGoogleAuth: () =>
             _handleProviderAuth(AuthProviderType.google, sheetSetState),
         onSwitchToSignUp: () => Navigator.of(
@@ -233,8 +240,8 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
 
   String get _headerTitlePrefix {
     return switch (_mode) {
-      AuthSheetMode.signIn => 'Halo, selamat datang',
-      AuthSheetMode.signUp => 'Buat akun Kamu',
+      AuthSheetMode.signIn => 'Selamat Datang Kembali',
+      AuthSheetMode.signUp => 'Buat Akun Barumu',
       AuthSheetMode.forgotPassword => 'Lupa password',
       AuthSheetMode.otpVerification => 'Masukkan kode',
       AuthSheetMode.changePassword => 'Ganti password',
@@ -256,8 +263,8 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
   String get _headerDescription {
     final String resetTarget = _resetEmailController.text.trim();
     return switch (_mode) {
-      AuthSheetMode.signIn => 'Yuk, masuk untuk mengakses layanan klinik Anda.',
-      AuthSheetMode.signUp => 'Lengkapi data dibawah ini untuk melanjutkan',
+      AuthSheetMode.signIn => 'Masuk untuk melanjutkan ke akunmu',
+      AuthSheetMode.signUp => 'Mulai pengalaman kesehatan yang dipersonalisasi',
       AuthSheetMode.forgotPassword =>
         'Masukkan emailmu, kita akan mengirim OTP ke sana',
       AuthSheetMode.otpVerification =>
@@ -274,7 +281,10 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     }
   }
 
-  Future<void> _handleCredentialSignIn(StateSetter sheetSetState) async {
+  Future<void> _handleCredentialSignIn(
+    BuildContext sheetContext,
+    StateSetter sheetSetState,
+  ) async {
     FocusManager.instance.primaryFocus?.unfocus();
     if (!(_signInFormKey.currentState?.validate() ?? false)) {
       return;
@@ -307,6 +317,10 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
 
     if (user != null) {
       widget.onAuthenticated?.call(user);
+      setState(() => _authenticatedUser = user);
+      if (sheetContext.mounted) {
+        Navigator.of(sheetContext).pop();
+      }
     }
   }
 
@@ -503,20 +517,48 @@ class _AuthBackgroundScrim extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: <Color>[
-            Colors.black.withValues(alpha: dark ? 0.10 : 0.02),
-            Colors.transparent,
-            Colors.black.withValues(alpha: 0.28),
-            Colors.black.withValues(alpha: 0.72),
-          ],
-          stops: const <double>[0, 0.46, 0.70, 1],
+    return Stack(
+      fit: StackFit.expand,
+      children: <Widget>[
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: <Color>[
+                Colors.black.withValues(alpha: dark ? 0.10 : 0.03),
+                Colors.transparent,
+                Colors.black.withValues(alpha: 0.14),
+                Colors.black.withValues(alpha: 0.36),
+                Colors.black.withValues(alpha: 0.78),
+              ],
+              stops: const <double>[0, 0.36, 0.56, 0.76, 1],
+            ),
+          ),
         ),
-      ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: FractionallySizedBox(
+            heightFactor: 0.90,
+            widthFactor: 1,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: <Color>[
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.08),
+                    Colors.black.withValues(alpha: 0.28),
+                    Colors.black.withValues(alpha: 0.54),
+                  ],
+                  stops: const <double>[0, 0.30, 0.66, 1],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -540,14 +582,31 @@ class _AuthClosedActions extends StatelessWidget {
             const Spacer(),
             Align(
               alignment: AlignmentDirectional.centerStart,
-              child: Text(
-                'Layanan Klinik\nAmanah Healthcare',
-                style: theme.textTheme.displaySmall?.copyWith(
-                  color: Colors.white,
-                  fontSize: 30,
-                  fontWeight: FontWeight.w900,
-                  height: 1.12,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Sehat Bersama Amanah',
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      color: Colors.white,
+                      fontFamily: 'PlusJakartaSans',
+                      fontSize: 31,
+                      fontWeight: FontWeight.w900,
+                      height: 1.12,
+                    ),
+                  ),
+                  const SizedBox(height: MEDIUM_SPACE),
+                  Text(
+                    'Menemukan layanan kesehatan dan perawatan terbaik yang dirancang khusus untuk kebutuhanmu',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.82),
+                      fontFamily: 'PlusJakartaSans',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      height: 1.42,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 28),

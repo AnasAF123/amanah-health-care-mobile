@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:smooth_app/features/authentication/presentation/components/auth_primary_button.dart';
 import 'package:smooth_app/features/authentication/presentation/components/auth_status_message.dart';
 import 'package:smooth_app/features/authentication/presentation/components/password_input_field.dart';
+import 'package:smooth_app/features/authentication/presentation/components/password_strength_meter.dart';
 import 'package:smooth_app/features/authentication/presentation/components/social_auth_button.dart';
+import 'package:smooth_app/features/authentication/presentation/state/password_requirements.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class ChangePasswordContent extends StatelessWidget {
@@ -44,6 +46,7 @@ class ChangePasswordContent extends StatelessWidget {
             autofillHints: const <String>[AutofillHints.newPassword],
             validator: _validatePassword,
           ),
+          PasswordStrengthMeter(controller: passwordController),
           const SizedBox(height: MEDIUM_SPACE),
           PasswordInputField(
             label: 'Konfirmasi password',
@@ -75,13 +78,9 @@ class ChangePasswordContent extends StatelessWidget {
   }
 
   String? _validatePassword(String? value) {
-    final String input = value ?? '';
-    if (input.isEmpty) {
-      return 'Password baru wajib diisi.';
-    }
-    if (input.length < 6) {
-      return 'Password minimal 6 karakter.';
-    }
-    return null;
+    return AmanahPasswordRequirements.validate(
+      value,
+      requiredMessage: 'Password baru wajib diisi.',
+    );
   }
 }

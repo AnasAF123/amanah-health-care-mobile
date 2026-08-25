@@ -70,12 +70,6 @@ class AuthPrimaryButton extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: SMALL_SPACE),
-                      Icon(
-                        Icons.arrow_forward_rounded,
-                        size: 19,
-                        color: foregroundColor,
-                      ),
                     ],
                   ),
           ),

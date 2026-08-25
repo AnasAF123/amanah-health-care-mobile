@@ -24,20 +24,23 @@ class AuthSheetHeader extends StatelessWidget {
       children: <Widget>[
         Align(
           alignment: AlignmentDirectional.centerEnd,
-          child: Semantics(
-            button: true,
-            label: 'Tutup autentikasi',
-            child: IconButton(
-              tooltip: 'Tutup',
-              onPressed: onDismiss,
-              style: IconButton.styleFrom(
-                fixedSize: const Size(MINIMUM_TOUCH_SIZE, MINIMUM_TOUCH_SIZE),
-                backgroundColor: theme.brightness == Brightness.dark
-                    ? theme.colorScheme.secondary.withValues(alpha: 0.36)
-                    : const Color(0xFFF3F7FB),
-                foregroundColor: theme.colorScheme.onSurface,
+          child: Transform.translate(
+            offset: const Offset(8, 0),
+            child: Semantics(
+              button: true,
+              label: 'Tutup autentikasi',
+              child: IconButton(
+                tooltip: 'Tutup',
+                onPressed: onDismiss,
+                style: IconButton.styleFrom(
+                  fixedSize: const Size(MINIMUM_TOUCH_SIZE, MINIMUM_TOUCH_SIZE),
+                  backgroundColor: theme.brightness == Brightness.dark
+                      ? theme.colorScheme.secondary.withValues(alpha: 0.36)
+                      : const Color(0xFFF3F7FB),
+                  foregroundColor: theme.colorScheme.onSurface,
+                ),
+                icon: const Icon(Icons.close_rounded, size: 20),
               ),
-              icon: const Icon(Icons.close_rounded, size: 20),
             ),
           ),
         ),
@@ -55,6 +58,7 @@ class AuthSheetHeader extends StatelessWidget {
           ),
           style: theme.textTheme.headlineSmall?.copyWith(
             color: theme.colorScheme.onSurface,
+            fontFamily: 'PlusJakartaSans',
             fontSize: 28,
             fontWeight: FontWeight.w900,
             height: 1.04,
@@ -65,8 +69,9 @@ class AuthSheetHeader extends StatelessWidget {
           description,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.58),
+            fontFamily: 'PlusJakartaSans',
             fontSize: 14,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w400,
             height: 1.38,
           ),
         ),

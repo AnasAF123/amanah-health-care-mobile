@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Amanah: Clean Emulator Session",
+      "type": "shell",
+      "command": "${workspaceFolder}\\scripts\\start_pixel_6_clean.bat",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      }
+    }
+  ]
+}
