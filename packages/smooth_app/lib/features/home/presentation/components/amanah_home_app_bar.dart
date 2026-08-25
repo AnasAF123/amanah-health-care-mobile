@@ -25,7 +25,7 @@ class AmanahHomeAppBar extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.only(top: SMALL_SPACE, bottom: 24),
+      padding: const EdgeInsets.only(top: SMALL_SPACE, bottom: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -102,15 +102,36 @@ class _DoctorAvatar extends StatelessWidget {
     return Semantics(
       label: 'Foto profil dokter',
       image: true,
-      child: SizedBox(
+      child: Container(
         width: 52,
         height: 52,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.40),
+            width: 2,
+          ),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: ClipOval(
           child: Image.asset(
             'assets/amanah/auth/auth_background.png',
             fit: BoxFit.cover,
             alignment: Alignment.topCenter,
             filterQuality: FilterQuality.high,
+            errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+              return Container(
+                color: const Color(0xFF0A44FF).withValues(alpha: 0.30),
+                alignment: Alignment.center,
+                child: const Icon(Icons.person, color: Colors.white, size: 28),
+              );
+            },
           ),
         ),
       ),

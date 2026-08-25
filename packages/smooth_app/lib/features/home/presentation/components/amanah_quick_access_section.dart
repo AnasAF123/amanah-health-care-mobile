@@ -15,7 +15,7 @@ class AmanahQuickAccessSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(VERY_SMALL_SPACE, 0, VERY_SMALL_SPACE, 36),
+      padding: const EdgeInsets.symmetric(horizontal: VERY_SMALL_SPACE),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,

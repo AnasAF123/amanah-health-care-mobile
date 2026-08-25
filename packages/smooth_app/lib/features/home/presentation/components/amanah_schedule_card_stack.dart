@@ -1,7 +1,9 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_status_badge.dart';
-import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class AmanahScheduleCardStack extends StatefulWidget {
   const AmanahScheduleCardStack({required this.schedules, super.key});
@@ -16,27 +18,67 @@ class AmanahScheduleCardStack extends StatefulWidget {
 class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack> {
   int _currentIndex = 0;
   double _dragOffset = 0;
+  bool _isDragging = false;
+  String? _animatingDirection; // 'left', 'right', or null
+  Timer? _animTimer;
 
-  void _showNext() {
-    if (widget.schedules.isEmpty) {
+  void _dismissCard() {
+    if (widget.schedules.isEmpty || _animatingDirection != null) {
       return;
     }
     setState(() {
-      _currentIndex = (_currentIndex + 1) % widget.schedules.length;
-      _dragOffset = 0;
+      _animatingDirection = 'right';
+    });
+    _animTimer?.cancel();
+    _animTimer = Timer(const Duration(milliseconds: 220), () {
+      if (mounted) {
+        setState(() {
+          _currentIndex = (_currentIndex + 1) % widget.schedules.length;
+          _animatingDirection = null;
+          _dragOffset = 0;
+        });
+      }
     });
   }
 
-  void _showPrevious() {
-    if (widget.schedules.isEmpty) {
+  void _handleDragEnd() {
+    if (!_isDragging) {
       return;
     }
-    setState(() {
-      _currentIndex =
-          (_currentIndex - 1 + widget.schedules.length) %
-          widget.schedules.length;
-      _dragOffset = 0;
-    });
+    _isDragging = false;
+
+    if (_dragOffset.abs() > 65) {
+      final String direction = _dragOffset > 0 ? 'right' : 'left';
+      setState(() {
+        _animatingDirection = direction;
+      });
+      _animTimer?.cancel();
+      _animTimer = Timer(const Duration(milliseconds: 220), () {
+        if (mounted) {
+          setState(() {
+            if (direction == 'right') {
+              _currentIndex =
+                  (_currentIndex - 1 + widget.schedules.length) %
+                  widget.schedules.length;
+            } else {
+              _currentIndex = (_currentIndex + 1) % widget.schedules.length;
+            }
+            _animatingDirection = null;
+            _dragOffset = 0;
+          });
+        }
+      });
+    } else {
+      setState(() {
+        _dragOffset = 0;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _animTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -47,56 +89,90 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack> {
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
+      onHorizontalDragStart: (DragStartDetails details) {
+        if (_animatingDirection != null) {
+          return;
+        }
+        setState(() {
+          _isDragging = true;
+        });
+      },
       onHorizontalDragUpdate: (DragUpdateDetails details) {
-        setState(() => _dragOffset += details.delta.dx);
+        if (_animatingDirection != null) {
+          return;
+        }
+        setState(() {
+          _dragOffset += details.delta.dx;
+        });
       },
       onHorizontalDragEnd: (DragEndDetails details) {
-        if (_dragOffset.abs() > 65) {
-          if (_dragOffset > 0) {
-            _showPrevious();
-          } else {
-            _showNext();
-          }
-        } else {
-          setState(() => _dragOffset = 0);
-        }
+        _handleDragEnd();
+      },
+      onHorizontalDragCancel: () {
+        _handleDragEnd();
       },
       child: SizedBox(
-        height: 223,
+        height: 194,
         width: double.infinity,
         child: Stack(
           clipBehavior: Clip.none,
           children: List<Widget>.generate(3, (int index) {
             final int depth = 2 - index;
+            final int safeIndex = _currentIndex % widget.schedules.length;
             final AmanahSchedule schedule =
-                widget.schedules[(_currentIndex + depth) %
-                    widget.schedules.length];
+                widget.schedules[(safeIndex + depth) % widget.schedules.length];
             final bool front = depth == 0;
-            final double drag = front ? _dragOffset : 0;
-            final double depthOffset = depth == 0 ? 0 : depth == 1 ? 14 : 28;
-            final double scale = depth == 0 ? 1 : depth == 1 ? 0.92 : 0.84;
-            final double opacity = depth == 0 ? 1 : depth == 1 ? 0.95 : 0.8;
+
+            double translateX = 0;
+            double translateY = depth == 0 ? 0.0 : (depth == 1 ? 16.0 : 32.0);
+            double rotationZ = 0;
+            double scale = depth == 0 ? 1.0 : (depth == 1 ? 0.92 : 0.84);
+            double opacity = depth == 0 ? 1.0 : (depth == 1 ? 0.95 : 0.80);
+
+            if (front) {
+              if (_animatingDirection != null) {
+                final double sign = _animatingDirection == 'right' ? 1.0 : -1.0;
+                translateX = sign * 380.0;
+                rotationZ = sign * 18.0 * (math.pi / 180.0);
+                scale = 0.95;
+                opacity = 0.0;
+              } else if (_isDragging) {
+                translateX = _dragOffset;
+                rotationZ = _dragOffset * 0.04 * (math.pi / 180.0);
+                scale = 1.0;
+                opacity = 1.0;
+              }
+            } else if (depth == 1) {
+              if (_isDragging) {
+                final double dragAbs = _dragOffset.abs();
+                translateY = 16.0 - math.min(dragAbs * 0.08, 16.0);
+                scale = 0.92 + math.min(dragAbs * 0.001, 0.08);
+              }
+            }
 
             return Positioned(
-              top: depthOffset,
+              top: 0,
               left: 0,
               right: 0,
               child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 220),
+                duration: Duration(
+                  milliseconds: _isDragging && front ? 0 : 220,
+                ),
                 opacity: opacity,
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 220),
+                  duration: Duration(
+                    milliseconds: _isDragging && front ? 0 : 220,
+                  ),
                   curve: Curves.easeOutCubic,
-                  transformAlignment: Alignment.topCenter,
-                  transform: Matrix4.identity()
-                    ..translate(drag)
-                    ..rotateZ(drag * 0.0007)
-                    ..scale(scale),
+                  transformAlignment: Alignment.center,
+                  transform: Matrix4.translationValues(translateX, translateY, 0.0)
+                    ..rotateZ(rotationZ)
+                    ..scaleByDouble(scale, scale, 1.0, 1.0),
                   child: IgnorePointer(
-                    ignoring: !front,
+                    ignoring: !front || _animatingDirection != null,
                     child: AmanahScheduleCard(
                       schedule: schedule,
-                      onDismiss: _showNext,
+                      onDismiss: _dismissCard,
                     ),
                   ),
                 ),
@@ -124,7 +200,8 @@ class AmanahScheduleCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
     final Color heading = dark ? Colors.white : const Color(0xFF1E293B);
-    final Color muted = dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final Color muted =
+        dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
     return Semantics(
       label: '${schedule.title}, ${schedule.time}',
@@ -150,6 +227,7 @@ class AmanahScheduleCard extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
+                    // Top Row: Title, Date, Dismiss Icon
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -184,6 +262,7 @@ class AmanahScheduleCard extends StatelessWidget {
                         _AmanahDismissButton(onTap: onDismiss, color: muted),
                       ],
                     ),
+                    // Center Row: Large Time, Status Badge
                     Row(
                       children: <Widget>[
                         Expanded(
@@ -192,7 +271,8 @@ class AmanahScheduleCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.headlineSmall?.copyWith(
-                              color: dark ? Colors.white : const Color(0xFF0F172A),
+                              color:
+                                  dark ? Colors.white : const Color(0xFF0F172A),
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 26,
                               fontWeight: FontWeight.w900,
@@ -206,6 +286,7 @@ class AmanahScheduleCard extends StatelessWidget {
                         ),
                       ],
                     ),
+                    // Bottom Row: Poli & Room on left, Slots on right
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
@@ -286,9 +367,8 @@ class _ScheduleFooterText extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return Column(
-      crossAxisAlignment: alignEnd
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
+      crossAxisAlignment:
+          alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: <Widget>[
         Text(
           title,
@@ -326,34 +406,41 @@ class _AmanahScheduleCardPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Path path = const _AmanahTicketClipper().getClip(size);
+
+    canvas.save();
+    canvas.clipPath(path);
+
+    // Card Fill
     final Paint fill = Paint()
       ..color = dark ? const Color(0xF2171717) : Colors.white
       ..style = PaintingStyle.fill
       ..isAntiAlias = true;
-
     canvas.drawPath(path, fill);
 
+    // Wave One (Primary Sweeping Wave)
     final Paint waveOne = Paint()
       ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
         colors: dark
             ? <Color>[
-                const Color(0xFF1E293B).withValues(alpha: 0.42),
-                const Color(0xFF0F172A).withValues(alpha: 0.18),
+                const Color(0xFF1E293B).withValues(alpha: 0.50),
+                const Color(0xFF0F172A).withValues(alpha: 0.20),
               ]
             : <Color>[
-                Colors.white.withValues(alpha: 0.96),
-                const Color(0xFFF8FAFF).withValues(alpha: 0.56),
-                const Color(0xFFF1F5F9).withValues(alpha: 0.24),
+                Colors.white.withValues(alpha: 0.95),
+                const Color(0xFFF8FAFF).withValues(alpha: 0.50),
+                const Color(0xFFF1F5F9).withValues(alpha: 0.20),
               ],
       ).createShader(Offset.zero & size)
       ..style = PaintingStyle.fill;
     final Path waveOnePath = Path()
       ..moveTo(-30, size.height + 18)
       ..cubicTo(
-        size.width * 0.18,
-        size.height * 0.62,
-        size.width * 0.38,
-        size.height * 0.32,
+        60,
+        110,
+        130,
+        50,
         size.width + 10,
         15,
       )
@@ -361,6 +448,7 @@ class _AmanahScheduleCardPainter extends CustomPainter {
       ..close();
     canvas.drawPath(waveOnePath, waveOne);
 
+    // Wave Two (Intersecting Translucent Wave)
     final Paint waveTwo = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topRight,
@@ -372,30 +460,51 @@ class _AmanahScheduleCardPainter extends CustomPainter {
               ]
             : <Color>[
                 Colors.white.withValues(alpha: 0.95),
-                const Color(0xFFF8FAFF).withValues(alpha: 0.58),
-                const Color(0xFFF1F5F9).withValues(alpha: 0.22),
+                const Color(0xFFF8FAFF).withValues(alpha: 0.60),
+                const Color(0xFFF1F5F9).withValues(alpha: 0.20),
               ],
       ).createShader(Offset.zero & size)
       ..style = PaintingStyle.fill;
     final Path waveTwoPath = Path()
       ..moveTo(40, -20)
       ..cubicTo(
-        size.width * 0.42,
-        42,
-        size.width * 0.62,
-        size.height * 0.70,
+        140,
+        40,
+        210,
+        120,
         size.width + 30,
-        size.height * 0.55,
+        95,
       )
       ..lineTo(size.width + 30, -20)
       ..close();
     canvas.drawPath(waveTwoPath, waveTwo);
 
+    final Paint waveStroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: dark
+            ? <Color>[
+                Colors.white.withValues(alpha: 0.10),
+                Colors.white.withValues(alpha: 0.05),
+              ]
+            : <Color>[
+                Colors.white.withValues(alpha: 0.95),
+                const Color(0xFFF1F5F9).withValues(alpha: 0.60),
+                const Color(0xFFCBD5E1).withValues(alpha: 0.30),
+              ],
+      ).createShader(Offset.zero & size);
+    canvas.drawPath(waveOnePath, waveStroke);
+    canvas.drawPath(waveTwoPath, waveStroke);
+
+    // Dashed Perforated Connector Line between the "C" Notches
     final Paint dashPaint = Paint()
       ..color = dark
           ? Colors.white.withValues(alpha: 0.20)
           : const Color(0xFFCBD5E1).withValues(alpha: 0.95)
-      ..strokeWidth = 1.4
+      ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
     _drawDashedLine(
       canvas,
@@ -404,14 +513,17 @@ class _AmanahScheduleCardPainter extends CustomPainter {
       dashPaint,
     );
 
+    // Card Outer Stroke
     final Paint stroke = Paint()
       ..color = dark
           ? Colors.white.withValues(alpha: 0.16)
-          : const Color(0xFFCBD5E1).withValues(alpha: 0.70)
+          : const Color(0xFFCBD5E1).withValues(alpha: 0.90)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2
       ..isAntiAlias = true;
     canvas.drawPath(path, stroke);
+
+    canvas.restore();
   }
 
   void _drawDashedLine(
@@ -435,9 +547,7 @@ class _AmanahScheduleCardPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _AmanahScheduleCardPainter oldDelegate) {
-    return oldDelegate.dark != dark;
-  }
+  bool shouldRepaint(covariant _AmanahScheduleCardPainter oldDelegate) => true;
 }
 
 class _AmanahTicketClipper extends CustomClipper<Path> {
