@@ -12,6 +12,7 @@ import 'package:smooth_app/features/home/presentation/components/amanah_today_ac
 import 'package:smooth_app/features/home/presentation/screen/amanah_account_tab_screen.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_schedule_tab_screen.dart';
 import 'package:smooth_app/features/presence/presentation/screen/amanah_presence_history_screen.dart';
+import 'package:smooth_app/features/presence/presentation/screen/amanah_qr_scanner_tab_screen.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class AmanahHomeShell extends StatefulWidget {
@@ -187,6 +188,13 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                 ),
                 AmanahHomeTab.schedule => AmanahScheduleTabScreen(
                   key: const ValueKey<String>('schedule_content'),
+                  onBack: () {
+                    setState(() => _selectedTab = AmanahHomeTab.home);
+                  },
+                ),
+                AmanahHomeTab.scan => AmanahQrScannerTabScreen(
+                  key: const ValueKey<String>('scan_content'),
+                  user: widget.user,
                   onBack: () {
                     setState(() => _selectedTab = AmanahHomeTab.home);
                   },
