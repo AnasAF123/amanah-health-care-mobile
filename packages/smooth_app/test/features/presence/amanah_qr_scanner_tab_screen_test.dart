@@ -177,6 +177,26 @@ void main() {
       expect(find.byIcon(Icons.flash_off_rounded), findsOneWidget);
     });
 
+    testWidgets('Tapping Ubah Kamera button toggles camera switch state',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.75;
+      addTearDown(() => tester.view.reset());
+
+      await tester.pumpWidget(createQrScreen());
+      await tester.pumpAndSettle();
+
+      // Find Ubah Kamera button
+      expect(find.bySemanticsLabel('Ubah Kamera'), findsOneWidget);
+      expect(find.byIcon(Icons.cameraswitch_rounded), findsOneWidget);
+
+      // Tap Ubah Kamera
+      await tester.tap(find.bySemanticsLabel('Ubah Kamera'));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.cameraswitch_rounded), findsOneWidget);
+    });
+
     testWidgets('Tapping Help button opens help dialog',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);

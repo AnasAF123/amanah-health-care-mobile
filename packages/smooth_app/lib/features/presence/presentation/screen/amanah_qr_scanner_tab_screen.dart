@@ -27,6 +27,7 @@ class AmanahQrScannerTabScreen extends StatefulWidget {
 class _AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     with SingleTickerProviderStateMixin {
   bool _isFlashOn = false;
+  bool _isFrontCamera = false;
   bool _isScanned = false;
   bool _isDrawerOpen = true;
   AmanahQrDrawerView _drawerView = AmanahQrDrawerView.menu;
@@ -67,6 +68,15 @@ class _AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
 
   void _toggleFlash() {
     setState(() => _isFlashOn = !_isFlashOn);
+  }
+
+  void _toggleCamera() {
+    setState(() {
+      _isFrontCamera = !_isFrontCamera;
+      if (_isFrontCamera) {
+        _isFlashOn = false;
+      }
+    });
   }
 
   void _handleSimulateScan() {
@@ -314,7 +324,7 @@ class _AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                   dark: dark,
                 ),
 
-                // Top Right Action Buttons: ( ? ) ( 🖼️ ) ( ⚡ )
+                // Top Right Action Buttons: ( ? ) ( 🖼️ ) ( 🔄 ) ( ⚡ )
                 Row(
                   children: <Widget>[
                     _FloatingCircularButton(
@@ -322,9 +332,9 @@ class _AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                       icon: Icons.help_outline_rounded,
                       label: 'Bantuan Presensi',
                       dark: dark,
-                      size: 42,
+                      size: 40,
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     _FloatingCircularButton(
                       onTap: () {
                         setState(() {
@@ -335,9 +345,19 @@ class _AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                       icon: Icons.image_outlined,
                       label: 'Pilih QR dari Galeri',
                       dark: dark,
-                      size: 42,
+                      size: 40,
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
+                    _FloatingCircularButton(
+                      onTap: _toggleCamera,
+                      icon: Icons.cameraswitch_rounded,
+                      label: 'Ubah Kamera',
+                      dark: dark,
+                      size: 40,
+                      isActive: _isFrontCamera,
+                      activeColor: const Color(0xFF06B6D4),
+                    ),
+                    const SizedBox(width: 8),
                     _FloatingCircularButton(
                       onTap: _toggleFlash,
                       icon: _isFlashOn
@@ -345,7 +365,7 @@ class _AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                           : Icons.flash_off_rounded,
                       label: 'Senter Flash',
                       dark: dark,
-                      size: 42,
+                      size: 40,
                       isActive: _isFlashOn,
                       activeColor: const Color(0xFFF59E0B),
                     ),
