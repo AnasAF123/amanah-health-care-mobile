@@ -29,6 +29,9 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
   AmanahHomeTab _selectedTab = AmanahHomeTab.home;
   String? _toastMessage;
   Timer? _toastTimer;
+  String? _scheduleInitialSessionId;
+  AmanahScheduleViewMode? _scheduleInitialViewMode;
+  bool _scheduleOpenDetailOnLaunch = false;
 
   void _showToast(String message) {
     _toastTimer?.cancel();
@@ -118,7 +121,12 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
       case 'presensi':
         Navigator.of(context).push(AmanahPresenceHistoryScreen.route());
       case 'jadwal-saya':
-        setState(() => _selectedTab = AmanahHomeTab.schedule);
+        setState(() {
+          _scheduleInitialSessionId = null;
+          _scheduleInitialViewMode = AmanahScheduleViewMode.sessions;
+          _scheduleOpenDetailOnLaunch = false;
+          _selectedTab = AmanahHomeTab.schedule;
+        });
       case 'cari-visit':
         _showToast('Membuka menu Cari Visit Pasien');
       case 'kartu-id':
@@ -126,6 +134,15 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
       default:
         _showToast('Fitur segera hadir');
     }
+  }
+
+  void _navigateToScheduleWithSession(AmanahSchedule schedule) {
+    setState(() {
+      _scheduleInitialSessionId = schedule.id;
+      _scheduleInitialViewMode = AmanahScheduleViewMode.sessions;
+      _scheduleOpenDetailOnLaunch = true;
+      _selectedTab = AmanahHomeTab.schedule;
+    });
   }
 
   @override
@@ -179,17 +196,33 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   onQuickActionTap: (AmanahQuickAction action) {
                     _handleQuickAction(action.id);
                   },
+                  onScheduleCardTap: _navigateToScheduleWithSession,
                   onDetailActivityTap: () {
-                    setState(() => _selectedTab = AmanahHomeTab.schedule);
+                    setState(() {
+                      _scheduleInitialSessionId = null;
+                      _scheduleInitialViewMode = AmanahScheduleViewMode.overview;
+                      _scheduleOpenDetailOnLaunch = false;
+                      _selectedTab = AmanahHomeTab.schedule;
+                    });
                   },
                   onActivityTap: (AmanahActivityMetric activity) {
                     _showToast('Membuka rincian aktivitas');
                   },
                 ),
                 AmanahHomeTab.schedule => AmanahScheduleTabScreen(
-                  key: const ValueKey<String>('schedule_content'),
+                  key: ValueKey<String>(
+                    'schedule_content_${_scheduleInitialSessionId ?? "all"}_${_scheduleInitialViewMode?.name ?? "default"}',
+                  ),
+                  initialSessionId: _scheduleInitialSessionId,
+                  initialViewMode: _scheduleInitialViewMode,
+                  openDetailOnLaunch: _scheduleOpenDetailOnLaunch,
                   onBack: () {
-                    setState(() => _selectedTab = AmanahHomeTab.home);
+                    setState(() {
+                      _scheduleInitialSessionId = null;
+                      _scheduleInitialViewMode = null;
+                      _scheduleOpenDetailOnLaunch = false;
+                      _selectedTab = AmanahHomeTab.home;
+                    });
                   },
                 ),
                 AmanahHomeTab.scan => AmanahQrScannerTabScreen(
@@ -237,7 +270,14 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
       bottomNavigationBar: AmanahBottomNavigationBar(
         selectedTab: _selectedTab,
         onTabSelected: (AmanahHomeTab tab) {
-          setState(() => _selectedTab = tab);
+          setState(() {
+            if (tab == AmanahHomeTab.schedule) {
+              _scheduleInitialSessionId = null;
+              _scheduleInitialViewMode = null;
+              _scheduleOpenDetailOnLaunch = false;
+            }
+            _selectedTab = tab;
+          });
         },
       ),
     );
@@ -253,6 +293,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
     required this.onQuickActionTap,
     required this.onDetailActivityTap,
     required this.onActivityTap,
+    this.onScheduleCardTap,
     super.key,
   });
 
@@ -263,6 +304,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
   final ValueChanged<AmanahQuickAction> onQuickActionTap;
   final VoidCallback onDetailActivityTap;
   final ValueChanged<AmanahActivityMetric> onActivityTap;
+  final ValueChanged<AmanahSchedule>? onScheduleCardTap;
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +323,10 @@ class _AmanahHomeScreenContent extends StatelessWidget {
         const SizedBox(height: 10),
 
         // 2. 3D Stack of Schedule Cards with Staggered Depth & Wave Petal Texture
-        AmanahScheduleCardStack(schedules: data.schedules),
+        AmanahScheduleCardStack(
+          schedules: data.schedules,
+          onCardTap: onScheduleCardTap,
+        ),
         const SizedBox(height: 16),
 
         // 3. Quick Access Menu Grid (Raised closer to the card stack)

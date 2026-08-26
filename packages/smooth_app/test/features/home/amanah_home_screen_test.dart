@@ -155,5 +155,24 @@ void main() {
 
       expect(find.text('Jadwal Siang'), findsOneWidget);
     });
+
+    testWidgets('Tapping schedule card navigates directly to Doctor Practice Schedule and opens Detail Sesi Praktik drawer',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.75;
+      addTearDown(() => tester.view.reset());
+
+      await tester.pumpWidget(createHomeScreen());
+      await tester.pumpAndSettle();
+
+      // Tap on the front schedule card (not on the dismiss button)
+      await tester.tap(find.text('07:30 - 11:30'));
+      await tester.pumpAndSettle();
+
+      // Should have navigated to the Doctor Practice Schedule and opened the Detail Sesi Praktik drawer
+      expect(find.text('Detail Sesi Praktik'), findsOneWidget);
+      expect(find.text('Sesi Praktik'), findsOneWidget);
+      expect(find.text('Ubah Sesi Praktik'), findsOneWidget);
+    });
   });
 }

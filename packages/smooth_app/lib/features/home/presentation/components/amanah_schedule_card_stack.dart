@@ -6,9 +6,14 @@ import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_status_badge.dart';
 
 class AmanahScheduleCardStack extends StatefulWidget {
-  const AmanahScheduleCardStack({required this.schedules, super.key});
+  const AmanahScheduleCardStack({
+    required this.schedules,
+    this.onCardTap,
+    super.key,
+  });
 
   final List<AmanahSchedule> schedules;
+  final ValueChanged<AmanahSchedule>? onCardTap;
 
   @override
   State<AmanahScheduleCardStack> createState() =>
@@ -46,6 +51,15 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack> {
       return;
     }
     _isDragging = false;
+
+    if (_dragOffset.abs() < 6) {
+      final int safeIndex = _currentIndex % widget.schedules.length;
+      widget.onCardTap?.call(widget.schedules[safeIndex]);
+      setState(() {
+        _dragOffset = 0;
+      });
+      return;
+    }
 
     if (_dragOffset.abs() > 65) {
       final String direction = _dragOffset > 0 ? 'right' : 'left';
@@ -89,6 +103,12 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack> {
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
+      onTap: () {
+        if (widget.schedules.isNotEmpty && _animatingDirection == null) {
+          final int safeIndex = _currentIndex % widget.schedules.length;
+          widget.onCardTap?.call(widget.schedules[safeIndex]);
+        }
+      },
       onHorizontalDragStart: (DragStartDetails details) {
         if (_animatingDirection != null) {
           return;
@@ -173,6 +193,9 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack> {
                     child: AmanahScheduleCard(
                       schedule: schedule,
                       onDismiss: _dismissCard,
+                      onCardTap: widget.onCardTap != null
+                          ? () => widget.onCardTap!(schedule)
+                          : null,
                     ),
                   ),
                 ),
@@ -189,11 +212,13 @@ class AmanahScheduleCard extends StatelessWidget {
   const AmanahScheduleCard({
     required this.schedule,
     required this.onDismiss,
+    this.onCardTap,
     super.key,
   });
 
   final AmanahSchedule schedule;
   final VoidCallback onDismiss;
+  final VoidCallback? onCardTap;
 
   @override
   Widget build(BuildContext context) {
@@ -222,14 +247,18 @@ class AmanahScheduleCard extends StatelessWidget {
             clipper: const _AmanahTicketClipper(),
             child: CustomPaint(
               painter: _AmanahScheduleCardPainter(dark: dark),
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    // Top Row: Title, Date, Dismiss Icon
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: onCardTap,
+                  child: Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        // Top Row: Title, Date, Dismiss Icon
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Expanded(
                           child: Column(
@@ -316,8 +345,10 @@ class AmanahScheduleCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 }
 
 class _AmanahDismissButton extends StatelessWidget {

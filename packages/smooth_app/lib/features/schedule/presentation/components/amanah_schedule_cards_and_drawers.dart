@@ -1368,16 +1368,38 @@ class _StackedPatientAvatars extends StatelessWidget {
               height: 24,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
+                color: dark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
                 border: Border.all(
                   color: dark ? const Color(0xFF0A0E1A) : Colors.white,
                   width: 2,
                 ),
-                image: DecorationImage(
-                  image: NetworkImage(
-                    p.avatarUrl ??
-                        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
-                  ),
+              ),
+              child: ClipOval(
+                child: Image.network(
+                  p.avatarUrl ??
+                      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
                   fit: BoxFit.cover,
+                  errorBuilder:
+                      (BuildContext context, Object error, StackTrace? stack) =>
+                          ColoredBox(
+                            color: dark
+                                ? const Color(0xFF334155)
+                                : const Color(0xFFCBD5E1),
+                            child: Center(
+                              child: Text(
+                                p.patientName.isNotEmpty
+                                    ? p.patientName.substring(0, 1)
+                                    : 'P',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                  color: dark
+                                      ? Colors.white
+                                      : const Color(0xFF1E293B),
+                                ),
+                              ),
+                            ),
+                          ),
                 ),
               ),
             ),

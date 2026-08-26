@@ -8,9 +8,20 @@ import 'package:smooth_app/features/schedule/presentation/components/amanah_sche
 enum AmanahScheduleViewMode { overview, sessions, sessionPatients }
 
 class AmanahScheduleTabScreen extends StatefulWidget {
-  const AmanahScheduleTabScreen({super.key, this.onBack});
+  const AmanahScheduleTabScreen({
+    super.key,
+    this.onBack,
+    this.initialDate,
+    this.initialViewMode,
+    this.initialSessionId,
+    this.openDetailOnLaunch = false,
+  });
 
   final VoidCallback? onBack;
+  final DateTime? initialDate;
+  final AmanahScheduleViewMode? initialViewMode;
+  final String? initialSessionId;
+  final bool openDetailOnLaunch;
 
   @override
   State<AmanahScheduleTabScreen> createState() =>
@@ -27,7 +38,32 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedDate = AmanahScheduleStore.baseToday;
+    _selectedDate = widget.initialDate ?? AmanahScheduleStore.baseToday;
+    if (widget.initialViewMode != null) {
+      _viewMode = widget.initialViewMode!;
+    }
+    if (widget.initialSessionId != null) {
+      final List<DoctorSchedule> list =
+          _store.getSchedulesForDate(_selectedDate);
+      int idx = list.indexWhere(
+        (DoctorSchedule s) => s.id == widget.initialSessionId,
+      );
+      if (idx < 0 && list.isNotEmpty) {
+        idx = 0;
+      }
+      if (idx >= 0 && idx < list.length) {
+        _selectedSession = list[idx];
+        if (widget.openDetailOnLaunch) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              final DayScheduleSetting daySetting =
+                  _store.getDaySettingForDate(_selectedDate);
+              _showSessionDetailSheet(context, list[idx], daySetting.isCuti);
+            }
+          });
+        }
+      }
+    }
     _store.addListener(_onStoreUpdated);
   }
 
@@ -442,15 +478,20 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Text(
-              'Daftar Sesi Praktik Dokter',
-              style: TextStyle(
-                color: dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                fontFamily: 'PlusJakartaSans',
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
+            Expanded(
+              child: Text(
+                'Daftar Sesi Praktik Dokter',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  fontFamily: 'PlusJakartaSans',
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
+            const SizedBox(width: 8),
             Text(
               '${schedules.length} Sesi Aktif',
               style: TextStyle(
