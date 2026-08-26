@@ -445,22 +445,24 @@ class AmanahDoctorSessionCard extends StatelessWidget {
     return Semantics(
       button: true,
       label: '${schedule.title}, ${schedule.poli}, $bookedCount Pasien',
-      child: Container(
-        height: 360,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
-          border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.18),
-              blurRadius: 24,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
+      child: GestureDetector(
+        onTap: onTapDetail,
+        child: Container(
+          height: 360,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: Colors.black.withValues(alpha: 0.10)),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.18),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
           children: <Widget>[
             // Layer 1: Nature Background
             Positioned.fill(
@@ -832,11 +834,556 @@ class AmanahDoctorSessionCard extends StatelessWidget {
           ],
         ),
       ),
+      ),
     );
   }
 }
 
-/// 6. Patient Detail & Complaint Bottom Sheet Modal
+/// 6. Schedule Session Detail Drawer (Detail Sesi Praktik - Read Only)
+/// Matching 1:1 with lines 2377-2584 in ScheduleTabScreen.tsx (.web)
+class AmanahScheduleDetailDrawer extends StatelessWidget {
+  const AmanahScheduleDetailDrawer({
+    required this.schedule,
+    required this.isDayCuti,
+    required this.onViewPatients,
+    required this.onTapEdit,
+    super.key,
+  });
+
+  final DoctorSchedule schedule;
+  final bool isDayCuti;
+  final VoidCallback onViewPatients;
+  final VoidCallback onTapEdit;
+
+  static void show(
+    BuildContext context, {
+    required DoctorSchedule schedule,
+    required bool isDayCuti,
+    required VoidCallback onViewPatients,
+    required VoidCallback onTapEdit,
+  }) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.60),
+      builder: (BuildContext ctx) => AmanahScheduleDetailDrawer(
+        schedule: schedule,
+        isDayCuti: isDayCuti,
+        onViewPatients: onViewPatients,
+        onTapEdit: onTapEdit,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool dark = theme.brightness == Brightness.dark;
+    final double maxHeight = MediaQuery.sizeOf(context).height * 0.88;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: dark ? const Color(0xFF0A0E1A) : Colors.white,
+            border: Border(
+              top: BorderSide(
+                color: dark
+                    ? Colors.white.withValues(alpha: 0.10)
+                    : const Color(0xFFF5F5F5),
+              ),
+            ),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 45,
+                offset: const Offset(0, -12),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              // Interactive Drag Handle
+              InkWell(
+                onTap: () => Navigator.of(context).pop(),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 38,
+                  child: Center(
+                    child: Container(
+                      width: 44,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: dark
+                            ? Colors.white.withValues(alpha: 0.25)
+                            : const Color(0xFFD4D4D8),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Master Header (Detail Sesi Praktik)
+              Container(
+                padding: const EdgeInsets.fromLTRB(24, 2, 24, 10),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: dark
+                          ? Colors.white.withValues(alpha: 0.10)
+                          : const Color(0xFFF1F5F9),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      'Detail Sesi Praktik',
+                      style: TextStyle(
+                        color: dark ? Colors.white : const Color(0xFF0F172A),
+                        fontFamily: 'PlusJakartaSans',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(999),
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: dark
+                              ? Colors.white.withValues(alpha: 0.10)
+                              : const Color(0xFFF5F5F5),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 16,
+                          color: dark
+                              ? const Color(0xFFD4D4D8)
+                              : const Color(0xFF52525B),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Detail Content Body
+              Flexible(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      // Title & Date Heading + Status Badge
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  schedule.title,
+                                  style: TextStyle(
+                                    color: dark
+                                        ? Colors.white
+                                        : const Color(0xFF020617),
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -0.3,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  schedule.date,
+                                  style: TextStyle(
+                                    color: dark
+                                        ? const Color(0xFFA1A1AA)
+                                        : const Color(0xFF64748B),
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isDayCuti
+                                  ? const Color(0xFFF59E0B).withValues(alpha: 0.20)
+                                  : (schedule.badgeVariant ==
+                                          AmanahBadgeVariant.success
+                                      ? (dark
+                                          ? const Color(0xFF10B981)
+                                              .withValues(alpha: 0.20)
+                                          : const Color(0xFFECFDF5))
+                                      : schedule.badgeVariant ==
+                                              AmanahBadgeVariant.warning
+                                          ? (dark
+                                              ? const Color(0xFFF59E0B)
+                                                  .withValues(alpha: 0.20)
+                                              : const Color(0xFFFEF3C7))
+                                          : (dark
+                                              ? const Color(0xFF3B82F6)
+                                                  .withValues(alpha: 0.20)
+                                              : const Color(0xFFEFF6FF))),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: isDayCuti
+                                        ? const Color(0xFFF59E0B)
+                                        : schedule.badgeVariant.color,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const SizedBox(width: 6, height: 6),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  isDayCuti ? 'Cuti' : schedule.badge,
+                                  style: TextStyle(
+                                    color: isDayCuti
+                                        ? const Color(0xFFF59E0B)
+                                        : (schedule.badgeVariant ==
+                                                AmanahBadgeVariant.success
+                                            ? (dark
+                                                ? const Color(0xFF34D399)
+                                                : const Color(0xFF047857))
+                                            : schedule.badgeVariant ==
+                                                    AmanahBadgeVariant.warning
+                                                ? (dark
+                                                    ? const Color(0xFFFBBF24)
+                                                    : const Color(0xFFD97706))
+                                                : (dark
+                                                    ? const Color(0xFF60A5FA)
+                                                    : const Color(0xFF1D4ED8))),
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Specification Records List
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(
+                              color: dark
+                                  ? Colors.white.withValues(alpha: 0.10)
+                                  : const Color(0xFFF1F5F9),
+                            ),
+                            bottom: BorderSide(
+                              color: dark
+                                  ? Colors.white.withValues(alpha: 0.10)
+                                  : const Color(0xFFF1F5F9),
+                            ),
+                          ),
+                        ),
+                        child: Column(
+                          children: <Widget>[
+                            _PatientSpecRow(
+                              label: 'Sesi Praktik',
+                              value: schedule.sessionType.isNotEmpty
+                                  ? 'Sesi ${schedule.sessionType}'
+                                  : schedule.title,
+                              dark: dark,
+                            ),
+                            _PatientSpecRow(
+                              label: 'Jam Praktik',
+                              value: schedule.time,
+                              dark: dark,
+                            ),
+                            _PatientSpecRow(
+                              label: 'Ruang Praktik',
+                              value: schedule.room,
+                              dark: dark,
+                            ),
+                            _PatientSpecRow(
+                              label: 'Poli / Spesialisasi',
+                              value: schedule.poli,
+                              dark: dark,
+                            ),
+                            _SessionSpecTotalPatientsRow(
+                              bookedCount: schedule.bookedPatients.length,
+                              dark: dark,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Stacked Avatars Trigger Bar (Lihat Pasien Booking)
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(
+                              color: dark
+                                  ? Colors.white.withValues(alpha: 0.10)
+                                  : const Color(0xFF000000).withValues(alpha: 0.06),
+                            ),
+                            bottom: BorderSide(
+                              color: dark
+                                  ? Colors.white.withValues(alpha: 0.10)
+                                  : const Color(0xFF000000).withValues(alpha: 0.06),
+                            ),
+                          ),
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            onViewPatients();
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Expanded(
+                                child: Row(
+                                  children: <Widget>[
+                                    _StackedPatientAvatars(
+                                      patients: schedule.bookedPatients,
+                                      dark: dark,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        'Lihat Pasien Booking (${schedule.bookedPatients.length} Pasien)',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: dark
+                                              ? const Color(0xFF22D3EE)
+                                              : const Color(0xFF2563EB),
+                                          fontFamily: 'PlusJakartaSans',
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                size: 16,
+                                color: dark
+                                    ? const Color(0xFF22D3EE)
+                                    : const Color(0xFF2563EB),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Action Button: Ubah Sesi Praktik
+                      SizedBox(
+                        width: double.infinity,
+                        height: 46,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: dark
+                                ? const Color(0xFF06B6D4)
+                                : const Color(0xFF2563EB),
+                            foregroundColor:
+                                dark ? const Color(0xFF083344) : Colors.white,
+                            elevation: 4,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            shadowColor: dark
+                                ? const Color(0xFF06B6D4).withValues(alpha: 0.30)
+                                : const Color(0xFF2563EB).withValues(alpha: 0.30),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            onTapEdit();
+                          },
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Icon(Icons.edit_outlined, size: 16),
+                              SizedBox(width: 8),
+                              Text(
+                                'Ubah Sesi Praktik',
+                                style: TextStyle(
+                                  fontFamily: 'PlusJakartaSans',
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SessionSpecTotalPatientsRow extends StatelessWidget {
+  const _SessionSpecTotalPatientsRow({
+    required this.bookedCount,
+    required this.dark,
+  });
+
+  final int bookedCount;
+  final bool dark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: dark
+                ? Colors.white.withValues(alpha: 0.10)
+                : const Color(0xFFF1F5F9),
+          ),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'Total Pasien Booking',
+            style: TextStyle(
+              color: dark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B),
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              '$bookedCount Pasien',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: dark ? const Color(0xFF22D3EE) : const Color(0xFF2563EB),
+                fontFamily: 'PlusJakartaSans',
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StackedPatientAvatars extends StatelessWidget {
+  const _StackedPatientAvatars({required this.patients, required this.dark});
+
+  final List<BookedPatient> patients;
+  final bool dark;
+
+  @override
+  Widget build(BuildContext context) {
+    if (patients.isEmpty) {
+      return Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: dark
+              ? Colors.white.withValues(alpha: 0.10)
+              : const Color(0xFFE2E8F0),
+          border: Border.all(
+            color: dark ? const Color(0xFF0A0E1A) : Colors.white,
+            width: 2,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          '0',
+          style: TextStyle(
+            color: dark ? Colors.white : const Color(0xFF334155),
+            fontFamily: 'PlusJakartaSans',
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      );
+    }
+
+    final List<BookedPatient> top3 = patients.take(3).toList();
+    final double stackWidth = 24.0 + (top3.length - 1) * 16.0;
+
+    return SizedBox(
+      width: stackWidth,
+      height: 24,
+      child: Stack(
+        children: List<Widget>.generate(top3.length, (int i) {
+          final BookedPatient p = top3[i];
+          return Positioned(
+            left: i * 16.0,
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: dark ? const Color(0xFF0A0E1A) : Colors.white,
+                  width: 2,
+                ),
+                image: DecorationImage(
+                  image: NetworkImage(
+                    p.avatarUrl ??
+                        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
+                  ),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+/// 7. Patient Detail & Complaint Bottom Sheet Modal
 class AmanahPatientDetailModal extends StatelessWidget {
   const AmanahPatientDetailModal({
     required this.patient,
