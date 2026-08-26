@@ -880,10 +880,11 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
-    final double maxHeight = MediaQuery.sizeOf(context).height * 0.88;
+    final double screenHeight = MediaQuery.sizeOf(context).height;
+    final double targetHeight = screenHeight * 0.85;
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: maxHeight),
+    return SizedBox(
+      height: targetHeight,
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         child: DecoratedBox(
@@ -905,14 +906,13 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
             ],
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               // Interactive Drag Handle
               InkWell(
                 onTap: () => Navigator.of(context).pop(),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 38,
+                  height: 40,
                   child: Center(
                     child: Container(
                       width: 44,
@@ -930,7 +930,7 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
 
               // Master Header (Detail Sesi Praktik)
               Container(
-                padding: const EdgeInsets.fromLTRB(24, 2, 24, 10),
+                padding: const EdgeInsets.fromLTRB(24, 2, 24, 12),
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
@@ -979,10 +979,15 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
               ),
 
               // Detail Content Body
-              Flexible(
+              Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    20,
+                    24,
+                    28 + MediaQuery.paddingOf(context).bottom,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
