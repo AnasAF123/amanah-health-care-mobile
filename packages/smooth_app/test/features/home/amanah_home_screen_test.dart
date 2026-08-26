@@ -49,10 +49,11 @@ void main() {
 
       // Check Schedule Card Stack
       expect(find.byType(AmanahScheduleCardStack), findsOneWidget);
-      expect(find.text('Jadwal Hari Ini'), findsOneWidget);
-      expect(find.text('07:30 - 11:30'), findsOneWidget);
-      expect(find.text('Poli Anak'), findsOneWidget);
-      expect(find.text('16 / 30'), findsOneWidget);
+      expect(find.text('Jadwal Hari Ini • Sesi Pagi'), findsOneWidget);
+      expect(find.text('07:00 - 11:00 WIB'), findsOneWidget);
+      expect(find.text('Poli Gigi & Mulut'), findsOneWidget);
+      expect(find.text('2 Pasien'), findsOneWidget);
+      expect(find.text('Terdaftar'), findsWidgets);
 
       // Check Quick Access Section
       expect(find.byType(AmanahQuickAccessSection), findsOneWidget);
@@ -61,11 +62,11 @@ void main() {
       expect(find.text('Cari Visit'), findsOneWidget);
       expect(find.text('Kartu ID'), findsOneWidget);
 
-      // Check Today's Activity Section
+      // Check Today's Activity Section (reflects live total booked patients: 4)
       expect(find.byType(AmanahTodayActivitySection), findsOneWidget);
       expect(find.text('Aktivitas hari ini'), findsOneWidget);
       expect(find.text('Antrean Aktif'), findsOneWidget);
-      expect(find.text('23'), findsOneWidget);
+      expect(find.text('4'), findsOneWidget);
       expect(find.text('Total Selesai'), findsOneWidget);
       expect(find.text('45'), findsOneWidget);
 
@@ -128,13 +129,13 @@ void main() {
       await tester.pumpWidget(createHomeScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('Jadwal Hari Ini'), findsOneWidget);
+      expect(find.text('Jadwal Hari Ini • Sesi Pagi'), findsOneWidget);
 
       await tester.tap(find.byIcon(Icons.close_rounded).last);
       await tester.pump(const Duration(milliseconds: 300));
       await tester.pumpAndSettle();
 
-      expect(find.text('Jadwal Siang'), findsOneWidget);
+      expect(find.text('Jadwal Hari Ini • Sesi Siang'), findsOneWidget);
     });
 
     testWidgets('Swiping left on schedule card stack switches to next card',
@@ -146,14 +147,14 @@ void main() {
       await tester.pumpWidget(createHomeScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('Jadwal Hari Ini'), findsOneWidget);
+      expect(find.text('Jadwal Hari Ini • Sesi Pagi'), findsOneWidget);
 
       // Drag horizontally to the left by -120px
       await tester.drag(find.byType(AmanahScheduleCardStack), const Offset(-120, 0));
       await tester.pump(const Duration(milliseconds: 300));
       await tester.pumpAndSettle();
 
-      expect(find.text('Jadwal Siang'), findsOneWidget);
+      expect(find.text('Jadwal Hari Ini • Sesi Siang'), findsOneWidget);
     });
 
     testWidgets('Tapping schedule card navigates directly to Doctor Practice Schedule and opens Detail Sesi Praktik drawer',
@@ -166,7 +167,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap on the front schedule card (not on the dismiss button)
-      await tester.tap(find.text('07:30 - 11:30'));
+      await tester.tap(find.text('07:00 - 11:00 WIB'));
       await tester.pumpAndSettle();
 
       // Should have navigated to the Doctor Practice Schedule and opened the Detail Sesi Praktik drawer

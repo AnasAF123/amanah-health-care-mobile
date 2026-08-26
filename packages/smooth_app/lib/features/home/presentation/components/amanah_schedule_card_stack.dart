@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_status_badge.dart';
+import 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart';
 
 class AmanahScheduleCardStack extends StatefulWidget {
   const AmanahScheduleCardStack({
@@ -12,8 +12,8 @@ class AmanahScheduleCardStack extends StatefulWidget {
     super.key,
   });
 
-  final List<AmanahSchedule> schedules;
-  final ValueChanged<AmanahSchedule>? onCardTap;
+  final List<DoctorSchedule> schedules;
+  final ValueChanged<DoctorSchedule>? onCardTap;
 
   @override
   State<AmanahScheduleCardStack> createState() =>
@@ -139,7 +139,7 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack> {
           children: List<Widget>.generate(3, (int index) {
             final int depth = 2 - index;
             final int safeIndex = _currentIndex % widget.schedules.length;
-            final AmanahSchedule schedule =
+            final DoctorSchedule schedule =
                 widget.schedules[(safeIndex + depth) % widget.schedules.length];
             final bool front = depth == 0;
 
@@ -216,9 +216,31 @@ class AmanahScheduleCard extends StatelessWidget {
     super.key,
   });
 
-  final AmanahSchedule schedule;
+  final DoctorSchedule schedule;
   final VoidCallback onDismiss;
   final VoidCallback? onCardTap;
+
+  String _formatCardTitle() {
+    if (schedule.sessionType.isNotEmpty) {
+      return 'Jadwal Hari Ini • Sesi ${schedule.sessionType}';
+    }
+    if (schedule.title.startsWith('Jadwal')) {
+      return schedule.title;
+    }
+    return 'Jadwal Hari Ini • ${schedule.title}';
+  }
+
+  String _formatPatientCount() {
+    if (schedule.bookedPatients.isNotEmpty) {
+      return '${schedule.bookedPatients.length} Pasien';
+    }
+    final String raw =
+        schedule.slotCount.replaceAll(RegExp(r'\s*/\s*\d+'), '').trim();
+    if (int.tryParse(raw) != null) {
+      return '$raw Pasien';
+    }
+    return '${schedule.slotCount} Pasien';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -228,8 +250,11 @@ class AmanahScheduleCard extends StatelessWidget {
     final Color muted =
         dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
+    final String cardTitle = _formatCardTitle();
+    final String patientMetric = _formatPatientCount();
+
     return Semantics(
-      label: '${schedule.title}, ${schedule.time}',
+      label: '$cardTitle, ${schedule.time}',
       child: SizedBox(
         height: 172,
         width: double.infinity,
@@ -259,96 +284,102 @@ class AmanahScheduleCard extends StatelessWidget {
                         // Top Row: Title, Date, Dismiss Icon
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                schedule.title,
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  color: heading,
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1.1,
-                                ),
+                          children: <Widget>[
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text(
+                                    cardTitle,
+                                    style:
+                                        theme.textTheme.titleSmall?.copyWith(
+                                      color: heading,
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800,
+                                      height: 1.1,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    schedule.date,
+                                    style:
+                                        theme.textTheme.labelSmall?.copyWith(
+                                      color: muted,
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 3),
-                              Text(
-                                schedule.date,
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: muted,
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.2,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        _AmanahDismissButton(onTap: onDismiss, color: muted),
-                      ],
-                    ),
-                    // Center Row: Large Time, Status Badge
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Text(
-                            schedule.time,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              color:
-                                  dark ? Colors.white : const Color(0xFF0F172A),
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 27,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -0.6,
-                              height: 1,
                             ),
-                          ),
+                            _AmanahDismissButton(
+                              onTap: onDismiss,
+                              color: muted,
+                            ),
+                          ],
                         ),
-                        AmanahStatusBadge(
-                          variant: schedule.badgeVariant,
-                          text: schedule.badge,
+                        // Center Row: Large Time, Status Badge
+                        Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: Text(
+                                schedule.time,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  color: dark
+                                      ? Colors.white
+                                      : const Color(0xFF0F172A),
+                                  fontFamily: 'PlusJakartaSans',
+                                  fontSize: 27,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.6,
+                                  height: 1,
+                                ),
+                              ),
+                            ),
+                            AmanahStatusBadge(
+                              variant: schedule.badgeVariant,
+                              text: schedule.badge,
+                            ),
+                          ],
+                        ),
+                        // Bottom Row: Poli & Room on left, Patients on right
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: <Widget>[
+                            Expanded(
+                              child: _ScheduleFooterText(
+                                title: schedule.poli,
+                                subtitle: schedule.room,
+                                alignEnd: false,
+                                heading: heading,
+                                muted: muted,
+                              ),
+                            ),
+                            _ScheduleFooterText(
+                              title: patientMetric,
+                              subtitle: 'Terdaftar',
+                              alignEnd: true,
+                              heading: heading,
+                              muted: muted,
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    // Bottom Row: Poli & Room on left, Slots on right
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        Expanded(
-                          child: _ScheduleFooterText(
-                            title: schedule.poli,
-                            subtitle: schedule.room,
-                            alignEnd: false,
-                            heading: heading,
-                            muted: muted,
-                          ),
-                        ),
-                        _ScheduleFooterText(
-                          title: schedule.slotCount,
-                          subtitle: schedule.slotText,
-                          alignEnd: true,
-                          heading: heading,
-                          muted: muted,
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
       ),
-    ),
-  ),
-);
-}
+    );
+  }
 }
 
 class _AmanahDismissButton extends StatelessWidget {

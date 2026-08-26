@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart';
 
-enum AmanahBadgeVariant { success, primary, live, trend }
+export 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart'
+    show AmanahBadgeVariant;
 
 enum AmanahQuickActionIcon { history, presence, schedule, search, idCard }
 
@@ -80,6 +82,28 @@ class AmanahActivityMetric {
   final AmanahBadgeVariant badgeVariant;
   final AmanahActivityIcon icon;
   final AmanahActivityGlow glow;
+
+  AmanahActivityMetric copyWith({
+    String? id,
+    String? title,
+    String? count,
+    String? unit,
+    String? badgeText,
+    AmanahBadgeVariant? badgeVariant,
+    AmanahActivityIcon? icon,
+    AmanahActivityGlow? glow,
+  }) {
+    return AmanahActivityMetric(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      count: count ?? this.count,
+      unit: unit ?? this.unit,
+      badgeText: badgeText ?? this.badgeText,
+      badgeVariant: badgeVariant ?? this.badgeVariant,
+      icon: icon ?? this.icon,
+      glow: glow ?? this.glow,
+    );
+  }
 }
 
 class AmanahHomeDashboardData {

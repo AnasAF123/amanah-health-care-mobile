@@ -42,6 +42,12 @@ class AmanahStatusBadge extends StatelessWidget {
         border: Color(0xFF38C474),
         icon: _AmanahBadgeIcon.none,
       ),
+      AmanahBadgeVariant.warning => _AmanahBadgeStyle(
+        background: dark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7),
+        foreground: const Color(0xFFF59E0B),
+        border: dark ? const Color(0xFFF59E0B) : const Color(0xFFFDE68A),
+        icon: _AmanahBadgeIcon.none,
+      ),
     };
 
     return DecoratedBox(

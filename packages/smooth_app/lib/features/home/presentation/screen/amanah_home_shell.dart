@@ -13,6 +13,8 @@ import 'package:smooth_app/features/home/presentation/screen/amanah_account_tab_
 import 'package:smooth_app/features/home/presentation/screen/amanah_schedule_tab_screen.dart';
 import 'package:smooth_app/features/presence/presentation/screen/amanah_presence_history_screen.dart';
 import 'package:smooth_app/features/presence/presentation/screen/amanah_qr_scanner_tab_screen.dart';
+import 'package:smooth_app/features/schedule/data/amanah_schedule_store.dart';
+import 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class AmanahHomeShell extends StatefulWidget {
@@ -26,12 +28,25 @@ class AmanahHomeShell extends StatefulWidget {
 }
 
 class _AmanahHomeShellState extends State<AmanahHomeShell> {
+  final AmanahScheduleStore _scheduleStore = AmanahScheduleStore.instance;
   AmanahHomeTab _selectedTab = AmanahHomeTab.home;
   String? _toastMessage;
   Timer? _toastTimer;
   String? _scheduleInitialSessionId;
   AmanahScheduleViewMode? _scheduleInitialViewMode;
   bool _scheduleOpenDetailOnLaunch = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleStore.addListener(_onStoreUpdated);
+  }
+
+  void _onStoreUpdated() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   void _showToast(String message) {
     _toastTimer?.cancel();
@@ -136,7 +151,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     }
   }
 
-  void _navigateToScheduleWithSession(AmanahSchedule schedule) {
+  void _navigateToScheduleWithSession(DoctorSchedule schedule) {
     setState(() {
       _scheduleInitialSessionId = schedule.id;
       _scheduleInitialViewMode = AmanahScheduleViewMode.sessions;
@@ -147,6 +162,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
 
   @override
   void dispose() {
+    _scheduleStore.removeListener(_onStoreUpdated);
     _toastTimer?.cancel();
     super.dispose();
   }
@@ -161,6 +177,9 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
         : (_selectedTab == AmanahHomeTab.home
               ? const Color(0xFFF8FAFF)
               : Colors.white);
+
+    final List<DoctorSchedule> todaySchedules =
+        _scheduleStore.getSchedulesForDate(AmanahScheduleStore.baseToday);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -187,6 +206,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   key: const ValueKey<String>('home_content'),
                   user: widget.user,
                   data: amanahHomeDashboardData,
+                  todaySchedules: todaySchedules,
                   onNotificationTap: () {
                     setState(() => _selectedTab = AmanahHomeTab.notifications);
                   },
@@ -288,6 +308,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
   const _AmanahHomeScreenContent({
     required this.user,
     required this.data,
+    required this.todaySchedules,
     required this.onNotificationTap,
     required this.onProfileTap,
     required this.onQuickActionTap,
@@ -299,15 +320,34 @@ class _AmanahHomeScreenContent extends StatelessWidget {
 
   final AmanahAuthUser user;
   final AmanahHomeDashboardData data;
+  final List<DoctorSchedule> todaySchedules;
   final VoidCallback onNotificationTap;
   final VoidCallback onProfileTap;
   final ValueChanged<AmanahQuickAction> onQuickActionTap;
   final VoidCallback onDetailActivityTap;
   final ValueChanged<AmanahActivityMetric> onActivityTap;
-  final ValueChanged<AmanahSchedule>? onScheduleCardTap;
+  final ValueChanged<DoctorSchedule>? onScheduleCardTap;
 
   @override
   Widget build(BuildContext context) {
+    final int totalBookedPatients = todaySchedules.fold<int>(
+      0,
+      (int acc, DoctorSchedule s) => acc + s.bookedPatients.length,
+    );
+
+    final List<AmanahActivityMetric> dynamicActivities = data.activities.map(
+      (AmanahActivityMetric act) {
+        if (act.id == 'antrean-aktif') {
+          return act.copyWith(
+            count: totalBookedPatients > 0
+                ? totalBookedPatients.toString()
+                : act.count,
+          );
+        }
+        return act;
+      },
+    ).toList();
+
     return ListView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
@@ -324,7 +364,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
 
         // 2. 3D Stack of Schedule Cards with Staggered Depth & Wave Petal Texture
         AmanahScheduleCardStack(
-          schedules: data.schedules,
+          schedules: todaySchedules,
           onCardTap: onScheduleCardTap,
         ),
         const SizedBox(height: 16),
@@ -338,7 +378,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
 
         // 4. Today's Activity Stat Cards
         AmanahTodayActivitySection(
-          activities: data.activities,
+          activities: dynamicActivities,
           onDetailTap: onDetailActivityTap,
           onActivityTap: onActivityTap,
         ),
