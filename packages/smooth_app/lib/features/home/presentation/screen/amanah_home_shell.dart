@@ -194,6 +194,9 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                 AmanahHomeTab.account => AmanahAccountTabScreen(
                   key: const ValueKey<String>('account_content'),
                   user: widget.user,
+                  onBack: () {
+                    setState(() => _selectedTab = AmanahHomeTab.home);
+                  },
                   onMenuItemTap: (String id) {
                     _showToast('Membuka menu $id');
                   },

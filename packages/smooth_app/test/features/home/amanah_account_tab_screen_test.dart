@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smooth_app/features/authentication/domain/amanah_auth_user.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_edit_profile_drawer.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_account_tab_screen.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_home_shell.dart';
 
@@ -39,7 +40,8 @@ void main() {
   }
 
   group('Amanah Account Tab Screen Tests', () {
-    testWidgets('Renders doctor identity header, menu items, and logout button',
+    testWidgets(
+        'Renders doctor identity header, bio, 8 settings items, and logout button',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.75;
@@ -51,23 +53,75 @@ void main() {
       // Doctor Profile Identity
       expect(find.text('dr. Andika Perkasa'), findsOneWidget);
       expect(find.text('Dokter Spesialis Anak'), findsOneWidget);
-      expect(find.text('ID: DOC-2026-0819'), findsOneWidget);
-      expect(find.text('RS Amanah Sehat'), findsOneWidget);
+      expect(find.text('ID: DOC-2026-0819 • RS Amanah Sehat'), findsOneWidget);
+      expect(find.text('Edit Profil'), findsOneWidget);
+      expect(find.byIcon(Icons.camera_alt_rounded), findsOneWidget);
 
-      // Settings Menu Items
-      expect(find.text('Surat Izin Praktek (SIP)'), findsOneWidget);
-      expect(find.text('SIP: 446/1029/DS/2024'), findsOneWidget);
-      expect(find.text('Spesialisasi & Sertifikasi'), findsOneWidget);
-      expect(find.text('Ikatan Dokter Anak Indonesia (IDAI)'), findsOneWidget);
-      expect(find.text('Keamanan & PIN Presensi'), findsOneWidget);
-      expect(find.text('Privasi Data Rekam Medis'), findsOneWidget);
-      expect(find.text('Pusat Bantuan & IT Support'), findsOneWidget);
+      // Settings Menu Items (8 items matching web)
+      expect(find.text('Akun & Identitas Dokter'), findsOneWidget);
+      expect(find.text('Pengaturan Praktik & Shift'), findsOneWidget);
+      expect(find.text('Privasi & Keamanan'), findsOneWidget);
+      expect(find.text('Notifikasi & Pengingat'), findsOneWidget);
+      expect(find.text('Data & Penyimpanan'), findsOneWidget);
+      expect(find.text('Dokumen & Sertifikasi'), findsOneWidget);
+      expect(find.text('Perangkat Terhubung'), findsOneWidget);
+      expect(find.text('Bantuan & IT Support'), findsOneWidget);
 
       // Logout Button
       expect(find.text('Keluar dari Akun Dokter'), findsOneWidget);
     });
 
-    testWidgets('Tapping a menu item triggers onMenuItemTap callback',
+    testWidgets('Tapping Edit Profil opens Edit Profile drawer and updates profile',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.75;
+      addTearDown(() => tester.view.reset());
+
+      await tester.pumpWidget(createAccountScreen());
+      await tester.pumpAndSettle();
+
+      // Tap Edit Profil button
+      await tester.tap(find.text('Edit Profil'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AmanahEditProfileDrawer), findsOneWidget);
+      expect(find.text('Edit Profil Dokter'), findsOneWidget);
+      expect(find.text('✓ Terverifikasi Manajemen RS Amanah Sehat'), findsOneWidget);
+      expect(find.text('Simpan Perubahan'), findsOneWidget);
+
+      // Tap Simpan Perubahan
+      await tester.tap(find.text('Simpan Perubahan'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AmanahEditProfileDrawer), findsNothing);
+    });
+
+    testWidgets('Tapping Camera icon button opens Avatar photo sheet',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.75;
+      addTearDown(() => tester.view.reset());
+
+      await tester.pumpWidget(createAccountScreen());
+      await tester.pumpAndSettle();
+
+      // Tap Camera button
+      await tester.tap(find.byIcon(Icons.camera_alt_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AmanahAvatarPhotoSheet), findsOneWidget);
+      expect(find.text('Ganti Foto Profil Dokter'), findsOneWidget);
+      expect(find.text('Pilih dari Galeri Perangkat'), findsOneWidget);
+      expect(find.text('Gunakan Foto Default'), findsOneWidget);
+
+      // Tap Gunakan Foto Default
+      await tester.tap(find.text('Gunakan Foto Default'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AmanahAvatarPhotoSheet), findsNothing);
+    });
+
+    testWidgets('Tapping a settings menu item triggers onMenuItemTap callback',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.75;
@@ -79,10 +133,10 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Surat Izin Praktek (SIP)'));
+      await tester.tap(find.text('Pengaturan Praktik & Shift'));
       await tester.pump();
 
-      expect(tappedItem, 'sip');
+      expect(tappedItem, 'practice');
     });
 
     testWidgets('Tapping logout button triggers onLogout callback',
@@ -121,7 +175,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AmanahAccountTabScreen), findsOneWidget);
-      expect(find.text('Surat Izin Praktek (SIP)'), findsOneWidget);
+      expect(find.text('Akun & Identitas Dokter'), findsOneWidget);
       expect(find.text('Keluar dari Akun Dokter'), findsOneWidget);
     });
   });
