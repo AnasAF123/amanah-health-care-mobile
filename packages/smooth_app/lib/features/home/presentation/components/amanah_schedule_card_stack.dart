@@ -274,8 +274,9 @@ class AmanahScheduleCard extends StatelessWidget {
                               color:
                                   dark ? Colors.white : const Color(0xFF0F172A),
                               fontFamily: 'PlusJakartaSans',
-                              fontSize: 26,
+                              fontSize: 27,
                               fontWeight: FontWeight.w900,
+                              letterSpacing: -0.6,
                               height: 1,
                             ),
                           ),
@@ -376,8 +377,9 @@ class _ScheduleFooterText extends StatelessWidget {
           style: theme.textTheme.labelMedium?.copyWith(
             color: heading,
             fontFamily: 'PlusJakartaSans',
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.2,
             height: 1.15,
           ),
         ),

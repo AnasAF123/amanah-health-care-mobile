@@ -50,13 +50,14 @@ class AmanahHomeAppBar extends StatelessWidget {
                             style: theme.textTheme.titleMedium?.copyWith(
                               color: Colors.white,
                               fontFamily: 'PlusJakartaSans',
-                              fontSize: 19,
+                              fontSize: 20,
                               fontWeight: FontWeight.w900,
+                              letterSpacing: -0.3,
                               height: 1.05,
                               shadows: <Shadow>[
                                 Shadow(
-                                  color: Colors.black.withValues(alpha: 0.12),
-                                  blurRadius: 2,
+                                  color: Colors.black.withValues(alpha: 0.15),
+                                  blurRadius: 3,
                                   offset: const Offset(0, 1),
                                 ),
                               ],

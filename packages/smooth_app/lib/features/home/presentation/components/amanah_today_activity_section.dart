@@ -36,8 +36,9 @@ class AmanahTodayActivitySection extends StatelessWidget {
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: dark ? Colors.white : const Color(0xFF1A1D2E),
                     fontFamily: 'PlusJakartaSans',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.3,
                     height: 1.15,
                   ),
                 ),
@@ -256,37 +257,41 @@ class AmanahActivityCard extends StatelessWidget {
                                 height: 1.1,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              textBaseline: TextBaseline.alphabetic,
-                              children: <Widget>[
-                                Text(
-                                  item.count,
-                                  style: theme.textTheme.headlineMedium?.copyWith(
-                                    color: dark
-                                        ? Colors.white
-                                        : const Color(0xFF0F172A),
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.w900,
-                                    height: 1,
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.baseline,
+                                textBaseline: TextBaseline.alphabetic,
+                                children: <Widget>[
+                                  Text(
+                                    item.count,
+                                    style: theme.textTheme.headlineMedium?.copyWith(
+                                      color: dark
+                                          ? Colors.white
+                                          : const Color(0xFF0F172A),
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: -0.8,
+                                      height: 1,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  item.unit,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: dark
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFF94A3B8),
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                    height: 1,
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    item.unit,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: dark
+                                          ? const Color(0xFF94A3B8)
+                                          : const Color(0xFF94A3B8),
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      height: 1,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),

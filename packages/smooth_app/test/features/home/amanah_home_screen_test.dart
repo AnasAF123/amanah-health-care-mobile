@@ -85,7 +85,7 @@ void main() {
       await tester.tap(find.text('Cari Visit'));
       await tester.pump();
 
-      expect(find.text('Fitur Cari Visit Pasien'), findsOneWidget);
+      expect(find.text('Membuka menu Cari Visit Pasien'), findsOneWidget);
     });
 
     testWidgets('Tapping notification bell navigates to Notification tab',

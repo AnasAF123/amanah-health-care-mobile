@@ -1,0 +1,1124 @@
+list kebodohan yang kamu lakukan
+
+msalah 1
+Cek kesehatan toolchain dulu
+Jalankan flutter doctor -v. Ini akan memaksa Flutter melakukan pengecekan versi/cache di awal (kalau memang itu biang keroknya) dan kamu akan lihat jelas kalau ada langkah yang menggantung atau butuh koneksi ke internet.Buka PowerShell/Windows Terminal biasa sendiri (jangan lewat prompt Codex yang tadi). Codex punya kebiasaan menunggu ~30-60 detik lalu menghentikan paksa proses yang diam — kalau kamu jalankan manual, kamu bisa menunggu selama apa pun pePindah ke folder package Flutter yang benar
+cd D:\MobileHealthcare\packages\smooth_app — pubspec.yaml dan folder test\ ada di sini, bukan di root D:\MobileHealthcare. Ini juga folder yang sama yang dipakai Codex saat dart.exe langsung berhasil tadi.Cek kesehatan toolchain dulu
+Jalankan flutter doctor -v. Ini akan memaksa Flutter melakukan pengecekan versi/cache di awal (kalau memang itu biang keroknya) dan kamu akan lihat jelas kalau ada langkah yang menggantung atau butuh koneksi ke internet.Matikan prompt telemetry/analytics
+Jalankan sekali: flutter config --no-analytics --no-cli-animations. Kalau selama ini yang bikin hang adalah consent prompt first-run yang menunggu input, ini akan menghilangkannya secara permanen untuk semua invocation berikutnya, termasuk yang dipanggil otomatis oleh Codex.Jalankan flutter test dan biarkan sampai selesai
+flutter test test\features\home\amanah_schedule_tab_screen_test.dart — biarkan jalan tanpa di-Ctrl+C dulu, terutama kalau ini run pertama (bisa beberapa menit karena build flutter_tester/engine artifact). Perhatikan apakah muncul teks 'Downloading...' yang diam lama — itu tanda network jadi masalah.Kalau memang hang, diagnosis dari situ
+Cek Task Manager apakah proses dart.exe/flutter_tester.exe masih aktif (CPU/network activity) atau benar-benar stuck. Kalau stuck di network, coba tes koneksi ke storage.googleapis.com. Setelah tahu penyebabnya, baru minta Codex ulangi langkah yang sama — sekarang environment-nya sudah 'dipanaskan' duluan jadi kemungkinan besar tidak hang lagi.
+proof
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+PS C:\Users\ANAS ABIYYU FALAH> cd D:\MobileHealthcare
+PS D:\MobileHealthcare> flutter test
+
+┌─────────────────────────────────────────────────────────┐
+│ A new version of Flutter is available!                  │
+│                                                         │
+│ To update to the latest version, run "flutter upgrade". │
+└─────────────────────────────────────────────────────────┘
+Test directory "test" not found.
+PS D:\MobileHealthcare> cd D:\MobileHealthcare\packages\smooth_app
+PS D:\MobileHealthcare\packages\smooth_app> flutter test
+00:41 +1: D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart: Bottom Sheetson Contribute Page looks as expected Software development_Page_Light_Theme
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/user_preferences_page_bottom_sheets_Software%20development-light.png": Pixel test
+failed, 12.54%, 60171px diff detected.
+Failure feedback can be found at
+/D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart:84:11)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:41 +1 -1: D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart: Bottom Sheets on Contribute Page looks as expected Software development_Page_Light_Theme [E]
+  Test failed. See exception logs above.
+  The test description was: Software development_Page_Light_Theme
+
+Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses
+TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request
+will actually be made. Any test expecting a real network connection and status code will fail.
+To test code that needs an HttpClient, provide your own HttpClient implementation to the code under
+test, so that your test can consistently provide a testable response to the code under test.
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart -p vm --plain-name "Bottom Sheets onContribute Page looks as expected Software development_Page_Light_Theme"
+00:42 +1 -1: D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart: Bottom Sheets on Contribute Page looks as expected Translate_Page_Light_Theme
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/user_preferences_page_bottom_sheets_Translate-light.png": Pixel test failed, 11.18%,
+53674px diff detected.
+Failure feedback can be found at
+/D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart:84:11)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:42 +2 -2: D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart: Bottom Sheets on Contribute Page looks as expected Translate_Page_Light_Theme [E]
+  Test failed. See exception logs above.
+  The test description was: Translate_Page_Light_Theme
+
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart -p vm --plain-name "Bottom Sheets onContribute Page looks as expected Translate_Page_Light_Theme"
+00:43 +5 -2: D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart: Bottom Sheets on Contribute Page looks as expected Software development_Page_Dark_Theme
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/user_preferences_page_bottom_sheets_Software%20development-dark.png": Pixel test
+failed, 46.82%, 224714px diff detected.
+Failure feedback can be found at
+/D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart:84:11)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:44 +5 -3: D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart: Bottom Sheets on Contribute Page looks as expected Software development_Page_Dark_Theme [E]
+  Test failed. See exception logs above.
+  The test description was: Software development_Page_Dark_Theme
+
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart -p vm --plain-name "Bottom Sheets onContribute Page looks as expected Software development_Page_Dark_Theme"
+00:44 +6 -3: D:/MobileHealthcare/packages/smooth_app/test/dialogs/generic_lib/dialogs_test.dart: Dialogs on Contribute Page looks as expected Improving_Page_Dark_Theme
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/user_preferences_page_dialogs_Improving-dark.png": Pixel test failed, 27.16%,
+130365px diff detected.
+Failure feedback can be found at
+/D:/MobileHealthcare/packages/smooth_app/test/dialogs/generic_lib/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/dialogs/generic_lib/dialogs_test.dart:80:11)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:44 +6 -4: D:/MobileHealthcare/packages/smooth_app/test/dialogs/generic_lib/dialogs_test.dart: Dialogs on Contribute Page looks as expected Improving_Page_Dark_Theme [E]
+  Test failed. See exception logs above.
+  The test description was: Improving_Page_Dark_Theme
+
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/dialogs/generic_lib/dialogs_test.dart -p vm --plain-name "Dialogs on Contribute Page looks as expected Improving_Page_Dark_Theme"
+00:45 +6 -4: D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart: Bottom Sheets on Contribute Page looks as expected Translate_Page_Dark_Theme
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/user_preferences_page_bottom_sheets_Translate-dark.png": Pixel test failed, 24.66%,
+118373px diff detected.
+Failure feedback can be found at
+/D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart:84:11)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:45 +6 -5: D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart: Bottom Sheets on Contribute Page looks as expected Translate_Page_Dark_Theme [E]
+  Test failed. See exception logs above.
+  The test description was: Translate_Page_Dark_Theme
+
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/bottom_sheets/generic_lib/bottom_sheets_test.dart -p vm --plain-name "Bottom Sheets onContribute Page looks as expected Translate_Page_Dark_Theme"
+00:56 +129 -5: D:/MobileHealthcare/packages/smooth_app/test/pages/user_preferences_page_test.dart: UserPreferencesPage looks as expected Light
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/user_preferences_page-light.png": Pixel test failed, 23.55%, 113037px diff detected.
+Failure feedback can be found at /D:/MobileHealthcare/packages/smooth_app/test/pages/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/pages/user_preferences_page_test.dart:67:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:57 +133 -6: D:/MobileHealthcare/packages/smooth_app/test/pages/user_preferences_page_test.dart: UserPreferencesPage looks as expected Light [E]
+  Test failed. See exception logs above.
+  The test description was: Light
+
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/pages/user_preferences_page_test.dart -p vm --plain-name "UserPreferencesPage looks asexpected Light"
+00:58 +159 -6: D:/MobileHealthcare/packages/smooth_app/test/pages/user_preferences_page_test.dart: UserPreferencesPage looks as expected Dark
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/user_preferences_page-dark.png": Pixel test failed, 40.76%, 195666px diff detected.
+Failure feedback can be found at /D:/MobileHealthcare/packages/smooth_app/test/pages/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/pages/user_preferences_page_test.dart:67:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:58 +159 -7: D:/MobileHealthcare/packages/smooth_app/test/pages/user_preferences_page_test.dart: UserPreferencesPage looks as expected Dark [E]
+  Test failed. See exception logs above.
+  The test description was: Dark
+
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/pages/user_preferences_page_test.dart -p vm --plain-name "UserPreferencesPage looks asexpected Dark"
+00:58 +174 -7: D:/MobileHealthcare/packages/smooth_app/test/pages/user_preferences_page_test.dart: UserPreferencesPage looks as expected AMOLED
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/user_preferences_page-amoled.png": Pixel test failed, 30.49%, 146337px diff
+detected.
+Failure feedback can be found at /D:/MobileHealthcare/packages/smooth_app/test/pages/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/pages/user_preferences_page_test.dart:67:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:58 +174 -8: D:/MobileHealthcare/packages/smooth_app/test/pages/user_preferences_page_test.dart: UserPreferencesPage looks as expected AMOLED [E]
+  Test failed. See exception logs above.
+  The test description was: AMOLED
+
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/pages/user_preferences_page_test.dart -p vm --plain-name "UserPreferencesPage looks asexpected AMOLED"
+01:03 +215 -8: D:/MobileHealthcare/packages/smooth_app/test/users/forgot_password_page_layout_test.dart: Password ResetPage looks as expected Light
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/forgot_password_page-light.png": Pixel test failed, 89.87%, 431358px diff detected.
+Failure feedback can be found at /D:/MobileHealthcare/packages/smooth_app/test/users/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/users/forgot_password_page_layout_test.dart:60:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:03 +215 -9: D:/MobileHealthcare/packages/smooth_app/test/users/forgot_password_page_layout_test.dart: Password ResetPage looks as expected Light [E]
+  Test failed. See exception logs above.
+  The test description was: Light
+
+Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses
+TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request
+will actually be made. Any test expecting a real network connection and status code will fail.
+To test code that needs an HttpClient, provide your own HttpClient implementation to the code under
+test, so that your test can consistently provide a testable response to the code under test.
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/users/forgot_password_page_layout_test.dart -p vm --plain-name "Password Reset Page looks as expected Light"
+01:03 +217 -9: D:/MobileHealthcare/packages/smooth_app/test/users/forgot_password_page_layout_test.dart: Password ResetPage looks as expected Dark
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/forgot_password_page-dark.png": Pixel test failed, 86.69%, 416129px diff detected.
+Failure feedback can be found at /D:/MobileHealthcare/packages/smooth_app/test/users/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/users/forgot_password_page_layout_test.dart:60:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:04 +217 -10: D:/MobileHealthcare/packages/smooth_app/test/users/forgot_password_page_layout_test.dart: Password Reset Page looks as expected Dark [E]
+  Test failed. See exception logs above.
+  The test description was: Dark
+
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/users/forgot_password_page_layout_test.dart -p vm --plain-name "Password Reset Page looks as expected Dark"
+01:04 +217 -10: D:/MobileHealthcare/packages/smooth_app/test/users/forgot_password_page_layout_test.dart: Password Reset Page looks as expected AMOLED
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/forgot_password_page-amoled.png": Pixel test failed, 85.23%, 409124px diff detected.
+Failure feedback can be found at /D:/MobileHealthcare/packages/smooth_app/test/users/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/users/forgot_password_page_layout_test.dart:60:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:04 +217 -11: D:/MobileHealthcare/packages/smooth_app/test/users/forgot_password_page_layout_test.dart: Password Reset Page looks as expected AMOLED [E]
+  Test failed. See exception logs above.
+  The test description was: AMOLED
+
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test (but after the test had completed):
+Expected: Text contrast should follow WCAG guidelines
+  Actual: <Instance of 'WidgetTester'>
+   Which: SemanticsNode#5(Rect.fromLTRB(120.0, 31.6, 680.0, 131.6), label: "In case of a forgotten
+password, enter your username or e-mail address to receive instructions for a password reset. Also,
+remember to check the Spam folder.", textDirection: ltr):
+          Expected contrast ratio of at least 4.5 but found 1.57 for a font size of 14.0.
+          The computed colors was:
+          light - Color(alpha: 1.0000, red: 0.9725, green: 0.9804, blue: 0.9882, colorSpace:
+ColorSpace.sRGB), dark - Color(alpha: 1.0000, red: 0.7922, green: 0.7922, blue: 0.7922, colorSpace:
+ColorSpace.sRGB)
+          See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+
+          SemanticsNode#7(Rect.fromLTRB(200.0, 369.5, 600.0, 417.5), actions: [focus, tap], flags:
+[isButton, hasEnabledState, isEnabled, isFocusable], label: "Change password", textDirection: ltr):
+          Expected contrast ratio of at least 3.0 but found 1.21 for a font size of 18.0.
+          The computed colors was:
+          light - Color(alpha: 1.0000, red: 0.0588, green: 0.0392, blue: 0.3529, colorSpace:
+ColorSpace.sRGB), dark - Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace:
+ColorSpace.sRGB)
+          See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:149:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:125:9)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 6 frames from dart:async and package:stack_trace)
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  Test failed. See exception logs above.
+  The test description was: AMOLED
+
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/users/forgot_password_page_layout_test.dart -p vm --plain-name "Password Reset Page looks as expected AMOLED"
+01:05 +235 -11: D:/MobileHealthcare/packages/smooth_app/test/users/login_page_layout_test.dart: LoginPage looks as expected Light
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/login_page-light.png": Pixel test failed, 69.10%, 331675px diff detected.
+Failure feedback can be found at /D:/MobileHealthcare/packages/smooth_app/test/users/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/users/login_page_layout_test.dart:60:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:05 +235 -12: D:/MobileHealthcare/packages/smooth_app/test/users/login_page_layout_test.dart: LoginPage looks as expected Light [E]
+  Test failed. See exception logs above.
+  The test description was: Light
+
+Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses
+TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request
+will actually be made. Any test expecting a real network connection and status code will fail.
+To test code that needs an HttpClient, provide your own HttpClient implementation to the code under
+test, so that your test can consistently provide a testable response to the code under test.
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/users/login_page_layout_test.dart -p vm --plain-name "LoginPage looks as expected Light"
+01:05 +236 -12: D:/MobileHealthcare/packages/smooth_app/test/users/login_page_layout_test.dart: LoginPage looks as expected Dark
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/login_page-dark.png": Pixel test failed, 69.47%, 333466px diff detected.
+Failure feedback can be found at /D:/MobileHealthcare/packages/smooth_app/test/users/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/users/login_page_layout_test.dart:60:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:05 +236 -13: D:/MobileHealthcare/packages/smooth_app/test/users/login_page_layout_test.dart: LoginPage looks as expected Dark [E]
+  Test failed. See exception logs above.
+  The test description was: Dark
+
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/users/login_page_layout_test.dart -p vm --plain-name "LoginPage looks as expected Dark"
+01:06 +236 -13: D:/MobileHealthcare/packages/smooth_app/test/users/login_page_layout_test.dart: LoginPage looks as expected AMOLED
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/login_page-amoled.png": Pixel test failed, 63.79%, 306190px diff detected.
+Failure feedback can be found at /D:/MobileHealthcare/packages/smooth_app/test/users/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/users/login_page_layout_test.dart:60:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:06 +236 -14: D:/MobileHealthcare/packages/smooth_app/test/users/signup_page_layout_test.dart: LoginPage looks as expected Light
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/signup_page-light.png": Pixel test failed, 88.90%, 426723px diff detected.
+Failure feedback can be found at /D:/MobileHealthcare/packages/smooth_app/test/users/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/users/signup_page_layout_test.dart:60:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:06 +236 -15: D:/MobileHealthcare/packages/smooth_app/test/users/login_page_layout_test.dart: LoginPage looks as expected AMOLED [E]
+  Test failed. See exception logs above.
+  The test description was: AMOLED
+
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test (but after the test had completed):
+Expected: Text contrast should follow WCAG guidelines
+  Actual: <Instance of 'WidgetTester'>
+   Which: SemanticsNode#7(Rect.fromLTRB(48.0, 122.0, 752.0, 166.0), label: "Sign in to your
+Open Food Facts account to save your contributions", textDirection: ltr):
+          Expected contrast ratio of at least 3.0 but found 1.05 for a font size of 20.0.
+          The computed colors was:
+          light - Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace:
+ColorSpace.sRGB), dark - Color(alpha: 1.0000, red: 0.9725, green: 0.9804, blue: 0.9882, colorSpace:
+ColorSpace.sRGB)
+          See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+
+
+          SemanticsNode#11(Rect.fromLTRB(494.4, 310.0, 744.0, 358.0), actions: [focus, tap], flags:
+[isButton, hasEnabledState, isEnabled, isFocusable], label: "Forgot password?", textDirection: ltr):
+          Expected contrast ratio of at least 4.5 but found 0.99 for a font size of 14.0.
+          The computed colors was:
+          light - Color(alpha: 1.0000, red: 0.0588, green: 0.0392, blue: 0.3529, colorSpace:
+ColorSpace.sRGB), dark - Color(alpha: 1.0000, red: 0.1255, green: 0.1020, blue: 0.0902, colorSpace:
+ColorSpace.sRGB)
+          See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+          SemanticsNode#12(Rect.fromLTRB(200.0, 374.0, 600.0, 422.0), actions: [focus, tap], flags:
+[isButton, hasEnabledState, isEnabled, isFocusable], label: "Sign in", textDirection: ltr):
+          Expected contrast ratio of at least 3.0 but found 1.21 for a font size of 18.0.
+          The computed colors was:
+          light - Color(alpha: 1.0000, red: 0.0588, green: 0.0392, blue: 0.3529, colorSpace:
+ColorSpace.sRGB), dark - Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace:
+ColorSpace.sRGB)
+          See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:149:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:125:9)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 6 frames from dart:async and package:stack_trace)
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  Test failed. See exception logs above.
+  The test description was: AMOLED
+
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/users/login_page_layout_test.dart -p vm --plain-name "LoginPage looks as expected AMOLED"
+01:06 +236 -15: D:/MobileHealthcare/packages/smooth_app/test/users/signup_page_layout_test.dart: LoginPage looks as expected Light [E]
+  Test failed. See exception logs above.
+  The test description was: Light
+
+Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses
+TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request
+will actually be made. Any test expecting a real network connection and status code will fail.
+To test code that needs an HttpClient, provide your own HttpClient implementation to the code under
+test, so that your test can consistently provide a testable response to the code under test.
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/users/signup_page_layout_test.dart -p vm --plain-name "LoginPage looks as expected Light"
+01:06 +236 -15: D:/MobileHealthcare/packages/smooth_app/test/users/signup_page_layout_test.dart: LoginPage looks as expected Dark
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/signup_page-dark.png": Pixel test failed, 89.23%, 428283px diff detected.
+Failure feedback can be found at /D:/MobileHealthcare/packages/smooth_app/test/users/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/users/signup_page_layout_test.dart:60:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:06 +236 -16: D:/MobileHealthcare/packages/smooth_app/test/users/signup_page_layout_test.dart: LoginPage looks as expected Dark [E]
+  Test failed. See exception logs above.
+  The test description was: Dark
+
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/users/signup_page_layout_test.dart -p vm --plain-name "LoginPage looks as expected Dark"
+01:07 +236 -16: D:/MobileHealthcare/packages/smooth_app/test/users/signup_page_layout_test.dart: LoginPage looks as expected AMOLED
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown while running async test code:
+Golden "goldens/signup_page-amoled.png": Pixel test failed, 82.89%, 397894px diff detected.
+Failure feedback can be found at /D:/MobileHealthcare/packages/smooth_app/test/users/failures
+
+When the exception was thrown, this was the stack:
+#0      SmoothieFileComparator.compare (file:///D:/MobileHealthcare/packages/smooth_app/test/tests_utils/goldens.dart:45:7)
+<asynchronous suspension>
+#1      MatchesGoldenFile.matchAsync.<anonymous closure> (package:flutter_test/src/_matchers_io.dart:124:32)
+<asynchronous suspension>
+<asynchronous suspension>
+#3      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:123:26)
+<asynchronous suspension>
+<asynchronous suspension>
+#5      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#6      main.<anonymous closure>.<anonymous closure> (file:///D:/MobileHealthcare/packages/smooth_app/test/users/signup_page_layout_test.dart:60:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 3 frames from dart:async and package:stack_trace)
+
+The exception was caught asynchronously.
+════════════════════════════════════════════════════════════════════════════════════════════════════
+01:07 +236 -17: D:/MobileHealthcare/packages/smooth_app/test/users/signup_page_layout_test.dart: LoginPage looks as expected AMOLED [E]
+  Test failed. See exception logs above.
+  The test description was: AMOLED
+
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test (but after the test had completed):
+Expected: Text contrast should follow WCAG guidelines
+  Actual: <Instance of 'WidgetTester'>
+   Which: SemanticsNode#23(Rect.fromLTRB(40.0, 366.0, 760.0, 402.0), tags: [RenderViewport.twoPane],
+actions: [focus], flags: [hasToggledState, isFocusable], label: "I am a food producer",
+textDirection: ltr, indexInParent: 12):
+          Expected contrast ratio of at least 4.5 but found 1.05 for a font size of 14.0.
+          The computed colors was:
+          light - Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace:
+ColorSpace.sRGB), dark - Color(alpha: 1.0000, red: 0.9725, green: 0.9804, blue: 0.9882, colorSpace:
+ColorSpace.sRGB)
+          See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+
+          SemanticsNode#25(Rect.fromLTRB(40.0, 412.0, 760.0, 472.0), tags: [RenderViewport.twoPane],
+actions: [focus], flags: [hasToggledState, isFocusable], label: "I'd like to subscribe to the
+Open Food Facts newsletter (You can unsubscribe from it at any time)", textDirection: ltr,
+indexInParent: 14):
+          Expected contrast ratio of at least 4.5 but found 1.05 for a font size of 14.0.
+          The computed colors was:
+          light - Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace:
+ColorSpace.sRGB), dark - Color(alpha: 1.0000, red: 0.9725, green: 0.9804, blue: 0.9882, colorSpace:
+ColorSpace.sRGB)
+          See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+
+          SemanticsNode#29(Rect.fromLTRB(80.0, 552.0, 720.0, 600.0), actions: [focus, tap], flags:
+[isButton, hasEnabledState, isEnabled, isFocusable], label: "Sign Up", textDirection: ltr):
+          Expected contrast ratio of at least 3.0 but found 1.21 for a font size of 18.0.
+          The computed colors was:
+          light - Color(alpha: 1.0000, red: 0.0588, green: 0.0392, blue: 0.3529, colorSpace:
+ColorSpace.sRGB), dark - Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace:
+ColorSpace.sRGB)
+          See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:149:31)
+#1      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:125:9)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided 6 frames from dart:async and package:stack_trace)
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  Test failed. See exception logs above.
+  The test description was: AMOLED
+
+
+To run this test again: C:\Users\ANAS ABIYYU FALAH\development\flutter\bin\cache\dart-sdk\bin\dart.exe test D:/MobileHealthcare/packages/smooth_app/test/users/signup_page_layout_test.dart -p vm --plain-name "LoginPage looks as expected AMOLED"
+01:07 +236 -17: Some tests failed.
+PS D:\MobileHealthcare\packages\smooth_app>
+
+Berdasarkan pola di transkrip, ini kemungkinan besar **bukan** karena `flutter test` memang lambat secara inheren — ada pola yang cukup jelas kalau dibaca urut:
+
+**Pola yang terlihat:**
+- Setiap kali Codex memanggil file **`.bat`** (`dart.bat format`, `dart.bat analyze`, `flutter.bat test`) → hasilnya selalu `(no output)`, harus di-poll berkali-kali, akhirnya dihentikan paksa.
+- Begitu Codex memanggil **`.exe` langsung** dari `bin\cache\dart-sdk\bin\dart.exe` (bypass wrapper `.bat`) → `format` selesai dalam 0.17 detik, `analyze` juga langsung selesai dengan output bersih.
+
+Ini indikasi kuat bahwa masalahnya ada di **wrapper `.bat`**, bukan di command itu sendiri atau di ukuran repo. Ada beberapa kemungkinan penyebab spesifik kenapa `.bat` hang di sandbox eksekusi Codex:
+
+1. **Version/update check yang butuh jaringan.** `flutter.bat` (dan `dart.bat` versi lama) melakukan pengecekan versi/channel — kadang lewat `git fetch` ke remote SDK, kadang lewat request analytics/telemetry. Kalau sandbox Codex membatasi domain outbound (sangat umum untuk CLI agent), request ini bisa *hang* alih-alih gagal cepat dengan error jelas.
+2. **`flutter test` khususnya butuh artifact tambahan** — mesin `flutter_tester` untuk headless widget test. Kalau belum ter-cache di mesin ini, Flutter akan mencoba download dari Google Cloud Storage. Kalau domain itu tidak masuk allowlist jaringan sandbox, prosesnya diam tanpa error, persis gejala yang muncul.
+3. **Prompt interaktif first-run** (consent analytics) yang menunggu input di stdin — di sesi non-interaktif, ini nge-block selamanya karena tidak ada yang bisa menjawab.
+4. **`.bat` sendiri men-spawn `cmd.exe` bersarang** — kalau harness eksekusi shell Codex tidak mengalokasikan console/pty yang proper, proses child bisa stuck menunggu handle yang tidak pernah beres.
+
+**Soal "paradigma"-nya — ya, ada yang bisa dikritik dari cara Codex menangani ini:**
+
+- Codex mengulang pendekatan yang sama (macam-macam quoting untuk `.bat`) **4-5 kali** sebelum akhirnya coba `.exe` langsung — cukup boros trial-and-error padahal pola kegagalannya sudah konsisten sejak percobaan kedua.
+- Yang lebih penting: setelah `dart.exe` langsung terbukti jadi solusinya untuk `format`/`analyze`, Codex **tidak menerapkan fix yang sama ke `flutter test`**. Dia cuma coba `flutter.bat` lagi, hang, lalu menyerah dan melaporkan `dart analyze` sebagai "validasi yang cukup". Padahal `dart analyze` cuma menangkap error tipe/compile-time — bukan bug behavior runtime di widget yang baru dipatch (blur layer, carousel snap, dsb). Jadi klaim "validasi berhasil" di ringkasan akhir itu agak menyesatkan: **test widget yang sebenarnya belum pernah benar-benar jalan.**
+- Codex juga tidak pernah membedakan "proses masih jalan lama" vs "proses sudah exit tapi outputnya kosong/di stream lain" — tidak ada `2>&1` untuk menangkap stderr, tidak ada exit code yang dicek eksplisit.
+
+**Saran praktis kalau mau lanjut mengejar root cause:**
+- Coba jalankan `flutter test` manual di terminal biasa (bukan lewat agent) — kalau memang nyangkut di prompt analytics atau download artifact, akan kelihatan langsung.
+- Jalankan sekali `flutter config --no-analytics` dan `flutter precache` secara manual supaya first-run prompt/download tidak lagi jadi penghalang saat dipanggil dari agent.
+- Kalau memang root cause-nya jaringan terbatas di sandbox Codex, cek apakah Codex punya pengaturan allowed-domains (mirip yang saya punya) dan tambahkan domain artifact Flutter (`storage.googleapis.com` dkk) atau jalankan test di luar sandbox.
+- Sebagai workaround cepat: coba pola yang sama seperti `dart.exe` — cari snapshot `flutter_tools` dan panggil lewat `dart.exe` langsung, bypass `flutter.bat` sepenuhnya.
+maslah 2
+Read(D:/mobile-ui-ux/.poc/glass-mask.jsx) (ctrl+o to expand)
+
+▸ Thought for 8s
+  Analyzing the Question
+  Ya, bisa 100% 1:1 fidelity.
+  Alasan mengapa efek glass mask di Flutter sering terlihat crisp (tepi kaku/patah) atau harsh adalah karena developer biasanya hanya
+  membungkus BackdropFilter dengan ClipRect standar tanpa melakukan alpha gradient masking atau progressive blur.
+  Di web/CSS (glass-mask.jsx:41-58), efek liquid blur tersebut dihasilkan dari kombinasi:
+
+  1. backdropFilter: 'blur(20px) saturate(160%)'
+  2. maskImage: linear-gradient(...) (melunakkan batas blur secara bertahap)
+  3. Ambient gradient overlay (menjaga kontras teks tanpa milky haze).
+  ──────
+  ### Library yang Dibutuhkan di Flutter
+
+  Sebenarnya Anda tidak wajib menginstall library pihak ketiga karena Flutter sudah menyediakan widget bawaan engine (Skia / Impeller) yang
+  sangat powerful. Namun ada opsi library jika ingin fitur shader tingkat lanjut:
+
+   Pendekatan                               | Library / Package               | Kapan Digunakan
+  ------------------------------------------|---------------------------------|-------------------------------------------------------------
+   Native Flutter (Sangat Direkomendasikan) | flutter/material.dart + dart:ui | Cukup gunakan ShaderMask + BackdropFilter +
+                                            |                                 | ColorFilter.matrix. Zero-dependency, performa 60–120 FPS
+                                            |                                 | native.
+   Shader Khusus (True Variable Blur)       | flutter_shaders[1]              | Jika butuh progressive variable blur (sigma blur membesar
+                                            |                                 | dinamis per-pixel via custom GLSL/SPIR-V fragment shader
+                                            |                                 | seperti di iOS).
+   Helper Utility                           | blur[2] atau glassmorphism[3]   | Jika ingin wrapper ringkas, namun untuk masking liquid
+                                            |                                 | tetap perlu kombinasi ShaderMask.
+
+  [1]: flutter_shaders https://pub.dev/packages/flutter_shaders
+  [2]: blur https://pub.dev/packages/blur
+  [3]: glassmorphism https://pub.dev/packages/glassmorphism
+  ──────
+  ### Kunci Agar Mask Liquid Tidak Crisp & Menyatu Halus
+
+  1. ShaderMask dengan BlendMode.dstIn: Berfungsi persis seperti mask-image: linear-gradient(...) di CSS. Bagian hitam gradien
+  mempertahankan blur, sedangkan bagian transparan memudarkan efek blur secara lembut ke foto asli.
+  2. Matrix Saturation: CSS saturate(160%) direplikasi menggunakan ColorFilter.matrix pada level filter agar warna di balik kaca tetap
+  pop/vibrant (tidak pucat/pudar).
+  3. ClipRRect Outer Boundary: Mencegah blur bleeding keluar dari sudut rounded card 32px.
+  ──────
+  ### Implementasi Flutter 1:1 (glass-mask.jsx)
+
+  Berikut implementasi lengkap widget Flutter yang mereplikasi struktur layer dari file JSX:
+    import 'dart:ui' as ui;
+    import 'package:flutter/material.dart';
+    
+    class PropertyGlassCard extends StatelessWidget {
+      const PropertyGlassCard({super.key});
+    
+      // Matrix untuk saturate(160%) / 1.6
+      static const ColorFilter saturate160 = ColorFilter.matrix(<double>[
+        1.424, -0.376, -0.048, 0, 0,
+        -0.076, 1.124, -0.048, 0, 0,
+        -0.076, -0.376, 1.452, 0, 0,
+        0,     0,      0,     1, 0,
+      ]);
+    
+      @override
+      Widget build(BuildContext context) {
+        return Center(
+          child: Container(
+            width: 360,
+            height: 520,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(32),
+              color: const Color(0xFF0F172A),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(32),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // LAYER 1: Background Image Crisp
+                  Image.network(
+                    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1000&auto=format&fit=crop',
+                    fit: BoxFit.cover,
+                  ),
+    
+                  // LAYER 2: GPU Liquid Glass Mask (Smooth Progressive Backdrop Blur + Saturation)
+                  ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return const LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        stops: [0.0, 0.35, 0.55, 0.75],
+                        colors: [
+                          Color(0xFF000000),             // 100% blur di bawah
+                          Color(0xF2000000),             // 95% blur di area tengah-bawah
+                          Color(0x4D000000),             // 30% transisi halus
+                          Color(0x00000000),             // 0% blur (fade out total)
+                        ],
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstIn,
+                    child: BackdropFilter(
+                      filter: ui.ImageFilter.compose(
+                        outer: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12), // ~20px CSS blur
+                        inner: saturate160,                                  // Vibrance boost
+                      ),
+                      child: Container(
+                        color: Colors.transparent,
+                      ),
+                    ),
+                  ),
+    
+                  // LAYER 3: High-Contrast Ambient Gradient Overlay
+                  Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        stops: [0.0, 0.40, 0.70],
+                        colors: [
+                          Color(0xD10C140F), // rgba(12, 20, 15, 0.82)
+                          Color(0x660C140F), // rgba(12, 20, 15, 0.40)
+                          Color(0x000C140F), // transparent
+                        ],
+                      ),
+                    ),
+                  ),
+    
+                  // TOP BADGE: Prime Pick
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(999),
+                      child: BackdropFilter(
+                        filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.95),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.08),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.star_rounded, size: 14, color: Color(0xFFFBBF24)),
+                              SizedBox(width: 6),
+                              Text(
+                                'Prime Pick',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF111827),
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+    
+                  // LAYER 4: Card Content Overlay
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Price
+                          const Text(
+                            'List: \$250,000',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 25,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: -0.5,
+                              height: 1.1,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+    
+                          // Details Row
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              // Address
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Harry Konigsberg's...",
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(alpha: 0.7),
+                                        fontSize: 13,
+                                        letterSpacing: -0.2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '1065 AG Guillaume Briard',
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(alpha: 0.95),
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w500,
+                                        letterSpacing: -0.2,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+    
+                              // Specs
+                              Row(
+                                children: [
+                                  _buildSpecItem(
+                                    icon: Icons.crop_free_rounded,
+                                    value: '29m²',
+                                    label: 'Living',
+                                  ),
+                                  Container(
+                                    width: 1,
+                                    height: 28,
+                                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                  ),
+                                  _buildSpecItem(
+                                    icon: Icons.meeting_room_outlined,
+                                    value: '2',
+                                    label: 'Rooms',
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+    
+                          // Divider Line
+                          Container(
+                            width: double.infinity,
+                            height: 1,
+                            margin: const EdgeInsets.symmetric(vertical: 14),
+                            color: Colors.white.withValues(alpha: 0.2),
+                          ),
+    
+                          // Footer Metadata
+                          Row(
+                            children: [
+                              Text(
+                                'By',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.7),
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Container(
+                                width: 4,
+                                height: 4,
+                                margin: const EdgeInsets.symmetric(horizontal: 6),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withValues(alpha: 0.6),
+                                ),
+                              ),
+                              const Text(
+                                'Waleed Sabir',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '2 days ago',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.7),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+    
+      static Widget _buildSpecItem({
+        required IconData icon,
+        required String value,
+        required String label,
+      }) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 16, color: Colors.white),
+                const SizedBox(width: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13.5,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 11,
+              ),
+            ),
+          ],
+        );
+      }
+    }

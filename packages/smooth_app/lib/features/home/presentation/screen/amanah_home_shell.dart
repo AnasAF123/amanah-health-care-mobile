@@ -9,12 +9,15 @@ import 'package:smooth_app/features/home/presentation/components/amanah_home_app
 import 'package:smooth_app/features/home/presentation/components/amanah_quick_access_section.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_schedule_card_stack.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_today_activity_section.dart';
+import 'package:smooth_app/features/home/presentation/screen/amanah_account_tab_screen.dart';
+import 'package:smooth_app/features/home/presentation/screen/amanah_schedule_tab_screen.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class AmanahHomeShell extends StatefulWidget {
-  const AmanahHomeShell({required this.user, super.key});
+  const AmanahHomeShell({required this.user, this.onLogout, super.key});
 
   final AmanahAuthUser user;
+  final VoidCallback? onLogout;
 
   @override
   State<AmanahHomeShell> createState() => _AmanahHomeShellState();
@@ -30,7 +33,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     setState(() {
       _toastMessage = message;
     });
-    _toastTimer = Timer(const Duration(milliseconds: 2200), () {
+    _toastTimer = Timer(const Duration(seconds: 3), () {
       if (mounted) {
         setState(() {
           _toastMessage = null;
@@ -39,22 +42,86 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     });
   }
 
+  void _handleLogout() {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        final bool dark = Theme.of(dialogContext).brightness == Brightness.dark;
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: dark ? const Color(0xFF171717) : Colors.white,
+          title: Text(
+            'Konfirmasi Keluar',
+            style: TextStyle(
+              fontFamily: 'PlusJakartaSans',
+              fontWeight: FontWeight.w800,
+              color: dark ? Colors.white : const Color(0xFF0F172A),
+            ),
+          ),
+          content: Text(
+            'Apakah Anda yakin ingin keluar dari akun dokter?',
+            style: TextStyle(
+              fontFamily: 'PlusJakartaSans',
+              color: dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text(
+                'Batal',
+                style: TextStyle(
+                  fontFamily: 'PlusJakartaSans',
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF64748B),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                _showToast('Berhasil keluar dari akun dokter');
+                if (widget.onLogout != null) {
+                  widget.onLogout?.call();
+                } else if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text(
+                'Keluar',
+                style: TextStyle(
+                  fontFamily: 'PlusJakartaSans',
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _handleQuickAction(String actionId) {
     switch (actionId) {
       case 'presensi':
         setState(() => _selectedTab = AmanahHomeTab.scan);
-        break;
       case 'jadwal-saya':
         setState(() => _selectedTab = AmanahHomeTab.schedule);
-        break;
       case 'cari-visit':
-        _showToast('Fitur Cari Visit Pasien');
-        break;
+        _showToast('Membuka menu Cari Visit Pasien');
       case 'kartu-id':
         setState(() => _selectedTab = AmanahHomeTab.account);
-        break;
       default:
-        _showToast('Aksi $actionId');
+        _showToast('Fitur segera hadir');
     }
   }
 
@@ -72,8 +139,8 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     final Color bgColor = dark
         ? const Color(0xFF0A0E1A)
         : (_selectedTab == AmanahHomeTab.home
-            ? const Color(0xFFF8FAFF)
-            : Colors.white);
+              ? const Color(0xFFF8FAFF)
+              : Colors.white);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -95,35 +162,50 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
             bottom: false,
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
-              child: _selectedTab == AmanahHomeTab.home
-                  ? _AmanahHomeScreenContent(
-                      key: const ValueKey<String>('home_content'),
-                      user: widget.user,
-                      data: amanahHomeDashboardData,
-                      onNotificationTap: () {
-                        setState(() => _selectedTab = AmanahHomeTab.notifications);
-                      },
-                      onProfileTap: () {
-                        setState(() => _selectedTab = AmanahHomeTab.account);
-                      },
-                      onQuickActionTap: (AmanahQuickAction action) {
-                        _handleQuickAction(action.id);
-                      },
-                      onDetailActivityTap: () {
-                        setState(() => _selectedTab = AmanahHomeTab.schedule);
-                      },
-                      onActivityTap: (AmanahActivityMetric activity) {
-                        _showToast('Membuka rincian aktivitas');
-                      },
-                    )
-                  : _AmanahPlaceholderPage(
-                      key: ValueKey<AmanahHomeTab>(_selectedTab),
-                      tab: _selectedTab,
-                      user: widget.user,
-                      onBackToHome: () {
-                        setState(() => _selectedTab = AmanahHomeTab.home);
-                      },
-                    ),
+              child: switch (_selectedTab) {
+                AmanahHomeTab.home => _AmanahHomeScreenContent(
+                  key: const ValueKey<String>('home_content'),
+                  user: widget.user,
+                  data: amanahHomeDashboardData,
+                  onNotificationTap: () {
+                    setState(() => _selectedTab = AmanahHomeTab.notifications);
+                  },
+                  onProfileTap: () {
+                    setState(() => _selectedTab = AmanahHomeTab.account);
+                  },
+                  onQuickActionTap: (AmanahQuickAction action) {
+                    _handleQuickAction(action.id);
+                  },
+                  onDetailActivityTap: () {
+                    setState(() => _selectedTab = AmanahHomeTab.schedule);
+                  },
+                  onActivityTap: (AmanahActivityMetric activity) {
+                    _showToast('Membuka rincian aktivitas');
+                  },
+                ),
+                AmanahHomeTab.schedule => AmanahScheduleTabScreen(
+                  key: const ValueKey<String>('schedule_content'),
+                  onBack: () {
+                    setState(() => _selectedTab = AmanahHomeTab.home);
+                  },
+                ),
+                AmanahHomeTab.account => AmanahAccountTabScreen(
+                  key: const ValueKey<String>('account_content'),
+                  user: widget.user,
+                  onMenuItemTap: (String id) {
+                    _showToast('Membuka menu $id');
+                  },
+                  onLogout: _handleLogout,
+                ),
+                _ => _AmanahPlaceholderPage(
+                  key: ValueKey<AmanahHomeTab>(_selectedTab),
+                  tab: _selectedTab,
+                  user: widget.user,
+                  onBackToHome: () {
+                    setState(() => _selectedTab = AmanahHomeTab.home);
+                  },
+                ),
+              },
             ),
           ),
 
@@ -329,34 +411,33 @@ class _AmanahPlaceholderPage extends StatelessWidget {
   _AmanahPageCopy _copyForTab(AmanahHomeTab tab) {
     return switch (tab) {
       AmanahHomeTab.home => const _AmanahPageCopy(
-          title: 'Home',
-          description:
-              'Ringkasan layanan klinik, jadwal, presensi, dan informasi harian akan ditempatkan di sini.',
-          icon: Icons.home_rounded,
-        ),
+        title: 'Home',
+        description:
+            'Ringkasan layanan klinik, jadwal, presensi, dan informasi harian akan ditempatkan di sini.',
+        icon: Icons.home_rounded,
+      ),
       AmanahHomeTab.schedule => const _AmanahPageCopy(
-          title: 'Jadwal Dokter',
-          description: 'Kelola jadwal praktik, antrean poliklinik, dan visit.',
-          icon: Icons.calendar_today_rounded,
-        ),
+        title: 'Jadwal Dokter',
+        description: 'Kelola jadwal praktik, antrean poliklinik, dan visit.',
+        icon: Icons.calendar_today_rounded,
+      ),
       AmanahHomeTab.scan => const _AmanahPageCopy(
-          title: 'Presensi QR',
-          description:
-              'Arahkan kamera ke QR terminal poliklinik untuk presensi.',
-          icon: Icons.qr_code_2_rounded,
-        ),
+        title: 'Presensi QR',
+        description: 'Arahkan kamera ke QR terminal poliklinik untuk presensi.',
+        icon: Icons.qr_code_2_rounded,
+      ),
       AmanahHomeTab.notifications => const _AmanahPageCopy(
-          title: 'Pusat Notifikasi',
-          description:
-              'Pemberitahuan darurat, antrean baru, dan pesan internal klinik.',
-          icon: Icons.notifications_rounded,
-        ),
+        title: 'Pusat Notifikasi',
+        description:
+            'Pemberitahuan darurat, antrean baru, dan pesan internal klinik.',
+        icon: Icons.notifications_rounded,
+      ),
       AmanahHomeTab.account => const _AmanahPageCopy(
-          title: 'Profil & Kartu ID',
-          description:
-              'Informasi SIP/STR, spesialisasi dokter, dan pengaturan akun.',
-          icon: Icons.person_rounded,
-        ),
+        title: 'Profil & Kartu ID',
+        description:
+            'Informasi SIP/STR, spesialisasi dokter, dan pengaturan akun.',
+        icon: Icons.person_rounded,
+      ),
     };
   }
 }
