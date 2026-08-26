@@ -358,7 +358,7 @@ class _AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
           // 3. Floating Bottom Trigger when Drawer is closed
           if (!_isDrawerOpen && !_isScanned)
             Positioned(
-              bottom: 96,
+              bottom: 110,
               left: 0,
               right: 0,
               child: Center(
@@ -432,7 +432,7 @@ class _AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                   }
                 },
                 child: Container(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 80),
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 130),
                   decoration: BoxDecoration(
                     color: drawerBg,
                     borderRadius:
@@ -453,15 +453,15 @@ class _AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                       GestureDetector(
                         onTap: () => setState(() => _isDrawerOpen = false),
                         child: Padding(
-                          padding: const EdgeInsets.only(top: 4, bottom: 12),
+                          padding: const EdgeInsets.only(top: 2, bottom: 14),
                           child: Container(
                             width: 48,
-                            height: 4,
+                            height: 4.5,
                             decoration: BoxDecoration(
                               color: dark
                                   ? Colors.white.withValues(alpha: 0.25)
                                   : const Color(0xFFCBD5E1),
-                              borderRadius: BorderRadius.circular(2),
+                              borderRadius: BorderRadius.circular(3),
                             ),
                           ),
                         ),
@@ -473,7 +473,7 @@ class _AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 14,
-                            vertical: 10,
+                            vertical: 11,
                           ),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
@@ -482,7 +482,7 @@ class _AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                 Color(0xFF4338CA),
                               ],
                             ),
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(18),
                             boxShadow: <BoxShadow>[
                               BoxShadow(
                                 color: const Color(0xFF2563EB)
@@ -508,7 +508,7 @@ class _AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                   style: TextStyle(
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 11.5,
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w700,
                                     color: Colors.white,
                                   ),
                                 ),
@@ -912,7 +912,7 @@ class _AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
           // 5. Success Feedback Card on Scan
           if (_isScanned)
             Positioned(
-              bottom: 96,
+              bottom: 110,
               left: 16,
               right: 16,
               child: Container(
@@ -1099,29 +1099,29 @@ class _ActionMenuCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color cardBg = dark
-        ? const Color(0xFF1F2937).withValues(alpha: 0.80)
-        : const Color(0xFFF8FAFC);
+        ? const Color(0xFF1F2937)
+        : Colors.white;
 
     final Color borderColor = dark
-        ? Colors.white.withValues(alpha: 0.10)
+        ? Colors.white.withValues(alpha: 0.12)
         : const Color(0xFFE2E8F0);
 
     final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
           color: cardBg,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: borderColor),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: borderColor, width: 1.2),
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: Colors.black.withValues(alpha: dark ? 0.20 : 0.03),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+              color: Colors.black.withValues(alpha: dark ? 0.25 : 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -1129,18 +1129,18 @@ class _ActionMenuCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFF06B6D4).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
+                color: const Color(0xFF06B6D4).withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
                 icon,
-                size: 20,
+                size: 22,
                 color: const Color(0xFF06B6D4),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
               title,
               maxLines: 1,
@@ -1148,7 +1148,7 @@ class _ActionMenuCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'PlusJakartaSans',
-                fontSize: 11,
+                fontSize: 11.5,
                 fontWeight: FontWeight.w700,
                 color: textColor,
               ),
