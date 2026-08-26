@@ -70,6 +70,22 @@ const List<String> kPoliOptions = <String>[
   'Klinik Eksekutif VIP',
 ];
 
+const List<String> kOccupiedTimeOptions = <String>[
+  '2:00 AM',
+  '3:00 AM',
+  '9:00 AM',
+  '10:00 AM',
+  '2:00 PM',
+  '3:00 PM',
+  '8:00 PM',
+];
+
+const List<String> kOccupiedRoomOptions = <String>[
+  'Ruang 102',
+  'Ruang 203',
+  'Ruang VIP 1',
+];
+
 /// 7. Monthly Doctor Schedule Big Calendar Drawer Modal ("Lihat Schedule")
 class AmanahDocScheduleCalendarDrawer extends StatefulWidget {
   const AmanahDocScheduleCalendarDrawer({
@@ -881,6 +897,7 @@ class _AmanahAddEditScheduleDrawerState
     required String currentValue,
     required List<String> options,
     required ValueChanged<String> onChanged,
+    List<String> disabledOptions = const <String>[],
   }) async {
     final String? selected = await showModalBottomSheet<String>(
       context: context,
@@ -891,6 +908,7 @@ class _AmanahAddEditScheduleDrawerState
         subtitle: subtitle,
         currentValue: currentValue,
         options: options,
+        disabledOptions: disabledOptions,
       ),
     );
     if (selected != null && mounted) {
@@ -903,274 +921,426 @@ class _AmanahAddEditScheduleDrawerState
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
     final bool isEditing = widget.scheduleToEdit != null;
+    final double screenHeight = MediaQuery.sizeOf(context).height;
 
-    return Container(
-      height: MediaQuery.sizeOf(context).height * 0.92,
-      decoration: BoxDecoration(
-        color: dark ? const Color(0xFF0A0E1A) : Colors.white,
+    return SizedBox(
+      height: screenHeight * 0.90,
+      child: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        border: Border(
-          top: BorderSide(
-            color: dark
-                ? Colors.white.withValues(alpha: 0.10)
-                : const Color(0xFFE5E7EB),
-          ),
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 45,
-            offset: const Offset(0, -12),
-          ),
-        ],
-      ),
-      padding: EdgeInsets.fromLTRB(
-        20,
-        14,
-        20,
-        24 + MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            // Drag Handle
-            Center(
-              child: Container(
-                width: 44,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: dark
-                      ? Colors.white.withValues(alpha: 0.20)
-                      : const Color(0xFFCBD5E1),
-                  borderRadius: BorderRadius.circular(3),
-                ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: dark ? const Color(0xFF0A0E1A) : Colors.white,
+            border: Border(
+              top: BorderSide(
+                color: dark
+                    ? Colors.white.withValues(alpha: 0.10)
+                    : const Color(0xFFF1F5F9),
               ),
             ),
-            const SizedBox(height: 16),
-
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Expanded(
-                  child: Text(
-                    isEditing ? 'Edit Jadwal' : 'Tambah Jadwal',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: dark ? Colors.white : const Color(0xFF0F172A),
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 45,
+                offset: const Offset(0, -12),
+              ),
+            ],
+          ),
+          child: Column(
+            children: <Widget>[
+              // Interactive Drag Handle
+              InkWell(
+                onTap: () => Navigator.of(context).pop(),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 40,
+                  child: Center(
+                    child: Container(
+                      width: 44,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: dark
+                            ? Colors.white.withValues(alpha: 0.25)
+                            : const Color(0xFFD4D4D8),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close_rounded, size: 20),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            Text(
-              'Tanggal Praktik',
-              style: TextStyle(
-                color: dark ? Colors.white : const Color(0xFF0F172A),
-                fontFamily: 'PlusJakartaSans',
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
               ),
-            ),
-            const SizedBox(height: 8),
-            _ScheduleSelectorButton(
-              value:
-                  '${_getDayName(_selectedDate.weekday)}, ${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
-              icon: Icons.calendar_today_rounded,
-              dark: dark,
-              expanded: _isCalendarOpen,
-              onTap: () => setState(() => _isCalendarOpen = !_isCalendarOpen),
-            ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              child: _isCalendarOpen
-                  ? Padding(
-                      key: const ValueKey<String>('inline-form-calendar'),
-                      padding: const EdgeInsets.only(top: 8),
-                      child: _buildInlineCalendar(dark),
-                    )
-                  : const SizedBox.shrink(),
-            ),
-            const SizedBox(height: 16),
 
-            if (isEditing) ...<Widget>[
-              Text(
-                'Status Praktik',
-                style: TextStyle(
-                  color: dark ? Colors.white : const Color(0xFF0F172A),
-                  fontFamily: 'PlusJakartaSans',
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 8),
+              // Master Header
               Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.fromLTRB(24, 2, 24, 12),
                 decoration: BoxDecoration(
-                  color: dark
-                      ? Colors.white.withValues(alpha: 0.06)
-                      : const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(16),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: dark
+                          ? Colors.white.withValues(alpha: 0.10)
+                          : const Color(0xFFF1F5F9),
+                    ),
+                  ),
                 ),
                 child: Row(
-                  children: <String>['Menunggu', 'Buka', 'Cuti'].map((
-                    String s,
-                  ) {
-                    final bool active = _status == s;
-                    Color pillBg = Colors.transparent;
-                    Color pillText = dark
-                        ? const Color(0xFF94A3B8)
-                        : const Color(0xFF64748B);
-
-                    if (active) {
-                      if (s == 'Buka') {
-                        pillBg = const Color(0xFF10B981);
-                        pillText = Colors.white;
-                      } else if (s == 'Cuti') {
-                        pillBg = const Color(0xFFE11D48);
-                        pillText = Colors.white;
-                      } else {
-                        pillBg = const Color(0xFF0A44FF);
-                        pillText = Colors.white;
-                      }
-                    }
-
-                    return Expanded(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () => setState(() => _status = s),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: pillBg,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          alignment: Alignment.center,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: active ? Colors.white : pillText,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const SizedBox(width: 6, height: 6),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                s,
-                                style: TextStyle(
-                                  color: pillText,
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
-                          ),
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      isEditing ? 'Edit Jadwal' : 'Tambah Jadwal',
+                      style: TextStyle(
+                        color: dark ? Colors.white : const Color(0xFF0F172A),
+                        fontFamily: 'PlusJakartaSans',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(999),
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: dark
+                              ? Colors.white.withValues(alpha: 0.10)
+                              : const Color(0xFFF5F5F5),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 16,
+                          color: dark
+                              ? const Color(0xFFD4D4D8)
+                              : const Color(0xFF52525B),
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            Text(
-              'Sesi Praktik & Jam',
-              style: TextStyle(
-                color: dark ? Colors.white : const Color(0xFF0F172A),
-                fontFamily: 'PlusJakartaSans',
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Column(
-              children: <Widget>[
-                for (final _ScheduleFormSession session
-                    in _sessions) ...<Widget>[
-                  _ScheduleSessionPanel(
-                    session: session,
-                    dark: dark,
-                    onToggle: (bool value) => _toggleSession(session.id, value),
-                    onSlotChanged:
-                        ({
-                          required int slotIndex,
-                          String? from,
-                          String? to,
-                          String? room,
-                          String? poli,
-                        }) {
-                          _updateSlot(
-                            session.id,
-                            slotIndex,
-                            from: from,
-                            to: to,
-                            room: room,
-                            poli: poli,
-                          );
-                        },
-                    onAddSlot: () => _addTimeSlot(session.id),
-                    onRemoveSlot: (int slotIndex) =>
-                        _removeTimeSlot(session.id, slotIndex),
-                    onOpenSelection: _openSelectionSheet,
-                  ),
-                  const SizedBox(height: 10),
-                ],
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // 5. Actions (Simpan, Batal, Hapus)
-            Row(
-              children: <Widget>[
-                if (isEditing) ...<Widget>[
-                  IconButton(
-                    style: IconButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFF1F2),
-                      foregroundColor: const Color(0xFFE11D48),
                     ),
-                    icon: const Icon(Icons.delete_outline_rounded),
-                    onPressed: _deleteSchedule,
+                  ],
+                ),
+              ),
+
+              // Form Scrollable Body
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    14,
+                    24,
+                    28 + MediaQuery.paddingOf(context).bottom,
                   ),
-                  const SizedBox(width: 8),
-                ],
-                Expanded(
-                  child: _ScheduleDrawerActionButton(
-                    label: 'Batal',
-                    dark: dark,
-                    variant: _ScheduleActionVariant.outline,
-                    onTap: () => Navigator.of(context).pop(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      // 0. Status Jadwal Praktik: Menunggu | Buka | Cuti (Only displayed when editing)
+                      if (isEditing) ...<Widget>[
+                        Text(
+                          'Status Praktik',
+                          style: TextStyle(
+                            color: dark
+                                ? const Color(0xFFE2E8F0)
+                                : const Color(0xFF334155),
+                            fontFamily: 'PlusJakartaSans',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: dark
+                                ? Colors.white.withValues(alpha: 0.05)
+                                : const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: dark
+                                  ? Colors.white.withValues(alpha: 0.10)
+                                  : const Color(0xFFE2E8F0),
+                            ),
+                          ),
+                          child: Row(
+                            children: <Map<String, dynamic>>[
+                              <String, dynamic>{
+                                'label': 'Menunggu',
+                                'activeBg': const Color(0xFFF59E0B),
+                                'activeText': Colors.white,
+                                'dotColor': const Color(0xFFFBBF24),
+                              },
+                              <String, dynamic>{
+                                'label': 'Buka',
+                                'activeBg': const Color(0xFF059669),
+                                'activeText': Colors.white,
+                                'dotColor': const Color(0xFF34D399),
+                              },
+                              <String, dynamic>{
+                                'label': 'Cuti',
+                                'activeBg': const Color(0xFFE11D48),
+                                'activeText': Colors.white,
+                                'dotColor': const Color(0xFFFB7185),
+                              },
+                            ].map((Map<String, dynamic> item) {
+                              final String label = item['label'] as String;
+                              final bool active = _status == label;
+                              final Color activeBg = item['activeBg'] as Color;
+                              final Color activeText =
+                                  item['activeText'] as Color;
+                              final Color dotColor = item['dotColor'] as Color;
+
+                              return Expanded(
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(12),
+                                  onTap: () => setState(() => _status = label),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 160),
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: active
+                                          ? activeBg
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: active
+                                          ? <BoxShadow>[
+                                              BoxShadow(
+                                                color: activeBg.withValues(
+                                                    alpha: 0.25),
+                                                blurRadius: 6,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ]
+                                          : null,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            color: active
+                                                ? Colors.white
+                                                : dotColor,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const SizedBox(
+                                              width: 6, height: 6),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          label,
+                                          style: TextStyle(
+                                            color: active
+                                                ? activeText
+                                                : (dark
+                                                    ? const Color(0xFFA1A1AA)
+                                                    : const Color(0xFF475569)),
+                                            fontFamily: 'PlusJakartaSans',
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                      ],
+
+                      // 1. Tanggal Praktik (Date Picker)
+                      Text(
+                        'Tanggal Praktik',
+                        style: TextStyle(
+                          color: dark
+                              ? const Color(0xFFE2E8F0)
+                              : const Color(0xFF334155),
+                          fontFamily: 'PlusJakartaSans',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      _ScheduleSelectorButton(
+                        value:
+                            '${_getDayName(_selectedDate.weekday)}, ${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
+                        icon: Icons.calendar_today_rounded,
+                        dark: dark,
+                        expanded: _isCalendarOpen,
+                        onTap: () =>
+                            setState(() => _isCalendarOpen = !_isCalendarOpen),
+                      ),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 220),
+                        switchInCurve: Curves.easeOutCubic,
+                        switchOutCurve: Curves.easeInCubic,
+                        child: _isCalendarOpen
+                            ? Padding(
+                                key: const ValueKey<String>(
+                                    'inline-form-calendar'),
+                                padding: const EdgeInsets.only(top: 8),
+                                child: _buildInlineCalendar(dark),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                      const SizedBox(height: 14),
+
+                      // 2. Sesi Praktik & Jam
+                      Text(
+                        'Sesi Praktik & Jam',
+                        style: TextStyle(
+                          color: dark
+                              ? const Color(0xFFE2E8F0)
+                              : const Color(0xFF334155),
+                          fontFamily: 'PlusJakartaSans',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Column(
+                        children: <Widget>[
+                          for (final _ScheduleFormSession session
+                              in _sessions) ...<Widget>[
+                            _ScheduleSessionPanel(
+                              session: session,
+                              dark: dark,
+                              onToggle: (bool value) =>
+                                  _toggleSession(session.id, value),
+                              onSlotChanged: ({
+                                required int slotIndex,
+                                String? from,
+                                String? to,
+                                String? room,
+                                String? poli,
+                              }) {
+                                _updateSlot(
+                                  session.id,
+                                  slotIndex,
+                                  from: from,
+                                  to: to,
+                                  room: room,
+                                  poli: poli,
+                                );
+                              },
+                              onAddSlot: () => _addTimeSlot(session.id),
+                              onRemoveSlot: (int slotIndex) =>
+                                  _removeTimeSlot(session.id, slotIndex),
+                              onOpenSelection: _openSelectionSheet,
+                            ),
+                            const SizedBox(height: 10),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+
+                      // 3. Actions (Simpan, Batal, Hapus)
+                      Row(
+                        children: <Widget>[
+                          if (isEditing) ...<Widget>[
+                            InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: _deleteSchedule,
+                              child: Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: dark
+                                      ? const Color(0xFFE11D48)
+                                          .withValues(alpha: 0.15)
+                                      : const Color(0xFFFFF1F2),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: dark
+                                        ? const Color(0xFFE11D48)
+                                            .withValues(alpha: 0.30)
+                                        : const Color(0xFFFECDD3),
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  size: 18,
+                                  color: Color(0xFFE11D48),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          Expanded(
+                            child: SizedBox(
+                              height: 44,
+                              child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: dark
+                                      ? const Color(0xFFD4D4D8)
+                                      : const Color(0xFF334155),
+                                  side: BorderSide(
+                                    color: dark
+                                        ? Colors.white.withValues(alpha: 0.15)
+                                        : const Color(0xFFCBD5E1),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text(
+                                  'Batal',
+                                  style: TextStyle(
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: SizedBox(
+                              height: 44,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: dark
+                                      ? const Color(0xFF06B6D4)
+                                      : const Color(0xFF2563EB),
+                                  foregroundColor: dark
+                                      ? const Color(0xFF083344)
+                                      : Colors.white,
+                                  elevation: 3,
+                                  shadowColor: (dark
+                                          ? const Color(0xFF06B6D4)
+                                          : const Color(0xFF2563EB))
+                                      .withValues(alpha: 0.30),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                onPressed: _saveSchedule,
+                                child: Text(
+                                  isEditing
+                                      ? 'Simpan Perubahan'
+                                      : 'Tambah Jadwal',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _ScheduleDrawerActionButton(
-                    label: isEditing ? 'Simpan Perubahan' : 'Tambah Jadwal',
-                    dark: dark,
-                    variant: _ScheduleActionVariant.primary,
-                    onTap: _saveSchedule,
-                  ),
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1354,11 +1524,10 @@ class _AmanahAddEditScheduleDrawerState
                     boxShadow: isSelected
                         ? <BoxShadow>[
                             BoxShadow(
-                              color:
-                                  (dark
-                                          ? const Color(0xFF22D3EE)
-                                          : const Color(0xFF2563EB))
-                                      .withValues(alpha: 0.24),
+                              color: (dark
+                                      ? const Color(0xFF22D3EE)
+                                      : const Color(0xFF2563EB))
+                                  .withValues(alpha: 0.24),
                               blurRadius: 12,
                               offset: const Offset(0, 5),
                             ),
@@ -1405,15 +1574,14 @@ class _ScheduleSelectorButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color background = dark
         ? (expanded
-              ? Colors.white.withValues(alpha: 0.10)
-              : Colors.white.withValues(alpha: 0.05))
+            ? Colors.white.withValues(alpha: 0.10)
+            : Colors.white.withValues(alpha: 0.05))
         : (expanded ? const Color(0xFFE2E8F0) : const Color(0xFFF8FAFC));
     final Color iconBackground = dark
         ? const Color(0xFF172554).withValues(alpha: 0.60)
         : const Color(0xFFEFF6FF);
-    final Color accent = dark
-        ? const Color(0xFF22D3EE)
-        : const Color(0xFF2563EB);
+    final Color accent =
+        dark ? const Color(0xFF22D3EE) : const Color(0xFF2563EB);
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
@@ -1468,100 +1636,6 @@ class _ScheduleSelectorButton extends StatelessWidget {
   }
 }
 
-enum _ScheduleActionVariant { outline, primary }
-
-class _ScheduleDrawerActionButton extends StatefulWidget {
-  const _ScheduleDrawerActionButton({
-    required this.label,
-    required this.dark,
-    required this.variant,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool dark;
-  final _ScheduleActionVariant variant;
-  final VoidCallback onTap;
-
-  @override
-  State<_ScheduleDrawerActionButton> createState() =>
-      _ScheduleDrawerActionButtonState();
-}
-
-class _ScheduleDrawerActionButtonState
-    extends State<_ScheduleDrawerActionButton> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final bool primary = widget.variant == _ScheduleActionVariant.primary;
-    final Color background = primary
-        ? (widget.dark ? const Color(0xFF22D3EE) : const Color(0xFF2563EB))
-        : Colors.transparent;
-    final Color foreground = primary
-        ? (widget.dark ? const Color(0xFF083344) : Colors.white)
-        : (widget.dark ? const Color(0xFFD4D4D8) : const Color(0xFF334155));
-    final Border? border = primary
-        ? null
-        : Border.all(
-            color: widget.dark
-                ? Colors.white.withValues(alpha: 0.15)
-                : const Color(0xFFE2E8F0),
-          );
-    final List<BoxShadow>? shadow = primary
-        ? <BoxShadow>[
-            BoxShadow(
-              color:
-                  (widget.dark
-                          ? const Color(0xFF22D3EE)
-                          : const Color(0xFF2563EB))
-                      .withValues(alpha: widget.dark ? 0.20 : 0.30),
-              blurRadius: 18,
-              offset: const Offset(0, 9),
-            ),
-          ]
-        : null;
-
-    return Listener(
-      onPointerDown: (_) => setState(() => _pressed = true),
-      onPointerUp: (_) => setState(() => _pressed = false),
-      onPointerCancel: (_) => setState(() => _pressed = false),
-      child: AnimatedScale(
-        duration: const Duration(milliseconds: 90),
-        scale: _pressed ? 0.98 : 1,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            curve: Curves.easeOutCubic,
-            height: 42,
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: background,
-              borderRadius: BorderRadius.circular(12),
-              border: border,
-              boxShadow: shadow,
-            ),
-            child: Text(
-              widget.label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: foreground,
-                fontFamily: 'PlusJakartaSans',
-                fontSize: 12,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _AnimatedSlotEntry extends StatelessWidget {
   const _AnimatedSlotEntry({required this.child, super.key});
 
@@ -1591,23 +1665,22 @@ class _AnimatedSlotEntry extends StatelessWidget {
   }
 }
 
-typedef _OpenScheduleSelectionSheet =
-    Future<void> Function({
-      required String title,
-      required String subtitle,
-      required String currentValue,
-      required List<String> options,
-      required ValueChanged<String> onChanged,
-    });
+typedef _OpenScheduleSelectionSheet = Future<void> Function({
+  required String title,
+  required String subtitle,
+  required String currentValue,
+  required List<String> options,
+  required ValueChanged<String> onChanged,
+  List<String> disabledOptions,
+});
 
-typedef _ScheduleSlotChanged =
-    void Function({
-      required int slotIndex,
-      String? from,
-      String? to,
-      String? room,
-      String? poli,
-    });
+typedef _ScheduleSlotChanged = void Function({
+  required int slotIndex,
+  String? from,
+  String? to,
+  String? room,
+  String? poli,
+});
 
 class _ScheduleSessionPanel extends StatelessWidget {
   const _ScheduleSessionPanel({
@@ -1646,8 +1719,8 @@ class _ScheduleSessionPanel extends StatelessWidget {
         border: Border.all(
           color: expanded
               ? (dark
-                    ? Colors.white.withValues(alpha: 0.15)
-                    : const Color(0xFFE2E8F0))
+                  ? Colors.white.withValues(alpha: 0.15)
+                  : const Color(0xFFE2E8F0))
               : Colors.transparent,
         ),
         boxShadow: expanded && !dark
@@ -1676,12 +1749,12 @@ class _ScheduleSessionPanel extends StatelessWidget {
                         color: expanded
                             ? (dark ? Colors.white : const Color(0xFF0F172A))
                             : (dark
-                                  ? const Color(0xFFD4D4D8)
-                                  : const Color(0xFF334155)),
+                                ? const Color(0xFFD4D4D8)
+                                : const Color(0xFF334155)),
                         fontFamily: 'PlusJakartaSans',
-                        fontSize: 13,
+                        fontSize: 13.5,
                         fontWeight: FontWeight.w700,
-                        letterSpacing: 0,
+                        letterSpacing: -0.1,
                       ),
                     ),
                   ),
@@ -1712,16 +1785,16 @@ class _ScheduleSessionPanel extends StatelessWidget {
                         ),
                       const SizedBox(height: 8),
                       InkWell(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(12),
                         onTap: onAddSlot,
                         child: Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 11),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
                             color: dark
                                 ? Colors.white.withValues(alpha: 0.05)
                                 : Colors.white,
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: dark
                                   ? Colors.white.withValues(alpha: 0.10)
@@ -1731,7 +1804,13 @@ class _ScheduleSessionPanel extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
-                              const Icon(Icons.add_rounded, size: 17),
+                              Icon(
+                                Icons.add_rounded,
+                                size: 16,
+                                color: dark
+                                    ? Colors.white
+                                    : const Color(0xFF1E293B),
+                              ),
                               const SizedBox(width: 6),
                               Text(
                                 'Add More',
@@ -1804,10 +1883,11 @@ class _ScheduleSlotRow extends StatelessWidget {
                 value: slot.from,
                 dark: dark,
                 onTap: () => onOpenSelection(
-                  title: 'Pilih Jam Mulai',
-                  subtitle: 'Jam awal sesi praktik dokter',
+                  title: 'Pilih Waktu Mulai (From)',
+                  subtitle: 'Pilih jam dari daftar atau ketik manual',
                   currentValue: slot.from,
                   options: kTimeOptions,
+                  disabledOptions: kOccupiedTimeOptions,
                   onChanged: (String value) =>
                       onChanged(slotIndex: slotIndex, from: value),
                 ),
@@ -1820,10 +1900,11 @@ class _ScheduleSlotRow extends StatelessWidget {
                 value: slot.to,
                 dark: dark,
                 onTap: () => onOpenSelection(
-                  title: 'Pilih Jam Selesai',
-                  subtitle: 'Jam akhir sesi praktik dokter',
+                  title: 'Pilih Waktu Selesai (To)',
+                  subtitle: 'Pilih jam dari daftar atau ketik manual',
                   currentValue: slot.to,
                   options: kTimeOptions,
+                  disabledOptions: kOccupiedTimeOptions,
                   onChanged: (String value) =>
                       onChanged(slotIndex: slotIndex, to: value),
                 ),
@@ -1838,7 +1919,7 @@ class _ScheduleSlotRow extends StatelessWidget {
                 height: 28,
                 child: Icon(
                   Icons.close_rounded,
-                  size: 17,
+                  size: 16,
                   color: dark
                       ? const Color(0xFFA1A1AA)
                       : const Color(0xFF94A3B8),
@@ -1857,9 +1938,10 @@ class _ScheduleSlotRow extends StatelessWidget {
                 dark: dark,
                 onTap: () => onOpenSelection(
                   title: 'Pilih Ruang Praktik',
-                  subtitle: 'Lokasi sesi dokter berlangsung',
+                  subtitle: 'Pilih ruangan praktik dokter',
                   currentValue: slot.room,
                   options: kRoomOptions,
+                  disabledOptions: kOccupiedRoomOptions,
                   onChanged: (String value) =>
                       onChanged(slotIndex: slotIndex, room: value),
                 ),
@@ -1873,7 +1955,7 @@ class _ScheduleSlotRow extends StatelessWidget {
                 dark: dark,
                 onTap: () => onOpenSelection(
                   title: 'Pilih Poli / Spesialisasi',
-                  subtitle: 'Unit layanan untuk sesi praktik',
+                  subtitle: 'Pilih poliklinik atau bidang spesialisasi',
                   currentValue: slot.poli,
                   options: kPoliOptions,
                   onChanged: (String value) =>
@@ -1986,7 +2068,7 @@ class _MiniSlotButton extends StatelessWidget {
                   color: dark ? Colors.white : const Color(0xFF0F172A),
                   fontFamily: 'PlusJakartaSans',
                   fontSize: 12,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -2011,32 +2093,32 @@ class _ScheduleToggleSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
+      duration: const Duration(milliseconds: 200),
       curve: Curves.easeOutCubic,
-      width: 42,
-      height: 24,
-      padding: const EdgeInsets.all(3),
+      width: 44,
+      height: 26,
+      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: active
-            ? (dark ? const Color(0xFF22D3EE) : const Color(0xFF2563EB))
+            ? (dark ? const Color(0xFF06B6D4) : const Color(0xFF1C1C1E))
             : (dark
-                  ? Colors.white.withValues(alpha: 0.12)
-                  : const Color(0xFFE2E8F0)),
+                ? Colors.white.withValues(alpha: 0.20)
+                : const Color(0xFFE5E5EA)),
         borderRadius: BorderRadius.circular(999),
       ),
       child: AnimatedAlign(
-        duration: const Duration(milliseconds: 180),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
         alignment: active ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
-          width: 18,
-          height: 18,
+          width: 22,
+          height: 22,
           decoration: BoxDecoration(
-            color: active && dark ? const Color(0xFF083344) : Colors.white,
+            color: Colors.white,
             shape: BoxShape.circle,
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.15),
+                color: Colors.black.withValues(alpha: 0.20),
                 blurRadius: 5,
                 offset: const Offset(0, 2),
               ),
@@ -2054,12 +2136,14 @@ class _AmanahScheduleSelectionSheet extends StatefulWidget {
     required this.subtitle,
     required this.currentValue,
     required this.options,
+    this.disabledOptions = const <String>[],
   });
 
   final String title;
   final String subtitle;
   final String currentValue;
   final List<String> options;
+  final List<String> disabledOptions;
 
   @override
   State<_AmanahScheduleSelectionSheet> createState() =>
@@ -2078,198 +2162,392 @@ class _AmanahScheduleSelectionSheetState
 
   @override
   Widget build(BuildContext context) {
-    final bool dark = Theme.of(context).brightness == Brightness.dark;
-    final String query = _controller.text.toLowerCase();
+    final ThemeData theme = Theme.of(context);
+    final bool dark = theme.brightness == Brightness.dark;
+    final String query = _controller.text.trim().toLowerCase();
     final List<String> filtered = widget.options
         .where((String option) => option.toLowerCase().contains(query))
         .toList();
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height * 0.78,
-      ),
-      decoration: BoxDecoration(
-        color: dark ? const Color(0xFF0A0E1A) : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border(
-          top: BorderSide(
-            color: dark
-                ? Colors.white.withValues(alpha: 0.10)
-                : const Color(0xFFE2E8F0),
-          ),
-        ),
-      ),
-      padding: EdgeInsets.fromLTRB(
-        20,
-        12,
-        20,
-        24 + MediaQuery.viewInsetsOf(context).bottom,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Center(
-            child: Container(
-              width: 44,
-              height: 5,
-              decoration: BoxDecoration(
+    return SizedBox(
+      height: MediaQuery.sizeOf(context).height * 0.82,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: dark ? const Color(0xFF0A0E1A) : Colors.white,
+            border: Border(
+              top: BorderSide(
                 color: dark
-                    ? Colors.white.withValues(alpha: 0.20)
-                    : const Color(0xFFCBD5E1),
-                borderRadius: BorderRadius.circular(3),
+                    ? Colors.white.withValues(alpha: 0.10)
+                    : const Color(0xFFF1F5F9),
               ),
             ),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 45,
+                offset: const Offset(0, -12),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          Row(
+          child: Column(
             children: <Widget>[
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      widget.title,
-                      style: TextStyle(
-                        color: dark ? Colors.white : const Color(0xFF0F172A),
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
+              // Interactive Drag Handle
+              InkWell(
+                onTap: () => Navigator.of(context).pop(),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 40,
+                  child: Center(
+                    child: Container(
+                      width: 44,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: dark
+                            ? Colors.white.withValues(alpha: 0.25)
+                            : const Color(0xFFD4D4D8),
+                        borderRadius: BorderRadius.circular(999),
                       ),
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      widget.subtitle,
-                      style: TextStyle(
-                        color: dark
-                            ? const Color(0xFF94A3B8)
-                            : const Color(0xFF64748B),
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+
+              // Master Header
+              Container(
+                padding: const EdgeInsets.fromLTRB(24, 2, 24, 12),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: dark
+                          ? Colors.white.withValues(alpha: 0.10)
+                          : const Color(0xFFF1F5F9),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            widget.title,
+                            style: TextStyle(
+                              color:
+                                  dark ? Colors.white : const Color(0xFF0F172A),
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                          if (widget.subtitle.isNotEmpty) ...<Widget>[
+                            const SizedBox(height: 2),
+                            Text(
+                              widget.subtitle,
+                              style: TextStyle(
+                                color: dark
+                                    ? const Color(0xFFA1A1AA)
+                                    : const Color(0xFF64748B),
+                                fontFamily: 'PlusJakartaSans',
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(999),
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: dark
+                              ? Colors.white.withValues(alpha: 0.10)
+                              : const Color(0xFFF5F5F5),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 16,
+                          color: dark
+                              ? const Color(0xFFD4D4D8)
+                              : const Color(0xFF52525B),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.close_rounded, size: 20),
-                onPressed: () => Navigator.of(context).pop(),
+
+              // Body Content
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    14,
+                    24,
+                    24 + MediaQuery.paddingOf(context).bottom,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      // Search & Manual Entry Form
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Container(
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: dark
+                                    ? Colors.white.withValues(alpha: 0.05)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: dark
+                                      ? Colors.white.withValues(alpha: 0.15)
+                                      : const Color(0xFFE2E8F0),
+                                ),
+                              ),
+                              child: TextField(
+                                controller: _controller,
+                                onChanged: (_) => setState(() {}),
+                                style: TextStyle(
+                                  color: dark
+                                      ? Colors.white
+                                      : const Color(0xFF0F172A),
+                                  fontFamily: 'PlusJakartaSans',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: 'Cari atau ketik manual...',
+                                  hintStyle: TextStyle(
+                                    color: dark
+                                        ? const Color(0xFF71717A)
+                                        : const Color(0xFF94A3B8),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.search_rounded,
+                                    size: 16,
+                                    color: dark
+                                        ? const Color(0xFFA1A1AA)
+                                        : const Color(0xFF94A3B8),
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 8,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (_controller.text.trim().isNotEmpty) ...<Widget>[
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              height: 38,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: dark
+                                      ? const Color(0xFF06B6D4)
+                                      : const Color(0xFF2563EB),
+                                  foregroundColor: dark
+                                      ? const Color(0xFF083344)
+                                      : Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .pop(_controller.text.trim());
+                                },
+                                child: const Text(
+                                  'Gunakan',
+                                  style: TextStyle(
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+
+                      Text(
+                        'Pilihan Tersedia',
+                        style: TextStyle(
+                          color: dark
+                              ? const Color(0xFFA1A1AA)
+                              : const Color(0xFF64748B),
+                          fontFamily: 'PlusJakartaSans',
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Options Grid
+                      Expanded(
+                        child: filtered.isEmpty
+                            ? Center(
+                                child: Text(
+                                  'Tidak ada pilihan ditemukan',
+                                  style: TextStyle(
+                                    color: dark
+                                        ? const Color(0xFFA1A1AA)
+                                        : const Color(0xFF94A3B8),
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              )
+                            : GridView.builder(
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: filtered.length,
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisExtent: 44,
+                                  crossAxisSpacing: 8,
+                                  mainAxisSpacing: 8,
+                                ),
+                                itemBuilder: (BuildContext context, int index) {
+                                  final String option = filtered[index];
+                                  final bool isSelected = widget.currentValue
+                                          .trim()
+                                          .toLowerCase() ==
+                                      option.trim().toLowerCase();
+                                  final bool isDisabled = !isSelected &&
+                                      widget.disabledOptions.any(
+                                        (String d) =>
+                                            d.trim().toLowerCase() ==
+                                            option.trim().toLowerCase(),
+                                      );
+
+                                  return InkWell(
+                                    borderRadius: BorderRadius.circular(12),
+                                    onTap: isDisabled
+                                        ? null
+                                        : () =>
+                                            Navigator.of(context).pop(option),
+                                    child: AnimatedContainer(
+                                      duration:
+                                          const Duration(milliseconds: 140),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 8,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isSelected
+                                            ? (dark
+                                                ? const Color(0xFF06B6D4)
+                                                : const Color(0xFF2563EB))
+                                            : isDisabled
+                                                ? (dark
+                                                    ? Colors.white.withValues(
+                                                        alpha: 0.02)
+                                                    : const Color(0xFFF1F5F9))
+                                                : (dark
+                                                    ? Colors.white.withValues(
+                                                        alpha: 0.05)
+                                                    : Colors.white),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? (dark
+                                                  ? const Color(0xFF06B6D4)
+                                                  : const Color(0xFF2563EB))
+                                              : (dark
+                                                  ? Colors.white.withValues(
+                                                      alpha: 0.10)
+                                                  : const Color(0xFFE2E8F0)),
+                                        ),
+                                        boxShadow: isSelected
+                                            ? <BoxShadow>[
+                                                BoxShadow(
+                                                  color: (dark
+                                                          ? const Color(
+                                                              0xFF06B6D4)
+                                                          : const Color(
+                                                              0xFF2563EB))
+                                                      .withValues(alpha: 0.25),
+                                                  blurRadius: 8,
+                                                  offset: const Offset(0, 3),
+                                                ),
+                                              ]
+                                            : null,
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          Expanded(
+                                            child: Text(
+                                              option,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                color: isSelected
+                                                    ? (dark
+                                                        ? const Color(
+                                                            0xFF083344)
+                                                        : Colors.white)
+                                                    : isDisabled
+                                                        ? (dark
+                                                            ? const Color(
+                                                                0xFF52525B)
+                                                            : const Color(
+                                                                0xFF94A3B8))
+                                                        : (dark
+                                                            ? Colors.white
+                                                            : const Color(
+                                                                0xFF0F172A)),
+                                                fontFamily: 'PlusJakartaSans',
+                                                fontSize: 12,
+                                                fontWeight: isSelected
+                                                    ? FontWeight.w800
+                                                    : FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                          if (isSelected)
+                                            Icon(
+                                              Icons.check_circle_rounded,
+                                              size: 15,
+                                              color: dark
+                                                  ? const Color(0xFF083344)
+                                                  : Colors.white,
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          TextField(
-            controller: _controller,
-            onChanged: (_) => setState(() {}),
-            style: TextStyle(
-              color: dark ? Colors.white : const Color(0xFF0F172A),
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-            ),
-            decoration: InputDecoration(
-              hintText: 'Cari atau ketik manual',
-              prefixIcon: const Icon(Icons.search_rounded, size: 18),
-              suffixIcon: _controller.text.trim().isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.add_rounded, size: 18),
-                      onPressed: () {
-                        Navigator.of(context).pop(_controller.text.trim());
-                      },
-                    )
-                  : null,
-              filled: true,
-              fillColor: dark
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : const Color(0xFFF8FAFC),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: dark
-                      ? Colors.white.withValues(alpha: 0.10)
-                      : const Color(0xFFE2E8F0),
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: dark
-                      ? Colors.white.withValues(alpha: 0.10)
-                      : const Color(0xFFE2E8F0),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          Flexible(
-            child: GridView.builder(
-              shrinkWrap: true,
-              itemCount: filtered.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisExtent: 48,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemBuilder: (BuildContext context, int index) {
-                final String option = filtered[index];
-                final bool selected = option == widget.currentValue;
-                return InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () => Navigator.of(context).pop(option),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? const Color(0xFF0A44FF)
-                          : (dark
-                                ? Colors.white.withValues(alpha: 0.05)
-                                : const Color(0xFFF8FAFC)),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: selected
-                            ? const Color(0xFF0A44FF)
-                            : (dark
-                                  ? Colors.white.withValues(alpha: 0.10)
-                                  : const Color(0xFFE2E8F0)),
-                      ),
-                    ),
-                    child: Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Text(
-                            option,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: selected
-                                  ? Colors.white
-                                  : (dark
-                                        ? Colors.white
-                                        : const Color(0xFF0F172A)),
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                        if (selected) ...<Widget>[
-                          const SizedBox(width: 6),
-                          const Icon(
-                            Icons.check_circle_rounded,
-                            size: 17,
-                            color: Colors.white,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
