@@ -49,7 +49,8 @@ void main() {
 
       // Check Schedule Card Stack
       expect(find.byType(AmanahScheduleCardStack), findsOneWidget);
-      expect(find.text('Jadwal Hari Ini • Sesi Pagi'), findsOneWidget);
+      expect(find.text('Jadwal Hari Ini'), findsWidgets);
+      expect(find.text('Sesi Pagi'), findsOneWidget);
       expect(find.text('07:00 - 11:00 WIB'), findsOneWidget);
       expect(find.text('Poli Gigi & Mulut'), findsOneWidget);
       expect(find.text('2 Pasien'), findsOneWidget);
@@ -129,13 +130,13 @@ void main() {
       await tester.pumpWidget(createHomeScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('Jadwal Hari Ini • Sesi Pagi'), findsOneWidget);
+      expect(find.text('Sesi Pagi'), findsOneWidget);
 
       await tester.tap(find.byIcon(Icons.close_rounded).last);
       await tester.pump(const Duration(milliseconds: 300));
       await tester.pumpAndSettle();
 
-      expect(find.text('Jadwal Hari Ini • Sesi Siang'), findsOneWidget);
+      expect(find.text('Sesi Siang'), findsOneWidget);
     });
 
     testWidgets('Swiping left on schedule card stack switches to next card',
@@ -147,17 +148,17 @@ void main() {
       await tester.pumpWidget(createHomeScreen());
       await tester.pumpAndSettle();
 
-      expect(find.text('Jadwal Hari Ini • Sesi Pagi'), findsOneWidget);
+      expect(find.text('Sesi Pagi'), findsOneWidget);
 
       // Drag horizontally to the left by -120px
       await tester.drag(find.byType(AmanahScheduleCardStack), const Offset(-120, 0));
       await tester.pump(const Duration(milliseconds: 300));
       await tester.pumpAndSettle();
 
-      expect(find.text('Jadwal Hari Ini • Sesi Siang'), findsOneWidget);
+      expect(find.text('Sesi Siang'), findsOneWidget);
     });
 
-    testWidgets('Tapping schedule card navigates directly to Doctor Practice Schedule and opens Detail Sesi Praktik drawer',
+    testWidgets('Tapping schedule card navigates directly to Doctor Practice Schedule overview',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.75;
@@ -170,10 +171,9 @@ void main() {
       await tester.tap(find.text('07:00 - 11:00 WIB'));
       await tester.pumpAndSettle();
 
-      // Should have navigated to the Doctor Practice Schedule and opened the Detail Sesi Praktik drawer
-      expect(find.text('Detail Sesi Praktik'), findsOneWidget);
-      expect(find.text('Sesi Praktik'), findsOneWidget);
-      expect(find.text('Ubah Sesi Praktik'), findsOneWidget);
+      // Should have navigated to the Doctor Practice Schedule overview
+      expect(find.text('Jadwal Praktik'), findsOneWidget);
+      expect(find.text('Kapasitas Hari Ini'), findsOneWidget);
     });
   });
 }

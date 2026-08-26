@@ -272,13 +272,31 @@ class AmanahBookedPatientCard extends StatelessWidget {
                           height: 48,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
+                            color: const Color(0xFF1E293B),
                             border: Border.all(color: Colors.white, width: 2),
-                            image: DecorationImage(
-                              image: NetworkImage(
-                                patient.avatarUrl ??
-                                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
-                              ),
+                          ),
+                          child: ClipOval(
+                            child: Image.network(
+                              patient.avatarUrl ??
+                                  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
                               fit: BoxFit.cover,
+                              errorBuilder: (BuildContext context, Object error,
+                                      StackTrace? stack) =>
+                                  ColoredBox(
+                                color: const Color(0xFF334155),
+                                child: Center(
+                                  child: Text(
+                                    patient.patientName.isNotEmpty
+                                        ? patient.patientName.substring(0, 1)
+                                        : 'P',
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -1622,12 +1640,32 @@ class _PatientProfileHeader extends StatelessWidget {
                       offset: const Offset(0, 8),
                     ),
                   ],
-                  image: DecorationImage(
-                    image: NetworkImage(
-                      patient.avatarUrl ??
-                          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop',
-                    ),
+                ),
+                child: ClipOval(
+                  child: Image.network(
+                    patient.avatarUrl ??
+                        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop',
                     fit: BoxFit.cover,
+                    errorBuilder: (BuildContext context, Object error,
+                            StackTrace? stack) =>
+                        ColoredBox(
+                      color: dark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFCBD5E1),
+                      child: Center(
+                        child: Text(
+                          patient.patientName.isNotEmpty
+                              ? patient.patientName.substring(0, 1)
+                              : 'P',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w800,
+                            color:
+                                dark ? Colors.white : const Color(0xFF1E293B),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),

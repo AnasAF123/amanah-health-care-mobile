@@ -154,8 +154,8 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
   void _navigateToScheduleWithSession(DoctorSchedule schedule) {
     setState(() {
       _scheduleInitialSessionId = schedule.id;
-      _scheduleInitialViewMode = AmanahScheduleViewMode.sessions;
-      _scheduleOpenDetailOnLaunch = true;
+      _scheduleInitialViewMode = AmanahScheduleViewMode.overview;
+      _scheduleOpenDetailOnLaunch = false;
       _selectedTab = AmanahHomeTab.schedule;
     });
   }

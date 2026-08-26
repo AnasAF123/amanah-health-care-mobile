@@ -220,16 +220,6 @@ class AmanahScheduleCard extends StatelessWidget {
   final VoidCallback onDismiss;
   final VoidCallback? onCardTap;
 
-  String _formatCardTitle() {
-    if (schedule.sessionType.isNotEmpty) {
-      return 'Jadwal Hari Ini • Sesi ${schedule.sessionType}';
-    }
-    if (schedule.title.startsWith('Jadwal')) {
-      return schedule.title;
-    }
-    return 'Jadwal Hari Ini • ${schedule.title}';
-  }
-
   String _formatPatientCount() {
     if (schedule.bookedPatients.isNotEmpty) {
       return '${schedule.bookedPatients.length} Pasien';
@@ -249,12 +239,13 @@ class AmanahScheduleCard extends StatelessWidget {
     final Color heading = dark ? Colors.white : const Color(0xFF1E293B);
     final Color muted =
         dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-
-    final String cardTitle = _formatCardTitle();
+    final String sessionLabel = schedule.sessionType.isNotEmpty
+        ? 'Sesi ${schedule.sessionType}'
+        : (schedule.title.startsWith('Jadwal') ? '' : schedule.title);
     final String patientMetric = _formatPatientCount();
 
     return Semantics(
-      label: '$cardTitle, ${schedule.time}',
+      label: 'Jadwal Hari Ini ${sessionLabel.isNotEmpty ? sessionLabel : ""}, ${schedule.time}',
       child: SizedBox(
         height: 172,
         width: double.infinity,
@@ -289,15 +280,56 @@ class AmanahScheduleCard extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Text(
-                                    cardTitle,
-                                    style:
-                                        theme.textTheme.titleSmall?.copyWith(
-                                      color: heading,
-                                      fontFamily: 'PlusJakartaSans',
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w800,
-                                      height: 1.1,
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: <Widget>[
+                                        Text(
+                                          'Jadwal Hari Ini',
+                                          style: theme.textTheme.titleSmall
+                                              ?.copyWith(
+                                            color: heading,
+                                            fontFamily: 'PlusJakartaSans',
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w800,
+                                            height: 1.1,
+                                          ),
+                                        ),
+                                        if (sessionLabel.isNotEmpty) ...<Widget>[
+                                          Container(
+                                            width: 1.5,
+                                            height: 11,
+                                            margin: const EdgeInsets.symmetric(
+                                              horizontal: 7,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: dark
+                                                  ? Colors.white
+                                                      .withValues(alpha: 0.25)
+                                                  : const Color(0xFFCBD5E1),
+                                              borderRadius:
+                                                  BorderRadius.circular(1),
+                                            ),
+                                          ),
+                                          Text(
+                                            sessionLabel,
+                                            style: theme.textTheme.titleSmall
+                                                ?.copyWith(
+                                              color: dark
+                                                  ? const Color(0xFF38BDF8)
+                                                  : const Color(0xFF0A44FF),
+                                              fontFamily: 'PlusJakartaSans',
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700,
+                                              height: 1.1,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                   ),
                                   const SizedBox(height: 3),
