@@ -11,6 +11,7 @@ import 'package:smooth_app/features/home/presentation/components/amanah_schedule
 import 'package:smooth_app/features/home/presentation/components/amanah_today_activity_section.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_account_tab_screen.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_schedule_tab_screen.dart';
+import 'package:smooth_app/features/presence/presentation/screen/amanah_presence_history_screen.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class AmanahHomeShell extends StatefulWidget {
@@ -112,8 +113,9 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
 
   void _handleQuickAction(String actionId) {
     switch (actionId) {
+      case 'history':
       case 'presensi':
-        setState(() => _selectedTab = AmanahHomeTab.scan);
+        Navigator.of(context).push(AmanahPresenceHistoryScreen.route());
       case 'jadwal-saya':
         setState(() => _selectedTab = AmanahHomeTab.schedule);
       case 'cari-visit':

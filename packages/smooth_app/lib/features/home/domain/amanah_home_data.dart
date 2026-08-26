@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 enum AmanahBadgeVariant { success, primary, live, trend }
 
-enum AmanahQuickActionIcon { presence, schedule, search, idCard }
+enum AmanahQuickActionIcon { history, presence, schedule, search, idCard }
 
 enum AmanahActivityIcon { users, stethoscope }
 
@@ -143,9 +143,9 @@ const AmanahHomeDashboardData amanahHomeDashboardData = AmanahHomeDashboardData(
   ],
   quickActions: <AmanahQuickAction>[
     AmanahQuickAction(
-      id: 'presensi',
-      label: 'Presensi',
-      icon: AmanahQuickActionIcon.presence,
+      id: 'history',
+      label: 'History',
+      icon: AmanahQuickActionIcon.history,
     ),
     AmanahQuickAction(
       id: 'jadwal-saya',
@@ -189,6 +189,7 @@ const AmanahHomeDashboardData amanahHomeDashboardData = AmanahHomeDashboardData(
 
 IconData amanahQuickActionIconData(AmanahQuickActionIcon icon) {
   return switch (icon) {
+    AmanahQuickActionIcon.history => Icons.history_rounded,
     AmanahQuickActionIcon.presence => Icons.check_box_outlined,
     AmanahQuickActionIcon.schedule => Icons.calendar_today_outlined,
     AmanahQuickActionIcon.search => Icons.search_rounded,

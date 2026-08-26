@@ -56,7 +56,7 @@ void main() {
 
       // Check Quick Access Section
       expect(find.byType(AmanahQuickAccessSection), findsOneWidget);
-      expect(find.text('Presensi'), findsOneWidget);
+      expect(find.text('History'), findsOneWidget);
       expect(find.text('Jadwal Saya'), findsOneWidget);
       expect(find.text('Cari Visit'), findsOneWidget);
       expect(find.text('Kartu ID'), findsOneWidget);
@@ -71,6 +71,22 @@ void main() {
 
       // Check Bottom Navigation Bar
       expect(find.byType(AmanahBottomNavigationBar), findsOneWidget);
+    });
+
+    testWidgets('Tapping History quick action navigates to Riwayat Presensi screen',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.75;
+      addTearDown(() => tester.view.reset());
+
+      await tester.pumpWidget(createHomeScreen());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('History'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Riwayat Presensi'), findsOneWidget);
+      expect(find.text('Timeline'), findsOneWidget);
     });
 
     testWidgets('Quick action Cari Visit shows toast feedback',
