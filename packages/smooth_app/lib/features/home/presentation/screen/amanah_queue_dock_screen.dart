@@ -2,25 +2,28 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:smooth_app/features/schedule/data/amanah_schedule_store.dart';
+import 'package:smooth_app/features/home/domain/amanah_queue_data.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_paramedic_toolbox.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_watermark_path.dart';
 import 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:smooth_app/features/schedule/presentation/components/amanah_schedule_cards_and_drawers.dart';
 
+/// Master 3D Queue Dock Screen (Pilih Antrean Pasien)
+/// Faithful 1:1 native Flutter replication of QueueDockScreen.tsx from web.
 class AmanahQueueDockScreen extends StatefulWidget {
   const AmanahQueueDockScreen({super.key});
 
   static Route<void> route() {
     return PageRouteBuilder<void>(
       pageBuilder: (_, _, _) => const AmanahQueueDockScreen(),
-      transitionsBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-            Widget child,
-          ) {
-            return FadeTransition(opacity: animation, child: child);
-          },
+      transitionsBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+        Widget child,
+      ) {
+        return FadeTransition(opacity: animation, child: child);
+      },
     );
   }
 
@@ -28,190 +31,424 @@ class AmanahQueueDockScreen extends StatefulWidget {
   State<AmanahQueueDockScreen> createState() => _AmanahQueueDockScreenState();
 }
 
-class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen> {
-  final AmanahScheduleStore _store = AmanahScheduleStore.instance;
+class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
+    with TickerProviderStateMixin {
+  final List<AmanahQueueCardData> _cards = defaultAmanahQueueCards;
+  final List<AmanahQueueCardData> _collectedCards = <AmanahQueueCardData>[];
+
   int _currentIndex = 1;
-  double _horizontalDrag = 0;
-  double _verticalDrag = 0;
-  bool _isActivating = false;
-  bool _showOverlay = false;
-  _QueuePatientEntry? _selectedEntry;
+  double _horizontalDrag = 0.0;
+  double _verticalDrag = 0.0;
+  bool _isLongPressing = false;
+  double _spinOffset = 0.0;
+
+  // Activation & Ejection stages matching web: 'idle', 'plunging', 'activating', 'dock_appear', 'rail_converge', 'atm_peek', 'full_eject'
+  String _activationStage = 'idle';
+  String _ejectionStage = 'idle';
+  bool _showSuccess = false;
+  bool _isGenieSettled = false;
+  AmanahQueueCardData? _selectedActiveCard;
+
+  int _dotCount = 0;
+  AnimationController? _dotsController;
+  AnimationController? _rouletteController;
+  double _rouletteVelocity = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _store.addListener(_handleStoreChanged);
+    _initDotsTimer();
+  }
+
+  void _initDotsTimer() {
+    _dotsController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 960),
+    )..addListener(() {
+        if (_activationStage == 'activating') {
+          final int next = ((_dotsController!.value * 3).floor() % 3) + 1;
+          if (next != _dotCount) {
+            setState(() => _dotCount = next);
+          }
+        }
+      });
   }
 
   @override
   void dispose() {
-    _store.removeListener(_handleStoreChanged);
+    _dotsController?.dispose();
+    _rouletteController?.dispose();
     super.dispose();
   }
 
-  void _handleStoreChanged() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  List<_QueuePatientEntry> get _entries {
-    return _store
-        .getAllBookedPatientsForDate(AmanahScheduleStore.baseToday)
-        .map(
-          (({BookedPatient patient, DoctorSchedule schedule}) item) =>
-              _QueuePatientEntry(
-                patient: item.patient,
-                schedule: item.schedule,
-              ),
-        )
-        .toList(growable: false);
-  }
-
-  void _moveBy(int delta, int length) {
-    if (length == 0) {
+  void _onIndexChange(int newIndex) {
+    if (_cards.isEmpty) {
       return;
     }
     setState(() {
-      _currentIndex = (_currentIndex + delta).clamp(0, length - 1);
+      _currentIndex = ((newIndex % _cards.length) + _cards.length) % _cards.length;
       _horizontalDrag = 0;
       _verticalDrag = 0;
     });
   }
 
-  void _activate(_QueuePatientEntry entry) {
-    if (_isActivating) {
+  void _startRouletteSpin() {
+    setState(() {
+      _isLongPressing = true;
+    });
+    HapticFeedback.heavyImpact();
+
+    _rouletteController?.dispose();
+    _rouletteVelocity = 18.0 * 230.0; // ~18 cards per second
+
+    _rouletteController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..addListener(() {
+        if (!_isLongPressing) {
+          return;
+        }
+        setState(() {
+          _spinOffset += _rouletteVelocity * 0.016;
+        });
+        final int cardStep = (_spinOffset / 230.0).floor();
+        if (cardStep.isEven) {
+          HapticFeedback.selectionClick();
+        }
+      });
+    _rouletteController!.repeat();
+  }
+
+  void _stopRouletteSpin() {
+    if (!_isLongPressing) {
       return;
     }
-    HapticFeedback.selectionClick();
-    setState(() {
-      _selectedEntry = entry;
-      _isActivating = true;
-      _verticalDrag = 0;
-      _horizontalDrag = 0;
+    _isLongPressing = false;
+
+    // Smooth exponential deceleration to snap firmly on selected card
+    final double startOffset = _spinOffset;
+    final int shiftCards = (startOffset / 230.0).round();
+    final double targetOffset = shiftCards * 230.0;
+    final int targetIndex =
+        (((_currentIndex + shiftCards) % _cards.length) + _cards.length) %
+        _cards.length;
+
+    _rouletteController?.stop();
+    _rouletteController?.dispose();
+
+    final AnimationController decelController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 550),
+    );
+    final Animation<double> decelAnimation = Tween<double>(
+      begin: startOffset,
+      end: targetOffset,
+    ).animate(CurvedAnimation(parent: decelController, curve: Curves.easeOutCubic));
+
+    decelAnimation.addListener(() {
+      if (mounted) {
+        setState(() {
+          _spinOffset = decelAnimation.value;
+        });
+      }
     });
-    Future<void>.delayed(const Duration(milliseconds: 360), () {
+
+    decelAnimation.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        if (mounted) {
+          setState(() {
+            _currentIndex = targetIndex;
+            _spinOffset = 0;
+          });
+          HapticFeedback.mediumImpact();
+        }
+        decelController.dispose();
+      }
+    });
+
+    decelController.forward();
+  }
+
+  void _handleActivate() {
+    if (_activationStage != 'idle') {
+      return;
+    }
+    final AmanahQueueCardData chosen = _cards[_currentIndex];
+    setState(() {
+      _selectedActiveCard = chosen;
+      _activationStage = 'plunging';
+      _ejectionStage = 'atm_plunge';
+    });
+    HapticFeedback.heavyImpact();
+
+    // 1. Plunge into slot (t = 450ms)
+    Future<void>.delayed(const Duration(milliseconds: 450), () {
       if (!mounted) {
         return;
       }
       setState(() {
-        _isActivating = false;
-        _showOverlay = true;
+        _activationStage = 'activating';
+        _ejectionStage = 'idle';
+      });
+      _dotsController?.repeat();
+    });
+
+    // 2. Complete Activation & Trigger Genie Open (t = 1800ms)
+    Future<void>.delayed(const Duration(milliseconds: 1800), () {
+      if (!mounted) {
+        return;
+      }
+      _dotsController?.stop();
+      setState(() {
+        _showSuccess = true;
+        _activationStage = 'idle';
+      });
+      // Settle Genie animation after card appears (t = 350ms)
+      Future<void>.delayed(const Duration(milliseconds: 350), () {
+        if (mounted) {
+          setState(() => _isGenieSettled = true);
+        }
       });
     });
   }
 
-  void _closeOverlay() {
+  void _handleCloseOverlay() {
     setState(() {
-      _showOverlay = false;
-      _selectedEntry = null;
+      _isGenieSettled = false;
+      _showSuccess = false;
+      _activationStage = 'idle';
+      _ejectionStage = 'dock_appear';
+      _verticalDrag = 0;
+      _horizontalDrag = 0;
+    });
+
+    // Step 2: Friends converge to 3D rail (t = 200ms)
+    Future<void>.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) {
+        setState(() => _ejectionStage = 'rail_converge');
+      }
+    });
+
+    // Step 3: Center card peeks from slot mouth (t = 850ms)
+    Future<void>.delayed(const Duration(milliseconds: 850), () {
+      if (mounted) {
+        setState(() => _ejectionStage = 'atm_peek');
+        HapticFeedback.lightImpact();
+      }
+    });
+
+    // Step 4: Center card rises into place (t = 1350ms)
+    Future<void>.delayed(const Duration(milliseconds: 1350), () {
+      if (mounted) {
+        setState(() => _ejectionStage = 'full_eject');
+      }
+    });
+
+    // Step 5: Lock firmly into rail (t = 2000ms)
+    Future<void>.delayed(const Duration(milliseconds: 2000), () {
+      if (mounted) {
+        setState(() {
+          _ejectionStage = 'idle';
+          _selectedActiveCard = null;
+        });
+        HapticFeedback.mediumImpact();
+      }
     });
   }
 
-  void _processSelected() {
-    final _QueuePatientEntry? selected = _selectedEntry;
-    _closeOverlay();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          selected == null
-              ? 'Antrean diproses'
-              : '${selected.patient.queueNumber} dipanggil untuk diproses',
+  void _handleCollectCard(AmanahQueueCardData card) {
+    setState(() {
+      _collectedCards.removeWhere((AmanahQueueCardData c) => c.id == card.id);
+      _collectedCards.insert(0, card);
+      _showSuccess = false;
+      _isGenieSettled = false;
+      _currentIndex = (_currentIndex + 1) % _cards.length;
+    });
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => AmanahQueueHistoryScreen(
+          collectedCards: _collectedCards,
+          onRedraw: () => Navigator.of(context).pop(),
         ),
-        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _openGuide() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _AmanahQueueGuideDrawer(),
+    );
+  }
+
+  void _openHistory() {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => AmanahQueueHistoryScreen(
+          collectedCards: _collectedCards,
+          onRedraw: () => Navigator.of(context).pop(),
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<_QueuePatientEntry> entries = _entries;
-    final int currentIndex = entries.isEmpty
-        ? 0
-        : _currentIndex.clamp(0, entries.length - 1);
-    final _QueuePatientEntry? currentEntry = entries.isEmpty
-        ? null
-        : entries[currentIndex];
-    final bool readyToActivate = _verticalDrag >= 45;
+    final double dragProgress = (_verticalDrag / 80.0).clamp(0.0, 1.0);
+    final bool isNearSlot = (_verticalDrag >= 20.0 || dragProgress >= 0.25) && _activationStage == 'idle';
+    final bool isMorphingActive = _activationStage == 'activating';
+
+    String headlineText = 'Pilih antrean\npasien';
+    if (isMorphingActive) {
+      headlineText = 'Memproses\nantrean';
+    } else if (isNearSlot) {
+      headlineText = 'Lepaskan untuk\nproses antrean';
+    }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFF),
+      backgroundColor: const Color(0xFFF4F7FF),
       body: Stack(
         children: <Widget>[
-          const Positioned.fill(child: _QueueAuroraBackground()),
+          // Background Gradient matching web
+          const Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment(0, -0.2),
+                  radius: 0.95,
+                  colors: <Color>[
+                    Color(0xFFDBEAFE),
+                    Color(0xFFEFF6FF),
+                    Color(0xFFF4F7FF),
+                  ],
+                  stops: <double>[0, 0.45, 1.0],
+                ),
+              ),
+            ),
+          ),
+
           SafeArea(
             child: Column(
               children: <Widget>[
-                _QueueDockHeader(
-                  title: _isActivating
-                      ? 'Memproses antrean'
-                      : readyToActivate
-                      ? 'Lepaskan untuk proses antrean'
-                      : 'Pilih antrean pasien',
+                // 1. Unified Master Header Bar
+                _QueueHeaderBar(
                   onBack: () => Navigator.of(context).pop(),
+                  onOpenGuide: _openGuide,
+                  onOpenHistory: _openHistory,
+                  historyCount: _collectedCards.length,
+                  showSuccess: _showSuccess,
                 ),
-                const SizedBox(height: 12),
-                _QueueDockTopLabel(totalCount: entries.length),
-                Expanded(
-                  child: entries.isEmpty
-                      ? const _QueueEmptyState()
-                      : GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onHorizontalDragUpdate: (DragUpdateDetails details) {
-                            setState(() {
-                              _horizontalDrag += details.delta.dx;
-                            });
-                          },
-                          onHorizontalDragEnd: (DragEndDetails details) {
-                            final double velocity =
-                                details.primaryVelocity ?? 0;
-                            if (_horizontalDrag < -48 || velocity < -480) {
-                              _moveBy(1, entries.length);
-                            } else if (_horizontalDrag > 48 || velocity > 480) {
-                              _moveBy(-1, entries.length);
-                            } else {
-                              setState(() => _horizontalDrag = 0);
-                            }
-                          },
-                          onVerticalDragUpdate: (DragUpdateDetails details) {
-                            setState(() {
-                              _verticalDrag = (_verticalDrag + details.delta.dy)
-                                  .clamp(0, 120);
-                            });
-                          },
-                          onVerticalDragEnd: (_) {
-                            if (_verticalDrag >= 45 && currentEntry != null) {
-                              _activate(currentEntry);
-                            } else {
-                              setState(() => _verticalDrag = 0);
-                            }
-                          },
-                          onTap: currentEntry == null
-                              ? null
-                              : () => _activate(currentEntry),
-                          child: _QueueDockDeck(
-                            entries: entries,
-                            currentIndex: currentIndex,
-                            horizontalDrag: _horizontalDrag,
-                            verticalDrag: _verticalDrag,
-                            isActivating: _isActivating,
+
+                // 2. 3D Paramedic Toolbox & Morphing Headline
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: _showSuccess ? 0.0 : 1.0,
+                  child: Column(
+                    children: <Widget>[
+                      AmanahParamedicToolbox3D(
+                        isOpen: isMorphingActive || isNearSlot,
+                        size: 76,
+                      ),
+                      const SizedBox(height: 8),
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 250),
+                        child: Text(
+                          isMorphingActive
+                              ? 'Memproses\nantrean${'.' * _dotCount}'
+                              : headlineText,
+                          key: ValueKey<String>(headlineText + (isMorphingActive ? '$_dotCount' : '')),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: isNearSlot || isMorphingActive
+                                ? const Color(0xFF0A44FF)
+                                : const Color(0xFF0F172A),
+                            fontFamily: 'PlusJakartaSans',
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.4,
+                            height: 1.2,
                           ),
                         ),
+                      ),
+                    ],
+                  ),
                 ),
-                _BottomNotchedDock(isArmed: readyToActivate),
+
+                // 3. 3D Cylindrical Carousel & Deck
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onLongPressStart: (_) => _startRouletteSpin(),
+                    onLongPressEnd: (_) => _stopRouletteSpin(),
+                    onPanUpdate: (DragUpdateDetails details) {
+                      if (_isLongPressing || _activationStage != 'idle') {
+                        return;
+                      }
+                      final double dx = details.delta.dx;
+                      final double dy = details.delta.dy;
+                      if (dy > 0 || _verticalDrag > 0) {
+                        setState(() {
+                          _verticalDrag = (_verticalDrag + dy).clamp(0.0, 110.0);
+                        });
+                      } else {
+                        setState(() {
+                          _horizontalDrag += dx;
+                        });
+                      }
+                    },
+                    onPanEnd: (DragEndDetails details) {
+                      if (_isLongPressing || _activationStage != 'idle') {
+                        return;
+                      }
+                      if (_verticalDrag >= 55) {
+                        _handleActivate();
+                      } else {
+                        setState(() => _verticalDrag = 0);
+                        final double vx = details.velocity.pixelsPerSecond.dx;
+                        if (_horizontalDrag < -45 || vx < -400) {
+                          _onIndexChange(_currentIndex + 1);
+                        } else if (_horizontalDrag > 45 || vx > 400) {
+                          _onIndexChange(_currentIndex - 1);
+                        } else {
+                          setState(() => _horizontalDrag = 0);
+                        }
+                      }
+                    },
+                    child: _AmanahQueue3DCarousel(
+                      cards: _cards,
+                      currentIndex: _currentIndex,
+                      horizontalDrag: _horizontalDrag,
+                      verticalDrag: _verticalDrag,
+                      spinOffset: _spinOffset,
+                      isActivating: _activationStage != 'idle',
+                      ejectionStage: _ejectionStage,
+                      showSuccess: _showSuccess,
+                      onCardSelect: _onIndexChange,
+                    ),
+                  ),
+                ),
+
+                // 4. SVG Notched Bottom Dock Floor with Glowing Cavity
+                _AmanahBottomNotchedDock(
+                  isActivating: isMorphingActive || _showSuccess,
+                  dragProgress: dragProgress,
+                  isLongPressing: _isLongPressing,
+                  label: 'Tarik antrean ke bawah untuk proses',
+                ),
               ],
             ),
           ),
-          if (_showOverlay && _selectedEntry != null)
-            _QueueActivationOverlay(
-              entry: _selectedEntry!,
-              onClose: _closeOverlay,
-              onProcess: _processSelected,
-              onOpenDetail: () => AmanahPatientDetailModal.show(
-                context,
-                _selectedEntry!.patient,
-                _selectedEntry!.schedule,
-              ),
+
+          // 5. Activation & Success Overlay with 3D Flip Hero Card
+          if (_showSuccess && _selectedActiveCard != null)
+            _AmanahQueueActivationOverlay(
+              card: _selectedActiveCard!,
+              isGenieSettled: _isGenieSettled,
+              onClose: _handleCloseOverlay,
+              onRedraw: _handleCloseOverlay,
+              onActionClick: () => _handleCollectCard(_selectedActiveCard!),
             ),
         ],
       ),
@@ -219,69 +456,91 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen> {
   }
 }
 
-class _QueuePatientEntry {
-  const _QueuePatientEntry({required this.patient, required this.schedule});
+// --- App Bar Header ---
 
-  final BookedPatient patient;
-  final DoctorSchedule schedule;
-}
+class _QueueHeaderBar extends StatelessWidget {
+  const _QueueHeaderBar({
+    required this.onBack,
+    required this.onOpenGuide,
+    required this.onOpenHistory,
+    required this.historyCount,
+    required this.showSuccess,
+  });
 
-class _QueueDockHeader extends StatelessWidget {
-  const _QueueDockHeader({required this.title, required this.onBack});
-
-  final String title;
   final VoidCallback onBack;
+  final VoidCallback onOpenGuide;
+  final VoidCallback onOpenHistory;
+  final int historyCount;
+  final bool showSuccess;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 56,
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 250),
+      opacity: showSuccess ? 0.0 : 1.0,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             IconButton(
               onPressed: onBack,
               icon: const Icon(Icons.arrow_back_rounded),
               color: const Color(0xFF1E293B),
-            ),
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 180),
-                child: Text(
-                  title,
-                  key: ValueKey<String>(title),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Color(0xFF0F172A),
-                    fontFamily: 'PlusJakartaSans',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0,
-                  ),
-                ),
-              ),
+              iconSize: 24,
             ),
             PopupMenuButton<String>(
-              icon: const Icon(
-                Icons.more_vert_rounded,
-                color: Color(0xFF1E293B),
-              ),
+              icon: const Icon(Icons.more_vert_rounded, color: Color(0xFF1E293B)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-              ),
-              itemBuilder: (BuildContext context) =>
-                  const <PopupMenuEntry<String>>[
-                    PopupMenuItem<String>(
-                      value: 'guide',
-                      child: Text('Panduan antrean'),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'history',
-                      child: Text('Riwayat antrean'),
-                    ),
-                  ],
+              onSelected: (String val) {
+                if (val == 'guide') {
+                  onOpenGuide();
+                } else if (val == 'history') {
+                  onOpenHistory();
+                }
+              },
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'guide',
+                  child: Row(
+                    children: <Widget>[
+                      Icon(Icons.info_outline_rounded, color: Color(0xFF0A44FF), size: 18),
+                      SizedBox(width: 10),
+                      Text('Panduan antrean', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'history',
+                  child: Row(
+                    children: <Widget>[
+                      const Icon(Icons.history_rounded, color: Color(0xFF0A44FF), size: 18),
+                      const SizedBox(width: 10),
+                      const Text('Riwayat antrean', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                      if (historyCount > 0) ...<Widget>[
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEFF6FF),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFFBFDBFE)),
+                          ),
+                          child: Text(
+                            '$historyCount',
+                            style: const TextStyle(
+                              color: Color(0xFF0A44FF),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -290,916 +549,652 @@ class _QueueDockHeader extends StatelessWidget {
   }
 }
 
-class _QueueDockTopLabel extends StatelessWidget {
-  const _QueueDockTopLabel({required this.totalCount});
+// --- 3D Carousel Deck with Target Glow Frame & Directional Chevrons ---
 
-  final int totalCount;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Container(
-          width: 52,
-          height: 52,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.92),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 1.5),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: const Color(0xFF0A44FF).withValues(alpha: 0.16),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.medical_services_outlined,
-            color: Color(0xFF0A44FF),
-            size: 24,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          '$totalCount antrean tersedia',
-          style: const TextStyle(
-            color: Color(0xFF64748B),
-            fontFamily: 'PlusJakartaSans',
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _QueueEmptyState extends StatelessWidget {
-  const _QueueEmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Belum ada antrean pasien',
-        style: TextStyle(
-          color: Color(0xFF64748B),
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
-class _QueueDockDeck extends StatelessWidget {
-  const _QueueDockDeck({
-    required this.entries,
+class _AmanahQueue3DCarousel extends StatelessWidget {
+  const _AmanahQueue3DCarousel({
+    required this.cards,
     required this.currentIndex,
     required this.horizontalDrag,
     required this.verticalDrag,
+    required this.spinOffset,
     required this.isActivating,
+    required this.ejectionStage,
+    required this.showSuccess,
+    required this.onCardSelect,
   });
 
-  final List<_QueuePatientEntry> entries;
+  final List<AmanahQueueCardData> cards;
   final int currentIndex;
   final double horizontalDrag;
   final double verticalDrag;
+  final double spinOffset;
   final bool isActivating;
+  final String ejectionStage;
+  final bool showSuccess;
+  final ValueChanged<int> onCardSelect;
 
   @override
   Widget build(BuildContext context) {
     final Size screen = MediaQuery.sizeOf(context);
-    final double dragUnits = horizontalDrag / 230;
-    final List<Widget> cards = <Widget>[];
+    final double totalDragOffset = horizontalDrag + spinOffset;
+    final double dragUnits = totalDragOffset / 230.0;
+    final double baseTop = math.max(16.0, screen.height * 0.05);
 
-    for (int index = 0; index < entries.length; index += 1) {
-      final double distance = index - currentIndex - dragUnits;
-      if (distance.abs() > 3.2) {
+    final List<Widget> cardWidgets = <Widget>[];
+
+    // 1. Target Alignment Glow Frame strictly behind cards (Compact to fit card)
+    cardWidgets.add(
+      Positioned(
+        left: (screen.width - 218) / 2,
+        top: baseTop - 3,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 350),
+          opacity: isActivating || showSuccess ? 0.0 : 1.0,
+          child: Container(
+            width: 218,
+            height: 341,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: const Color(0xFF38BDF8).withValues(alpha: 0.75),
+                width: 1.8,
+              ),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: const Color(0xFF0A44FF).withValues(alpha: 0.16),
+                  blurRadius: 18,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // 2. Dual ChevronDown Animated Bouncing Arrow pointing to bottom dock
+    cardWidgets.add(
+      Positioned(
+        left: (screen.width - 40) / 2,
+        top: baseTop + 342 + (verticalDrag > 0 ? verticalDrag * 0.3 : 0),
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 300),
+          opacity: isActivating || showSuccess || ejectionStage != 'idle' ? 0.0 : 1.0,
+          child: const _AmanahBouncingChevrons(),
+        ),
+      ),
+    );
+
+    // 3. Render 3D Cards with U-Railway Geometry
+    for (int index = 0; index < cards.length; index++) {
+      double distanceFromCenter = (index - currentIndex) - dragUnits;
+
+      // Handle wrapping for infinite carousel illusion
+      while (distanceFromCenter > cards.length / 2) {
+        distanceFromCenter -= cards.length;
+      }
+      while (distanceFromCenter < -cards.length / 2) {
+        distanceFromCenter += cards.length;
+      }
+
+      if (distanceFromCenter.abs() > 2.8) {
         continue;
       }
-      final bool active = index == currentIndex;
-      final double angle = distance * 19.5 * math.pi / 180;
-      final double translateX = math.sin(angle) * 172;
-      final double translateY =
-          18 + (1 - math.cos(angle)) * 88 + (active ? verticalDrag : 0);
-      final double rotationZ = (distance * 13) * math.pi / 180;
-      final double scale = (1 - distance.abs() * 0.055).clamp(0.78, 1.0);
-      final double opacity = (1 - distance.abs() * 0.22).clamp(0.24, 1.0);
 
-      cards.add(
-        AnimatedPositioned(
-          key: ValueKey<String>(entries[index].patient.id),
-          duration: const Duration(milliseconds: 210),
-          curve: Curves.easeOutCubic,
-          left: (screen.width - 212) / 2 + translateX,
-          top: 44 + translateY,
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 180),
-            opacity: isActivating && active ? 0 : opacity,
+      final bool isCenter = index == currentIndex && totalDragOffset.abs() < 24;
+      final double angleDeg = distanceFromCenter * 19.5;
+      final double angleRad = angleDeg * math.pi / 180.0;
+
+      // U-Railway geometry matching web
+      final double x = 660.0 * math.sin(angleRad) * (screen.width / 420.0);
+      double y = -660.0 * (1.0 - math.cos(angleRad)) * 0.8;
+      final double rotateZ = -distanceFromCenter * 13.0 * math.pi / 180.0;
+      final double rotateY = distanceFromCenter * 8.0 * math.pi / 180.0;
+      final double scale = 1.0 - math.min(0.06, distanceFromCenter.abs() * 0.035);
+      double opacity = (1.0 - (distanceFromCenter.abs() - 0.85).clamp(0.0, 1.0) * 0.95).clamp(0.0, 1.0);
+
+      // Pull down gesture on center card
+      if (isCenter && verticalDrag > 0) {
+        y += verticalDrag;
+      }
+
+      // Ejection animations
+      if (isActivating || showSuccess || ejectionStage == 'dock_appear') {
+        if (index != currentIndex) {
+          opacity = 0.0;
+        } else {
+          y = 650.0;
+          opacity = showSuccess ? 0.0 : 1.0;
+        }
+      } else if (ejectionStage == 'rail_converge') {
+        if (index == currentIndex) {
+          y = 650.0;
+          opacity = 0.0;
+        } else {
+          opacity = 1.0;
+        }
+      } else if (ejectionStage == 'atm_peek') {
+        if (index == currentIndex) {
+          y = 165.0;
+          opacity = 1.0;
+        }
+      } else if (ejectionStage == 'full_eject') {
+        if (index == currentIndex) {
+          y = 0.0;
+          opacity = 1.0;
+        }
+      }
+
+      cardWidgets.add(
+        Positioned(
+          key: ValueKey<String>(cards[index].id),
+          left: (screen.width - 212) / 2 + x,
+          top: baseTop + y,
+          child: Opacity(
+            opacity: opacity,
             child: Transform(
-              alignment: Alignment.center,
+              alignment: const Alignment(0, -0.6), // center 20%
               transform: Matrix4.identity()
-                ..setEntry(3, 2, 0.0012)
-                ..rotateY(-distance * 8 * math.pi / 180)
-                ..rotateZ(rotationZ)
+                ..setEntry(3, 2, 0.001)
+                ..rotateY(rotateY)
+                ..rotateZ(rotateZ)
                 ..scaleByDouble(scale, scale, 1, 1),
-              child: _QueueCardMaster(entry: entries[index], revealed: false),
+              child: GestureDetector(
+                onTap: () {
+                  if (index != currentIndex) {
+                    onCardSelect(index);
+                  }
+                },
+                child: _AmanahQueueCardCover(
+                  card: cards[index],
+                ),
+              ),
             ),
           ),
         ),
       );
     }
 
-    cards.sort((Widget a, Widget b) {
-      final ValueKey<String> aKey = a.key! as ValueKey<String>;
-      final ValueKey<String> bKey = b.key! as ValueKey<String>;
-      final int aIndex = entries.indexWhere(
-        (_QueuePatientEntry entry) => entry.patient.id == aKey.value,
-      );
-      final int bIndex = entries.indexWhere(
-        (_QueuePatientEntry entry) => entry.patient.id == bKey.value,
-      );
-      return (currentIndex - bIndex).abs().compareTo(
-        (currentIndex - aIndex).abs(),
-      );
-    });
-
     return Stack(
       clipBehavior: Clip.none,
-      children: <Widget>[
-        Positioned.fill(
-          child: IgnorePointer(
-            child: CustomPaint(painter: _QueueRailPainter()),
-          ),
-        ),
-        ...cards,
-      ],
+      children: cardWidgets,
     );
   }
 }
 
-class _QueueActivationOverlay extends StatelessWidget {
-  const _QueueActivationOverlay({
-    required this.entry,
-    required this.onClose,
-    required this.onProcess,
-    required this.onOpenDetail,
-  });
-
-  final _QueuePatientEntry entry;
-  final VoidCallback onClose;
-  final VoidCallback onProcess;
-  final VoidCallback onOpenDetail;
+class _AmanahBouncingChevrons extends StatefulWidget {
+  const _AmanahBouncingChevrons();
 
   @override
-  Widget build(BuildContext context) {
-    final EdgeInsets padding = MediaQuery.paddingOf(context);
-    return Positioned.fill(
-      child: TweenAnimationBuilder<double>(
-        tween: Tween<double>(begin: 0, end: 1),
-        duration: const Duration(milliseconds: 260),
-        curve: Curves.easeOutCubic,
-        builder: (BuildContext context, double value, Widget? child) {
-          return Opacity(
-            opacity: value,
-            child: Transform.translate(
-              offset: Offset(0, (1 - value) * 18),
-              child: child,
-            ),
-          );
-        },
-        child: ColoredBox(
-          color: const Color(0xF2F8FAFF),
-          child: Stack(
-            children: <Widget>[
-              const Positioned.fill(child: _QueueAuroraBackground()),
-              SafeArea(
-                child: Column(
-                  children: <Widget>[
-                    SizedBox(
-                      height: 56,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          children: <Widget>[
-                            IconButton(
-                              onPressed: onClose,
-                              icon: const Icon(Icons.arrow_back_rounded),
-                              color: const Color(0xFF1E293B),
-                            ),
-                            const Expanded(
-                              child: Text(
-                                'Antrean terpilih',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Color(0xFF0F172A),
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 48),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: GestureDetector(
-                          onTap: onOpenDetail,
-                          child: _QueueCardMaster(entry: entry, revealed: true),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        20,
-                        0,
-                        20,
-                        24 + padding.bottom,
-                      ),
-                      child: Column(
-                        children: <Widget>[
-                          _QueuePrimaryButton(
-                            label: 'Panggil & Proses Pasien',
-                            icon: Icons.call_made_rounded,
-                            onTap: onProcess,
-                          ),
-                          const SizedBox(height: 12),
-                          _QueueSecondaryButton(
-                            label: 'Pilih Antrean Lain',
-                            onTap: onClose,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  State<_AmanahBouncingChevrons> createState() => _AmanahBouncingChevronsState();
 }
 
-class _QueueCardMaster extends StatelessWidget {
-  const _QueueCardMaster({required this.entry, required this.revealed});
-
-  final _QueuePatientEntry entry;
-  final bool revealed;
+class _AmanahBouncingChevronsState extends State<_AmanahBouncingChevrons>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
 
   @override
-  Widget build(BuildContext context) {
-    final double width = revealed
-        ? math.min(MediaQuery.sizeOf(context).width - 70, 320)
-        : 212;
-    final double height = revealed ? width / 0.718 : 335;
-
-    return SizedBox(
-      width: width,
-      height: height,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[Colors.white, Color(0xFFF8FAFF), Color(0xFFEDF2FF)],
-          ),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.80)),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Colors.black.withValues(alpha: revealed ? 0.18 : 0.12),
-              blurRadius: revealed ? 34 : 28,
-              offset: Offset(0, revealed ? 18 : 14),
-              spreadRadius: -12,
-            ),
-            BoxShadow(
-              color: const Color(0xFF0A44FF).withValues(alpha: 0.10),
-              blurRadius: 34,
-              offset: const Offset(0, 16),
-              spreadRadius: -16,
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(22),
-          child: Stack(
-            children: <Widget>[
-              const Positioned.fill(
-                child: CustomPaint(painter: _PixelTexturePainter()),
-              ),
-              Positioned(
-                top: revealed ? -26 : -22,
-                left: revealed ? -44 : -36,
-                child: CustomPaint(
-                  size: Size(revealed ? 210 : 152, revealed ? 210 : 152),
-                  painter: const _QueueWatermarkPainter(),
-                ),
-              ),
-              if (revealed) ...<Widget>[
-                const Positioned(
-                  top: 18,
-                  right: 18,
-                  child: _QueueStatusPill(label: 'ANTREAN AKTIF'),
-                ),
-                Positioned(
-                  top: 30,
-                  left: 20,
-                  child: _QueueBadge(
-                    number: entry.patient.queueNumber,
-                    size: 44,
-                  ),
-                ),
-                Positioned(
-                  left: 22,
-                  top: 86,
-                  child: Text(
-                    entry.patient.queueNumber,
-                    style: const TextStyle(
-                      color: Color(0xFF0A44FF),
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 42,
-                      fontWeight: FontWeight.w900,
-                      height: 0.96,
-                      letterSpacing: 0,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  right: -18,
-                  top: 78,
-                  width: width * 0.62,
-                  bottom: 78,
-                  child: _PatientHeroImage(patient: entry.patient),
-                ),
-                Positioned(
-                  left: 16,
-                  right: 16,
-                  bottom: 16,
-                  child: _QueueCardPatientSummary(entry: entry),
-                ),
-              ] else ...<Widget>[
-                Positioned(
-                  top: 18,
-                  left: 18,
-                  child: _QueueBadge(
-                    number: entry.patient.queueNumber,
-                    size: 42,
-                  ),
-                ),
-                Center(
-                  child: Text(
-                    entry.patient.queueNumber,
-                    style: const TextStyle(
-                      color: Color(0xFF0A44FF),
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 48,
-                      fontWeight: FontWeight.w900,
-                      height: 0.9,
-                      letterSpacing: 0,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 16,
-                  right: 16,
-                  bottom: 18,
-                  child: Text(
-                    entry.schedule.poli,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Color(0xFF1E293B),
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat();
   }
-}
 
-class _QueueCardPatientSummary extends StatelessWidget {
-  const _QueueCardPatientSummary({required this.entry});
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
-  final _QueuePatientEntry entry;
+  double _calculateBounce(double t) {
+    final double normalized = (t % 1.0 + 1.0) % 1.0;
+    if (normalized <= 0.5) {
+      final double p = normalized / 0.5;
+      final double curved = math.sin(p * math.pi / 2.0);
+      return -6.0 * (1.0 - curved);
+    } else {
+      final double p = (normalized - 0.5) / 0.5;
+      final double curved = math.sin(p * math.pi / 2.0);
+      return -6.0 * curved;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Row(
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (BuildContext context, Widget? child) {
+        final double t = _controller.value;
+        final double bounce1 = _calculateBounce(t);
+        final double bounce2 = _calculateBounce(t - 0.15);
+
+        return Stack(
+          alignment: Alignment.topCenter,
+          clipBehavior: Clip.none,
           children: <Widget>[
-            Container(
-              width: 27,
-              height: 27,
-              decoration: const BoxDecoration(
-                color: Color(0xFF0A44FF),
-                shape: BoxShape.circle,
-              ),
+            Transform.translate(
+              offset: Offset(0, bounce1),
               child: const Icon(
-                Icons.north_east_rounded,
-                color: Colors.white,
-                size: 15,
+                Icons.keyboard_arrow_down_rounded,
+                color: Color(0xFF0A44FF),
+                size: 26,
               ),
             ),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Text(
-                entry.patient.patientName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Color(0xFF020617),
-                  fontFamily: 'PlusJakartaSans',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                  height: 1.12,
-                ),
+            Transform.translate(
+              offset: Offset(0, 12.0 + bounce2),
+              child: const Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: Color(0xFF0A44FF),
+                size: 26,
               ),
             ),
           ],
-        ),
-        const SizedBox(height: 7),
-        Text(
-          entry.patient.patientComplaint,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: Color(0xFF64748B),
-            fontFamily: 'PlusJakartaSans',
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            height: 1.35,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Text(
-            entry.schedule.poli,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Color(0xFF0A44FF),
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 11,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.4,
-            ),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
 
-class _PatientHeroImage extends StatelessWidget {
-  const _PatientHeroImage({required this.patient});
+// --- Card Cover (Back Face on 3D Rail with Watermark & Organic Pixel Texture) ---
 
-  final BookedPatient patient;
+class _AmanahQueueCardCover extends StatelessWidget {
+  const _AmanahQueueCardCover({required this.card});
 
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: Image.network(
-        patient.avatarUrl ??
-            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop',
-        fit: BoxFit.cover,
-        alignment: Alignment.topCenter,
-        errorBuilder: (BuildContext context, Object error, StackTrace? stack) {
-          return DecoratedBox(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: <Color>[Color(0xFFDBEAFE), Color(0xFFBFDBFE)],
-              ),
-            ),
-            child: Center(
-              child: Text(
-                patient.patientName.isEmpty
-                    ? 'P'
-                    : patient.patientName.substring(0, 1),
-                style: const TextStyle(
-                  color: Color(0xFF1E293B),
-                  fontFamily: 'PlusJakartaSans',
-                  fontSize: 38,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _QueueStatusPill extends StatelessWidget {
-  const _QueueStatusPill({required this.label});
-
-  final String label;
+  final AmanahQueueCardData card;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      width: 212,
+      height: 335,
       decoration: BoxDecoration(
-        color: const Color(0xFFEFF6FF),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFFBFDBFE)),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          color: Color(0xFF1D4ED8),
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 9,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 0.8,
+        borderRadius: BorderRadius.circular(22),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: <Color>[
+            Colors.white,
+            Color(0xFFF8FAFF),
+            Color(0xFFEDF2FF),
+          ],
         ),
-      ),
-    );
-  }
-}
-
-class _QueuePrimaryButton extends StatelessWidget {
-  const _QueuePrimaryButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: Ink(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            gradient: const LinearGradient(
-              colors: <Color>[Color(0xFF0A44FF), Color(0xFF2563EB)],
-            ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: const Color(0xFF0A44FF).withValues(alpha: 0.32),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
-                spreadRadius: -10,
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(icon, color: Colors.white, size: 18),
-              const SizedBox(width: 9),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'PlusJakartaSans',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _QueueSecondaryButton extends StatelessWidget {
-  const _QueueSecondaryButton({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 13),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.90),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Color(0xFF334155),
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BottomNotchedDock extends StatelessWidget {
-  const _BottomNotchedDock({required this.isArmed});
-
-  final bool isArmed;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 122,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: <Widget>[
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: 84,
-            child: CustomPaint(painter: _BottomNotchedDockPainter()),
-          ),
-          Positioned(
-            top: 0,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 160),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: isArmed ? const Color(0xFF0A44FF) : Colors.white,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(
-                  color: isArmed ? const Color(0xFF0A44FF) : Colors.white,
-                ),
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.10),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
-                    spreadRadius: -8,
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    color: isArmed ? Colors.white : const Color(0xFF0A44FF),
-                    size: 18,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Tarik antrean ke bawah untuk proses',
-                    style: TextStyle(
-                      color: isArmed ? Colors.white : const Color(0xFF334155),
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: const Color(0xFF0A1E50).withValues(alpha: 0.14),
+            blurRadius: 32,
+            offset: const Offset(0, 14),
+            spreadRadius: -6,
           ),
         ],
+        border: Border.all(color: Colors.white, width: 1.5),
       ),
-    );
-  }
-}
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            // 1. Background Texture with Bottom-to-Top Gradient Masking
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: <Color>[
+                      const Color(0xFFDBEAFE).withValues(alpha: 0.50),
+                      const Color(0xFFEFF6FF).withValues(alpha: 0.15),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
-class _QueueBadge extends StatelessWidget {
-  const _QueueBadge({required this.number, required this.size});
+            // 2. Organic Cybernetic Pixel Texture with Clean Coverage
+            const AmanahPixelTexture(
+              isDark: false,
+              opacity: 0.20,
+              maskType: AmanahPixelMaskType.none,
+            ),
 
-  final String number;
-  final double size;
+            // 3. Center Group: Official Vector Watermark (wm.svg) + Queue Number
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                // Vector Watermark with Theme Gradient Fill (wm.svg 1:1, crisp and clean without box shadow)
+                const AmanahWatermarkLogo(
+                  size: 136,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: <Color>[
+                      Color(0xFF0A44FF),
+                      Color(0xFF1A55FF),
+                      Color(0xFF00D4FF),
+                    ],
+                  ),
+                ),
 
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(size, size * 1.18),
-      painter: _QueueBadgePainter(number),
-    );
-  }
-}
+                const SizedBox(height: 12),
 
-class _QueueAuroraBackground extends StatelessWidget {
-  const _QueueAuroraBackground();
+                // Queue Number (#01, #04, etc.)
+                Text(
+                  card.queueNumber,
+                  style: const TextStyle(
+                    color: Color(0xFF0A44FF),
+                    fontFamily: 'PlusJakartaSans',
+                    fontSize: 38,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -1.2,
+                    height: 1.0,
+                  ),
+                ),
+              ],
+            ),
 
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: const Alignment(0, -0.10),
-          radius: 0.86,
-          colors: <Color>[
-            const Color(0xFFDBEAFE).withValues(alpha: 0.88),
-            const Color(0xFFEFF6FF).withValues(alpha: 0.58),
-            const Color(0xFFF8FAFF),
+            // 5. Glossy Sheen Overlay
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: <Color>[
+                      Colors.white.withValues(alpha: 0.10),
+                      Colors.transparent,
+                    ],
+                    stops: const <double>[0.0, 0.45],
+                  ),
+                ),
+              ),
+            ),
           ],
-          stops: const <double>[0, 0.50, 1],
         ),
       ),
     );
   }
 }
 
-class _QueueRailPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = const Color(0xFF0A44FF).withValues(alpha: 0.05)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5;
-    final Path path = Path()
-      ..moveTo(size.width * -0.10, size.height * 0.76)
-      ..quadraticBezierTo(
-        size.width * 0.50,
-        size.height * 0.40,
-        size.width * 1.10,
-        size.height * 0.76,
-      );
-    canvas.drawPath(path, paint);
-  }
+// --- Bottom Notched Floor Dock with SVG Cavity ---
+
+class _AmanahBottomNotchedDock extends StatelessWidget {
+  const _AmanahBottomNotchedDock({
+    required this.isActivating,
+    required this.dragProgress,
+    required this.isLongPressing,
+    required this.label,
+  });
+
+  final bool isActivating;
+  final double dragProgress;
+  final bool isLongPressing;
+  final String label;
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  Widget build(BuildContext context) {
+    final double activeProgress = isActivating ? 1.0 : dragProgress;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeOut,
+      transform: Matrix4.translationValues(0, isActivating ? 180.0 : 0.0, 0),
+      child: SizedBox(
+        height: 145,
+        width: double.infinity,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          clipBehavior: Clip.none,
+          children: <Widget>[
+            // 1. Volumetric Aura & Rising Heat Beam Container
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 700),
+                opacity: isLongPressing ? 1.0 : (0.20 + activeProgress * 0.80),
+                child: SizedBox(
+                  height: 145,
+                  child: Stack(
+                    alignment: Alignment.topCenter,
+                    clipBehavior: Clip.none,
+                    children: <Widget>[
+                      // Layer A: Rising Aura Beam on Long-Press (-top-36 -> -144px, h: 220, w: 260)
+                      Positioned(
+                        top: -144,
+                        child: AnimatedScale(
+                          duration: const Duration(milliseconds: 1000),
+                          curve: Curves.easeOut,
+                          scale: isLongPressing ? 1.05 : 0.60,
+                          alignment: Alignment.bottomCenter,
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 1000),
+                            opacity: isLongPressing ? 1.0 : 0.0,
+                            child: Container(
+                              width: 260,
+                              height: 220,
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.vertical(top: Radius.circular(130)),
+                                gradient: LinearGradient(
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                  colors: <Color>[
+                                    const Color(0xFF2563EB).withValues(alpha: 0.90),
+                                    const Color(0xFF0EA5E9).withValues(alpha: 0.60),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Layer B: Inner Cyan Heat Core (-top-24 -> -96px, h: 160, w: 200)
+                      Positioned(
+                        top: -96,
+                        child: AnimatedScale(
+                          duration: const Duration(milliseconds: 1200),
+                          curve: Curves.easeOut,
+                          scale: isLongPressing ? 1.0 : 0.40,
+                          alignment: Alignment.bottomCenter,
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 1200),
+                            opacity: isLongPressing ? 0.90 : 0.0,
+                            child: Container(
+                              width: 200,
+                              height: 160,
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.vertical(top: Radius.circular(100)),
+                                gradient: LinearGradient(
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                  colors: <Color>[
+                                    const Color(0xFF0A44FF).withValues(alpha: 0.80),
+                                    const Color(0xFF22D3EE).withValues(alpha: 0.50),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Layer C: Semi-Circular Radial Volumetric Dome Halo (-top-16 -> -64px, h: 150, w: 245)
+                      Positioned(
+                        top: -64,
+                        child: AnimatedScale(
+                          duration: const Duration(milliseconds: 700),
+                          scale: isLongPressing ? 1.08 : (0.92 + activeProgress * 0.28),
+                          child: Container(
+                            width: 245,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(122.5)),
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: <Color>[
+                                  const Color(0xFF0A44FF).withValues(alpha: isLongPressing ? 0.80 : 0.65),
+                                  const Color(0xFF38BDF8).withValues(alpha: isLongPressing ? 0.50 : 0.35),
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Layer D: Interior Cavity Core Radial Aperture Glow (top: 8px, h: 45, w: 235)
+                      Positioned(
+                        top: 8,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 800),
+                          width: isLongPressing ? 245 : 235,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(999),
+                            color: isLongPressing
+                                ? const Color(0xFF38BDF8)
+                                : const Color(0xFF0A44FF).withValues(alpha: 0.85),
+                            boxShadow: <BoxShadow>[
+                              BoxShadow(
+                                color: const Color(0xFF38BDF8),
+                                blurRadius: isLongPressing ? 28 : 14,
+                                spreadRadius: isLongPressing ? 4 : 0,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // 2. SVG Notched Solid Foreground Floor Mask
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 145,
+              child: CustomPaint(
+                painter: _SvgNotchedDockFloorPainter(
+                  isLongPressing: isLongPressing,
+                  dragProgress: dragProgress,
+                ),
+              ),
+            ),
+
+            // 3. Instruction Text Prompt placed at top: 66px below notch opening (1:1 Web Placement)
+            Positioned(
+              top: 66,
+              left: 16,
+              right: 16,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: isActivating ? 0.0 : 1.0,
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: dragProgress > 0.05
+                        ? const Color(0xFF38BDF8)
+                        : const Color(0xFF334155),
+                    fontFamily: 'PlusJakartaSans',
+                    fontSize: 12,
+                    fontWeight: dragProgress > 0.05 ? FontWeight.w800 : FontWeight.w600,
+                    letterSpacing: 0.2,
+                    shadows: dragProgress > 0.05
+                        ? const <Shadow>[
+                            Shadow(
+                              color: Color(0xFF38BDF8),
+                              blurRadius: 12,
+                            ),
+                          ]
+                        : null,
+                  ),
+                ),
+              ),
+            ),
+
+            // 4. Bottom Home Indicator Gesture Bar
+            Positioned(
+              bottom: 10,
+              child: Container(
+                width: 112,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _PixelTexturePainter extends CustomPainter {
-  const _PixelTexturePainter();
+class _SvgNotchedDockFloorPainter extends CustomPainter {
+  const _SvgNotchedDockFloorPainter({
+    required this.isLongPressing,
+    required this.dragProgress,
+  });
+
+  final bool isLongPressing;
+  final double dragProgress;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint blue = Paint()
-      ..color = const Color(0xFF0A44FF).withValues(alpha: 0.09);
-    final Paint cyan = Paint()
-      ..color = const Color(0xFF00D4FF).withValues(alpha: 0.08);
-    for (double y = 22; y < size.height; y += 28) {
-      for (double x = 18; x < size.width; x += 30) {
-        final bool alternate = ((x + y) ~/ 30).isEven;
-        canvas.drawRRect(
-          RRect.fromRectAndRadius(
-            Rect.fromLTWH(x, y, alternate ? 11 : 7, alternate ? 11 : 7),
-            const Radius.circular(3),
-          ),
-          alternate ? blue : cyan,
-        );
-      }
-    }
-  }
+    final double w = size.width;
+    final double scaleX = w / 390.0;
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
+    // 1. Deep Recessed Hollow Slot Cavity Opening
+    final Path cavityPath = Path()
+      ..moveTo(73 * scaleX, 10)
+      ..quadraticBezierTo(81 * scaleX, 10, 83 * scaleX, 18)
+      ..lineTo(86 * scaleX, 30)
+      ..quadraticBezierTo(89 * scaleX, 40, 100 * scaleX, 40)
+      ..lineTo(290 * scaleX, 40)
+      ..quadraticBezierTo(301 * scaleX, 40, 304 * scaleX, 30)
+      ..lineTo(307 * scaleX, 18)
+      ..quadraticBezierTo(309 * scaleX, 10, 317 * scaleX, 10)
+      ..lineTo(317 * scaleX, 60)
+      ..lineTo(73 * scaleX, 60)
+      ..close();
 
-class _QueueWatermarkPainter extends CustomPainter {
-  const _QueueWatermarkPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = const Color(0xFF0A44FF).withValues(alpha: 0.10)
-      ..style = PaintingStyle.fill;
-    final Offset center = Offset(size.width * 0.48, size.height * 0.48);
-    final double radius = size.shortestSide * 0.28;
-    canvas.drawCircle(center, radius, paint);
-    canvas.drawPath(
-      Path()
-        ..moveTo(size.width * 0.12, size.height * 0.72)
-        ..lineTo(size.width * 0.40, size.height * 0.48)
-        ..lineTo(size.width * 0.44, size.height * 0.82)
-        ..close(),
-      paint,
-    );
-    canvas.drawPath(
-      Path()
-        ..moveTo(size.width * 0.54, size.height * 0.14)
-        ..lineTo(size.width * 0.90, size.height * 0.20)
-        ..lineTo(size.width * 0.62, size.height * 0.50)
-        ..close(),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _QueueBadgePainter extends CustomPainter {
-  const _QueueBadgePainter(this.number);
-
-  final String number;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint shadow = Paint()
-      ..color = const Color(0xFF0A44FF).withValues(alpha: 0.18)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
-    final Rect oval = Rect.fromLTWH(
-      size.width * 0.11,
-      0,
-      size.width * 0.78,
-      size.width * 0.78,
-    );
-    canvas.drawOval(oval.shift(const Offset(0, 3)), shadow);
-
-    final Paint fill = Paint()
+    final Paint cavityPaint = Paint()
       ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: <Color>[Color(0xFF00D4FF), Color(0xFF0A44FF)],
-      ).createShader(oval);
-    canvas.drawOval(oval, fill);
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: <Color>[Color(0xFF060913), Color(0xFF020306)],
+      ).createShader(Offset.zero & size);
+    canvas.drawPath(cavityPath, cavityPaint);
 
-    final Paint ribbon = Paint()..color = const Color(0xFF0A44FF);
-    canvas.drawPath(
-      Path()
-        ..moveTo(size.width * 0.27, size.width * 0.58)
-        ..lineTo(size.width * 0.43, size.height)
-        ..lineTo(size.width * 0.50, size.width * 0.66)
-        ..close(),
-      ribbon,
-    );
-    canvas.drawPath(
-      Path()
-        ..moveTo(size.width * 0.73, size.width * 0.58)
-        ..lineTo(size.width * 0.57, size.height)
-        ..lineTo(size.width * 0.50, size.width * 0.66)
-        ..close(),
-      ribbon,
-    );
+    // 2. Elevated Solid Notched Box Floor Surface
+    final Path floorPath = Path()
+      ..moveTo(0, 10)
+      ..lineTo(73 * scaleX, 10)
+      ..quadraticBezierTo(81 * scaleX, 10, 83 * scaleX, 18)
+      ..lineTo(86 * scaleX, 30)
+      ..quadraticBezierTo(89 * scaleX, 40, 100 * scaleX, 40)
+      ..lineTo(290 * scaleX, 40)
+      ..quadraticBezierTo(301 * scaleX, 40, 304 * scaleX, 30)
+      ..lineTo(307 * scaleX, 18)
+      ..quadraticBezierTo(309 * scaleX, 10, 317 * scaleX, 10)
+      ..lineTo(w, 10)
+      ..lineTo(w, size.height)
+      ..lineTo(0, size.height)
+      ..close();
 
-    final TextPainter textPainter = TextPainter(
-      text: TextSpan(
-        text: number.replaceAll('#', ''),
-        style: const TextStyle(
-          color: Colors.white,
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 15,
-          fontWeight: FontWeight.w900,
-          height: 1,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    textPainter.paint(
-      canvas,
-      Offset(
-        oval.center.dx - textPainter.width / 2,
-        oval.center.dy - textPainter.height / 2,
-      ),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _QueueBadgePainter oldDelegate) {
-    return oldDelegate.number != number;
-  }
-}
-
-class _BottomNotchedDockPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Rect rect = Offset.zero & size;
-    final Paint base = Paint()
+    final Paint floorPaint = Paint()
       ..shader = const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
@@ -1208,39 +1203,804 @@ class _BottomNotchedDockPainter extends CustomPainter {
           Color(0xFFCBD5E1),
           Color(0xFF94A3B8),
         ],
-      ).createShader(rect);
-    final Path path = Path()
-      ..moveTo(0, size.height * 0.40)
-      ..quadraticBezierTo(
-        size.width * 0.28,
-        size.height * 0.06,
-        size.width * 0.50,
-        size.height * 0.28,
-      )
-      ..quadraticBezierTo(
-        size.width * 0.72,
-        size.height * 0.06,
-        size.width,
-        size.height * 0.40,
-      )
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-    canvas.drawPath(path, base);
+      ).createShader(Offset.zero & size);
+    canvas.drawPath(floorPath, floorPaint);
 
-    final Paint cavity = Paint()
-      ..color = const Color(0xFF0F172A).withValues(alpha: 0.20)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(size.width / 2, size.height * 0.40),
-        width: 112,
-        height: 28,
+    // 3. Ambient Radiant Contour Glow
+    final Path contourPath = Path()
+      ..moveTo(0, 10)
+      ..lineTo(73 * scaleX, 10)
+      ..quadraticBezierTo(81 * scaleX, 10, 83 * scaleX, 18)
+      ..lineTo(86 * scaleX, 30)
+      ..quadraticBezierTo(89 * scaleX, 40, 100 * scaleX, 40)
+      ..lineTo(290 * scaleX, 40)
+      ..quadraticBezierTo(301 * scaleX, 40, 304 * scaleX, 30)
+      ..lineTo(307 * scaleX, 18)
+      ..quadraticBezierTo(309 * scaleX, 10, 317 * scaleX, 10)
+      ..lineTo(w, 10);
+
+    final Paint contourGlow = Paint()
+      ..color = const Color(0xFF0284C7).withValues(alpha: 0.40)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5.5
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.5);
+    canvas.drawPath(contourPath, contourGlow);
+
+    // 4. Base Rim Stroke
+    final Paint rimPaint = Paint()
+      ..shader = const LinearGradient(
+        colors: <Color>[Color(0xFF0369A1), Color(0xFF0284C7), Color(0xFF38BDF8), Color(0xFF0284C7), Color(0xFF0369A1)],
+        stops: <double>[0.0, 0.22, 0.50, 0.78, 1.0],
+      ).createShader(Rect.fromLTWH(0, 0, w, 50))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.85;
+    canvas.drawPath(contourPath, rimPaint);
+
+    // 5. Dedicated Molten Core Lip Filament (illuminates when dragging / long-pressing)
+    if (isLongPressing || dragProgress > 0.05) {
+      final Paint moltenGlow = Paint()
+        ..shader = const LinearGradient(
+          colors: <Color>[Color(0xFF0284C7), Color(0xFF38BDF8), Color(0xFF7DD3FC), Color(0xFF38BDF8), Color(0xFF0284C7)],
+        ).createShader(Rect.fromLTWH(100 * scaleX, 38, 190 * scaleX, 4))
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = isLongPressing ? 8.0 : 4.0
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0)
+        ..strokeCap = StrokeCap.round;
+      canvas.drawLine(Offset(100 * scaleX, 40), Offset(290 * scaleX, 40), moltenGlow);
+
+      final Paint moltenCore = Paint()
+        ..shader = const LinearGradient(
+          colors: <Color>[Color(0xFF0284C7), Color(0xFF38BDF8), Color(0xFFE0F2FE), Color(0xFF38BDF8), Color(0xFF0284C7)],
+        ).createShader(Rect.fromLTWH(100 * scaleX, 38, 190 * scaleX, 4))
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = isLongPressing ? 3.0 : 2.0
+        ..strokeCap = StrokeCap.round;
+      canvas.drawLine(Offset(100 * scaleX, 40), Offset(290 * scaleX, 40), moltenCore);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SvgNotchedDockFloorPainter oldDelegate) {
+    return oldDelegate.isLongPressing != isLongPressing ||
+        oldDelegate.dragProgress != dragProgress;
+  }
+}
+
+// --- Success & Activation Overlay with 3D Flip Hero Card ---
+
+class _AmanahQueueActivationOverlay extends StatefulWidget {
+  const _AmanahQueueActivationOverlay({
+    required this.card,
+    required this.isGenieSettled,
+    required this.onClose,
+    required this.onRedraw,
+    required this.onActionClick,
+  });
+
+  final AmanahQueueCardData card;
+  final bool isGenieSettled;
+  final VoidCallback onClose;
+  final VoidCallback onRedraw;
+  final VoidCallback onActionClick;
+
+  @override
+  State<_AmanahQueueActivationOverlay> createState() =>
+      _AmanahQueueActivationOverlayState();
+}
+
+class _AmanahQueueActivationOverlayState
+    extends State<_AmanahQueueActivationOverlay> {
+  double _tiltX = 0.0;
+  double _tiltY = 0.0;
+
+  void _openDetailModal() {
+    AmanahPatientDetailModal.show(
+      context,
+      BookedPatient(
+        id: widget.card.id,
+        patientName: widget.card.patientName,
+        patientComplaint: widget.card.complaint,
+        queueNumber: widget.card.queueNumber,
+        timeSlot: widget.card.timeSlot,
+        avatarUrl: widget.card.doctorImage,
+        patientAge: '${widget.card.age} Thn',
+        patientRm: widget.card.patientRm,
+        badge: widget.card.priority,
+        badgeVariant: widget.card.priority == 'Prioritas'
+            ? AmanahBadgeVariant.warning
+            : AmanahBadgeVariant.primary,
       ),
-      cavity,
+      DoctorSchedule(
+        id: 'sch_${widget.card.id}',
+        title: 'Praktik Dokter',
+        date: 'Hari ini',
+        time: widget.card.timeSlot,
+        poli: widget.card.poly,
+        room: widget.card.room,
+        slotCount: '1',
+        slotText: 'Antrean',
+        badge: widget.card.priority,
+        badgeVariant: AmanahBadgeVariant.primary,
+      ),
     );
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  Widget build(BuildContext context) {
+    final Size size = MediaQuery.sizeOf(context);
+    final double cardW = math.min(size.width - 64, 320.0);
+    final double cardH = cardW / 0.718;
+
+    return Positioned.fill(
+      child: Container(
+        color: const Color(0xF8F8FAFF),
+        child: SafeArea(
+          child: Column(
+            children: <Widget>[
+              // Top Bar: Back button & Title
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    IconButton(
+                      onPressed: widget.onClose,
+                      icon: const Icon(Icons.arrow_back_rounded),
+                      color: const Color(0xFF1E293B),
+                    ),
+                    const Text(
+                      'Antrean terpilih',
+                      style: TextStyle(
+                        color: Color(0xFF14103B),
+                        fontFamily: 'PlusJakartaSans',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(width: 48),
+                  ],
+                ),
+              ),
+
+              // Activated Hero Card with 3D tilt
+              Expanded(
+                child: Center(
+                  child: GestureDetector(
+                    onPanUpdate: (DragUpdateDetails d) {
+                      setState(() {
+                        _tiltX = (d.localPosition.dy / cardH - 0.5) * -0.35;
+                        _tiltY = (d.localPosition.dx / cardW - 0.5) * 0.35;
+                      });
+                    },
+                    onPanEnd: (_) {
+                      setState(() {
+                        _tiltX = 0;
+                        _tiltY = 0;
+                      });
+                    },
+                    onTap: _openDetailModal,
+                    child: Transform(
+                      alignment: Alignment.center,
+                      transform: Matrix4.identity()
+                        ..setEntry(3, 2, 0.001)
+                        ..rotateX(_tiltX)
+                        ..rotateY(_tiltY),
+                      child: _AmanahRevealedHeroCard(
+                        card: widget.card,
+                        width: cardW,
+                        height: cardH,
+                        onDetailTap: _openDetailModal,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Action Buttons: Panggil Pasien & Pilih Antrean Lain
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                child: Column(
+                  children: <Widget>[
+                    // Primary Action Button
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(18),
+                        onTap: widget.onActionClick,
+                        child: Ink(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                            gradient: const LinearGradient(
+                              colors: <Color>[Color(0xFF0A44FF), Color(0xFF1A55FF), Color(0xFF0055FF)],
+                            ),
+                            boxShadow: <BoxShadow>[
+                              BoxShadow(
+                                color: const Color(0xFF0A44FF).withValues(alpha: 0.35),
+                                blurRadius: 25,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
+                          ),
+                          child: const Text(
+                            'Panggil & Proses Pasien',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Secondary Action Button
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(18),
+                        onTap: widget.onRedraw,
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                          ),
+                          child: const Text(
+                            'Pilih Antrean Lain',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Color(0xFF334155),
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// --- Front Face Revealed Hero Card ---
+
+class _AmanahRevealedHeroCard extends StatelessWidget {
+  const _AmanahRevealedHeroCard({
+    required this.card,
+    required this.width,
+    required this.height,
+    required this.onDetailTap,
+  });
+
+  final AmanahQueueCardData card;
+  final double width;
+  final double height;
+  final VoidCallback onDetailTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: <Color>[
+            Colors.white,
+            Color(0xFFF8FAFF),
+            Color(0xFFEDF2FF),
+          ],
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: const Color(0xFF0A1E50).withValues(alpha: 0.18),
+            blurRadius: 40,
+            offset: const Offset(0, 18),
+            spreadRadius: -12,
+          ),
+        ],
+        border: Border.all(color: Colors.white, width: 1.5),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(21),
+        child: Stack(
+          children: <Widget>[
+            // 1. Official Vector Watermark switched to Top-Left (-top-4 -left-6)
+            const Positioned(
+              top: -16,
+              left: -24,
+              child: AmanahWatermarkLogo(
+                size: 200,
+                color: Color(0xFF0A44FF),
+                opacity: 0.25,
+              ),
+            ),
+
+            // 2. Cybernetic Pixel Matrix Texture (bottom-left feathering)
+            const AmanahPixelTexture(
+              isDark: false,
+              opacity: 0.22,
+              maskType: AmanahPixelMaskType.bottomLeft,
+            ),
+
+            // 3. Top-Left Queue Number
+            Positioned(
+              top: 16,
+              left: 20,
+              child: Text(
+                card.queueNumber,
+                style: const TextStyle(
+                  color: Color(0xFF0A44FF),
+                  fontFamily: 'PlusJakartaSans',
+                  fontSize: 38,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -1.5,
+                  height: 1.0,
+                ),
+              ),
+            ),
+
+            // 4. Doctor / Patient Silhouette Photo with Smooth Bottom Alpha Fade
+            Positioned(
+              right: 0,
+              top: 36,
+              bottom: 74,
+              width: width * 0.76,
+              child: ShaderMask(
+                shaderCallback: (Rect bounds) {
+                  return const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: <Color>[
+                      Colors.black,
+                      Colors.black,
+                      Colors.transparent,
+                    ],
+                    stops: <double>[0.0, 0.68, 1.0],
+                  ).createShader(bounds);
+                },
+                blendMode: BlendMode.dstIn,
+                child: Image.asset(
+                  card.doctorImage,
+                  fit: BoxFit.contain,
+                  alignment: Alignment.bottomRight,
+                  errorBuilder: (_, _, _) => const SizedBox(),
+                ),
+              ),
+            ),
+
+            // 5. Bottom Section: Patient Name with Clickable Arrow ↗ + Complaint
+            Positioned(
+              bottom: 48,
+              left: 20,
+              right: 20,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      const Icon(
+                        Icons.arrow_outward_rounded,
+                        color: Color(0xFF0A44FF),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          card.patientName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Color(0xFF0F172A),
+                            fontFamily: 'PlusJakartaSans',
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    card.complaint,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Color(0xFF64748B),
+                      fontFamily: 'PlusJakartaSans',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 6. Polyclinic Tag (Bottom Right)
+            Positioned(
+              bottom: 16,
+              right: 20,
+              child: Text(
+                card.poly,
+                style: const TextStyle(
+                  color: Color(0xFF0A44FF),
+                  fontFamily: 'PlusJakartaSans',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// --- History Screen (Riwayat Antrean Diproses) ---
+
+class AmanahQueueHistoryScreen extends StatelessWidget {
+  const AmanahQueueHistoryScreen({
+    required this.collectedCards,
+    required this.onRedraw,
+    super.key,
+  });
+
+  final List<AmanahQueueCardData> collectedCards;
+  final VoidCallback onRedraw;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F7FF),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF1E293B)),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const Text(
+          'Riwayat antrean diproses',
+          style: TextStyle(
+            color: Color(0xFF0F172A),
+            fontFamily: 'PlusJakartaSans',
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: collectedCards.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEFF6FF),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFBFDBFE)),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        '#',
+                        style: TextStyle(
+                          color: Color(0xFF0A44FF),
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Belum ada antrean diproses',
+                    style: TextStyle(
+                      color: Color(0xFF0F172A),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 40),
+                    child: Text(
+                      'Tarik kartu antrean pasien ke bawah pada rel 3D untuk memproses dan memanggil pasien!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : GridView.builder(
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.15,
+              ),
+              itemCount: collectedCards.length,
+              itemBuilder: (BuildContext context, int index) {
+                final AmanahQueueCardData card = collectedCards[index];
+                return GestureDetector(
+                  onTap: () {
+                    AmanahPatientDetailModal.show(
+                      context,
+                      BookedPatient(
+                        id: card.id,
+                        patientName: card.patientName,
+                        patientComplaint: card.complaint,
+                        queueNumber: card.queueNumber,
+                        timeSlot: card.timeSlot,
+                        avatarUrl: card.doctorImage,
+                        patientAge: '${card.age} Thn',
+                        patientRm: card.patientRm,
+                        badge: card.priority,
+                        badgeVariant: card.priority == 'Prioritas'
+                            ? AmanahBadgeVariant.warning
+                            : AmanahBadgeVariant.primary,
+                      ),
+                      DoctorSchedule(
+                        id: 'sch_${card.id}',
+                        title: 'Praktik Dokter',
+                        date: 'Hari ini',
+                        time: card.timeSlot,
+                        poli: card.poly,
+                        room: card.room,
+                        slotCount: '1',
+                        slotText: 'Antrean',
+                        badge: card.priority,
+                        badgeVariant: AmanahBadgeVariant.primary,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      boxShadow: <BoxShadow>[
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text(
+                              card.queueNumber,
+                              style: const TextStyle(
+                                color: Color(0xFF0A44FF),
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEFF6FF),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: const Color(0xFFDBEAFE)),
+                              ),
+                              child: Text(
+                                card.poly,
+                                style: const TextStyle(
+                                  color: Color(0xFF0A44FF),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              card.patientName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Color(0xFF0F172A),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            Text(
+                              card.complaint,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Color(0xFF64748B),
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+// --- Panduan Alur Sistem Antrean Master Drawer ---
+
+class _AmanahQueueGuideDrawer extends StatelessWidget {
+  const _AmanahQueueGuideDrawer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          // Drag Handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFCBD5E1),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              const Text(
+                'Panduan alur sistem antrean',
+                style: TextStyle(
+                  color: Color(0xFF0F172A),
+                  fontFamily: 'PlusJakartaSans',
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close_rounded, size: 20),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+          const Text(
+            'Sistem rel antrean 3D interaktif Klinik Amanah mempermudah dokter & staf dalam memproses dan memanggil pasien:',
+            style: TextStyle(
+              color: Color(0xFF64748B),
+              fontSize: 12,
+              height: 1.4,
+            ),
+          ),
+
+          const SizedBox(height: 16),
+          _buildStep(
+            '1. Geser Rel 3D',
+            'Geser kartu ke kiri/kanan untuk memilih nomor antrean pasien',
+            const Color(0xFF0A44FF),
+          ),
+          _buildStep(
+            '2. Tarik ke Bawah',
+            'Tarik kartu ke slot bawah hingga kotak paramedis terbuka untuk memproses',
+            const Color(0xFF00D4FF),
+          ),
+          _buildStep(
+            '3. Putar & Cek Kartu',
+            'Kartu berputar 3D menampilkan nama pasien, keluhan, dan poli tujuan',
+            const Color(0xFF14B8A6),
+          ),
+          _buildStep(
+            '4. Panggil Pasien',
+            'Tekan "Panggil Pasien" untuk aktivasi atau simpan ke riwayat antrean',
+            const Color(0xFF6366F1),
+          ),
+
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFF1F5F9),
+                foregroundColor: const Color(0xFF334155),
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              child: const Text('Mengerti', style: TextStyle(fontWeight: FontWeight.w700)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep(String title, String desc, Color dotColor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            margin: const EdgeInsets.only(top: 5),
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  desc,
+                  style: const TextStyle(
+                    color: Color(0xFF64748B),
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

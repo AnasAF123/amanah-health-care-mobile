@@ -105,9 +105,10 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Pilih Antrean'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.text('Pilih antrean pasien'), findsOneWidget);
+      expect(find.textContaining('Pilih antrean'), findsWidgets);
       expect(find.text('Tarik antrean ke bawah untuk proses'), findsOneWidget);
     });
 

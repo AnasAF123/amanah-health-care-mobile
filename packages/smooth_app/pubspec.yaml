@@ -171,6 +171,10 @@ flutter:
     - assets/icons/
     - assets/amanah/
     - assets/amanah/auth/
+    - assets/amanah/id_card/
+    - assets/amanah/id_card/3d/
+    - assets/amanah/id_card/images/
+    - assets/amanah/id_card/js/
     - assets/amanah/theme/
 
   # /!\

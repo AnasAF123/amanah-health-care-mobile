@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Amanah 3D Doctor ID Card</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent !important;
+    }
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      touch-action: none;
+      background: transparent !important;
+    }
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+      background: transparent !important;
+    }
+  </style>
+  <script src="js/three.min.js"></script>
+  <script src="js/GLTFLoader.js"></script>
+  <script src="js/embedded_assets.js"></script>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <script>
+    (function () {
+      // Doctor Profile configuration exactly matching Web App state
+      const profile = {
+        name: 'dr. Amelia Cantika',
+        role: 'Dokter Spesialis Anak',
+        sip: '503/442.1/SIP-D/2026',
+        hospital: 'RS AMANAH SEHAT',
+        theme: 'light'
+      };
+
+      // Helper: Base64 to ArrayBuffer for GLTFLoader.parse (Zero Network/CORS Dependency)
+      function base64ToArrayBuffer(base64) {
+        const binaryString = window.atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes.buffer;
+      }
+
+      // Scene, Camera, Renderer matching Web App Canvas
+      const container = document.getElementById('canvas-container');
+      const scene = new THREE.Scene();
+
+      const camera = new THREE.PerspectiveCamera(
+        27.5,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        100
+      );
+      camera.position.set(0, 0.05, 11.8);
+
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        powerPreference: 'high-performance'
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3.0));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 0.88;
+      renderer.setClearColor(0x000000, 0);
+      container.appendChild(renderer.domElement);
+
+      // Balanced studio lighting for a mostly-white, PBR card surface.
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.72);
+      scene.add(ambientLight);
+
+      const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.70);
+      dirLight1.position.set(0, 6, 8);
+      scene.add(dirLight1);
+
+      const dirLight2 = new THREE.DirectionalLight(0xdbeafe, 0.22);
+      dirLight2.position.set(-6, -3, 4);
+      scene.add(dirLight2);
+
+      const dirLight3 = new THREE.DirectionalLight(0xffffff, 0.18);
+      dirLight3.position.set(6, 4, 3);
+      scene.add(dirLight3);
+
+      // --- Texture Generators ported 1:1 from DoctorIdCard3D.tsx ---
+
+      function drawBauhausBlock(ctx, x, y, w, h, type, primaryColor, secondaryColor, opacity) {
+        ctx.save();
+        ctx.globalAlpha = opacity || 1.0;
+
+        if (secondaryColor) {
+          ctx.fillStyle = secondaryColor;
+          ctx.fillRect(x, y, w, h);
+        }
+
+        ctx.fillStyle = primaryColor;
+        const cx = x + w / 2;
+        const cy = y + h / 2;
+        const r = w / 2;
+
+        ctx.beginPath();
+        switch (type % 6) {
+          case 0:
+            ctx.arc(cx, cy, r * 0.92, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+          case 1:
+            ctx.arc(cx, cy + r * 0.2, r * 0.88, Math.PI, 0);
+            ctx.fill();
+            break;
+          case 2:
+            ctx.moveTo(x, y);
+            ctx.arc(x, y, w * 0.95, 0, Math.PI / 2);
+            ctx.lineTo(x, y);
+            ctx.fill();
+            break;
+          case 3:
+            ctx.moveTo(cx, y + 6);
+            ctx.lineTo(x + w - 6, cy);
+            ctx.lineTo(cx, y + h - 6);
+            ctx.lineTo(x + 6, cy);
+            ctx.closePath();
+            ctx.fill();
+            break;
+          case 4:
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + w, y);
+            ctx.lineTo(x + w, y + h);
+            ctx.closePath();
+            ctx.fill();
+            break;
+          case 5:
+          default:
+            ctx.arc(cx, cy, r * 0.92, Math.PI, 0);
+            ctx.lineTo(cx + r * 0.45, cy);
+            ctx.arc(cx, cy, r * 0.45, 0, Math.PI, true);
+            ctx.closePath();
+            ctx.fill();
+            break;
+        }
+        ctx.restore();
+      }
+
+      function drawThemeGrid(ctx, startX, startY, totalW, totalH, theme, cols, rows, opacity) {
+        const lightPalette = [
+          { fg: '#002b9e', bg: '#eef4ff' },
+          { fg: '#0a44ff', bg: '#dbeafe' },
+          { fg: '#07247a', bg: '#eef4ff' },
+          { fg: '#00d4ff', bg: '#002b9e' },
+          { fg: '#0a44ff', bg: '#ffffff' },
+          { fg: '#002b9e', bg: '#dbeafe' }
+        ];
+
+        const gap = 16;
+        const blockW = (totalW - (cols - 1) * gap) / cols;
+        const blockH = (totalH - (rows - 1) * gap) / rows;
+
+        let index = 0;
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const bx = startX + c * (blockW + gap);
+            const by = startY + r * (blockH + gap);
+            const type = (r * 3 + c * 2 + (r % 2)) % 6;
+            const pair = lightPalette[(r * cols + c + index) % lightPalette.length];
+            drawBauhausBlock(ctx, bx, by, blockW, blockH, type, pair.fg, pair.bg, opacity);
+            index++;
+          }
+        }
+      }
+
+      function drawLinearBarcode(ctx, x, y, width, height, barcodeValue) {
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(x - 30, y - 24, width + 60, height + 84, 24);
+        else ctx.rect(x - 30, y - 24, width + 60, height + 84);
+        ctx.fill();
+
+        ctx.fillStyle = '#0f172a';
+        let currentX = x;
+        const totalUnits = 140;
+        const unitWidth = width / totalUnits;
+
+        let seed = 1337;
+        for (let i = 0; i < barcodeValue.length; i++) {
+          seed = (seed * 31 + barcodeValue.charCodeAt(i)) % 10000;
+        }
+
+        ctx.fillRect(currentX, y, unitWidth * 2, height); currentX += unitWidth * 3;
+        ctx.fillRect(currentX, y, unitWidth * 2, height); currentX += unitWidth * 3;
+
+        while (currentX < x + width - unitWidth * 12) {
+          seed = (seed * 9301 + 49297) % 233280;
+          const rnd = seed / 233280;
+          const barWidth = rnd > 0.65 ? unitWidth * 3.5 : (rnd > 0.35 ? unitWidth * 2 : unitWidth);
+          const spaceWidth = (1 - rnd) > 0.65 ? unitWidth * 3 : unitWidth * 1.5;
+          ctx.fillRect(currentX, y, barWidth, height);
+          currentX += barWidth + spaceWidth;
+        }
+
+        ctx.fillRect(x + width - unitWidth * 8, y, unitWidth * 2, height);
+        ctx.fillRect(x + width - unitWidth * 3, y, unitWidth * 2, height);
+
+        ctx.fillStyle = '#334155';
+        ctx.font = 'bold 36px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(barcodeValue, x + width / 2, y + height + 42);
+        ctx.restore();
+      }
+
+      function createDoctorCardCanvasTexture(prof, avatarImg) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 4096;
+        canvas.height = 4096;
+        const ctx = canvas.getContext('2d');
+        const cardWhite = '#f6f9ff';
+        const cardPanelWhite = '#fbfdff';
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        // Background Base
+        ctx.fillStyle = cardWhite;
+        ctx.fillRect(0, 0, 4096, 4096);
+
+        const frontW = 2048;
+        const frontH = 3072;
+        const bottomPanelY = 2360;
+
+        ctx.fillStyle = cardWhite;
+        ctx.fillRect(0, 0, frontW, frontH);
+
+        // Soft Radial Glow
+        const frontGlow = ctx.createRadialGradient(
+          frontW * 0.75, frontH * 0.25, 50,
+          frontW * 0.5, frontH * 0.4, 1400
+        );
+        frontGlow.addColorStop(0, 'rgba(0, 43, 158, 0.14)');
+        frontGlow.addColorStop(0.6, 'rgba(10, 68, 255, 0.08)');
+        frontGlow.addColorStop(1, 'rgba(246, 249, 255, 0)');
+        ctx.fillStyle = frontGlow;
+        ctx.fillRect(0, 0, frontW, frontH);
+
+        const fontSans = 'sans-serif';
+
+        // Brand Cross Logo
+        ctx.fillStyle = '#00d4ff';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(180, 200, 72, 72, 20);
+        else ctx.rect(180, 200, 72, 72);
+        ctx.fill();
+
+        ctx.fillStyle = '#0a44ff';
+        ctx.fillRect(204, 216, 24, 40);
+        ctx.fillRect(196, 224, 40, 24);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 72px ' + fontSans;
+        ctx.textAlign = 'left';
+        ctx.fillText('Amanah', 276, 256);
+
+        // Bauhaus Decorative Shapes Grid
+        drawThemeGrid(ctx, 180, 360, 1688, 1960, 'light', 4, 5, 0.66);
+
+        // Doctor Avatar Image
+        if (avatarImg && avatarImg.complete && avatarImg.naturalWidth > 0) {
+          ctx.save();
+          const imgAspect = avatarImg.naturalWidth / avatarImg.naturalHeight;
+          const drawH = 2380;
+          const drawW = drawH * imgAspect;
+          const drawX = 1024 - drawW / 2;
+          const drawY = bottomPanelY - drawH + 260;
+          ctx.filter = 'brightness(0.88) contrast(1.12) saturate(1.02)';
+          ctx.drawImage(avatarImg, drawX, drawY, drawW, drawH);
+          ctx.filter = 'none';
+          ctx.restore();
+        }
+
+        // Bottom Details White Card Panel
+        ctx.fillStyle = cardPanelWhite;
+        ctx.fillRect(0, bottomPanelY, frontW, frontH - bottomPanelY);
+
+        ctx.strokeStyle = 'rgba(10, 68, 255, 0.15)';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(180, bottomPanelY);
+        ctx.lineTo(1868, bottomPanelY);
+        ctx.stroke();
+
+        ctx.fillStyle = '#0f172a';
+        const nameFontSize = prof.name.length > 25 ? 74 : (prof.name.length > 18 ? 86 : 102);
+        ctx.font = 'bold ' + nameFontSize + 'px ' + fontSans;
+        ctx.textAlign = 'left';
+        ctx.fillText(prof.name, 180, bottomPanelY + 165);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '600 58px ' + fontSans;
+        ctx.fillText(prof.role, 180, bottomPanelY + 265);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'bold 40px ' + fontSans;
+        ctx.textAlign = 'right';
+        ctx.fillText('NOMOR SIP / ID', 1868, bottomPanelY + 145);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 52px monospace';
+        ctx.fillText(prof.sip || '503/442.1/SIP-D/2026', 1868, bottomPanelY + 225);
+
+        ctx.fillStyle = '#0a44ff';
+        ctx.font = '700 46px ' + fontSans;
+        ctx.fillText('RS AMANAH SEHAT', 1868, bottomPanelY + 310);
+
+        // --- Back Side Surface (2048 to 4096) ---
+        const backStartX = 2048;
+        const backCenterX = 3072;
+
+        ctx.fillStyle = cardWhite;
+        ctx.fillRect(backStartX, 0, frontW, frontH);
+
+        drawThemeGrid(ctx, backStartX + 180, 180, 1688, 1750, 'light', 4, 4, 1.0);
+
+        drawLinearBarcode(
+          ctx,
+          backStartX + 260,
+          2080,
+          1528,
+          170,
+          '*DOC-' + (prof.sip.replace(/[^a-zA-Z0-9]/g, '') || '50344212026') + '*'
+        );
+
+        ctx.fillStyle = '#00d4ff';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(backCenterX - 220, 2580, 76, 76, 22);
+        else ctx.rect(backCenterX - 220, 2580, 76, 76);
+        ctx.fill();
+
+        ctx.fillStyle = '#0a44ff';
+        ctx.fillRect(backCenterX - 198, 2600, 32, 36);
+        ctx.fillRect(backCenterX - 206, 2604, 48, 28);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 84px ' + fontSans;
+        ctx.textAlign = 'left';
+        ctx.fillText('Amanah', backCenterX - 110, 2642);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '700 36px ' + fontSans;
+        ctx.textAlign = 'center';
+        ctx.fillText('HEALTHCARE IDENTITY SYSTEM', backCenterX, 2735);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.anisotropy = 16;
+        texture.encoding = THREE.sRGBEncoding;
+        texture.minFilter = THREE.LinearMipmapLinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.generateMipmaps = true;
+        texture.flipY = false;
+        texture.needsUpdate = true;
+        return texture;
+      }
+
+      function createLanyardCanvasTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1024;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = '#091b36';
+        ctx.fillRect(0, 0, 1024, 256);
+
+        // Grid Weave Pattern
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+        for (let x = 0; x < 1024; x += 6) {
+          for (let y = 0; y < 256; y += 6) {
+            if ((x + y) % 12 === 0) {
+              ctx.fillRect(x, y, 3, 3);
+            }
+          }
+        }
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([10, 8]);
+        ctx.beginPath();
+        ctx.moveTo(0, 22);
+        ctx.lineTo(1024, 22);
+        ctx.moveTo(0, 234);
+        ctx.lineTo(1024, 234);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#00d4ff';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(70, 88, 80, 80, 20);
+        else ctx.rect(70, 88, 80, 80);
+        ctx.fill();
+
+        ctx.fillStyle = '#091b36';
+        ctx.fillRect(98, 104, 24, 48);
+        ctx.fillRect(86, 116, 48, 24);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 64px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('RS AMANAH SEHAT', 180, 128);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(-3, 1);
+        texture.anisotropy = 16;
+        texture.needsUpdate = true;
+        return texture;
+      }
+
+      // --- Scene Assembly ---
+
+      // Start the suspended body above the viewport, then let gravity reveal it as one connected object.
+      const MODEL_SCALE = 2.80;
+      const WEB_MODEL_SCALE = 3.20;
+      const MODEL_SCALE_RATIO = MODEL_SCALE / WEB_MODEL_SCALE;
+      const fixedPoint = new THREE.Vector3(0, 3.25, 0);
+      const joints = [
+        { pos: new THREE.Vector3(0, 3.25, 0), oldPos: new THREE.Vector3(0, 3.25, 0), fixed: true },
+        { pos: new THREE.Vector3(0.36, 3.05, 0), oldPos: new THREE.Vector3(0.36, 3.15, 0), fixed: false },
+        { pos: new THREE.Vector3(0.72, 2.85, 0), oldPos: new THREE.Vector3(0.72, 2.95, 0), fixed: false },
+        { pos: new THREE.Vector3(1.08, 2.65, 0), oldPos: new THREE.Vector3(1.08, 2.75, 0), fixed: false },
+      ];
+      const segmentLengths = [0.54, 0.54, 0.54];
+      const CARD_HOOK_OFFSET_Y = 2.02 * MODEL_SCALE_RATIO;
+      const CARD_HOOK_LOCAL = new THREE.Vector3(0, CARD_HOOK_OFFSET_Y, 0);
+      const ROPE_GRAVITY = 18.0;
+      const ROPE_DAMPING = 0.90;
+      const CARD_DAMPING = 0.92;
+      const CARD_START_X = 1.26;
+      const CARD_START_Y = 0.90;
+
+      const cardGroup = new THREE.Group();
+      cardGroup.position.set(CARD_START_X, CARD_START_Y, 0);
+      cardGroup.visible = false;
+      scene.add(cardGroup);
+
+      let cardPos = new THREE.Vector3(CARD_START_X, CARD_START_Y, 0);
+      let cardOldPos = new THREE.Vector3(CARD_START_X, CARD_START_Y + 0.10, 0);
+      let cardVel = new THREE.Vector3(0, 0, 0);
+      let cardRotY = 0;
+      let cardSpinVelY = 0;
+      let cardTiltZ = 0;
+      let cardTiltVelZ = 0;
+
+      let isDragging = false;
+      let dragOffset = new THREE.Vector3();
+      let dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+      let raycaster = new THREE.Raycaster();
+      let mousePos = new THREE.Vector2();
+      let dragStartTime = 0;
+      let dragStartScreen = { x: 0, y: 0 };
+      let lastDragPos = new THREE.Vector3();
+      let lastDragTime = 0;
+      let dragVelocity = new THREE.Vector3();
+      const previousHookPos = new THREE.Vector3();
+      const hookQuat = new THREE.Quaternion();
+      let sceneReady = false;
+      let modelReady = false;
+      let avatarReady = false;
+      let physicsSettled = false;
+      let settledFrames = 0;
+      let lastTime = performance.now();
+
+      function getCardHookPosition(target) {
+        hookQuat.setFromEuler(new THREE.Euler(0, cardRotY, cardTiltZ, 'XYZ'));
+        return target.copy(CARD_HOOK_LOCAL).applyQuaternion(hookQuat).add(cardPos);
+      }
+
+      function wakePhysics() {
+        physicsSettled = false;
+        settledFrames = 0;
+      }
+
+      // Ribbon Geometry & Lanyard Mesh
+      const ribbonSegments = 32;
+      const BASE_RIBBON_WIDTH = 0.26;
+      const ribbonGeom = new THREE.BufferGeometry();
+      const posArray = new Float32Array((ribbonSegments + 1) * 2 * 3);
+      const uvArray = new Float32Array((ribbonSegments + 1) * 2 * 2);
+      const indices = [];
+
+      for (let i = 0; i < ribbonSegments; i++) {
+        const r1 = i * 2;
+        const r2 = (i + 1) * 2;
+        indices.push(r1, r1 + 1, r2);
+        indices.push(r1 + 1, r2 + 1, r2);
+      }
+      ribbonGeom.setIndex(indices);
+      ribbonGeom.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+      ribbonGeom.setAttribute('uv', new THREE.BufferAttribute(uvArray, 2));
+
+      function getRibbonScale(w, h) {
+        const aspect = w / h;
+        const isPortrait = aspect < 1;
+        const MIN_SCALE = 0.60;
+        const MAX_SCALE = 1.0;
+        if (!isPortrait) return MAX_SCALE;
+        return Math.min(MAX_SCALE, Math.max(MIN_SCALE, aspect * 1.35));
+      }
+
+      const lanyardTexture = createLanyardCanvasTexture();
+      const ribbonMat = new THREE.MeshBasicMaterial({
+        map: lanyardTexture,
+        side: THREE.DoubleSide,
+        transparent: true,
+        depthTest: false
+      });
+      const ribbonMesh = new THREE.Mesh(ribbonGeom, ribbonMat);
+      ribbonMesh.visible = false;
+      scene.add(ribbonMesh);
+
+      function startIntroIfReady() {
+        if (sceneReady || !modelReady || !avatarReady) return;
+        cardGroup.visible = true;
+        ribbonMesh.visible = true;
+        sceneReady = true;
+        lastTime = performance.now();
+      }
+
+      const ribbonCurve = new THREE.CatmullRomCurve3([
+        joints[3].pos,
+        joints[2].pos,
+        joints[1].pos,
+        joints[0].pos
+      ]);
+      ribbonCurve.curveType = 'chordal';
+
+      function updateRibbonGeometry() {
+        ribbonCurve.points = [
+          joints[3].pos,
+          joints[2].pos,
+          joints[1].pos,
+          joints[0].pos
+        ];
+        const points = ribbonCurve.getPoints(ribbonSegments);
+        const positions = ribbonGeom.attributes.position.array;
+        const uvs = ribbonGeom.attributes.uv.array;
+        const currentRibbonWidth = BASE_RIBBON_WIDTH * getRibbonScale(window.innerWidth, window.innerHeight);
+
+        for (let i = 0; i <= ribbonSegments; i++) {
+          const pt = points[i];
+          const t = i / ribbonSegments;
+          const tangent = ribbonCurve.getTangent(t);
+          const normal = new THREE.Vector3(-tangent.y, tangent.x, 0).normalize().multiplyScalar(currentRibbonWidth / 2);
+
+          const idxPos = i * 6;
+          positions[idxPos] = pt.x - normal.x;
+          positions[idxPos + 1] = pt.y - normal.y;
+          positions[idxPos + 2] = pt.z;
+
+          positions[idxPos + 3] = pt.x + normal.x;
+          positions[idxPos + 4] = pt.y + normal.y;
+          positions[idxPos + 5] = pt.z;
+
+          const idxUv = i * 4;
+          uvs[idxUv] = t * 3.0;
+          uvs[idxUv + 1] = 0;
+
+          uvs[idxUv + 2] = t * 3.0;
+          uvs[idxUv + 3] = 1;
+        }
+
+        ribbonGeom.attributes.position.needsUpdate = true;
+        ribbonGeom.attributes.uv.needsUpdate = true;
+        ribbonGeom.computeVertexNormals();
+      }
+
+      // --- Model Loading & Shaders from Web App ---
+      let doctorCardTexture = null;
+      let cardMesh = null;
+      let clipMesh = null;
+      let clampMesh = null;
+      let cardMaterial = null;
+
+      const avatarImg = new Image();
+      avatarImg.onload = () => {
+        avatarReady = true;
+        doctorCardTexture = createDoctorCardCanvasTexture(profile, avatarImg);
+        if (cardMesh && cardMaterial) {
+          cardMaterial.map = doctorCardTexture;
+          cardMaterial.needsUpdate = true;
+        }
+        startIntroIfReady();
+      };
+      avatarImg.onerror = () => {
+        avatarReady = true;
+        startIntroIfReady();
+      };
+      if (window.AVATAR_BASE64) {
+        avatarImg.src = window.AVATAR_BASE64;
+      } else {
+        avatarReady = true;
+      }
+
+      if (window.CARD_GLB_BASE64) {
+        const gltfLoader = new THREE.GLTFLoader();
+        const arrayBuffer = base64ToArrayBuffer(window.CARD_GLB_BASE64);
+
+        gltfLoader.parse(arrayBuffer, '', function (gltf) {
+          const root = gltf.scene;
+          root.scale.set(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
+          root.position.set(0, -1.78 * MODEL_SCALE_RATIO, -0.05);
+
+          doctorCardTexture = doctorCardTexture || createDoctorCardCanvasTexture(profile, avatarImg);
+
+          cardMaterial = new THREE.MeshPhysicalMaterial({
+            map: doctorCardTexture,
+            clearcoat: 0.08,
+            clearcoatRoughness: 0.15,
+            roughness: 0.35,
+            metalness: 0.05,
+            toneMapped: true,
+            side: THREE.DoubleSide
+          });
+
+          root.traverse((child) => {
+            if (child.isMesh) {
+              const meshName = (child.name || '').toLowerCase();
+              if (meshName.includes('card')) {
+                cardMesh = child;
+                child.material = cardMaterial;
+              } else if (meshName.includes('clip')) {
+                clipMesh = child;
+                child.material = new THREE.MeshStandardMaterial({
+                  color: 0x18181b,
+                  roughness: 0.20,
+                  metalness: 0.90
+                });
+              } else if (meshName.includes('clamp')) {
+                clampMesh = child;
+                child.material = new THREE.MeshStandardMaterial({
+                  color: 0x27272a,
+                  roughness: 0.20,
+                  metalness: 0.90
+                });
+              }
+            }
+          });
+
+          cardGroup.add(root);
+          modelReady = true;
+          startIntroIfReady();
+        }, function (error) {
+          console.error('Error parsing GLTF:', error);
+        });
+      }
+
+      // --- Pointer / Touch Drag & Spin Gestures ---
+      function getRaycastIntersection(e) {
+        const rect = renderer.domElement.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+        const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+        mousePos.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+        mousePos.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mousePos, camera);
+        const hitPoint = new THREE.Vector3();
+        raycaster.ray.intersectPlane(dragPlane, hitPoint);
+        return hitPoint;
+      }
+
+      function onPointerDown(e) {
+        const hit = getRaycastIntersection(e);
+        if (!hit) return;
+
+        isDragging = true;
+        wakePhysics();
+        dragStartTime = Date.now();
+        dragStartScreen = {
+          x: e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0),
+          y: e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0)
+        };
+        dragOffset.copy(cardPos).sub(hit);
+        lastDragPos.copy(cardPos);
+        lastDragTime = Date.now();
+        dragVelocity.set(0, 0, 0);
+      }
+
+      function onPointerMove(e) {
+        if (!isDragging) return;
+        const hit = getRaycastIntersection(e);
+        if (!hit) return;
+
+        const targetPos = new THREE.Vector3().addVectors(hit, dragOffset);
+        targetPos.x = THREE.MathUtils.clamp(targetPos.x, -3.2, 3.2);
+        targetPos.y = THREE.MathUtils.clamp(targetPos.y, -4.5, 1.8);
+        cardPos.copy(targetPos);
+        cardOldPos.copy(cardPos);
+
+        const now = Date.now();
+        const dt = (now - lastDragTime) / 1000.0;
+        if (dt > 0.005) {
+          dragVelocity.copy(cardPos).sub(lastDragPos).divideScalar(dt);
+          lastDragPos.copy(cardPos);
+          lastDragTime = now;
+        }
+      }
+
+      function onPointerUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+
+        const clientX = e.clientX || (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientX : 0);
+        const clientY = e.clientY || (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : 0);
+        const moveDist = Math.hypot(clientX - dragStartScreen.x, clientY - dragStartScreen.y);
+        const elapsed = Date.now() - dragStartTime;
+
+        if (moveDist < 12 && elapsed < 350) {
+          // Tap / Click: Spin card 3D flip!
+          const spinDir = clientX < (window.innerWidth / 2) ? 1.0 : -1.0;
+          cardSpinVelY = spinDir * 22.0;
+          cardVel.set(spinDir * 1.5, 0.8, 0);
+        } else {
+          // Release drag with momentum
+          cardVel.copy(dragVelocity).clampLength(0, 25.0);
+          if (Math.abs(cardVel.x) > 3.0) {
+            cardSpinVelY = (cardVel.x > 0 ? 1 : -1) * Math.min(18.0, Math.abs(cardVel.x) * 1.8);
+          }
+        }
+
+        cardOldPos.copy(cardPos).sub(cardVel.clone().multiplyScalar(1 / 60));
+      }
+
+      const dom = renderer.domElement;
+      dom.addEventListener('mousedown', onPointerDown);
+      window.addEventListener('mousemove', onPointerMove);
+      window.addEventListener('mouseup', onPointerUp);
+
+      dom.addEventListener('touchstart', onPointerDown, { passive: true });
+      window.addEventListener('touchmove', onPointerMove, { passive: true });
+      window.addEventListener('touchend', onPointerUp, { passive: true });
+      window.addEventListener('touchcancel', onPointerUp, { passive: true });
+
+      // Resize Handler
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      // --- Animation Loop with Dynamic Sheen Shader updates ---
+      let ambientAngle = 0;
+      const cardNormal = new THREE.Vector3();
+      const cardQuat = new THREE.Quaternion();
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        const now = performance.now();
+        const dt = Math.min(0.033, (now - lastTime) / 1000.0);
+        lastTime = now;
+
+        ambientAngle += dt;
+
+        if (!sceneReady) {
+          renderer.render(scene, camera);
+          return;
+        }
+
+        if (physicsSettled && !isDragging) {
+          renderer.render(scene, camera);
+          return;
+        }
+
+        previousHookPos.copy(cardPos);
+
+        // Verlet simulation: rope joints and card body are solved as linked bodies.
+        joints[0].pos.copy(fixedPoint);
+
+        if (!isDragging) {
+          const cardTemp = cardPos.clone();
+          const cardFrameVel = cardPos.clone().sub(cardOldPos).multiplyScalar(CARD_DAMPING);
+          cardFrameVel.y -= ROPE_GRAVITY * dt * dt;
+          cardPos.add(cardFrameVel);
+          cardOldPos.copy(cardTemp);
+        }
+
+        // Verlet integration for free rope joints.
+        for (let i = 1; i <= 3; i++) {
+          const j = joints[i];
+          const temp = j.pos.clone();
+          const vel = j.pos.clone().sub(j.oldPos).multiplyScalar(ROPE_DAMPING);
+          vel.y -= ROPE_GRAVITY * dt * dt;
+          j.pos.add(vel);
+          j.oldPos.copy(temp);
+        }
+
+        // Relaxation constraints keep the lanyard taut and pin the card hook to j3.
+        const hookWorld = new THREE.Vector3();
+        for (let iter = 0; iter < 14; iter++) {
+          joints[0].pos.copy(fixedPoint);
+
+          for (let i = 0; i < 3; i++) {
+            const jA = joints[i];
+            const jB = joints[i + 1];
+            const targetDist = segmentLengths[i];
+            const delta = jB.pos.clone().sub(jA.pos);
+            const dist = delta.length() || 0.001;
+            const diff = (dist - targetDist) / dist;
+
+            if (!jA.fixed && !jB.fixed) {
+              jA.pos.add(delta.clone().multiplyScalar(diff * 0.5));
+              jB.pos.sub(delta.clone().multiplyScalar(diff * 0.5));
+            } else if (jA.fixed && !jB.fixed) {
+              jB.pos.sub(delta.clone().multiplyScalar(diff));
+            } else if (!jA.fixed && jB.fixed) {
+              jA.pos.add(delta.clone().multiplyScalar(diff));
+            }
+          }
+
+          getCardHookPosition(hookWorld);
+          const hookDelta = hookWorld.clone().sub(joints[3].pos);
+          if (isDragging) {
+            joints[3].pos.add(hookDelta.multiplyScalar(0.92));
+          } else {
+            joints[3].pos.add(hookDelta.clone().multiplyScalar(0.45));
+            cardPos.sub(hookDelta.multiplyScalar(0.55));
+          }
+        }
+
+        getCardHookPosition(hookWorld);
+        const finalHookDelta = hookWorld.clone().sub(joints[3].pos);
+        cardPos.sub(finalHookDelta);
+        cardVel.copy(cardPos).sub(previousHookPos).divideScalar(dt);
+
+        // Angular Tilt Oscillation follows the suspended hook and momentum.
+        const kTilt = 46.0;
+        const cTilt = 9.0;
+        const targetTilt = (joints[3].pos.x - fixedPoint.x) * 0.16 + cardVel.x * 0.012;
+        const tiltDelta = targetTilt - cardTiltZ;
+        const tiltAccel = tiltDelta * kTilt - cardTiltVelZ * cTilt;
+
+        cardTiltVelZ += tiltAccel * dt;
+        cardTiltZ += cardTiltVelZ * dt;
+        getCardHookPosition(hookWorld);
+        const tiltedHookDelta = hookWorld.clone().sub(joints[3].pos);
+        cardPos.sub(tiltedHookDelta);
+
+        // Y-axis Spin Decay & Face Snapping
+        if (Math.abs(cardSpinVelY) > 0.05) {
+          cardRotY += cardSpinVelY * dt;
+          cardSpinVelY *= Math.pow(0.12, dt);
+        } else {
+          const nearestSide = Math.round(cardRotY / Math.PI) * Math.PI;
+          const snapDelta = nearestSide - cardRotY;
+          if (Math.abs(snapDelta) > 0.001) {
+            cardRotY += snapDelta * Math.min(1.0, dt * 14.0);
+          } else {
+            cardRotY = nearestSide;
+            cardSpinVelY = 0;
+          }
+        }
+
+        const hookError = getCardHookPosition(hookWorld).distanceTo(joints[3].pos);
+        const motion = cardVel.length() + Math.abs(cardTiltVelZ) + Math.abs(cardSpinVelY);
+        if (!isDragging && hookError < 0.012 && motion < 0.040) {
+          settledFrames += 1;
+        } else {
+          settledFrames = 0;
+        }
+
+        if (settledFrames > 18) {
+          cardVel.set(0, 0, 0);
+          cardOldPos.copy(cardPos);
+          cardTiltVelZ = 0;
+          if (Math.abs(cardTiltZ) < 0.012) {
+            cardTiltZ = 0;
+          }
+          for (let i = 1; i <= 3; i++) {
+            joints[i].oldPos.copy(joints[i].pos);
+          }
+          physicsSettled = true;
+        }
+
+        // Apply transforms to Card Group after rope constraints resolve.
+        cardGroup.position.copy(cardPos);
+        cardGroup.rotation.y = cardRotY;
+        cardGroup.rotation.z = cardTiltZ;
+
+        // Dynamic Clearcoat & Roughness based on angle facing camera (from DoctorIdCard3D.tsx)
+        if (cardMaterial) {
+          cardQuat.setFromEuler(cardGroup.rotation);
+          cardNormal.set(0, 0, 1).applyQuaternion(cardQuat);
+          const facingRatio = Math.min(1, Math.max(0, Math.abs(cardNormal.z)));
+          const facingPower = Math.pow(facingRatio, 3);
+          cardMaterial.clearcoat = THREE.MathUtils.lerp(0.92, 0.04, facingPower);
+          cardMaterial.clearcoatRoughness = THREE.MathUtils.lerp(0.08, 0.25, facingRatio);
+          cardMaterial.roughness = THREE.MathUtils.lerp(0.20, 0.40, facingPower);
+        }
+
+        updateRibbonGeometry();
+        renderer.render(scene, camera);
+      }
+
+      animate();
+    })();
+  </script>
+</body>
+</html>
