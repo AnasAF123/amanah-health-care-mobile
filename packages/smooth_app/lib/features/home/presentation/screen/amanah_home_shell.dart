@@ -10,6 +10,8 @@ import 'package:smooth_app/features/home/presentation/components/amanah_quick_ac
 import 'package:smooth_app/features/home/presentation/components/amanah_schedule_card_stack.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_today_activity_section.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_account_tab_screen.dart';
+import 'package:smooth_app/features/home/presentation/screen/amanah_doctor_id_card_screen.dart';
+import 'package:smooth_app/features/home/presentation/screen/amanah_queue_dock_screen.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_schedule_tab_screen.dart';
 import 'package:smooth_app/features/presence/presentation/screen/amanah_presence_history_screen.dart';
 import 'package:smooth_app/features/presence/presentation/screen/amanah_qr_scanner_tab_screen.dart';
@@ -142,10 +144,16 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
           _scheduleOpenDetailOnLaunch = false;
           _selectedTab = AmanahHomeTab.schedule;
         });
+      case 'pilih-antrean':
       case 'cari-visit':
-        _showToast('Membuka menu Cari Visit Pasien');
+        Navigator.of(context).push(AmanahQueueDockScreen.route());
       case 'kartu-id':
-        setState(() => _selectedTab = AmanahHomeTab.account);
+        Navigator.of(context).push(
+          AmanahDoctorIdCardScreen.route(
+            user: widget.user,
+            profile: amanahHomeDashboardData.profile,
+          ),
+        );
       default:
         _showToast('Fitur segera hadir');
     }
@@ -178,8 +186,8 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
               ? const Color(0xFFF8FAFF)
               : Colors.white);
 
-    final List<DoctorSchedule> todaySchedules =
-        _scheduleStore.getSchedulesForDate(AmanahScheduleStore.baseToday);
+    final List<DoctorSchedule> todaySchedules = _scheduleStore
+        .getSchedulesForDate(AmanahScheduleStore.baseToday);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -220,7 +228,8 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   onDetailActivityTap: () {
                     setState(() {
                       _scheduleInitialSessionId = null;
-                      _scheduleInitialViewMode = AmanahScheduleViewMode.overview;
+                      _scheduleInitialViewMode =
+                          AmanahScheduleViewMode.overview;
                       _scheduleOpenDetailOnLaunch = false;
                       _selectedTab = AmanahHomeTab.schedule;
                     });
@@ -335,18 +344,18 @@ class _AmanahHomeScreenContent extends StatelessWidget {
       (int acc, DoctorSchedule s) => acc + s.bookedPatients.length,
     );
 
-    final List<AmanahActivityMetric> dynamicActivities = data.activities.map(
-      (AmanahActivityMetric act) {
-        if (act.id == 'antrean-aktif') {
-          return act.copyWith(
-            count: totalBookedPatients > 0
-                ? totalBookedPatients.toString()
-                : act.count,
-          );
-        }
-        return act;
-      },
-    ).toList();
+    final List<AmanahActivityMetric> dynamicActivities = data.activities.map((
+      AmanahActivityMetric act,
+    ) {
+      if (act.id == 'antrean-aktif') {
+        return act.copyWith(
+          count: totalBookedPatients > 0
+              ? totalBookedPatients.toString()
+              : act.count,
+        );
+      }
+      return act;
+    }).toList();
 
     return ListView(
       physics: const BouncingScrollPhysics(),

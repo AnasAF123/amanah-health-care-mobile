@@ -280,23 +280,29 @@ class AmanahBookedPatientCard extends StatelessWidget {
                               patient.avatarUrl ??
                                   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
                               fit: BoxFit.cover,
-                              errorBuilder: (BuildContext context, Object error,
-                                      StackTrace? stack) =>
-                                  ColoredBox(
-                                color: const Color(0xFF334155),
-                                child: Center(
-                                  child: Text(
-                                    patient.patientName.isNotEmpty
-                                        ? patient.patientName.substring(0, 1)
-                                        : 'P',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
+                              errorBuilder:
+                                  (
+                                    BuildContext context,
+                                    Object error,
+                                    StackTrace? stack,
+                                  ) => ColoredBox(
+                                    color: const Color(0xFF334155),
+                                    child: Center(
+                                      child: Text(
+                                        patient.patientName.isNotEmpty
+                                            ? patient.patientName.substring(
+                                                0,
+                                                1,
+                                              )
+                                            : 'P',
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
                             ),
                           ),
                         ),
@@ -481,377 +487,385 @@ class AmanahDoctorSessionCard extends StatelessWidget {
           ),
           clipBehavior: Clip.antiAlias,
           child: Stack(
-          children: <Widget>[
-            // Layer 1: Nature Background
-            Positioned.fill(
-              child: Image.network(
-                bgUrl,
-                fit: BoxFit.cover,
-                errorBuilder:
-                    (
-                      BuildContext context,
-                      Object error,
-                      StackTrace? stackTrace,
-                    ) => Container(color: const Color(0xFF0F172A)),
-              ),
-            ),
-
-            // Layer 2: Full-card liquid-glass blur with the same mask as patient cards.
-            const _LiquidGlassMaskLayer(),
-
-            // Layer 3: Ambient contrast wash.
-            const _AmbientCardGradientLayer(),
-
-            // Layer 4: Top Badges (Status & Booked Count)
-            Positioned(
-              top: 16,
-              left: 16,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: dark
-                          ? const Color(0xFF0A0E1A).withValues(alpha: 0.65)
-                          : Colors.white.withValues(alpha: 0.85),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.10),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: schedule.badgeVariant.color,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const SizedBox(width: 8, height: 8),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          schedule.badge,
-                          style: TextStyle(
-                            color: dark
-                                ? Colors.white
-                                : const Color(0xFF0F172A),
-                            fontFamily: 'PlusJakartaSans',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+            children: <Widget>[
+              // Layer 1: Nature Background
+              Positioned.fill(
+                child: Image.network(
+                  bgUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder:
+                      (
+                        BuildContext context,
+                        Object error,
+                        StackTrace? stackTrace,
+                      ) => Container(color: const Color(0xFF0F172A)),
                 ),
               ),
-            ),
 
-            Positioned(
-              top: 16,
-              right: 16,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: dark
-                          ? const Color(0xFF0A0E1A).withValues(alpha: 0.65)
-                          : Colors.white.withValues(alpha: 0.85),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.10),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Icon(
-                          Icons.people_alt_rounded,
-                          size: 14,
-                          color: dark ? Colors.white : const Color(0xFF0F172A),
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          '$bookedCount Pasien Booking',
-                          style: TextStyle(
-                            color: dark
-                                ? Colors.white
-                                : const Color(0xFF0F172A),
-                            fontFamily: 'PlusJakartaSans',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
+              // Layer 2: Full-card liquid-glass blur with the same mask as patient cards.
+              const _LiquidGlassMaskLayer(),
+
+              // Layer 3: Ambient contrast wash.
+              const _AmbientCardGradientLayer(),
+
+              // Layer 4: Top Badges (Status & Booked Count)
+              Positioned(
+                top: 16,
+                left: 16,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: dark
+                            ? const Color(0xFF0A0E1A).withValues(alpha: 0.65)
+                            : Colors.white.withValues(alpha: 0.85),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: <BoxShadow>[
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.10),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // Layer 5: Content Overlay at Bottom
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    // Session Name
-                    Text(
-                      schedule.title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0,
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: schedule.badgeVariant.color,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const SizedBox(width: 8, height: 8),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            schedule.badge,
+                            style: TextStyle(
+                              color: dark
+                                  ? Colors.white
+                                  : const Color(0xFF0F172A),
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 6),
+                  ),
+                ),
+              ),
 
-                    // Details: Room & Poli on Left, Start & End Time on Right
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+              Positioned(
+                top: 16,
+                right: 16,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: dark
+                            ? const Color(0xFF0A0E1A).withValues(alpha: 0.65)
+                            : Colors.white.withValues(alpha: 0.85),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: <BoxShadow>[
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.10),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Icon(
+                            Icons.people_alt_rounded,
+                            size: 14,
+                            color: dark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            '$bookedCount Pasien Booking',
+                            style: TextStyle(
+                              color: dark
+                                  ? Colors.white
+                                  : const Color(0xFF0F172A),
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Layer 5: Content Overlay at Bottom
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      // Session Name
+                      Text(
+                        schedule.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'PlusJakartaSans',
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+
+                      // Details: Room & Poli on Left, Start & End Time on Right
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: <Widget>[
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  '${schedule.poli} • ${schedule.room}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.75),
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  schedule.date,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+
+                          // Time Specifications (Start | Finish)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              Text(
-                                '${schedule.poli} • ${schedule.room}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.75),
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                              Column(
+                                children: <Widget>[
+                                  Row(
+                                    children: <Widget>[
+                                      const Icon(
+                                        Icons.access_time_filled_rounded,
+                                        size: 13,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        startTime,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontFamily: 'PlusJakartaSans',
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Mulai',
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.70,
+                                      ),
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                schedule.date,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
+                              Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 8,
                                 ),
+                                width: 1,
+                                height: 24,
+                                color: Colors.white.withValues(alpha: 0.25),
+                              ),
+                              Column(
+                                children: <Widget>[
+                                  Row(
+                                    children: <Widget>[
+                                      const Icon(
+                                        Icons.access_time_filled_rounded,
+                                        size: 13,
+                                        color: Colors.white,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        endTime,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontFamily: 'PlusJakartaSans',
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Selesai',
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.70,
+                                      ),
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ),
-                        const SizedBox(width: 8),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
 
-                        // Time Specifications (Start | Finish)
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Column(
-                              children: <Widget>[
-                                Row(
-                                  children: <Widget>[
-                                    const Icon(
-                                      Icons.access_time_filled_rounded,
-                                      size: 13,
-                                      color: Colors.white,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      startTime,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'PlusJakartaSans',
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Mulai',
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.70),
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
+                      // Divider
+                      Container(
+                        width: double.infinity,
+                        height: 1,
+                        color: Colors.white.withValues(alpha: 0.20),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Action Buttons (Detail Sesi + Edit + Delete)
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: SizedBox(
+                              height: 42,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: const Color(0xFF0F172A),
+                                  elevation: 4,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
-                              ],
-                            ),
-                            Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 8),
-                              width: 1,
-                              height: 24,
-                              color: Colors.white.withValues(alpha: 0.25),
-                            ),
-                            Column(
-                              children: <Widget>[
-                                Row(
-                                  children: <Widget>[
-                                    const Icon(
-                                      Icons.access_time_filled_rounded,
-                                      size: 13,
-                                      color: Colors.white,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      endTime,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'PlusJakartaSans',
-                                        fontSize: 12.5,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Selesai',
+                                onPressed: onTapDetail,
+                                child: const Text(
+                                  'Detail Sesi',
                                   style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.70),
                                     fontFamily: 'PlusJakartaSans',
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
                                   ),
                                 ),
-                              ],
+                              ),
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
+                          ),
+                          const SizedBox(width: 8),
 
-                    // Divider
-                    Container(
-                      width: double.infinity,
-                      height: 1,
-                      color: Colors.white.withValues(alpha: 0.20),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Action Buttons (Detail Sesi + Edit + Delete)
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: SizedBox(
-                            height: 42,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: const Color(0xFF0F172A),
-                                elevation: 4,
-                                shape: RoundedRectangleBorder(
+                          // Edit Button
+                          Semantics(
+                            button: true,
+                            label: 'Edit Jadwal',
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: onTapEdit,
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.25),
+                                  ),
                                 ),
-                              ),
-                              onPressed: onTapDetail,
-                              child: const Text(
-                                'Detail Sesi',
-                                style: TextStyle(
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w800,
+                                child: const Icon(
+                                  Icons.edit_outlined,
+                                  size: 18,
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
+                          const SizedBox(width: 8),
 
-                        // Edit Button
-                        Semantics(
-                          button: true,
-                          label: 'Edit Jadwal',
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(16),
-                            onTap: onTapEdit,
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.25),
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.edit_outlined,
-                                size: 18,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-
-                        // Delete Button
-                        Semantics(
-                          button: true,
-                          label: 'Hapus Jadwal',
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(16),
-                            onTap: onTapDelete,
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: const Color(
-                                  0xFFE11D48,
-                                ).withValues(alpha: 0.25),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
+                          // Delete Button
+                          Semantics(
+                            button: true,
+                            label: 'Hapus Jadwal',
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: onTapDelete,
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
                                   color: const Color(
                                     0xFFE11D48,
-                                  ).withValues(alpha: 0.40),
+                                  ).withValues(alpha: 0.25),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: const Color(
+                                      0xFFE11D48,
+                                    ).withValues(alpha: 0.40),
+                                  ),
                                 ),
-                              ),
-                              child: const Icon(
-                                Icons.delete_outline_rounded,
-                                size: 18,
-                                color: Color(0xFFFECDD3),
+                                child: const Icon(
+                                  Icons.delete_outline_rounded,
+                                  size: 18,
+                                  color: Color(0xFFFECDD3),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -1053,22 +1067,27 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                             ),
                             decoration: BoxDecoration(
                               color: isDayCuti
-                                  ? const Color(0xFFF59E0B).withValues(alpha: 0.20)
+                                  ? const Color(
+                                      0xFFF59E0B,
+                                    ).withValues(alpha: 0.20)
                                   : (schedule.badgeVariant ==
-                                          AmanahBadgeVariant.success
-                                      ? (dark
-                                          ? const Color(0xFF10B981)
-                                              .withValues(alpha: 0.20)
-                                          : const Color(0xFFECFDF5))
-                                      : schedule.badgeVariant ==
+                                            AmanahBadgeVariant.success
+                                        ? (dark
+                                              ? const Color(
+                                                  0xFF10B981,
+                                                ).withValues(alpha: 0.20)
+                                              : const Color(0xFFECFDF5))
+                                        : schedule.badgeVariant ==
                                               AmanahBadgeVariant.warning
-                                          ? (dark
-                                              ? const Color(0xFFF59E0B)
-                                                  .withValues(alpha: 0.20)
+                                        ? (dark
+                                              ? const Color(
+                                                  0xFFF59E0B,
+                                                ).withValues(alpha: 0.20)
                                               : const Color(0xFFFEF3C7))
-                                          : (dark
-                                              ? const Color(0xFF3B82F6)
-                                                  .withValues(alpha: 0.20)
+                                        : (dark
+                                              ? const Color(
+                                                  0xFF3B82F6,
+                                                ).withValues(alpha: 0.20)
                                               : const Color(0xFFEFF6FF))),
                               borderRadius: BorderRadius.circular(999),
                             ),
@@ -1091,16 +1110,16 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                                     color: isDayCuti
                                         ? const Color(0xFFF59E0B)
                                         : (schedule.badgeVariant ==
-                                                AmanahBadgeVariant.success
-                                            ? (dark
-                                                ? const Color(0xFF34D399)
-                                                : const Color(0xFF047857))
-                                            : schedule.badgeVariant ==
+                                                  AmanahBadgeVariant.success
+                                              ? (dark
+                                                    ? const Color(0xFF34D399)
+                                                    : const Color(0xFF047857))
+                                              : schedule.badgeVariant ==
                                                     AmanahBadgeVariant.warning
-                                                ? (dark
+                                              ? (dark
                                                     ? const Color(0xFFFBBF24)
                                                     : const Color(0xFFD97706))
-                                                : (dark
+                                              : (dark
                                                     ? const Color(0xFF60A5FA)
                                                     : const Color(0xFF1D4ED8))),
                                     fontFamily: 'PlusJakartaSans',
@@ -1172,12 +1191,16 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                             top: BorderSide(
                               color: dark
                                   ? Colors.white.withValues(alpha: 0.10)
-                                  : const Color(0xFF000000).withValues(alpha: 0.06),
+                                  : const Color(
+                                      0xFF000000,
+                                    ).withValues(alpha: 0.06),
                             ),
                             bottom: BorderSide(
                               color: dark
                                   ? Colors.white.withValues(alpha: 0.10)
-                                  : const Color(0xFF000000).withValues(alpha: 0.06),
+                                  : const Color(
+                                      0xFF000000,
+                                    ).withValues(alpha: 0.06),
                             ),
                           ),
                         ),
@@ -1238,15 +1261,20 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                             backgroundColor: dark
                                 ? const Color(0xFF06B6D4)
                                 : const Color(0xFF2563EB),
-                            foregroundColor:
-                                dark ? const Color(0xFF083344) : Colors.white,
+                            foregroundColor: dark
+                                ? const Color(0xFF083344)
+                                : Colors.white,
                             elevation: 4,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
                             shadowColor: dark
-                                ? const Color(0xFF06B6D4).withValues(alpha: 0.30)
-                                : const Color(0xFF2563EB).withValues(alpha: 0.30),
+                                ? const Color(
+                                    0xFF06B6D4,
+                                  ).withValues(alpha: 0.30)
+                                : const Color(
+                                    0xFF2563EB,
+                                  ).withValues(alpha: 0.30),
                           ),
                           onPressed: () {
                             Navigator.of(context).pop();
@@ -1530,7 +1558,7 @@ class AmanahPatientDetailModal extends StatelessWidget {
                       children: <Widget>[
                         Expanded(
                           child: Text(
-                            'Detail Rekam Pasien',
+                            'Detail rekam pasien',
                             style: TextStyle(
                               color: dark
                                   ? Colors.white
@@ -1646,26 +1674,30 @@ class _PatientProfileHeader extends StatelessWidget {
                     patient.avatarUrl ??
                         'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop',
                     fit: BoxFit.cover,
-                    errorBuilder: (BuildContext context, Object error,
-                            StackTrace? stack) =>
-                        ColoredBox(
-                      color: dark
-                          ? const Color(0xFF334155)
-                          : const Color(0xFFCBD5E1),
-                      child: Center(
-                        child: Text(
-                          patient.patientName.isNotEmpty
-                              ? patient.patientName.substring(0, 1)
-                              : 'P',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w800,
-                            color:
-                                dark ? Colors.white : const Color(0xFF1E293B),
+                    errorBuilder:
+                        (
+                          BuildContext context,
+                          Object error,
+                          StackTrace? stack,
+                        ) => ColoredBox(
+                          color: dark
+                              ? const Color(0xFF334155)
+                              : const Color(0xFFCBD5E1),
+                          child: Center(
+                            child: Text(
+                              patient.patientName.isNotEmpty
+                                  ? patient.patientName.substring(0, 1)
+                                  : 'P',
+                              style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w800,
+                                color: dark
+                                    ? Colors.white
+                                    : const Color(0xFF1E293B),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
                   ),
                 ),
               ),
@@ -1798,23 +1830,23 @@ class _PatientSpecificationTable extends StatelessWidget {
       child: Column(
         children: <Widget>[
           _PatientSpecRow(
-            label: 'Waktu / Jam Booking',
+            label: 'Waktu / jam booking',
             value: patient.timeSlot,
             dark: dark,
           ),
           _PatientSpecRow(
-            label: 'Sesi Praktik',
+            label: 'Sesi praktik',
             value: '${schedule.title} (${schedule.poli})',
             dark: dark,
           ),
           _PatientSpecRow(
-            label: 'Ruang Praktik',
+            label: 'Ruang praktik',
             value: schedule.room,
             dark: dark,
           ),
           if (patient.patientGuardian != null)
             _PatientSpecRow(
-              label: 'Nama Pendamping',
+              label: 'Nama pendamping',
               value: patient.patientGuardian!,
               dark: dark,
             ),
@@ -1866,8 +1898,8 @@ class _PatientSpecRow extends StatelessWidget {
             style: TextStyle(
               color: dark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B),
               fontFamily: 'PlusJakartaSans',
-              fontSize: 12.5,
-              fontWeight: FontWeight.w600,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(width: 16),
@@ -1878,8 +1910,8 @@ class _PatientSpecRow extends StatelessWidget {
               style: TextStyle(
                 color: dark ? Colors.white : const Color(0xFF0F172A),
                 fontFamily: 'PlusJakartaSans',
-                fontSize: 12.5,
-                fontWeight: FontWeight.w800,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -1903,12 +1935,12 @@ class _PatientComplaintBlock extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Keluhan & Catatan Medis Pasien',
+            'Keluhan & catatan medis pasien',
             style: TextStyle(
               color: dark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B),
               fontFamily: 'PlusJakartaSans',
               fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 6),
@@ -1932,7 +1964,7 @@ class _PatientComplaintBlock extends StatelessWidget {
                 color: dark ? const Color(0xFFE5E7EB) : const Color(0xFF1E293B),
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 height: 1.45,
               ),
             ),
@@ -1993,7 +2025,7 @@ class _PatientCloseButtonState extends State<_PatientCloseButton> {
             ),
             alignment: Alignment.center,
             child: Text(
-              'Tutup Detail Pasien',
+              'Tutup detail pasien',
               style: TextStyle(
                 color: widget.dark
                     ? const Color(0xFFD4D4D8)

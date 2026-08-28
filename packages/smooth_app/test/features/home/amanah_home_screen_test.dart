@@ -33,8 +33,9 @@ void main() {
   }
 
   group('Amanah Home Screen Tests', () {
-    testWidgets('Renders all Home screen components in Light mode',
-        (WidgetTester tester) async {
+    testWidgets('Renders all Home screen components in Light mode', (
+      WidgetTester tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.75;
       addTearDown(() => tester.view.reset());
@@ -60,7 +61,7 @@ void main() {
       expect(find.byType(AmanahQuickAccessSection), findsOneWidget);
       expect(find.text('History'), findsOneWidget);
       expect(find.text('Jadwal Saya'), findsOneWidget);
-      expect(find.text('Cari Visit'), findsOneWidget);
+      expect(find.text('Pilih Antrean'), findsOneWidget);
       expect(find.text('Kartu ID'), findsOneWidget);
 
       // Check Today's Activity Section (reflects live total booked patients: 4)
@@ -75,8 +76,27 @@ void main() {
       expect(find.byType(AmanahBottomNavigationBar), findsOneWidget);
     });
 
-    testWidgets('Tapping History quick action navigates to Riwayat Presensi screen',
-        (WidgetTester tester) async {
+    testWidgets(
+      'Tapping History quick action navigates to Riwayat Presensi screen',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.75;
+        addTearDown(() => tester.view.reset());
+
+        await tester.pumpWidget(createHomeScreen());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('History'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Riwayat Presensi'), findsOneWidget);
+        expect(find.text('Timeline'), findsOneWidget);
+      },
+    );
+
+    testWidgets('Quick action Pilih Antrean opens queue dock screen', (
+      WidgetTester tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.75;
       addTearDown(() => tester.view.reset());
@@ -84,30 +104,46 @@ void main() {
       await tester.pumpWidget(createHomeScreen());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('History'));
+      await tester.tap(find.text('Pilih Antrean'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Riwayat Presensi'), findsOneWidget);
-      expect(find.text('Timeline'), findsOneWidget);
+      expect(find.text('Pilih antrean pasien'), findsOneWidget);
+      expect(find.text('Tarik antrean ke bawah untuk proses'), findsOneWidget);
     });
 
-    testWidgets('Quick action Cari Visit shows toast feedback',
-        (WidgetTester tester) async {
+    testWidgets('Tapping Kartu ID quick action opens Doctor ID Card screen', (
+      WidgetTester tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.75;
       addTearDown(() => tester.view.reset());
 
-      await tester.pumpWidget(createHomeScreen());
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            fontFamily: 'PlusJakartaSans',
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF0A44FF),
+            ),
+          ),
+          home: const AmanahHomeShell(user: testUser),
+        ),
+      );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Cari Visit'));
+      await tester.tap(find.text('Kartu ID'));
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 360));
 
-      expect(find.text('Membuka menu Cari Visit Pasien'), findsOneWidget);
+      expect(find.text('Kartu Identitas'), findsOneWidget);
+      expect(find.text('Bagikan'), findsOneWidget);
+      expect(find.text('Unduh PDF'), findsOneWidget);
+      expect(find.text('RS AMANAH SEHAT'), findsWidgets);
     });
 
-    testWidgets('Tapping notification bell navigates to Notification tab',
-        (WidgetTester tester) async {
+    testWidgets('Tapping notification bell navigates to Notification tab', (
+      WidgetTester tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.75;
       addTearDown(() => tester.view.reset());
@@ -121,8 +157,9 @@ void main() {
       expect(find.text('Notifikasi'), findsWidgets);
     });
 
-    testWidgets('Tapping dismiss button on schedule card cycles schedule',
-        (WidgetTester tester) async {
+    testWidgets('Tapping dismiss button on schedule card cycles schedule', (
+      WidgetTester tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.75;
       addTearDown(() => tester.view.reset());
@@ -139,8 +176,9 @@ void main() {
       expect(find.text('Sesi Siang'), findsOneWidget);
     });
 
-    testWidgets('Swiping left on schedule card stack switches to next card',
-        (WidgetTester tester) async {
+    testWidgets('Swiping left on schedule card stack switches to next card', (
+      WidgetTester tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.75;
       addTearDown(() => tester.view.reset());
@@ -151,29 +189,34 @@ void main() {
       expect(find.text('Sesi Pagi'), findsOneWidget);
 
       // Drag horizontally to the left by -120px
-      await tester.drag(find.byType(AmanahScheduleCardStack), const Offset(-120, 0));
+      await tester.drag(
+        find.byType(AmanahScheduleCardStack),
+        const Offset(-120, 0),
+      );
       await tester.pump(const Duration(milliseconds: 300));
       await tester.pumpAndSettle();
 
       expect(find.text('Sesi Siang'), findsOneWidget);
     });
 
-    testWidgets('Tapping schedule card navigates directly to Doctor Practice Schedule overview',
-        (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.75;
-      addTearDown(() => tester.view.reset());
+    testWidgets(
+      'Tapping schedule card navigates directly to Doctor Practice Schedule overview',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.75;
+        addTearDown(() => tester.view.reset());
 
-      await tester.pumpWidget(createHomeScreen());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(createHomeScreen());
+        await tester.pumpAndSettle();
 
-      // Tap on the front schedule card (not on the dismiss button)
-      await tester.tap(find.text('07:00 - 11:00 WIB'));
-      await tester.pumpAndSettle();
+        // Tap on the front schedule card (not on the dismiss button)
+        await tester.tap(find.text('07:00 - 11:00 WIB'));
+        await tester.pumpAndSettle();
 
-      // Should have navigated to the Doctor Practice Schedule overview
-      expect(find.text('Jadwal Praktik'), findsOneWidget);
-      expect(find.text('Kapasitas Hari Ini'), findsOneWidget);
-    });
+        // Should have navigated to the Doctor Practice Schedule overview
+        expect(find.text('Jadwal Praktik'), findsOneWidget);
+        expect(find.text('Kapasitas Hari Ini'), findsOneWidget);
+      },
+    );
   });
 }

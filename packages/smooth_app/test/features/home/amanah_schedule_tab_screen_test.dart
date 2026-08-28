@@ -102,8 +102,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AmanahPatientDetailModal), findsOneWidget);
-      expect(find.text('Detail Rekam Pasien'), findsOneWidget);
-      expect(find.text('Keluhan & Catatan Medis Pasien'), findsOneWidget);
+      expect(find.text('Detail rekam pasien'), findsOneWidget);
+      expect(find.text('Keluhan & catatan medis pasien'), findsOneWidget);
     });
 
     testWidgets('Tapping + icon button opens Add Schedule drawer', (

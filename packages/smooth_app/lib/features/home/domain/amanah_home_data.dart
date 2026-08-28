@@ -16,12 +16,30 @@ class AmanahDoctorProfile {
     required this.role,
     required this.greeting,
     required this.unreadNotifications,
+    this.sip = 'SIP. 503/442.1/SIP-D/2026',
+    this.str = 'STR. 31.2.1.100.1.20.123456',
+    this.nik = '3171015508920003',
+    this.kkiNumber = 'KKI-ID-2026-98124',
+    this.email = 'amelia.cantika@rsamanah.co.id',
+    this.phone = '+62 812-3456-7890',
+    this.hospital = 'RS Amanah Sehat',
+    this.department = 'Departemen Ilmu Kesehatan Anak',
+    this.avatarAsset = 'assets/amanah/id_card/images/woman-doctor-4.png',
   });
 
   final String name;
   final String role;
   final String greeting;
   final int unreadNotifications;
+  final String sip;
+  final String str;
+  final String nik;
+  final String kkiNumber;
+  final String email;
+  final String phone;
+  final String hospital;
+  final String department;
+  final String avatarAsset;
 }
 
 class AmanahSchedule {
@@ -177,8 +195,8 @@ const AmanahHomeDashboardData amanahHomeDashboardData = AmanahHomeDashboardData(
       icon: AmanahQuickActionIcon.schedule,
     ),
     AmanahQuickAction(
-      id: 'cari-visit',
-      label: 'Cari Visit',
+      id: 'pilih-antrean',
+      label: 'Pilih Antrean',
       icon: AmanahQuickActionIcon.search,
     ),
     AmanahQuickAction(
