@@ -1,0 +1,278 @@
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+
+/// 6-Layer Volumetric Optical Glow Painter for the Bottom Dock Hollow Slot
+/// Matches the web specification in BottomNotchedDock.tsx and Recessed3DSlot.tsx
+class AmanahDockHollowGlowPainter extends CustomPainter {
+  const AmanahDockHollowGlowPainter({
+    required this.dragProgress,
+    required this.isLongPressing,
+    required this.isActivating,
+    this.isDark = false,
+  });
+
+  final double dragProgress;
+  final bool isLongPressing;
+  final bool isActivating;
+  final bool isDark;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double w = size.width;
+    final double h = size.height;
+
+    // ViewBox scaling (Original SVG viewBox: 0 0 390 145)
+    final double scaleX = w / 390.0;
+    final double scaleY = h / 145.0;
+
+    final double activeProgress = isActivating ? 1.0 : dragProgress.clamp(0.0, 1.0);
+
+    canvas.save();
+    canvas.scale(scaleX, scaleY);
+
+    // =========================================================================
+    // LAYER 1: VOLUMETRIC VERTICAL HEAT BEAM & RISING ATMOSPHERIC AURA
+    // =========================================================================
+    // 1A. High Rising Aura Beam (Only on Long-Press or Dragging Down)
+    if (isLongPressing || activeProgress > 0.05) {
+      final double auraProgress = isLongPressing ? 1.0 : activeProgress;
+      final double auraOpacity = isLongPressing ? 0.95 : (auraProgress * 0.85);
+
+      final Paint risingAuraPaint = Paint()
+        ..shader = ui.Gradient.linear(
+          const Offset(195, 145),
+          const Offset(195, -130),
+          <Color>[
+            const Color(0xFF2563EB).withValues(alpha: 0.85 * auraOpacity),
+            const Color(0xFF0EA5E9).withValues(alpha: 0.60 * auraOpacity),
+            const Color(0xFF38BDF8).withValues(alpha: 0.30 * auraOpacity),
+            const Color(0x0038BDF8), // Explicit transparent Sky Blue (avoids transparent black artifact)
+          ],
+          <double>[0.0, 0.35, 0.70, 1.0],
+        )
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 28);
+
+      final Rect risingAuraRect = Rect.fromCenter(
+        center: const Offset(195, -20),
+        width: 260 * (isLongPressing ? 1.05 : (0.90 + auraProgress * 0.15)),
+        height: 220 * (isLongPressing ? 1.0 : (0.50 + auraProgress * 0.50)),
+      );
+      canvas.drawOval(risingAuraRect, risingAuraPaint);
+
+      // 1B. Inner Cyan Radiant Heat Core
+      final Paint innerCorePaint = Paint()
+        ..shader = ui.Gradient.linear(
+          const Offset(195, 120),
+          const Offset(195, -60),
+          <Color>[
+            const Color(0xFF0A44FF).withValues(alpha: 0.75 * auraOpacity),
+            const Color(0xFF00D4FF).withValues(alpha: 0.55 * auraOpacity),
+            const Color(0x0000D4FF), // Explicit transparent Cyan
+          ],
+          <double>[0.0, 0.60, 1.0],
+        )
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18);
+
+      final Rect innerCoreRect = Rect.fromCenter(
+        center: const Offset(195, 10),
+        width: 200 * (isLongPressing ? 1.0 : (0.80 + auraProgress * 0.20)),
+        height: 160 * (isLongPressing ? 1.0 : (0.30 + auraProgress * 0.70)),
+      );
+      canvas.drawOval(innerCoreRect, innerCorePaint);
+    }
+
+    // 1C. Semi-Circular Ambient Dome Halo
+    final double domeScale = isLongPressing ? 1.08 : (0.92 + activeProgress * 0.28);
+    final double domeOpacity = isLongPressing ? 0.75 : (0.25 + activeProgress * 0.45);
+    final Paint domePaint = Paint()
+      ..shader = ui.Gradient.linear(
+        const Offset(195, 80),
+        const Offset(195, -30),
+        <Color>[
+          const Color(0xFF0A44FF).withValues(alpha: 0.65 * domeOpacity),
+          const Color(0xFF38BDF8).withValues(alpha: 0.40 * domeOpacity),
+          const Color(0x0038BDF8), // Explicit transparent Sky Blue
+        ],
+        <double>[0.0, 0.55, 1.0],
+      )
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20);
+
+    final Rect domeRect = Rect.fromCenter(
+      center: const Offset(195, 25),
+      width: 245 * domeScale,
+      height: 150 * domeScale,
+    );
+    canvas.drawOval(domeRect, domePaint);
+
+    // =========================================================================
+    // LAYER 2: INTERIOR CAVITY APERTURE CORE GLOW
+    // =========================================================================
+    final double apertureOpacity = isLongPressing ? 1.0 : (0.45 + activeProgress * 0.55);
+    final Paint aperturePaint = Paint()
+      ..shader = ui.Gradient.radial(
+        const Offset(195, 42),
+        120,
+        <Color>[
+          const Color(0xFF38BDF8).withValues(alpha: apertureOpacity),
+          const Color(0xFF0A44FF).withValues(alpha: apertureOpacity * 0.60),
+          const Color(0x000A44FF), // Explicit transparent Royal Blue
+        ],
+        <double>[0.0, 0.60, 1.0],
+      )
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
+
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: const Offset(195, 42),
+        width: isLongPressing ? 245 : 235,
+        height: 45,
+      ),
+      aperturePaint,
+    );
+
+    // =========================================================================
+    // LAYER 3: RECESSED HOLLOW CAVITY (DEEP CONTRAST MASK)
+    // =========================================================================
+    final Path cavityPath = Path()
+      ..moveTo(73, 10)
+      ..quadraticBezierTo(81, 10, 83, 18)
+      ..lineTo(86, 30)
+      ..quadraticBezierTo(89, 40, 100, 40)
+      ..lineTo(290, 40)
+      ..quadraticBezierTo(301, 40, 304, 30)
+      ..lineTo(307, 18)
+      ..quadraticBezierTo(309, 10, 317, 10)
+      ..lineTo(317, 55)
+      ..lineTo(73, 55)
+      ..close();
+
+    final Paint cavityPaint = Paint()
+      ..shader = ui.Gradient.linear(
+        const Offset(195, 10),
+        const Offset(195, 55),
+        const <Color>[Color(0xFF060913), Color(0xFF020306)],
+      );
+    canvas.drawPath(cavityPath, cavityPaint);
+
+    // =========================================================================
+    // LAYER 4: NOTCHED BOX FOREGROUND SURFACE
+    // =========================================================================
+    final Path surfacePath = Path()
+      ..moveTo(0, 10)
+      ..lineTo(73, 10)
+      ..quadraticBezierTo(81, 10, 83, 18)
+      ..lineTo(86, 30)
+      ..quadraticBezierTo(89, 40, 100, 40)
+      ..lineTo(290, 40)
+      ..quadraticBezierTo(301, 40, 304, 30)
+      ..lineTo(307, 18)
+      ..quadraticBezierTo(309, 10, 317, 10)
+      ..lineTo(390, 10)
+      ..lineTo(390, 145)
+      ..lineTo(0, 145)
+      ..close();
+
+    final Paint surfacePaint = Paint()
+      ..shader = ui.Gradient.linear(
+        const Offset(195, 0),
+        const Offset(195, 145),
+        isDark
+            ? const <Color>[Color(0xFF0F1629), Color(0xFF0A0F1D), Color(0xFF050810)]
+            : const <Color>[Color(0xFFE2E8F0), Color(0xFFCBD5E1), Color(0xFF94A3B8)],
+        const <double>[0.0, 0.35, 1.0],
+      );
+    canvas.drawPath(surfacePath, surfacePaint);
+
+    // =========================================================================
+    // LAYER 5: AMBIENT CONTOUR NOTCH GLOW (WIDE DIFFUSE PASS + CRISP RIM)
+    // =========================================================================
+    final Path contourLipPath = Path()
+      ..moveTo(0, 10)
+      ..lineTo(73, 10)
+      ..quadraticBezierTo(81, 10, 83, 18)
+      ..lineTo(86, 30)
+      ..quadraticBezierTo(89, 40, 100, 40)
+      ..lineTo(290, 40)
+      ..quadraticBezierTo(301, 40, 304, 30)
+      ..lineTo(307, 18)
+      ..quadraticBezierTo(309, 10, 317, 10)
+      ..lineTo(390, 10);
+
+    final Shader contourGlowShader = ui.Gradient.linear(
+      Offset.zero,
+      const Offset(390, 0),
+      const <Color>[
+        Color(0x000284C7),
+        Color(0x660284C7),
+        Color(0xD938BDF8), // 85% opacity at center notch
+        Color(0x660284C7),
+        Color(0x000284C7),
+      ],
+      const <double>[0.0, 0.22, 0.50, 0.78, 1.0],
+    );
+
+    // Wide diffuse blur stroke
+    final Paint diffusePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5.5
+      ..shader = contourGlowShader
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
+    canvas.drawPath(contourLipPath, diffusePaint);
+
+    // Crisp metallic edge stroke
+    final Paint crispRimPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.85
+      ..shader = contourGlowShader;
+    canvas.drawPath(contourLipPath, crispRimPaint);
+
+    // =========================================================================
+    // LAYER 6: WHITE-HOT MOLTEN CORE FILAMENT (STRAIGHT BOTTOM LIP)
+    // =========================================================================
+    if (isLongPressing || activeProgress > 0.05) {
+      final Path filamentPath = Path()
+        ..moveTo(100, 40)
+        ..lineTo(290, 40);
+
+      final Shader filamentShader = ui.Gradient.linear(
+        const Offset(100, 0),
+        const Offset(290, 0),
+        const <Color>[
+          Color(0x000284C7),
+          Color(0xE638BDF8),
+          Color(0xFFE0F2FE), // White-hot cyan center
+          Color(0xE638BDF8),
+          Color(0x000284C7),
+        ],
+        const <double>[0.0, 0.25, 0.50, 0.75, 1.0],
+      );
+
+      // Molten diffuse glow
+      final Paint moltenGlowPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = isLongPressing ? 8.0 : 5.0
+        ..shader = filamentShader
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
+      canvas.drawPath(filamentPath, moltenGlowPaint);
+
+      // Razor white core
+      final Paint coreLaserPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = isLongPressing ? 3.0 : 1.85
+        ..shader = filamentShader;
+      canvas.drawPath(filamentPath, coreLaserPaint);
+    }
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant AmanahDockHollowGlowPainter oldDelegate) {
+    return oldDelegate.dragProgress != dragProgress ||
+        oldDelegate.isLongPressing != isLongPressing ||
+        oldDelegate.isActivating != isActivating ||
+        oldDelegate.isDark != isDark;
+  }
+}

@@ -1,9 +1,15 @@
+import 'dart:async' as async;
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:smooth_app/features/home/domain/amanah_queue_data.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_blurry_morph_text.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_dock_hollow_glow.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_genie_effect.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_paramedic_toolbox.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_racing_chevrons.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_watermark_path.dart';
 import 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:smooth_app/features/schedule/presentation/components/amanah_schedule_cards_and_drawers.dart';
@@ -49,15 +55,31 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
   bool _isGenieSettled = false;
   AmanahQueueCardData? _selectedActiveCard;
 
+  // Genie Animation Engine
+  AnimationController? _genieController;
+  ui.Image? _genieSnapshot;
+  AmanahGenieDirection _genieDirection = AmanahGenieDirection.open;
+  bool _isGenieRunning = false;
+
+  final List<async.Timer> _ejectionTimers = <async.Timer>[];
+
   int _dotCount = 0;
   AnimationController? _dotsController;
   AnimationController? _rouletteController;
+  AnimationController? _decelController;
   double _rouletteVelocity = 0.0;
 
   @override
   void initState() {
     super.initState();
     _initDotsTimer();
+  }
+
+  void _clearEjectionTimers() {
+    for (final async.Timer t in _ejectionTimers) {
+      t.cancel();
+    }
+    _ejectionTimers.clear();
   }
 
   void _initDotsTimer() {
@@ -74,10 +96,40 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
       });
   }
 
+  void _disposeRouletteController() {
+    if (_rouletteController != null) {
+      _rouletteController!.stop();
+      _rouletteController!.dispose();
+      _rouletteController = null;
+    }
+  }
+
+  void _disposeDecelController() {
+    if (_decelController != null) {
+      _decelController!.stop();
+      _decelController!.dispose();
+      _decelController = null;
+    }
+  }
+
+  void _disposeGenieController() {
+    if (_genieController != null) {
+      _genieController!.stop();
+      _genieController!.dispose();
+      _genieController = null;
+    }
+  }
+
   @override
   void dispose() {
+    _clearEjectionTimers();
     _dotsController?.dispose();
-    _rouletteController?.dispose();
+    _dotsController = null;
+    _genieSnapshot?.dispose();
+    _genieSnapshot = null;
+    _disposeRouletteController();
+    _disposeDecelController();
+    _disposeGenieController();
     super.dispose();
   }
 
@@ -85,27 +137,37 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     if (_cards.isEmpty) {
       return;
     }
+    _disposeRouletteController();
+    _disposeDecelController();
     setState(() {
       _currentIndex = ((newIndex % _cards.length) + _cards.length) % _cards.length;
       _horizontalDrag = 0;
       _verticalDrag = 0;
+      _spinOffset = 0;
     });
   }
 
   void _startRouletteSpin() {
+    if (_activationStage != 'idle') {
+      return;
+    }
+    _disposeDecelController();
+    _disposeRouletteController();
+
     setState(() {
       _isLongPressing = true;
+      _horizontalDrag = 0;
+      _verticalDrag = 0;
     });
     HapticFeedback.heavyImpact();
 
-    _rouletteController?.dispose();
     _rouletteVelocity = 18.0 * 230.0; // ~18 cards per second
 
     _rouletteController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
     )..addListener(() {
-        if (!_isLongPressing) {
+        if (!_isLongPressing || !mounted) {
           return;
         }
         setState(() {
@@ -123,7 +185,11 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     if (!_isLongPressing) {
       return;
     }
-    _isLongPressing = false;
+    _disposeRouletteController();
+
+    setState(() {
+      _isLongPressing = false;
+    });
 
     // Smooth exponential deceleration to snap firmly on selected card
     final double startOffset = _spinOffset;
@@ -133,17 +199,16 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
         (((_currentIndex + shiftCards) % _cards.length) + _cards.length) %
         _cards.length;
 
-    _rouletteController?.stop();
-    _rouletteController?.dispose();
+    _disposeDecelController();
 
-    final AnimationController decelController = AnimationController(
+    _decelController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 550),
     );
     final Animation<double> decelAnimation = Tween<double>(
       begin: startOffset,
       end: targetOffset,
-    ).animate(CurvedAnimation(parent: decelController, curve: Curves.easeOutCubic));
+    ).animate(CurvedAnimation(parent: _decelController!, curve: Curves.easeOutCubic));
 
     decelAnimation.addListener(() {
       if (mounted) {
@@ -162,17 +227,21 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
           });
           HapticFeedback.mediumImpact();
         }
-        decelController.dispose();
+        _disposeDecelController();
       }
     });
 
-    decelController.forward();
+    _decelController!.forward();
   }
 
-  void _handleActivate() {
-    if (_activationStage != 'idle') {
+  Future<void> _handleActivate() async {
+    if (_activationStage != 'idle' || _isGenieRunning) {
       return;
     }
+    _disposeRouletteController();
+    _disposeDecelController();
+    _disposeGenieController();
+
     final AmanahQueueCardData chosen = _cards[_currentIndex];
     setState(() {
       _selectedActiveCard = chosen;
@@ -182,96 +251,260 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     HapticFeedback.heavyImpact();
 
     // 1. Plunge into slot (t = 450ms)
-    Future<void>.delayed(const Duration(milliseconds: 450), () {
-      if (!mounted) {
-        return;
+    await Future<void>.delayed(const Duration(milliseconds: 450));
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _activationStage = 'activating';
+      _ejectionStage = 'idle';
+    });
+    _dotsController?.repeat();
+
+    // 2. Complete Activation & Trigger Genie Open Emergence (t = 1800ms)
+    await Future<void>.delayed(const Duration(milliseconds: 1800));
+    if (!mounted) {
+      return;
+    }
+
+    _dotsController?.stop();
+
+    final Size screenSize = MediaQuery.sizeOf(context);
+    final double cardW = math.min(screenSize.width - 64, 320.0);
+    final double cardH = cardW / 0.718;
+
+    final ui.Image coverSnapshot = await generateCardCoverSnapshot(
+      card: chosen,
+      size: Size(cardW, cardH),
+    );
+
+    if (!mounted) {
+      coverSnapshot.dispose();
+      return;
+    }
+
+    _genieSnapshot?.dispose();
+    _genieSnapshot = coverSnapshot;
+    _genieDirection = AmanahGenieDirection.open;
+    _isGenieRunning = true;
+    _showSuccess = true;
+    _isGenieSettled = false;
+    _activationStage = 'idle';
+
+    _genieController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    _genieController!.addListener(() {
+      if (mounted) {
+        setState(() {});
       }
-      setState(() {
-        _activationStage = 'activating';
-        _ejectionStage = 'idle';
-      });
-      _dotsController?.repeat();
     });
 
-    // 2. Complete Activation & Trigger Genie Open (t = 1800ms)
-    Future<void>.delayed(const Duration(milliseconds: 1800), () {
-      if (!mounted) {
-        return;
-      }
-      _dotsController?.stop();
-      setState(() {
-        _showSuccess = true;
-        _activationStage = 'idle';
-      });
-      // Settle Genie animation after card appears (t = 350ms)
-      Future<void>.delayed(const Duration(milliseconds: 350), () {
+    _genieController!.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
         if (mounted) {
-          setState(() => _isGenieSettled = true);
+          setState(() {
+            _isGenieRunning = false;
+          });
+          // Deliberate event-based settle pause (300ms) so backface card is seen landed
+          // stably in place before starting the smooth 3D flip rotation
+          async.Timer(const Duration(milliseconds: 300), () {
+            if (mounted && _showSuccess) {
+              setState(() {
+                _isGenieSettled = true;
+              });
+            }
+          });
         }
-      });
+        _disposeGenieController();
+      }
     });
+
+    _genieController!.forward();
   }
 
-  void _handleCloseOverlay() {
+  Future<void> _handleCloseOverlay() async {
+    if (_isGenieRunning) {
+      return;
+    }
+    _disposeGenieController();
+
     setState(() {
       _isGenieSettled = false;
-      _showSuccess = false;
-      _activationStage = 'idle';
-      _ejectionStage = 'dock_appear';
-      _verticalDrag = 0;
-      _horizontalDrag = 0;
     });
+
+    final AmanahQueueCardData chosen = _selectedActiveCard ?? _cards[_currentIndex];
+    final Size screenSize = MediaQuery.sizeOf(context);
+    final double cardW = math.min(screenSize.width - 64, 320.0);
+    final double cardH = cardW / 0.718;
+
+    final ui.Image coverSnapshot = await generateCardCoverSnapshot(
+      card: chosen,
+      size: Size(cardW, cardH),
+    );
+
+    if (!mounted) {
+      coverSnapshot.dispose();
+      return;
+    }
+
+    _genieSnapshot?.dispose();
+    _genieSnapshot = coverSnapshot;
+    _genieDirection = AmanahGenieDirection.minimize;
+    _isGenieRunning = true;
+
+    _genieController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    _genieController!.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+
+    _genieController!.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        if (mounted) {
+          setState(() {
+            _isGenieRunning = false;
+            _showSuccess = false;
+            _activationStage = 'idle';
+            _ejectionStage = 'dock_appear';
+            _verticalDrag = 0;
+            _horizontalDrag = 0;
+          });
+          _startEjectionChoreography();
+        }
+        _disposeGenieController();
+      }
+    });
+
+    _genieController!.forward();
+  }
+
+  void _startEjectionChoreography() {
+    _clearEjectionTimers();
 
     // Step 2: Friends converge to 3D rail (t = 200ms)
-    Future<void>.delayed(const Duration(milliseconds: 200), () {
-      if (mounted) {
-        setState(() => _ejectionStage = 'rail_converge');
-      }
-    });
+    _ejectionTimers.add(
+      async.Timer(const Duration(milliseconds: 200), () {
+        if (mounted) {
+          setState(() => _ejectionStage = 'rail_converge');
+        }
+      }),
+    );
 
     // Step 3: Center card peeks from slot mouth (t = 850ms)
-    Future<void>.delayed(const Duration(milliseconds: 850), () {
-      if (mounted) {
-        setState(() => _ejectionStage = 'atm_peek');
-        HapticFeedback.lightImpact();
-      }
-    });
+    _ejectionTimers.add(
+      async.Timer(const Duration(milliseconds: 850), () {
+        if (mounted) {
+          setState(() => _ejectionStage = 'atm_peek');
+          HapticFeedback.lightImpact();
+        }
+      }),
+    );
 
     // Step 4: Center card rises into place (t = 1350ms)
-    Future<void>.delayed(const Duration(milliseconds: 1350), () {
-      if (mounted) {
-        setState(() => _ejectionStage = 'full_eject');
-      }
-    });
+    _ejectionTimers.add(
+      async.Timer(const Duration(milliseconds: 1350), () {
+        if (mounted) {
+          setState(() => _ejectionStage = 'full_eject');
+        }
+      }),
+    );
 
     // Step 5: Lock firmly into rail (t = 2000ms)
-    Future<void>.delayed(const Duration(milliseconds: 2000), () {
-      if (mounted) {
-        setState(() {
-          _ejectionStage = 'idle';
-          _selectedActiveCard = null;
-        });
-        HapticFeedback.mediumImpact();
-      }
-    });
+    _ejectionTimers.add(
+      async.Timer(const Duration(milliseconds: 2000), () {
+        if (mounted) {
+          setState(() {
+            _ejectionStage = 'idle';
+            _selectedActiveCard = null;
+          });
+          HapticFeedback.mediumImpact();
+        }
+      }),
+    );
   }
 
-  void _handleCollectCard(AmanahQueueCardData card) {
+  Future<void> _handleCollectCard(AmanahQueueCardData card) async {
+    if (_isGenieRunning) {
+      return;
+    }
+    _disposeGenieController();
+
     setState(() {
-      _collectedCards.removeWhere((AmanahQueueCardData c) => c.id == card.id);
-      _collectedCards.insert(0, card);
-      _showSuccess = false;
       _isGenieSettled = false;
-      _currentIndex = (_currentIndex + 1) % _cards.length;
     });
-    Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        builder: (_) => AmanahQueueHistoryScreen(
-          collectedCards: _collectedCards,
-          onRedraw: () => Navigator.of(context).pop(),
-        ),
-      ),
+
+    final Size screenSize = MediaQuery.sizeOf(context);
+    final double cardW = math.min(screenSize.width - 64, 320.0);
+    final double cardH = cardW / 0.718;
+
+    final ui.Image coverSnapshot = await generateCardCoverSnapshot(
+      card: card,
+      size: Size(cardW, cardH),
     );
+
+    if (!mounted) {
+      coverSnapshot.dispose();
+      return;
+    }
+
+    _genieSnapshot?.dispose();
+    _genieSnapshot = coverSnapshot;
+    _genieDirection = AmanahGenieDirection.minimize;
+    _isGenieRunning = true;
+
+    _genieController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    _genieController!.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+
+    _genieController!.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        if (mounted) {
+          setState(() {
+            _collectedCards.removeWhere((AmanahQueueCardData c) => c.id == card.id);
+            _collectedCards.insert(0, card);
+            _showSuccess = false;
+            _isGenieRunning = false;
+            _isGenieSettled = false;
+            _selectedActiveCard = null;
+            _activationStage = 'idle';
+            _ejectionStage = 'idle';
+            _verticalDrag = 0;
+            _horizontalDrag = 0;
+            _spinOffset = 0;
+            _currentIndex = (_currentIndex + 1) % _cards.length;
+          });
+          _disposeGenieController();
+          _clearEjectionTimers();
+
+          Navigator.of(context).push<void>(
+            MaterialPageRoute<void>(
+              builder: (_) => AmanahQueueHistoryScreen(
+                collectedCards: _collectedCards,
+                onRedraw: () => Navigator.of(context).pop(),
+              ),
+            ),
+          );
+        }
+      }
+    });
+
+    _genieController!.forward();
   }
 
   void _openGuide() {
@@ -296,6 +529,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
 
   @override
   Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.sizeOf(context);
     final double dragProgress = (_verticalDrag / 80.0).clamp(0.0, 1.0);
     final bool isNearSlot = (_verticalDrag >= 20.0 || dragProgress >= 0.25) && _activationStage == 'idle';
     final bool isMorphingActive = _activationStage == 'activating';
@@ -341,38 +575,49 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                   showSuccess: _showSuccess,
                 ),
 
-                // 2. 3D Paramedic Toolbox & Morphing Headline
+                // 2. 3D Paramedic Toolbox & Morphing Headline with Spatial Top-to-Center Glide
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 300),
                   opacity: _showSuccess ? 0.0 : 1.0,
-                  child: Column(
-                    children: <Widget>[
-                      AmanahParamedicToolbox3D(
-                        isOpen: isMorphingActive || isNearSlot,
-                        size: 76,
-                      ),
-                      const SizedBox(height: 8),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 250),
-                        child: Text(
-                          isMorphingActive
-                              ? 'Memproses\nantrean${'.' * _dotCount}'
-                              : headlineText,
-                          key: ValueKey<String>(headlineText + (isMorphingActive ? '$_dotCount' : '')),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: isNearSlot || isMorphingActive
-                                ? const Color(0xFF0A44FF)
-                                : const Color(0xFF0F172A),
-                            fontFamily: 'PlusJakartaSans',
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.4,
-                            height: 1.2,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 700),
+                    curve: const Cubic(0.22, 1.0, 0.36, 1.0),
+                    transform: Matrix4.translationValues(0, isMorphingActive ? 220.0 : 12.0, 0),
+                    child: AnimatedScale(
+                      scale: isMorphingActive ? 1.05 : 1.0,
+                      duration: const Duration(milliseconds: 700),
+                      curve: const Cubic(0.22, 1.0, 0.36, 1.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          const SizedBox(height: 6),
+                          AnimatedScale(
+                            scale: (isMorphingActive || isNearSlot) ? 1.1 : 1.0,
+                            duration: const Duration(milliseconds: 500),
+                            child: AmanahParamedicToolbox3D(
+                              isOpen: isMorphingActive || isNearSlot,
+                              size: 76,
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 10),
+                          BlurryMorphText(
+                            text: headlineText,
+                            isProcessing: isMorphingActive,
+                            dotCount: _dotCount,
+                            style: TextStyle(
+                              color: isNearSlot || isMorphingActive
+                                  ? const Color(0xFF0A44FF)
+                                  : const Color(0xFF0F172A),
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.4,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
 
@@ -382,6 +627,22 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                     behavior: HitTestBehavior.opaque,
                     onLongPressStart: (_) => _startRouletteSpin(),
                     onLongPressEnd: (_) => _stopRouletteSpin(),
+                    onPanDown: (_) {
+                      if (_decelController != null && _decelController!.isAnimating) {
+                        _disposeDecelController();
+                        setState(() {
+                          _spinOffset = 0;
+                        });
+                      }
+                    },
+                    onPanCancel: () {
+                      if (!_isLongPressing && _activationStage == 'idle') {
+                        setState(() {
+                          _horizontalDrag = 0;
+                          _verticalDrag = 0;
+                        });
+                      }
+                    },
                     onPanUpdate: (DragUpdateDetails details) {
                       if (_isLongPressing || _activationStage != 'idle') {
                         return;
@@ -446,9 +707,30 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
             _AmanahQueueActivationOverlay(
               card: _selectedActiveCard!,
               isGenieSettled: _isGenieSettled,
+              isGenieRunning: _isGenieRunning,
               onClose: _handleCloseOverlay,
               onRedraw: _handleCloseOverlay,
               onActionClick: () => _handleCollectCard(_selectedActiveCard!),
+            ),
+
+          // 6. Native Genie Effect Canvas Layer (1:1 macOS-style Suction & Emergence)
+          if (_isGenieRunning && _genieSnapshot != null)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: AmanahGenieCanvasPainter(
+                    snapshot: _genieSnapshot!,
+                    progress: _genieController?.value ?? 0.0,
+                    direction: _genieDirection,
+                    dockPoint: Offset(screenSize.width / 2, screenSize.height - 65),
+                    cardRect: Rect.fromCenter(
+                      center: Offset(screenSize.width / 2, (screenSize.height - 145) * 0.44 + 48),
+                      width: math.min(screenSize.width - 64, 320.0),
+                      height: math.min(screenSize.width - 64, 320.0) / 0.718,
+                    ),
+                  ),
+                ),
+              ),
             ),
         ],
       ),
@@ -602,7 +884,7 @@ class _AmanahQueue3DCarousel extends StatelessWidget {
               ),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: const Color(0xFF0A44FF).withValues(alpha: 0.16),
+                  color: const Color(0xFF38BDF8).withValues(alpha: 0.22),
                   blurRadius: 18,
                   spreadRadius: 0,
                 ),
@@ -613,15 +895,20 @@ class _AmanahQueue3DCarousel extends StatelessWidget {
       ),
     );
 
-    // 2. Dual ChevronDown Animated Bouncing Arrow pointing to bottom dock
+    // 2. High-Performance Aerodynamic Racing Chevrons (Centered beneath target frame)
     cardWidgets.add(
       Positioned(
-        left: (screen.width - 40) / 2,
-        top: baseTop + 342 + (verticalDrag > 0 ? verticalDrag * 0.3 : 0),
-        child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 300),
-          opacity: isActivating || showSuccess || ejectionStage != 'idle' ? 0.0 : 1.0,
-          child: const _AmanahBouncingChevrons(),
+        left: 0,
+        right: 0,
+        top: baseTop + 348,
+        child: Center(
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 200),
+            opacity: (isActivating || showSuccess || ejectionStage != 'idle')
+                ? 0.0
+                : (1.0 - (verticalDrag / 40.0)).clamp(0.0, 1.0),
+            child: const AmanahRacingPulseChevrons(),
+          ),
         ),
       ),
     );
@@ -719,81 +1006,6 @@ class _AmanahQueue3DCarousel extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: cardWidgets,
-    );
-  }
-}
-
-class _AmanahBouncingChevrons extends StatefulWidget {
-  const _AmanahBouncingChevrons();
-
-  @override
-  State<_AmanahBouncingChevrons> createState() => _AmanahBouncingChevronsState();
-}
-
-class _AmanahBouncingChevronsState extends State<_AmanahBouncingChevrons>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  double _calculateBounce(double t) {
-    final double normalized = (t % 1.0 + 1.0) % 1.0;
-    if (normalized <= 0.5) {
-      final double p = normalized / 0.5;
-      final double curved = math.sin(p * math.pi / 2.0);
-      return -6.0 * (1.0 - curved);
-    } else {
-      final double p = (normalized - 0.5) / 0.5;
-      final double curved = math.sin(p * math.pi / 2.0);
-      return -6.0 * curved;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (BuildContext context, Widget? child) {
-        final double t = _controller.value;
-        final double bounce1 = _calculateBounce(t);
-        final double bounce2 = _calculateBounce(t - 0.15);
-
-        return Stack(
-          alignment: Alignment.topCenter,
-          clipBehavior: Clip.none,
-          children: <Widget>[
-            Transform.translate(
-              offset: Offset(0, bounce1),
-              child: const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: Color(0xFF0A44FF),
-                size: 26,
-              ),
-            ),
-            Transform.translate(
-              offset: Offset(0, 12.0 + bounce2),
-              child: const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: Color(0xFF0A44FF),
-                size: 26,
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }
@@ -935,343 +1147,91 @@ class _AmanahBottomNotchedDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double activeProgress = isActivating ? 1.0 : dragProgress;
-
     return AnimatedContainer(
       duration: const Duration(milliseconds: 450),
       curve: Curves.easeOut,
       transform: Matrix4.translationValues(0, isActivating ? 180.0 : 0.0, 0),
-      child: SizedBox(
-        height: 145,
-        width: double.infinity,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          clipBehavior: Clip.none,
-          children: <Widget>[
-            // 1. Volumetric Aura & Rising Heat Beam Container
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 700),
-                opacity: isLongPressing ? 1.0 : (0.20 + activeProgress * 0.80),
-                child: SizedBox(
-                  height: 145,
-                  child: Stack(
-                    alignment: Alignment.topCenter,
-                    clipBehavior: Clip.none,
-                    children: <Widget>[
-                      // Layer A: Rising Aura Beam on Long-Press (-top-36 -> -144px, h: 220, w: 260)
-                      Positioned(
-                        top: -144,
-                        child: AnimatedScale(
-                          duration: const Duration(milliseconds: 1000),
-                          curve: Curves.easeOut,
-                          scale: isLongPressing ? 1.05 : 0.60,
-                          alignment: Alignment.bottomCenter,
-                          child: AnimatedOpacity(
-                            duration: const Duration(milliseconds: 1000),
-                            opacity: isLongPressing ? 1.0 : 0.0,
-                            child: Container(
-                              width: 260,
-                              height: 220,
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.vertical(top: Radius.circular(130)),
-                                gradient: LinearGradient(
-                                  begin: Alignment.bottomCenter,
-                                  end: Alignment.topCenter,
-                                  colors: <Color>[
-                                    const Color(0xFF2563EB).withValues(alpha: 0.90),
-                                    const Color(0xFF0EA5E9).withValues(alpha: 0.60),
-                                    Colors.transparent,
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // Layer B: Inner Cyan Heat Core (-top-24 -> -96px, h: 160, w: 200)
-                      Positioned(
-                        top: -96,
-                        child: AnimatedScale(
-                          duration: const Duration(milliseconds: 1200),
-                          curve: Curves.easeOut,
-                          scale: isLongPressing ? 1.0 : 0.40,
-                          alignment: Alignment.bottomCenter,
-                          child: AnimatedOpacity(
-                            duration: const Duration(milliseconds: 1200),
-                            opacity: isLongPressing ? 0.90 : 0.0,
-                            child: Container(
-                              width: 200,
-                              height: 160,
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.vertical(top: Radius.circular(100)),
-                                gradient: LinearGradient(
-                                  begin: Alignment.bottomCenter,
-                                  end: Alignment.topCenter,
-                                  colors: <Color>[
-                                    const Color(0xFF0A44FF).withValues(alpha: 0.80),
-                                    const Color(0xFF22D3EE).withValues(alpha: 0.50),
-                                    Colors.transparent,
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // Layer C: Semi-Circular Radial Volumetric Dome Halo (-top-16 -> -64px, h: 150, w: 245)
-                      Positioned(
-                        top: -64,
-                        child: AnimatedScale(
-                          duration: const Duration(milliseconds: 700),
-                          scale: isLongPressing ? 1.08 : (0.92 + activeProgress * 0.28),
-                          child: Container(
-                            width: 245,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(122.5)),
-                              gradient: LinearGradient(
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
-                                colors: <Color>[
-                                  const Color(0xFF0A44FF).withValues(alpha: isLongPressing ? 0.80 : 0.65),
-                                  const Color(0xFF38BDF8).withValues(alpha: isLongPressing ? 0.50 : 0.35),
-                                  Colors.transparent,
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // Layer D: Interior Cavity Core Radial Aperture Glow (top: 8px, h: 45, w: 235)
-                      Positioned(
-                        top: 8,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 800),
-                          width: isLongPressing ? 245 : 235,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(999),
-                            color: isLongPressing
-                                ? const Color(0xFF38BDF8)
-                                : const Color(0xFF0A44FF).withValues(alpha: 0.85),
-                            boxShadow: <BoxShadow>[
-                              BoxShadow(
-                                color: const Color(0xFF38BDF8),
-                                blurRadius: isLongPressing ? 28 : 14,
-                                spreadRadius: isLongPressing ? 4 : 0,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 400),
+        opacity: isActivating ? 0.0 : 1.0,
+        child: SizedBox(
+          height: 145,
+          width: double.infinity,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.bottomCenter,
+            children: <Widget>[
+              // 1. Master 6-Layer Volumetric Optical Glow & Notched Dock Painter
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: AmanahDockHollowGlowPainter(
+                    dragProgress: dragProgress,
+                    isLongPressing: isLongPressing,
+                    isActivating: isActivating,
+                    isDark: false,
                   ),
                 ),
               ),
-            ),
 
-            // 2. SVG Notched Solid Foreground Floor Mask
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 145,
-              child: CustomPaint(
-                painter: _SvgNotchedDockFloorPainter(
-                  isLongPressing: isLongPressing,
-                  dragProgress: dragProgress,
-                ),
-              ),
-            ),
-
-            // 3. Instruction Text Prompt placed at top: 66px below notch opening (1:1 Web Placement)
-            Positioned(
-              top: 66,
-              left: 16,
-              right: 16,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 300),
-                opacity: isActivating ? 0.0 : 1.0,
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: dragProgress > 0.05
-                        ? const Color(0xFF38BDF8)
-                        : const Color(0xFF334155),
-                    fontFamily: 'PlusJakartaSans',
-                    fontSize: 12,
-                    fontWeight: dragProgress > 0.05 ? FontWeight.w800 : FontWeight.w600,
-                    letterSpacing: 0.2,
-                    shadows: dragProgress > 0.05
-                        ? const <Shadow>[
-                            Shadow(
-                              color: Color(0xFF38BDF8),
-                              blurRadius: 12,
-                            ),
-                          ]
-                        : null,
+              // 2. Instruction Text Prompt placed at top: 66px below notch opening (1:1 Web Placement)
+              Positioned(
+                top: 66,
+                left: 16,
+                right: 16,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: isActivating ? 0.0 : 1.0,
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: dragProgress > 0.05
+                          ? const Color(0xFF38BDF8)
+                          : const Color(0xFF334155),
+                      fontFamily: 'PlusJakartaSans',
+                      fontSize: 12,
+                      fontWeight: dragProgress > 0.05 ? FontWeight.w800 : FontWeight.w600,
+                      letterSpacing: 0.2,
+                      shadows: dragProgress > 0.05
+                          ? const <Shadow>[
+                              Shadow(
+                                color: Color(0xFF38BDF8),
+                                blurRadius: 12,
+                              ),
+                            ]
+                          : null,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // 4. Bottom Home Indicator Gesture Bar
-            Positioned(
-              bottom: 10,
-              child: Container(
-                width: 112,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(999),
+              // 3. Bottom Home Indicator Gesture Bar
+              Positioned(
+                bottom: 10,
+                child: Container(
+                  width: 112,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _SvgNotchedDockFloorPainter extends CustomPainter {
-  const _SvgNotchedDockFloorPainter({
-    required this.isLongPressing,
-    required this.dragProgress,
-  });
-
-  final bool isLongPressing;
-  final double dragProgress;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double w = size.width;
-    final double scaleX = w / 390.0;
-
-    // 1. Deep Recessed Hollow Slot Cavity Opening
-    final Path cavityPath = Path()
-      ..moveTo(73 * scaleX, 10)
-      ..quadraticBezierTo(81 * scaleX, 10, 83 * scaleX, 18)
-      ..lineTo(86 * scaleX, 30)
-      ..quadraticBezierTo(89 * scaleX, 40, 100 * scaleX, 40)
-      ..lineTo(290 * scaleX, 40)
-      ..quadraticBezierTo(301 * scaleX, 40, 304 * scaleX, 30)
-      ..lineTo(307 * scaleX, 18)
-      ..quadraticBezierTo(309 * scaleX, 10, 317 * scaleX, 10)
-      ..lineTo(317 * scaleX, 60)
-      ..lineTo(73 * scaleX, 60)
-      ..close();
-
-    final Paint cavityPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: <Color>[Color(0xFF060913), Color(0xFF020306)],
-      ).createShader(Offset.zero & size);
-    canvas.drawPath(cavityPath, cavityPaint);
-
-    // 2. Elevated Solid Notched Box Floor Surface
-    final Path floorPath = Path()
-      ..moveTo(0, 10)
-      ..lineTo(73 * scaleX, 10)
-      ..quadraticBezierTo(81 * scaleX, 10, 83 * scaleX, 18)
-      ..lineTo(86 * scaleX, 30)
-      ..quadraticBezierTo(89 * scaleX, 40, 100 * scaleX, 40)
-      ..lineTo(290 * scaleX, 40)
-      ..quadraticBezierTo(301 * scaleX, 40, 304 * scaleX, 30)
-      ..lineTo(307 * scaleX, 18)
-      ..quadraticBezierTo(309 * scaleX, 10, 317 * scaleX, 10)
-      ..lineTo(w, 10)
-      ..lineTo(w, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-
-    final Paint floorPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: <Color>[
-          Color(0xFFE2E8F0),
-          Color(0xFFCBD5E1),
-          Color(0xFF94A3B8),
-        ],
-      ).createShader(Offset.zero & size);
-    canvas.drawPath(floorPath, floorPaint);
-
-    // 3. Ambient Radiant Contour Glow
-    final Path contourPath = Path()
-      ..moveTo(0, 10)
-      ..lineTo(73 * scaleX, 10)
-      ..quadraticBezierTo(81 * scaleX, 10, 83 * scaleX, 18)
-      ..lineTo(86 * scaleX, 30)
-      ..quadraticBezierTo(89 * scaleX, 40, 100 * scaleX, 40)
-      ..lineTo(290 * scaleX, 40)
-      ..quadraticBezierTo(301 * scaleX, 40, 304 * scaleX, 30)
-      ..lineTo(307 * scaleX, 18)
-      ..quadraticBezierTo(309 * scaleX, 10, 317 * scaleX, 10)
-      ..lineTo(w, 10);
-
-    final Paint contourGlow = Paint()
-      ..color = const Color(0xFF0284C7).withValues(alpha: 0.40)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 5.5
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.5);
-    canvas.drawPath(contourPath, contourGlow);
-
-    // 4. Base Rim Stroke
-    final Paint rimPaint = Paint()
-      ..shader = const LinearGradient(
-        colors: <Color>[Color(0xFF0369A1), Color(0xFF0284C7), Color(0xFF38BDF8), Color(0xFF0284C7), Color(0xFF0369A1)],
-        stops: <double>[0.0, 0.22, 0.50, 0.78, 1.0],
-      ).createShader(Rect.fromLTWH(0, 0, w, 50))
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.85;
-    canvas.drawPath(contourPath, rimPaint);
-
-    // 5. Dedicated Molten Core Lip Filament (illuminates when dragging / long-pressing)
-    if (isLongPressing || dragProgress > 0.05) {
-      final Paint moltenGlow = Paint()
-        ..shader = const LinearGradient(
-          colors: <Color>[Color(0xFF0284C7), Color(0xFF38BDF8), Color(0xFF7DD3FC), Color(0xFF38BDF8), Color(0xFF0284C7)],
-        ).createShader(Rect.fromLTWH(100 * scaleX, 38, 190 * scaleX, 4))
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = isLongPressing ? 8.0 : 4.0
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0)
-        ..strokeCap = StrokeCap.round;
-      canvas.drawLine(Offset(100 * scaleX, 40), Offset(290 * scaleX, 40), moltenGlow);
-
-      final Paint moltenCore = Paint()
-        ..shader = const LinearGradient(
-          colors: <Color>[Color(0xFF0284C7), Color(0xFF38BDF8), Color(0xFFE0F2FE), Color(0xFF38BDF8), Color(0xFF0284C7)],
-        ).createShader(Rect.fromLTWH(100 * scaleX, 38, 190 * scaleX, 4))
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = isLongPressing ? 3.0 : 2.0
-        ..strokeCap = StrokeCap.round;
-      canvas.drawLine(Offset(100 * scaleX, 40), Offset(290 * scaleX, 40), moltenCore);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _SvgNotchedDockFloorPainter oldDelegate) {
-    return oldDelegate.isLongPressing != isLongPressing ||
-        oldDelegate.dragProgress != dragProgress;
-  }
-}
-
-// --- Success & Activation Overlay with 3D Flip Hero Card ---
+// --- Success & Activation Overlay with 3D Flip Hero Card & Genie Synchronization ---
 
 class _AmanahQueueActivationOverlay extends StatefulWidget {
   const _AmanahQueueActivationOverlay({
     required this.card,
     required this.isGenieSettled,
+    required this.isGenieRunning,
     required this.onClose,
     required this.onRedraw,
     required this.onActionClick,
@@ -1279,6 +1239,7 @@ class _AmanahQueueActivationOverlay extends StatefulWidget {
 
   final AmanahQueueCardData card;
   final bool isGenieSettled;
+  final bool isGenieRunning;
   final VoidCallback onClose;
   final VoidCallback onRedraw;
   final VoidCallback onActionClick;
@@ -1289,9 +1250,55 @@ class _AmanahQueueActivationOverlay extends StatefulWidget {
 }
 
 class _AmanahQueueActivationOverlayState
-    extends State<_AmanahQueueActivationOverlay> {
+    extends State<_AmanahQueueActivationOverlay>
+    with TickerProviderStateMixin {
+  late final AnimationController _flipController;
+  late final Animation<double> _flipAnimation;
+
   double _tiltX = 0.0;
   double _tiltY = 0.0;
+  bool _hapticFired = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _flipController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 750),
+    );
+    _flipAnimation = Tween<double>(
+      begin: math.pi,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _flipController, curve: Curves.easeOutCubic));
+
+    _flipController.addListener(() {
+      if (_flipController.value >= 0.45 && !_hapticFired) {
+        _hapticFired = true;
+        HapticFeedback.mediumImpact();
+      }
+      setState(() {});
+    });
+
+    if (widget.isGenieSettled) {
+      _flipController.value = 1.0;
+      _hapticFired = true;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _AmanahQueueActivationOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isGenieSettled && !oldWidget.isGenieSettled) {
+      _hapticFired = false;
+      _flipController.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _flipController.dispose();
+    super.dispose();
+  }
 
   void _openDetailModal() {
     AmanahPatientDetailModal.show(
@@ -1331,147 +1338,202 @@ class _AmanahQueueActivationOverlayState
     final double cardW = math.min(size.width - 64, 320.0);
     final double cardH = cardW / 0.718;
 
-    return Positioned.fill(
-      child: Container(
-        color: const Color(0xF8F8FAFF),
-        child: SafeArea(
-          child: Column(
-            children: <Widget>[
-              // Top Bar: Back button & Title
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    IconButton(
-                      onPressed: widget.onClose,
-                      icon: const Icon(Icons.arrow_back_rounded),
-                      color: const Color(0xFF1E293B),
-                    ),
-                    const Text(
-                      'Antrean terpilih',
-                      style: TextStyle(
-                        color: Color(0xFF14103B),
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(width: 48),
-                  ],
-                ),
-              ),
+    final double flipAngle = _flipAnimation.value;
+    final bool isBackface = flipAngle > (math.pi / 2);
 
-              // Activated Hero Card with 3D tilt
-              Expanded(
-                child: Center(
-                  child: GestureDetector(
-                    onPanUpdate: (DragUpdateDetails d) {
-                      setState(() {
-                        _tiltX = (d.localPosition.dy / cardH - 0.5) * -0.35;
-                        _tiltY = (d.localPosition.dx / cardW - 0.5) * 0.35;
-                      });
-                    },
-                    onPanEnd: (_) {
-                      setState(() {
-                        _tiltX = 0;
-                        _tiltY = 0;
-                      });
-                    },
-                    onTap: _openDetailModal,
-                    child: Transform(
-                      alignment: Alignment.center,
-                      transform: Matrix4.identity()
-                        ..setEntry(3, 2, 0.001)
-                        ..rotateX(_tiltX)
-                        ..rotateY(_tiltY),
-                      child: _AmanahRevealedHeroCard(
-                        card: widget.card,
-                        width: cardW,
-                        height: cardH,
-                        onDetailTap: _openDetailModal,
+    return Positioned.fill(
+      child: Stack(
+        children: <Widget>[
+          // 1. Soft Background Scrim (Fades in softly without wrapping or pulsing the Hero Card)
+          Positioned.fill(
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 350),
+              opacity: widget.isGenieSettled ? 1.0 : (widget.isGenieRunning ? 0.0 : 0.95),
+              child: Container(
+                color: const Color(0xF8F8FAFF),
+              ),
+            ),
+          ),
+
+          SafeArea(
+            child: Column(
+              children: <Widget>[
+                // 2. Top Header Bar (Animated Slide & Fade when settled)
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 350),
+                  opacity: widget.isGenieSettled ? 1.0 : 0.0,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 450),
+                    curve: Curves.easeOut,
+                    transform: Matrix4.translationValues(
+                      0,
+                      widget.isGenieSettled ? 0.0 : -14.0,
+                      0,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          IconButton(
+                            onPressed: widget.onClose,
+                            icon: const Icon(Icons.arrow_back_rounded),
+                            color: const Color(0xFF1E293B),
+                          ),
+                          const Text(
+                            'Antrean terpilih',
+                            style: TextStyle(
+                              color: Color(0xFF14103B),
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(width: 48),
+                        ],
                       ),
                     ),
                   ),
                 ),
-              ),
 
-              // Action Buttons: Panggil Pasien & Pilih Antrean Lain
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                child: Column(
-                  children: <Widget>[
-                    // Primary Action Button
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(18),
-                        onTap: widget.onActionClick,
-                        child: Ink(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(18),
-                            gradient: const LinearGradient(
-                              colors: <Color>[Color(0xFF0A44FF), Color(0xFF1A55FF), Color(0xFF0055FF)],
-                            ),
-                            boxShadow: <BoxShadow>[
-                              BoxShadow(
-                                color: const Color(0xFF0A44FF).withValues(alpha: 0.35),
-                                blurRadius: 25,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: const Text(
-                            'Panggil & Proses Pasien',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
+                // 3. Activated Hero Card: Steady, Solid & Continuous (Zero flash, zero pulse)
+                Expanded(
+                  child: Center(
+                    child: GestureDetector(
+                      onPanUpdate: (DragUpdateDetails d) {
+                        setState(() {
+                          _tiltX = (d.localPosition.dy / cardH - 0.5) * -0.35;
+                          _tiltY = (d.localPosition.dx / cardW - 0.5) * 0.35;
+                        });
+                      },
+                      onPanEnd: (_) {
+                        setState(() {
+                          _tiltX = 0;
+                          _tiltY = 0;
+                        });
+                      },
+                      onTap: _openDetailModal,
+                      child: Opacity(
+                        opacity: widget.isGenieRunning ? 0.0 : 1.0,
+                        child: Transform(
+                          alignment: Alignment.center,
+                          transform: Matrix4.identity()
+                            ..setEntry(3, 2, 0.001)
+                            ..rotateX(_tiltX)
+                            ..rotateY(_tiltY + flipAngle),
+                          child: isBackface
+                              ? Transform(
+                                  alignment: Alignment.center,
+                                  transform: Matrix4.identity()..rotateY(math.pi),
+                                  child: SizedBox(
+                                    width: cardW,
+                                    height: cardH,
+                                    child: _AmanahQueueCardCover(card: widget.card),
+                                  ),
+                                )
+                              : _AmanahRevealedHeroCard(
+                                  card: widget.card,
+                                  width: cardW,
+                                  height: cardH,
+                                  onDetailTap: _openDetailModal,
+                                ),
                         ),
                       ),
                     ),
-
-                    const SizedBox(height: 12),
-
-                    // Secondary Action Button
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(18),
-                        onTap: widget.onRedraw,
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 13),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
-                          ),
-                          child: const Text(
-                            'Pilih Antrean Lain',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Color(0xFF334155),
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+
+                // 4. Action Buttons: Panggil Pasien & Pilih Antrean Lain (Animated Slide & Fade when settled)
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 350),
+                  opacity: widget.isGenieSettled ? 1.0 : 0.0,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeOut,
+                    transform: Matrix4.translationValues(
+                      0,
+                      widget.isGenieSettled ? 0.0 : 28.0,
+                      0,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                      child: Column(
+                        children: <Widget>[
+                          // Primary Action Button: Panggil & Proses Pasien (Triggers Genie suction into dock)
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(18),
+                              onTap: widget.onActionClick,
+                              child: Ink(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(18),
+                                  gradient: const LinearGradient(
+                                    colors: <Color>[Color(0xFF0A44FF), Color(0xFF1A55FF), Color(0xFF0055FF)],
+                                  ),
+                                  boxShadow: <BoxShadow>[
+                                    BoxShadow(
+                                      color: const Color(0xFF0A44FF).withValues(alpha: 0.35),
+                                      blurRadius: 25,
+                                      offset: const Offset(0, 10),
+                                    ),
+                                  ],
+                                ),
+                                child: const Text(
+                                  'Panggil & Proses Pasien',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // Secondary Action Button
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(18),
+                              onTap: widget.onRedraw,
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 13),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(18),
+                                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                                ),
+                                child: const Text(
+                                  'Pilih Antrean Lain',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Color(0xFF334155),
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -1810,19 +1872,24 @@ class AmanahQueueHistoryScreen extends StatelessWidget {
                                 fontWeight: FontWeight.w900,
                               ),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFEFF6FF),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: const Color(0xFFDBEAFE)),
-                              ),
-                              child: Text(
-                                card.poly,
-                                style: const TextStyle(
-                                  color: Color(0xFF0A44FF),
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEFF6FF),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: const Color(0xFFDBEAFE)),
+                                ),
+                                child: Text(
+                                  card.poly,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Color(0xFF0A44FF),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
                               ),
                             ),
@@ -1859,6 +1926,34 @@ class AmanahQueueHistoryScreen extends StatelessWidget {
                 );
               },
             ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              onRedraw();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0A44FF),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 4,
+            ),
+            child: const Text(
+              'Panggil Antrean Lain',
+              style: TextStyle(
+                fontFamily: 'PlusJakartaSans',
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
