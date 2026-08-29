@@ -234,7 +234,7 @@ IconData amanahQuickActionIconData(AmanahQuickActionIcon icon) {
     AmanahQuickActionIcon.history => Icons.history_rounded,
     AmanahQuickActionIcon.presence => Icons.check_box_outlined,
     AmanahQuickActionIcon.schedule => Icons.calendar_today_outlined,
-    AmanahQuickActionIcon.search => Icons.search_rounded,
+    AmanahQuickActionIcon.search => Icons.groups_outlined,
     AmanahQuickActionIcon.idCard => Icons.contact_page_outlined,
   };
 }

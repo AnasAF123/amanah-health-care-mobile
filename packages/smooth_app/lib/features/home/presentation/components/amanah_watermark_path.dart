@@ -4651,8 +4651,8 @@ class _AmanahWatermarkPainter extends CustomPainter {
 class AmanahPixelTexture extends StatelessWidget {
   const AmanahPixelTexture({
     this.isDark = false,
-    this.opacity = 0.22,
-    this.maskType = AmanahPixelMaskType.concaveTop,
+    this.opacity = 0.35,
+    this.maskType = AmanahPixelMaskType.fadeTop,
     super.key,
   });
 
@@ -4662,12 +4662,13 @@ class AmanahPixelTexture extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget content = Opacity(
-      opacity: opacity,
-      child: CustomPaint(
-        painter: _AmanahOrganicPixelPainter(isDark: isDark),
-        size: Size.infinite,
+    Widget content = CustomPaint(
+      painter: AmanahOrganicPixelPainter(
+        isDark: isDark,
+        opacity: opacity,
+        fadeTop: maskType == AmanahPixelMaskType.fadeTop,
       ),
+      size: Size.infinite,
     );
 
     if (maskType == AmanahPixelMaskType.concaveTop) {
@@ -4718,28 +4719,40 @@ class AmanahPixelTexture extends StatelessWidget {
 
 enum AmanahPixelMaskType {
   none,
+  fadeTop,
   concaveTop,
   bottomLeft,
 }
 
-class _AmanahOrganicPixelPainter extends CustomPainter {
-  const _AmanahOrganicPixelPainter({required this.isDark});
+class AmanahOrganicPixelPainter extends CustomPainter {
+  const AmanahOrganicPixelPainter({
+    required this.isDark,
+    this.fadeTop = false,
+    this.opacity = 0.35,
+  });
 
   final bool isDark;
+  final bool fadeTop;
+  final double opacity;
 
   static double _seededHash(double x, double y, double seed) {
     final double n = math.sin(x * 12.9898 + y * 78.233 + seed * 37.719) * 43758.5453;
     return n - n.floorToDouble();
   }
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    const double pixelSize = 3.5;
-    const double gap = 2.0;
+  static void drawPixelsToCanvas(
+    Canvas canvas,
+    Size size, {
+    bool isDark = false,
+    double opacity = 0.35,
+    bool fadeTop = true,
+  }) {
+    const double pixelSize = 4.0;
+    const double gap = 1.8;
     const double step = pixelSize + gap;
     final int cols = (size.width / step).ceil() + 1;
     final int rows = (size.height / step).ceil() + 1;
-    const double dropoutThreshold = 0.42;
+    const double dropoutThreshold = 0.36;
 
     final List<Color> customColors = isDark
         ? const <Color>[
@@ -4760,6 +4773,16 @@ class _AmanahOrganicPixelPainter extends CustomPainter {
     final Paint paint = Paint()..style = PaintingStyle.fill;
 
     for (int r = 0; r < rows; r++) {
+      final double yRatio = r / rows;
+      // Progressive bottom-to-top gradual fade matching web maskGradient
+      final double verticalFade = fadeTop
+          ? (yRatio * yRatio * 1.15).clamp(0.0, 1.0)
+          : 1.0;
+
+      if (fadeTop && verticalFade < 0.04) {
+        continue;
+      }
+
       for (int c = 0; c < cols; c++) {
         final double dropoutVal = _seededHash(r.toDouble(), c.toDouble(), 11);
         if (dropoutVal < dropoutThreshold) {
@@ -4767,7 +4790,11 @@ class _AmanahOrganicPixelPainter extends CustomPainter {
         }
 
         final double opacRand = _seededHash(r.toDouble(), c.toDouble(), 23);
-        final double cellOpacity = (0.15 + opacRand * 0.85).clamp(0.10, 1.0);
+        final double cellOpacity = (0.18 + opacRand * 0.82).clamp(0.10, 1.0) * opacity * verticalFade;
+
+        if (cellOpacity < 0.02) {
+          continue;
+        }
 
         final double sizeRand = _seededHash(r.toDouble(), c.toDouble(), 37);
         final double curSize = sizeRand < 0.20
@@ -4800,8 +4827,21 @@ class _AmanahOrganicPixelPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _AmanahOrganicPixelPainter oldDelegate) {
-    return oldDelegate.isDark != isDark;
+  void paint(Canvas canvas, Size size) {
+    drawPixelsToCanvas(
+      canvas,
+      size,
+      isDark: isDark,
+      opacity: opacity,
+      fadeTop: fadeTop,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant AmanahOrganicPixelPainter oldDelegate) {
+    return oldDelegate.isDark != isDark ||
+        oldDelegate.fadeTop != fadeTop ||
+        oldDelegate.opacity != opacity;
   }
 }
 

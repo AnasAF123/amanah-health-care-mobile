@@ -33,58 +33,79 @@ class AmanahDockHollowGlowPainter extends CustomPainter {
     // =========================================================================
     // LAYER 1: VOLUMETRIC VERTICAL HEAT BEAM & RISING ATMOSPHERIC AURA
     // =========================================================================
-    // 1A. High Rising Aura Beam (Only on Long-Press or Dragging Down)
-    if (isLongPressing || activeProgress > 0.05) {
+    // =========================================================================
+    // LAYER 1: VOLUMETRIC VERTICAL HEAT BEAM & RISING ATMOSPHERIC AURA
+    // Emerges from bottom slot cavity and rises progressively upward
+    // =========================================================================
+    if (isLongPressing || activeProgress > 0.02) {
       final double auraProgress = isLongPressing ? 1.0 : activeProgress;
-      final double auraOpacity = isLongPressing ? 0.95 : (auraProgress * 0.85);
+      final double risingFactor = Curves.easeOutCubic.transform(auraProgress);
+      final double auraOpacity = isLongPressing ? 0.95 : (risingFactor * 0.90);
+
+      // 1A. Physical Rising Aura Beam (Origin at bottom slot Y=48, extending upward to Y=-135)
+      const double beamBottomY = 48.0;
+      final double beamTopY = 38.0 - (175.0 * risingFactor);
+      final double beamHeight = (beamBottomY - beamTopY).clamp(20.0, 220.0);
+      final double beamCenterY = beamTopY + (beamHeight / 2.0);
+      final double beamWidth = 190.0 + (75.0 * risingFactor);
 
       final Paint risingAuraPaint = Paint()
+        ..blendMode = BlendMode.screen
         ..shader = ui.Gradient.linear(
-          const Offset(195, 145),
-          const Offset(195, -130),
+          const Offset(195, beamBottomY),
+          Offset(195, beamTopY),
           <Color>[
             const Color(0xFF2563EB).withValues(alpha: 0.85 * auraOpacity),
             const Color(0xFF0EA5E9).withValues(alpha: 0.60 * auraOpacity),
             const Color(0xFF38BDF8).withValues(alpha: 0.30 * auraOpacity),
-            const Color(0x0038BDF8), // Explicit transparent Sky Blue (avoids transparent black artifact)
+            const Color(0x0038BDF8), // Explicit transparent Sky Blue
           ],
           <double>[0.0, 0.35, 0.70, 1.0],
         )
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 28);
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 26);
 
       final Rect risingAuraRect = Rect.fromCenter(
-        center: const Offset(195, -20),
-        width: 260 * (isLongPressing ? 1.05 : (0.90 + auraProgress * 0.15)),
-        height: 220 * (isLongPressing ? 1.0 : (0.50 + auraProgress * 0.50)),
+        center: Offset(195, beamCenterY),
+        width: beamWidth,
+        height: beamHeight,
       );
       canvas.drawOval(risingAuraRect, risingAuraPaint);
 
-      // 1B. Inner Cyan Radiant Heat Core
+      // 1B. Inner Cyan Radiant Heat Core (Emanating from bottom Y=44 upward to Y=-65)
+      const double coreBottomY = 44.0;
+      final double coreTopY = 36.0 - (105.0 * risingFactor);
+      final double coreHeight = (coreBottomY - coreTopY).clamp(15.0, 150.0);
+      final double coreCenterY = coreTopY + (coreHeight / 2.0);
+      final double coreWidth = 160.0 + (45.0 * risingFactor);
+
       final Paint innerCorePaint = Paint()
+        ..blendMode = BlendMode.screen
         ..shader = ui.Gradient.linear(
-          const Offset(195, 120),
-          const Offset(195, -60),
+          const Offset(195, coreBottomY),
+          Offset(195, coreTopY),
           <Color>[
-            const Color(0xFF0A44FF).withValues(alpha: 0.75 * auraOpacity),
+            const Color(0xFF0A44FF).withValues(alpha: 0.80 * auraOpacity),
             const Color(0xFF00D4FF).withValues(alpha: 0.55 * auraOpacity),
             const Color(0x0000D4FF), // Explicit transparent Cyan
           ],
           <double>[0.0, 0.60, 1.0],
         )
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18);
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16);
 
       final Rect innerCoreRect = Rect.fromCenter(
-        center: const Offset(195, 10),
-        width: 200 * (isLongPressing ? 1.0 : (0.80 + auraProgress * 0.20)),
-        height: 160 * (isLongPressing ? 1.0 : (0.30 + auraProgress * 0.70)),
+        center: Offset(195, coreCenterY),
+        width: coreWidth,
+        height: coreHeight,
       );
       canvas.drawOval(innerCoreRect, innerCorePaint);
     }
 
     // 1C. Semi-Circular Ambient Dome Halo
-    final double domeScale = isLongPressing ? 1.08 : (0.92 + activeProgress * 0.28);
-    final double domeOpacity = isLongPressing ? 0.75 : (0.25 + activeProgress * 0.45);
+    final double domeFactor = Curves.easeOutCubic.transform(activeProgress);
+    final double domeScale = isLongPressing ? 1.08 : (0.90 + domeFactor * 0.30);
+    final double domeOpacity = isLongPressing ? 0.75 : (0.20 + domeFactor * 0.50);
     final Paint domePaint = Paint()
+      ..blendMode = BlendMode.screen
       ..shader = ui.Gradient.linear(
         const Offset(195, 80),
         const Offset(195, -30),

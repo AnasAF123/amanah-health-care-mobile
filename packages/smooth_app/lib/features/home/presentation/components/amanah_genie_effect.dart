@@ -82,22 +82,23 @@ class AmanahGenieCanvasPainter extends CustomPainter {
       canvas.drawImageRect(snapshot, srcRect, dstRect, paint);
     }
 
-    // Radiant glow burst at dock point (theme cyan & royal blue)
+    // Radiant glow burst at dock point (theme cyan & royal blue with screen blend mode)
     final double glowRaw = direction == AmanahGenieDirection.minimize ? rawT : 1.0 - rawT;
     if (glowRaw > 0.70) {
       final double a = _eOut2((glowRaw - 0.70) / 0.30) * 0.45;
       final Paint glowPaint = Paint()
+        ..blendMode = BlendMode.screen
         ..shader = ui.Gradient.radial(
           dockPoint,
           80,
           <Color>[
             const Color(0xFF38BDF8).withValues(alpha: a),
             const Color(0xFF0A44FF).withValues(alpha: a * 0.65),
-            Colors.transparent,
+            const Color(0x000A44FF), // Explicit transparent Royal Blue (avoids transparent black artifact)
           ],
           <double>[0.0, 0.40, 1.0],
         );
-      canvas.drawRect(Offset.zero & size, glowPaint);
+      canvas.drawCircle(dockPoint, 80, glowPaint);
     }
   }
 
@@ -153,14 +154,23 @@ Future<ui.Image> generateCardCoverSnapshot({
       colors: <Color>[
         const Color(0xFFDBEAFE).withValues(alpha: 0.50),
         const Color(0xFFEFF6FF).withValues(alpha: 0.15),
-        Colors.transparent,
+        const Color(0x00EFF6FF),
       ],
     ).createShader(rect);
   canvas.save();
   canvas.clipRRect(rrect);
   canvas.drawRect(rect, sheenPaint);
 
-  // 4. Draw Official Watermark Vector Logo
+  // 4. Organic Cybernetic Pixel Texture (Faded bottom-to-top, 1:1 with _AmanahQueueCardCover)
+  AmanahOrganicPixelPainter.drawPixelsToCanvas(
+    canvas,
+    size,
+    isDark: false,
+    opacity: 0.38,
+    fadeTop: true,
+  );
+
+  // 5. Draw Official Watermark Vector Logo
   final Paint wmPaint = Paint()
     ..shader = const LinearGradient(
       begin: Alignment.topLeft,
@@ -179,7 +189,7 @@ Future<ui.Image> generateCardCoverSnapshot({
   final Path transformed = wmPath.transform(matrix.storage);
   canvas.drawPath(transformed, wmPaint);
 
-  // 5. Draw Queue Number Text (#01, #02, etc.)
+  // 6. Draw Queue Number Text (#01, #02, etc.)
   final TextPainter tp = TextPainter(
     text: TextSpan(
       text: card.queueNumber,
