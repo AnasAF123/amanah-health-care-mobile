@@ -13,56 +13,36 @@ const List<String> kNatureImagesPool = <String>[
   'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800&auto=format&fit=crop',
 ];
 
-const ColorFilter _kSaturate160 = ColorFilter.matrix(<double>[
-  1.424,
-  -0.376,
-  -0.048,
-  0,
-  0,
-  -0.076,
-  1.124,
-  -0.048,
-  0,
-  0,
-  -0.076,
-  -0.376,
-  1.452,
-  0,
-  0,
-  0,
-  0,
-  0,
-  1,
-  0,
-]);
-
 class _LiquidGlassMaskLayer extends StatelessWidget {
   const _LiquidGlassMaskLayer();
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: 200,
       child: IgnorePointer(
-        child: ShaderMask(
-          blendMode: BlendMode.dstIn,
-          shaderCallback: (Rect bounds) {
-            return const LinearGradient(
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-              colors: <Color>[
-                Colors.black,
-                Colors.black,
-                Color(0x4D000000),
-                Colors.transparent,
-              ],
-              stops: <double>[0.0, 0.35, 0.55, 0.75],
-            ).createShader(bounds);
-          },
-          child: ColorFiltered(
-            colorFilter: _kSaturate160,
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-              child: const ColoredBox(color: Color(0x01000000)),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(32),
+          ),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: <Color>[
+                    const Color(0xFF0C140F).withValues(alpha: 0.0),
+                    const Color(0xFF0C140F).withValues(alpha: 0.40),
+                    const Color(0xFF0C140F).withValues(alpha: 0.85),
+                  ],
+                  stops: const <double>[0.0, 0.30, 1.0],
+                ),
+              ),
             ),
           ),
         ),
@@ -84,11 +64,11 @@ class _AmbientCardGradientLayer extends StatelessWidget {
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
               colors: <Color>[
-                const Color(0xFF0C140F).withValues(alpha: 0.82),
-                const Color(0xFF0C140F).withValues(alpha: 0.40),
+                const Color(0xFF0C140F).withValues(alpha: 0.70),
+                const Color(0xFF0C140F).withValues(alpha: 0.30),
                 const Color(0xFF0C140F).withValues(alpha: 0.0),
               ],
-              stops: const <double>[0.0, 0.40, 0.70],
+              stops: const <double>[0.0, 0.45, 0.75],
             ),
           ),
         ),
