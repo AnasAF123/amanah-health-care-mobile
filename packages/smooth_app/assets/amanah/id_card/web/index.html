@@ -114,6 +114,7 @@
     };
 
     let avatarImage = null;
+    let logoImage = null;
     let cardTexture = null;
     let lanyardTexture = null;
     let cardMaterial = null;
@@ -124,6 +125,14 @@
     img.src = profile.avatarUrl;
     img.onload = () => {
       avatarImage = img;
+      if (window.regenerateTextures) window.regenerateTextures();
+    };
+
+    const logoImg = new Image();
+    logoImg.crossOrigin = 'anonymous';
+    logoImg.src = './assets/logo_healthcare_1.svg';
+    logoImg.onload = () => {
+      logoImage = logoImg;
       if (window.regenerateTextures) window.regenerateTextures();
     };
 
@@ -303,18 +312,22 @@
 
       const fontSans = '"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
-      // Logo Top Left
-      ctx.fillStyle = isDark ? '#a3e635' : '#00d4ff';
-      ctx.beginPath();
-      if ('roundRect' in ctx) {
-        ctx.roundRect(180, 200, 72, 72, 20);
+      // Logo Top Left (Amanah Healthcare)
+      if (logoImage && logoImage.complete && logoImage.naturalWidth > 0) {
+        ctx.drawImage(logoImage, 180, 200, 72, 72);
       } else {
-        ctx.fillRect(180, 200, 72, 72);
+        ctx.fillStyle = isDark ? '#a3e635' : '#00d4ff';
+        ctx.beginPath();
+        if ('roundRect' in ctx) {
+          ctx.roundRect(180, 200, 72, 72, 20);
+        } else {
+          ctx.fillRect(180, 200, 72, 72);
+        }
+        ctx.fill();
+        ctx.fillStyle = isDark ? '#00d4ff' : '#0a44ff';
+        ctx.fillRect(204, 216, 24, 40);
+        ctx.fillRect(196, 224, 40, 24);
       }
-      ctx.fill();
-      ctx.fillStyle = isDark ? '#00d4ff' : '#0a44ff';
-      ctx.fillRect(204, 216, 24, 40);
-      ctx.fillRect(196, 224, 40, 24);
 
       ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
       ctx.font = `bold 72px ${fontSans}`;
@@ -388,17 +401,21 @@
         `*DOC-${profile.sip.replace(/[^a-zA-Z0-9]/g, '') || '50344212026'}*`
       );
 
-      ctx.fillStyle = isDark ? '#a3e635' : '#00d4ff';
-      ctx.beginPath();
-      if ('roundRect' in ctx) {
-        ctx.roundRect(backCenterX - 220, 2580, 76, 76, 22);
+      if (logoImage && logoImage.complete && logoImage.naturalWidth > 0) {
+        ctx.drawImage(logoImage, backCenterX - 220, 2580, 76, 76);
       } else {
-        ctx.fillRect(backCenterX - 220, 2580, 76, 76);
+        ctx.fillStyle = isDark ? '#a3e635' : '#00d4ff';
+        ctx.beginPath();
+        if ('roundRect' in ctx) {
+          ctx.roundRect(backCenterX - 220, 2580, 76, 76, 22);
+        } else {
+          ctx.fillRect(backCenterX - 220, 2580, 76, 76);
+        }
+        ctx.fill();
+        ctx.fillStyle = isDark ? '#00d4ff' : '#0a44ff';
+        ctx.fillRect(backCenterX - 198, 2600, 32, 36);
+        ctx.fillRect(backCenterX - 206, 2604, 48, 28);
       }
-      ctx.fill();
-      ctx.fillStyle = isDark ? '#00d4ff' : '#0a44ff';
-      ctx.fillRect(backCenterX - 198, 2600, 32, 36);
-      ctx.fillRect(backCenterX - 206, 2604, 48, 28);
 
       ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
       ctx.font = `bold 84px ${fontSans}`;

@@ -176,6 +176,7 @@ flutter:
     - assets/amanah/id_card/images/
     - assets/amanah/id_card/js/
     - assets/amanah/id_card/web/
+    - assets/amanah/id_card/web/assets/
     - assets/amanah/id_card/web/assets/3d/
     - assets/amanah/id_card/web/assets/images/doctors/
     - assets/amanah/theme/

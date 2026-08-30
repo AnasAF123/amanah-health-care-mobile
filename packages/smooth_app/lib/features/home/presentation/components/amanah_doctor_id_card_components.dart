@@ -296,6 +296,9 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
     if (assetKey.endsWith('.png')) {
       return ContentType('image', 'png');
     }
+    if (assetKey.endsWith('.svg')) {
+      return ContentType('image', 'svg+xml');
+    }
     return ContentType.binary;
   }
 
