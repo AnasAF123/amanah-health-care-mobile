@@ -130,7 +130,7 @@
 
     const logoImg = new Image();
     logoImg.crossOrigin = 'anonymous';
-    logoImg.src = './assets/logo_healthcare_1.svg';
+    logoImg.src = './assets/logo.svg';
     logoImg.onload = () => {
       logoImage = logoImg;
       if (window.regenerateTextures) window.regenerateTextures();
@@ -312,9 +312,9 @@
 
       const fontSans = '"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
-      // Logo Top Left (Amanah Healthcare)
+      // Logo Top Left (Amanah Healthcare Official SVG)
       if (logoImage && logoImage.complete && logoImage.naturalWidth > 0) {
-        ctx.drawImage(logoImage, 180, 200, 72, 72);
+        ctx.drawImage(logoImage, 180, 192, 246, 72);
       } else {
         ctx.fillStyle = isDark ? '#a3e635' : '#00d4ff';
         ctx.beginPath();
@@ -327,12 +327,12 @@
         ctx.fillStyle = isDark ? '#00d4ff' : '#0a44ff';
         ctx.fillRect(204, 216, 24, 40);
         ctx.fillRect(196, 224, 40, 24);
-      }
 
-      ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
-      ctx.font = `bold 72px ${fontSans}`;
-      ctx.textAlign = 'left';
-      ctx.fillText('Amanah', 276, 256);
+        ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+        ctx.font = `bold 72px ${fontSans}`;
+        ctx.textAlign = 'left';
+        ctx.fillText('Amanah', 276, 256);
+      }
 
       // Bauhaus Matrix Grid
       drawThemeGrid(ctx, 180, 360, 1688, 1960, theme, 4, 5, isDark ? 0.68 : 0.6);
@@ -402,7 +402,7 @@
       );
 
       if (logoImage && logoImage.complete && logoImage.naturalWidth > 0) {
-        ctx.drawImage(logoImage, backCenterX - 220, 2580, 76, 76);
+        ctx.drawImage(logoImage, backCenterX - 130, 2580, 260, 76);
       } else {
         ctx.fillStyle = isDark ? '#a3e635' : '#00d4ff';
         ctx.beginPath();
@@ -415,12 +415,12 @@
         ctx.fillStyle = isDark ? '#00d4ff' : '#0a44ff';
         ctx.fillRect(backCenterX - 198, 2600, 32, 36);
         ctx.fillRect(backCenterX - 206, 2604, 48, 28);
-      }
 
-      ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
-      ctx.font = `bold 84px ${fontSans}`;
-      ctx.textAlign = 'left';
-      ctx.fillText('Amanah', backCenterX - 110, 2642);
+        ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+        ctx.font = `bold 84px ${fontSans}`;
+        ctx.textAlign = 'left';
+        ctx.fillText('Amanah', backCenterX - 110, 2642);
+      }
 
       ctx.fillStyle = '#94a3b8';
       ctx.font = `700 36px ${fontSans}`;
