@@ -199,13 +199,13 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
       extendBody: true,
       body: Stack(
         children: <Widget>[
-          // Dynamic Aurora Ambient Glow (400px matching web source AuroraBackground.tsx 1:1)
+          // Dynamic Aurora Ambient Glow (310px reaching down to Poli Gigi & Mulut text at the schedule card bottom)
           if (_selectedTab == AmanahHomeTab.home)
             Positioned(
               top: 0,
               left: 0,
               right: 0,
-              height: 400,
+              height: 310,
               child: _AmanahHomeAuroraBackground(dark: dark),
             ),
 
@@ -471,71 +471,71 @@ class _AmanahHomeAuroraPainter extends CustomPainter {
     canvas.saveLayer(topMask, Paint());
 
     if (dark) {
-      // 1. Deep Cosmic Sapphire Glow (#07247a, blur 100px, opacity 0.90, -top 15%, -left 20%, w 140%, h 290)
+      // 1. Deep Cosmic Sapphire Glow (Softened, blur 100px, alpha 0.55)
       final Paint sapphireGlow = Paint()
-        ..color = const Color(0xFF07247A).withValues(alpha: 0.90)
+        ..color = const Color(0xFF07247A).withValues(alpha: 0.55)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 100);
       canvas.drawOval(
         Rect.fromLTWH(
           -size.width * 0.20,
           -size.height * 0.15,
           size.width * 1.40,
-          290,
+          240,
         ),
         sapphireGlow,
       );
 
-      // 2. Electric Cyan/Teal Glow (#0088cc, blur 90px, opacity 0.70, top 5%, right -20%, w 100%, h 200)
+      // 2. Electric Cyan/Teal Glow (Softened, blur 90px, alpha 0.55)
       final Paint tealGlow = Paint()
-        ..color = const Color(0xFF0088CC).withValues(alpha: 0.70)
+        ..color = const Color(0xFF0088CC).withValues(alpha: 0.55)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 90);
       canvas.drawOval(
         Rect.fromLTWH(
           size.width * 0.20,
           size.height * 0.05,
           size.width * 1.0,
-          200,
+          180,
         ),
         tealGlow,
       );
     } else {
-      // 1. Vibrant Apple/Amanah Blue Base (#0A44FF, blur 100px, opacity 0.90, -top 10%, -left 20%, w 140%, h 270)
+      // 1. Soft Ambient Blue Base in top-left (Softened to match cyan balance, alpha 0.45, blur 100px)
       final Paint blueGlow = Paint()
-        ..color = const Color(0xFF0A44FF).withValues(alpha: 0.90)
+        ..color = const Color(0xFF0A44FF).withValues(alpha: 0.45)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 100);
       canvas.drawOval(
         Rect.fromLTWH(
           -size.width * 0.20,
           -size.height * 0.10,
           size.width * 1.40,
-          270,
+          220,
         ),
         blueGlow,
       );
 
-      // 2. Radiant Cyan Glow (#00D4FF, blur 90px, opacity 0.80, top 5%, right -20%, w 100%, h 190)
+      // 2. Radiant Soft Cyan Glow in top-right (alpha 0.60, blur 90px)
       final Paint cyanGlow = Paint()
-        ..color = const Color(0xFF00D4FF).withValues(alpha: 0.80)
+        ..color = const Color(0xFF00D4FF).withValues(alpha: 0.60)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 90);
       canvas.drawOval(
         Rect.fromLTWH(
           size.width * 0.20,
           size.height * 0.05,
           size.width * 1.0,
-          190,
+          180,
         ),
         cyanGlow,
       );
     }
 
-    // 3. Smooth Integration Mask (black 25%, transparent 100%) matching web maskImage: linear-gradient(to bottom, black 25%, transparent 100%)
+    // 3. Smooth Integration Mask (Fade begins right at the "Poli Gigi & Mulut" schedule text at ~76% height, disappearing at 100%)
     final Paint fadePaint = Paint()
       ..blendMode = BlendMode.dstIn
       ..shader = const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: <Color>[Colors.black, Colors.black, Colors.transparent],
-        stops: <double>[0.0, 0.25, 1.0],
+        stops: <double>[0.0, 0.76, 1.0],
       ).createShader(topMask);
     canvas.drawRect(topMask, fadePaint);
     canvas.restore();
