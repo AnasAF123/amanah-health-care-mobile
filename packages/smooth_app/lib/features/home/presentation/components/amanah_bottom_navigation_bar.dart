@@ -226,16 +226,14 @@ class _AmanahScanSlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 64,
-      height: 66,
+      width: 68,
+      height: 60,
       child: Stack(
         clipBehavior: Clip.none,
-        alignment: Alignment.topCenter,
+        alignment: Alignment.center,
         children: <Widget>[
           Positioned(
-            top: -20,
-            left: 4,
-            right: 4,
+            top: -12,
             child: _AmanahScanButton(selected: selected, onTap: onTap),
           ),
         ],
@@ -262,20 +260,20 @@ class _AmanahScanButton extends StatelessWidget {
       button: true,
       label: 'Pindai QR Presensi',
       child: SizedBox(
-        width: 56,
-        height: 56,
+        width: 60,
+        height: 60,
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: primary,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(22),
             boxShadow: <BoxShadow>[
               BoxShadow(
                 color: dark ? const Color(0xFF0A0A0A) : Colors.white,
-                spreadRadius: 4,
+                spreadRadius: 4.5,
               ),
               BoxShadow(
-                color: primary.withValues(alpha: selected ? 0.38 : 0.30),
-                blurRadius: 16,
+                color: primary.withValues(alpha: selected ? 0.40 : 0.32),
+                blurRadius: 18,
                 offset: const Offset(0, 8),
                 spreadRadius: -2,
               ),
@@ -283,14 +281,16 @@ class _AmanahScanButton extends StatelessWidget {
           ),
           child: Material(
             color: Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(22),
             child: InkWell(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(22),
               onTap: onTap,
-              child: const Icon(
-                Icons.qr_code_2_rounded,
-                size: 28,
-                color: Colors.white,
+              child: const Center(
+                child: Icon(
+                  Icons.qr_code_2_rounded,
+                  size: 34,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
