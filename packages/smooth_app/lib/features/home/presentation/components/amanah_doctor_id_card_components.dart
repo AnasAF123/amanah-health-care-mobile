@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -158,37 +160,257 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
   double _ambientTime = 0.0;
 
   WebViewController? _webController;
+  HttpServer? _server;
+  int? _port;
   bool _useWebView = true;
+  bool _isWebViewLoading = true;
+  String? _lastSyncedProfile;
+  String? _lastSyncedTheme;
 
   @override
   void initState() {
     super.initState();
-    _ticker = createTicker(_onTick)..start();
-    _initWebView();
+    _ticker = createTicker(_onTick);
+    _startLocalServerAndLoadWebView();
   }
 
-  void _initWebView() {
-    try {
-      _webController = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setBackgroundColor(Colors.transparent)
-        ..clearCache()
-        ..clearLocalStorage()
-        ..setNavigationDelegate(
-          NavigationDelegate(
-            onWebResourceError: (WebResourceError error) {
-              debugPrint('WebView Error: ${error.description}');
-            },
-          ),
-        )
-        ..loadFlutterAsset('assets/amanah/id_card/interactive_card.html');
-    } catch (_) {
-      _useWebView = false;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncWebRuntimeState();
+  }
+
+  @override
+  void didUpdateWidget(covariant AmanahDoctorIdCardStage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_profileSignature(oldWidget.profile) !=
+        _profileSignature(widget.profile)) {
+      _reloadWebView();
+    } else {
+      _syncWebRuntimeState(forceProfile: true);
     }
   }
 
   @override
+  void reassemble() {
+    super.reassemble();
+    _reloadWebView();
+  }
+
+  Future<void> _startLocalServerAndLoadWebView() async {
+    try {
+      _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      _port = _server!.port;
+      _server!.listen(_handleWebAssetRequest);
+
+      final WebViewController controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setBackgroundColor(Colors.transparent)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onPageFinished: (_) {
+              if (!mounted) {
+                return;
+              }
+              setState(() => _isWebViewLoading = false);
+              _syncWebRuntimeState(forceProfile: true, forceTheme: true);
+            },
+            onWebResourceError: (WebResourceError error) {
+              debugPrint('WebView Error: ${error.description}');
+            },
+          ),
+        );
+
+      await controller.clearCache();
+      await controller.clearLocalStorage();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _webController = controller;
+        _isWebViewLoading = true;
+      });
+      await controller.loadRequest(_webRuntimeUri());
+    } catch (error) {
+      debugPrint('Failed to start lanyard WebView runtime: $error');
+      _switchToNativeFallback();
+    }
+  }
+
+  Future<void> _handleWebAssetRequest(HttpRequest request) async {
+    final String? assetKey = _assetKeyForRequestPath(request.uri.path);
+
+    try {
+      if (assetKey == null) {
+        request.response.statusCode = HttpStatus.notFound;
+        request.response.write('Asset not found');
+        return;
+      }
+
+      final ByteData data = await rootBundle.load(assetKey);
+      final Uint8List bytes = data.buffer.asUint8List(
+        data.offsetInBytes,
+        data.lengthInBytes,
+      );
+
+      request.response.headers.contentType = _contentTypeFor(assetKey);
+      request.response.headers.add(
+        HttpHeaders.cacheControlHeader,
+        'no-store, no-cache, must-revalidate, max-age=0',
+      );
+      request.response.headers.add(HttpHeaders.pragmaHeader, 'no-cache');
+      request.response.headers.add(HttpHeaders.expiresHeader, '0');
+      request.response.headers.add('Access-Control-Allow-Origin', '*');
+      request.response.add(bytes);
+    } catch (error) {
+      request.response.statusCode = HttpStatus.notFound;
+      request.response.write('Asset not found: $assetKey');
+      debugPrint('Lanyard WebView asset error: $error');
+    } finally {
+      await request.response.close();
+    }
+  }
+
+  String? _assetKeyForRequestPath(String requestPath) {
+    String path = requestPath.isEmpty || requestPath == '/'
+        ? '/index.html'
+        : Uri.decodeComponent(requestPath);
+    path = path.replaceAll(r'\', '/');
+    if (path.contains('..')) {
+      return null;
+    }
+    return 'assets/amanah/id_card/web${path.startsWith('/') ? path : '/$path'}';
+  }
+
+  ContentType _contentTypeFor(String assetKey) {
+    if (assetKey.endsWith('.html')) {
+      return ContentType.html;
+    }
+    if (assetKey.endsWith('.js')) {
+      return ContentType('application', 'javascript', charset: 'utf-8');
+    }
+    if (assetKey.endsWith('.wasm')) {
+      return ContentType('application', 'wasm');
+    }
+    if (assetKey.endsWith('.glb')) {
+      return ContentType('model', 'gltf-binary');
+    }
+    if (assetKey.endsWith('.png')) {
+      return ContentType('image', 'png');
+    }
+    return ContentType.binary;
+  }
+
+  Uri _webRuntimeUri() {
+    final bool dark = Theme.of(context).brightness == Brightness.dark;
+    return Uri(
+      scheme: 'http',
+      host: '127.0.0.1',
+      port: _port,
+      path: '/index.html',
+      queryParameters: <String, String>{
+        'theme': dark ? 'dark' : 'light',
+        'transparent': 'true',
+        'name': widget.profile.name,
+        'role': widget.profile.role,
+        'sip': widget.profile.sip,
+        'hospital': widget.profile.hospital.toUpperCase(),
+        'department': widget.profile.department,
+        'avatarUrl': '/assets/images/doctors/woman-doctor-4.png',
+        'v': DateTime.now().millisecondsSinceEpoch.toString(),
+      },
+    );
+  }
+
+  Future<void> _reloadWebView() async {
+    final WebViewController? controller = _webController;
+    if (controller == null || _port == null) {
+      return;
+    }
+    if (mounted) {
+      setState(() => _isWebViewLoading = true);
+    }
+    _lastSyncedProfile = null;
+    _lastSyncedTheme = null;
+    await controller.clearCache();
+    await controller.loadRequest(_webRuntimeUri());
+  }
+
+  void _syncWebRuntimeState({
+    bool forceProfile = false,
+    bool forceTheme = false,
+  }) {
+    final WebViewController? controller = _webController;
+    if (controller == null || !mounted) {
+      return;
+    }
+
+    final String theme = Theme.of(context).brightness == Brightness.dark
+        ? 'dark'
+        : 'light';
+    if (forceTheme || _lastSyncedTheme != theme) {
+      _lastSyncedTheme = theme;
+      final String message = jsonEncode(<String, Object>{
+        'type': 'SET_THEME',
+        'payload': theme,
+      });
+      controller.runJavaScript(
+        "window.postMessage($message, '*');"
+        "if (window.setAppTheme) window.setAppTheme('$theme');",
+      );
+    }
+
+    final Map<String, String> profilePayload = _webProfilePayload();
+    final String profileSignature = jsonEncode(profilePayload);
+    if (forceProfile || _lastSyncedProfile != profileSignature) {
+      _lastSyncedProfile = profileSignature;
+      final String message = jsonEncode(<String, Object>{
+        'type': 'UPDATE_PROFILE',
+        'payload': profilePayload,
+      });
+      controller.runJavaScript("window.postMessage($message, '*');");
+    }
+  }
+
+  Map<String, String> _webProfilePayload() {
+    return <String, String>{
+      'name': widget.profile.name,
+      'role': widget.profile.role,
+      'sip': widget.profile.sip,
+      'hospital': widget.profile.hospital.toUpperCase(),
+      'department': widget.profile.department,
+      'avatarUrl': '/assets/images/doctors/woman-doctor-4.png',
+    };
+  }
+
+  String _profileSignature(AmanahDoctorProfile profile) {
+    return jsonEncode(<String, String>{
+      'name': profile.name,
+      'role': profile.role,
+      'sip': profile.sip,
+      'hospital': profile.hospital,
+      'department': profile.department,
+      'avatarAsset': profile.avatarAsset,
+    });
+  }
+
+  void _switchToNativeFallback() {
+    if (!mounted) {
+      return;
+    }
+    _server?.close(force: true);
+    _server = null;
+    _port = null;
+    setState(() {
+      _useWebView = false;
+      _isWebViewLoading = false;
+    });
+    _wakeUp();
+  }
+
+  @override
   void dispose() {
+    _server?.close(force: true);
     _ticker.dispose();
     super.dispose();
   }
@@ -262,8 +484,7 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
           _spinVelY *= math.pow(0.12, clampedDt).toDouble();
         } else {
           // Snap smoothly to nearest side (0 or pi radians)
-          final double nearestSide =
-              (_rotationY / math.pi).round() * math.pi;
+          final double nearestSide = (_rotationY / math.pi).round() * math.pi;
           final double snapDelta = nearestSide - _rotationY;
           if (snapDelta.abs() > 0.001) {
             _rotationY += snapDelta * math.min(1.0, clampedDt * 14.0);
@@ -287,9 +508,10 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
         }
       } else {
         // While dragging: tilt follows displacement angle
-        final double targetTilt =
-            (_cardPos!.dx - anchor.dx) * 0.0015;
-        _cardTiltZ = _cardTiltZ + (targetTilt - _cardTiltZ) * math.min(1.0, clampedDt * 18.0);
+        final double targetTilt = (_cardPos!.dx - anchor.dx) * 0.0015;
+        _cardTiltZ =
+            _cardTiltZ +
+            (targetTilt - _cardTiltZ) * math.min(1.0, clampedDt * 18.0);
       }
     });
   }
@@ -298,10 +520,12 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
     _wakeUp();
     _isDragging = true;
     _dragTouchStart = event.position;
-    _dragCardStart = _cardPos ?? Offset(
-      MediaQuery.sizeOf(context).width / 2,
-      MediaQuery.sizeOf(context).height * 0.44,
-    );
+    _dragCardStart =
+        _cardPos ??
+        Offset(
+          MediaQuery.sizeOf(context).width / 2,
+          MediaQuery.sizeOf(context).height * 0.44,
+        );
     _dragStartTime = DateTime.now();
 
     _lastPointerPos = event.position;
@@ -333,8 +557,8 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
     final DateTime now = DateTime.now();
     final int dtUs = now.difference(_lastPointerTime).inMicroseconds;
     if (dtUs > 2000) {
-      final Offset curVel = (event.position - _lastPointerPos) /
-          (dtUs / 1000000.0);
+      final Offset curVel =
+          (event.position - _lastPointerPos) / (dtUs / 1000000.0);
       _pointerVelocity = _pointerVelocity * 0.3 + curVel * 0.7;
       _lastPointerPos = event.position;
       _lastPointerTime = now;
@@ -347,14 +571,16 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
     }
 
     final double moveDistance = (event.position - _dragTouchStart).distance;
-    final int elapsedMs =
-        DateTime.now().difference(_dragStartTime).inMilliseconds;
+    final int elapsedMs = DateTime.now()
+        .difference(_dragStartTime)
+        .inMilliseconds;
 
     if (moveDistance < 14 && elapsedMs < 360) {
       // User tapped or flicked: Spin the card 3D to flip side
       HapticFeedback.selectionClick();
       final double clickX = event.position.dx;
-      final double cardCenterX = _cardPos?.dx ?? MediaQuery.sizeOf(context).width / 2;
+      final double cardCenterX =
+          _cardPos?.dx ?? MediaQuery.sizeOf(context).width / 2;
       final double spinDir = clickX < cardCenterX ? 1.0 : -1.0;
       _spinVelY = spinDir * 18.0;
       _cardVel = Offset(spinDir * 80.0, 40.0);
@@ -397,9 +623,23 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
             ),
           ),
           // Genuine 3D Three.js WebGL Canvas with card.glb & tag_texture.png
-          Positioned.fill(
-            child: WebViewWidget(controller: _webController!),
-          ),
+          Positioned.fill(child: WebViewWidget(controller: _webController!)),
+          if (_isWebViewLoading)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: dark
+                      ? const Color(0xFF070B14)
+                      : const Color(0xFFF8FAFF),
+                ),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF00D4FF),
+                    strokeWidth: 3,
+                  ),
+                ),
+              ),
+            ),
         ],
       );
     }
@@ -413,15 +653,18 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
         final double cardHeight = cardWidth * 1.50;
 
         final Offset anchor = Offset(viewportWidth / 2, 0);
-        final Offset cardCenter = _cardPos ??
-            Offset(viewportWidth / 2, viewportHeight * 0.44);
+        final Offset cardCenter =
+            _cardPos ?? Offset(viewportWidth / 2, viewportHeight * 0.44);
 
         // Normalize rotation for front/back detection
-        final double normalizedRot = (_rotationY % (math.pi * 2) + math.pi * 2) % (math.pi * 2);
-        final bool showBack = normalizedRot > (math.pi / 2) && normalizedRot < (math.pi * 1.5);
+        final double normalizedRot =
+            (_rotationY % (math.pi * 2) + math.pi * 2) % (math.pi * 2);
+        final bool showBack =
+            normalizedRot > (math.pi / 2) && normalizedRot < (math.pi * 1.5);
 
         // Sheen specular shine angle
-        final double sheenShift = math.sin(_cardTiltZ * 4.0 + _rotationY) * 0.5 + 0.5;
+        final double sheenShift =
+            math.sin(_cardTiltZ * 4.0 + _rotationY) * 0.5 + 0.5;
 
         return Listener(
           onPointerDown: _handlePointerDown,
@@ -489,11 +732,16 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  begin: Alignment(-1.5 + sheenShift * 3.0, -1.0),
+                                  begin: Alignment(
+                                    -1.5 + sheenShift * 3.0,
+                                    -1.0,
+                                  ),
                                   end: Alignment(-0.5 + sheenShift * 3.0, 1.0),
                                   colors: <Color>[
                                     Colors.white.withValues(alpha: 0.0),
-                                    Colors.white.withValues(alpha: dark ? 0.08 : 0.18),
+                                    Colors.white.withValues(
+                                      alpha: dark ? 0.08 : 0.18,
+                                    ),
                                     Colors.white.withValues(alpha: 0.0),
                                   ],
                                   stops: const <double>[0.0, 0.5, 1.0],
@@ -1637,14 +1885,8 @@ class _LanyardPhysicsPainter extends CustomPainter {
     final Offset diff = p3 - p0;
 
     // Intermediate Bézier control points
-    final Offset p1 = Offset(
-      p0.dx + diff.dx * 0.25,
-      p0.dy + diff.dy * 0.35,
-    );
-    final Offset p2 = Offset(
-      p0.dx + diff.dx * 0.75,
-      p0.dy + diff.dy * 0.70,
-    );
+    final Offset p1 = Offset(p0.dx + diff.dx * 0.25, p0.dy + diff.dy * 0.35);
+    final Offset p2 = Offset(p0.dx + diff.dx * 0.75, p0.dy + diff.dy * 0.70);
 
     final Path ribbonPath = Path()
       ..moveTo(p0.dx, p0.dy)
@@ -1785,23 +2027,27 @@ class _LanyardPhysicsPainter extends CustomPainter {
     final double uuu = uu * u;
     final double ttt = tt * t;
 
-    final double x = uuu * p0.dx +
-        3 * uu * t * p1.dx +
-        3 * u * tt * p2.dx +
-        ttt * p3.dx;
-    final double y = uuu * p0.dy +
-        3 * uu * t * p1.dy +
-        3 * u * tt * p2.dy +
-        ttt * p3.dy;
+    final double x =
+        uuu * p0.dx + 3 * uu * t * p1.dx + 3 * u * tt * p2.dx + ttt * p3.dx;
+    final double y =
+        uuu * p0.dy + 3 * uu * t * p1.dy + 3 * u * tt * p2.dy + ttt * p3.dy;
     return Offset(x, y);
   }
 
-  Offset _evalCubicTangent(Offset p0, Offset p1, Offset p2, Offset p3, double t) {
+  Offset _evalCubicTangent(
+    Offset p0,
+    Offset p1,
+    Offset p2,
+    Offset p3,
+    double t,
+  ) {
     final double u = 1 - t;
-    final double dx = 3 * u * u * (p1.dx - p0.dx) +
+    final double dx =
+        3 * u * u * (p1.dx - p0.dx) +
         6 * u * t * (p2.dx - p1.dx) +
         3 * t * t * (p3.dx - p2.dx);
-    final double dy = 3 * u * u * (p1.dy - p0.dy) +
+    final double dy =
+        3 * u * u * (p1.dy - p0.dy) +
         6 * u * t * (p2.dy - p1.dy) +
         3 * t * t * (p3.dy - p2.dy);
     return Offset(dx, dy);
