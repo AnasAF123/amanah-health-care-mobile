@@ -149,6 +149,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
           _selectedTab = AmanahHomeTab.schedule;
         });
       case 'pilih-antrean':
+      case 'queue':
       case 'cari-visit':
         Navigator.of(context).push(AmanahQueueDockScreen.route());
       case 'kartu-id':
@@ -232,13 +233,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   },
                   onScheduleCardTap: _navigateToScheduleWithSession,
                   onDetailActivityTap: () {
-                    setState(() {
-                      _scheduleInitialSessionId = null;
-                      _scheduleInitialViewMode =
-                          AmanahScheduleViewMode.overview;
-                      _scheduleOpenDetailOnLaunch = false;
-                      _selectedTab = AmanahHomeTab.schedule;
-                    });
+                    _handleQuickAction('queue');
                   },
                   onActivityTap: (AmanahActivityMetric activity) {
                     _showToast('Membuka rincian aktivitas');

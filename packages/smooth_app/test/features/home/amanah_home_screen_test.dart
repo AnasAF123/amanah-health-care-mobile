@@ -219,5 +219,24 @@ void main() {
         expect(find.text('Kapasitas Hari Ini'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'Tapping Detail on Aktivitas hari ini navigates to Pilih Antrean queue dock',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.75;
+        addTearDown(() => tester.view.reset());
+
+        await tester.pumpWidget(createHomeScreen());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Detail'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+
+        expect(find.textContaining('Pilih antrean'), findsWidgets);
+        expect(find.text('Tarik antrean ke bawah untuk proses'), findsOneWidget);
+      },
+    );
   });
 }

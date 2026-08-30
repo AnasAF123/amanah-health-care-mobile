@@ -24,8 +24,8 @@ class AmanahBottomNavigationBar extends StatelessWidget {
         ? theme.colorScheme.surface
         : const Color(0xFFFFFFFF);
     final Color activeColor = dark
-        ? theme.colorScheme.primary
-        : const Color(0xFF1C1645);
+        ? const Color(0xFF22D3EE)
+        : const Color(0xFF0A44FF);
     const Color inactiveColor = Color(0xFF9CA3AF);
 
     return Semantics(
@@ -253,9 +253,10 @@ class _AmanahScanButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color primary = theme.brightness == Brightness.dark
-        ? theme.colorScheme.primary
-        : const Color(0xFF14103B);
+    final bool dark = theme.brightness == Brightness.dark;
+    final Color primary = dark
+        ? const Color(0xFF06B6D4)
+        : const Color(0xFF0A44FF);
 
     return Semantics(
       button: true,
@@ -268,18 +269,15 @@ class _AmanahScanButton extends StatelessWidget {
             color: primary,
             borderRadius: BorderRadius.circular(20),
             boxShadow: <BoxShadow>[
-              const BoxShadow(color: Colors.white, spreadRadius: 4),
               BoxShadow(
-                color: primary.withValues(alpha: selected ? 0.34 : 0.30),
-                blurRadius: 15,
-                offset: const Offset(0, 10),
-                spreadRadius: -3,
+                color: dark ? const Color(0xFF0A0A0A) : Colors.white,
+                spreadRadius: 4,
               ),
               BoxShadow(
-                color: primary.withValues(alpha: selected ? 0.28 : 0.24),
-                blurRadius: 6,
-                offset: const Offset(0, 4),
-                spreadRadius: -4,
+                color: primary.withValues(alpha: selected ? 0.38 : 0.30),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+                spreadRadius: -2,
               ),
             ],
           ),
