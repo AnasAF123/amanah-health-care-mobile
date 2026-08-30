@@ -88,19 +88,19 @@
       renderer.setClearColor(0x000000, 0);
       container.appendChild(renderer.domElement);
 
-      // Balanced studio lighting matching web canvas exactly
-      const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+      // Soft, natural studio lighting preventing overexposure
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.72);
       scene.add(ambientLight);
 
-      const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.45);
+      const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.28);
       dirLight1.position.set(0, 6, 8);
       scene.add(dirLight1);
 
-      const dirLight2 = new THREE.DirectionalLight(0xdbeafe, 0.20);
+      const dirLight2 = new THREE.DirectionalLight(0xdbeafe, 0.12);
       dirLight2.position.set(-6, -3, 4);
       scene.add(dirLight2);
 
-      const dirLight3 = new THREE.DirectionalLight(0xffffff, 0.15);
+      const dirLight3 = new THREE.DirectionalLight(0xffffff, 0.08);
       dirLight3.position.set(6, 4, 3);
       scene.add(dirLight3);
 
@@ -235,7 +235,7 @@
         canvas.width = 4096;
         canvas.height = 4096;
         const ctx = canvas.getContext('2d');
-        const cardWhite = '#ffffff';
+        const cardWhite = '#f7faff';
         const cardPanelWhite = '#ffffff';
 
         ctx.imageSmoothingEnabled = true;
@@ -259,7 +259,7 @@
         );
         frontGlow.addColorStop(0, 'rgba(0, 43, 158, 0.14)');
         frontGlow.addColorStop(0.6, 'rgba(10, 68, 255, 0.08)');
-        frontGlow.addColorStop(1, 'rgba(248, 250, 255, 0)');
+        frontGlow.addColorStop(1, 'rgba(247, 250, 255, 0)');
         ctx.fillStyle = frontGlow;
         ctx.fillRect(0, 0, frontW, frontH);
 
@@ -284,7 +284,7 @@
         // Bauhaus Decorative Shapes Grid matching reference image (opacity 0.58)
         drawThemeGrid(ctx, 180, 360, 1688, 1960, 'light', 4, 5, 0.58);
 
-        // Doctor Avatar Image
+        // Doctor Avatar Image with Natural Tone
         if (avatarImg && avatarImg.complete && avatarImg.naturalWidth > 0) {
           ctx.save();
           const imgAspect = avatarImg.naturalWidth / avatarImg.naturalHeight;
@@ -292,7 +292,9 @@
           const drawW = drawH * imgAspect;
           const drawX = 1024 - drawW / 2;
           const drawY = bottomPanelY - drawH + 260;
+          ctx.filter = 'brightness(0.92) contrast(1.03)';
           ctx.drawImage(avatarImg, drawX, drawY, drawW, drawH);
+          ctx.filter = 'none';
           ctx.restore();
         }
 
