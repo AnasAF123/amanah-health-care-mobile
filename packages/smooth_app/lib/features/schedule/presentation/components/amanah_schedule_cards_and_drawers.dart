@@ -14,35 +14,39 @@ const List<String> kNatureImagesPool = <String>[
 ];
 
 class _LiquidGlassMaskLayer extends StatelessWidget {
-  const _LiquidGlassMaskLayer();
+  const _LiquidGlassMaskLayer({required this.bgUrl});
+
+  final String bgUrl;
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      height: 190,
+    return Positioned.fill(
       child: IgnorePointer(
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(
-            bottom: Radius.circular(32),
-          ),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[
-                    Colors.transparent,
-                    const Color(0xFF0A1624).withValues(alpha: 0.40),
-                    const Color(0xFF0A1624).withValues(alpha: 0.88),
-                  ],
-                  stops: const <double>[0.0, 0.35, 1.0],
-                ),
-              ),
+        child: ShaderMask(
+          blendMode: BlendMode.dstIn,
+          shaderCallback: (Rect bounds) {
+            return const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: <Color>[
+                Colors.transparent,
+                Colors.transparent,
+                Colors.black,
+              ],
+              stops: <double>[0.0, 0.35, 0.68],
+            ).createShader(bounds);
+          },
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 7.0, sigmaY: 7.0),
+            child: Image.network(
+              bgUrl,
+              fit: BoxFit.cover,
+              errorBuilder:
+                  (
+                    BuildContext context,
+                    Object error,
+                    StackTrace? stackTrace,
+                  ) => Container(color: const Color(0xFF0F172A)),
             ),
           ),
         ),
@@ -64,11 +68,12 @@ class _AmbientCardGradientLayer extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: <Color>[
-                Colors.transparent,
-                Colors.transparent,
-                const Color(0xFF0A1624).withValues(alpha: 0.30),
+                const Color(0xFF0A1624).withValues(alpha: 0.0),
+                const Color(0xFF0A1624).withValues(alpha: 0.0),
+                const Color(0xFF0A1624).withValues(alpha: 0.45),
+                const Color(0xFF0A1624).withValues(alpha: 0.88),
               ],
-              stops: const <double>[0.0, 0.40, 1.0],
+              stops: const <double>[0.0, 0.35, 0.60, 1.0],
             ),
           ),
         ),
@@ -134,7 +139,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
             ),
 
             // Layer 2: Full-card liquid-glass blur with a progressive top mask.
-            const _LiquidGlassMaskLayer(),
+            _LiquidGlassMaskLayer(bgUrl: bgUrl),
 
             // Layer 3: High-contrast ambient gradient for readable text.
             const _AmbientCardGradientLayer(),
@@ -483,7 +488,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
               ),
 
               // Layer 2: Full-card liquid-glass blur with the same mask as patient cards.
-              const _LiquidGlassMaskLayer(),
+              _LiquidGlassMaskLayer(bgUrl: bgUrl),
 
               // Layer 3: Ambient contrast wash.
               const _AmbientCardGradientLayer(),
