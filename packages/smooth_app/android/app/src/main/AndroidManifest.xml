@@ -24,6 +24,7 @@
         android:hasFragileUserData="true"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_scheme"
+        android:networkSecurityConfig="@xml/amanah_network_security_config"
         tools:targetApi="q">
         <activity
             android:name=".MainActivity"

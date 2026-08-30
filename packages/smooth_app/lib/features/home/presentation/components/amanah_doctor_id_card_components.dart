@@ -166,6 +166,7 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
   bool _isWebViewLoading = true;
   String? _lastSyncedProfile;
   String? _lastSyncedTheme;
+  static const String _webTheme = 'light';
 
   @override
   void initState() {
@@ -302,14 +303,13 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
   }
 
   Uri _webRuntimeUri() {
-    final bool dark = Theme.of(context).brightness == Brightness.dark;
     return Uri(
       scheme: 'http',
       host: '127.0.0.1',
       port: _port,
       path: '/index.html',
       queryParameters: <String, String>{
-        'theme': dark ? 'dark' : 'light',
+        'theme': _webTheme,
         'transparent': 'true',
         'name': widget.profile.name,
         'role': widget.profile.role,
@@ -345,9 +345,7 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
       return;
     }
 
-    final String theme = Theme.of(context).brightness == Brightness.dark
-        ? 'dark'
-        : 'light';
+    const String theme = _webTheme;
     if (forceTheme || _lastSyncedTheme != theme) {
       _lastSyncedTheme = theme;
       final String message = jsonEncode(<String, Object>{
