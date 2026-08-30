@@ -22,28 +22,15 @@ class _LiquidGlassMaskLayer extends StatelessWidget {
       left: 0,
       right: 0,
       bottom: 0,
-      height: 200,
+      height: 180,
       child: IgnorePointer(
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(
             bottom: Radius.circular(32),
           ),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[
-                    const Color(0xFF0C140F).withValues(alpha: 0.0),
-                    const Color(0xFF0C140F).withValues(alpha: 0.40),
-                    const Color(0xFF0C140F).withValues(alpha: 0.85),
-                  ],
-                  stops: const <double>[0.0, 0.30, 1.0],
-                ),
-              ),
-            ),
+            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+            child: const ColoredBox(color: Colors.transparent),
           ),
         ),
       ),
@@ -64,11 +51,11 @@ class _AmbientCardGradientLayer extends StatelessWidget {
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
               colors: <Color>[
-                const Color(0xFF0C140F).withValues(alpha: 0.70),
-                const Color(0xFF0C140F).withValues(alpha: 0.30),
-                const Color(0xFF0C140F).withValues(alpha: 0.0),
+                const Color(0xFF0A1624).withValues(alpha: 0.88),
+                const Color(0xFF0A1624).withValues(alpha: 0.42),
+                const Color(0xFF0A1624).withValues(alpha: 0.0),
               ],
-              stops: const <double>[0.0, 0.45, 0.75],
+              stops: const <double>[0.0, 0.45, 0.70],
             ),
           ),
         ),
