@@ -610,7 +610,7 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
 
-    if (_useWebView && _webController != null) {
+    if (_useWebView) {
       return Stack(
         children: <Widget>[
           // Ambient medical glow
@@ -621,16 +621,13 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
             ),
           ),
           // Genuine 3D Three.js WebGL Canvas with card.glb & tag_texture.png
-          Positioned.fill(child: WebViewWidget(controller: _webController!)),
-          if (_isWebViewLoading)
-            Positioned.fill(
+          if (_webController != null)
+            Positioned.fill(child: WebViewWidget(controller: _webController!)),
+          if (_isWebViewLoading || _webController == null)
+            const Positioned.fill(
               child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: dark
-                      ? const Color(0xFF070B14)
-                      : const Color(0xFFF8FAFF),
-                ),
-                child: const Center(
+                decoration: BoxDecoration(color: Color(0xFFF8FAFF)),
+                child: Center(
                   child: CircularProgressIndicator(
                     color: Color(0xFF00D4FF),
                     strokeWidth: 3,

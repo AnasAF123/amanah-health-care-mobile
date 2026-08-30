@@ -1,160 +1,1224 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-  >
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>RS Amanah - 3D Doctor ID Card</title>
+  <title>3D Interactive Lanyard ID Card - Ultra HD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
       -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      user-select: none;
     }
-
-    html,
-    body,
-    #root {
+    html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
-      overscroll-behavior: none;
-      background: transparent;
-      touch-action: none;
+      background-color: #030712;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      transition: background-color 0.4s ease;
     }
-
-    body {
-      font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    html.theme-light, body.theme-light {
+      background-color: #f8faff !important;
     }
-
-    canvas {
-      display: block;
-      width: 100% !important;
-      height: 100% !important;
+    html.theme-dark, body.theme-dark {
+      background-color: #030712 !important;
     }
-
-    #root > main {
-      width: 100vw;
-      height: 100vh;
-    }
-
-    .relative {
-      position: relative;
-    }
-
-    .absolute {
+    #canvas-container {
       position: absolute;
-    }
-
-    .w-screen {
-      width: 100vw;
-    }
-
-    .h-screen {
-      height: 100vh;
-    }
-
-    .w-full {
+      inset: 0;
       width: 100%;
-    }
-
-    .h-full {
       height: 100%;
+      cursor: grab;
     }
-
-    .overflow-hidden {
-      overflow: hidden;
+    #canvas-container:active {
+      cursor: grabbing;
     }
-
-    .select-none {
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    .touch-none {
-      touch-action: none;
-    }
-
-    .overscroll-none {
-      overscroll-behavior: none;
-    }
-
-    .flex {
-      display: flex;
-    }
-
-    .items-center {
-      align-items: center;
-    }
-
-    .justify-center {
-      justify-content: center;
-    }
-
-    .pointer-events-none {
+    .ambient-glow {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 45%, 
+        rgba(0, 212, 255, 0.18) 0%, 
+        rgba(0, 180, 255, 0.13) 15%,
+        rgba(10, 80, 255, 0.08) 32%, 
+        rgba(8, 30, 90, 0.04) 52%,
+        rgba(7, 15, 35, 0.01) 70%, 
+        rgba(3, 7, 18, 0) 88%
+      );
       pointer-events: none;
+      transition: opacity 0.5s ease;
     }
-
-    .top-1\/3 {
-      top: 33.333333%;
+    .theme-light .ambient-glow {
+      background: radial-gradient(circle at 50% 45%, 
+        rgba(10, 68, 255, 0.14) 0%, 
+        rgba(0, 180, 255, 0.09) 20%, 
+        rgba(0, 212, 255, 0.05) 45%, 
+        rgba(248, 250, 255, 0) 75%
+      ) !important;
     }
-
-    .left-1\/2 {
-      left: 50%;
+    .ui-controls {
+      display: none;
     }
-
-    .-translate-x-1\/2 {
-      transform: translateX(-50%);
+    .btn-toggle {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
-
-    .-translate-y-1\/2 {
-      transform: translateY(-50%);
+    .btn-toggle:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.3);
     }
-
-    .-translate-x-1\/2.-translate-y-1\/2 {
-      transform: translate(-50%, -50%);
+    .btn-toggle:active {
+      transform: scale(0.95);
     }
-
-    .w-\[340px\] {
-      width: 340px;
+    .theme-light .btn-toggle {
+      background: rgba(0, 0, 0, 0.05);
+      border-color: rgba(0, 0, 0, 0.1);
+      color: #0f172a;
     }
-
-    .h-\[340px\] {
-      height: 340px;
+    #loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: #070b14;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      color: #38bdf8;
+      transition: opacity 0.5s ease;
     }
-
-    .rounded-full {
-      border-radius: 9999px;
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 3.5px solid rgba(56, 189, 248, 0.18);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     }
-
-    .filter {
-      filter: var(--tw-blur, none);
-    }
-
-    .blur-\[100px\] {
-      --tw-blur: blur(100px);
-    }
-
-    .bg-blue-400\/25 {
-      background-color: rgb(96 165 250 / 0.25);
-    }
-
-    .bg-cyan-500\/20 {
-      background-color: rgb(6 182 212 / 0.20);
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "@dimforge/rapier3d-compat": "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.11.2/rapier.es.min.js"
+      }
+    }
+  </script>
 </head>
-<body>
-  <div id="root"></div>
-  <script type="module" src="./bundle.js"></script>
+<body class="theme-dark">
+  <div class="ambient-glow"></div>
+  <div id="canvas-container"></div>
+
+  <div class="ui-controls">
+    <button class="btn-toggle" id="theme-btn" onclick="window.toggleTheme()">
+      <span id="theme-icon">☀️</span> <span id="theme-label">Light Mode</span>
+    </button>
+  </div>
+
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <p style="margin-top: 14px; font-weight: 700; font-size: 13px; letter-spacing: 0.05em; color: #94a3b8;">MEMUAT 3D ID CARD ULTRA HD...</p>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import RAPIER from '@dimforge/rapier3d-compat';
+
+    // 1. Configuration & Profile Data
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentTheme = urlParams.get('theme') === 'light' ? 'light' : 'dark';
+
+    if (currentTheme === 'light') {
+      document.body.classList.add('theme-light');
+      document.documentElement.classList.add('theme-light');
+    } else {
+      document.body.classList.add('theme-dark');
+      document.documentElement.classList.add('theme-dark');
+    }
+
+    const profile = {
+      name: urlParams.get('name') || 'dr. Amelia Cantika',
+      role: urlParams.get('role') || 'Dokter Spesialis Anak',
+      sip: urlParams.get('sip') || '503/442.1/SIP-D/2026',
+      hospital: 'RS AMANAH SEHAT',
+      avatarUrl: './assets/images/doctors/woman-doctor-4.png'
+    };
+
+    let avatarImage = null;
+    let cardTexture = null;
+    let lanyardTexture = null;
+    let cardMaterial = null;
+    let strapMaterial = null;
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = profile.avatarUrl;
+    img.onload = () => {
+      avatarImage = img;
+      if (window.regenerateTextures) window.regenerateTextures();
+    };
+
+    // 2. Exact 1:1 Procedural Texture Generators from DoctorIdCard3D.tsx
+    function drawBauhausBlock(ctx, x, y, w, h, type, primaryColor, secondaryColor, opacity = 1.0) {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+
+      if (secondaryColor) {
+        ctx.fillStyle = secondaryColor;
+        ctx.fillRect(x, y, w, h);
+      }
+
+      ctx.fillStyle = primaryColor;
+      const cx = x + w / 2;
+      const cy = y + h / 2;
+      const r = w / 2;
+
+      ctx.beginPath();
+      switch (type % 6) {
+        case 0:
+          ctx.arc(cx, cy, r * 0.92, 0, Math.PI * 2);
+          ctx.fill();
+          break;
+        case 1:
+          ctx.arc(cx, cy + r * 0.2, r * 0.88, Math.PI, 0);
+          ctx.fill();
+          break;
+        case 2:
+          ctx.moveTo(x, y);
+          ctx.arc(x, y, w * 0.95, 0, Math.PI / 2);
+          ctx.lineTo(x, y);
+          ctx.fill();
+          break;
+        case 3:
+          ctx.moveTo(cx, y + 6);
+          ctx.lineTo(x + w - 6, cy);
+          ctx.lineTo(cx, y + h - 6);
+          ctx.lineTo(x + 6, cy);
+          ctx.closePath();
+          ctx.fill();
+          break;
+        case 4:
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + w, y);
+          ctx.lineTo(x + w, y + h);
+          ctx.closePath();
+          ctx.fill();
+          break;
+        case 5:
+        default:
+          ctx.arc(cx, cy, r * 0.92, Math.PI, 0);
+          ctx.lineTo(cx + r * 0.45, cy);
+          ctx.arc(cx, cy, r * 0.45, 0, Math.PI, true);
+          ctx.closePath();
+          ctx.fill();
+          break;
+      }
+      ctx.restore();
+    }
+
+    function drawThemeGrid(ctx, startX, startY, totalW, totalH, theme, cols = 4, rows = 5, opacity = 1.0) {
+      const lightPalette = [
+        { fg: '#002b9e', bg: '#eef4ff' },
+        { fg: '#0a44ff', bg: '#dbeafe' },
+        { fg: '#07247a', bg: '#eef4ff' },
+        { fg: '#00d4ff', bg: '#002b9e' },
+        { fg: '#0a44ff', bg: '#ffffff' },
+        { fg: '#002b9e', bg: '#dbeafe' },
+      ];
+
+      const darkPalette = [
+        { fg: '#00d4ff', bg: '#062837' },
+        { fg: '#a3e635', bg: '#083344' },
+        { fg: '#14b8a6', bg: '#04202c' },
+        { fg: '#22d3ee', bg: '#0d3846' },
+        { fg: '#84cc16', bg: '#021824' },
+        { fg: '#67e8f9', bg: '#0f4050' },
+      ];
+
+      const activePalette = theme === 'dark' ? darkPalette : lightPalette;
+      const gap = 16;
+      const blockW = (totalW - (cols - 1) * gap) / cols;
+      const blockH = (totalH - (rows - 1) * gap) / rows;
+
+      let index = 0;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const bx = startX + c * (blockW + gap);
+          const by = startY + r * (blockH + gap);
+          const type = (r * 3 + c * 2 + (r % 2)) % 6;
+          const pair = activePalette[(r * cols + c + index) % activePalette.length];
+          drawBauhausBlock(ctx, bx, by, blockW, blockH, type, pair.fg, pair.bg, opacity);
+          index++;
+        }
+      }
+    }
+
+    function drawLinearBarcode(ctx, x, y, width, height, barcodeValue) {
+      ctx.save();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      if ('roundRect' in ctx) {
+        ctx.roundRect(x - 30, y - 24, width + 60, height + 84, 24);
+      } else {
+        ctx.fillRect(x - 30, y - 24, width + 60, height + 84);
+      }
+      ctx.fill();
+
+      ctx.fillStyle = '#0f172a';
+      let currentX = x;
+      const totalUnits = 140;
+      const unitWidth = width / totalUnits;
+
+      let seed = 1337;
+      for (let i = 0; i < barcodeValue.length; i++) {
+        seed = (seed * 31 + barcodeValue.charCodeAt(i)) % 10000;
+      }
+
+      ctx.fillRect(currentX, y, unitWidth * 2, height); currentX += unitWidth * 3;
+      ctx.fillRect(currentX, y, unitWidth * 2, height); currentX += unitWidth * 3;
+
+      while (currentX < x + width - unitWidth * 12) {
+        seed = (seed * 9301 + 49297) % 233280;
+        const rnd = seed / 233280;
+        const barWidth = rnd > 0.65 ? unitWidth * 3.5 : (rnd > 0.35 ? unitWidth * 2 : unitWidth);
+        const spaceWidth = (1 - rnd) > 0.65 ? unitWidth * 3 : unitWidth * 1.5;
+        ctx.fillRect(currentX, y, barWidth, height);
+        currentX += barWidth + spaceWidth;
+      }
+
+      ctx.fillRect(x + width - unitWidth * 8, y, unitWidth * 2, height);
+      ctx.fillRect(x + width - unitWidth * 3, y, unitWidth * 2, height);
+
+      ctx.fillStyle = '#334155';
+      ctx.font = 'bold 36px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(barcodeValue, x + width / 2, y + height + 42);
+      ctx.restore();
+    }
+
+    function createDoctorCardCanvasTexture(theme = 'dark') {
+      const canvas = document.createElement('canvas');
+      canvas.width = 4096;
+      canvas.height = 4096;
+      const ctx = canvas.getContext('2d');
+      const isDark = theme === 'dark';
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      ctx.fillStyle = isDark ? '#07121b' : '#ffffff';
+      ctx.fillRect(0, 0, 4096, 4096);
+
+      const frontW = 2048;
+      const frontH = 3072;
+      const bottomPanelY = 2360;
+
+      ctx.fillStyle = isDark ? '#08141e' : '#f8faff';
+      ctx.fillRect(0, 0, frontW, frontH);
+
+      const frontGlow = ctx.createRadialGradient(
+        frontW * 0.75, frontH * 0.25, 50,
+        frontW * 0.5, frontH * 0.4, 1400
+      );
+      if (isDark) {
+        frontGlow.addColorStop(0, 'rgba(0, 212, 255, 0.18)');
+        frontGlow.addColorStop(0.6, 'rgba(163, 230, 53, 0.09)');
+        frontGlow.addColorStop(1, 'rgba(8, 20, 30, 0)');
+      } else {
+        frontGlow.addColorStop(0, 'rgba(0, 43, 158, 0.16)');
+        frontGlow.addColorStop(0.6, 'rgba(10, 68, 255, 0.09)');
+        frontGlow.addColorStop(1, 'rgba(248, 250, 255, 0)');
+      }
+      ctx.fillStyle = frontGlow;
+      ctx.fillRect(0, 0, frontW, frontH);
+
+      const fontSans = '"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+      // Logo Top Left
+      ctx.fillStyle = isDark ? '#a3e635' : '#00d4ff';
+      ctx.beginPath();
+      if ('roundRect' in ctx) {
+        ctx.roundRect(180, 200, 72, 72, 20);
+      } else {
+        ctx.fillRect(180, 200, 72, 72);
+      }
+      ctx.fill();
+      ctx.fillStyle = isDark ? '#00d4ff' : '#0a44ff';
+      ctx.fillRect(204, 216, 24, 40);
+      ctx.fillRect(196, 224, 40, 24);
+
+      ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+      ctx.font = `bold 72px ${fontSans}`;
+      ctx.textAlign = 'left';
+      ctx.fillText('Amanah', 276, 256);
+
+      // Bauhaus Matrix Grid
+      drawThemeGrid(ctx, 180, 360, 1688, 1960, theme, 4, 5, isDark ? 0.68 : 0.6);
+
+      // Doctor Photo Frame
+      if (avatarImage && avatarImage.complete && avatarImage.naturalWidth > 0) {
+        ctx.save();
+        const imgAspect = avatarImage.naturalWidth / avatarImage.naturalHeight;
+        const drawH = 2380;
+        const drawW = drawH * imgAspect;
+        const drawX = 1024 - drawW / 2;
+        const drawY = bottomPanelY - drawH + 260;
+        ctx.drawImage(avatarImage, drawX, drawY, drawW, drawH);
+        ctx.restore();
+      }
+
+      // Bottom Info Panel
+      ctx.fillStyle = isDark ? '#0c1b29' : '#ffffff';
+      ctx.fillRect(0, bottomPanelY, frontW, frontH - bottomPanelY);
+
+      ctx.strokeStyle = isDark ? 'rgba(0, 212, 255, 0.25)' : 'rgba(10, 68, 255, 0.15)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(180, bottomPanelY);
+      ctx.lineTo(1868, bottomPanelY);
+      ctx.stroke();
+
+      ctx.fillStyle = isDark ? '#ffffff' : '#0f172a';
+      const nameFontSize = profile.name.length > 25 ? 74 : (profile.name.length > 18 ? 86 : 102);
+      ctx.font = `bold ${nameFontSize}px ${fontSans}`;
+      ctx.textAlign = 'left';
+      ctx.fillText(profile.name, 180, bottomPanelY + 165);
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = `600 58px ${fontSans}`;
+      ctx.fillText(profile.role, 180, bottomPanelY + 265);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = `bold 40px ${fontSans}`;
+      ctx.textAlign = 'right';
+      ctx.fillText('NOMOR SIP / ID', 1868, bottomPanelY + 145);
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = `bold 52px "Plus Jakarta Sans", monospace`;
+      ctx.fillText(profile.sip || '503/442.1/SIP-D/2026', 1868, bottomPanelY + 225);
+
+      ctx.fillStyle = isDark ? '#2dd4bf' : '#0a44ff';
+      ctx.font = `700 46px ${fontSans}`;
+      ctx.fillText('RS AMANAH SEHAT', 1868, bottomPanelY + 310);
+
+      // BACK SIDE (2048..4096)
+      const backStartX = 2048;
+      const backCenterX = 3072;
+
+      ctx.fillStyle = isDark ? '#08141e' : '#f8faff';
+      ctx.fillRect(backStartX, 0, frontW, frontH);
+
+      drawThemeGrid(ctx, backStartX + 180, 180, 1688, 1750, theme, 4, 4, 1.0);
+
+      drawLinearBarcode(
+        ctx,
+        backStartX + 260,
+        2080,
+        1528,
+        170,
+        `*DOC-${profile.sip.replace(/[^a-zA-Z0-9]/g, '') || '50344212026'}*`
+      );
+
+      ctx.fillStyle = isDark ? '#a3e635' : '#00d4ff';
+      ctx.beginPath();
+      if ('roundRect' in ctx) {
+        ctx.roundRect(backCenterX - 220, 2580, 76, 76, 22);
+      } else {
+        ctx.fillRect(backCenterX - 220, 2580, 76, 76);
+      }
+      ctx.fill();
+      ctx.fillStyle = isDark ? '#00d4ff' : '#0a44ff';
+      ctx.fillRect(backCenterX - 198, 2600, 32, 36);
+      ctx.fillRect(backCenterX - 206, 2604, 48, 28);
+
+      ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+      ctx.font = `bold 84px ${fontSans}`;
+      ctx.textAlign = 'left';
+      ctx.fillText('Amanah', backCenterX - 110, 2642);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = `700 36px ${fontSans}`;
+      ctx.textAlign = 'center';
+      ctx.fillText('HEALTHCARE IDENTITY SYSTEM', backCenterX, 2735);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.anisotropy = 16;
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.minFilter = THREE.LinearMipmapLinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.generateMipmaps = true;
+      texture.flipY = false;
+      texture.needsUpdate = true;
+      return texture;
+    }
+
+    function createLanyardCanvasTexture(theme = 'dark') {
+      const canvas = document.createElement('canvas');
+      canvas.width = 2048;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      const isDark = theme === 'dark';
+
+      // 1. Sleek Corporate Gradient Background
+      const bgGrad = ctx.createLinearGradient(0, 0, 2048, 0);
+      if (isDark) {
+        bgGrad.addColorStop(0.0, '#040b17');
+        bgGrad.addColorStop(0.3, '#0a1932');
+        bgGrad.addColorStop(0.7, '#071224');
+        bgGrad.addColorStop(1.0, '#030812');
+      } else {
+        bgGrad.addColorStop(0.0, '#1e3a8a');
+        bgGrad.addColorStop(0.3, '#1d4ed8');
+        bgGrad.addColorStop(0.7, '#1e40af');
+        bgGrad.addColorStop(1.0, '#172554');
+      }
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 2048, 256);
+
+      // 2. Micro Poly-Weave Fabric Texture
+      ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.05)';
+      for (let x = 0; x < 2048; x += 8) {
+        for (let y = 0; y < 256; y += 8) {
+          if ((x + y) % 16 === 0) ctx.fillRect(x, y, 4, 4);
+        }
+      }
+
+      // 3. Corporate Stacked Chevron Gradient Arrow Pattern (Bottom Hook Section: X = 20 to 680)
+      const numChevrons = 16;
+      const chevronStartX = 30;
+      const chevronSpacing = 38;
+
+      for (let i = 0; i < numChevrons; i++) {
+        const cx = chevronStartX + (i * chevronSpacing);
+        const progress = i / (numChevrons - 1); // 0.0 at hook, 1.0 towards text
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(cx, 32);
+        ctx.lineTo(cx + 42, 128);
+        ctx.lineTo(cx, 224);
+
+        ctx.lineWidth = 14;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        // Gradient from bright electric cyan at bottom to deep blue/fade
+        if (isDark) {
+          const alpha = Math.max(0.08, 1.0 - Math.pow(progress, 1.3));
+          if (progress < 0.35) {
+            ctx.strokeStyle = `rgba(0, 245, 255, ${alpha})`;
+          } else if (progress < 0.7) {
+            ctx.strokeStyle = `rgba(0, 136, 255, ${alpha * 0.9})`;
+          } else {
+            ctx.strokeStyle = `rgba(30, 58, 138, ${alpha * 0.7})`;
+          }
+        } else {
+          const alpha = Math.max(0.12, 1.0 - Math.pow(progress, 1.3));
+          if (progress < 0.35) {
+            ctx.strokeStyle = `rgba(103, 232, 249, ${alpha})`;
+          } else if (progress < 0.7) {
+            ctx.strokeStyle = `rgba(56, 189, 248, ${alpha * 0.9})`;
+          } else {
+            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.6})`;
+          }
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 4. Bold Modern Typography (X = 740 to 1800)
+      const textX = 760;
+
+      // Cyan Pill Badge Icon
+      ctx.fillStyle = isDark ? '#00f5ff' : '#67e8f9';
+      if ('roundRect' in ctx) {
+        ctx.beginPath();
+        ctx.roundRect(textX, 88, 76, 76, 20);
+        ctx.fill();
+      } else {
+        ctx.fillRect(textX, 88, 76, 76);
+      }
+      ctx.fillStyle = isDark ? '#040b17' : '#1e3a8a';
+      ctx.fillRect(textX + 26, 102, 24, 48);
+      ctx.fillRect(textX + 14, 114, 48, 24);
+
+      // Hospital Brand Text
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 64px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(profile.hospital || 'RS AMANAH SEHAT', textX + 105, 128);
+
+      // Subtle Chevron Accents at Ceiling Tail (X = 1860 to 2000)
+      for (let i = 0; i < 4; i++) {
+        const cx = 1860 + (i * 36);
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(cx, 48);
+        ctx.lineTo(cx + 36, 128);
+        ctx.lineTo(cx, 208);
+        ctx.lineWidth = 10;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = isDark ? `rgba(0, 245, 255, ${0.4 - i * 0.08})` : `rgba(255, 255, 255, ${0.5 - i * 0.1})`;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 5. Sleek Dashed Border Stitches
+      ctx.strokeStyle = isDark ? 'rgba(0, 245, 255, 0.7)' : 'rgba(255, 255, 255, 0.85)';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([14, 10]);
+      ctx.beginPath();
+      ctx.moveTo(0, 16); ctx.lineTo(2048, 16);
+      ctx.moveTo(0, 240); ctx.lineTo(2048, 240);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.ClampToEdgeWrapping;
+      tex.wrapT = THREE.ClampToEdgeWrapping;
+      tex.repeat.set(1, 1);
+      tex.anisotropy = 16;
+      tex.needsUpdate = true;
+      return tex;
+    }
+
+    // Procedural Studio HDRI Environment for Specular Gloss & Glare Reflections
+    function createStudioEnvironment(renderer) {
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      pmrem.compileEquirectangularShader();
+
+      const envCanvas = document.createElement('canvas');
+      envCanvas.width = 1024;
+      envCanvas.height = 512;
+      const ectx = envCanvas.getContext('2d');
+
+      const grad = ectx.createLinearGradient(0, 0, 0, 512);
+      grad.addColorStop(0, '#101c2e');
+      grad.addColorStop(0.5, '#070e17');
+      grad.addColorStop(1, '#02060b');
+      ectx.fillStyle = grad;
+      ectx.fillRect(0, 0, 1024, 512);
+
+      // Studio Softbox 1 (Top Left Overcast)
+      const sb1 = ectx.createRadialGradient(260, 140, 5, 260, 140, 200);
+      sb1.addColorStop(0, '#ffffff');
+      sb1.addColorStop(0.3, '#d8edff');
+      sb1.addColorStop(1, 'transparent');
+      ectx.fillStyle = sb1;
+      ectx.fillRect(0, 0, 512, 350);
+
+      // Studio Softbox 2 (Top Right Crisp Rim)
+      const sb2 = ectx.createRadialGradient(780, 150, 5, 780, 150, 220);
+      sb2.addColorStop(0, '#ffffff');
+      sb2.addColorStop(0.35, '#bce1ff');
+      sb2.addColorStop(1, 'transparent');
+      ectx.fillStyle = sb2;
+      ectx.fillRect(512, 0, 512, 350);
+
+      // Cyan Underglow Luminous Rim
+      const sb3 = ectx.createRadialGradient(512, 440, 5, 512, 440, 280);
+      sb3.addColorStop(0, '#00d4ff');
+      sb3.addColorStop(0.6, '#0a44ff');
+      sb3.addColorStop(1, 'transparent');
+      ectx.fillStyle = sb3;
+      ectx.fillRect(180, 280, 664, 232);
+
+      const envTex = new THREE.CanvasTexture(envCanvas);
+      envTex.mapping = THREE.EquirectangularReflectionMapping;
+      const rt = pmrem.fromEquirectangular(envTex);
+      pmrem.dispose();
+      return rt.texture;
+    }
+
+    // 3. Three.js Scene Setup
+    async function init() {
+      const container = document.getElementById('canvas-container');
+      const scene = new THREE.Scene();
+
+      // Perfectly Centered Camera Framing with Adaptive Mobile Ratio
+      const camera = new THREE.PerspectiveCamera(26.5, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(0, -0.4, 11.5);
+
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        powerPreference: 'high-performance'
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.5));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.0;
+      container.appendChild(renderer.domElement);
+
+      function updateCameraFraming() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const aspect = width / height;
+        camera.aspect = aspect;
+        if (aspect < 1.0) {
+          camera.fov = 26.5 / Math.max(aspect * 1.52, 0.72);
+        } else {
+          camera.fov = 26.5;
+        }
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+      }
+      window.addEventListener('resize', updateCameraFraming);
+      updateCameraFraming();
+
+      // Studio Lighting (1:1 with DoctorIdCard3D.tsx)
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.8);
+      scene.add(ambientLight);
+
+      const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.2);
+      dirLight1.position.set(0, 6, 8);
+      scene.add(dirLight1);
+
+      const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
+      dirLight2.position.set(-6, -3, 4);
+      scene.add(dirLight2);
+
+      // Rapier3D Physics Engine Initialisation
+      await RAPIER.init();
+      const gravity = { x: 0, y: -40, z: 0 };
+      const world = new RAPIER.World(gravity);
+
+      // Perfectly Centered Vertical Chain (Top anchor at Y = 2.75 so card centers at Y = -0.4)
+      const fixedBodyDesc = RAPIER.RigidBodyDesc.fixed().setTranslation(0, 2.75, 0);
+      const fixedBody = world.createRigidBody(fixedBodyDesc);
+
+      const j1Desc = RAPIER.RigidBodyDesc.dynamic().setTranslation(0.3, 2.75, 0).setAngularDamping(1.5).setLinearDamping(1.8);
+      const j1 = world.createRigidBody(j1Desc);
+      world.createCollider(RAPIER.ColliderDesc.ball(0.08), j1);
+
+      const j2Desc = RAPIER.RigidBodyDesc.dynamic().setTranslation(0.6, 2.75, 0).setAngularDamping(1.5).setLinearDamping(1.8);
+      const j2 = world.createRigidBody(j2Desc);
+      world.createCollider(RAPIER.ColliderDesc.ball(0.08), j2);
+
+      const j3Desc = RAPIER.RigidBodyDesc.dynamic().setTranslation(0.9, 2.75, 0).setAngularDamping(1.5).setLinearDamping(1.8);
+      const j3 = world.createRigidBody(j3Desc);
+      world.createCollider(RAPIER.ColliderDesc.ball(0.08), j3);
+
+      const cardDesc = RAPIER.RigidBodyDesc.dynamic().setTranslation(1.2, 2.75, 0).setAngularDamping(2.0).setLinearDamping(2.0);
+      const cardBody = world.createRigidBody(cardDesc);
+      world.createCollider(RAPIER.ColliderDesc.cuboid(1.14, 1.6, 0.015), cardBody);
+
+      // Spherical Joints
+      world.createImpulseJoint(RAPIER.JointData.spherical({ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }), fixedBody, j1, true);
+      world.createImpulseJoint(RAPIER.JointData.spherical({ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }), j1, j2, true);
+      world.createImpulseJoint(RAPIER.JointData.spherical({ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 0 }), j2, j3, true);
+      world.createImpulseJoint(RAPIER.JointData.spherical({ x: 0, y: 0, z: 0 }, { x: 0, y: 2.02, z: 0 }), j3, cardBody, true);
+
+      // Textures & Pokemon-Style Dynamic Holographic Specular Clearcoat Material
+      cardTexture = createDoctorCardCanvasTexture(currentTheme);
+      lanyardTexture = createLanyardCanvasTexture(currentTheme);
+
+      window.regenerateTextures = function() {
+        if (cardTexture) cardTexture.dispose();
+        if (lanyardTexture) lanyardTexture.dispose();
+        cardTexture = createDoctorCardCanvasTexture(currentTheme);
+        lanyardTexture = createLanyardCanvasTexture(currentTheme);
+        if (cardMaterial) {
+          cardMaterial.map = cardTexture;
+          cardMaterial.needsUpdate = true;
+        }
+        if (strapMaterial) {
+          strapMaterial.map = lanyardTexture;
+          strapMaterial.needsUpdate = true;
+        }
+      };
+
+      window.setAppTheme = function(theme) {
+        currentTheme = theme;
+        if (currentTheme === 'light') {
+          document.body.classList.add('theme-light');
+          document.body.classList.remove('theme-dark');
+          document.documentElement.classList.add('theme-light');
+          document.documentElement.classList.remove('theme-dark');
+        } else {
+          document.body.classList.add('theme-dark');
+          document.body.classList.remove('theme-light');
+          document.documentElement.classList.add('theme-dark');
+          document.documentElement.classList.remove('theme-light');
+        }
+        window.regenerateTextures();
+      };
+
+      if (avatarImage && avatarImage.complete) {
+        window.regenerateTextures();
+      }
+
+      cardMaterial = new THREE.MeshPhysicalMaterial({
+        map: cardTexture,
+        clearcoat: 0.08,
+        clearcoatRoughness: 0.15,
+        roughness: 0.35,
+        metalness: 0.05,
+        toneMapped: false
+      });
+
+      const metalMaterial = new THREE.MeshStandardMaterial({
+        color: 0xeeeeee,
+        roughness: 0.15,
+        metalness: 0.95
+      });
+
+      // 3D Card Object Hierarchy
+      const cardMeshGroup = new THREE.Group();
+      scene.add(cardMeshGroup);
+
+      const innerGroup = new THREE.Group();
+      innerGroup.scale.set(3.2, 3.2, 3.2);
+      innerGroup.position.set(0, -1.78, -0.05);
+      cardMeshGroup.add(innerGroup);
+
+      // Load card.glb Model & Compute Exact Top Ring Slot Bar
+      const clipHoleAnchor = new THREE.Vector3(0, 1.0, -0.05);
+
+      const gltfLoader = new GLTFLoader();
+      gltfLoader.load('./assets/3d/card.glb', (gltf) => {
+        const nodes = gltf.scene;
+        let highestBboxMaxY = -Infinity;
+        let bestBbox = null;
+
+        nodes.traverse((child) => {
+          if (child.isMesh) {
+            if (child.name === 'card' || child.name.toLowerCase().includes('card') || child.geometry?.name === 'card') {
+              child.material = cardMaterial;
+            } else {
+              child.material = metalMaterial;
+              child.geometry.computeBoundingBox();
+              const bbox = child.geometry.boundingBox;
+              if (bbox && bbox.max.y > highestBboxMaxY) {
+                highestBboxMaxY = bbox.max.y;
+                bestBbox = bbox;
+              }
+            }
+          }
+        });
+
+        if (bestBbox) {
+          const clipTopY = (bestBbox.max.y * 3.2) - 1.78;
+          const clipMidX = (bestBbox.min.x + bestBbox.max.x) * 0.5;
+          const clipMidZ = (bestBbox.min.z + bestBbox.max.z) * 0.5;
+          clipHoleAnchor.set(clipMidX, clipTopY, clipMidZ);
+          loopHemMesh.position.set(clipMidX, bestBbox.max.y - 0.012, clipMidZ);
+        }
+
+        innerGroup.add(nodes);
+        document.getElementById('loading-overlay').style.opacity = '0';
+        setTimeout(() => {
+          const el = document.getElementById('loading-overlay');
+          if (el) el.style.display = 'none';
+        }, 500);
+      }, undefined, (err) => {
+        console.warn('GLB asset load fallback:', err);
+        const cardGeo = new THREE.BoxGeometry(0.72, 1.0, 0.01);
+        const fallbackCard = new THREE.Mesh(cardGeo, cardMaterial);
+        innerGroup.add(fallbackCard);
+        document.getElementById('loading-overlay').style.display = 'none';
+      });
+
+
+      function createStrapBufferGeometry(numSegments) {
+        const geo = new THREE.BufferGeometry();
+        const numVerts = (numSegments + 1) * 2;
+        const positions = new Float32Array(numVerts * 3);
+        const uvs = new Float32Array(numVerts * 2);
+        const indices = [];
+
+        for (let i = 0; i < numSegments; i++) {
+          const a = i * 2;
+          const b = i * 2 + 1;
+          const c = (i + 1) * 2;
+          const d = (i + 1) * 2 + 1;
+          indices.push(a, b, c);
+          indices.push(b, d, c);
+        }
+
+        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geo.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+        geo.setIndex(indices);
+        return geo;
+      }
+
+      const identityQuat = new THREE.Quaternion();
+      const segQuat = new THREE.Quaternion();
+      const tangentVec = new THREE.Vector3();
+      const widthVec = new THREE.Vector3();
+      const rightVec = new THREE.Vector3();
+
+      function updateStrapGeometry(geo, crv, numSegments, width, hookQuat) {
+        if (!crv || !crv.points || crv.points.length < 4) return;
+        const points = crv.getPoints(numSegments);
+        if (!points || points.length <= numSegments) return;
+
+        const posAttr = geo.attributes.position;
+        const uvAttr = geo.attributes.uv;
+        const positions = posAttr.array;
+        const uvs = uvAttr.array;
+        const halfW = width * 0.5;
+
+        for (let i = 0; i <= numSegments; i++) {
+          const p = points[i];
+          const pNext = points[Math.min(i + 1, numSegments)];
+          const pPrev = points[Math.max(i - 1, 0)];
+
+          // 1. Tangent along curve at segment i
+          tangentVec.subVectors(pNext, pPrev);
+          if (tangentVec.lengthSq() < 0.000001) tangentVec.set(0, -1, 0);
+          tangentVec.normalize();
+
+          // 2. Smooth Torsional Twist Interpolation (t = 1 at hook, t = 0 at ceiling)
+          const t = 1.0 - (i / numSegments);
+
+          // Slerp orientation from identity (flat at ceiling) to hookQuat (rotated with card/hook)
+          if (hookQuat) {
+            segQuat.slerpQuaternions(identityQuat, hookQuat, t);
+          } else {
+            segQuat.copy(identityQuat);
+          }
+
+          // 3. Compute 3D Width Vector rotated by the interpolated twist quaternion
+          widthVec.set(1, 0, 0).applyQuaternion(segQuat);
+
+          // Project widthVec perpendicular to curve tangent (Gram-Schmidt orthogonalization)
+          const dot = widthVec.dot(tangentVec);
+          rightVec.copy(widthVec).addScaledVector(tangentVec, -dot);
+          if (rightVec.lengthSq() < 0.000001) {
+            rightVec.crossVectors(tangentVec, new THREE.Vector3(0, 0, 1));
+            if (rightVec.lengthSq() < 0.000001) rightVec.crossVectors(tangentVec, new THREE.Vector3(1, 0, 0));
+          }
+          rightVec.normalize().multiplyScalar(halfW);
+
+          const idx = i * 2;
+
+          // Left vertex
+          positions[idx * 3] = p.x - rightVec.x;
+          positions[idx * 3 + 1] = p.y - rightVec.y;
+          positions[idx * 3 + 2] = p.z - rightVec.z;
+
+          // Right vertex
+          positions[(idx + 1) * 3] = p.x + rightVec.x;
+          positions[(idx + 1) * 3 + 1] = p.y + rightVec.y;
+          positions[(idx + 1) * 3 + 2] = p.z + rightVec.z;
+
+          // UV mapping - single unified graphic with correct unmirrored reading orientation
+          const u = 1.0 - (i / numSegments);
+          uvs[idx * 2] = u;
+          uvs[idx * 2 + 1] = 0.0;
+
+          uvs[(idx + 1) * 2] = u;
+          uvs[(idx + 1) * 2 + 1] = 1.0;
+        }
+
+        posAttr.needsUpdate = true;
+        uvAttr.needsUpdate = true;
+        geo.computeVertexNormals();
+        geo.computeBoundingBox();
+        geo.computeBoundingSphere();
+      }
+
+      // 100% Native Dynamic Lanyard Strap Mesh (Joint Connection Inside Metal Ring)
+      const NUM_STRAP_SEGMENTS = 32;
+      const STRAP_WIDTH = 0.23;
+
+      const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0.9, 2.75, 0),
+        new THREE.Vector3(0.6, 2.75, 0),
+        new THREE.Vector3(0.3, 2.75, 0),
+        new THREE.Vector3(0, 2.75, 0),
+      ]);
+      curve.curveType = 'catmullrom';
+
+      const strapGeo = createStrapBufferGeometry(NUM_STRAP_SEGMENTS);
+      updateStrapGeometry(strapGeo, curve, NUM_STRAP_SEGMENTS, STRAP_WIDTH);
+
+      strapMaterial = new THREE.MeshStandardMaterial({
+        map: lanyardTexture,
+        roughness: 0.45,
+        metalness: 0.05,
+        side: THREE.DoubleSide,
+      });
+
+      const strapMesh = new THREE.Mesh(strapGeo, strapMaterial);
+      strapMesh.frustumCulled = false;
+      scene.add(strapMesh);
+
+      // Stitched Fabric Loop Sleeve / Hem (Melingkari & Menutup Sisi Depan dan Belakang Besi Hook)
+      const loopHemGeo = new THREE.BoxGeometry(0.078, 0.034, 0.046);
+      const loopHemMesh = new THREE.Mesh(loopHemGeo, strapMaterial);
+      loopHemMesh.position.set(0.0, 1.205, 0.005);
+      innerGroup.add(loopHemMesh);
+
+      const j1Lerped = new THREE.Vector3(0.3, 2.75, 0);
+      const j2Lerped = new THREE.Vector3(0.6, 2.75, 0);
+
+      // Robust Direct Drag & Gesture Interaction (Exact 1:1 Unprojection Algorithm)
+      let isDragging = false;
+      const dragOffset = new THREE.Vector3();
+      const pointer = new THREE.Vector2(0, 0);
+      const pointerDownPos = { x: 0, y: 0 };
+      const pointerWorldPos = new THREE.Vector3();
+      const raycaster = new THREE.Raycaster();
+      const planeZ = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+
+      const unprojectVec = new THREE.Vector3();
+      const unprojectDir = new THREE.Vector3();
+
+      function updatePointerCoords(clientX, clientY) {
+        pointer.x = (clientX / window.innerWidth) * 2 - 1;
+        pointer.y = -(clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(pointer, camera);
+        raycaster.ray.intersectPlane(planeZ, pointerWorldPos);
+      }
+
+      window.addEventListener('pointerdown', (e) => {
+        try {
+          e.target?.setPointerCapture?.(e.pointerId);
+        } catch (_) {}
+
+        pointerDownPos.x = e.clientX;
+        pointerDownPos.y = e.clientY;
+        updatePointerCoords(e.clientX, e.clientY);
+
+        // Raycast to find intersection point on 3D card
+        const intersects = raycaster.intersectObjects([cardMeshGroup], true);
+        const cardPos = cardBody.translation();
+
+        let hitPoint = new THREE.Vector3();
+        if (intersects.length > 0) {
+          hitPoint.copy(intersects[0].point);
+        } else {
+          hitPoint.copy(pointerWorldPos);
+        }
+
+        const dx = Math.abs(hitPoint.x - cardPos.x);
+        const dy = Math.abs(hitPoint.y - (cardPos.y - 0.4));
+
+        if (intersects.length > 0 || (dx < 2.2 && dy < 3.2)) {
+          isDragging = true;
+          dragOffset.copy(hitPoint).sub(new THREE.Vector3(cardPos.x, cardPos.y, cardPos.z));
+          [fixedBody, j1, j2, j3, cardBody].forEach(b => b.wakeUp());
+        }
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        updatePointerCoords(e.clientX, e.clientY);
+      });
+
+      const handleRelease = (e) => {
+        try {
+          e.target?.releasePointerCapture?.(e.pointerId);
+        } catch (_) {}
+
+        if (!isDragging) return;
+        const distMoved = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+        isDragging = false;
+
+        // Realistic Point-Impulse Torque Physics:
+        // Pushing a corner/edge into the screen (-Z) produces torque tau = r x F.
+        // Top-Right (+rx, +ry): tau_x < 0 (top tilts back), tau_y > 0 (right tilts back)
+        // -> Top-Right corner pushes backward into screen, Bottom-Left corner swings forward!
+        if (distMoved < 20) {
+          const cardPos = cardBody.translation();
+          const rx = Math.max(-1.1, Math.min(1.1, (pointerWorldPos.x - cardPos.x)));
+          const ry = Math.max(-1.5, Math.min(1.5, (pointerWorldPos.y - (cardPos.y - 0.4))));
+
+          [fixedBody, j1, j2, j3, cardBody].forEach(b => b.wakeUp());
+
+          // Apply slight linear impulse into screen
+          cardBody.applyImpulse({ x: rx * 0.25, y: ry * 0.1, z: -1.2 }, true);
+
+          // Apply angular velocity:
+          // X rotation = -ry (pushing top pushes top backward)
+          // Y rotation = +rx (pushing right pushes right backward)
+          // Z rotation = -rx (slight pendulum roll)
+          cardBody.setAngvel({
+            x: -ry * 5.2,
+            y: rx * 9.2,
+            z: -rx * 1.5
+          }, true);
+        }
+      };
+
+      window.addEventListener('pointerup', handleRelease);
+      window.addEventListener('pointercancel', handleRelease);
+
+      window.toggleTheme = function() {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.body.className = currentTheme === 'dark' ? 'theme-dark' : 'theme-light';
+        document.getElementById('theme-icon').textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+        document.getElementById('theme-label').textContent = currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+
+        if (lanyardTexture) lanyardTexture.dispose();
+        lanyardTexture = createLanyardCanvasTexture(currentTheme);
+        strapMaterial.map = lanyardTexture;
+        strapMaterial.needsUpdate = true;
+
+        if (window.regenerateTextures) window.regenerateTextures();
+      };
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      // 4. Main Animation Loop
+      let clock = new THREE.Clock();
+      const cardQuat = new THREE.Quaternion();
+      const cardNormal = new THREE.Vector3();
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        const delta = Math.min(clock.getDelta(), 0.1);
+
+        // Exact Continuous Per-Frame Drag Unprojection from DoctorIdCard3D.tsx:548-560
+        if (isDragging && dragOffset) {
+          unprojectVec.set(pointer.x, pointer.y, 0.5).unproject(camera);
+          unprojectDir.copy(unprojectVec).sub(camera.position).normalize();
+          unprojectVec.add(unprojectDir.multiplyScalar(camera.position.length()));
+
+          [cardBody, j1, j2, j3, fixedBody].forEach(b => b.wakeUp());
+
+          const targetX = unprojectVec.x - dragOffset.x;
+          const targetY = unprojectVec.y - dragOffset.y;
+          const targetZ = unprojectVec.z - dragOffset.z;
+
+          cardBody.setTranslation({ x: targetX, y: targetY, z: targetZ }, true);
+          cardBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
+        }
+
+        world.step();
+
+        // Sync 3D Card Group with Rapier RigidBody
+        const cardPos = cardBody.translation();
+        const cardRot = cardBody.rotation();
+        cardMeshGroup.position.set(cardPos.x, cardPos.y, cardPos.z);
+        cardMeshGroup.quaternion.set(cardRot.x, cardRot.y, cardRot.z, cardRot.w);
+
+        // Smooth Joint Lerping
+        const j1Pos = j1.translation();
+        const j2Pos = j2.translation();
+        const minSpeed = 10;
+        const maxSpeed = 50;
+
+        const d1 = Math.max(0.1, Math.min(1, j1Lerped.distanceTo(new THREE.Vector3(j1Pos.x, j1Pos.y, j1Pos.z))));
+        j1Lerped.lerp(new THREE.Vector3(j1Pos.x, j1Pos.y, j1Pos.z), Math.min(1, delta * (minSpeed + d1 * (maxSpeed - minSpeed))));
+
+        const d2 = Math.max(0.1, Math.min(1, j2Lerped.distanceTo(new THREE.Vector3(j2Pos.x, j2Pos.y, j2Pos.z))));
+        j2Lerped.lerp(new THREE.Vector3(j2Pos.x, j2Pos.y, j2Pos.z), Math.min(1, delta * (minSpeed + d2 * (maxSpeed - minSpeed))));
+
+        // Direct Connection to Stitched Loop Hem Inside the Metal Hook Ring
+        const hookPos = new THREE.Vector3();
+        loopHemMesh.getWorldPosition(hookPos);
+
+        const p0 = hookPos;
+        const p3 = fixedBody.translation();
+
+        // Rubber Band Elastic Tautness & Tension Dynamics (No Kinks / Patahan)
+        const straightP1 = new THREE.Vector3().lerpVectors(p0, new THREE.Vector3(p3.x, p3.y, p3.z), 0.33);
+        const straightP2 = new THREE.Vector3().lerpVectors(p0, new THREE.Vector3(p3.x, p3.y, p3.z), 0.67);
+
+        const currentDist = p0.distanceTo(new THREE.Vector3(p3.x, p3.y, p3.z));
+        const tautFactor = Math.min(0.85, Math.max(0.5, (currentDist - 1.8) * 0.5));
+
+        const p1 = new THREE.Vector3().lerpVectors(j2Lerped, straightP1, tautFactor);
+        const p2 = new THREE.Vector3().lerpVectors(j1Lerped, straightP2, tautFactor);
+
+        curve.points[0].copy(p0);
+        curve.points[1].copy(p1);
+        curve.points[2].copy(p2);
+        curve.points[3].set(p3.x, p3.y, p3.z);
+        curve.curveType = 'centripetal';
+
+        updateStrapGeometry(strapGeo, curve, NUM_STRAP_SEGMENTS, STRAP_WIDTH, cardMeshGroup.quaternion);
+
+        // Realistic Natural Ambient Air Currents (Micro-Breeze Idle Physics)
+        if (!isDragging) {
+          const t = clock.getElapsedTime();
+
+          // Multi-harmonic natural breeze waveforms (organic, non-repeating air draft)
+          const windSwayX = (Math.sin(t * 1.15) * 0.07 + Math.sin(t * 2.3) * 0.025 + Math.sin(t * 0.45) * 0.04);
+          const windSwayZ = (Math.cos(t * 0.85) * 0.035 + Math.sin(t * 1.6) * 0.015);
+          const windTorqueY = (Math.sin(t * 0.7) * 0.03 + Math.cos(t * 1.75) * 0.015);
+          const windTorqueX = (Math.cos(t * 1.1) * 0.018 + Math.sin(t * 0.5) * 0.01);
+
+          // Apply gentle physical breeze impulses
+          cardBody.applyImpulse({
+            x: windSwayX * delta * 0.35,
+            y: 0,
+            z: windSwayZ * delta * 0.25
+          }, false);
+
+          // Aerodynamic rotational stabilization with natural ambient micro-wobble
+          const angvel = cardBody.angvel();
+          cardBody.setAngvel({
+            x: angvel.x * 0.96 + windTorqueX * delta * 0.6,
+            y: (angvel.y - cardMeshGroup.rotation.y * 0.28) * 0.96 + windTorqueY * delta * 0.6,
+            z: angvel.z * 0.96 - windSwayX * delta * 0.35
+          }, false);
+
+          // Keep physics bodies awake for continuous soothing ambient motion
+          cardBody.wakeUp();
+          j1.wakeUp();
+          j2.wakeUp();
+          j3.wakeUp();
+        }
+
+        // Dynamic Soft Fresnel Clearcoat (Exact 1:1 with DoctorIdCard3D.tsx:590-592)
+        if (cardMaterial) {
+          cardQuat.set(cardRot.x, cardRot.y, cardRot.z, cardRot.w);
+          cardNormal.set(0, 0, 1).applyQuaternion(cardQuat);
+          const facingRatio = Math.abs(cardNormal.z);
+          const facingPower = Math.pow(facingRatio, 3);
+          cardMaterial.clearcoat = THREE.MathUtils.lerp(0.92, 0.04, facingPower);
+          cardMaterial.clearcoatRoughness = THREE.MathUtils.lerp(0.08, 0.25, facingRatio);
+          cardMaterial.roughness = THREE.MathUtils.lerp(0.2, 0.4, facingPower);
+        }
+
+        renderer.render(scene, camera);
+      }
+
+      animate();
+    }
+
+    init();
+  </script>
 </body>
 </html>
