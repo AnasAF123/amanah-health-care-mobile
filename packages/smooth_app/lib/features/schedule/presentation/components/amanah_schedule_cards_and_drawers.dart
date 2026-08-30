@@ -18,19 +18,25 @@ class _LiquidGlassMaskLayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      height: 180,
+    return Positioned.fill(
       child: IgnorePointer(
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(
-            bottom: Radius.circular(32),
-          ),
+        child: ShaderMask(
+          blendMode: BlendMode.dstIn,
+          shaderCallback: (Rect bounds) {
+            return const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: <Color>[
+                Colors.transparent,
+                Colors.transparent,
+                Colors.black,
+              ],
+              stops: <double>[0.0, 0.38, 0.65],
+            ).createShader(bounds);
+          },
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-            child: const ColoredBox(color: Colors.transparent),
+            filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
+            child: const ColoredBox(color: Color(0x01000000)),
           ),
         ),
       ),
@@ -48,14 +54,15 @@ class _AmbientCardGradientLayer extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
               colors: <Color>[
-                const Color(0xFF0A1624).withValues(alpha: 0.88),
-                const Color(0xFF0A1624).withValues(alpha: 0.42),
                 const Color(0xFF0A1624).withValues(alpha: 0.0),
+                const Color(0xFF0A1624).withValues(alpha: 0.0),
+                const Color(0xFF0A1624).withValues(alpha: 0.42),
+                const Color(0xFF0A1624).withValues(alpha: 0.88),
               ],
-              stops: const <double>[0.0, 0.45, 0.70],
+              stops: const <double>[0.0, 0.35, 0.60, 1.0],
             ),
           ),
         ),
