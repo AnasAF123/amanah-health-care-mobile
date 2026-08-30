@@ -443,21 +443,21 @@
       const MODEL_SCALE = 2.80;
       const WEB_MODEL_SCALE = 3.20;
       const MODEL_SCALE_RATIO = MODEL_SCALE / WEB_MODEL_SCALE;
-      const fixedPoint = new THREE.Vector3(0, 3.25, 0);
+      const fixedPoint = new THREE.Vector3(0, 3.85, 0);
       const joints = [
-        { pos: new THREE.Vector3(0, 3.25, 0), oldPos: new THREE.Vector3(0, 3.25, 0), fixed: true },
-        { pos: new THREE.Vector3(0.36, 3.05, 0), oldPos: new THREE.Vector3(0.36, 3.15, 0), fixed: false },
-        { pos: new THREE.Vector3(0.72, 2.85, 0), oldPos: new THREE.Vector3(0.72, 2.95, 0), fixed: false },
-        { pos: new THREE.Vector3(1.08, 2.65, 0), oldPos: new THREE.Vector3(1.08, 2.75, 0), fixed: false },
+        { pos: new THREE.Vector3(0, 3.85, 0), oldPos: new THREE.Vector3(0, 3.85, 0), fixed: true },
+        { pos: new THREE.Vector3(0.36, 3.60, 0), oldPos: new THREE.Vector3(0.36, 3.70, 0), fixed: false },
+        { pos: new THREE.Vector3(0.72, 3.35, 0), oldPos: new THREE.Vector3(0.72, 3.45, 0), fixed: false },
+        { pos: new THREE.Vector3(1.08, 3.10, 0), oldPos: new THREE.Vector3(1.08, 3.20, 0), fixed: false },
       ];
-      const segmentLengths = [0.54, 0.54, 0.54];
+      const segmentLengths = [0.63, 0.63, 0.63];
       const CARD_HOOK_OFFSET_Y = 2.02 * MODEL_SCALE_RATIO;
       const CARD_HOOK_LOCAL = new THREE.Vector3(0, CARD_HOOK_OFFSET_Y, 0);
       const ROPE_GRAVITY = 18.0;
       const ROPE_DAMPING = 0.90;
       const CARD_DAMPING = 0.92;
       const CARD_START_X = 1.26;
-      const CARD_START_Y = 0.90;
+      const CARD_START_Y = 1.05;
 
       const cardGroup = new THREE.Group();
       cardGroup.position.set(CARD_START_X, CARD_START_Y, 0);

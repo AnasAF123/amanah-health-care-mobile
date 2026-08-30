@@ -8,10 +8,12 @@ class AmanahBottomNavigationBar extends StatelessWidget {
     required this.selectedTab,
     required this.onTabSelected,
     super.key,
+    this.unreadNotifications = 0,
   });
 
   final AmanahHomeTab selectedTab;
   final ValueChanged<AmanahHomeTab> onTabSelected;
+  final int unreadNotifications;
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +106,7 @@ class AmanahBottomNavigationBar extends StatelessWidget {
                     label: 'Notifikasi',
                     activeColor: activeColor,
                     inactiveColor: inactiveColor,
+                    badgeCount: unreadNotifications,
                     onTap: onTabSelected,
                   ),
                   _AmanahNavigationItem(
@@ -136,6 +139,7 @@ class _AmanahNavigationItem extends StatelessWidget {
     required this.activeColor,
     required this.inactiveColor,
     required this.onTap,
+    this.badgeCount = 0,
   });
 
   final AmanahHomeTab tab;
@@ -146,6 +150,7 @@ class _AmanahNavigationItem extends StatelessWidget {
   final Color activeColor;
   final Color inactiveColor;
   final ValueChanged<AmanahHomeTab> onTap;
+  final int badgeCount;
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +170,31 @@ class _AmanahNavigationItem extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(selected ? selectedIcon : icon, size: 24, color: color),
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: <Widget>[
+                    Icon(selected ? selectedIcon : icon, size: 24, color: color),
+                    if (badgeCount > 0)
+                      Positioned(
+                        top: -2,
+                        right: -4,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEF4444),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Theme.of(context).brightness == Brightness.dark
+                                  ? const Color(0xFF171717)
+                                  : Colors.white,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
                 const SizedBox(height: VERY_SMALL_SPACE),
                 Text(
                   label,

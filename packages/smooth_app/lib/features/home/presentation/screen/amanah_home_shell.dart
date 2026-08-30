@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/authentication/domain/amanah_auth_user.dart';
 import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
+import 'package:smooth_app/features/home/domain/amanah_notification_model.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_bottom_navigation_bar.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_home_app_bar.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_quick_access_section.dart';
@@ -11,13 +12,13 @@ import 'package:smooth_app/features/home/presentation/components/amanah_schedule
 import 'package:smooth_app/features/home/presentation/components/amanah_today_activity_section.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_account_tab_screen.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_doctor_id_card_screen.dart';
+import 'package:smooth_app/features/home/presentation/screen/amanah_notification_tab_screen.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_queue_dock_screen.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_schedule_tab_screen.dart';
 import 'package:smooth_app/features/presence/presentation/screen/amanah_presence_history_screen.dart';
 import 'package:smooth_app/features/presence/presentation/screen/amanah_qr_scanner_tab_screen.dart';
 import 'package:smooth_app/features/schedule/data/amanah_schedule_store.dart';
 import 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart';
-import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class AmanahHomeShell extends StatefulWidget {
   const AmanahHomeShell({required this.user, this.onLogout, super.key});
@@ -31,6 +32,8 @@ class AmanahHomeShell extends StatefulWidget {
 
 class _AmanahHomeShellState extends State<AmanahHomeShell> {
   final AmanahScheduleStore _scheduleStore = AmanahScheduleStore.instance;
+  final AmanahNotificationStore _notificationStore =
+      AmanahNotificationStore.instance;
   AmanahHomeTab _selectedTab = AmanahHomeTab.home;
   String? _toastMessage;
   Timer? _toastTimer;
@@ -42,6 +45,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
   void initState() {
     super.initState();
     _scheduleStore.addListener(_onStoreUpdated);
+    _notificationStore.addListener(_onStoreUpdated);
   }
 
   void _onStoreUpdated() {
@@ -171,6 +175,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
   @override
   void dispose() {
     _scheduleStore.removeListener(_onStoreUpdated);
+    _notificationStore.removeListener(_onStoreUpdated);
     _toastTimer?.cancel();
     super.dispose();
   }
@@ -215,6 +220,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   user: widget.user,
                   data: amanahHomeDashboardData,
                   todaySchedules: todaySchedules,
+                  unreadNotifications: _notificationStore.unreadCount,
                   onNotificationTap: () {
                     setState(() => _selectedTab = AmanahHomeTab.notifications);
                   },
@@ -261,6 +267,12 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                     setState(() => _selectedTab = AmanahHomeTab.home);
                   },
                 ),
+                AmanahHomeTab.notifications => AmanahNotificationTabScreen(
+                  key: const ValueKey<String>('notifications_content'),
+                  onBack: () {
+                    setState(() => _selectedTab = AmanahHomeTab.home);
+                  },
+                ),
                 AmanahHomeTab.account => AmanahAccountTabScreen(
                   key: const ValueKey<String>('account_content'),
                   user: widget.user,
@@ -271,14 +283,6 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                     _showToast('Membuka menu $id');
                   },
                   onLogout: _handleLogout,
-                ),
-                _ => _AmanahPlaceholderPage(
-                  key: ValueKey<AmanahHomeTab>(_selectedTab),
-                  tab: _selectedTab,
-                  user: widget.user,
-                  onBackToHome: () {
-                    setState(() => _selectedTab = AmanahHomeTab.home);
-                  },
                 ),
               },
             ),
@@ -298,6 +302,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
       ),
       bottomNavigationBar: AmanahBottomNavigationBar(
         selectedTab: _selectedTab,
+        unreadNotifications: _notificationStore.unreadCount,
         onTabSelected: (AmanahHomeTab tab) {
           setState(() {
             if (tab == AmanahHomeTab.schedule) {
@@ -323,6 +328,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
     required this.onQuickActionTap,
     required this.onDetailActivityTap,
     required this.onActivityTap,
+    this.unreadNotifications = 0,
     this.onScheduleCardTap,
     super.key,
   });
@@ -336,6 +342,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
   final VoidCallback onDetailActivityTap;
   final ValueChanged<AmanahActivityMetric> onActivityTap;
   final ValueChanged<DoctorSchedule>? onScheduleCardTap;
+  final int unreadNotifications;
 
   @override
   Widget build(BuildContext context) {
@@ -365,7 +372,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
         AmanahHomeAppBar(
           user: user,
           greeting: data.profile.greeting,
-          unreadNotifications: data.profile.unreadNotifications,
+          unreadNotifications: unreadNotifications,
           onNotificationTap: onNotificationTap,
           onProfileTap: onProfileTap,
         ),
@@ -440,115 +447,6 @@ class _AmanahEphemeralToast extends StatelessWidget {
   }
 }
 
-class _AmanahPlaceholderPage extends StatelessWidget {
-  const _AmanahPlaceholderPage({
-    required this.tab,
-    required this.user,
-    required this.onBackToHome,
-    super.key,
-  });
-
-  final AmanahHomeTab tab;
-  final AmanahAuthUser user;
-  final VoidCallback onBackToHome;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool dark = theme.brightness == Brightness.dark;
-    final _AmanahPageCopy copy = _copyForTab(tab);
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(24, 22, 24, 126),
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-              onPressed: onBackToHome,
-              color: dark ? Colors.white : const Color(0xFF1E293B),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    'Amanah Healthcare',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontFamily: 'PlusJakartaSans',
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: VERY_SMALL_SPACE),
-                  Text(
-                    copy.title,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      color: dark ? Colors.white : theme.colorScheme.onSurface,
-                      fontFamily: 'PlusJakartaSans',
-                      fontWeight: FontWeight.w900,
-                      height: 1.08,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            _AmanahUserAvatar(user: user),
-          ],
-        ),
-        const SizedBox(height: 28),
-        Text(
-          copy.description,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: dark
-                ? const Color(0xFF94A3B8)
-                : theme.colorScheme.onSurface.withValues(alpha: 0.58),
-            fontFamily: 'PlusJakartaSans',
-            fontWeight: FontWeight.w500,
-            height: 1.45,
-          ),
-        ),
-        const SizedBox(height: 32),
-        _AmanahFeaturePlaceholder(copy: copy),
-      ],
-    );
-  }
-
-  _AmanahPageCopy _copyForTab(AmanahHomeTab tab) {
-    return switch (tab) {
-      AmanahHomeTab.home => const _AmanahPageCopy(
-        title: 'Home',
-        description:
-            'Ringkasan layanan klinik, jadwal, presensi, dan informasi harian akan ditempatkan di sini.',
-        icon: Icons.home_rounded,
-      ),
-      AmanahHomeTab.schedule => const _AmanahPageCopy(
-        title: 'Jadwal Dokter',
-        description: 'Kelola jadwal praktik, antrean poliklinik, dan visit.',
-        icon: Icons.calendar_today_rounded,
-      ),
-      AmanahHomeTab.scan => const _AmanahPageCopy(
-        title: 'Presensi QR',
-        description: 'Arahkan kamera ke QR terminal poliklinik untuk presensi.',
-        icon: Icons.qr_code_2_rounded,
-      ),
-      AmanahHomeTab.notifications => const _AmanahPageCopy(
-        title: 'Pusat Notifikasi',
-        description:
-            'Pemberitahuan darurat, antrean baru, dan pesan internal klinik.',
-        icon: Icons.notifications_rounded,
-      ),
-      AmanahHomeTab.account => const _AmanahPageCopy(
-        title: 'Profil & Kartu ID',
-        description:
-            'Informasi SIP/STR, spesialisasi dokter, dan pengaturan akun.',
-        icon: Icons.person_rounded,
-      ),
-    };
-  }
-}
-
 class _AmanahHomeAuroraBackground extends StatelessWidget {
   const _AmanahHomeAuroraBackground({required this.dark});
 
@@ -615,117 +513,4 @@ class _AmanahHomeAuroraPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _AmanahHomeAuroraPainter oldDelegate) => true;
-}
-
-class _AmanahUserAvatar extends StatelessWidget {
-  const _AmanahUserAvatar({required this.user});
-
-  final AmanahAuthUser user;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final String name = user.fullName.trim();
-    final String initial = name.isEmpty
-        ? 'A'
-        : name.substring(0, 1).toUpperCase();
-
-    return Semantics(
-      label: 'Profil ${user.fullName}',
-      child: CircleAvatar(
-        radius: 24,
-        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.10),
-        child: Text(
-          initial,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: theme.colorScheme.primary,
-            fontFamily: 'PlusJakartaSans',
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AmanahFeaturePlaceholder extends StatelessWidget {
-  const _AmanahFeaturePlaceholder({required this.copy});
-
-  final _AmanahPageCopy copy;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool dark = theme.brightness == Brightness.dark;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: dark ? const Color(0xE6171717) : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: dark
-              ? Colors.white.withValues(alpha: 0.15)
-              : theme.colorScheme.outlineVariant.withValues(alpha: 0.52),
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withValues(alpha: dark ? 0.36 : 0.04),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: <Widget>[
-            Container(
-              width: 58,
-              height: 58,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(copy.icon, color: theme.colorScheme.primary),
-            ),
-            const SizedBox(height: LARGE_SPACE),
-            Text(
-              'Placeholder ${copy.title}',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: dark ? Colors.white : theme.colorScheme.onSurface,
-                fontFamily: 'PlusJakartaSans',
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: SMALL_SPACE),
-            Text(
-              'Konten halaman ini akan diisi setelah struktur navigasi final.',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: dark
-                    ? const Color(0xFF94A3B8)
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.52),
-                fontFamily: 'PlusJakartaSans',
-                fontWeight: FontWeight.w500,
-                height: 1.45,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AmanahPageCopy {
-  const _AmanahPageCopy({
-    required this.title,
-    required this.description,
-    required this.icon,
-  });
-
-  final String title;
-  final String description;
-  final IconData icon;
 }
