@@ -101,9 +101,9 @@ class AmanahBottomNavigationBar extends StatelessWidget {
                   _AmanahNavigationItem(
                     tab: AmanahHomeTab.notifications,
                     selectedTab: selectedTab,
-                    icon: Icons.notifications_none_rounded,
-                    selectedIcon: Icons.notifications_rounded,
-                    label: 'Notifikasi',
+                    icon: Icons.mail_outline_rounded,
+                    selectedIcon: Icons.mail_rounded,
+                    label: 'Perizinan',
                     activeColor: activeColor,
                     inactiveColor: inactiveColor,
                     badgeCount: unreadNotifications,

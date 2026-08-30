@@ -44,7 +44,7 @@ class AmanahScreenHeader extends StatelessWidget implements PreferredSizeWidget 
               // 1. Leading / Start (Back Button or Spacer)
               Align(
                 alignment: Alignment.centerLeft,
-                child: onBack != null
+                child: (onBack != null || Navigator.canPop(context))
                     ? Semantics(
                         button: true,
                         label: 'Kembali',
@@ -53,7 +53,7 @@ class AmanahScreenHeader extends StatelessWidget implements PreferredSizeWidget 
                           shape: const CircleBorder(),
                           child: InkWell(
                             customBorder: const CircleBorder(),
-                            onTap: onBack,
+                            onTap: onBack ?? () => Navigator.of(context).maybePop(),
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Icon(

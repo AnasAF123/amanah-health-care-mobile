@@ -15,6 +15,8 @@ import 'package:smooth_app/features/home/presentation/screen/amanah_doctor_id_ca
 import 'package:smooth_app/features/home/presentation/screen/amanah_notification_tab_screen.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_queue_dock_screen.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_schedule_tab_screen.dart';
+import 'package:smooth_app/features/permission/data/amanah_permission_store.dart';
+import 'package:smooth_app/features/permission/presentation/screen/amanah_leave_permission_tab_screen.dart';
 import 'package:smooth_app/features/presence/presentation/screen/amanah_presence_history_screen.dart';
 import 'package:smooth_app/features/presence/presentation/screen/amanah_qr_scanner_tab_screen.dart';
 import 'package:smooth_app/features/schedule/data/amanah_schedule_store.dart';
@@ -34,6 +36,8 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
   final AmanahScheduleStore _scheduleStore = AmanahScheduleStore.instance;
   final AmanahNotificationStore _notificationStore =
       AmanahNotificationStore.instance;
+  final AmanahPermissionStore _permissionStore =
+      AmanahPermissionStore.instance;
   AmanahHomeTab _selectedTab = AmanahHomeTab.home;
   String? _toastMessage;
   Timer? _toastTimer;
@@ -46,6 +50,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     super.initState();
     _scheduleStore.addListener(_onStoreUpdated);
     _notificationStore.addListener(_onStoreUpdated);
+    _permissionStore.addListener(_onStoreUpdated);
   }
 
   void _onStoreUpdated() {
@@ -144,7 +149,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
       case 'jadwal-saya':
         setState(() {
           _scheduleInitialSessionId = null;
-          _scheduleInitialViewMode = AmanahScheduleViewMode.sessions;
+          _scheduleInitialViewMode = AmanahScheduleViewMode.overview;
           _scheduleOpenDetailOnLaunch = false;
           _selectedTab = AmanahHomeTab.schedule;
         });
@@ -177,6 +182,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
   void dispose() {
     _scheduleStore.removeListener(_onStoreUpdated);
     _notificationStore.removeListener(_onStoreUpdated);
+    _permissionStore.removeListener(_onStoreUpdated);
     _toastTimer?.cancel();
     super.dispose();
   }
@@ -223,7 +229,9 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   todaySchedules: todaySchedules,
                   unreadNotifications: _notificationStore.unreadCount,
                   onNotificationTap: () {
-                    setState(() => _selectedTab = AmanahHomeTab.notifications);
+                    Navigator.of(context).push(
+                      AmanahNotificationTabScreen.route(),
+                    );
                   },
                   onProfileTap: () {
                     setState(() => _selectedTab = AmanahHomeTab.account);
@@ -262,8 +270,10 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                     setState(() => _selectedTab = AmanahHomeTab.home);
                   },
                 ),
-                AmanahHomeTab.notifications => AmanahNotificationTabScreen(
-                  key: const ValueKey<String>('notifications_content'),
+                AmanahHomeTab.notifications => AmanahLeavePermissionTabScreen(
+                  key: const ValueKey<String>('permissions_content'),
+                  doctorName: widget.user.fullName,
+                  doctorRole: 'Dokter Spesialis Anak',
                   onBack: () {
                     setState(() => _selectedTab = AmanahHomeTab.home);
                   },
@@ -297,7 +307,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
       ),
       bottomNavigationBar: AmanahBottomNavigationBar(
         selectedTab: _selectedTab,
-        unreadNotifications: _notificationStore.unreadCount,
+        unreadNotifications: _permissionStore.pendingCount,
         onTabSelected: (AmanahHomeTab tab) {
           setState(() {
             if (tab == AmanahHomeTab.schedule) {

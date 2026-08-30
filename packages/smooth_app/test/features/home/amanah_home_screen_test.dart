@@ -94,6 +94,25 @@ void main() {
       },
     );
 
+    testWidgets(
+      'Tapping Jadwal Saya quick action navigates to Schedule Overview screen with capacity gauge',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.75;
+        addTearDown(() => tester.view.reset());
+
+        await tester.pumpWidget(createHomeScreen());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Jadwal Saya'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Jadwal Praktik'), findsOneWidget);
+        expect(find.text('Lihat Schedule'), findsOneWidget);
+        expect(find.text('Kapasitas Hari Ini'), findsWidgets);
+      },
+    );
+
     testWidgets('Quick action Pilih Antrean opens queue dock screen', (
       WidgetTester tester,
     ) async {
@@ -142,7 +161,7 @@ void main() {
       expect(find.text('RS AMANAH SEHAT'), findsWidgets);
     });
 
-    testWidgets('Tapping notification bell navigates to Notification tab', (
+    testWidgets('Tapping notification bell button in app bar navigates to Notification screen', (
       WidgetTester tester,
     ) async {
       tester.view.physicalSize = const Size(1080, 2400);

@@ -179,17 +179,10 @@ class _AmanahCategoryChip extends StatelessWidget {
     final Color badgeText;
 
     if (isActive) {
-      if (dark) {
-        bgColor = Colors.white;
-        textColor = const Color(0xFF0F172A);
-        badgeBg = const Color(0xFFE2E8F0);
-        badgeText = const Color(0xFF0F172A);
-      } else {
-        bgColor = const Color(0xFF0F172A);
-        textColor = Colors.white;
-        badgeBg = const Color(0xFF1E293B);
-        badgeText = Colors.white;
-      }
+      bgColor = const Color(0xFF0A44FF);
+      textColor = Colors.white;
+      badgeBg = Colors.white.withValues(alpha: 0.22);
+      badgeText = Colors.white;
     } else {
       if (dark) {
         bgColor = Colors.white.withValues(alpha: 0.05);

@@ -57,14 +57,14 @@ void main() {
       expect(find.text('Edit Profil'), findsOneWidget);
       expect(find.byIcon(Icons.camera_alt_rounded), findsOneWidget);
 
-      // Settings Menu Items (8 items matching web)
+      // Settings Menu Items (7 items matching web after removing Perangkat Terhubung)
       expect(find.text('Akun & Identitas Dokter'), findsOneWidget);
       expect(find.text('Pengaturan Praktik & Shift'), findsOneWidget);
       expect(find.text('Privasi & Keamanan'), findsOneWidget);
       expect(find.text('Notifikasi & Pengingat'), findsOneWidget);
       expect(find.text('Data & Penyimpanan'), findsOneWidget);
       expect(find.text('Dokumen & Sertifikasi'), findsOneWidget);
-      expect(find.text('Perangkat Terhubung'), findsOneWidget);
+      expect(find.text('Perangkat Terhubung'), findsNothing);
       expect(find.text('Bantuan & IT Support'), findsOneWidget);
 
       // Logout Button

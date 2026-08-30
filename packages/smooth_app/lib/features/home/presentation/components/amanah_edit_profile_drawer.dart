@@ -460,10 +460,8 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
                         child: ElevatedButton(
                           onPressed: _isSaved ? null : _handleSave,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                dark ? Colors.white : const Color(0xFF0F172A),
-                            foregroundColor:
-                                dark ? const Color(0xFF020617) : Colors.white,
+                            backgroundColor: const Color(0xFF0A44FF),
+                            foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             elevation: 0,
                             shape: RoundedRectangleBorder(

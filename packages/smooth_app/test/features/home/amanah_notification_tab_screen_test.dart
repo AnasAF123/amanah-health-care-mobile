@@ -174,30 +174,32 @@ void main() {
           findsOneWidget);
     });
 
-    testWidgets('Bottom navigation tab switching to Notifikasi opens screen in shell',
-        (WidgetTester tester) async {
+    testWidgets('AmanahNotificationTabScreen route renders notification screen', (
+      WidgetTester tester,
+    ) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.75;
       addTearDown(() => tester.view.reset());
 
-      const AmanahAuthUser testUser = AmanahAuthUser(
-        id: 'doc-001',
-        role: AmanahUserRole.doctor,
-        fullName: 'dr. Andika Perkasa',
-        email: 'dokter@amanah.health',
-        phone: '081234567890',
-        password: 'password123',
-      );
-
       await tester.pumpWidget(
-        const MaterialApp(
-          home: AmanahHomeShell(user: testUser),
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) => Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).push(
+                    AmanahNotificationTabScreen.route(),
+                  ),
+                  child: const Text('Buka Notifikasi'),
+                ),
+              ),
+            ),
+          ),
         ),
       );
       await tester.pumpAndSettle();
 
-      // Tap 'Notifikasi' on BottomNavigationBar
-      await tester.tap(find.text('Notifikasi'));
+      await tester.tap(find.text('Buka Notifikasi'));
       await tester.pumpAndSettle();
 
       expect(find.text('Pasien Siap di Ruang Periksa'), findsOneWidget);

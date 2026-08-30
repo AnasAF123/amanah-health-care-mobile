@@ -107,15 +107,6 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
       icon: Icons.description_outlined,
     ),
     AmanahSettingsItemData(
-      id: 'devices',
-      title: 'Perangkat Terhubung',
-      subtitle: 'Mobile App, Tablet Poli, Desktop RS',
-      colorPrimary: Color(0xFF14B8A6),
-      colorLight: Color(0xFF5EEAD4),
-      colorDark: Color(0xFF0F766E),
-      icon: Icons.devices_rounded,
-    ),
-    AmanahSettingsItemData(
       id: 'help',
       title: 'Bantuan & IT Support',
       subtitle: 'Helpdesk SIMRS, Panduan Presensi',
