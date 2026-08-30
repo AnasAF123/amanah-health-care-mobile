@@ -471,10 +471,10 @@ class _AmanahHomeAuroraPainter extends CustomPainter {
     canvas.saveLayer(topMask, Paint());
 
     if (dark) {
-      // 1. Deep Cosmic Sapphire Glow (alpha 0.75, blur 100px)
+      // 1. Deep Cosmic Sapphire Glow (alpha 0.62, blur 105px)
       final Paint sapphireGlow = Paint()
-        ..color = const Color(0xFF07247A).withValues(alpha: 0.75)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 100);
+        ..color = const Color(0xFF07247A).withValues(alpha: 0.62)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 105);
       canvas.drawOval(
         Rect.fromLTWH(
           -size.width * 0.20,
@@ -485,10 +485,10 @@ class _AmanahHomeAuroraPainter extends CustomPainter {
         sapphireGlow,
       );
 
-      // 2. Electric Cyan/Teal Glow (alpha 0.65, blur 90px)
+      // 2. Electric Cyan/Teal Glow (alpha 0.55, blur 95px)
       final Paint tealGlow = Paint()
-        ..color = const Color(0xFF0088CC).withValues(alpha: 0.65)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 90);
+        ..color = const Color(0xFF0088CC).withValues(alpha: 0.55)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 95);
       canvas.drawOval(
         Rect.fromLTWH(
           size.width * 0.20,
@@ -499,10 +499,10 @@ class _AmanahHomeAuroraPainter extends CustomPainter {
         tealGlow,
       );
     } else {
-      // 1. Vibrant Apple/Amanah Blue Base in top-left (alpha 0.72, blur 95px, balanced and radiant)
+      // 1. Soft Vibrant Blue Base in top-left (alpha 0.58, blur 105px, gentle and airy)
       final Paint blueGlow = Paint()
-        ..color = const Color(0xFF0A44FF).withValues(alpha: 0.72)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 95);
+        ..color = const Color(0xFF0A44FF).withValues(alpha: 0.58)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 105);
       canvas.drawOval(
         Rect.fromLTWH(
           -size.width * 0.20,
@@ -513,10 +513,10 @@ class _AmanahHomeAuroraPainter extends CustomPainter {
         blueGlow,
       );
 
-      // 2. Radiant Cyan Glow in top-right (alpha 0.75, blur 85px)
+      // 2. Soft Radiant Cyan Glow in top-right (alpha 0.62, blur 95px)
       final Paint cyanGlow = Paint()
-        ..color = const Color(0xFF00D4FF).withValues(alpha: 0.75)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 85);
+        ..color = const Color(0xFF00D4FF).withValues(alpha: 0.62)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 95);
       canvas.drawOval(
         Rect.fromLTWH(
           size.width * 0.20,
