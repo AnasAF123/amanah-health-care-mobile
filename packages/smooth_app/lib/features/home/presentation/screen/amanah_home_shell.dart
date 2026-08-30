@@ -199,13 +199,13 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
       extendBody: true,
       body: Stack(
         children: <Widget>[
-          // Dynamic Aurora Ambient Glow (265px reaching slightly past the middle of schedule card)
+          // Dynamic Aurora Ambient Glow (400px matching web source AuroraBackground.tsx 1:1)
           if (_selectedTab == AmanahHomeTab.home)
             Positioned(
               top: 0,
               left: 0,
               right: 0,
-              height: 265,
+              height: 400,
               child: _AmanahHomeAuroraBackground(dark: dark),
             ),
 
@@ -470,47 +470,78 @@ class _AmanahHomeAuroraPainter extends CustomPainter {
     final Rect topMask = Rect.fromLTWH(0, 0, size.width, size.height);
     canvas.saveLayer(topMask, Paint());
 
-    // 1. Deep Blue Base (Atmospheric glow behind App Bar and top of schedule card)
-    final Paint blueGlow = Paint()
-      ..color = (dark ? const Color(0xFF07247A) : const Color(0xFF0A44FF))
-          .withValues(alpha: dark ? 0.70 : 0.76)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 80);
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(size.width * 0.25, 40),
-        width: size.width * 1.40,
-        height: 360,
-      ),
-      blueGlow,
-    );
+    if (dark) {
+      // 1. Deep Cosmic Sapphire Glow (#07247a, blur 100px, opacity 0.90, -top 15%, -left 20%, w 140%, h 290)
+      final Paint sapphireGlow = Paint()
+        ..color = const Color(0xFF07247A).withValues(alpha: 0.90)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 100);
+      canvas.drawOval(
+        Rect.fromLTWH(
+          -size.width * 0.20,
+          -size.height * 0.15,
+          size.width * 1.40,
+          290,
+        ),
+        sapphireGlow,
+      );
 
-    // 2. Vibrant Cyan Glow (Radiant cyan glow in upper right)
-    final Paint cyanGlow = Paint()
-      ..color = (dark ? const Color(0xFF0088CC) : const Color(0xFF00D4FF))
-          .withValues(alpha: dark ? 0.55 : 0.65)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 70);
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(size.width * 0.85, 60),
-        width: size.width * 1.10,
-        height: 300,
-      ),
-      cyanGlow,
-    );
+      // 2. Electric Cyan/Teal Glow (#0088cc, blur 90px, opacity 0.70, top 5%, right -20%, w 100%, h 200)
+      final Paint tealGlow = Paint()
+        ..color = const Color(0xFF0088CC).withValues(alpha: 0.70)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 90);
+      canvas.drawOval(
+        Rect.fromLTWH(
+          size.width * 0.20,
+          size.height * 0.05,
+          size.width * 1.0,
+          200,
+        ),
+        tealGlow,
+      );
+    } else {
+      // 1. Vibrant Apple/Amanah Blue Base (#0A44FF, blur 100px, opacity 0.90, -top 10%, -left 20%, w 140%, h 270)
+      final Paint blueGlow = Paint()
+        ..color = const Color(0xFF0A44FF).withValues(alpha: 0.90)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 100);
+      canvas.drawOval(
+        Rect.fromLTWH(
+          -size.width * 0.20,
+          -size.height * 0.10,
+          size.width * 1.40,
+          270,
+        ),
+        blueGlow,
+      );
 
-    // 3. Smooth Integration Mask (Full color at top, fading just past the middle of schedule card)
+      // 2. Radiant Cyan Glow (#00D4FF, blur 90px, opacity 0.80, top 5%, right -20%, w 100%, h 190)
+      final Paint cyanGlow = Paint()
+        ..color = const Color(0xFF00D4FF).withValues(alpha: 0.80)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 90);
+      canvas.drawOval(
+        Rect.fromLTWH(
+          size.width * 0.20,
+          size.height * 0.05,
+          size.width * 1.0,
+          190,
+        ),
+        cyanGlow,
+      );
+    }
+
+    // 3. Smooth Integration Mask (black 25%, transparent 100%) matching web maskImage: linear-gradient(to bottom, black 25%, transparent 100%)
     final Paint fadePaint = Paint()
       ..blendMode = BlendMode.dstIn
       ..shader = const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: <Color>[Colors.black, Colors.black, Colors.transparent],
-        stops: <double>[0, 0.50, 1],
+        stops: <double>[0.0, 0.25, 1.0],
       ).createShader(topMask);
     canvas.drawRect(topMask, fadePaint);
     canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant _AmanahHomeAuroraPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _AmanahHomeAuroraPainter oldDelegate) =>
+      oldDelegate.dark != dark;
 }
