@@ -163,7 +163,6 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
   HttpServer? _server;
   int? _port;
   bool _useWebView = true;
-  bool _isWebViewLoading = true;
   String? _lastSyncedProfile;
   String? _lastSyncedTheme;
   static const String _webTheme = 'light';
@@ -213,7 +212,6 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
               if (!mounted) {
                 return;
               }
-              setState(() => _isWebViewLoading = false);
               _syncWebRuntimeState(forceProfile: true, forceTheme: true);
             },
             onWebResourceError: (WebResourceError error) {
@@ -229,7 +227,6 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
       }
       setState(() {
         _webController = controller;
-        _isWebViewLoading = true;
       });
       await controller.loadRequest(_webRuntimeUri());
     } catch (error) {
@@ -327,9 +324,6 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
     if (controller == null || _port == null) {
       return;
     }
-    if (mounted) {
-      setState(() => _isWebViewLoading = true);
-    }
     _lastSyncedProfile = null;
     _lastSyncedTheme = null;
     await controller.clearCache();
@@ -401,7 +395,6 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
     _port = null;
     setState(() {
       _useWebView = false;
-      _isWebViewLoading = false;
     });
     _wakeUp();
   }
@@ -613,28 +606,9 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
     if (_useWebView) {
       return Stack(
         children: <Widget>[
-          // Ambient medical glow
-          const Positioned.fill(
-            child: Align(
-              alignment: Alignment(0, -0.2),
-              child: _IdCardUnderglow(),
-            ),
-          ),
           // Genuine 3D Three.js WebGL Canvas with card.glb & tag_texture.png
           if (_webController != null)
             Positioned.fill(child: WebViewWidget(controller: _webController!)),
-          if (_isWebViewLoading || _webController == null)
-            const Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(color: Color(0xFFF8FAFF)),
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xFF00D4FF),
-                    strokeWidth: 3,
-                  ),
-                ),
-              ),
-            ),
         ],
       );
     }

@@ -24,15 +24,11 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: #030712;
+      background-color: transparent;
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      transition: background-color 0.4s ease;
     }
     html.theme-light, body.theme-light {
-      background-color: #f8faff !important;
-    }
-    html.theme-dark, body.theme-dark {
-      background-color: #030712 !important;
+      background-color: transparent !important;
     }
     #canvas-container {
       position: absolute;
@@ -43,30 +39,6 @@
     }
     #canvas-container:active {
       cursor: grabbing;
-    }
-    .ambient-glow {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at 50% 45%, 
-        rgba(0, 212, 255, 0.18) 0%, 
-        rgba(0, 180, 255, 0.13) 15%,
-        rgba(10, 80, 255, 0.08) 32%, 
-        rgba(8, 30, 90, 0.04) 52%,
-        rgba(7, 15, 35, 0.01) 70%, 
-        rgba(3, 7, 18, 0) 88%
-      );
-      pointer-events: none;
-      transition: opacity 0.5s ease;
-    }
-    .theme-light .ambient-glow {
-      background: radial-gradient(circle at 50% 45%, 
-        rgba(10, 68, 255, 0.14) 0%, 
-        rgba(0, 180, 255, 0.09) 20%, 
-        rgba(0, 212, 255, 0.05) 45%, 
-        rgba(248, 250, 255, 0) 75%
-      ) !important;
     }
     .ui-controls {
       display: none;
@@ -100,29 +72,6 @@
       border-color: rgba(0, 0, 0, 0.1);
       color: #0f172a;
     }
-    #loading-overlay {
-      position: absolute;
-      inset: 0;
-      background: #070b14;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      color: #38bdf8;
-      transition: opacity 0.5s ease;
-    }
-    .spinner {
-      width: 44px;
-      height: 44px;
-      border: 3.5px solid rgba(56, 189, 248, 0.18);
-      border-top-color: #38bdf8;
-      border-radius: 50%;
-      animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
   </style>
 
   <script type="importmap">
@@ -135,19 +84,13 @@
     }
   </script>
 </head>
-<body class="theme-dark">
-  <div class="ambient-glow"></div>
+<body class="theme-light">
   <div id="canvas-container"></div>
 
   <div class="ui-controls">
     <button class="btn-toggle" id="theme-btn" onclick="window.toggleTheme()">
       <span id="theme-icon">☀️</span> <span id="theme-label">Light Mode</span>
     </button>
-  </div>
-
-  <div id="loading-overlay">
-    <div class="spinner"></div>
-    <p style="margin-top: 14px; font-weight: 700; font-size: 13px; letter-spacing: 0.05em; color: #94a3b8;">MEMUAT 3D ID CARD ULTRA HD...</p>
   </div>
 
   <script type="module">
@@ -157,15 +100,10 @@
 
     // 1. Configuration & Profile Data
     const urlParams = new URLSearchParams(window.location.search);
-    let currentTheme = urlParams.get('theme') === 'light' ? 'light' : 'dark';
+    let currentTheme = 'light';
 
-    if (currentTheme === 'light') {
-      document.body.classList.add('theme-light');
-      document.documentElement.classList.add('theme-light');
-    } else {
-      document.body.classList.add('theme-dark');
-      document.documentElement.classList.add('theme-dark');
-    }
+    document.body.classList.add('theme-light');
+    document.documentElement.classList.add('theme-light');
 
     const profile = {
       name: urlParams.get('name') || 'dr. Amelia Cantika',
@@ -761,19 +699,10 @@
         }
       };
 
-      window.setAppTheme = function(theme) {
-        currentTheme = theme;
-        if (currentTheme === 'light') {
-          document.body.classList.add('theme-light');
-          document.body.classList.remove('theme-dark');
-          document.documentElement.classList.add('theme-light');
-          document.documentElement.classList.remove('theme-dark');
-        } else {
-          document.body.classList.add('theme-dark');
-          document.body.classList.remove('theme-light');
-          document.documentElement.classList.add('theme-dark');
-          document.documentElement.classList.remove('theme-light');
-        }
+      window.setAppTheme = function() {
+        currentTheme = 'light';
+        document.body.className = 'theme-light';
+        document.documentElement.className = 'theme-light';
         window.regenerateTextures();
       };
 
@@ -839,17 +768,11 @@
         }
 
         innerGroup.add(nodes);
-        document.getElementById('loading-overlay').style.opacity = '0';
-        setTimeout(() => {
-          const el = document.getElementById('loading-overlay');
-          if (el) el.style.display = 'none';
-        }, 500);
       }, undefined, (err) => {
         console.warn('GLB asset load fallback:', err);
         const cardGeo = new THREE.BoxGeometry(0.72, 1.0, 0.01);
         const fallbackCard = new THREE.Mesh(cardGeo, cardMaterial);
         innerGroup.add(fallbackCard);
-        document.getElementById('loading-overlay').style.display = 'none';
       });
 
 
@@ -1079,10 +1002,12 @@
       window.addEventListener('pointercancel', handleRelease);
 
       window.toggleTheme = function() {
-        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.body.className = currentTheme === 'dark' ? 'theme-dark' : 'theme-light';
-        document.getElementById('theme-icon').textContent = currentTheme === 'dark' ? '☀️' : '🌙';
-        document.getElementById('theme-label').textContent = currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+        currentTheme = 'light';
+        document.body.className = 'theme-light';
+        const themeIcon = document.getElementById('theme-icon');
+        const themeLabel = document.getElementById('theme-label');
+        if (themeIcon) themeIcon.textContent = '🌙';
+        if (themeLabel) themeLabel.textContent = 'Dark Mode';
 
         if (lanyardTexture) lanyardTexture.dispose();
         lanyardTexture = createLanyardCanvasTexture(currentTheme);
