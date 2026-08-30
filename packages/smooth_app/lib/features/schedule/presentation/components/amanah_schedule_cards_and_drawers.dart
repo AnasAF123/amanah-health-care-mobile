@@ -18,25 +18,32 @@ class _LiquidGlassMaskLayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: 190,
       child: IgnorePointer(
-        child: ShaderMask(
-          blendMode: BlendMode.dstIn,
-          shaderCallback: (Rect bounds) {
-            return const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: <Color>[
-                Colors.transparent,
-                Colors.transparent,
-                Colors.black,
-              ],
-              stops: <double>[0.0, 0.38, 0.65],
-            ).createShader(bounds);
-          },
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(32),
+          ),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
-            child: const ColoredBox(color: Color(0x01000000)),
+            filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: <Color>[
+                    Colors.transparent,
+                    const Color(0xFF0A1624).withValues(alpha: 0.40),
+                    const Color(0xFF0A1624).withValues(alpha: 0.88),
+                  ],
+                  stops: const <double>[0.0, 0.35, 1.0],
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -57,12 +64,11 @@ class _AmbientCardGradientLayer extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: <Color>[
-                const Color(0xFF0A1624).withValues(alpha: 0.0),
-                const Color(0xFF0A1624).withValues(alpha: 0.0),
-                const Color(0xFF0A1624).withValues(alpha: 0.42),
-                const Color(0xFF0A1624).withValues(alpha: 0.88),
+                Colors.transparent,
+                Colors.transparent,
+                const Color(0xFF0A1624).withValues(alpha: 0.30),
               ],
-              stops: const <double>[0.0, 0.35, 0.60, 1.0],
+              stops: const <double>[0.0, 0.40, 1.0],
             ),
           ),
         ),
