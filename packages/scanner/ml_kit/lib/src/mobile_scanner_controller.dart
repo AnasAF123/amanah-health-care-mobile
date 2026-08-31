@@ -20,6 +20,7 @@ class CustomScannerController {
   bool _isStarting = false;
   bool _isClosing = false;
   bool _isClosed = false;
+  bool _isListening = false;
 
   Future<void> start() async {
     if (isStarted || _isStarting || isClosing) {
@@ -29,9 +30,13 @@ class CustomScannerController {
     _isStarting = true;
     _isClosed = false;
     try {
-      _controller.addListener(_onControllerChanged);
+      if (!_isListening) {
+        _controller.addListener(_onControllerChanged);
+        _isListening = true;
+      }
       await _controller.start();
       _isStarted = true;
+      _onControllerChanged();
 
       if (isTorchOn) {
         // Slight delay, because it doesn't always work if called immediately
@@ -39,8 +44,15 @@ class CustomScannerController {
           turnTorchOn();
         });
       }
+    } catch (_) {
+      if (_isListening) {
+        _controller.removeListener(_onControllerChanged);
+        _isListening = false;
+      }
+      _isStarted = false;
+    } finally {
       _isStarting = false;
-    } catch (_) {}
+    }
   }
 
   void _onControllerChanged() {
@@ -66,10 +78,15 @@ class CustomScannerController {
     _isStarted = false;
     try {
       await _controller.stop();
-      _controller.removeListener(_onControllerChanged);
-      _isClosing = false;
+      if (_isListening) {
+        _controller.removeListener(_onControllerChanged);
+        _isListening = false;
+      }
       _isClosed = true;
-    } catch (_) {}
+    } catch (_) {
+    } finally {
+      _isClosing = false;
+    }
   }
 
   bool get hasTorch => _torchState.value != null;
@@ -103,12 +120,12 @@ class CustomScannerController {
   ValueNotifier<int> get availableCameras => _availableCamerasState;
   ValueNotifier<CameraFacing> get cameraFacing => _cameraFacingState;
 
-  void toggleCamera() {
-    _controller.switchCamera();
+  Future<void> toggleCamera() async {
+    await _controller.switchCamera();
     if (_controller.facing == CameraFacing.front) {
       _torchState.value = null;
       _cameraFacingState.value = CameraFacing.front;
-    } else if (_controller.facing == CameraFacing.front) {
+    } else if (_controller.facing == CameraFacing.back) {
       _torchState.value = false;
       _cameraFacingState.value = CameraFacing.back;
     }

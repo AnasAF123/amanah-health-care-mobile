@@ -84,17 +84,23 @@ class _SmoothBarcodeScannerZXing extends StatefulWidget {
 class _SmoothBarcodeScannerZXingState
     extends State<_SmoothBarcodeScannerZXing> {
   static const List<BarcodeFormat> _barcodeFormats = <BarcodeFormat>[
+    BarcodeFormat.aztec,
+    BarcodeFormat.codabar,
     BarcodeFormat.code39,
     BarcodeFormat.code93,
     BarcodeFormat.code128,
+    BarcodeFormat.dataMatrix,
     BarcodeFormat.ean8,
     BarcodeFormat.ean13,
     BarcodeFormat.itf,
+    BarcodeFormat.maxicode,
+    BarcodeFormat.pdf417,
+    BarcodeFormat.qrcode,
+    BarcodeFormat.rss14,
+    BarcodeFormat.rssExpanded,
     BarcodeFormat.upcA,
     BarcodeFormat.upcE,
-    // 2D formats for GS1 Sunrise 2027
-    BarcodeFormat.dataMatrix,
-    BarcodeFormat.qrcode,
+    BarcodeFormat.upcEanExtension,
   ];
 
   bool _visible = false;
@@ -155,8 +161,12 @@ class _SmoothBarcodeScannerZXingState
         Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
-            padding: const EdgeInsets.all(
-              SmoothBarcodeScannerVisor.CORNER_PADDING,
+            padding: EdgeInsetsDirectional.only(
+              start: SmoothBarcodeScannerVisor.CORNER_PADDING,
+              end: SmoothBarcodeScannerVisor.CORNER_PADDING,
+              bottom:
+                  SmoothBarcodeScannerVisor.CORNER_PADDING +
+                  MediaQuery.viewPaddingOf(context).bottom,
             ),
             child: Row(
               mainAxisAlignment: _showFlipCameraButton

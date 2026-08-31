@@ -94,17 +94,19 @@ class _SmoothBarcodeScannerMLKit extends StatefulWidget {
 class _SmoothBarcodeScannerMLKitState extends State<_SmoothBarcodeScannerMLKit>
     with SingleTickerProviderStateMixin {
   static const List<BarcodeFormat> _barcodeFormats = <BarcodeFormat>[
+    BarcodeFormat.aztec,
+    BarcodeFormat.codabar,
     BarcodeFormat.code39,
     BarcodeFormat.code93,
     BarcodeFormat.code128,
+    BarcodeFormat.dataMatrix,
     BarcodeFormat.ean8,
     BarcodeFormat.ean13,
     BarcodeFormat.itf,
+    BarcodeFormat.pdf417,
+    BarcodeFormat.qrCode,
     BarcodeFormat.upcA,
     BarcodeFormat.upcE,
-    // 2D formats for GS1 Sunrise 2027
-    BarcodeFormat.dataMatrix,
-    BarcodeFormat.qrCode,
   ];
 
   static const ValueKey<String> _visibilityKey = ValueKey<String>(
@@ -179,8 +181,12 @@ class _SmoothBarcodeScannerMLKitState extends State<_SmoothBarcodeScannerMLKit>
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
-                padding: const EdgeInsetsDirectional.all(
-                  SmoothBarcodeScannerVisor.CORNER_PADDING,
+                padding: EdgeInsetsDirectional.only(
+                  start: SmoothBarcodeScannerVisor.CORNER_PADDING,
+                  end: SmoothBarcodeScannerVisor.CORNER_PADDING,
+                  bottom:
+                      SmoothBarcodeScannerVisor.CORNER_PADDING +
+                      MediaQuery.viewPaddingOf(context).bottom,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -306,7 +312,7 @@ class _ToggleCameraIcon extends StatelessWidget {
         return VisorButton(
           onTap: () async {
             hapticFeedback.call();
-            controller.toggleCamera();
+            await controller.toggleCamera();
           },
           tooltip:
               toggleCameraModeTooltip ?? 'Switch between back and front camera',

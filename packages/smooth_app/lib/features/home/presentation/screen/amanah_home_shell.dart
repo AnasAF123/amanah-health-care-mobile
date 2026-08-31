@@ -266,6 +266,8 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                 AmanahHomeTab.scan => AmanahQrScannerTabScreen(
                   key: const ValueKey<String>('scan_content'),
                   user: widget.user,
+                  bottomNavigationClearance:
+                      96 + MediaQuery.viewPaddingOf(context).bottom,
                   onBack: () {
                     setState(() => _selectedTab = AmanahHomeTab.home);
                   },
