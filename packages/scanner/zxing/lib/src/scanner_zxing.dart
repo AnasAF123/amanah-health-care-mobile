@@ -30,6 +30,7 @@ class ScannerZXing extends Scanner {
     required Widget barcodeScannerIcon,
     required Widget torchOnIcon,
     required Widget torchOffIcon,
+    Color? visorColor,
     String? toggleCameraModeTooltip,
     String? toggleFlashModeTooltip,
     EdgeInsetsGeometry? contentPadding,
@@ -44,6 +45,7 @@ class ScannerZXing extends Scanner {
       barcodeScannerIcon: barcodeScannerIcon,
       torchOnIcon: torchOnIcon,
       torchOffIcon: torchOffIcon,
+      visorColor: visorColor,
       contentPadding: contentPadding,
     );
   }
@@ -59,6 +61,7 @@ class _SmoothBarcodeScannerZXing extends StatefulWidget {
     required this.barcodeScannerIcon,
     required this.torchOnIcon,
     required this.torchOffIcon,
+    this.visorColor,
     this.toggleCameraModeTooltip,
     this.toggleFlashModeTooltip,
     this.contentPadding,
@@ -72,6 +75,7 @@ class _SmoothBarcodeScannerZXing extends StatefulWidget {
   final Widget barcodeScannerIcon;
   final Widget torchOnIcon;
   final Widget torchOffIcon;
+  final Color? visorColor;
 
   final EdgeInsetsGeometry? contentPadding;
   final String? toggleCameraModeTooltip;
@@ -156,6 +160,7 @@ class _SmoothBarcodeScannerZXingState
           child: SmoothBarcodeScannerVisor(
             icon: widget.barcodeScannerIcon,
             contentPadding: widget.contentPadding,
+            color: widget.visorColor ?? Colors.white,
           ),
         ),
         Align(

@@ -4,6 +4,7 @@ class SmoothBarcodeScannerVisor extends StatelessWidget {
   const SmoothBarcodeScannerVisor({
     required this.icon,
     this.contentPadding,
+    this.color,
     super.key,
   });
 
@@ -12,6 +13,7 @@ class SmoothBarcodeScannerVisor extends StatelessWidget {
 
   final Widget icon;
   final EdgeInsetsGeometry? contentPadding;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,7 @@ class SmoothBarcodeScannerVisor extends StatelessWidget {
           : Curves.decelerate,
       child: SizedBox.expand(
         child: CustomPaint(
-          painter: _ScanVisorPainter(),
+          painter: _ScanVisorPainter(color: color ?? Colors.white),
           child: Center(
             child: IconTheme.merge(
               data: const IconThemeData(size: 35.0, color: Colors.white),
@@ -55,11 +57,12 @@ class SmoothBarcodeScannerVisor extends StatelessWidget {
 }
 
 class _ScanVisorPainter extends CustomPainter {
-  _ScanVisorPainter();
+  _ScanVisorPainter({required this.color});
 
   static const double _fullCornerSize = 31.0;
   static const double _halfCornerSize = _fullCornerSize / 2;
   static const Radius _borderRadius = Radius.circular(_halfCornerSize);
+  final Color color;
 
   final Paint _paint = Paint()
     ..strokeWidth = SmoothBarcodeScannerVisor.STROKE_WIDTH
@@ -81,7 +84,7 @@ class _ScanVisorPainter extends CustomPainter {
     canvas.drawPath(path, _paint);
 
     _paint.maskFilter = null;
-    _paint.color = Colors.white;
+    _paint.color = color;
     canvas.drawPath(path, _paint);
   }
 
@@ -139,7 +142,9 @@ class _ScanVisorPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_ScanVisorPainter oldDelegate) => false;
+  bool shouldRepaint(_ScanVisorPainter oldDelegate) {
+    return oldDelegate.color != color;
+  }
 }
 
 class VisorButton extends StatelessWidget {

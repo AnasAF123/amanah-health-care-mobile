@@ -30,6 +30,7 @@ class ScannerMLKit extends Scanner {
     required Widget barcodeScannerIcon,
     required Widget torchOnIcon,
     required Widget torchOffIcon,
+    Color? visorColor,
     String? toggleCameraModeTooltip,
     String? toggleFlashModeTooltip,
     EdgeInsetsGeometry? contentPadding,
@@ -45,6 +46,7 @@ class ScannerMLKit extends Scanner {
       barcodeScannerIcon: barcodeScannerIcon,
       torchOnIcon: torchOnIcon,
       torchOffIcon: torchOffIcon,
+      visorColor: visorColor,
       contentPadding: contentPadding,
     );
   }
@@ -61,6 +63,7 @@ class _SmoothBarcodeScannerMLKit extends StatefulWidget {
     required this.barcodeScannerIcon,
     required this.torchOnIcon,
     required this.torchOffIcon,
+    this.visorColor,
     this.toggleCameraModeTooltip,
     this.toggleFlashModeTooltip,
     this.contentPadding,
@@ -82,6 +85,7 @@ class _SmoothBarcodeScannerMLKit extends StatefulWidget {
   final Widget barcodeScannerIcon;
   final Widget torchOnIcon;
   final Widget torchOffIcon;
+  final Color? visorColor;
 
   final EdgeInsetsGeometry? contentPadding;
   final String? toggleCameraModeTooltip;
@@ -176,6 +180,7 @@ class _SmoothBarcodeScannerMLKitState extends State<_SmoothBarcodeScannerMLKit>
               child: SmoothBarcodeScannerVisor(
                 icon: widget.barcodeScannerIcon,
                 contentPadding: widget.contentPadding,
+                color: widget.visorColor ?? Colors.white,
               ),
             ),
             Align(

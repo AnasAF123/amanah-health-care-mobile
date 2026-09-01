@@ -24,6 +24,7 @@ class MockedScanner extends Scanner {
     required Widget barcodeScannerIcon,
     required Widget torchOnIcon,
     required Widget torchOffIcon,
+    Color? visorColor,
     String? toggleCameraModeTooltip,
     String? toggleFlashModeTooltip,
     EdgeInsetsGeometry? contentPadding,
