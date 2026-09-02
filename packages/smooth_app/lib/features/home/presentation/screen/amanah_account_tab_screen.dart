@@ -2,26 +2,29 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/authentication/domain/amanah_auth_user.dart';
+import 'package:smooth_app/features/home/domain/amanah_visual_role.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_clay_icon.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_edit_profile_drawer.dart';
+import 'package:smooth_app/features/home/presentation/screen/settings/amanah_account_identity_settings_screen.dart';
+import 'package:smooth_app/features/home/presentation/screen/settings/amanah_data_storage_settings_screen.dart';
+import 'package:smooth_app/features/home/presentation/screen/settings/amanah_it_support_settings_screen.dart';
+import 'package:smooth_app/features/home/presentation/screen/settings/amanah_privacy_security_settings_screen.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahSettingsItemData {
   const AmanahSettingsItemData({
     required this.id,
     required this.title,
     required this.subtitle,
-    required this.colorPrimary,
-    required this.colorLight,
-    required this.colorDark,
+    required this.tone,
     required this.icon,
   });
 
   final String id;
   final String title;
   final String subtitle;
-  final Color colorPrimary;
-  final Color colorLight;
-  final Color colorDark;
+  final AmanahIconTone tone;
   final IconData icon;
 }
 
@@ -52,70 +55,35 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
 
   static const List<AmanahSettingsItemData> _settingsItems =
       <AmanahSettingsItemData>[
-    AmanahSettingsItemData(
-      id: 'account',
-      title: 'Akun & Identitas Dokter',
-      subtitle: 'SIP, STR, NIK, Bio Medis',
-      colorPrimary: Color(0xFF2563EB),
-      colorLight: Color(0xFF60A5FA),
-      colorDark: Color(0xFF1D4ED8),
-      icon: Icons.person_outline_rounded,
-    ),
-    AmanahSettingsItemData(
-      id: 'practice',
-      title: 'Pengaturan Praktik & Shift',
-      subtitle: 'Poli Spesialis, Kuota Pasien, Jadwal',
-      colorPrimary: Color(0xFFF59E0B),
-      colorLight: Color(0xFFFCD34D),
-      colorDark: Color(0xFFD97706),
-      icon: Icons.calendar_today_outlined,
-    ),
-    AmanahSettingsItemData(
-      id: 'security',
-      title: 'Privasi & Keamanan',
-      subtitle: 'PIN Presensi, Biometrik, Akses Data',
-      colorPrimary: Color(0xFF10B981),
-      colorLight: Color(0xFF6EE7B7),
-      colorDark: Color(0xFF059669),
-      icon: Icons.verified_user_outlined,
-    ),
-    AmanahSettingsItemData(
-      id: 'notifications',
-      title: 'Notifikasi & Pengingat',
-      subtitle: 'Panggilan Darurat IGD, Suara, Alarm Shift',
-      colorPrimary: Color(0xFFEF4444),
-      colorLight: Color(0xFFFCA5A5),
-      colorDark: Color(0xFFDC2626),
-      icon: Icons.notifications_none_rounded,
-    ),
-    AmanahSettingsItemData(
-      id: 'data',
-      title: 'Data & Penyimpanan',
-      subtitle: 'Unduh Laporan PDF, Cache SIMRS',
-      colorPrimary: Color(0xFF3B82F6),
-      colorLight: Color(0xFF93C5FD),
-      colorDark: Color(0xFF1E40AF),
-      icon: Icons.storage_rounded,
-    ),
-    AmanahSettingsItemData(
-      id: 'documents',
-      title: 'Dokumen & Sertifikasi',
-      subtitle: 'SIP Aktif, STR KKI, IDAI',
-      colorPrimary: Color(0xFF06B6D4),
-      colorLight: Color(0xFF67E8F9),
-      colorDark: Color(0xFF0891B2),
-      icon: Icons.description_outlined,
-    ),
-    AmanahSettingsItemData(
-      id: 'help',
-      title: 'Bantuan & IT Support',
-      subtitle: 'Helpdesk SIMRS, Panduan Presensi',
-      colorPrimary: Color(0xFF8B5CF6),
-      colorLight: Color(0xFFC4B5FD),
-      colorDark: Color(0xFF6D28D9),
-      icon: Icons.help_outline_rounded,
-    ),
-  ];
+        AmanahSettingsItemData(
+          id: 'account',
+          title: 'Akun & identitas dokter',
+          subtitle: 'SIP, STR, NIK, bio medis',
+          tone: AmanahIconTone.account,
+          icon: Icons.person_outline_rounded,
+        ),
+        AmanahSettingsItemData(
+          id: 'security',
+          title: 'Privasi & keamanan',
+          subtitle: 'PIN presensi, biometrik, akses data',
+          tone: AmanahIconTone.security,
+          icon: Icons.verified_user_outlined,
+        ),
+        AmanahSettingsItemData(
+          id: 'data',
+          title: 'Data & penyimpanan',
+          subtitle: 'Unduh laporan PDF, cache SIMRS',
+          tone: AmanahIconTone.data,
+          icon: Icons.storage_rounded,
+        ),
+        AmanahSettingsItemData(
+          id: 'help',
+          title: 'Bantuan teknisi IT',
+          subtitle: 'Helpdesk SIMRS, panduan presensi',
+          tone: AmanahIconTone.help,
+          icon: Icons.help_outline_rounded,
+        ),
+      ];
 
   @override
   void initState() {
@@ -127,8 +95,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   }
 
   Future<void> _openEditProfileDrawer() async {
-    final AmanahEditProfileResult? result =
-        await AmanahEditProfileDrawer.show(
+    final AmanahEditProfileResult? result = await AmanahEditProfileDrawer.show(
       context: context,
       doctorName: widget.user.fullName,
       initialPhone: _phone,
@@ -172,8 +139,9 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   }
 
   Future<void> _openAvatarPhotoSheet() async {
-    final AmanahAvatarPhotoResult? result =
-        await AmanahAvatarPhotoSheet.show(context);
+    final AmanahAvatarPhotoResult? result = await AmanahAvatarPhotoSheet.show(
+      context,
+    );
 
     if (result != null && mounted) {
       setState(() {
@@ -218,18 +186,65 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
     }
   }
 
+  void _handleMenuItemTap(String id) {
+    widget.onMenuItemTap(id);
+    switch (id) {
+      case 'account':
+        Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (BuildContext ctx) => AmanahAccountIdentitySettingsScreen(
+              user: widget.user,
+              onBack: () => Navigator.of(ctx).pop(),
+            ),
+          ),
+        );
+        break;
+      case 'security':
+        Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (BuildContext ctx) => AmanahPrivacySecuritySettingsScreen(
+              onBack: () => Navigator.of(ctx).pop(),
+            ),
+          ),
+        );
+        break;
+      case 'data':
+        Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (BuildContext ctx) => AmanahDataStorageSettingsScreen(
+              onBack: () => Navigator.of(ctx).pop(),
+            ),
+          ),
+        );
+        break;
+      case 'help':
+        Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (BuildContext ctx) => AmanahItSupportSettingsScreen(
+              user: widget.user,
+              onBack: () => Navigator.of(ctx).pop(),
+            ),
+          ),
+        );
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color bgColor =
-        dark ? const Color(0xFF0A0E1A) : const Color(0xFFF8FAFF);
-    final Color cardBg =
-        dark ? const Color(0xFF111624) : const Color(0xFFFFFFFF);
+    final Color bgColor = dark
+        ? const Color(0xFF0A0E1A)
+        : const Color(0xFFF8FAFF);
+    final Color cardBg = dark
+        ? const Color(0xFF111624)
+        : const Color(0xFFFFFFFF);
     final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor =
-        dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final Color subtextColor = dark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
     final Color dividerColor = dark
         ? Colors.white.withValues(alpha: 0.05)
         : const Color(0xFFF1F5F9);
@@ -256,7 +271,12 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
 
             // 2. Settings Items Container (3D ClayIcon Style in Rounded-3xl Card)
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 110),
+              padding: EdgeInsets.fromLTRB(
+                20,
+                4,
+                20,
+                130 + MediaQuery.paddingOf(context).bottom,
+              ),
               child: Column(
                 children: <Widget>[
                   Container(
@@ -277,19 +297,19 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                       borderRadius: BorderRadius.circular(24),
                       child: Column(
                         children: <Widget>[
-                          for (int i = 0; i < _settingsItems.length; i++) ...<Widget>[
+                          for (
+                            int i = 0;
+                            i < _settingsItems.length;
+                            i++
+                          ) ...<Widget>[
                             _SettingsItemRow(
                               item: _settingsItems[i],
                               dark: dark,
                               textColor: textColor,
                               subtextColor: subtextColor,
-                              onTap: () {
-                                if (_settingsItems[i].id == 'account') {
-                                  _openEditProfileDrawer();
-                                } else {
-                                  widget.onMenuItemTap(_settingsItems[i].id);
-                                }
-                              },
+                              onTap: () => _handleMenuItemTap(
+                                _settingsItems[i].id,
+                              ),
                             ),
                             if (i < _settingsItems.length - 1)
                               Divider(
@@ -305,10 +325,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                   const SizedBox(height: 14),
 
                   // 3. Logout Action Button
-                  _LogoutButton(
-                    onTap: widget.onLogout,
-                    dark: dark,
-                  ),
+                  _LogoutButton(onTap: widget.onLogout, dark: dark),
                 ],
               ),
             ),
@@ -346,8 +363,9 @@ class _AccountHeaderBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color solidBg = dark ? const Color(0xFF0A0E1A) : Colors.white;
     final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor =
-        dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final Color subtextColor = dark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
 
     return Container(
       color: solidBg,
@@ -366,25 +384,26 @@ class _AccountHeaderBanner extends StatelessWidget {
                     'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800&auto=format&fit=crop',
                     fit: BoxFit.cover,
                     alignment: Alignment.center,
-                    errorBuilder: (
-                      BuildContext context,
-                      Object error,
-                      StackTrace? stackTrace,
-                    ) {
-                      return Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: <Color>[
-                              Color(0xFF1E3A8A),
-                              Color(0xFF0284C7),
-                              Color(0xFF38BDF8),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                    errorBuilder:
+                        (
+                          BuildContext context,
+                          Object error,
+                          StackTrace? stackTrace,
+                        ) {
+                          return Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: <Color>[
+                                  Color(0xFF1E3A8A),
+                                  Color(0xFF1D4ED8),
+                                  Color(0xFF3B82F6),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                   ),
                 ),
 
@@ -472,10 +491,7 @@ class _AccountHeaderBanner extends StatelessWidget {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: solidBg,
-                                border: Border.all(
-                                  color: solidBg,
-                                  width: 4,
-                                ),
+                                border: Border.all(color: solidBg, width: 4),
                                 boxShadow: <BoxShadow>[
                                   BoxShadow(
                                     color: Colors.black.withValues(
@@ -486,9 +502,7 @@ class _AccountHeaderBanner extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              child: ClipOval(
-                                child: _buildAvatarImage(),
-                              ),
+                              child: ClipOval(child: _buildAvatarImage()),
                             ),
                           ),
 
@@ -505,10 +519,7 @@ class _AccountHeaderBanner extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: const Color(0xFF2AABEE),
-                                  border: Border.all(
-                                    color: solidBg,
-                                    width: 2,
-                                  ),
+                                  border: Border.all(color: solidBg, width: 2),
                                   boxShadow: <BoxShadow>[
                                     BoxShadow(
                                       color: Colors.black.withValues(
@@ -556,8 +567,8 @@ class _AccountHeaderBanner extends StatelessWidget {
                         doctorRole,
                         style: TextStyle(
                           color: dark
-                              ? const Color(0xFF22D3EE)
-                              : const Color(0xFF0891B2),
+                              ? const Color(0xFF60A5FA)
+                              : const Color(0xFF2563EB),
                           fontFamily: 'PlusJakartaSans',
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -609,7 +620,9 @@ class _AccountHeaderBanner extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 4, vertical: 2),
+                                horizontal: 4,
+                                vertical: 2,
+                              ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: <Widget>[
@@ -617,7 +630,7 @@ class _AccountHeaderBanner extends StatelessWidget {
                                     Icons.edit_outlined,
                                     size: 13,
                                     color: dark
-                                        ? const Color(0xFF38BDF8)
+                                        ? const Color(0xFF60A5FA)
                                         : const Color(0xFF2563EB),
                                   ),
                                   const SizedBox(width: 4),
@@ -625,7 +638,7 @@ class _AccountHeaderBanner extends StatelessWidget {
                                     'Edit Profil',
                                     style: TextStyle(
                                       color: dark
-                                          ? const Color(0xFF38BDF8)
+                                          ? const Color(0xFF60A5FA)
                                           : const Color(0xFF2563EB),
                                       fontFamily: 'PlusJakartaSans',
                                       fontSize: 11,
@@ -719,13 +732,7 @@ class _SettingsItemRow extends StatelessWidget {
           child: Row(
             children: <Widget>[
               // Left: 3D ClayIcon Badge without glow
-              AmanahClayIcon(
-                icon: item.icon,
-                colorPrimary: item.colorPrimary,
-                colorLight: item.colorLight,
-                colorDark: item.colorDark,
-                size: 28,
-              ),
+              AmanahClayIcon(icon: item.icon, tone: item.tone, size: 28),
               const SizedBox(width: 14),
 
               // Title & Subtitle
@@ -776,67 +783,22 @@ class _SettingsItemRow extends StatelessWidget {
 }
 
 class _LogoutButton extends StatelessWidget {
-  const _LogoutButton({
-    required this.onTap,
-    required this.dark,
-  });
+  const _LogoutButton({required this.onTap, required this.dark});
 
   final VoidCallback onTap;
   final bool dark;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: 'Keluar dari Akun Dokter',
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 13),
-            decoration: BoxDecoration(
-              color: dark
-                  ? const Color(0xFFEF4444).withValues(alpha: 0.12)
-                  : const Color(0xFFFFF1F2),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: dark
-                    ? const Color(0xFFEF4444).withValues(alpha: 0.25)
-                    : const Color(0xFFFECDD3),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Icon(
-                  Icons.logout_rounded,
-                  size: 16,
-                  color: dark
-                      ? const Color(0xFFF87171)
-                      : const Color(0xFFE11D48),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Keluar dari Akun Dokter',
-                  style: TextStyle(
-                    color: dark
-                        ? const Color(0xFFF87171)
-                        : const Color(0xFFE11D48),
-                    fontFamily: 'PlusJakartaSans',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.1,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return AmanahButton.ghost(
+      text: 'Keluar dari Akun Dokter',
+      leadingIcon: Icons.logout_rounded,
+      isFullWidth: true,
+      customForegroundColor: dark
+          ? AmanahColorTokens.dangerBorder
+          : AmanahColorTokens.dangerDark,
+      semanticsLabel: 'Keluar dari Akun Dokter',
+      onPressed: onTap,
     );
   }
 }

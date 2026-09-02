@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/features/schedule/data/amanah_schedule_store.dart';
 import 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart';
 
@@ -105,10 +108,8 @@ class AmanahDocScheduleCalendarDrawer extends StatefulWidget {
     required DateTime baseToday,
     required ValueChanged<DateTime> onSelectDate,
   }) {
-    showModalBottomSheet<void>(
+    showAmanahBottomSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (BuildContext ctx) => AmanahDocScheduleCalendarDrawer(
         selectedDate: selectedDate,
         baseToday: baseToday,
@@ -144,6 +145,7 @@ class _AmanahDocScheduleCalendarDrawerState
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
     final AmanahScheduleStore store = AmanahScheduleStore.instance;
+    final double bottomNavPadding = MediaQuery.viewPaddingOf(context).bottom;
 
     final DateTime firstDayOfMonth = DateTime(
       _currentMonth.year,
@@ -167,7 +169,7 @@ class _AmanahDocScheduleCalendarDrawerState
         color: dark ? const Color(0xFF0A0E1A) : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
       ),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+      padding: EdgeInsets.fromLTRB(20, 12, 20, 32.0 + bottomNavPadding),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,18 +311,18 @@ class _AmanahDocScheduleCalendarDrawerState
                 bgColor = isCuti
                     ? const Color(0xFFF59E0B)
                     : (dark
-                          ? const Color(0xFF38BDF8)
+                          ? const Color(0xFF3B82F6)
                           : const Color(0xFF0A44FF));
                 textColor = (isCuti && dark) ? Colors.black : Colors.white;
               } else if (isToday) {
                 bgColor =
-                    (dark ? const Color(0xFF38BDF8) : const Color(0xFF0A44FF))
+                    (dark ? const Color(0xFF3B82F6) : const Color(0xFF0A44FF))
                         .withValues(alpha: 0.15);
                 textColor = dark
-                    ? const Color(0xFF38BDF8)
+                    ? const Color(0xFF60A5FA)
                     : const Color(0xFF0A44FF);
                 dotColor = dark
-                    ? const Color(0xFF38BDF8)
+                    ? const Color(0xFF60A5FA)
                     : const Color(0xFF0A44FF);
               } else if (isPast) {
                 textColor = dark
@@ -546,10 +548,8 @@ class AmanahAddEditScheduleDrawer extends StatefulWidget {
     DoctorSchedule? scheduleToEdit,
     ValueChanged<DateTime>? onSavedDate,
   }) {
-    showModalBottomSheet<void>(
+    showAmanahBottomSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (BuildContext ctx) => AmanahAddEditScheduleDrawer(
         initialDate: initialDate,
         scheduleToEdit: scheduleToEdit,
@@ -899,10 +899,8 @@ class _AmanahAddEditScheduleDrawerState
     required ValueChanged<String> onChanged,
     List<String> disabledOptions = const <String>[],
   }) async {
-    final String? selected = await showModalBottomSheet<String>(
+    final String? selected = await showAmanahBottomSheet<String>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (BuildContext context) => _AmanahScheduleSelectionSheet(
         title: title,
         subtitle: subtitle,
@@ -1026,7 +1024,7 @@ class _AmanahAddEditScheduleDrawerState
                     24,
                     14,
                     24,
-                    28 + MediaQuery.paddingOf(context).bottom,
+                    130 + MediaQuery.paddingOf(context).bottom,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1059,91 +1057,107 @@ class _AmanahAddEditScheduleDrawerState
                             ),
                           ),
                           child: Row(
-                            children: <Map<String, dynamic>>[
-                              <String, dynamic>{
-                                'label': 'Menunggu',
-                                'activeBg': const Color(0xFFF59E0B),
-                                'activeText': Colors.white,
-                                'dotColor': const Color(0xFFFBBF24),
-                              },
-                              <String, dynamic>{
-                                'label': 'Buka',
-                                'activeBg': const Color(0xFF059669),
-                                'activeText': Colors.white,
-                                'dotColor': const Color(0xFF34D399),
-                              },
-                              <String, dynamic>{
-                                'label': 'Cuti',
-                                'activeBg': const Color(0xFFE11D48),
-                                'activeText': Colors.white,
-                                'dotColor': const Color(0xFFFB7185),
-                              },
-                            ].map((Map<String, dynamic> item) {
-                              final String label = item['label'] as String;
-                              final bool active = _status == label;
-                              final Color activeBg = item['activeBg'] as Color;
-                              final Color activeText =
-                                  item['activeText'] as Color;
-                              final Color dotColor = item['dotColor'] as Color;
+                            children:
+                                <Map<String, dynamic>>[
+                                  <String, dynamic>{
+                                    'label': 'Menunggu',
+                                    'activeBg': const Color(0xFFF59E0B),
+                                    'activeText': Colors.white,
+                                    'dotColor': const Color(0xFFFBBF24),
+                                  },
+                                  <String, dynamic>{
+                                    'label': 'Buka',
+                                    'activeBg': const Color(0xFF059669),
+                                    'activeText': Colors.white,
+                                    'dotColor': const Color(0xFF34D399),
+                                  },
+                                  <String, dynamic>{
+                                    'label': 'Cuti',
+                                    'activeBg': const Color(0xFFE11D48),
+                                    'activeText': Colors.white,
+                                    'dotColor': const Color(0xFFFB7185),
+                                  },
+                                ].map((Map<String, dynamic> item) {
+                                  final String label = item['label'] as String;
+                                  final bool active = _status == label;
+                                  final Color activeBg =
+                                      item['activeBg'] as Color;
+                                  final Color activeText =
+                                      item['activeText'] as Color;
+                                  final Color dotColor =
+                                      item['dotColor'] as Color;
 
-                              return Expanded(
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(12),
-                                  onTap: () => setState(() => _status = label),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 160),
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: active
-                                          ? activeBg
-                                          : Colors.transparent,
+                                  return Expanded(
+                                    child: InkWell(
                                       borderRadius: BorderRadius.circular(12),
-                                      boxShadow: active
-                                          ? <BoxShadow>[
-                                              BoxShadow(
-                                                color: activeBg.withValues(
-                                                    alpha: 0.25),
-                                                blurRadius: 6,
-                                                offset: const Offset(0, 2),
+                                      onTap: () =>
+                                          setState(() => _status = label),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 160,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: active
+                                              ? activeBg
+                                              : Colors.transparent,
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          boxShadow: active
+                                              ? <BoxShadow>[
+                                                  BoxShadow(
+                                                    color: activeBg.withValues(
+                                                      alpha: 0.25,
+                                                    ),
+                                                    blurRadius: 6,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ]
+                                              : null,
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            DecoratedBox(
+                                              decoration: BoxDecoration(
+                                                color: active
+                                                    ? Colors.white
+                                                    : dotColor,
+                                                shape: BoxShape.circle,
                                               ),
-                                            ]
-                                          : null,
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        DecoratedBox(
-                                          decoration: BoxDecoration(
-                                            color: active
-                                                ? Colors.white
-                                                : dotColor,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const SizedBox(
-                                              width: 6, height: 6),
+                                              child: const SizedBox(
+                                                width: 6,
+                                                height: 6,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              label,
+                                              style: TextStyle(
+                                                color: active
+                                                    ? activeText
+                                                    : (dark
+                                                          ? const Color(
+                                                              0xFFA1A1AA,
+                                                            )
+                                                          : const Color(
+                                                              0xFF475569,
+                                                            )),
+                                                fontFamily: 'PlusJakartaSans',
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          label,
-                                          style: TextStyle(
-                                            color: active
-                                                ? activeText
-                                                : (dark
-                                                    ? const Color(0xFFA1A1AA)
-                                                    : const Color(0xFF475569)),
-                                            fontFamily: 'PlusJakartaSans',
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
+                                  );
+                                }).toList(),
                           ),
                         ),
                         const SizedBox(height: 14),
@@ -1178,7 +1192,8 @@ class _AmanahAddEditScheduleDrawerState
                         child: _isCalendarOpen
                             ? Padding(
                                 key: const ValueKey<String>(
-                                    'inline-form-calendar'),
+                                  'inline-form-calendar',
+                                ),
                                 padding: const EdgeInsets.only(top: 8),
                                 child: _buildInlineCalendar(dark),
                               )
@@ -1208,22 +1223,23 @@ class _AmanahAddEditScheduleDrawerState
                               dark: dark,
                               onToggle: (bool value) =>
                                   _toggleSession(session.id, value),
-                              onSlotChanged: ({
-                                required int slotIndex,
-                                String? from,
-                                String? to,
-                                String? room,
-                                String? poli,
-                              }) {
-                                _updateSlot(
-                                  session.id,
-                                  slotIndex,
-                                  from: from,
-                                  to: to,
-                                  room: room,
-                                  poli: poli,
-                                );
-                              },
+                              onSlotChanged:
+                                  ({
+                                    required int slotIndex,
+                                    String? from,
+                                    String? to,
+                                    String? room,
+                                    String? poli,
+                                  }) {
+                                    _updateSlot(
+                                      session.id,
+                                      slotIndex,
+                                      from: from,
+                                      to: to,
+                                      room: room,
+                                      poli: poli,
+                                    );
+                                  },
                               onAddSlot: () => _addTimeSlot(session.id),
                               onRemoveSlot: (int slotIndex) =>
                                   _removeTimeSlot(session.id, slotIndex),
@@ -1235,104 +1251,28 @@ class _AmanahAddEditScheduleDrawerState
                       ),
                       const SizedBox(height: 20),
 
-                      // 3. Actions (Simpan, Batal, Hapus)
-                      Row(
+                      // 3. Actions (Simpan Perubahan & Hapus in vertical layout)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
+                          AmanahButton.primary(
+                            text: isEditing
+                                ? 'Simpan Perubahan'
+                                : 'Tambah Jadwal',
+                            size: AmanahButtonSize.medium,
+                            isFullWidth: true,
+                            onPressed: _saveSchedule,
+                          ),
                           if (isEditing) ...<Widget>[
-                            InkWell(
-                              borderRadius: BorderRadius.circular(12),
-                              onTap: _deleteSchedule,
-                              child: Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  color: dark
-                                      ? const Color(0xFFE11D48)
-                                          .withValues(alpha: 0.15)
-                                      : const Color(0xFFFFF1F2),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: dark
-                                        ? const Color(0xFFE11D48)
-                                            .withValues(alpha: 0.30)
-                                        : const Color(0xFFFECDD3),
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.delete_outline_rounded,
-                                  size: 18,
-                                  color: Color(0xFFE11D48),
-                                ),
-                              ),
+                            const SizedBox(height: 10),
+                            AmanahButton.ghost(
+                              text: 'Hapus',
+                              size: AmanahButtonSize.medium,
+                              isFullWidth: true,
+                              customForegroundColor: const Color(0xFFE11D48),
+                              onPressed: _deleteSchedule,
                             ),
-                            const SizedBox(width: 8),
                           ],
-                          Expanded(
-                            child: SizedBox(
-                              height: 44,
-                              child: OutlinedButton(
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: dark
-                                      ? const Color(0xFFD4D4D8)
-                                      : const Color(0xFF334155),
-                                  side: BorderSide(
-                                    color: dark
-                                        ? Colors.white.withValues(alpha: 0.15)
-                                        : const Color(0xFFCBD5E1),
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                onPressed: () => Navigator.of(context).pop(),
-                                child: const Text(
-                                  'Batal',
-                                  style: TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: SizedBox(
-                              height: 44,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: dark
-                                      ? const Color(0xFF06B6D4)
-                                      : const Color(0xFF2563EB),
-                                  foregroundColor: dark
-                                      ? const Color(0xFF083344)
-                                      : Colors.white,
-                                  elevation: 3,
-                                  shadowColor: (dark
-                                          ? const Color(0xFF06B6D4)
-                                          : const Color(0xFF2563EB))
-                                      .withValues(alpha: 0.30),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                onPressed: _saveSchedule,
-                                child: Text(
-                                  isEditing
-                                      ? 'Simpan Perubahan'
-                                      : 'Tambah Jadwal',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ],
@@ -1495,15 +1435,15 @@ class _AmanahAddEditScheduleDrawerState
                   : (dark ? const Color(0xFF52525B) : const Color(0xFFCBD5E1));
               if (isSelected) {
                 bgColor = dark
-                    ? const Color(0xFF22D3EE)
+                    ? const Color(0xFF3B82F6)
                     : const Color(0xFF2563EB);
-                textColor = dark ? const Color(0xFF083344) : Colors.white;
+                textColor = Colors.white;
               } else if (isToday) {
                 bgColor = dark
-                    ? const Color(0xFF22D3EE).withValues(alpha: 0.15)
+                    ? const Color(0xFF3B82F6).withValues(alpha: 0.15)
                     : const Color(0xFFEFF6FF);
                 textColor = dark
-                    ? const Color(0xFF22D3EE)
+                    ? const Color(0xFF60A5FA)
                     : const Color(0xFF2563EB);
               }
 
@@ -1524,10 +1464,11 @@ class _AmanahAddEditScheduleDrawerState
                     boxShadow: isSelected
                         ? <BoxShadow>[
                             BoxShadow(
-                              color: (dark
-                                      ? const Color(0xFF22D3EE)
-                                      : const Color(0xFF2563EB))
-                                  .withValues(alpha: 0.24),
+                              color:
+                                  (dark
+                                          ? const Color(0xFF3B82F6)
+                                          : const Color(0xFF2563EB))
+                                      .withValues(alpha: 0.24),
                               blurRadius: 12,
                               offset: const Offset(0, 5),
                             ),
@@ -1574,14 +1515,15 @@ class _ScheduleSelectorButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color background = dark
         ? (expanded
-            ? Colors.white.withValues(alpha: 0.10)
-            : Colors.white.withValues(alpha: 0.05))
+              ? Colors.white.withValues(alpha: 0.10)
+              : Colors.white.withValues(alpha: 0.05))
         : (expanded ? const Color(0xFFE2E8F0) : const Color(0xFFF8FAFC));
     final Color iconBackground = dark
         ? const Color(0xFF172554).withValues(alpha: 0.60)
         : const Color(0xFFEFF6FF);
-    final Color accent =
-        dark ? const Color(0xFF22D3EE) : const Color(0xFF2563EB);
+    final Color accent = dark
+        ? const Color(0xFF60A5FA)
+        : const Color(0xFF2563EB);
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
@@ -1665,22 +1607,24 @@ class _AnimatedSlotEntry extends StatelessWidget {
   }
 }
 
-typedef _OpenScheduleSelectionSheet = Future<void> Function({
-  required String title,
-  required String subtitle,
-  required String currentValue,
-  required List<String> options,
-  required ValueChanged<String> onChanged,
-  List<String> disabledOptions,
-});
+typedef _OpenScheduleSelectionSheet =
+    Future<void> Function({
+      required String title,
+      required String subtitle,
+      required String currentValue,
+      required List<String> options,
+      required ValueChanged<String> onChanged,
+      List<String> disabledOptions,
+    });
 
-typedef _ScheduleSlotChanged = void Function({
-  required int slotIndex,
-  String? from,
-  String? to,
-  String? room,
-  String? poli,
-});
+typedef _ScheduleSlotChanged =
+    void Function({
+      required int slotIndex,
+      String? from,
+      String? to,
+      String? room,
+      String? poli,
+    });
 
 class _ScheduleSessionPanel extends StatelessWidget {
   const _ScheduleSessionPanel({
@@ -1719,8 +1663,8 @@ class _ScheduleSessionPanel extends StatelessWidget {
         border: Border.all(
           color: expanded
               ? (dark
-                  ? Colors.white.withValues(alpha: 0.15)
-                  : const Color(0xFFE2E8F0))
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : const Color(0xFFE2E8F0))
               : Colors.transparent,
         ),
         boxShadow: expanded && !dark
@@ -1749,8 +1693,8 @@ class _ScheduleSessionPanel extends StatelessWidget {
                         color: expanded
                             ? (dark ? Colors.white : const Color(0xFF0F172A))
                             : (dark
-                                ? const Color(0xFFD4D4D8)
-                                : const Color(0xFF334155)),
+                                  ? const Color(0xFFD4D4D8)
+                                  : const Color(0xFF334155)),
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 13.5,
                         fontWeight: FontWeight.w700,
@@ -2100,10 +2044,10 @@ class _ScheduleToggleSwitch extends StatelessWidget {
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: active
-            ? (dark ? const Color(0xFF06B6D4) : const Color(0xFF1C1C1E))
+            ? (dark ? const Color(0xFF2563EB) : const Color(0xFF0D66E9))
             : (dark
-                ? Colors.white.withValues(alpha: 0.20)
-                : const Color(0xFFE5E5EA)),
+                  ? Colors.white.withValues(alpha: 0.20)
+                  : const Color(0xFFE5E5EA)),
         borderRadius: BorderRadius.circular(999),
       ),
       child: AnimatedAlign(
@@ -2236,8 +2180,9 @@ class _AmanahScheduleSelectionSheetState
                           Text(
                             widget.title,
                             style: TextStyle(
-                              color:
-                                  dark ? Colors.white : const Color(0xFF0F172A),
+                              color: dark
+                                  ? Colors.white
+                                  : const Color(0xFF0F172A),
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -2353,36 +2298,14 @@ class _AmanahScheduleSelectionSheetState
                           ),
                           if (_controller.text.trim().isNotEmpty) ...<Widget>[
                             const SizedBox(width: 8),
-                            SizedBox(
-                              height: 38,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: dark
-                                      ? const Color(0xFF06B6D4)
-                                      : const Color(0xFF2563EB),
-                                  foregroundColor: dark
-                                      ? const Color(0xFF083344)
-                                      : Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 14),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  elevation: 0,
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context)
-                                      .pop(_controller.text.trim());
-                                },
-                                child: const Text(
-                                  'Gunakan',
-                                  style: TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
+                            AmanahButton.primary(
+                              text: 'Gunakan',
+                              size: AmanahButtonSize.small,
+                              onPressed: () {
+                                Navigator.of(
+                                  context,
+                                ).pop(_controller.text.trim());
+                              },
                             ),
                           ],
                         ],
@@ -2422,18 +2345,20 @@ class _AmanahScheduleSelectionSheetState
                                 itemCount: filtered.length,
                                 gridDelegate:
                                     const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  mainAxisExtent: 44,
-                                  crossAxisSpacing: 8,
-                                  mainAxisSpacing: 8,
-                                ),
+                                      crossAxisCount: 2,
+                                      mainAxisExtent: 44,
+                                      crossAxisSpacing: 8,
+                                      mainAxisSpacing: 8,
+                                    ),
                                 itemBuilder: (BuildContext context, int index) {
                                   final String option = filtered[index];
-                                  final bool isSelected = widget.currentValue
+                                  final bool isSelected =
+                                      widget.currentValue
                                           .trim()
                                           .toLowerCase() ==
                                       option.trim().toLowerCase();
-                                  final bool isDisabled = !isSelected &&
+                                  final bool isDisabled =
+                                      !isSelected &&
                                       widget.disabledOptions.any(
                                         (String d) =>
                                             d.trim().toLowerCase() ==
@@ -2445,10 +2370,11 @@ class _AmanahScheduleSelectionSheetState
                                     onTap: isDisabled
                                         ? null
                                         : () =>
-                                            Navigator.of(context).pop(option),
+                                              Navigator.of(context).pop(option),
                                     child: AnimatedContainer(
-                                      duration:
-                                          const Duration(milliseconds: 140),
+                                      duration: const Duration(
+                                        milliseconds: 140,
+                                      ),
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 10,
                                         vertical: 8,
@@ -2456,37 +2382,45 @@ class _AmanahScheduleSelectionSheetState
                                       decoration: BoxDecoration(
                                         color: isSelected
                                             ? (dark
-                                                ? const Color(0xFF06B6D4)
-                                                : const Color(0xFF2563EB))
+                                                  ? const Color(0xFF2563EB)
+                                                  : const Color(0xFF2563EB))
                                             : isDisabled
-                                                ? (dark
-                                                    ? Colors.white.withValues(
-                                                        alpha: 0.02)
-                                                    : const Color(0xFFF1F5F9))
-                                                : (dark
-                                                    ? Colors.white.withValues(
-                                                        alpha: 0.05)
-                                                    : Colors.white),
+                                            ? (dark
+                                                  ? Colors.white.withValues(
+                                                      alpha: 0.02,
+                                                    )
+                                                  : const Color(0xFFF1F5F9))
+                                            : (dark
+                                                  ? Colors.white.withValues(
+                                                      alpha: 0.05,
+                                                    )
+                                                  : Colors.white),
                                         borderRadius: BorderRadius.circular(12),
                                         border: Border.all(
                                           color: isSelected
                                               ? (dark
-                                                  ? const Color(0xFF06B6D4)
-                                                  : const Color(0xFF2563EB))
+                                                    ? const Color(0xFF2563EB)
+                                                    : const Color(0xFF2563EB))
                                               : (dark
-                                                  ? Colors.white.withValues(
-                                                      alpha: 0.10)
-                                                  : const Color(0xFFE2E8F0)),
+                                                    ? Colors.white.withValues(
+                                                        alpha: 0.10,
+                                                      )
+                                                    : const Color(0xFFE2E8F0)),
                                         ),
                                         boxShadow: isSelected
                                             ? <BoxShadow>[
                                                 BoxShadow(
-                                                  color: (dark
-                                                          ? const Color(
-                                                              0xFF06B6D4)
-                                                          : const Color(
-                                                              0xFF2563EB))
-                                                      .withValues(alpha: 0.25),
+                                                  color:
+                                                      (dark
+                                                              ? const Color(
+                                                                  0xFF2563EB,
+                                                                )
+                                                              : const Color(
+                                                                  0xFF2563EB,
+                                                                ))
+                                                          .withValues(
+                                                            alpha: 0.25,
+                                                          ),
                                                   blurRadius: 8,
                                                   offset: const Offset(0, 3),
                                                 ),
@@ -2505,19 +2439,23 @@ class _AmanahScheduleSelectionSheetState
                                               style: TextStyle(
                                                 color: isSelected
                                                     ? (dark
-                                                        ? const Color(
-                                                            0xFF083344)
-                                                        : Colors.white)
+                                                          ? const Color(
+                                                              0xFF083344,
+                                                            )
+                                                          : Colors.white)
                                                     : isDisabled
-                                                        ? (dark
-                                                            ? const Color(
-                                                                0xFF52525B)
-                                                            : const Color(
-                                                                0xFF94A3B8))
-                                                        : (dark
-                                                            ? Colors.white
-                                                            : const Color(
-                                                                0xFF0F172A)),
+                                                    ? (dark
+                                                          ? const Color(
+                                                              0xFF52525B,
+                                                            )
+                                                          : const Color(
+                                                              0xFF94A3B8,
+                                                            ))
+                                                    : (dark
+                                                          ? Colors.white
+                                                          : const Color(
+                                                              0xFF0F172A,
+                                                            )),
                                                 fontFamily: 'PlusJakartaSans',
                                                 fontSize: 12,
                                                 fontWeight: isSelected

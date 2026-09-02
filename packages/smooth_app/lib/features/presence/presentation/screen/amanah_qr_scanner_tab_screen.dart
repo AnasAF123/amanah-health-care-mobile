@@ -52,6 +52,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
   bool _isFlashOn = false;
   bool _isFrontCamera = false;
   bool _isDrawerOpen = true;
+  bool _isHelpOpen = false;
   _AttendanceFlowState _attendanceFlowState = _AttendanceFlowState.idle;
   AmanahQrDrawerView _drawerView = AmanahQrDrawerView.menu;
   String _manualPin = '';
@@ -256,8 +257,9 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     }
   }
 
-  void _showHelpDialog() {
-    showDialog<void>(
+  Future<void> _showHelpDialog() async {
+    setState(() => _isHelpOpen = true);
+    await showDialog<void>(
       context: context,
       builder: (BuildContext ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -300,6 +302,9 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
         ],
       ),
     );
+    if (mounted) {
+      setState(() => _isHelpOpen = false);
+    }
   }
 
   bool _shouldUseLegacyCameraScanner(BuildContext context) {
@@ -560,6 +565,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                       label: 'Bantuan Presensi',
                       dark: dark,
                       size: 40,
+                      isActive: _isHelpOpen,
                     ),
                     const SizedBox(width: 8),
                     _FloatingCircularButton(
@@ -568,6 +574,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                       label: 'Pilih QR dari Galeri',
                       dark: dark,
                       size: 40,
+                      isActive: _isDrawerOpen &&
+                          _drawerView == AmanahQrDrawerView.uploadQr,
                     ),
                     const SizedBox(width: 8),
                     _FloatingCircularButton(
@@ -576,10 +584,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                       label: 'Buka Menu Presensi',
                       dark: dark,
                       size: 40,
-                      isActive:
-                          _isDrawerOpen &&
+                      isActive: _isDrawerOpen &&
                           _drawerView == AmanahQrDrawerView.menu,
-                      activeColor: const Color(0xFF2563EB),
                     ),
                     if (!_shouldUseLegacyCameraScanner(context)) ...<Widget>[
                       const SizedBox(width: 8),
@@ -590,7 +596,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                         dark: dark,
                         size: 40,
                         isActive: _isFrontCamera,
-                        activeColor: const Color(0xFF2563EB),
                       ),
                       const SizedBox(width: 8),
                       _FloatingCircularButton(
@@ -602,7 +607,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                         dark: dark,
                         size: 40,
                         isActive: _isFlashOn,
-                        activeColor: const Color(0xFFF59E0B),
                       ),
                     ],
                   ],
@@ -798,6 +802,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                             title: 'Tampilkan QR',
                                             icon: Icons.qr_code_rounded,
                                             dark: dark,
+                                            isActive: _drawerView ==
+                                                AmanahQrDrawerView.myQr,
                                             onTap: () => _openDrawer(
                                               AmanahQrDrawerView.myQr,
                                             ),
@@ -811,6 +817,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                             title: 'Manual',
                                             icon: Icons.password_rounded,
                                             dark: dark,
+                                            isActive: _drawerView ==
+                                                AmanahQrDrawerView.manualPin,
                                             onTap: () {
                                               setState(() {
                                                 _pinError = null;
@@ -830,6 +838,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                             title: 'Upload QR',
                                             icon: Icons.image_outlined,
                                             dark: dark,
+                                            isActive: _drawerView ==
+                                                AmanahQrDrawerView.uploadQr,
                                             onTap: () => _openDrawer(
                                               AmanahQrDrawerView.uploadQr,
                                             ),
@@ -1320,7 +1330,6 @@ class _FloatingCircularButton extends StatelessWidget {
     required this.dark,
     this.size = 44,
     this.isActive = false,
-    this.activeColor,
   });
 
   final VoidCallback onTap;
@@ -1329,25 +1338,40 @@ class _FloatingCircularButton extends StatelessWidget {
   final bool dark;
   final double size;
   final bool isActive;
-  final Color? activeColor;
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = isActive
-        ? (activeColor ?? const Color(0xFFF59E0B))
+    final Gradient? bgGradient = isActive
+        ? (dark
+            ? AmanahColorTokens.btnCrispBlueDarkGradient
+            : AmanahColorTokens.btnCrispBlueGradient)
+        : null;
+
+    final Color? bgColor = isActive
+        ? null
         : (dark
-              ? const Color(0xFF1E293B).withValues(alpha: 0.75)
-              : Colors.white.withValues(alpha: 0.85));
+            ? const Color(0xFF1E293B).withValues(alpha: 0.75)
+            : Colors.white.withValues(alpha: 0.85));
 
     final Color iconColor = isActive
-        ? const Color(0xFF0F172A)
+        ? Colors.white
         : (dark ? Colors.white : const Color(0xFF1E293B));
 
     final Color borderColor = isActive
-        ? (activeColor ?? const Color(0xFFF59E0B))
+        ? (dark
+            ? AmanahColorTokens.btnCrispBlueDarkBorder
+            : AmanahColorTokens.btnCrispBlueBorder)
         : (dark
-              ? Colors.white.withValues(alpha: 0.20)
-              : Colors.white.withValues(alpha: 0.80));
+            ? Colors.white.withValues(alpha: 0.20)
+            : Colors.white.withValues(alpha: 0.80));
+
+    final List<BoxShadow> shadows = <BoxShadow>[
+      BoxShadow(
+        color: Colors.black.withValues(alpha: dark ? 0.35 : 0.16),
+        blurRadius: 8,
+        offset: const Offset(0, 2),
+      ),
+    ];
 
     return Semantics(
       button: true,
@@ -1357,20 +1381,19 @@ class _FloatingCircularButton extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(100),
-          child: Container(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
             width: size,
             height: size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: bgColor,
-              border: Border.all(color: borderColor),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.20),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              gradient: bgGradient,
+              border: Border.all(
+                color: borderColor,
+                width: isActive ? 0.8 : 1.0,
+              ),
+              boxShadow: shadows,
             ),
             child: Center(
               child: Icon(icon, size: size * 0.48, color: iconColor),
@@ -1388,12 +1411,14 @@ class _ActionMenuCard extends StatelessWidget {
     required this.icon,
     required this.dark,
     required this.onTap,
+    this.isActive = false,
   });
 
   final String title;
   final IconData icon;
   final bool dark;
   final VoidCallback onTap;
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
@@ -1405,22 +1430,53 @@ class _ActionMenuCard extends StatelessWidget {
 
     final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: borderColor, width: 1.2),
-          boxShadow: <BoxShadow>[
+    final Gradient? bgGradient = isActive
+        ? (dark
+            ? AmanahColorTokens.btnCrispBlueDarkGradient
+            : AmanahColorTokens.btnCrispBlueGradient)
+        : null;
+
+    final Color effectiveBorderColor = isActive
+        ? (dark
+            ? AmanahColorTokens.btnCrispBlueDarkBorder
+            : AmanahColorTokens.btnCrispBlueBorder)
+        : borderColor;
+
+    final List<BoxShadow> shadows = isActive
+        ? <BoxShadow>[
+            if (dark)
+              AmanahColorTokens.btnCrispBlueDarkShadow
+            else
+              AmanahColorTokens.btnCrispBlueShadow,
+            BoxShadow(
+              color: (dark
+                      ? const Color(0xFF2563EB)
+                      : const Color(0xFF0D66E9))
+                  .withValues(alpha: 0.30),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ]
+        : <BoxShadow>[
             BoxShadow(
               color: Colors.black.withValues(alpha: dark ? 0.25 : 0.04),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
-          ],
+          ];
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isActive ? null : cardBg,
+          gradient: bgGradient,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: effectiveBorderColor, width: 1.2),
+          boxShadow: shadows,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1428,10 +1484,22 @@ class _ActionMenuCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB).withValues(alpha: 0.14),
+                color: isActive
+                    ? Colors.white.withValues(alpha: 0.22)
+                    : (dark
+                        ? const Color(0xFF2563EB).withValues(alpha: 0.20)
+                        : const Color(0xFF2563EB).withValues(alpha: 0.14)),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(icon, size: 22, color: const Color(0xFF2563EB)),
+              child: Icon(
+                icon,
+                size: 22,
+                color: isActive
+                    ? Colors.white
+                    : (dark
+                        ? const Color(0xFF60A5FA)
+                        : const Color(0xFF2563EB)),
+              ),
             ),
             const SizedBox(height: 10),
             Text(
@@ -1442,8 +1510,8 @@ class _ActionMenuCard extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 11.5,
-                fontWeight: FontWeight.w700,
-                color: textColor,
+                fontWeight: isActive ? FontWeight.w800 : FontWeight.w700,
+                color: isActive ? Colors.white : textColor,
               ),
             ),
           ],

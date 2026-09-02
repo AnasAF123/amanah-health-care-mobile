@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/features/schedule/data/amanah_schedule_store.dart';
 import 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:smooth_app/features/schedule/presentation/components/amanah_schedule_cards_and_drawers.dart';
@@ -43,8 +45,9 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
       _viewMode = widget.initialViewMode!;
     }
     if (widget.initialSessionId != null) {
-      final List<DoctorSchedule> list =
-          _store.getSchedulesForDate(_selectedDate);
+      final List<DoctorSchedule> list = _store.getSchedulesForDate(
+        _selectedDate,
+      );
       int idx = list.indexWhere(
         (DoctorSchedule s) => s.id == widget.initialSessionId,
       );
@@ -56,8 +59,9 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
         if (widget.openDetailOnLaunch) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              final DayScheduleSetting daySetting =
-                  _store.getDaySettingForDate(_selectedDate);
+              final DayScheduleSetting daySetting = _store.getDaySettingForDate(
+                _selectedDate,
+              );
               _showSessionDetailSheet(context, list[idx], daySetting.isCuti);
             }
           });
@@ -121,8 +125,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool dark = theme.brightness == Brightness.dark;
+    final bool dark = Theme.of(context).brightness == Brightness.dark;
 
     final DayScheduleSetting daySetting = _store.getDaySettingForDate(
       _selectedDate,
@@ -154,7 +157,9 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
     }
 
     return Scaffold(
-      backgroundColor: dark ? const Color(0xFF030712) : const Color(0xFFF8FAFC),
+      backgroundColor: dark
+          ? AmanahColorTokens.canvasDark
+          : AmanahColorTokens.canvasLight,
       body: SafeArea(
         child: Stack(
           children: <Widget>[
@@ -193,8 +198,8 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                           Icons.add,
                           size: 26,
                           color: dark
-                              ? const Color(0xFF22D3EE)
-                              : const Color(0xFF2563EB),
+                              ? AmanahColorTokens.brandAccent
+                              : AmanahColorTokens.brand,
                         ),
                         onPressed: () {
                           AmanahAddEditScheduleDrawer.show(
@@ -280,8 +285,8 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
             TextButton.icon(
               style: TextButton.styleFrom(
                 foregroundColor: dark
-                    ? const Color(0xFF38BDF8)
-                    : const Color(0xFF0A44FF),
+                    ? AmanahColorTokens.brandAccent
+                    : AmanahColorTokens.brand,
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               ),
               onPressed: () {
@@ -353,7 +358,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFF59E0B),
-                    foregroundColor: Colors.black,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
                       vertical: 6,
@@ -484,7 +489,9 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                  color: dark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
                   fontFamily: 'PlusJakartaSans',
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
@@ -609,13 +616,19 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0A44FF).withValues(alpha: 0.12),
+                  color:
+                      (dark
+                              ? AmanahColorTokens.brandAccent
+                              : AmanahColorTokens.brand)
+                          .withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '${patients.length} Pasien',
-                  style: const TextStyle(
-                    color: Color(0xFF0A44FF),
+                  style: TextStyle(
+                    color: dark
+                        ? AmanahColorTokens.brandAccent
+                        : AmanahColorTokens.brand,
                     fontFamily: 'PlusJakartaSans',
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
@@ -724,49 +737,22 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
             ),
           ),
           const SizedBox(height: 18),
-          SizedBox(
-            width: double.infinity,
-            height: 44,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0A44FF),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              onPressed: onTapButton,
-              child: Text(
-                buttonText,
-                style: const TextStyle(
-                  fontFamily: 'PlusJakartaSans',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
+          AmanahButton.primary(
+            text: buttonText,
+            isFullWidth: true,
+            size: AmanahButtonSize.medium,
+            onPressed: onTapButton,
           ),
           if (secondaryButtonText != null) ...<Widget>[
             const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              height: 44,
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                onPressed: onTapSecondaryButton,
-                child: Text(
-                  secondaryButtonText,
-                  style: const TextStyle(
-                    fontFamily: 'PlusJakartaSans',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
+            AmanahButton.ghost(
+              text: secondaryButtonText,
+              isFullWidth: true,
+              size: AmanahButtonSize.medium,
+              customForegroundColor: dark
+                  ? AmanahColorTokens.neutral200
+                  : AmanahColorTokens.neutral700,
+              onPressed: onTapSecondaryButton,
             ),
           ],
         ],
@@ -796,6 +782,9 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
           scheduleToEdit: schedule,
           onSavedDate: _handleSavedDate,
         );
+      },
+      onTapDelete: () {
+        _store.deleteSchedule(_selectedDate, schedule.id);
       },
     );
   }

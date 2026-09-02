@@ -82,7 +82,7 @@ class AmanahGenieCanvasPainter extends CustomPainter {
       canvas.drawImageRect(snapshot, srcRect, dstRect, paint);
     }
 
-    // Radiant glow burst at dock point (theme cyan & royal blue with screen blend mode)
+    // Radiant glow burst at dock point (brand blue with screen blend mode)
     final double glowRaw = direction == AmanahGenieDirection.minimize ? rawT : 1.0 - rawT;
     if (glowRaw > 0.70) {
       final double a = _eOut2((glowRaw - 0.70) / 0.30) * 0.45;
@@ -92,9 +92,9 @@ class AmanahGenieCanvasPainter extends CustomPainter {
           dockPoint,
           80,
           <Color>[
-            const Color(0xFF38BDF8).withValues(alpha: a),
+            const Color(0xFF3B82F6).withValues(alpha: a),
             const Color(0xFF0A44FF).withValues(alpha: a * 0.65),
-            const Color(0x000A44FF), // Explicit transparent Royal Blue (avoids transparent black artifact)
+            const Color(0x000A44FF), // Explicit transparent Royal Blue
           ],
           <double>[0.0, 0.40, 1.0],
         );
@@ -178,7 +178,7 @@ Future<ui.Image> generateCardCoverSnapshot({
       colors: <Color>[
         Color(0xFF0A44FF),
         Color(0xFF1A55FF),
-        Color(0xFF00D4FF),
+        Color(0xFF3B82F6),
       ],
     ).createShader(Rect.fromCenter(center: rect.center, width: 140, height: 140));
 

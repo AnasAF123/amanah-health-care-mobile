@@ -156,7 +156,7 @@ class _DigitBox extends StatelessWidget {
     final Color borderColor = hasError
         ? const Color(0xFFEF4444)
         : (controller.text.isNotEmpty
-            ? (dark ? const Color(0xFF22D3EE) : const Color(0xFF0F172A))
+            ? (dark ? const Color(0xFF3B82F6) : const Color(0xFF0F172A))
             : (dark
                 ? Colors.white.withValues(alpha: 0.15)
                 : const Color(0xFFCBD5E1)));
@@ -169,6 +169,7 @@ class _DigitBox extends StatelessWidget {
       child: TextField(
         controller: controller,
         focusNode: focusNode,
+        scrollPadding: EdgeInsets.zero,
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         maxLength: 1,
@@ -196,7 +197,7 @@ class _DigitBox extends StatelessWidget {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(
-              color: dark ? const Color(0xFF22D3EE) : const Color(0xFF0A44FF),
+              color: dark ? const Color(0xFF3B82F6) : const Color(0xFF0A44FF),
               width: 2.0,
             ),
           ),

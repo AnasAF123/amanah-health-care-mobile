@@ -56,9 +56,9 @@ class AmanahDockHollowGlowPainter extends CustomPainter {
           Offset(195, beamTopY),
           <Color>[
             const Color(0xFF2563EB).withValues(alpha: 0.85 * auraOpacity),
-            const Color(0xFF0EA5E9).withValues(alpha: 0.60 * auraOpacity),
-            const Color(0xFF38BDF8).withValues(alpha: 0.30 * auraOpacity),
-            const Color(0x0038BDF8), // Explicit transparent Sky Blue
+            const Color(0xFF1D4ED8).withValues(alpha: 0.60 * auraOpacity),
+            const Color(0xFF3B82F6).withValues(alpha: 0.30 * auraOpacity),
+            const Color(0x003B82F6), // Explicit transparent Sky Blue
           ],
           <double>[0.0, 0.35, 0.70, 1.0],
         )
@@ -71,7 +71,7 @@ class AmanahDockHollowGlowPainter extends CustomPainter {
       );
       canvas.drawOval(risingAuraRect, risingAuraPaint);
 
-      // 1B. Inner Cyan Radiant Heat Core (Emanating from bottom Y=44 upward to Y=-65)
+      // 1B. Inner Radiant Heat Core (Emanating from bottom Y=44 upward to Y=-65)
       const double coreBottomY = 44.0;
       final double coreTopY = 36.0 - (105.0 * risingFactor);
       final double coreHeight = (coreBottomY - coreTopY).clamp(15.0, 150.0);
@@ -85,8 +85,8 @@ class AmanahDockHollowGlowPainter extends CustomPainter {
           Offset(195, coreTopY),
           <Color>[
             const Color(0xFF0A44FF).withValues(alpha: 0.80 * auraOpacity),
-            const Color(0xFF00D4FF).withValues(alpha: 0.55 * auraOpacity),
-            const Color(0x0000D4FF), // Explicit transparent Cyan
+            const Color(0xFF3B82F6).withValues(alpha: 0.55 * auraOpacity),
+            const Color(0x003B82F6), // Explicit transparent Blue
           ],
           <double>[0.0, 0.60, 1.0],
         )
@@ -111,8 +111,8 @@ class AmanahDockHollowGlowPainter extends CustomPainter {
         const Offset(195, -30),
         <Color>[
           const Color(0xFF0A44FF).withValues(alpha: 0.65 * domeOpacity),
-          const Color(0xFF38BDF8).withValues(alpha: 0.40 * domeOpacity),
-          const Color(0x0038BDF8), // Explicit transparent Sky Blue
+          const Color(0xFF3B82F6).withValues(alpha: 0.40 * domeOpacity),
+          const Color(0x003B82F6), // Explicit transparent Sky Blue
         ],
         <double>[0.0, 0.55, 1.0],
       )
@@ -134,7 +134,7 @@ class AmanahDockHollowGlowPainter extends CustomPainter {
         const Offset(195, 42),
         120,
         <Color>[
-          const Color(0xFF38BDF8).withValues(alpha: apertureOpacity),
+          const Color(0xFF3B82F6).withValues(alpha: apertureOpacity),
           const Color(0xFF0A44FF).withValues(alpha: apertureOpacity * 0.60),
           const Color(0x000A44FF), // Explicit transparent Royal Blue
         ],
@@ -223,11 +223,11 @@ class AmanahDockHollowGlowPainter extends CustomPainter {
       Offset.zero,
       const Offset(390, 0),
       const <Color>[
-        Color(0x000284C7),
-        Color(0x660284C7),
-        Color(0xD938BDF8), // 85% opacity at center notch
-        Color(0x660284C7),
-        Color(0x000284C7),
+        Color(0x001D4ED8),
+        Color(0x661D4ED8),
+        Color(0xD93B82F6), // 85% opacity at center notch
+        Color(0x661D4ED8),
+        Color(0x001D4ED8),
       ],
       const <double>[0.0, 0.22, 0.50, 0.78, 1.0],
     );
@@ -259,11 +259,11 @@ class AmanahDockHollowGlowPainter extends CustomPainter {
         const Offset(100, 0),
         const Offset(290, 0),
         const <Color>[
-          Color(0x000284C7),
-          Color(0xE638BDF8),
-          Color(0xFFE0F2FE), // White-hot cyan center
-          Color(0xE638BDF8),
-          Color(0x000284C7),
+          Color(0x001D4ED8),
+          Color(0xE63B82F6),
+          Color(0xFFDBEAFE), // White-hot blue center
+          Color(0xE63B82F6),
+          Color(0x001D4ED8),
         ],
         const <double>[0.0, 0.25, 0.50, 0.75, 1.0],
       );

@@ -4604,7 +4604,7 @@ class AmanahWatermarkLogo extends StatelessWidget {
                   colors: <Color>[
                     Color(0xFF0A44FF),
                     Color(0xFF1A55FF),
-                    Color(0xFF00D4FF),
+                    Color(0xFF3B82F6),
                   ],
                 ),
             color: color,
@@ -4756,15 +4756,15 @@ class AmanahOrganicPixelPainter extends CustomPainter {
 
     final List<Color> customColors = isDark
         ? const <Color>[
-            Color(0xFF00D4FF),
-            Color(0xFF38BDF8),
+            Color(0xFF2563EB),
+            Color(0xFF3B82F6),
             Color(0xFF0A44FF),
             Color(0xFF60A5FA),
             Color(0xFF93C5FD),
           ]
         : const <Color>[
             Color(0xFF0A44FF),
-            Color(0xFF38BDF8),
+            Color(0xFF2563EB),
             Color(0xFF60A5FA),
             Color(0xFF93C5FD),
             Color(0xFFBFDBFE),

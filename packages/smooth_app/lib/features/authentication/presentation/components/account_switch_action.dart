@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 
 class AccountSwitchAction extends StatelessWidget {
   const AccountSwitchAction({
@@ -28,20 +29,10 @@ class AccountSwitchAction extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          TextButton(
+          AmanahButton.text(
+            text: actionLabel,
             onPressed: onTap,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              minimumSize: const Size(44, 36),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              actionLabel,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
+            size: AmanahButtonSize.small,
           ),
         ],
       ),

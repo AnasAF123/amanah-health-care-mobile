@@ -7,6 +7,7 @@ import 'package:smooth_app/features/home/presentation/components/amanah_quick_ac
 import 'package:smooth_app/features/home/presentation/components/amanah_schedule_card_stack.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_today_activity_section.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_home_shell.dart';
+import 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart';
 
 void main() {
   const AmanahAuthUser testUser = AmanahAuthUser(
@@ -255,6 +256,41 @@ void main() {
 
         expect(find.textContaining('Pilih antrean'), findsWidgets);
         expect(find.text('Tarik antrean ke bawah untuk proses'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Single schedule card in stack maintains exact card height (172.0) and does not stretch',
+      (WidgetTester tester) async {
+        const DoctorSchedule singleSchedule = DoctorSchedule(
+          id: 'test-single',
+          title: 'Jadwal Hari Ini',
+          sessionType: 'Pagi',
+          date: '03 Sep 2026',
+          time: '08:00 - 12:00 WIB',
+          poli: 'Poli Anak',
+          room: 'Ruang 102',
+          slotCount: '5 Pasien',
+          slotText: '5 Pasien',
+          badge: 'Terdaftar',
+          badgeVariant: AmanahBadgeVariant.primary,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AmanahScheduleCardStack(
+                schedules: const <DoctorSchedule>[singleSchedule],
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final Finder cardFinder = find.byType(AmanahScheduleCard);
+        expect(cardFinder, findsOneWidget);
+        final Size cardSize = tester.getSize(cardFinder);
+        expect(cardSize.height, 172.0);
       },
     );
   });

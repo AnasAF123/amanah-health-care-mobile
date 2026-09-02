@@ -170,6 +170,8 @@ flutter:
     - assets/product/
     - assets/icons/
     - assets/amanah/
+    - assets/amanah/images/
+    - assets/amanah/images/doctors/
     - assets/amanah/auth/
     - assets/amanah/id_card/
     - assets/amanah/id_card/3d/

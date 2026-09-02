@@ -1,8 +1,10 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
-class AmanahScreenHeader extends StatelessWidget implements PreferredSizeWidget {
+class AmanahScreenHeader extends StatelessWidget
+    implements PreferredSizeWidget {
   const AmanahScreenHeader({
     required this.title,
     super.key,
@@ -19,7 +21,8 @@ class AmanahScreenHeader extends StatelessWidget implements PreferredSizeWidget 
   final Color? backgroundColor;
 
   @override
-  Size get preferredSize => const Size.fromHeight(56);
+  Size get preferredSize =>
+      const Size.fromHeight(AmanahComponentSize.topAppBar);
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +30,7 @@ class AmanahScreenHeader extends StatelessWidget implements PreferredSizeWidget 
     final bool dark = theme.brightness == Brightness.dark;
 
     final Color defaultBg = dark
-        ? const Color(0xFF0A0E1A).withValues(alpha: 0.85)
+        ? AmanahColorTokens.canvasDark.withValues(alpha: 0.85)
         : Colors.white.withValues(alpha: 0.85);
 
     return ClipRect(
@@ -35,8 +38,8 @@ class AmanahScreenHeader extends StatelessWidget implements PreferredSizeWidget 
         filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: Container(
           width: double.infinity,
-          height: 56,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          height: AmanahComponentSize.topAppBar,
+          padding: const EdgeInsets.symmetric(horizontal: AmanahSpacing.lg),
           color: backgroundColor ?? defaultBg,
           child: Stack(
             alignment: Alignment.center,
@@ -53,26 +56,30 @@ class AmanahScreenHeader extends StatelessWidget implements PreferredSizeWidget 
                           shape: const CircleBorder(),
                           child: InkWell(
                             customBorder: const CircleBorder(),
-                            onTap: onBack ?? () => Navigator.of(context).maybePop(),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
+                            onTap:
+                                onBack ??
+                                () => Navigator.of(context).maybePop(),
+                            child: SizedBox.square(
+                              dimension: AmanahComponentSize.iconButton,
                               child: Icon(
                                 Icons.arrow_back_rounded,
                                 size: 22,
-                                color: dark
-                                    ? const Color(0xFFE2E8F0)
-                                    : const Color(0xFF334155),
+                                color: AmanahThemeTokens.textSecondary(context),
                               ),
                             ),
                           ),
                         ),
                       )
-                    : const SizedBox(width: 40, height: 40),
+                    : const SizedBox.square(
+                        dimension: AmanahComponentSize.iconButton,
+                      ),
               ),
 
               // 2. Absolute Optical Center (Title + Subtitle)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 48),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AmanahComponentSize.iconButton,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -86,8 +93,8 @@ class AmanahScreenHeader extends StatelessWidget implements PreferredSizeWidget 
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        letterSpacing: -0.3,
-                        color: dark ? Colors.white : const Color(0xFF0F172A),
+                        letterSpacing: 0,
+                        color: AmanahThemeTokens.textPrimary(context),
                         height: 1.2,
                       ),
                     ),
@@ -103,10 +110,8 @@ class AmanahScreenHeader extends StatelessWidget implements PreferredSizeWidget 
                             fontFamily: 'PlusJakartaSans',
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            letterSpacing: -0.2,
-                            color: dark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
+                            letterSpacing: 0,
+                            color: AmanahThemeTokens.textSecondary(context),
                             height: 1.1,
                           ),
                         ),
@@ -118,7 +123,12 @@ class AmanahScreenHeader extends StatelessWidget implements PreferredSizeWidget 
               // 3. Trailing / End Action
               Align(
                 alignment: Alignment.centerRight,
-                child: rightAction ?? const SizedBox(width: 40, height: 40),
+                child: SizedBox.square(
+                  dimension: AmanahComponentSize.iconButton,
+                  child: rightAction == null
+                      ? const SizedBox.shrink()
+                      : Center(child: rightAction),
+                ),
               ),
             ],
           ),

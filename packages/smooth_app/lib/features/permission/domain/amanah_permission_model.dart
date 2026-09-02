@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 enum AmanahPermissionStatus {
   menunggu,
   disetujui,
@@ -57,51 +55,6 @@ enum AmanahPermissionType {
         return 'Urusan Keluarga';
       case AmanahPermissionType.tugasLuarRS:
         return 'Tugas Luar RS';
-    }
-  }
-
-  Color get colorPrimary {
-    switch (this) {
-      case AmanahPermissionType.cutiTahunan:
-        return const Color(0xFF2563EB);
-      case AmanahPermissionType.izinSakit:
-        return const Color(0xFFEF4444);
-      case AmanahPermissionType.seminarSimposium:
-        return const Color(0xFF8B5CF6);
-      case AmanahPermissionType.urusanKeluarga:
-        return const Color(0xFFF59E0B);
-      case AmanahPermissionType.tugasLuarRS:
-        return const Color(0xFF06B6D4);
-    }
-  }
-
-  Color get colorLight {
-    switch (this) {
-      case AmanahPermissionType.cutiTahunan:
-        return const Color(0xFF60A5FA);
-      case AmanahPermissionType.izinSakit:
-        return const Color(0xFFFCA5A5);
-      case AmanahPermissionType.seminarSimposium:
-        return const Color(0xFFC4B5FD);
-      case AmanahPermissionType.urusanKeluarga:
-        return const Color(0xFFFCD34D);
-      case AmanahPermissionType.tugasLuarRS:
-        return const Color(0xFF67E8F9);
-    }
-  }
-
-  Color get colorDark {
-    switch (this) {
-      case AmanahPermissionType.cutiTahunan:
-        return const Color(0xFF1D4ED8);
-      case AmanahPermissionType.izinSakit:
-        return const Color(0xFFDC2626);
-      case AmanahPermissionType.seminarSimposium:
-        return const Color(0xFF6D28D9);
-      case AmanahPermissionType.urusanKeluarga:
-        return const Color(0xFFD97706);
-      case AmanahPermissionType.tugasLuarRS:
-        return const Color(0xFF0891B2);
     }
   }
 

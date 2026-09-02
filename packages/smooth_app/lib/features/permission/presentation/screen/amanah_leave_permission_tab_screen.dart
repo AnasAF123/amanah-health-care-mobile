@@ -1,12 +1,18 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_filter_bar.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/features/permission/data/amanah_permission_store.dart';
 import 'package:smooth_app/features/permission/domain/amanah_permission_model.dart';
 import 'package:smooth_app/features/permission/presentation/components/amanah_permission_card.dart';
 import 'package:smooth_app/features/permission/presentation/components/amanah_permission_detail_drawer.dart';
 import 'package:smooth_app/features/permission/presentation/components/amanah_permission_form_drawer.dart';
 
+/// Master Leave & Permission Screen
+/// Matching 1:1 with LeavePermissionTabScreen.tsx (.web)
 class AmanahLeavePermissionTabScreen extends StatefulWidget {
   const AmanahLeavePermissionTabScreen({
     this.onBack,
@@ -76,11 +82,11 @@ class _AmanahLeavePermissionTabScreenState
   Future<void> _handleOpenCreateForm() async {
     final AmanahPermissionFormData? result =
         await AmanahPermissionFormDrawer.show(
-      context: context,
-      doctorName: widget.doctorName,
-      doctorRole: widget.doctorRole,
-      doctorAvatarUrl: widget.doctorAvatarUrl,
-    );
+          context: context,
+          doctorName: widget.doctorName,
+          doctorRole: widget.doctorRole,
+          doctorAvatarUrl: widget.doctorAvatarUrl,
+        );
 
     if (result != null && mounted) {
       _store.createPermission(
@@ -99,16 +105,16 @@ class _AmanahLeavePermissionTabScreenState
   Future<void> _handleOpenEditForm(AmanahPermissionRecord record) async {
     final AmanahPermissionFormData? result =
         await AmanahPermissionFormDrawer.show(
-      context: context,
-      doctorName: widget.doctorName,
-      doctorRole: widget.doctorRole,
-      doctorAvatarUrl: widget.doctorAvatarUrl,
-      editingRecord: record,
-    );
+          context: context,
+          doctorName: widget.doctorName,
+          doctorRole: widget.doctorRole,
+          doctorAvatarUrl: widget.doctorAvatarUrl,
+          editingRecord: record,
+        );
 
     if (result != null && mounted) {
       final ({AmanahPermissionRecord? record, String message, bool success})
-          updateRes = _store.updatePermission(
+      updateRes = _store.updatePermission(
         id: record.id,
         startDate: result.startDate,
         endDate: result.endDate,
@@ -134,97 +140,41 @@ class _AmanahLeavePermissionTabScreenState
     );
   }
 
-  void _showCancelConfirmation(AmanahPermissionRecord record) {
-    showDialog<void>(
+  Future<void> _showCancelConfirmation(AmanahPermissionRecord record) async {
+    final bool confirmed = await showAmanahConfirmationDialog(
       context: context,
-      builder: (BuildContext dialogCtx) {
-        final bool dark = Theme.of(dialogCtx).brightness == Brightness.dark;
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          backgroundColor: dark ? const Color(0xFF111624) : Colors.white,
-          title: Text(
-            'Batalkan pengajuan perizinan?',
-            style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: dark ? Colors.white : const Color(0xFF0F172A),
-            ),
-          ),
-          content: Text(
-            'Apakah Anda yakin ingin membatalkan pengajuan izin ini (${record.formattedDateRange})? Tindakan ini tidak dapat dibatalkan.',
-            style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 12,
-              color: dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-              height: 1.4,
-            ),
-          ),
-          actionsPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(dialogCtx).pop(),
-              child: Text(
-                'Kembali',
-                style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color:
-                      dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(dialogCtx).pop();
-                final ({
-                  AmanahPermissionRecord? record,
-                  String message,
-                  bool success
-                }) cancelRes = _store.cancelPermission(record.id);
-                if (cancelRes.success) {
-                  _showToast('Pengajuan izin berhasil dibatalkan.');
-                } else {
-                  _showToast(cancelRes.message);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                'Ya, Batalkan Izin',
-                style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+      title: 'Batalkan pengajuan perizinan?',
+      message:
+          'Apakah Anda yakin ingin membatalkan pengajuan izin ini (${record.formattedDateRange})? Tindakan ini tidak dapat dibatalkan.',
+      confirmLabel: 'Ya, Batalkan Izin',
+      cancelLabel: 'Kembali',
+      destructive: true,
     );
+
+    if (!confirmed || !mounted) {
+      return;
+    }
+
+    final ({AmanahPermissionRecord? record, String message, bool success})
+    cancelRes = _store.cancelPermission(record.id);
+    if (cancelRes.success) {
+      _showToast('Pengajuan izin berhasil dibatalkan.');
+    } else {
+      _showToast(cancelRes.message);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
-    final List<AmanahPermissionRecord> filteredList =
-        _store.getFiltered(_statusFilter);
+    final List<AmanahPermissionRecord> filteredList = _store.getFiltered(
+      _statusFilter,
+    );
     final int pendingCount = _store.pendingCount;
 
     return Scaffold(
-      backgroundColor:
-          dark ? const Color(0xFF0A0E1A) : const Color(0xFFF8FAFF),
+      backgroundColor: AmanahThemeTokens.canvas(context),
       body: SafeArea(
         bottom: false,
         child: Stack(
@@ -235,88 +185,47 @@ class _AmanahLeavePermissionTabScreenState
                 AmanahScreenHeader(
                   title: 'Perizinan',
                   onBack: widget.onBack,
-                  rightAction: IconButton(
+                  rightAction: AmanahButton.icon(
+                    icon: Icons.add_rounded,
                     onPressed: _handleOpenCreateForm,
-                    icon: const Icon(Icons.add_rounded, size: 24),
-                    tooltip: 'Tambah Perizinan Baru',
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 36,
-                      minHeight: 36,
-                    ),
-                    style: IconButton.styleFrom(
-                      foregroundColor: dark
-                          ? const Color(0xFF22D3EE)
-                          : const Color(0xFF0A44FF),
-                    ),
+                    customBackgroundColor: Colors.transparent,
+                    customBorder: Border.all(color: Colors.transparent),
+                    customForegroundColor: dark
+                        ? AmanahColorTokens.brandSoft
+                        : AmanahColorTokens.brand,
+                    semanticsLabel: 'Tambah Perizinan Baru',
                   ),
                 ),
 
-                // 2. Filter Chips (Horizontal Segmented Chips)
-                Container(
-                  height: 44,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    child: Row(
-                      children: <Widget>[
-                        _FilterChipItem(
-                          label: 'Semua',
-                          isSelected: _statusFilter == null,
-                          dark: dark,
-                          onTap: () => setState(() => _statusFilter = null),
-                        ),
-                        const SizedBox(width: 6),
-                        _FilterChipItem(
-                          label: 'Menunggu',
-                          badgeCount: pendingCount,
-                          isSelected:
-                              _statusFilter == AmanahPermissionStatus.menunggu,
-                          dark: dark,
-                          onTap: () => setState(
-                            () => _statusFilter =
-                                AmanahPermissionStatus.menunggu,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        _FilterChipItem(
-                          label: 'Disetujui',
-                          isSelected:
-                              _statusFilter == AmanahPermissionStatus.disetujui,
-                          dark: dark,
-                          onTap: () => setState(
-                            () => _statusFilter =
-                                AmanahPermissionStatus.disetujui,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        _FilterChipItem(
-                          label: 'Ditolak',
-                          isSelected:
-                              _statusFilter == AmanahPermissionStatus.ditolak,
-                          dark: dark,
-                          onTap: () => setState(
-                            () => _statusFilter =
-                                AmanahPermissionStatus.ditolak,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        _FilterChipItem(
-                          label: 'Dibatalkan',
-                          isSelected: _statusFilter ==
-                              AmanahPermissionStatus.dibatalkan,
-                          dark: dark,
-                          onTap: () => setState(
-                            () => _statusFilter =
-                                AmanahPermissionStatus.dibatalkan,
-                          ),
-                        ),
-                      ],
+                // 2. Filter Chips (shared master filter bar)
+                AmanahFilterBar<AmanahPermissionStatus?>(
+                  selectedValue: _statusFilter,
+                  onSelected: (AmanahPermissionStatus? status) {
+                    setState(() => _statusFilter = status);
+                  },
+                  items: <AmanahFilterBarItem<AmanahPermissionStatus?>>[
+                    const AmanahFilterBarItem<AmanahPermissionStatus?>(
+                      value: null,
+                      label: 'Semua',
                     ),
-                  ),
+                    AmanahFilterBarItem<AmanahPermissionStatus?>(
+                      value: AmanahPermissionStatus.menunggu,
+                      label: 'Menunggu',
+                      badgeCount: pendingCount,
+                    ),
+                    const AmanahFilterBarItem<AmanahPermissionStatus?>(
+                      value: AmanahPermissionStatus.disetujui,
+                      label: 'Disetujui',
+                    ),
+                    const AmanahFilterBarItem<AmanahPermissionStatus?>(
+                      value: AmanahPermissionStatus.ditolak,
+                      label: 'Ditolak',
+                    ),
+                    const AmanahFilterBarItem<AmanahPermissionStatus?>(
+                      value: AmanahPermissionStatus.dibatalkan,
+                      label: 'Dibatalkan',
+                    ),
+                  ],
                 ),
 
                 // 3. Cards List Viewport
@@ -327,9 +236,8 @@ class _AmanahLeavePermissionTabScreenState
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
                           physics: const BouncingScrollPhysics(),
                           itemCount: filteredList.length,
-                          separatorBuilder:
-                              (BuildContext context, int index) =>
-                                  const SizedBox(height: 12),
+                          separatorBuilder: (BuildContext context, int index) =>
+                              const SizedBox(height: 14),
                           itemBuilder: (BuildContext context, int index) {
                             final AmanahPermissionRecord item =
                                 filteredList[index];
@@ -388,98 +296,6 @@ class _AmanahLeavePermissionTabScreenState
   }
 }
 
-class _FilterChipItem extends StatelessWidget {
-  const _FilterChipItem({
-    required this.label,
-    required this.isSelected,
-    required this.dark,
-    required this.onTap,
-    this.badgeCount = 0,
-  });
-
-  final String label;
-  final bool isSelected;
-  final bool dark;
-  final VoidCallback onTap;
-  final int badgeCount;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color bgColor;
-    final Color textColor;
-    final Color badgeBg;
-    final Color badgeText;
-
-    if (isSelected) {
-      bgColor = const Color(0xFF0A44FF);
-      textColor = Colors.white;
-      badgeBg = Colors.white.withValues(alpha: 0.22);
-      badgeText = Colors.white;
-    } else {
-      if (dark) {
-        bgColor = Colors.white.withValues(alpha: 0.05);
-        textColor = const Color(0xFF94A3B8);
-        badgeBg = const Color(0xFFF59E0B).withValues(alpha: 0.20);
-        badgeText = const Color(0xFFFCD34D);
-      } else {
-        bgColor = const Color(0xFFF1F5F9);
-        textColor = const Color(0xFF475569);
-        badgeBg = const Color(0xFFFEF3C7);
-        badgeText = const Color(0xFF92400E);
-      }
-    }
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(100),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(100),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                label,
-                style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: textColor,
-                ),
-              ),
-              if (badgeCount > 0) ...<Widget>[
-                const SizedBox(width: 6),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                  decoration: BoxDecoration(
-                    color: badgeBg,
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Text(
-                    '$badgeCount',
-                    style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      color: badgeText,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _EmptyPermissionView extends StatelessWidget {
   const _EmptyPermissionView({required this.dark});
 
@@ -489,17 +305,17 @@ class _EmptyPermissionView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
+        padding: const EdgeInsets.all(24),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: dark
-                ? Colors.white.withValues(alpha: 0.03)
+                ? Colors.white.withValues(alpha: 0.05)
                 : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: dark
-                  ? Colors.white.withValues(alpha: 0.08)
+                  ? Colors.white.withValues(alpha: 0.10)
                   : const Color(0xFFE2E8F0),
             ),
           ),
@@ -510,7 +326,7 @@ class _EmptyPermissionView extends StatelessWidget {
                 Icons.calendar_today_rounded,
                 size: 36,
                 color: dark
-                    ? Colors.white.withValues(alpha: 0.30)
+                    ? Colors.white.withValues(alpha: 0.40)
                     : const Color(0xFF94A3B8),
               ),
               const SizedBox(height: 12),
@@ -518,8 +334,8 @@ class _EmptyPermissionView extends StatelessWidget {
                 'Tidak ada perizinan',
                 style: TextStyle(
                   fontFamily: 'PlusJakartaSans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w800,
                   color: dark ? Colors.white : const Color(0xFF0F172A),
                 ),
               ),
@@ -529,11 +345,12 @@ class _EmptyPermissionView extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'PlusJakartaSans',
-                  fontSize: 11.5,
+                  fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color:
-                      dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                  height: 1.45,
+                  color: dark
+                      ? const Color(0xFF94A3B8)
+                      : const Color(0xFF64748B),
+                  height: 1.4,
                 ),
               ),
             ],

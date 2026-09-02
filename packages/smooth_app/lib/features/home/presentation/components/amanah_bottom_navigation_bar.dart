@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
 enum AmanahHomeTab { home, schedule, scan, notifications, account }
@@ -24,9 +25,11 @@ class AmanahBottomNavigationBar extends StatelessWidget {
         ? theme.colorScheme.surface
         : const Color(0xFFFFFFFF);
     final Color activeColor = dark
-        ? const Color(0xFF22D3EE)
-        : const Color(0xFF0A44FF);
-    const Color inactiveColor = Color(0xFF9CA3AF);
+        ? AmanahColorTokens.tabActiveDark
+        : AmanahColorTokens.tabActiveLight;
+    final Color inactiveColor = dark
+        ? AmanahColorTokens.tabInactiveDark
+        : AmanahColorTokens.tabInactiveLight;
 
     return Semantics(
       container: true,
@@ -242,6 +245,7 @@ class _AmanahScanSlot extends StatelessWidget {
   }
 }
 
+/// Floating Heroic QR Action Button matching BottomNavBar.tsx (.btn-crisp-blue)
 class _AmanahScanButton extends StatelessWidget {
   const _AmanahScanButton({required this.selected, required this.onTap});
 
@@ -250,47 +254,51 @@ class _AmanahScanButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool dark = theme.brightness == Brightness.dark;
-    final Color primary = dark
-        ? const Color(0xFF06B6D4)
-        : const Color(0xFF0A44FF);
+    final bool dark = Theme.of(context).brightness == Brightness.dark;
 
     return Semantics(
       button: true,
       label: 'Pindai QR Presensi',
-      child: SizedBox(
-        width: 60,
-        height: 60,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: primary,
-            borderRadius: BorderRadius.circular(22),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: dark ? const Color(0xFF0A0A0A) : Colors.white,
-                spreadRadius: 4.5,
-              ),
-              BoxShadow(
-                color: primary.withValues(alpha: selected ? 0.40 : 0.32),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-                spreadRadius: -2,
-              ),
-            ],
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: dark
+              ? AmanahColorTokens.btnCrispBlueDarkGradient
+              : AmanahColorTokens.btnCrispBlueGradient,
+          border: Border.all(
+            color: dark
+                ? AmanahColorTokens.btnCrispBlueDarkBorder
+                : AmanahColorTokens.btnCrispBlueBorder,
+            width: 0.8,
           ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(22),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(22),
-              onTap: onTap,
-              child: const Center(
-                child: Icon(
-                  Icons.qr_code_2_rounded,
-                  size: 34,
-                  color: Colors.white,
-                ),
+          boxShadow: <BoxShadow>[
+            // 4px Ring halo (White on light, Dark neutral on dark)
+            BoxShadow(
+              color: dark
+                  ? AmanahColorTokens.qrRingDark
+                  : AmanahColorTokens.qrRingLight,
+              spreadRadius: 4.0,
+            ),
+            // Outer dynamic ambient brand-blue glow.
+            if (dark)
+              AmanahColorTokens.qrButtonShadowDark
+            else
+              AmanahColorTokens.qrButtonShadowLight,
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            onTap: onTap,
+            child: const Center(
+              child: Icon(
+                Icons.qr_code_2_rounded,
+                size: 30,
+                color: Colors.white,
               ),
             ),
           ),

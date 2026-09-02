@@ -7,6 +7,9 @@ enum AmanahButtonVariant {
   /// Bold established blue gradient with specular sheen & shadow
   primary,
 
+  /// Filled destructive action for confirmed dangerous flows
+  destructive,
+
   /// Subtle soft-blue tinted surface button
   secondary,
 
@@ -28,16 +31,16 @@ enum AmanahButtonVariant {
 
 /// Master Button Sizing Scales
 enum AmanahButtonSize {
-  /// Height: 34px, font: 12px, icon: 16px, padding: H12 V6
+  /// Height: 48dp, font: 12px, icon: 16px, padding: H12
   small,
 
-  /// Height: 44px, font: 14px, icon: 18px, padding: H16 V10
+  /// Height: 48dp, font: 14px, icon: 18px, padding: H16
   medium,
 
-  /// Height: 52px, font: 15px, icon: 20px, padding: H20 V14
+  /// Height: 52dp, font: 15px, icon: 20px, padding: H20
   large,
 
-  /// Height: 58px, font: 16px, icon: 22px, padding: H24 V16
+  /// Height: 56dp, font: 16px, icon: 22px, padding: H24
   hero,
 }
 
@@ -90,25 +93,61 @@ class AmanahButton extends StatelessWidget {
     String? semanticsLabel,
     bool enableHaptics = true,
   }) : this(
-          key: key,
-          text: text,
-          onPressed: onPressed,
-          variant: AmanahButtonVariant.primary,
-          size: size,
-          leadingIcon: leadingIcon,
-          trailingIcon: trailingIcon,
-          trailingText: trailingText,
-          isLoading: isLoading,
-          isDisabled: isDisabled,
-          isFullWidth: isFullWidth,
-          customHeight: customHeight,
-          customWidth: customWidth,
-          borderRadius: borderRadius,
-          customGradient: customGradient,
-          boxShadow: boxShadow,
-          semanticsLabel: semanticsLabel,
-          enableHaptics: enableHaptics,
-        );
+         key: key,
+         text: text,
+         onPressed: onPressed,
+         variant: AmanahButtonVariant.primary,
+         size: size,
+         leadingIcon: leadingIcon,
+         trailingIcon: trailingIcon,
+         trailingText: trailingText,
+         isLoading: isLoading,
+         isDisabled: isDisabled,
+         isFullWidth: isFullWidth,
+         customHeight: customHeight,
+         customWidth: customWidth,
+         borderRadius: borderRadius,
+         customGradient: customGradient,
+         boxShadow: boxShadow,
+         semanticsLabel: semanticsLabel,
+         enableHaptics: enableHaptics,
+       );
+
+  /// Factory: Destructive Filled Button
+  const AmanahButton.destructive({
+    Key? key,
+    String? text,
+    VoidCallback? onPressed,
+    AmanahButtonSize size = AmanahButtonSize.medium,
+    dynamic leadingIcon,
+    dynamic trailingIcon,
+    String? trailingText,
+    bool isLoading = false,
+    bool isDisabled = false,
+    bool isFullWidth = false,
+    double? customHeight,
+    double? customWidth,
+    BorderRadius? borderRadius,
+    String? semanticsLabel,
+    bool enableHaptics = true,
+  }) : this(
+         key: key,
+         text: text,
+         onPressed: onPressed,
+         variant: AmanahButtonVariant.destructive,
+         size: size,
+         leadingIcon: leadingIcon,
+         trailingIcon: trailingIcon,
+         trailingText: trailingText,
+         isLoading: isLoading,
+         isDisabled: isDisabled,
+         isFullWidth: isFullWidth,
+         customHeight: customHeight,
+         customWidth: customWidth,
+         borderRadius: borderRadius,
+         semanticsLabel: semanticsLabel,
+         enableHaptics: enableHaptics,
+       );
 
   /// Factory: Secondary / Subtle Blue Button
   const AmanahButton.secondary({
@@ -130,25 +169,25 @@ class AmanahButton extends StatelessWidget {
     String? semanticsLabel,
     bool enableHaptics = true,
   }) : this(
-          key: key,
-          text: text,
-          onPressed: onPressed,
-          variant: AmanahButtonVariant.secondary,
-          size: size,
-          leadingIcon: leadingIcon,
-          trailingIcon: trailingIcon,
-          trailingText: trailingText,
-          isLoading: isLoading,
-          isDisabled: isDisabled,
-          isFullWidth: isFullWidth,
-          customHeight: customHeight,
-          customWidth: customWidth,
-          borderRadius: borderRadius,
-          customBackgroundColor: customBackgroundColor,
-          customForegroundColor: customForegroundColor,
-          semanticsLabel: semanticsLabel,
-          enableHaptics: enableHaptics,
-        );
+         key: key,
+         text: text,
+         onPressed: onPressed,
+         variant: AmanahButtonVariant.secondary,
+         size: size,
+         leadingIcon: leadingIcon,
+         trailingIcon: trailingIcon,
+         trailingText: trailingText,
+         isLoading: isLoading,
+         isDisabled: isDisabled,
+         isFullWidth: isFullWidth,
+         customHeight: customHeight,
+         customWidth: customWidth,
+         borderRadius: borderRadius,
+         customBackgroundColor: customBackgroundColor,
+         customForegroundColor: customForegroundColor,
+         semanticsLabel: semanticsLabel,
+         enableHaptics: enableHaptics,
+       );
 
   /// Factory: Stroke-Only / Outlined Button
   const AmanahButton.outline({
@@ -170,25 +209,25 @@ class AmanahButton extends StatelessWidget {
     String? semanticsLabel,
     bool enableHaptics = true,
   }) : this(
-          key: key,
-          text: text,
-          onPressed: onPressed,
-          variant: AmanahButtonVariant.outline,
-          size: size,
-          leadingIcon: leadingIcon,
-          trailingIcon: trailingIcon,
-          trailingText: trailingText,
-          isLoading: isLoading,
-          isDisabled: isDisabled,
-          isFullWidth: isFullWidth,
-          customHeight: customHeight,
-          customWidth: customWidth,
-          borderRadius: borderRadius,
-          customForegroundColor: customForegroundColor,
-          customBorder: customBorder,
-          semanticsLabel: semanticsLabel,
-          enableHaptics: enableHaptics,
-        );
+         key: key,
+         text: text,
+         onPressed: onPressed,
+         variant: AmanahButtonVariant.outline,
+         size: size,
+         leadingIcon: leadingIcon,
+         trailingIcon: trailingIcon,
+         trailingText: trailingText,
+         isLoading: isLoading,
+         isDisabled: isDisabled,
+         isFullWidth: isFullWidth,
+         customHeight: customHeight,
+         customWidth: customWidth,
+         borderRadius: borderRadius,
+         customForegroundColor: customForegroundColor,
+         customBorder: customBorder,
+         semanticsLabel: semanticsLabel,
+         enableHaptics: enableHaptics,
+       );
 
   /// Factory: Ghost / Transparent Button
   const AmanahButton.ghost({
@@ -209,24 +248,24 @@ class AmanahButton extends StatelessWidget {
     String? semanticsLabel,
     bool enableHaptics = true,
   }) : this(
-          key: key,
-          text: text,
-          onPressed: onPressed,
-          variant: AmanahButtonVariant.ghost,
-          size: size,
-          leadingIcon: leadingIcon,
-          trailingIcon: trailingIcon,
-          trailingText: trailingText,
-          isLoading: isLoading,
-          isDisabled: isDisabled,
-          isFullWidth: isFullWidth,
-          customHeight: customHeight,
-          customWidth: customWidth,
-          borderRadius: borderRadius,
-          customForegroundColor: customForegroundColor,
-          semanticsLabel: semanticsLabel,
-          enableHaptics: enableHaptics,
-        );
+         key: key,
+         text: text,
+         onPressed: onPressed,
+         variant: AmanahButtonVariant.ghost,
+         size: size,
+         leadingIcon: leadingIcon,
+         trailingIcon: trailingIcon,
+         trailingText: trailingText,
+         isLoading: isLoading,
+         isDisabled: isDisabled,
+         isFullWidth: isFullWidth,
+         customHeight: customHeight,
+         customWidth: customWidth,
+         borderRadius: borderRadius,
+         customForegroundColor: customForegroundColor,
+         semanticsLabel: semanticsLabel,
+         enableHaptics: enableHaptics,
+       );
 
   /// Factory: Text-Only Button
   const AmanahButton.text({
@@ -242,19 +281,19 @@ class AmanahButton extends StatelessWidget {
     String? semanticsLabel,
     bool enableHaptics = true,
   }) : this(
-          key: key,
-          text: text,
-          onPressed: onPressed,
-          variant: AmanahButtonVariant.text,
-          size: size,
-          leadingIcon: leadingIcon,
-          trailingIcon: trailingIcon,
-          isLoading: isLoading,
-          isDisabled: isDisabled,
-          customForegroundColor: customForegroundColor,
-          semanticsLabel: semanticsLabel,
-          enableHaptics: enableHaptics,
-        );
+         key: key,
+         text: text,
+         onPressed: onPressed,
+         variant: AmanahButtonVariant.text,
+         size: size,
+         leadingIcon: leadingIcon,
+         trailingIcon: trailingIcon,
+         isLoading: isLoading,
+         isDisabled: isDisabled,
+         customForegroundColor: customForegroundColor,
+         semanticsLabel: semanticsLabel,
+         enableHaptics: enableHaptics,
+       );
 
   /// Factory: Icon-Only Action Button (Circular or Rounded)
   const AmanahButton.icon({
@@ -273,23 +312,23 @@ class AmanahButton extends StatelessWidget {
     String? semanticsLabel,
     bool enableHaptics = true,
   }) : this(
-          key: key,
-          leadingIcon: icon,
-          onPressed: onPressed,
-          variant: AmanahButtonVariant.icon,
-          size: size,
-          isCircle: isCircle,
-          isLoading: isLoading,
-          isDisabled: isDisabled,
-          customHeight: customSize,
-          customWidth: customSize,
-          customBackgroundColor: customBackgroundColor,
-          customForegroundColor: customForegroundColor,
-          customBorder: customBorder,
-          boxShadow: boxShadow,
-          semanticsLabel: semanticsLabel,
-          enableHaptics: enableHaptics,
-        );
+         key: key,
+         leadingIcon: icon,
+         onPressed: onPressed,
+         variant: AmanahButtonVariant.icon,
+         size: size,
+         isCircle: isCircle,
+         isLoading: isLoading,
+         isDisabled: isDisabled,
+         customHeight: customSize,
+         customWidth: customSize,
+         customBackgroundColor: customBackgroundColor,
+         customForegroundColor: customForegroundColor,
+         customBorder: customBorder,
+         boxShadow: boxShadow,
+         semanticsLabel: semanticsLabel,
+         enableHaptics: enableHaptics,
+       );
 
   /// Factory: Custom Vector / Painter Action Button
   const AmanahButton.vectorOnly({
@@ -302,16 +341,16 @@ class AmanahButton extends StatelessWidget {
     String? semanticsLabel,
     bool enableHaptics = true,
   }) : this(
-          key: key,
-          vectorChild: vectorChild,
-          onPressed: onPressed,
-          variant: AmanahButtonVariant.vectorOnly,
-          isDisabled: isDisabled,
-          customWidth: width,
-          customHeight: height,
-          semanticsLabel: semanticsLabel,
-          enableHaptics: enableHaptics,
-        );
+         key: key,
+         vectorChild: vectorChild,
+         onPressed: onPressed,
+         variant: AmanahButtonVariant.vectorOnly,
+         isDisabled: isDisabled,
+         customWidth: width,
+         customHeight: height,
+         semanticsLabel: semanticsLabel,
+         enableHaptics: enableHaptics,
+       );
 
   final String? text;
   final VoidCallback? onPressed;
@@ -342,13 +381,13 @@ class AmanahButton extends StatelessWidget {
     }
     switch (size) {
       case AmanahButtonSize.small:
-        return 34.0;
+        return AmanahComponentSize.buttonSmall;
       case AmanahButtonSize.medium:
-        return 44.0;
+        return AmanahComponentSize.buttonMedium;
       case AmanahButtonSize.large:
-        return 52.0;
+        return AmanahComponentSize.buttonLarge;
       case AmanahButtonSize.hero:
-        return 58.0;
+        return AmanahComponentSize.buttonHero;
     }
   }
 
@@ -380,20 +419,20 @@ class AmanahButton extends StatelessWidget {
 
   EdgeInsetsGeometry get _padding {
     if (variant == AmanahButtonVariant.text) {
-      return const EdgeInsets.symmetric(horizontal: 4, vertical: 2);
+      return const EdgeInsets.symmetric(horizontal: 16);
     }
     if (variant == AmanahButtonVariant.icon) {
       return EdgeInsets.zero;
     }
     switch (size) {
       case AmanahButtonSize.small:
-        return const EdgeInsets.symmetric(horizontal: 12, vertical: 6);
+        return const EdgeInsets.symmetric(horizontal: 12);
       case AmanahButtonSize.medium:
-        return const EdgeInsets.symmetric(horizontal: 16, vertical: 10);
+        return const EdgeInsets.symmetric(horizontal: 16);
       case AmanahButtonSize.large:
-        return const EdgeInsets.symmetric(horizontal: 20, vertical: 12);
+        return const EdgeInsets.symmetric(horizontal: 20);
       case AmanahButtonSize.hero:
-        return const EdgeInsets.symmetric(horizontal: 24, vertical: 14);
+        return const EdgeInsets.symmetric(horizontal: 24);
     }
   }
 
@@ -431,11 +470,7 @@ class AmanahButton extends StatelessWidget {
       return Icon(icon, size: _iconSize, color: color);
     }
     if (icon is Widget) {
-      return SizedBox(
-        width: _iconSize,
-        height: _iconSize,
-        child: icon,
-      );
+      return SizedBox(width: _iconSize, height: _iconSize, child: icon);
     }
     return const SizedBox.shrink();
   }
@@ -479,18 +514,21 @@ class AmanahButton extends StatelessWidget {
     switch (variant) {
       case AmanahButtonVariant.primary:
         fgColor = customForegroundColor ?? Colors.white;
-        gradient = customGradient ??
+        gradient =
+            customGradient ??
             (dark
                 ? AmanahColorTokens.btnCrispBlueDarkGradient
                 : AmanahColorTokens.btnCrispBlueGradient);
-        border = border ??
+        border =
+            border ??
             Border.all(
               color: dark
                   ? AmanahColorTokens.btnCrispBlueDarkBorder
                   : AmanahColorTokens.btnCrispBlueBorder,
               width: 1.0,
             );
-        shadows = shadows ??
+        shadows =
+            shadows ??
             <BoxShadow>[
               AmanahColorTokens.btnCrispDropShadow,
               if (dark)
@@ -500,58 +538,94 @@ class AmanahButton extends StatelessWidget {
             ];
         break;
 
+      case AmanahButtonVariant.destructive:
+        fgColor = customForegroundColor ?? Colors.white;
+        gradient =
+            customGradient ??
+            const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: <Color>[
+                AmanahColorTokens.danger,
+                AmanahColorTokens.dangerDark,
+              ],
+            );
+        border =
+            border ??
+            Border.all(color: AmanahColorTokens.dangerDark, width: 1.0);
+        shadows =
+            shadows ??
+            <BoxShadow>[
+              AmanahColorTokens.btnCrispDropShadow,
+              BoxShadow(
+                color: AmanahColorTokens.danger.withValues(alpha: 0.24),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ];
+        break;
+
       case AmanahButtonVariant.secondary:
-        fgColor = customForegroundColor ??
-            (dark ? const Color(0xFF93C5FD) : AmanahColorTokens.brand);
-        bgColor = customBackgroundColor ??
+        fgColor =
+            customForegroundColor ??
+            (dark ? AmanahColorTokens.brandSubtle : AmanahColorTokens.brand);
+        bgColor =
+            customBackgroundColor ??
             (dark
-                ? const Color(0xFF1E293B)
-                : const Color(0xFFEFF6FF));
-        border = border ??
+                ? AmanahColorTokens.neutral700
+                : AmanahColorTokens.brandSurface);
+        border =
+            border ??
             Border.all(
               color: dark
-                  ? const Color(0xFF334155)
-                  : const Color(0xFFDBEAFE),
+                  ? AmanahColorTokens.neutral600
+                  : AmanahColorTokens.brandMuted,
               width: 1.2,
             );
         break;
 
       case AmanahButtonVariant.outline:
-        fgColor = customForegroundColor ??
-            (dark ? const Color(0xFF93C5FD) : AmanahColorTokens.brand);
-        bgColor = customBackgroundColor ??
+        fgColor =
+            customForegroundColor ??
+            (dark ? AmanahColorTokens.brandSubtle : AmanahColorTokens.brand);
+        bgColor =
+            customBackgroundColor ??
             (dark
                 ? Colors.white.withValues(alpha: 0.04)
                 : Colors.white.withValues(alpha: 0.85));
-        border = border ??
+        border =
+            border ??
             Border.all(
-              color: dark
-                  ? const Color(0xFF3B82F6)
-                  : const Color(0xFF2563EB),
+              color: dark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB),
               width: 1.5,
             );
         break;
 
       case AmanahButtonVariant.ghost:
-        fgColor = customForegroundColor ??
-            (dark ? const Color(0xFF93C5FD) : AmanahColorTokens.brand);
+        fgColor =
+            customForegroundColor ??
+            (dark ? AmanahColorTokens.brandSubtle : AmanahColorTokens.brand);
         bgColor = customBackgroundColor ?? Colors.transparent;
         break;
 
       case AmanahButtonVariant.text:
-        fgColor = customForegroundColor ??
-            (dark ? const Color(0xFF93C5FD) : AmanahColorTokens.brand);
+        fgColor =
+            customForegroundColor ??
+            (dark ? AmanahColorTokens.brandSubtle : AmanahColorTokens.brand);
         bgColor = Colors.transparent;
         break;
 
       case AmanahButtonVariant.icon:
-        fgColor = customForegroundColor ??
+        fgColor =
+            customForegroundColor ??
             (dark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A));
-        bgColor = customBackgroundColor ??
+        bgColor =
+            customBackgroundColor ??
             (dark
                 ? Colors.white.withValues(alpha: 0.08)
                 : const Color(0xFFEFF6FF));
-        border = border ??
+        border =
+            border ??
             Border.all(
               color: dark
                   ? Colors.white.withValues(alpha: 0.12)
@@ -584,9 +658,7 @@ class AmanahButton extends StatelessWidget {
         ),
       );
     } else if (variant == AmanahButtonVariant.icon) {
-      content = Center(
-        child: _buildIconWidget(leadingIcon, fgColor),
-      );
+      content = Center(child: _buildIconWidget(leadingIcon, fgColor));
     } else {
       final List<Widget> children = <Widget>[];
 
@@ -610,7 +682,7 @@ class AmanahButton extends StatelessWidget {
                 fontFamily: 'PlusJakartaSans',
                 fontSize: _fontSize,
                 fontWeight: FontWeight.w700,
-                letterSpacing: -0.2,
+                letterSpacing: 0,
                 height: 1.0,
               ),
             ),
@@ -658,8 +730,10 @@ class AmanahButton extends StatelessWidget {
 
     Widget buttonBody = AnimatedContainer(
       duration: const Duration(milliseconds: 180),
-      height: customHeight ?? (isCircle ? _height : (variant == AmanahButtonVariant.text ? null : _height)),
-      width: customWidth ?? (isCircle ? _height : (isFullWidth ? double.infinity : null)),
+      height: _height,
+      width:
+          customWidth ??
+          (isCircle ? _height : (isFullWidth ? double.infinity : null)),
       padding: _padding,
       decoration: BoxDecoration(
         color: gradient == null ? bgColor : null,
@@ -718,9 +792,62 @@ class AmanahButton extends StatelessWidget {
           borderRadius: _resolvedBorderRadius,
           splashColor: fgColor.withValues(alpha: 0.12),
           highlightColor: fgColor.withValues(alpha: 0.08),
-          child: buttonBody,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: AmanahComponentSize.minTouchTarget,
+            ),
+            child: buttonBody,
+          ),
         ),
       ),
+    );
+  }
+}
+
+enum AmanahActionRowAxis { horizontal, vertical }
+
+class AmanahActionRow extends StatelessWidget {
+  const AmanahActionRow({
+    required this.primary,
+    super.key,
+    this.secondary,
+    this.axis = AmanahActionRowAxis.horizontal,
+    this.primaryFlex = 2,
+    this.secondaryFlex = 1,
+    this.spacing = AmanahSpacing.md,
+  });
+
+  final Widget primary;
+  final Widget? secondary;
+  final AmanahActionRowAxis axis;
+  final int primaryFlex;
+  final int secondaryFlex;
+  final double spacing;
+
+  @override
+  Widget build(BuildContext context) {
+    if (secondary == null) {
+      return primary;
+    }
+
+    if (axis == AmanahActionRowAxis.vertical) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          primary,
+          SizedBox(height: spacing),
+          secondary!,
+        ],
+      );
+    }
+
+    return Row(
+      children: <Widget>[
+        Expanded(flex: secondaryFlex, child: secondary!),
+        SizedBox(width: spacing),
+        Expanded(flex: primaryFlex, child: primary),
+      ],
     );
   }
 }

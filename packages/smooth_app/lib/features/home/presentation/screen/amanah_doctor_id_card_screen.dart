@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:smooth_app/features/authentication/domain/amanah_auth_user.dart';
 import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_doctor_id_card_components.dart';
 
 class AmanahDoctorIdCardScreen extends StatefulWidget {
@@ -155,110 +156,27 @@ class _AmanahDoctorIdCardScreenState extends State<AmanahDoctorIdCardScreen> {
             child: Row(
               children: <Widget>[
                 Expanded(
-                  child: _IdCardBottomButton(
-                    label: 'Bagikan',
-                    icon: Icons.share_outlined,
-                    onTap: _shareDoctorId,
-                    dark: dark,
-                    primary: false,
+                  child: AmanahButton.secondary(
+                    text: 'Bagikan',
+                    leadingIcon: Icons.share_outlined,
+                    onPressed: _shareDoctorId,
+                    size: AmanahButtonSize.medium,
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: _IdCardBottomButton(
-                    label: _isDownloading ? 'Membuat PDF...' : 'Unduh PDF',
-                    icon: _isDownloading
-                        ? Icons.sync_rounded
-                        : Icons.download_rounded,
-                    onTap: _downloadPdf,
-                    dark: dark,
-                    primary: true,
-                    loading: _isDownloading,
+                  child: AmanahButton.primary(
+                    text: _isDownloading ? 'Membuat PDF...' : 'Unduh PDF',
+                    leadingIcon: Icons.download_rounded,
+                    onPressed: _downloadPdf,
+                    isLoading: _isDownloading,
+                    size: AmanahButtonSize.medium,
                   ),
                 ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _IdCardBottomButton extends StatelessWidget {
-  const _IdCardBottomButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-    required this.dark,
-    required this.primary,
-    this.loading = false,
-  });
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool dark;
-  final bool primary;
-  final bool loading;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color bgColor = primary
-        ? (dark ? const Color(0xFF22D3EE) : const Color(0xFF0A44FF))
-        : (dark
-              ? const Color(0xFF111624).withValues(alpha: 0.85)
-              : Colors.white.withValues(alpha: 0.90));
-    final Color fgColor = primary
-        ? (dark ? const Color(0xFF0F172A) : Colors.white)
-        : (dark ? const Color(0xFFE5E7EB) : const Color(0xFF1E293B));
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Material(
-        color: bgColor,
-        shadowColor: primary
-            ? (dark ? const Color(0xFF06B6D4) : const Color(0xFF3B82F6))
-                  .withValues(alpha: 0.25)
-            : Colors.black.withValues(alpha: 0.05),
-        elevation: primary ? 3 : 1,
-        child: InkWell(
-          onTap: loading ? null : onTap,
-          child: SizedBox(
-            height: 42,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                if (loading)
-                  SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(fgColor),
-                    ),
-                  )
-                else
-                  Icon(icon, size: 16, color: fgColor),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: fgColor,
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 12,
-                      fontWeight: primary ? FontWeight.w900 : FontWeight.w800,
-                      letterSpacing: 0,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

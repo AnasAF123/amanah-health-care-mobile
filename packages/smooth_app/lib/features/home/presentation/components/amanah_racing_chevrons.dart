@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
 /// Premium Automotive / Racing Game-Style Dynamic Directional Chevrons
 /// Staggered kinetic impulse wave with aerodynamic neon glow trails
@@ -7,7 +8,8 @@ class AmanahRacingPulseChevrons extends StatefulWidget {
   const AmanahRacingPulseChevrons({super.key});
 
   @override
-  State<AmanahRacingPulseChevrons> createState() => _AmanahRacingPulseChevronsState();
+  State<AmanahRacingPulseChevrons> createState() =>
+      _AmanahRacingPulseChevronsState();
 }
 
 class _AmanahRacingPulseChevronsState extends State<AmanahRacingPulseChevrons>
@@ -68,7 +70,8 @@ class _RacingChevronPainter extends CustomPainter {
       if (normalized < 0.40) {
         waveProgress = Curves.easeOutCubic.transform(normalized / 0.40);
       } else {
-        waveProgress = 1.0 - Curves.easeInOut.transform((normalized - 0.40) / 0.60);
+        waveProgress =
+            1.0 - Curves.easeInOut.transform((normalized - 0.40) / 0.60);
       }
 
       final double yOffset = i * spacing + (waveProgress * 3.5);
@@ -86,9 +89,11 @@ class _RacingChevronPainter extends CustomPainter {
           Offset(centerX - wingWidth / 2, yOffset),
           Offset(centerX + wingWidth / 2, yOffset + wingHeight),
           <Color>[
-            const Color(0xFF00E5FF).withValues(alpha: 0.60 * waveProgress),
-            const Color(0xFF0A44FF).withValues(alpha: 0.85 * waveProgress),
-            const Color(0xFF00E5FF).withValues(alpha: 0.60 * waveProgress),
+            AmanahColorTokens.brandSoft.withValues(alpha: 0.60 * waveProgress),
+            AmanahColorTokens.brandPrimary.withValues(
+              alpha: 0.85 * waveProgress,
+            ),
+            AmanahColorTokens.brandSoft.withValues(alpha: 0.60 * waveProgress),
           ],
           const <double>[0.0, 0.50, 1.0],
         );
@@ -109,9 +114,9 @@ class _RacingChevronPainter extends CustomPainter {
         Offset(centerX - wingWidth / 2, yOffset),
         Offset(centerX + wingWidth / 2, yOffset + wingHeight),
         <Color>[
-          const Color(0xFF38BDF8).withValues(alpha: opacity * 0.85),
-          const Color(0xFF0A44FF).withValues(alpha: opacity),
-          const Color(0xFF38BDF8).withValues(alpha: opacity * 0.85),
+          AmanahColorTokens.brandLight.withValues(alpha: opacity * 0.85),
+          AmanahColorTokens.brandPrimary.withValues(alpha: opacity),
+          AmanahColorTokens.brandLight.withValues(alpha: opacity * 0.85),
         ],
         const <double>[0.0, 0.50, 1.0],
       );

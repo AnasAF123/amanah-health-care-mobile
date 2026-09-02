@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class AmanahQuickAccessSection extends StatelessWidget {
@@ -47,8 +48,8 @@ class AmanahQuickActionButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
     final Color foreground = dark
-        ? theme.colorScheme.primary
-        : const Color(0xFF0A44FF);
+        ? AmanahColorTokens.brandLight
+        : AmanahColorTokens.brand;
     final Color labelColor = dark
         ? const Color(0xFF94A3B8)
         : const Color(0xFF64748B);

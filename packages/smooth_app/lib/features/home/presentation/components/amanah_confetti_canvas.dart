@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
 /// Native Flutter Confetti Particle Streamer System
 /// 1:1 Replication of ConfettiCanvas.tsx from web.
@@ -41,13 +42,13 @@ class AmanahConfettiCanvasState extends State<AmanahConfettiCanvas>
   final math.Random _random = math.Random();
 
   static const List<Color> _palette = <Color>[
-    Color(0xFFFF9900),
-    Color(0xFFFF0055),
-    Color(0xFF00E5FF),
-    Color(0xFF0A44FF),
-    Color(0xFF10B981),
-    Color(0xFF8B5CF6),
-    Color(0xFFFBBF24),
+    AmanahColorTokens.warning,
+    AmanahColorTokens.danger,
+    AmanahColorTokens.brandSoft,
+    AmanahColorTokens.brandPrimary,
+    AmanahColorTokens.success,
+    AmanahColorTokens.violet,
+    AmanahColorTokens.warningBorder,
   ];
 
   @override
@@ -127,20 +128,14 @@ class AmanahConfettiCanvasState extends State<AmanahConfettiCanvas>
     return IgnorePointer(
       child: CustomPaint(
         size: Size.infinite,
-        painter: _ConfettiPainter(
-          particles: _particles,
-          globalAlpha: alpha,
-        ),
+        painter: _ConfettiPainter(particles: _particles, globalAlpha: alpha),
       ),
     );
   }
 }
 
 class _ConfettiPainter extends CustomPainter {
-  const _ConfettiPainter({
-    required this.particles,
-    required this.globalAlpha,
-  });
+  const _ConfettiPainter({required this.particles, required this.globalAlpha});
 
   final List<_ConfettiParticle> particles;
   final double globalAlpha;
@@ -150,7 +145,10 @@ class _ConfettiPainter extends CustomPainter {
     final Paint paint = Paint()..style = PaintingStyle.stroke;
 
     for (final _ConfettiParticle p in particles) {
-      if (p.y < -50 || p.y > size.height + 50 || p.x < -50 || p.x > size.width + 50) {
+      if (p.y < -50 ||
+          p.y > size.height + 50 ||
+          p.x < -50 ||
+          p.x > size.width + 50) {
         continue;
       }
 

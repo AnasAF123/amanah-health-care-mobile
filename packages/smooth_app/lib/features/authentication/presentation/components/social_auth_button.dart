@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:smooth_app/generic_lib/design_constants.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 
 enum AuthProviderType { google, email }
 
@@ -29,60 +29,20 @@ class SocialAuthButton extends StatelessWidget {
       alpha: 0.9,
     );
 
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: Semantics(
-        button: true,
-        label: label,
-        child: ElevatedButton(
-          onPressed: loading ? null : onPressed,
-          style: ElevatedButton.styleFrom(
-            elevation: 0,
-            backgroundColor: backgroundColor,
-            foregroundColor: foregroundColor,
-            disabledBackgroundColor: backgroundColor.withValues(alpha: 0.72),
-            disabledForegroundColor: foregroundColor.withValues(alpha: 0.72),
-            shape: RoundedRectangleBorder(
-              borderRadius: CIRCULAR_BORDER_RADIUS,
-              side: BorderSide(color: borderColor, width: 1),
-            ),
-          ),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 180),
-            child: loading
-                ? SizedBox(
-                    key: const ValueKey<String>('loading'),
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: foregroundColor,
-                    ),
-                  )
-                : Row(
-                    key: const ValueKey<String>('content'),
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      _ProviderIcon(provider: provider, color: foregroundColor),
-                      const SizedBox(width: MEDIUM_SPACE),
-                      Flexible(
-                        child: Text(
-                          label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: foregroundColor,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-          ),
-        ),
-      ),
+    return AmanahButton(
+      text: label,
+      onPressed: onPressed,
+      variant: AmanahButtonVariant.secondary,
+      size: AmanahButtonSize.large,
+      leadingIcon: _ProviderIcon(provider: provider, color: foregroundColor),
+      isLoading: loading,
+      isDisabled: onPressed == null && !loading,
+      isFullWidth: true,
+      customBackgroundColor: backgroundColor,
+      customForegroundColor: foregroundColor,
+      customBorder: Border.all(color: borderColor),
+      boxShadow: const <BoxShadow>[],
+      semanticsLabel: label,
     );
   }
 }

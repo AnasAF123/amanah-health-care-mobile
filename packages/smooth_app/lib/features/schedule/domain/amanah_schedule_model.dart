@@ -1,27 +1,4 @@
-import 'package:flutter/material.dart';
-
-enum AmanahBadgeVariant {
-  success,
-  primary,
-  warning,
-  live,
-  trend;
-
-  Color get color {
-    switch (this) {
-      case AmanahBadgeVariant.success:
-        return const Color(0xFF10B981);
-      case AmanahBadgeVariant.primary:
-        return const Color(0xFF0A44FF);
-      case AmanahBadgeVariant.warning:
-        return const Color(0xFFF59E0B);
-      case AmanahBadgeVariant.live:
-        return const Color(0xFF38BDF8);
-      case AmanahBadgeVariant.trend:
-        return const Color(0xFF8B5CF6);
-    }
-  }
-}
+enum AmanahBadgeVariant { success, primary, warning, live, trend }
 
 class BookedPatient {
   const BookedPatient({

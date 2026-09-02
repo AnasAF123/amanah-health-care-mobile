@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/features/presence/presentation/components/amanah_qr_code_widget.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -55,42 +58,50 @@ class AmanahDoctorIdCardHeader extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        _RoundIconButton(
+                        AmanahButton.icon(
                           icon: Icons.arrow_back,
-                          label: 'Kembali',
-                          onTap: onBack,
-                          dark: dark,
-                          foreground: dark
+                          semanticsLabel: 'Kembali',
+                          onPressed: onBack,
+                          customSize: 34,
+                          customBackgroundColor: Colors.transparent,
+                          customBorder: Border.all(color: Colors.transparent),
+                          customForegroundColor: dark
                               ? const Color(0xFFE5E7EB)
                               : const Color(0xFF334155),
                         ),
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            _RoundIconButton(
+                            AmanahButton.icon(
                               icon: Icons.info_outline_rounded,
-                              label: 'Petunjuk & Informasi ID Card',
-                              onTap: onInfo,
-                              dark: dark,
-                              foreground: dark
-                                  ? const Color(0xFF22D3EE)
-                                  : const Color(0xFF0A44FF),
-                              hoverColor: dark
-                                  ? Colors.white.withValues(alpha: 0.10)
+                              semanticsLabel: 'Petunjuk & Informasi ID Card',
+                              onPressed: onInfo,
+                              customSize: 34,
+                              customBackgroundColor: dark
+                                  ? Colors.white.withValues(alpha: 0.06)
                                   : const Color(0xFFEFF6FF),
+                              customBorder: Border.all(
+                                color: Colors.transparent,
+                              ),
+                              customForegroundColor: dark
+                                  ? const Color(0xFF60A5FA)
+                                  : const Color(0xFF0A44FF),
                             ),
                             const SizedBox(width: 4),
-                            _RoundIconButton(
+                            AmanahButton.icon(
                               icon: Icons.qr_code_2_rounded,
-                              label: 'Tampilkan QR Code Presensi',
-                              onTap: onQr,
-                              dark: dark,
-                              foreground: dark
-                                  ? const Color(0xFF22D3EE)
-                                  : const Color(0xFF0A44FF),
-                              hoverColor: dark
-                                  ? Colors.white.withValues(alpha: 0.10)
+                              semanticsLabel: 'Tampilkan QR Code Presensi',
+                              onPressed: onQr,
+                              customSize: 34,
+                              customBackgroundColor: dark
+                                  ? Colors.white.withValues(alpha: 0.06)
                                   : const Color(0xFFEFF6FF),
+                              customBorder: Border.all(
+                                color: Colors.transparent,
+                              ),
+                              customForegroundColor: dark
+                                  ? const Color(0xFF60A5FA)
+                                  : const Color(0xFF0A44FF),
                             ),
                           ],
                         ),
@@ -752,11 +763,8 @@ class AmanahDoctorIdInfoDrawer extends StatelessWidget {
   const AmanahDoctorIdInfoDrawer({super.key});
 
   static Future<void> show(BuildContext context) {
-    return showModalBottomSheet<void>(
+    return showAmanahBottomSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.60),
       builder: (BuildContext ctx) => const AmanahDoctorIdInfoDrawer(),
     );
   }
@@ -798,21 +806,17 @@ class AmanahDoctorIdInfoDrawer extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  behavior: HitTestBehavior.opaque,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 12, bottom: 4),
-                    child: Center(
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: dark
-                              ? Colors.white.withValues(alpha: 0.20)
-                              : const Color(0xFFCBD5E1),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 4),
+                  child: Center(
+                    child: Container(
+                      width: 44,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: dark
+                            ? Colors.white.withValues(alpha: 0.20)
+                            : AmanahColorTokens.neutral300,
+                        borderRadius: BorderRadius.circular(AmanahRadius.pill),
                       ),
                     ),
                   ),
@@ -896,32 +900,11 @@ class AmanahDoctorIdInfoDrawer extends StatelessWidget {
                 ),
                 Padding(
                   padding: EdgeInsets.fromLTRB(24, 8, 24, bottomInset + 24),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 45,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        shadowColor: Colors.transparent,
-                        backgroundColor: dark
-                            ? Colors.white.withValues(alpha: 0.10)
-                            : const Color(0xFF0A44FF),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: const Text(
-                        'Mengerti',
-                        style: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0,
-                        ),
-                      ),
-                    ),
+                  child: AmanahButton.primary(
+                    text: 'Mengerti',
+                    isFullWidth: true,
+                    size: AmanahButtonSize.medium,
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
                 ),
               ],
@@ -1017,12 +1000,12 @@ class AmanahDoctorIdQrDialog extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF06B6D4).withValues(alpha: 0.10),
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Icon(
                     Icons.qr_code_2_rounded,
-                    color: Color(0xFF06B6D4),
+                    color: Color(0xFF2563EB),
                     size: 24,
                   ),
                 ),
@@ -1093,31 +1076,12 @@ class AmanahDoctorIdQrDialog extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 38,
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: TextButton.styleFrom(
-                      backgroundColor: dark
-                          ? Colors.white.withValues(alpha: 0.10)
-                          : const Color(0xFFF1F5F9),
-                      foregroundColor: dark
-                          ? Colors.white
-                          : const Color(0xFF1E293B),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Tutup',
-                      style: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
+                AmanahButton.ghost(
+                  text: 'Tutup',
+                  isFullWidth: true,
+                  size: AmanahButtonSize.small,
+                  customForegroundColor: subtextColor,
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
             ),
@@ -1248,7 +1212,7 @@ class _DoctorIdCardFace extends StatelessWidget {
               border: Border(
                 top: BorderSide(
                   color: dark
-                      ? const Color(0xFF00D4FF).withValues(alpha: 0.25)
+                      ? const Color(0xFF3B82F6).withValues(alpha: 0.25)
                       : const Color(0xFF0A44FF).withValues(alpha: 0.15),
                 ),
               ),
@@ -1466,47 +1430,6 @@ class _DoctorIdCardFace extends StatelessWidget {
   }
 }
 
-class _RoundIconButton extends StatelessWidget {
-  const _RoundIconButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    required this.dark,
-    required this.foreground,
-    this.hoverColor,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool dark;
-  final Color foreground;
-  final Color? hoverColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: SizedBox(
-        width: 32,
-        height: 32,
-        child: Material(
-          color: Colors.transparent,
-          shape: const CircleBorder(),
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: onTap,
-            splashColor: hoverColor,
-            highlightColor: hoverColor,
-            child: Icon(icon, size: 21, color: foreground),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _IdCardClip extends StatelessWidget {
   const _IdCardClip({required this.dark});
 
@@ -1580,14 +1503,14 @@ class _InfoDrawerItem extends StatelessWidget {
               margin: const EdgeInsets.only(top: 2),
               decoration: BoxDecoration(
                 color: dark
-                    ? const Color(0xFF06B6D4).withValues(alpha: 0.10)
+                    ? const Color(0xFF2563EB).withValues(alpha: 0.10)
                     : const Color(0xFFEFF6FF),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
                 size: 16,
-                color: dark ? const Color(0xFF22D3EE) : const Color(0xFF0A44FF),
+                color: dark ? const Color(0xFF60A5FA) : const Color(0xFF0A44FF),
               ),
             ),
             const SizedBox(width: 12),
@@ -1639,7 +1562,7 @@ class _AmanahMark extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: dark ? const Color(0xFFA3E635) : const Color(0xFF00D4FF),
+        color: dark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB),
         borderRadius: BorderRadius.circular(size * 0.27),
       ),
       child: CustomPaint(painter: _AmanahCrossPainter(dark: dark)),
@@ -1655,7 +1578,7 @@ class _AmanahCrossPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-      ..color = dark ? const Color(0xFF00D4FF) : const Color(0xFF0A44FF)
+      ..color = dark ? const Color(0xFF93C5FD) : const Color(0xFF0A44FF)
       ..style = PaintingStyle.fill;
     canvas.drawRRect(
       RRect.fromRectAndRadius(
@@ -1697,20 +1620,53 @@ class _BauhausGridPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final List<_BauhausColorPair> palette = dark
         ? const <_BauhausColorPair>[
-            _BauhausColorPair(Color(0xFF00D4FF), Color(0xFF062837)),
-            _BauhausColorPair(Color(0xFFA3E635), Color(0xFF083344)),
-            _BauhausColorPair(Color(0xFF14B8A6), Color(0xFF04202C)),
-            _BauhausColorPair(Color(0xFF22D3EE), Color(0xFF0D3846)),
-            _BauhausColorPair(Color(0xFF84CC16), Color(0xFF021824)),
-            _BauhausColorPair(Color(0xFF67E8F9), Color(0xFF0F4050)),
+            _BauhausColorPair(
+              AmanahColorTokens.brandLight,
+              AmanahColorTokens.darkNavy,
+            ),
+            _BauhausColorPair(
+              AmanahColorTokens.successBorder,
+              AmanahColorTokens.navy,
+            ),
+            _BauhausColorPair(
+              AmanahColorTokens.success,
+              AmanahColorTokens.successDark,
+            ),
+            _BauhausColorPair(
+              AmanahColorTokens.brandSoft,
+              AmanahColorTokens.surfaceElevatedDark,
+            ),
+            _BauhausColorPair(
+              AmanahColorTokens.emerald,
+              AmanahColorTokens.surfaceDark,
+            ),
+            _BauhausColorPair(
+              AmanahColorTokens.brandSubtle,
+              AmanahColorTokens.neutral900,
+            ),
           ]
         : const <_BauhausColorPair>[
-            _BauhausColorPair(Color(0xFF002B9E), Color(0xFFEEF4FF)),
-            _BauhausColorPair(Color(0xFF0A44FF), Color(0xFFDBEAFE)),
-            _BauhausColorPair(Color(0xFF07247A), Color(0xFFEEF4FF)),
-            _BauhausColorPair(Color(0xFF00D4FF), Color(0xFF002B9E)),
-            _BauhausColorPair(Color(0xFF0A44FF), Colors.white),
-            _BauhausColorPair(Color(0xFF002B9E), Color(0xFFDBEAFE)),
+            _BauhausColorPair(
+              AmanahColorTokens.brand,
+              AmanahColorTokens.brandSurface,
+            ),
+            _BauhausColorPair(
+              AmanahColorTokens.brandPrimary,
+              AmanahColorTokens.brandMuted,
+            ),
+            _BauhausColorPair(
+              AmanahColorTokens.navy,
+              AmanahColorTokens.brandSurface,
+            ),
+            _BauhausColorPair(
+              AmanahColorTokens.brandAccent,
+              AmanahColorTokens.brand,
+            ),
+            _BauhausColorPair(AmanahColorTokens.brandPrimary, Colors.white),
+            _BauhausColorPair(
+              AmanahColorTokens.brand,
+              AmanahColorTokens.brandMuted,
+            ),
           ];
 
     final Paint paint = Paint()..style = PaintingStyle.fill;
@@ -1947,7 +1903,7 @@ class _LanyardPhysicsPainter extends CustomPainter {
     )..layout();
 
     final Paint badgePaint = Paint()
-      ..color = const Color(0xFF00D4FF)
+      ..color = const Color(0xFF3B82F6)
       ..style = PaintingStyle.fill;
 
     final Paint crossPaint = Paint()
@@ -1965,7 +1921,7 @@ class _LanyardPhysicsPainter extends CustomPainter {
       canvas.translate(pt.dx, pt.dy);
       canvas.rotate(angle);
 
-      // Cyan Cross Emblem Badge
+      // Brand cross emblem badge.
       final Offset emblemCenter = Offset(0, -textPainter.height / 2 - 6);
       canvas.drawRRect(
         RRect.fromRectAndRadius(
@@ -2161,7 +2117,7 @@ class _UnderglowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-      ..color = (dark ? const Color(0xFF06B6D4) : const Color(0xFF60A5FA))
+      ..color = (dark ? const Color(0xFF3B82F6) : const Color(0xFF60A5FA))
           .withValues(alpha: dark ? 0.20 : 0.25)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 80);
     canvas.drawCircle(size.center(Offset.zero), size.width / 2.2, paint);

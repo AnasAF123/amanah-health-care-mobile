@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <defs>
+        <!-- Soft shadow blur -->
+        <filter id="shadowBlur" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2.5" />
+        </filter>
+
+        <!-- Box Face Lighting Gradients -->
+        <linearGradient id="topFace" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FCE068" />
+            <stop offset="100%" stop-color="#E4A018" />
+        </linearGradient>
+        <linearGradient id="leftFace" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#E17A05" />
+            <stop offset="100%" stop-color="#8A4000" />
+        </linearGradient>
+        <linearGradient id="rightFace" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#FFB111" />
+            <stop offset="100%" stop-color="#C37200" />
+        </linearGradient>
+
+        <!-- Ribbon Lighting Gradients -->
+        <linearGradient id="ribbonTop1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FF5C22" />
+            <stop offset="100%" stop-color="#D9261C" />
+        </linearGradient>
+        <linearGradient id="ribbonTop2" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#FA473C" />
+            <stop offset="100%" stop-color="#D9261C" />
+        </linearGradient>
+        <linearGradient id="ribbonLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#E13009" />
+            <stop offset="100%" stop-color="#701200" />
+        </linearGradient>
+        <linearGradient id="ribbonRight" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#FF4F15" />
+            <stop offset="100%" stop-color="#A02000" />
+        </linearGradient>
+        
+        <!-- Bow Shading -->
+        <linearGradient id="bowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#FF7545" />
+            <stop offset="100%" stop-color="#E13009" />
+        </linearGradient>
+    </defs>
+
+    <!-- Soft Drop Shadow under the box -->
+    <ellipse cx="52" cy="74" rx="20" ry="7" fill="#000000" filter="url(#shadowBlur)" opacity="0.25" />
+    <ellipse cx="51" cy="73.5" rx="15" ry="5" fill="#000000" filter="url(#shadowBlur)" opacity="0.35" />
+
+    <!-- Left Face (Darker) -->
+    <polygon points="50,50 28.35,37.5 28.35,62.5 50,75" fill="url(#leftFace)" />
+    <!-- Right Face (Brighter) -->
+    <polygon points="50,50 71.65,37.5 71.65,62.5 50,75" fill="url(#rightFace)" />
+    <!-- Top Face (Brightest) -->
+    <polygon points="50,50 71.65,37.5 50,25 28.35,37.5" fill="url(#topFace)" />
+
+    <!-- Inner 'Y' Edge Highlights -->
+    <line x1="28.35" y1="37.5" x2="50" y2="50" stroke="#FCE068" stroke-width="0.75" opacity="0.8" />
+    <line x1="50" y1="50" x2="71.65" y2="37.5" stroke="#FFE98A" stroke-width="0.75" opacity="1.0" />
+    <line x1="50" y1="50" x2="50" y2="75" stroke="#FFD045" stroke-width="0.75" opacity="0.9" />
+    
+    <!-- Outer Edge Highlights -->
+    <line x1="28.35" y1="37.5" x2="50" y2="25" stroke="#FFF3B3" stroke-width="0.5" opacity="0.8" />
+    <line x1="50" y1="25" x2="71.65" y2="37.5" stroke="#FFF3B3" stroke-width="0.5" opacity="0.8" />
+    <!-- Subtle edge darkening for the left side to simulate ambient occlusion -->
+    <line x1="28.35" y1="37.5" x2="28.35" y2="62.5" stroke="#A84C00" stroke-width="0.5" opacity="0.6" />
+    <line x1="71.65" y1="37.5" x2="71.65" y2="62.5" stroke="#FFE18A" stroke-width="0.5" opacity="0.6" />
+
+    <!-- Left Vertical Ribbon -->
+    <polygon points="34.175,40.86 44.175,46.64 44.175,71.64 34.175,65.86" fill="url(#ribbonLeft)" />
+    <line x1="34.175" y1="40.86" x2="34.175" y2="65.86" stroke="#FF6B3D" stroke-width="0.5" />
+    <line x1="44.175" y1="46.64" x2="44.175" y2="71.64" stroke="#4A0B00" stroke-width="0.5" />
+
+    <!-- Right Vertical Ribbon -->
+    <polygon points="55.825,46.64 65.825,40.86 65.825,65.86 55.825,71.64" fill="url(#ribbonRight)" />
+    <line x1="55.825" y1="46.64" x2="55.825" y2="71.64" stroke="#FF855C" stroke-width="0.5" />
+    <line x1="65.825" y1="40.86" x2="65.825" y2="65.86" stroke="#701200" stroke-width="0.5" />
+
+    <!-- Top Ribbon Band 1 -->
+    <polygon points="34.175,40.86 55.825,28.36 65.825,34.14 44.175,46.64" fill="url(#ribbonTop1)" />
+    <line x1="34.175" y1="40.86" x2="55.825" y2="28.36" stroke="#FF855C" stroke-width="0.5" />
+    <line x1="44.175" y1="46.64" x2="65.825" y2="34.14" stroke="#B31A10" stroke-width="0.5" />
+
+    <!-- Top Ribbon Band 2 -->
+    <polygon points="55.825,46.64 34.175,34.14 44.175,28.36 65.825,40.86" fill="url(#ribbonTop2)" />
+    <line x1="65.825" y1="40.86" x2="44.175" y2="28.36" stroke="#FFA385" stroke-width="0.5" />
+    <line x1="55.825" y1="46.64" x2="34.175" y2="34.14" stroke="#B31A10" stroke-width="0.5" />
+
+    <!-- Left Loop Inner Cavity (Dark) -->
+    <path d="M 47,37.5 C 43,34.5 36,35.5 38,38 C 40,39.5 44,38.5 46.5,37.8 Z" fill="#7A0E05" />
+    <!-- Left Loop Outer Body -->
+    <path d="M 48,37.5 C 42,32 32,34 36,39.5 C 39,41.5 45,39.5 48,38 Z" fill="url(#bowGrad)" fill-opacity="0.95" />
+    <!-- Left Loop Edge Highlight -->
+    <path d="M 48,37.5 C 42,32 32,34 36,39.5 C 39,41.5 45,39.5 48,38 Z" fill="none" stroke="#FFA385" stroke-width="0.4" />
+
+    <!-- Right Loop Inner Cavity (Dark) -->
+    <path d="M 53,37.5 C 57,34.5 64,35.5 62,38 C 60,39.5 56,38.5 53.5,37.8 Z" fill="#99140C" />
+    <!-- Right Loop Outer Body -->
+    <path d="M 52,37.5 C 58,32 68,34 64,39.5 C 61,41.5 55,39.5 52,38 Z" fill="url(#bowGrad)" fill-opacity="0.95" />
+    <!-- Right Loop Edge Highlight -->
+    <path d="M 52,37.5 C 58,32 68,34 64,39.5 C 61,41.5 55,39.5 52,38 Z" fill="none" stroke="#FFC2B3" stroke-width="0.4" />
+
+    <!-- Center Knot Base/Shadow -->
+    <ellipse cx="50" cy="38.5" rx="5.5" ry="4.5" fill="#99140C" />
+    <!-- Center Knot Main Volume -->
+    <ellipse cx="50" cy="37.5" rx="5" ry="4" fill="url(#bowGrad)" />
+    <!-- Center Knot Shiny Highlight -->
+    <ellipse cx="49" cy="36.5" rx="2" ry="1.5" fill="#FFC2B3" opacity="0.8" />
+</svg>

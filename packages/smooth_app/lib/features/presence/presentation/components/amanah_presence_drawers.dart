@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/features/presence/data/amanah_presence_store.dart';
 import 'package:smooth_app/features/presence/domain/amanah_presence_model.dart';
 
@@ -21,10 +24,8 @@ class AmanahPresenceFilterDrawer extends StatefulWidget {
     required String currentUnit,
     required int? currentDay,
   }) {
-    return showModalBottomSheet<Map<String, dynamic>>(
+    return showAmanahBottomSheet<Map<String, dynamic>>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (BuildContext ctx) => AmanahPresenceFilterDrawer(
         initialStatus: currentStatus,
         initialUnit: currentUnit,
@@ -73,15 +74,18 @@ class _AmanahPresenceFilterDrawerState
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
     final double screenHeight = MediaQuery.sizeOf(context).height;
+    final double bottomNavPadding = MediaQuery.viewPaddingOf(context).bottom;
 
-    final Color bgColor =
-        dark ? const Color(0xFF0A0E1A) : const Color(0xFFFFFFFF);
-    final Color borderColor =
-        dark ? Colors.white.withValues(alpha: 0.10) : const Color(0xFFF1F5F9);
-    final Color textColor =
-        dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor =
-        dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final Color bgColor = dark
+        ? const Color(0xFF0A0E1A)
+        : const Color(0xFFFFFFFF);
+    final Color borderColor = dark
+        ? Colors.white.withValues(alpha: 0.10)
+        : const Color(0xFFF1F5F9);
+    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
+    final Color subtextColor = dark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
 
     return SizedBox(
       height: screenHeight * 0.85,
@@ -102,22 +106,18 @@ class _AmanahPresenceFilterDrawerState
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           child: Column(
             children: <Widget>[
-              // Interactive Drag Handle
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 4),
-                  child: Center(
-                    child: Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: dark
-                            ? Colors.white.withValues(alpha: 0.20)
-                            : const Color(0xFFCBD5E1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+              // Drag Handle
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 4),
+                child: Center(
+                  child: Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: dark
+                          ? Colors.white.withValues(alpha: 0.20)
+                          : AmanahColorTokens.neutral300,
+                      borderRadius: BorderRadius.circular(AmanahRadius.pill),
                     ),
                   ),
                 ),
@@ -125,7 +125,10 @@ class _AmanahPresenceFilterDrawerState
 
               // Master Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   border: Border(bottom: BorderSide(color: borderColor)),
                 ),
@@ -163,42 +166,11 @@ class _AmanahPresenceFilterDrawerState
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        TextButton(
+                        AmanahButton.text(
+                          text: 'Reset',
                           onPressed: _reset,
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text(
-                            'Reset',
-                            style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: subtextColor,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        IconButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          icon: const Icon(Icons.close_rounded, size: 16),
-                          visualDensity: VisualDensity.compact,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(
-                            minWidth: 28,
-                            minHeight: 28,
-                          ),
-                          style: IconButton.styleFrom(
-                            backgroundColor: dark
-                                ? Colors.white.withValues(alpha: 0.05)
-                                : const Color(0xFFF1F5F9),
-                            foregroundColor: subtextColor,
-                          ),
+                          size: AmanahButtonSize.small,
+                          customForegroundColor: subtextColor,
                         ),
                       ],
                     ),
@@ -210,7 +182,10 @@ class _AmanahPresenceFilterDrawerState
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -228,49 +203,69 @@ class _AmanahPresenceFilterDrawerState
                       Wrap(
                         spacing: 6,
                         runSpacing: 6,
-                        children: kStatusOptions.map((AttendanceFilterOption<AttendanceStatus?> opt) {
-                          final bool isSelected = _draftStatus == opt.value;
-                          return InkWell(
-                            onTap: () => setState(() => _draftStatus = opt.value),
-                            borderRadius: BorderRadius.circular(12),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 150),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? (dark ? Colors.white : const Color(0xFF0F172A))
-                                    : (dark
-                                        ? Colors.white.withValues(alpha: 0.05)
-                                        : const Color(0xFFF8FAFC)),
+                        children: kStatusOptions
+                            .map((
+                              AttendanceFilterOption<AttendanceStatus?> opt,
+                            ) {
+                              final bool isSelected = _draftStatus == opt.value;
+                              return InkWell(
+                                onTap: () =>
+                                    setState(() => _draftStatus = opt.value),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? (dark ? Colors.white : const Color(0xFF0F172A))
-                                      : (dark
-                                          ? Colors.white.withValues(alpha: 0.10)
-                                          : const Color(0xFFE2E8F0)),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 150),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? AmanahColorTokens.brand
+                                        : (dark
+                                              ? Colors.white.withValues(
+                                                  alpha: 0.05,
+                                                )
+                                              : const Color(0xFFF8FAFC)),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? AmanahColorTokens.brand
+                                          : (dark
+                                                ? Colors.white.withValues(
+                                                    alpha: 0.10,
+                                                  )
+                                                : const Color(0xFFE2E8F0)),
+                                    ),
+                                    boxShadow: isSelected
+                                        ? <BoxShadow>[
+                                            BoxShadow(
+                                              color: AmanahColorTokens.brand
+                                                  .withValues(alpha: 0.28),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Text(
+                                    opt.label,
+                                    style: TextStyle(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 12,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : (dark
+                                                ? const Color(0xFFCBD5E1)
+                                                : const Color(0xFF334155)),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              child: Text(
-                                opt.label,
-                                style: TextStyle(
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 12,
-                                  fontWeight:
-                                      isSelected ? FontWeight.w700 : FontWeight.w500,
-                                  color: isSelected
-                                      ? (dark ? const Color(0xFF020617) : Colors.white)
-                                      : (dark
-                                          ? const Color(0xFFCBD5E1)
-                                          : const Color(0xFF334155)),
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(growable: false),
+                              );
+                            })
+                            .toList(growable: false),
                       ),
                       const SizedBox(height: 20),
 
@@ -288,49 +283,67 @@ class _AmanahPresenceFilterDrawerState
                       Wrap(
                         spacing: 6,
                         runSpacing: 6,
-                        children: kUnitOptions.map((AttendanceFilterOption<String> opt) {
-                          final bool isSelected = _draftUnit == opt.value;
-                          return InkWell(
-                            onTap: () => setState(() => _draftUnit = opt.value),
-                            borderRadius: BorderRadius.circular(12),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 150),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? (dark ? Colors.white : const Color(0xFF0F172A))
-                                    : (dark
-                                        ? Colors.white.withValues(alpha: 0.05)
-                                        : const Color(0xFFF8FAFC)),
+                        children: kUnitOptions
+                            .map((AttendanceFilterOption<String> opt) {
+                              final bool isSelected = _draftUnit == opt.value;
+                              return InkWell(
+                                onTap: () =>
+                                    setState(() => _draftUnit = opt.value),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? (dark ? Colors.white : const Color(0xFF0F172A))
-                                      : (dark
-                                          ? Colors.white.withValues(alpha: 0.10)
-                                          : const Color(0xFFE2E8F0)),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 150),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? AmanahColorTokens.brand
+                                        : (dark
+                                              ? Colors.white.withValues(
+                                                  alpha: 0.05,
+                                                )
+                                              : const Color(0xFFF8FAFC)),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? AmanahColorTokens.brand
+                                          : (dark
+                                                ? Colors.white.withValues(
+                                                    alpha: 0.10,
+                                                  )
+                                                : const Color(0xFFE2E8F0)),
+                                    ),
+                                    boxShadow: isSelected
+                                        ? <BoxShadow>[
+                                            BoxShadow(
+                                              color: AmanahColorTokens.brand
+                                                  .withValues(alpha: 0.28),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Text(
+                                    opt.label,
+                                    style: TextStyle(
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 12,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : (dark
+                                                ? const Color(0xFFCBD5E1)
+                                                : const Color(0xFF334155)),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              child: Text(
-                                opt.label,
-                                style: TextStyle(
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 12,
-                                  fontWeight:
-                                      isSelected ? FontWeight.w700 : FontWeight.w500,
-                                  color: isSelected
-                                      ? (dark ? const Color(0xFF020617) : Colors.white)
-                                      : (dark
-                                          ? const Color(0xFFCBD5E1)
-                                          : const Color(0xFF334155)),
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(growable: false),
+                              );
+                            })
+                            .toList(growable: false),
                       ),
                       const SizedBox(height: 20),
 
@@ -419,67 +432,20 @@ class _AmanahPresenceFilterDrawerState
 
               // Bottom Action Bar
               Container(
-                padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
+                padding: EdgeInsets.fromLTRB(
+                  24,
+                  12,
+                  24,
+                  28.0 + bottomNavPadding,
+                ),
                 decoration: BoxDecoration(
                   border: Border(top: BorderSide(color: borderColor)),
                 ),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      flex: 1,
-                      child: OutlinedButton(
-                        onPressed: _reset,
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          side: BorderSide(
-                            color: dark
-                                ? Colors.white.withValues(alpha: 0.15)
-                                : const Color(0xFFE2E8F0),
-                          ),
-                        ),
-                        child: Text(
-                          'Reset',
-                          style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: dark
-                                ? const Color(0xFFCBD5E1)
-                                : const Color(0xFF334155),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      flex: 2,
-                      child: ElevatedButton(
-                        onPressed: _apply,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              dark ? Colors.white : const Color(0xFF0F172A),
-                          foregroundColor:
-                              dark ? const Color(0xFF020617) : Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: const Text(
-                          'Terapkan Filter',
-                          style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                child: AmanahButton.primary(
+                  text: 'Terapkan Filter',
+                  size: AmanahButtonSize.medium,
+                  isFullWidth: true,
+                  onPressed: _apply,
                 ),
               ),
             ],
@@ -520,9 +486,18 @@ class _AmanahPresenceFilterDrawerState
             height: 28,
             decoration: BoxDecoration(
               color: isSelected
-                  ? (dark ? Colors.white : const Color(0xFF0F172A))
+                  ? AmanahColorTokens.brand
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
+              boxShadow: isSelected
+                  ? <BoxShadow>[
+                      BoxShadow(
+                        color: AmanahColorTokens.brand.withValues(alpha: 0.35),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
             ),
             child: Stack(
               alignment: Alignment.center,
@@ -534,10 +509,10 @@ class _AmanahPresenceFilterDrawerState
                     fontSize: 11,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                     color: isSelected
-                        ? (dark ? const Color(0xFF020617) : Colors.white)
+                        ? Colors.white
                         : (dark
-                            ? const Color(0xFFE2E8F0)
-                            : const Color(0xFF334155)),
+                              ? const Color(0xFFE2E8F0)
+                              : const Color(0xFF334155)),
                   ),
                 ),
                 if (hasEvent && !isSelected)
@@ -547,7 +522,7 @@ class _AmanahPresenceFilterDrawerState
                       width: 4,
                       height: 4,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF22D3EE),
+                        color: Color(0xFF2563EB),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -607,18 +582,13 @@ class _CalendarHeaderDay extends StatelessWidget {
 
 /// 2. Leave Reason Master Drawer ("Alasan Cuti Dokter")
 class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
-  const AmanahPresenceLeaveReasonDrawer({
-    required this.record,
-    super.key,
-  });
+  const AmanahPresenceLeaveReasonDrawer({required this.record, super.key});
 
   final AttendanceRecord record;
 
   static void show(BuildContext context, {required AttendanceRecord record}) {
-    showModalBottomSheet<void>(
+    showAmanahBottomSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (BuildContext ctx) =>
           AmanahPresenceLeaveReasonDrawer(record: record),
     );
@@ -629,17 +599,18 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color bgColor =
-        dark ? const Color(0xFF0A0E1A) : const Color(0xFFFFFFFF);
-    final Color borderColor =
-        dark ? Colors.white.withValues(alpha: 0.10) : const Color(0xFFF1F5F9);
-    final Color textColor =
-        dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor =
-        dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final Color bgColor = dark
+        ? const Color(0xFF0A0E1A)
+        : const Color(0xFFFFFFFF);
+    final Color borderColor = dark
+        ? Colors.white.withValues(alpha: 0.10)
+        : const Color(0xFFF1F5F9);
+    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
+    final Color subtextColor = dark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
 
     final double screenHeight = MediaQuery.sizeOf(context).height;
-
     return SizedBox(
       height: screenHeight * 0.45,
       child: DecoratedBox(
@@ -659,22 +630,18 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           child: Column(
             children: <Widget>[
-              // Interactive Drag Handle
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 4),
-                  child: Center(
-                    child: Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: dark
-                            ? Colors.white.withValues(alpha: 0.20)
-                            : const Color(0xFFCBD5E1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+              // Drag Handle
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 4),
+                child: Center(
+                  child: Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: dark
+                          ? Colors.white.withValues(alpha: 0.20)
+                          : AmanahColorTokens.neutral300,
+                      borderRadius: BorderRadius.circular(AmanahRadius.pill),
                     ),
                   ),
                 ),
@@ -682,7 +649,10 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
 
               // Master Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   border: Border(bottom: BorderSide(color: borderColor)),
                 ),
@@ -714,23 +684,7 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close_rounded, size: 16),
-                      visualDensity: VisualDensity.compact,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 28,
-                        minHeight: 28,
-                      ),
-                      style: IconButton.styleFrom(
-                        backgroundColor: dark
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : const Color(0xFFF1F5F9),
-                        foregroundColor: subtextColor,
-                      ),
-                    ),
+                    const SizedBox(width: AmanahComponentSize.iconButton),
                   ],
                 ),
               ),
@@ -739,7 +693,10 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -808,39 +765,6 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // Action Button: Tutup
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 8, 24, 28),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      side: BorderSide(
-                        color: dark
-                            ? Colors.white.withValues(alpha: 0.15)
-                            : const Color(0xFFE2E8F0),
-                      ),
-                    ),
-                    child: Text(
-                      'Tutup',
-                      style: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: dark
-                            ? const Color(0xFFCBD5E1)
-                            : const Color(0xFF334155),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -854,10 +778,8 @@ class AmanahPresenceInfoDrawer extends StatelessWidget {
   const AmanahPresenceInfoDrawer({super.key});
 
   static void show(BuildContext context) {
-    showModalBottomSheet<void>(
+    showAmanahBottomSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (BuildContext ctx) => const AmanahPresenceInfoDrawer(),
     );
   }
@@ -867,17 +789,18 @@ class AmanahPresenceInfoDrawer extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color bgColor =
-        dark ? const Color(0xFF0A0E1A) : const Color(0xFFFFFFFF);
-    final Color borderColor =
-        dark ? Colors.white.withValues(alpha: 0.10) : const Color(0xFFF1F5F9);
-    final Color textColor =
-        dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor =
-        dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final Color bgColor = dark
+        ? const Color(0xFF0A0E1A)
+        : const Color(0xFFFFFFFF);
+    final Color borderColor = dark
+        ? Colors.white.withValues(alpha: 0.10)
+        : const Color(0xFFF1F5F9);
+    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
+    final Color subtextColor = dark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
 
     final double screenHeight = MediaQuery.sizeOf(context).height;
-
     return SizedBox(
       height: screenHeight * 0.55,
       child: DecoratedBox(
@@ -897,22 +820,18 @@ class AmanahPresenceInfoDrawer extends StatelessWidget {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           child: Column(
             children: <Widget>[
-              // Interactive Drag Handle
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 4),
-                  child: Center(
-                    child: Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: dark
-                            ? Colors.white.withValues(alpha: 0.20)
-                            : const Color(0xFFCBD5E1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+              // Drag Handle
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 4),
+                child: Center(
+                  child: Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: dark
+                          ? Colors.white.withValues(alpha: 0.20)
+                          : AmanahColorTokens.neutral300,
+                      borderRadius: BorderRadius.circular(AmanahRadius.pill),
                     ),
                   ),
                 ),
@@ -920,7 +839,10 @@ class AmanahPresenceInfoDrawer extends StatelessWidget {
 
               // Master Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   border: Border(bottom: BorderSide(color: borderColor)),
                 ),
@@ -937,23 +859,7 @@ class AmanahPresenceInfoDrawer extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close_rounded, size: 16),
-                      visualDensity: VisualDensity.compact,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 28,
-                        minHeight: 28,
-                      ),
-                      style: IconButton.styleFrom(
-                        backgroundColor: dark
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : const Color(0xFFF1F5F9),
-                        foregroundColor: subtextColor,
-                      ),
-                    ),
+                    const SizedBox(width: AmanahComponentSize.iconButton),
                   ],
                 ),
               ),
@@ -962,7 +868,10 @@ class AmanahPresenceInfoDrawer extends StatelessWidget {
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 14,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -999,36 +908,6 @@ class AmanahPresenceInfoDrawer extends StatelessWidget {
                         isLast: true,
                       ),
                     ],
-                  ),
-                ),
-              ),
-
-              // Action Button: Tutup Informasi
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 8, 24, 28),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          dark ? Colors.white : const Color(0xFF0F172A),
-                      foregroundColor:
-                          dark ? const Color(0xFF020617) : Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Text(
-                      'Tutup Informasi',
-                      style: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
                   ),
                 ),
               ),

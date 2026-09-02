@@ -1,5 +1,8 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahEditProfileResult {
   const AmanahEditProfileResult({
@@ -34,10 +37,8 @@ class AmanahEditProfileDrawer extends StatefulWidget {
     required String initialEmail,
     required String initialBio,
   }) {
-    return showModalBottomSheet<AmanahEditProfileResult>(
+    return showAmanahBottomSheet<AmanahEditProfileResult>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (BuildContext ctx) => AmanahEditProfileDrawer(
         doctorName: doctorName,
         initialPhone: initialPhone,
@@ -95,18 +96,24 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
     final bool dark = theme.brightness == Brightness.dark;
     final double screenHeight = MediaQuery.sizeOf(context).height;
     final double bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final double bottomNavPadding = MediaQuery.viewPaddingOf(context).bottom;
 
-    final Color bgColor =
-        dark ? const Color(0xFF0A0E1A) : const Color(0xFFFFFFFF);
-    final Color borderColor =
-        dark ? Colors.white.withValues(alpha: 0.10) : const Color(0xFFF1F5F9);
+    final Color bgColor = dark
+        ? const Color(0xFF0A0E1A)
+        : const Color(0xFFFFFFFF);
+    final Color borderColor = dark
+        ? Colors.white.withValues(alpha: 0.10)
+        : const Color(0xFFF1F5F9);
     final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor =
-        dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-    final Color fieldBg =
-        dark ? Colors.white.withValues(alpha: 0.05) : Colors.white;
-    final Color fieldBorder =
-        dark ? Colors.white.withValues(alpha: 0.10) : const Color(0xFFE2E8F0);
+    final Color subtextColor = dark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
+    final Color fieldBg = dark
+        ? Colors.white.withValues(alpha: 0.05)
+        : Colors.white;
+    final Color fieldBorder = dark
+        ? Colors.white.withValues(alpha: 0.10)
+        : const Color(0xFFE2E8F0);
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
@@ -129,22 +136,18 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             child: Column(
               children: <Widget>[
-                // Interactive Drag Handle
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  behavior: HitTestBehavior.opaque,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 12, bottom: 4),
-                    child: Center(
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: dark
-                              ? Colors.white.withValues(alpha: 0.20)
-                              : const Color(0xFFCBD5E1),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+                // Drag Handle
+                Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 4),
+                  child: Center(
+                    child: Container(
+                      width: 44,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: dark
+                            ? Colors.white.withValues(alpha: 0.20)
+                            : AmanahColorTokens.neutral300,
+                        borderRadius: BorderRadius.circular(AmanahRadius.pill),
                       ),
                     ),
                   ),
@@ -152,8 +155,10 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
 
                 // Master Header
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     border: Border(bottom: BorderSide(color: borderColor)),
                   ),
@@ -185,22 +190,7 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
                           ],
                         ),
                       ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close_rounded, size: 16),
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                          minWidth: 28,
-                          minHeight: 28,
-                        ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: dark
-                              ? Colors.white.withValues(alpha: 0.05)
-                              : const Color(0xFFF1F5F9),
-                          foregroundColor: subtextColor,
-                        ),
-                      ),
+                      const SizedBox(width: AmanahComponentSize.iconButton),
                     ],
                   ),
                 ),
@@ -210,7 +200,9 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 16),
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -228,7 +220,9 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 11),
+                            horizontal: 14,
+                            vertical: 11,
+                          ),
                           decoration: BoxDecoration(
                             color: dark
                                 ? Colors.white.withValues(alpha: 0.05)
@@ -255,7 +249,7 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
                             fontFamily: 'PlusJakartaSans',
                             fontSize: 10.5,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF0891B2),
+                            color: Color(0xFF2563EB),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -420,7 +414,12 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
 
                 // Bottom Action Bar (Batal & Simpan Perubahan)
                 Container(
-                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 28),
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    12,
+                    24,
+                    bottomInset > 0 ? 16.0 : (28.0 + bottomNavPadding),
+                  ),
                   decoration: BoxDecoration(
                     border: Border(top: BorderSide(color: borderColor)),
                   ),
@@ -428,71 +427,23 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
                     children: <Widget>[
                       Expanded(
                         flex: 1,
-                        child: OutlinedButton(
+                        child: AmanahButton.ghost(
+                          text: 'Batal',
+                          size: AmanahButtonSize.medium,
+                          isFullWidth: true,
+                          customForegroundColor: subtextColor,
                           onPressed: () => Navigator.of(context).pop(),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            side: BorderSide(
-                              color: dark
-                                  ? Colors.white.withValues(alpha: 0.15)
-                                  : const Color(0xFFE2E8F0),
-                            ),
-                          ),
-                          child: Text(
-                            'Batal',
-                            style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: dark
-                                  ? const Color(0xFFCBD5E1)
-                                  : const Color(0xFF334155),
-                            ),
-                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         flex: 2,
-                        child: ElevatedButton(
+                        child: AmanahButton.primary(
+                          text: _isSaved ? 'Tersimpan' : 'Simpan Perubahan',
+                          leadingIcon: _isSaved ? Icons.check_rounded : null,
+                          size: AmanahButtonSize.medium,
+                          isFullWidth: true,
                           onPressed: _isSaved ? null : _handleSave,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0A44FF),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              if (_isSaved) ...<Widget>[
-                                const Icon(Icons.check_rounded, size: 16),
-                                const SizedBox(width: 6),
-                                const Text(
-                                  'Tersimpan',
-                                  style: TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ] else
-                                const Text(
-                                  'Simpan Perubahan',
-                                  style: TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                            ],
-                          ),
                         ),
                       ),
                     ],
@@ -530,10 +481,8 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
   ];
 
   static Future<AmanahAvatarPhotoResult?> show(BuildContext context) {
-    return showModalBottomSheet<AmanahAvatarPhotoResult>(
+    return showAmanahBottomSheet<AmanahAvatarPhotoResult>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (BuildContext ctx) => const AmanahAvatarPhotoSheet(),
     );
   }
@@ -543,21 +492,19 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.image,
       );
-      if (result != null && result.files.single.path != null && context.mounted) {
+      if (result != null &&
+          result.files.single.path != null &&
+          context.mounted) {
         Navigator.of(context).pop(
-          AmanahAvatarPhotoResult(
-            customImagePath: result.files.single.path,
-          ),
+          AmanahAvatarPhotoResult(customImagePath: result.files.single.path),
         );
       }
     } catch (_) {
       // Fallback if platform picker not supported
       if (context.mounted) {
-        Navigator.of(context).pop(
-          AmanahAvatarPhotoResult(
-            presetAvatarUrl: presetAvatars.first,
-          ),
-        );
+        Navigator.of(
+          context,
+        ).pop(AmanahAvatarPhotoResult(presetAvatarUrl: presetAvatars.first));
       }
     }
   }
@@ -567,14 +514,18 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
     final double screenHeight = MediaQuery.sizeOf(context).height;
+    final double bottomNavPadding = MediaQuery.viewPaddingOf(context).bottom;
 
-    final Color bgColor =
-        dark ? const Color(0xFF0A0E1A) : const Color(0xFFFFFFFF);
-    final Color borderColor =
-        dark ? Colors.white.withValues(alpha: 0.10) : const Color(0xFFF1F5F9);
+    final Color bgColor = dark
+        ? const Color(0xFF0A0E1A)
+        : const Color(0xFFFFFFFF);
+    final Color borderColor = dark
+        ? Colors.white.withValues(alpha: 0.10)
+        : const Color(0xFFF1F5F9);
     final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor =
-        dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final Color subtextColor = dark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
 
     return SizedBox(
       height: screenHeight * 0.48,
@@ -595,22 +546,18 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
           child: Column(
             children: <Widget>[
-              // Interactive Drag Handle
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 4),
-                  child: Center(
-                    child: Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: dark
-                            ? Colors.white.withValues(alpha: 0.20)
-                            : const Color(0xFFCBD5E1),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+              // Drag Handle
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 4),
+                child: Center(
+                  child: Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: dark
+                          ? Colors.white.withValues(alpha: 0.20)
+                          : AmanahColorTokens.neutral300,
+                      borderRadius: BorderRadius.circular(AmanahRadius.pill),
                     ),
                   ),
                 ),
@@ -618,8 +565,10 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
 
               // Master Header
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   border: Border(bottom: BorderSide(color: borderColor)),
                 ),
@@ -636,22 +585,7 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
                         ),
                       ),
                     ),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close_rounded, size: 16),
-                      visualDensity: VisualDensity.compact,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 28,
-                        minHeight: 28,
-                      ),
-                      style: IconButton.styleFrom(
-                        backgroundColor: dark
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : const Color(0xFFF1F5F9),
-                        foregroundColor: subtextColor,
-                      ),
-                    ),
+                    const SizedBox(width: AmanahComponentSize.iconButton),
                   ],
                 ),
               ),
@@ -660,8 +594,12 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding: EdgeInsets.fromLTRB(
+                    24,
+                    16,
+                    24,
+                    24.0 + bottomNavPadding,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -671,8 +609,9 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
                         leading: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2563EB)
-                                .withValues(alpha: 0.12),
+                            color: const Color(
+                              0xFF2563EB,
+                            ).withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -736,8 +675,9 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: const Color(0xFF0A44FF)
-                                        .withValues(alpha: 0.35),
+                                    color: const Color(
+                                      0xFF0A44FF,
+                                    ).withValues(alpha: 0.35),
                                     width: 2,
                                   ),
                                 ),
@@ -745,16 +685,17 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
                                   child: Image.network(
                                     presetAvatars[i],
                                     fit: BoxFit.cover,
-                                    errorBuilder: (
-                                      BuildContext ctx,
-                                      Object err,
-                                      StackTrace? st,
-                                    ) {
-                                      return const Icon(
-                                        Icons.person_rounded,
-                                        color: Color(0xFF0A44FF),
-                                      );
-                                    },
+                                    errorBuilder:
+                                        (
+                                          BuildContext ctx,
+                                          Object err,
+                                          StackTrace? st,
+                                        ) {
+                                          return const Icon(
+                                            Icons.person_rounded,
+                                            color: Color(0xFF0A44FF),
+                                          );
+                                        },
                                   ),
                                 ),
                               ),
@@ -765,21 +706,14 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
 
                       // 3. Reset Option
                       Center(
-                        child: TextButton(
+                        child: AmanahButton.text(
+                          text: 'Gunakan Foto Default',
                           onPressed: () {
-                            Navigator.of(context).pop(
-                              const AmanahAvatarPhotoResult(isReset: true),
-                            );
+                            Navigator.of(
+                              context,
+                            ).pop(const AmanahAvatarPhotoResult(isReset: true));
                           },
-                          child: Text(
-                            'Gunakan Foto Default',
-                            style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: subtextColor,
-                            ),
-                          ),
+                          customForegroundColor: subtextColor,
                         ),
                       ),
                     ],

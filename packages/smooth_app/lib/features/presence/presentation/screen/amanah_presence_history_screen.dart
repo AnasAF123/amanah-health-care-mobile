@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/features/presence/data/amanah_presence_store.dart';
 import 'package:smooth_app/features/presence/domain/amanah_presence_model.dart';
 import 'package:smooth_app/features/presence/presentation/components/amanah_presence_drawers.dart';
@@ -241,15 +242,15 @@ class _AmanahPresenceHistoryScreenState
                       decoration: BoxDecoration(
                         color: _hasActiveFilters
                             ? (dark
-                                ? const Color(0x3322D3EE)
-                                : const Color(0xFFECFEFF))
+                                ? const Color(0x332563EB)
+                                : const Color(0xFFEFF6FF))
                             : (dark
                                 ? Colors.white.withValues(alpha: 0.05)
                                 : Colors.white),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _hasActiveFilters
-                              ? const Color(0xFF06B6D4)
+                              ? const Color(0xFF2563EB)
                               : (dark
                                   ? Colors.white.withValues(alpha: 0.10)
                                   : const Color(0xFFE2E8F0)),
@@ -262,7 +263,7 @@ class _AmanahPresenceHistoryScreenState
                             Icons.tune_rounded,
                             size: 16,
                             color: _hasActiveFilters
-                                ? const Color(0xFF0891B2)
+                                ? const Color(0xFF1D4ED8)
                                 : subtextColor,
                           ),
                           if (_hasActiveFilters)
@@ -273,7 +274,7 @@ class _AmanahPresenceHistoryScreenState
                                 width: 6,
                                 height: 6,
                                 decoration: const BoxDecoration(
-                                  color: Color(0xFF06B6D4),
+                                  color: Color(0xFF2563EB),
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -391,7 +392,7 @@ class _AmanahPresenceHistoryScreenState
                           fontFamily: 'PlusJakartaSans',
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF0891B2),
+                          color: Color(0xFF2563EB),
                           decoration: TextDecoration.underline,
                         ),
                       ),
@@ -839,10 +840,8 @@ class _AmanahPresenceHistoryScreenState
                   icon: const Icon(Icons.restart_alt_rounded, size: 14),
                   label: const Text('Reset Filter'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        dark ? Colors.white : const Color(0xFF0F172A),
-                    foregroundColor:
-                        dark ? const Color(0xFF020617) : Colors.white,
+                    backgroundColor: AmanahColorTokens.brand,
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 10,

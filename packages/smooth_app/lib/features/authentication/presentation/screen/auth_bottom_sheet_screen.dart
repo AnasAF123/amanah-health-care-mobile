@@ -13,6 +13,7 @@ import 'package:smooth_app/features/authentication/presentation/organisms/passwo
 import 'package:smooth_app/features/authentication/presentation/organisms/sign_in_content.dart';
 import 'package:smooth_app/features/authentication/presentation/organisms/sign_up_content.dart';
 import 'package:smooth_app/features/authentication/presentation/state/auth_ui_state.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_home_shell.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
@@ -610,50 +611,24 @@ class _AuthClosedActions extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton(
-                onPressed: onSignUp,
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: Colors.white,
-                  foregroundColor: primary,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: CIRCULAR_BORDER_RADIUS,
-                  ),
-                ),
-                child: Text(
-                  'Mulai',
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: primary,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
+            AmanahButton(
+              text: 'Mulai',
+              onPressed: onSignUp,
+              variant: AmanahButtonVariant.secondary,
+              size: AmanahButtonSize.large,
+              isFullWidth: true,
+              customBackgroundColor: Colors.white,
+              customForegroundColor: primary,
+              customBorder: Border.all(color: Colors.transparent),
+              boxShadow: const <BoxShadow>[],
             ),
             const SizedBox(height: MEDIUM_SPACE),
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: OutlinedButton(
-                onPressed: onSignIn,
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.white.withValues(alpha: 0.16),
-                  foregroundColor: Colors.white,
-                  side: BorderSide(color: Colors.white.withValues(alpha: 0.20)),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: CIRCULAR_BORDER_RADIUS,
-                  ),
-                ),
-                child: Text(
-                  'Saya sudah punya akun',
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
+            AmanahButton.ghost(
+              text: 'Saya sudah punya akun',
+              onPressed: onSignIn,
+              size: AmanahButtonSize.large,
+              isFullWidth: true,
+              customForegroundColor: Colors.white,
             ),
             const SizedBox(height: 24),
             Text.rich(

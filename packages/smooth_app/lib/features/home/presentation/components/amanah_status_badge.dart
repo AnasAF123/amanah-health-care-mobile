@@ -25,15 +25,15 @@ class AmanahStatusBadge extends StatelessWidget {
         icon: _AmanahBadgeIcon.live,
       ),
       AmanahBadgeVariant.trend => _AmanahBadgeStyle(
-        background: dark ? const Color(0xFF064E3B) : const Color(0xFFECFDF5),
-        foreground: const Color(0xFF10B981),
-        border: dark ? const Color(0xFF10B981) : const Color(0xFFD1FAE5),
+        background: dark ? const Color(0xFF0C2445) : const Color(0xFFEFF6FF),
+        foreground: dark ? const Color(0xFF3B82F6) : const Color(0xFF0D66E9),
+        border: dark ? const Color(0xFF1D4ED8) : const Color(0xFFDBEAFE),
         icon: _AmanahBadgeIcon.trend,
       ),
       AmanahBadgeVariant.primary => const _AmanahBadgeStyle(
-        background: Color(0xFF3B82F6),
+        background: Color(0xFF0D66E9),
         foreground: Colors.white,
-        border: Color(0xFF3B82F6),
+        border: Color(0xFF1D58AC),
         icon: _AmanahBadgeIcon.none,
       ),
       AmanahBadgeVariant.success => const _AmanahBadgeStyle(

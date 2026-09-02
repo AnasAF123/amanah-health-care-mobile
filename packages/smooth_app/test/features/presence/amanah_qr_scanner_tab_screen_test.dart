@@ -38,7 +38,7 @@ void main() {
 
   group('Amanah QR Scanner Tab Screen Tests', () {
     testWidgets(
-        'Renders floating controls, info strip, and 3 action cards in drawer',
+        'Renders floating controls, reticle, and can open/close drawer modal',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.75;
@@ -51,13 +51,28 @@ void main() {
       expect(find.bySemanticsLabel('Kembali'), findsOneWidget);
       expect(find.bySemanticsLabel('Bantuan Presensi'), findsOneWidget);
       expect(find.bySemanticsLabel('Pilih QR dari Galeri'), findsOneWidget);
+      expect(find.bySemanticsLabel('Buka Menu Presensi'), findsOneWidget);
       expect(find.bySemanticsLabel('Senter Flash'), findsOneWidget);
 
-      // Drawer Content
+      // Initially drawer is closed
+      expect(find.text('Tampilkan QR'), findsNothing);
+
+      // Tap Buka Menu Presensi to open drawer modal overlay
+      await tester.tap(find.bySemanticsLabel('Buka Menu Presensi'));
+      await tester.pumpAndSettle();
+
+      // Drawer Content is now visible
       expect(find.text('Praktek Poli Anak dimulai 08:00 WIB'), findsOneWidget);
       expect(find.text('Tampilkan QR'), findsOneWidget);
       expect(find.text('Manual'), findsOneWidget);
       expect(find.text('Upload QR'), findsOneWidget);
+
+      // Tap Chevron down to close drawer modal
+      await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded));
+      await tester.pumpAndSettle();
+
+      // Drawer is closed
+      expect(find.text('Tampilkan QR'), findsNothing);
     });
 
     testWidgets('Tapping Tampilkan QR displays QR Code and 5-digit code',
@@ -67,6 +82,10 @@ void main() {
       addTearDown(() => tester.view.reset());
 
       await tester.pumpWidget(createQrScreen());
+      await tester.pumpAndSettle();
+
+      // Open drawer
+      await tester.tap(find.bySemanticsLabel('Buka Menu Presensi'));
       await tester.pumpAndSettle();
 
       // Tap Tampilkan QR
@@ -103,6 +122,10 @@ void main() {
       await tester.pumpWidget(createQrScreen());
       await tester.pumpAndSettle();
 
+      // Open drawer
+      await tester.tap(find.bySemanticsLabel('Buka Menu Presensi'));
+      await tester.pumpAndSettle();
+
       // Tap Manual
       await tester.tap(find.text('Manual'));
       await tester.pumpAndSettle();
@@ -121,15 +144,15 @@ void main() {
       await tester.enterText(textFields.at(5), '1');
       await tester.pumpAndSettle();
 
-      // Check success banner (auto-verified upon 6th digit)
-      expect(find.text('Presensi Masuk Berhasil'), findsOneWidget);
-      expect(find.text('dr. Andika Perkasa • Poli Anak'), findsOneWidget);
-
-      // Tap Tutup to reset
-      await tester.tap(find.text('Tutup'));
+      // Tap Verifikasi Presensi button explicitly
+      await tester.tap(find.text('Verifikasi Presensi'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Presensi Masuk Berhasil'), findsNothing);
+      // Dismiss success sheet
+      await tester.tap(find.text('Beranda'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Presensi Berhasil!'), findsNothing);
     });
 
     testWidgets('Tapping Upload QR switches to dropzone and simulates scan',
@@ -139,6 +162,10 @@ void main() {
       addTearDown(() => tester.view.reset());
 
       await tester.pumpWidget(createQrScreen());
+      await tester.pumpAndSettle();
+
+      // Open drawer
+      await tester.tap(find.bySemanticsLabel('Buka Menu Presensi'));
       await tester.pumpAndSettle();
 
       // Tap Upload QR
@@ -152,7 +179,7 @@ void main() {
       await tester.tap(find.text('Pilih file QR atau seret ke sini'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Presensi Masuk Berhasil'), findsOneWidget);
+      expect(find.text('Presensi Berhasil!'), findsOneWidget);
     });
 
     testWidgets('Tapping Flashlight button toggles flash state',
@@ -239,7 +266,6 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.byType(AmanahQrScannerTabScreen), findsOneWidget);
-      expect(find.text('Praktek Poli Anak dimulai 08:00 WIB'), findsOneWidget);
     });
   });
 }

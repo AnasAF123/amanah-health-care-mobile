@@ -1,21 +1,21 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/home/domain/amanah_notification_model.dart';
+import 'package:smooth_app/features/home/domain/amanah_visual_role.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_clay_icon.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_filter_bar.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahNotificationTabScreen extends StatefulWidget {
-  const AmanahNotificationTabScreen({
-    this.onBack,
-    super.key,
-  });
+  const AmanahNotificationTabScreen({this.onBack, super.key});
 
   final VoidCallback? onBack;
 
   static Route<void> route({VoidCallback? onBack}) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) => AmanahNotificationTabScreen(onBack: onBack),
+      builder: (BuildContext context) =>
+          AmanahNotificationTabScreen(onBack: onBack),
     );
   }
 
@@ -53,14 +53,10 @@ class _AmanahNotificationTabScreenState
   }
 
   void _showNotificationDetail(AmanahNotificationItem item) {
-    showModalBottomSheet<void>(
+    showAmanahBottomSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.60),
       builder: (BuildContext modalContext) {
-        final bool dark = Theme.of(modalContext).brightness == Brightness.dark;
-        return _AmanahNotificationDetailModal(item: item, dark: dark);
+        return _AmanahNotificationDetailModal(item: item);
       },
     );
   }
@@ -69,12 +65,13 @@ class _AmanahNotificationTabScreenState
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
-    final List<AmanahNotificationItem> filteredList =
-        _store.getFiltered(_activeCategory);
+    final List<AmanahNotificationItem> filteredList = _store.getFiltered(
+      _activeCategory,
+    );
     final int unreadCount = _store.unreadCount;
 
     return Scaffold(
-      backgroundColor: dark ? const Color(0xFF0A0E1A) : const Color(0xFFF8FAFF),
+      backgroundColor: AmanahThemeTokens.canvas(context),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -91,36 +88,22 @@ class _AmanahNotificationTabScreenState
               ),
             ),
 
-            // 2. Category Filter Chips (Horizontal Scrolling)
-            Container(
-              height: 48,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                child: Row(
-                  children: AmanahNotificationCategory.values
-                      .map((AmanahNotificationCategory category) {
-                    final bool isActive = _activeCategory == category;
-                    final int count = _store.countForCategory(category);
-
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 6),
-                      child: _AmanahCategoryChip(
-                        category: category,
-                        count: count,
-                        isActive: isActive,
-                        dark: dark,
-                        onTap: () {
-                          setState(() {
-                            _activeCategory = category;
-                          });
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
+            // 2. Category Filter Chips (shared master filter bar)
+            AmanahFilterBar<AmanahNotificationCategory>(
+              selectedValue: _activeCategory,
+              onSelected: (AmanahNotificationCategory category) {
+                setState(() => _activeCategory = category);
+              },
+              items: AmanahNotificationCategory.values
+                  .map(
+                    (AmanahNotificationCategory category) =>
+                        AmanahFilterBarItem<AmanahNotificationCategory>(
+                          value: category,
+                          label: category.label,
+                          badgeCount: _store.countForCategory(category),
+                        ),
+                  )
+                  .toList(),
             ),
 
             // 3. Notification List Area
@@ -133,12 +116,12 @@ class _AmanahNotificationTabScreenState
                       itemCount: filteredList.length,
                       separatorBuilder: (BuildContext context, int index) =>
                           Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: dark
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : const Color(0xFFF1F5F9),
-                      ),
+                            height: 1,
+                            thickness: 1,
+                            color: dark
+                                ? Colors.white.withValues(alpha: 0.05)
+                                : const Color(0xFFF1F5F9),
+                          ),
                       itemBuilder: (BuildContext context, int index) {
                         final AmanahNotificationItem item = filteredList[index];
                         return _AmanahNotificationTile(
@@ -150,109 +133,6 @@ class _AmanahNotificationTabScreenState
                     ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AmanahCategoryChip extends StatelessWidget {
-  const _AmanahCategoryChip({
-    required this.category,
-    required this.count,
-    required this.isActive,
-    required this.dark,
-    required this.onTap,
-  });
-
-  final AmanahNotificationCategory category;
-  final int count;
-  final bool isActive;
-  final bool dark;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color bgColor;
-    final Color textColor;
-    final Color badgeBg;
-    final Color badgeText;
-
-    if (isActive) {
-      bgColor = const Color(0xFF0A44FF);
-      textColor = Colors.white;
-      badgeBg = Colors.white.withValues(alpha: 0.22);
-      badgeText = Colors.white;
-    } else {
-      if (dark) {
-        bgColor = Colors.white.withValues(alpha: 0.05);
-        textColor = const Color(0xFF94A3B8);
-        badgeBg = Colors.white.withValues(alpha: 0.10);
-        badgeText = const Color(0xFFCBD5E1);
-      } else {
-        bgColor = const Color(0xFFF1F5F9);
-        textColor = const Color(0xFF475569);
-        badgeBg = const Color(0xFFE2E8F0);
-        badgeText = const Color(0xFF334155);
-      }
-    }
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: isActive
-                ? <BoxShadow>[
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                category.label,
-                style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: textColor,
-                  letterSpacing: -0.2,
-                ),
-              ),
-              if (count > 0) ...<Widget>[
-                const SizedBox(width: 6),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                  decoration: BoxDecoration(
-                    color: badgeBg,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '$count',
-                    style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                      color: badgeText,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
         ),
       ),
     );
@@ -288,10 +168,8 @@ class _AmanahNotificationTile extends StatelessWidget {
                 children: <Widget>[
                   AmanahClayIcon(
                     size: 32,
-                    colorPrimary: item.colorPrimary,
-                    colorLight: item.colorLight,
-                    colorDark: item.colorDark,
-                    icon: item.icon,
+                    tone: item.visual.tone,
+                    icon: item.visual.icon,
                   ),
                   if (item.isUrgent)
                     Positioned(
@@ -301,15 +179,19 @@ class _AmanahNotificationTile extends StatelessWidget {
                         width: 10,
                         height: 10,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEF4444),
+                          color: AmanahColorTokens.danger,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: dark ? const Color(0xFF0A0E1A) : Colors.white,
+                            color: dark
+                                ? const Color(0xFF0A0E1A)
+                                : Colors.white,
                             width: 1.8,
                           ),
                           boxShadow: <BoxShadow>[
                             BoxShadow(
-                              color: const Color(0xFFEF4444).withValues(alpha: 0.60),
+                              color: AmanahColorTokens.danger.withValues(
+                                alpha: 0.60,
+                              ),
                               blurRadius: 4,
                             ),
                           ],
@@ -338,8 +220,8 @@ class _AmanahNotificationTile extends StatelessWidget {
                         color: item.isUnread
                             ? (dark ? Colors.white : const Color(0xFF0F172A))
                             : (dark
-                                ? const Color(0xFFCBD5E1)
-                                : const Color(0xFF334155)),
+                                  ? const Color(0xFFCBD5E1)
+                                  : const Color(0xFF334155)),
                         letterSpacing: -0.2,
                         height: 1.25,
                       ),
@@ -387,12 +269,13 @@ class _AmanahNotificationTile extends StatelessWidget {
                           width: 6,
                           height: 6,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2563EB),
+                            color: AmanahColorTokens.brandAccent,
                             shape: BoxShape.circle,
                             boxShadow: <BoxShadow>[
                               BoxShadow(
-                                color: const Color(0xFF3B82F6)
-                                    .withValues(alpha: 0.60),
+                                color: AmanahColorTokens.brandLight.withValues(
+                                  alpha: 0.60,
+                                ),
                                 blurRadius: 4,
                               ),
                             ],
@@ -442,9 +325,7 @@ class _AmanahEmptyNotificationView extends StatelessWidget {
               child: Icon(
                 Icons.notifications_none_rounded,
                 size: 26,
-                color: dark
-                    ? const Color(0xFF64748B)
-                    : const Color(0xFF94A3B8),
+                color: dark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
               ),
             ),
             const SizedBox(height: 12),
@@ -454,9 +335,7 @@ class _AmanahEmptyNotificationView extends StatelessWidget {
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: dark
-                    ? const Color(0xFFE2E8F0)
-                    : const Color(0xFF334155),
+                color: dark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
               ),
             ),
             const SizedBox(height: 4),
@@ -467,9 +346,7 @@ class _AmanahEmptyNotificationView extends StatelessWidget {
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
-                color: dark
-                    ? const Color(0xFF64748B)
-                    : const Color(0xFF94A3B8),
+                color: dark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
               ),
             ),
           ],
@@ -496,11 +373,13 @@ class _AmanahNotificationOptionsMenu extends StatelessWidget {
       icon: Icon(
         Icons.more_vert_rounded,
         size: 20,
-        color: dark ? const Color(0xFFE2E8F0) : const Color(0xFF475569),
+        color: dark
+            ? AmanahColorTokens.neutral200
+            : AmanahColorTokens.neutral600,
       ),
       constraints: const BoxConstraints(minWidth: 180, maxWidth: 220),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: dark ? const Color(0xFF111624) : Colors.white,
+      color: AmanahThemeTokens.elevatedSurface(context),
       elevation: 12,
       onSelected: (String value) {
         if (value == 'mark_all') {
@@ -515,8 +394,11 @@ class _AmanahNotificationOptionsMenu extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const Icon(Icons.done_all_rounded,
-                  size: 18, color: Color(0xFF06B6D4)),
+              const Icon(
+                Icons.done_all_rounded,
+                size: 18,
+                color: AmanahColorTokens.brandAccent,
+              ),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
@@ -527,23 +409,24 @@ class _AmanahNotificationOptionsMenu extends StatelessWidget {
                     fontFamily: 'PlusJakartaSans',
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: dark ? Colors.white : const Color(0xFF0F172A),
+                    color: AmanahThemeTokens.textPrimary(context),
                   ),
                 ),
               ),
             ],
           ),
         ),
-        const PopupMenuDivider(
-          height: 1,
-        ),
+        const PopupMenuDivider(height: 1),
         PopupMenuItem<String>(
           value: 'clear_read',
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const Icon(Icons.delete_outline_rounded,
-                  size: 18, color: Color(0xFFEF4444)),
+              const Icon(
+                Icons.delete_outline_rounded,
+                size: 18,
+                color: AmanahColorTokens.danger,
+              ),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
@@ -554,8 +437,9 @@ class _AmanahNotificationOptionsMenu extends StatelessWidget {
                     fontFamily: 'PlusJakartaSans',
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color:
-                        dark ? const Color(0xFFFCA5A5) : const Color(0xFFDC2626),
+                    color: dark
+                        ? AmanahColorTokens.dangerBorder
+                        : AmanahColorTokens.dangerDark,
                   ),
                 ),
               ),
@@ -568,168 +452,95 @@ class _AmanahNotificationOptionsMenu extends StatelessWidget {
 }
 
 class _AmanahNotificationDetailModal extends StatelessWidget {
-  const _AmanahNotificationDetailModal({
-    required this.item,
-    required this.dark,
-  });
+  const _AmanahNotificationDetailModal({required this.item});
 
   final AmanahNotificationItem item;
-  final bool dark;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        16,
-        16,
-        MediaQuery.viewPaddingOf(context).bottom + 24,
+    return AmanahBottomSheetScaffold(
+      title: 'Detail notifikasi',
+      subtitle: '${item.timestamp} WIB',
+      maxHeightFactor: 0.58,
+      minHeight: 320,
+      trailing: AmanahClayIcon(
+        size: 36,
+        tone: item.visual.tone,
+        icon: item.visual.icon,
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: dark
-                  ? const Color(0xFF111624).withValues(alpha: 0.95)
-                  : Colors.white.withValues(alpha: 0.95),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: dark
-                    ? Colors.white.withValues(alpha: 0.10)
-                    : const Color(0xFFF1F5F9),
-              ),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: dark ? 0.40 : 0.12),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                // Header: ClayIcon + Category + Timestamp
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    AmanahClayIcon(
-                      size: 36,
-                      colorPrimary: item.colorPrimary,
-                      colorLight: item.colorLight,
-                      colorDark: item.colorDark,
-                      icon: item.icon,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Text(
-                                item.category.label.toUpperCase(),
-                                style: const TextStyle(
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF0891B2),
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              Text(
-                                '${item.timestamp} WIB',
-                                style: const TextStyle(
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF94A3B8),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            item.title,
-                            style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                              color: dark
-                                  ? Colors.white
-                                  : const Color(0xFF0F172A),
-                              height: 1.25,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-
-                // Description
-                Text(
-                  item.desc,
-                  style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: dark
-                        ? const Color(0xFFCBD5E1)
-                        : const Color(0xFF475569),
-                    height: 1.45,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Action Footer
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: dark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : const Color(0xFFF1F5F9),
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor: dark
-                          ? Colors.white.withValues(alpha: 0.10)
-                          : const Color(0xFFF1F5F9),
-                      foregroundColor: dark
-                          ? Colors.white
-                          : const Color(0xFF1E293B),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
-                    ),
-                    child: const Text(
-                      'Tutup',
-                      style: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            item.category.label.toUpperCase(),
+            style: const TextStyle(
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: AmanahColorTokens.brandAccent,
+              letterSpacing: 0.5,
             ),
           ),
-        ),
+          const SizedBox(height: AmanahSpacing.sm),
+          Text(
+            item.title,
+            style: TextStyle(
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: AmanahThemeTokens.textPrimary(context),
+              height: 1.25,
+            ),
+          ),
+          const SizedBox(height: AmanahSpacing.lg),
+          Text(
+            item.desc,
+            style: TextStyle(
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AmanahThemeTokens.textSecondary(context),
+              height: 1.45,
+            ),
+          ),
+        ],
       ),
     );
+  }
+}
+
+extension _AmanahNotificationVisualResolver on AmanahNotificationVisual {
+  AmanahIconTone get tone {
+    switch (this) {
+      case AmanahNotificationVisual.queueVitals:
+        return AmanahIconTone.queue;
+      case AmanahNotificationVisual.clinicalCritical:
+        return AmanahIconTone.clinicalCritical;
+      case AmanahNotificationVisual.clinicalConsult:
+        return AmanahIconTone.clinicalConsult;
+      case AmanahNotificationVisual.shiftSchedule:
+        return AmanahIconTone.shift;
+      case AmanahNotificationVisual.clinicalReport:
+        return AmanahIconTone.documents;
+      case AmanahNotificationVisual.shiftReminder:
+        return AmanahIconTone.success;
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case AmanahNotificationVisual.queueVitals:
+        return Icons.monitor_heart_outlined;
+      case AmanahNotificationVisual.clinicalCritical:
+        return Icons.error_outline_rounded;
+      case AmanahNotificationVisual.clinicalConsult:
+        return Icons.chat_bubble_outline_rounded;
+      case AmanahNotificationVisual.shiftSchedule:
+        return Icons.calendar_today_outlined;
+      case AmanahNotificationVisual.clinicalReport:
+        return Icons.description_outlined;
+      case AmanahNotificationVisual.shiftReminder:
+        return Icons.access_time_rounded;
+    }
   }
 }

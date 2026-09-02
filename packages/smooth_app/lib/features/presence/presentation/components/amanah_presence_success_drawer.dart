@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:smooth_app/features/presence/presentation/components/amanah_presence_success_core.dart';
 import 'package:smooth_app/features/presence/presentation/screen/amanah_presence_history_screen.dart';
 
@@ -27,13 +28,8 @@ class AmanahPresenceSuccessDrawer extends StatelessWidget {
   }) {
     final NavigatorState parentNavigator = Navigator.of(context);
 
-    return showModalBottomSheet<void>(
+    return showAmanahBottomSheet<void>(
       context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      enableDrag: true,
-      backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.40),
       builder: (BuildContext ctx) => AmanahPresenceSuccessDrawer(
         timeString: timeString,
         bottomPadding: bottomPadding,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 
 class AuthTextAction extends StatelessWidget {
   const AuthTextAction({
@@ -14,25 +15,12 @@ class AuthTextAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
     return Align(
       alignment: alignment,
-      child: TextButton(
+      child: AmanahButton.text(
+        text: label,
         onPressed: onPressed,
-        style: TextButton.styleFrom(
-          padding: EdgeInsets.zero,
-          minimumSize: const Size(44, 36),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          foregroundColor: theme.colorScheme.primary,
-        ),
-        child: Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.primary,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
+        size: AmanahButtonSize.small,
       ),
     );
   }

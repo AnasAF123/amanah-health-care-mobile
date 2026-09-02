@@ -1,24 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/domain/amanah_visual_role.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahClayIcon extends StatelessWidget {
   const AmanahClayIcon({
     required this.icon,
-    required this.colorPrimary,
-    required this.colorLight,
-    required this.colorDark,
     super.key,
+    this.tone = AmanahIconTone.brand,
+    this.colorPrimary,
+    this.colorLight,
+    this.colorDark,
     this.size = 28,
   });
 
   final IconData icon;
-  final Color colorPrimary;
-  final Color colorLight;
-  final Color colorDark;
+  final AmanahIconTone tone;
+  final Color? colorPrimary;
+  final Color? colorLight;
+  final Color? colorDark;
   final double size;
 
   @override
   Widget build(BuildContext context) {
     final double radius = size * 0.28;
+    final AmanahTone resolvedTone = AmanahThemeTokens.iconTone(tone);
+    final Color primary = colorPrimary ?? resolvedTone.primary;
+    final Color light = colorLight ?? resolvedTone.light;
+    final Color dark = colorDark ?? resolvedTone.dark;
 
     return Container(
       width: size,
@@ -28,27 +36,19 @@ class AmanahClayIcon extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: <Color>[
-            colorLight,
-            colorPrimary,
-            colorDark,
-          ],
+          colors: <Color>[light, primary, dark],
           stops: const <double>[0.0, 0.45, 1.0],
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: colorDark.withValues(alpha: 0.35),
+            color: dark.withValues(alpha: 0.35),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Center(
-        child: Icon(
-          icon,
-          size: size * 0.52,
-          color: Colors.white,
-        ),
+        child: Icon(icon, size: size * 0.52, color: Colors.white),
       ),
     );
   }

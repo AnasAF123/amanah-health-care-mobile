@@ -8,6 +8,7 @@ import 'package:smooth_app/features/authentication/domain/amanah_auth_user.dart'
 import 'package:smooth_app/features/home/presentation/screen/amanah_home_shell.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_schedule_tab_screen.dart';
 import 'package:smooth_app/features/schedule/data/amanah_schedule_store.dart';
+import 'package:smooth_app/features/schedule/presentation/components/amanah_queue_badge.dart';
 import 'package:smooth_app/features/schedule/presentation/components/amanah_schedule_cards_and_drawers.dart';
 import 'package:smooth_app/features/schedule/presentation/components/amanah_schedule_form_and_calendar_dialog.dart';
 
@@ -29,7 +30,10 @@ void main() {
     AmanahScheduleStore.instance.reset();
   });
 
-  Widget createScheduleScreen({Brightness brightness = Brightness.light}) {
+  Widget createScheduleScreen({
+    Brightness brightness = Brightness.light,
+    AmanahScheduleViewMode? initialViewMode,
+  }) {
     return MaterialApp(
       theme: ThemeData(
         brightness: brightness,
@@ -39,7 +43,7 @@ void main() {
           brightness: brightness,
         ),
       ),
-      home: const AmanahScheduleTabScreen(),
+      home: AmanahScheduleTabScreen(initialViewMode: initialViewMode),
     );
   }
 
@@ -63,7 +67,7 @@ void main() {
 
         // Booked Patients Showcase on Aug 26
         expect(find.text('Steven Pratama'), findsOneWidget);
-        expect(find.text('Antrean #01'), findsWidgets);
+        expect(find.byType(AmanahQueueBadge), findsWidgets);
         expect(find.text('Detail Pasien'), findsWidgets);
       },
     );
@@ -127,6 +131,71 @@ void main() {
       expect(find.text('Tanggal Praktik'), findsOneWidget);
       expect(find.text('Sesi Praktik & Jam'), findsOneWidget);
     });
+
+    testWidgets(
+      'Session Card and Session Detail Drawer have no more_vert, and Edit Jadwal button is brand below booking row',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.75;
+        addTearDown(() => tester.view.reset());
+
+        await tester.pumpWidget(
+          createScheduleScreen(
+            initialViewMode: AmanahScheduleViewMode.sessions,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Verify session cards exist and NO more_vert icon exists on cards
+        expect(find.byType(AmanahDoctorSessionCard), findsWidgets);
+        expect(find.byIcon(Icons.more_vert_rounded), findsNothing);
+
+        // Tap Detail Sesi
+        final Finder detailSesiButtons = find.text('Detail Sesi');
+        expect(detailSesiButtons, findsWidgets);
+        await tester.tap(detailSesiButtons.first);
+        await tester.pumpAndSettle();
+
+        // Verify Session Detail Drawer is displayed
+        expect(find.byType(AmanahScheduleDetailDrawer), findsOneWidget);
+        expect(find.text('Detail Sesi Praktik'), findsOneWidget);
+        // Verify NO more_vert icon inside drawer header
+        expect(find.byIcon(Icons.more_vert_rounded), findsNothing);
+
+        // Verify Edit Jadwal brand button is rendered below Lihat Pasien Booking
+        expect(
+          find.textContaining('Lihat Pasien Booking'),
+          findsOneWidget,
+        );
+        expect(find.text('Edit Jadwal'), findsOneWidget);
+
+        // Tap Edit Jadwal button
+        await tester.tap(find.text('Edit Jadwal'));
+        await tester.pumpAndSettle();
+
+        // Verify Add/Edit Schedule Drawer is in editing mode
+        expect(find.byType(AmanahAddEditScheduleDrawer), findsOneWidget);
+        expect(find.text('Edit Jadwal'), findsOneWidget);
+        expect(find.text('Simpan Perubahan'), findsOneWidget);
+        expect(find.text('Hapus'), findsOneWidget);
+
+        // Verify "Batal" button and trash icon are NOT present
+        expect(find.text('Batal'), findsNothing);
+        expect(find.byIcon(Icons.delete_outline_rounded), findsNothing);
+
+        // Drag to scroll Hapus into view and tap it to delete schedule
+        await tester.drag(
+          find.byType(SingleChildScrollView).last,
+          const Offset(0, -300),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Hapus'));
+        await tester.pumpAndSettle();
+
+        // Drawer is closed
+        expect(find.byType(AmanahAddEditScheduleDrawer), findsNothing);
+      },
+    );
 
     testWidgets(
       'Bottom navigation bar Jadwal tab navigates to Schedule Tab screen',

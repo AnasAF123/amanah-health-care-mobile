@@ -1,7 +1,10 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:smooth_app/features/home/presentation/components/amanah_clay_icon.dart';
 import 'package:smooth_app/features/permission/domain/amanah_permission_model.dart';
+import 'package:smooth_app/features/permission/presentation/theme/amanah_permission_tokens.dart';
 
+/// Master Permission Card Component (Stitched Stacked Ticket Motif)
+/// Replicating lines 695-796 in LeavePermissionTabScreen.tsx (.web) 1:1
 class AmanahPermissionCard extends StatelessWidget {
   const AmanahPermissionCard({
     required this.item,
@@ -17,223 +20,247 @@ class AmanahPermissionCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color cardBg =
-        dark ? const Color(0xFF111624) : const Color(0xFFFFFFFF);
-    final Color borderColor =
-        dark ? Colors.white.withValues(alpha: 0.10) : const Color(0xFFF1F5F9);
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor =
-        dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-    final Color dividerColor = dark
-        ? Colors.white.withValues(alpha: 0.05)
-        : const Color(0xFFF1F5F9);
+    final Color statusBg = AmanahPermissionTokens.getStatusBg(
+      item.status,
+      dark: dark,
+    );
+    final Color statusText = AmanahPermissionTokens.getStatusText(
+      item.status,
+      dark: dark,
+    );
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: borderColor),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withValues(alpha: dark ? 0.40 : 0.03),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              // 1. Card Header: Type with ClayIcon + Status Badge
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Expanded(
-                    child: Row(
-                      children: <Widget>[
-                        AmanahClayIcon(
-                          icon: Icons.calendar_today_rounded,
-                          size: 28,
-                          colorPrimary: item.type.colorPrimary,
-                          colorLight: item.type.colorLight,
-                          colorDark: item.type.colorDark,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            item.type.label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.2,
-                              color: textColor,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  _PermissionStatusBadge(status: item.status, dark: dark),
-                ],
-              ),
-              const SizedBox(height: 14),
+    final Color cardWrapperBg = dark
+        ? AmanahPermissionTokens.cardWrapperDark
+        : AmanahPermissionTokens.cardWrapperLight;
+    final Color cardBorder = dark
+        ? AmanahPermissionTokens.cardBorderDark
+        : AmanahPermissionTokens.cardBorderLight;
 
-              // 2. Card Body: Date Range & Duration Pill
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          item.formattedDateRange,
-                          style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.3,
-                            color: textColor,
-                            height: 1.15,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Durasi izin praktik',
-                          style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: subtextColor,
-                          ),
-                        ),
-                      ],
-                    ),
+    final Color innerStitchBg = dark
+        ? AmanahPermissionTokens.innerStitchBgDark
+        : AmanahPermissionTokens.innerStitchBgLight;
+    final Color dashedStrokeColor = dark
+        ? AmanahPermissionTokens.dashedStrokeDark
+        : AmanahPermissionTokens.dashedStrokeLight;
+
+    final Color textTitle = dark
+        ? AmanahPermissionTokens.textTitleDark
+        : AmanahPermissionTokens.textTitleLight;
+    final Color textMuted = dark
+        ? AmanahPermissionTokens.textMutedDark
+        : AmanahPermissionTokens.textMutedLight;
+
+    return Semantics(
+      button: true,
+      label: 'Perizinan ${item.type.label}, Status ${item.status.label}',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: statusBg,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: dark ? 0.40 : 0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                // 1. Top Stacking Layer Status Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 7,
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: dark
-                          ? Colors.white.withValues(alpha: 0.10)
-                          : const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                  child: Center(
                     child: Text(
-                      '${item.durationDays} Hari',
+                      item.status.label,
                       style: TextStyle(
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 12,
                         fontWeight: FontWeight.w900,
-                        color: textColor,
+                        letterSpacing: 0.4,
+                        color: statusText,
                       ),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 14),
-
-              // 3. Card Footer: Applicant User Info & Chevron
-              Container(
-                padding: const EdgeInsets.only(top: 12),
-                decoration: BoxDecoration(
-                  border: Border(top: BorderSide(color: dividerColor)),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Expanded(
-                      child: Row(
-                        children: <Widget>[
-                          Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: dark
-                                    ? Colors.white.withValues(alpha: 0.20)
-                                    : const Color(0xFFE2E8F0),
+
+                // 2. Main Stacked White/Dark Card Wrapper
+                Container(
+                  margin: const EdgeInsets.fromLTRB(2, 0, 2, 2),
+                  decoration: BoxDecoration(
+                    color: cardWrapperBg,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: cardBorder, width: 1),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(2),
+                    child: CustomPaint(
+                      painter: _DashedRoundedRectPainter(
+                        strokeColor: dashedStrokeColor,
+                        strokeWidth: 1.5,
+                        radius: 20,
+                        dashWidth: 5.0,
+                        dashSpace: 3.5,
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          color: innerStitchBg,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            // Title (Full Width, No Pills)
+                            Text(
+                              item.type.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: 'PlusJakartaSans',
+                                fontSize: 16.5,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.3,
+                                color: textTitle,
                               ),
                             ),
-                            child: ClipOval(
-                              child: Image.asset(
-                                item.userAvatarUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (BuildContext context,
-                                    Object error, StackTrace? stackTrace) {
-                                  return Container(
-                                    color: const Color(0xFF0A44FF)
-                                        .withValues(alpha: 0.30),
-                                    alignment: Alignment.center,
-                                    child: const Icon(
-                                      Icons.person,
-                                      size: 16,
-                                      color: Colors.white,
-                                    ),
-                                  );
-                                },
+                            const SizedBox(height: 3),
+
+                            // Reason (Truncated with Ellipsis)
+                            Text(
+                              item.reason,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: 'PlusJakartaSans',
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w500,
+                                color: textMuted,
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            const SizedBox(height: 12),
+
+                            // Dates Row (Mulai & Selesai)
+                            Row(
                               children: <Widget>[
-                                Text(
-                                  item.userName,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: textColor,
-                                    height: 1.15,
+                                // Mulai
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Row(
+                                        children: <Widget>[
+                                          Icon(
+                                            Icons.calendar_today_rounded,
+                                            size: 14,
+                                            color: textMuted,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Flexible(
+                                            child: Text(
+                                              item.formattedStartDate,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontFamily: 'PlusJakartaSans',
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w800,
+                                                letterSpacing: -0.2,
+                                                color: textTitle,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 20, top: 2),
+                                        child: Text(
+                                          'Mulai',
+                                          style: TextStyle(
+                                            fontFamily: 'PlusJakartaSans',
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w500,
+                                            color: textMuted,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(height: 1),
-                                Text(
-                                  item.userRole,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w500,
-                                    color: subtextColor,
+
+                                const SizedBox(width: 16),
+
+                                // Selesai
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Row(
+                                        children: <Widget>[
+                                          Icon(
+                                            Icons.calendar_today_rounded,
+                                            size: 14,
+                                            color: textMuted,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Flexible(
+                                            child: Text(
+                                              item.formattedEndDate,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontFamily: 'PlusJakartaSans',
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w800,
+                                                letterSpacing: -0.2,
+                                                color: textTitle,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 20, top: 2),
+                                        child: Text(
+                                          'Selesai',
+                                          style: TextStyle(
+                                            fontFamily: 'PlusJakartaSans',
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w500,
+                                            color: textMuted,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      size: 18,
-                      color: subtextColor.withValues(alpha: 0.70),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -241,105 +268,63 @@ class AmanahPermissionCard extends StatelessWidget {
   }
 }
 
-class _PermissionStatusBadge extends StatelessWidget {
-  const _PermissionStatusBadge({
-    required this.status,
-    required this.dark,
+/// Custom painter to draw crisp dashed rounded borders
+class _DashedRoundedRectPainter extends CustomPainter {
+  const _DashedRoundedRectPainter({
+    required this.strokeColor,
+    required this.strokeWidth,
+    required this.radius,
+    this.dashWidth = 5.0,
+    this.dashSpace = 3.5,
   });
 
-  final AmanahPermissionStatus status;
-  final bool dark;
+  final Color strokeColor;
+  final double strokeWidth;
+  final double radius;
+  final double dashWidth;
+  final double dashSpace;
 
   @override
-  Widget build(BuildContext context) {
-    final Color bgColor;
-    final Color borderColor;
-    final Color textColor;
-    final Widget icon;
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = strokeColor
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
 
-    switch (status) {
-      case AmanahPermissionStatus.menunggu:
-        bgColor = dark
-            ? const Color(0xFF451A03).withValues(alpha: 0.60)
-            : const Color(0xFFFFFBEB);
-        borderColor = dark
-            ? const Color(0xFFF59E0B).withValues(alpha: 0.30)
-            : const Color(0xFFFDE68A);
-        textColor = dark ? const Color(0xFFFBBF24) : const Color(0xFF92400E);
-        icon = Container(
-          width: 6,
-          height: 6,
-          decoration: const BoxDecoration(
-            color: Color(0xFFF59E0B),
-            shape: BoxShape.circle,
+    final RRect rrect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(
+        strokeWidth / 2,
+        strokeWidth / 2,
+        size.width - strokeWidth,
+        size.height - strokeWidth,
+      ),
+      Radius.circular(radius),
+    );
+
+    final Path path = Path()..addRRect(rrect);
+    final Path dashPath = Path();
+
+    for (final ui.PathMetric metric in path.computeMetrics()) {
+      double distance = 0.0;
+      while (distance < metric.length) {
+        final double next = distance + dashWidth;
+        dashPath.addPath(
+          metric.extractPath(
+            distance,
+            next > metric.length ? metric.length : next,
           ),
+          Offset.zero,
         );
-
-      case AmanahPermissionStatus.disetujui:
-        bgColor = dark
-            ? const Color(0xFF064E3B).withValues(alpha: 0.60)
-            : const Color(0xFFECFDF5);
-        borderColor = dark
-            ? const Color(0xFF10B981).withValues(alpha: 0.30)
-            : const Color(0xFFA7F3D0);
-        textColor = dark ? const Color(0xFF34D399) : const Color(0xFF065F46);
-        icon = Icon(
-          Icons.check_rounded,
-          size: 12,
-          color: textColor,
-        );
-
-      case AmanahPermissionStatus.ditolak:
-        bgColor = dark
-            ? const Color(0xFF4C0519).withValues(alpha: 0.60)
-            : const Color(0xFFFFF1F2);
-        borderColor = dark
-            ? const Color(0xFFF43F5E).withValues(alpha: 0.30)
-            : const Color(0xFFFECDD3);
-        textColor = dark ? const Color(0xFFFB7185) : const Color(0xFF9F1239);
-        icon = Icon(
-          Icons.close_rounded,
-          size: 12,
-          color: textColor,
-        );
-
-      case AmanahPermissionStatus.dibatalkan:
-        bgColor = dark
-            ? Colors.white.withValues(alpha: 0.05)
-            : const Color(0xFFF1F5F9);
-        borderColor = dark
-            ? Colors.white.withValues(alpha: 0.10)
-            : const Color(0xFFE2E8F0);
-        textColor = dark ? const Color(0xFFA1A1AA) : const Color(0xFF475569);
-        icon = const SizedBox.shrink();
+        distance = next + dashSpace;
+      }
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: borderColor),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          if (status != AmanahPermissionStatus.dibatalkan) ...<Widget>[
-            icon,
-            const SizedBox(width: 4),
-          ],
-          Text(
-            status.label,
-            style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 10.5,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.2,
-              color: textColor,
-            ),
-          ),
-        ],
-      ),
-    );
+    canvas.drawPath(dashPath, paint);
   }
+
+  @override
+  bool shouldRepaint(covariant _DashedRoundedRectPainter oldDelegate) =>
+      strokeColor != oldDelegate.strokeColor ||
+      strokeWidth != oldDelegate.strokeWidth ||
+      radius != oldDelegate.radius;
 }

@@ -130,9 +130,9 @@ class _AmanahToolbox3DPainter extends CustomPainter {
       final Paint medicalGlow = Paint()
         ..shader = RadialGradient(
           colors: <Color>[
-            const Color(0xFF38BDF8),
-            const Color(0xFF0EA5E9).withValues(alpha: 0.8),
-            const Color(0xFF0284C7).withValues(alpha: 0.0),
+            const Color(0xFF60A5FA),
+            const Color(0xFF2563EB).withValues(alpha: 0.8),
+            const Color(0xFF1D4ED8).withValues(alpha: 0.0),
           ],
           stops: const <double>[0.0, 0.45, 1.0],
         ).createShader(Rect.fromCenter(center: const Offset(50, 52), width: 32, height: 18));

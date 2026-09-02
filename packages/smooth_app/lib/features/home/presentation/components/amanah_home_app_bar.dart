@@ -1,9 +1,8 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/authentication/domain/amanah_auth_user.dart';
-import 'package:smooth_app/generic_lib/design_constants.dart';
 
+/// Organism: DoctorProfileHeader App Bar matching DoctorProfileHeader.tsx (.web)
+/// Renders doctor avatar, doctor name with drop shadow, greeting, and frosted unread notification bell.
 class AmanahHomeAppBar extends StatelessWidget {
   const AmanahHomeAppBar({
     required this.user,
@@ -22,13 +21,13 @@ class AmanahHomeAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
     return Padding(
-      padding: const EdgeInsets.only(top: SMALL_SPACE, bottom: 8),
+      padding: const EdgeInsets.only(top: 6.0, bottom: 14.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
+          // Doctor Profile Identity Group (Avatar + Name + Greeting)
           Expanded(
             child: Material(
               color: Colors.transparent,
@@ -47,18 +46,18 @@ class AmanahHomeAppBar extends StatelessWidget {
                             user.fullName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleMedium?.copyWith(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontFamily: 'PlusJakartaSans',
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
+                              fontSize: 19.0,
+                              fontWeight: FontWeight.w800,
                               letterSpacing: -0.3,
-                              height: 1.05,
+                              height: 1.1,
                               shadows: <Shadow>[
                                 Shadow(
-                                  color: Colors.black.withValues(alpha: 0.15),
+                                  color: Color(0x33000000),
                                   blurRadius: 3,
-                                  offset: const Offset(0, 1),
+                                  offset: Offset(0, 1),
                                 ),
                               ],
                             ),
@@ -68,10 +67,10 @@ class AmanahHomeAppBar extends StatelessWidget {
                             greeting,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.90),
+                            style: const TextStyle(
+                              color: Color(0xE6FFFFFF), // text-white/90
                               fontFamily: 'PlusJakartaSans',
-                              fontSize: 13,
+                              fontSize: 13.0,
                               fontWeight: FontWeight.w500,
                               height: 1.2,
                             ),
@@ -84,7 +83,9 @@ class AmanahHomeAppBar extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: MEDIUM_SPACE),
+          const SizedBox(width: 12),
+
+          // Notification Bell Button (Frosted Capsule: w-10 h-10, bg-white/10, border white/15)
           _NotificationButton(
             unreadNotifications: unreadNotifications,
             onTap: onNotificationTap,
@@ -95,6 +96,7 @@ class AmanahHomeAppBar extends StatelessWidget {
   }
 }
 
+/// Atom: Doctor Avatar with circular border and fallback hero asset
 class _DoctorAvatar extends StatelessWidget {
   const _DoctorAvatar();
 
@@ -109,26 +111,26 @@ class _DoctorAvatar extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.40),
-            width: 2,
+            color: Colors.white.withValues(alpha: 0.35),
+            width: 1.5,
           ),
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.12),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
         child: ClipOval(
           child: Image.asset(
-            'assets/amanah/auth/auth_background.png',
+            'assets/amanah/images/woman-signin-hero.png',
             fit: BoxFit.cover,
             alignment: Alignment.topCenter,
             filterQuality: FilterQuality.high,
             errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
               return Container(
-                color: const Color(0xFF0A44FF).withValues(alpha: 0.30),
+                color: const Color(0xFF0D66E9).withValues(alpha: 0.40),
                 alignment: Alignment.center,
                 child: const Icon(Icons.person, color: Colors.white, size: 28),
               );
@@ -140,6 +142,7 @@ class _DoctorAvatar extends StatelessWidget {
   }
 }
 
+/// Atom: Frosted Notification Bell Button
 class _NotificationButton extends StatelessWidget {
   const _NotificationButton({
     required this.unreadNotifications,
@@ -154,48 +157,55 @@ class _NotificationButton extends StatelessWidget {
     return Semantics(
       button: true,
       label: 'Notifikasi',
-      child: SizedBox(
-        width: 44,
-        height: 44,
-        child: ClipOval(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Material(
-              color: Colors.white.withValues(alpha: 0.10),
-              shape: CircleBorder(
-                side: BorderSide(color: Colors.white.withValues(alpha: 0.30)),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.12),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.20),
+                width: 1.0,
               ),
-              shadowColor: Colors.black.withValues(alpha: 0.12),
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: onTap,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: <Widget>[
-                    const Icon(
-                      Icons.notifications_none_rounded,
-                      size: 22,
-                      color: Colors.white,
-                    ),
-                    if (unreadNotifications > 0)
-                      Positioned(
-                        top: SMALL_SPACE,
-                        right: SMALL_SPACE,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEF4444),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.60),
-                              width: 2,
-                            ),
-                          ),
-                          child: const SizedBox(width: 8, height: 8),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                const Icon(
+                  Icons.notifications_none_rounded,
+                  size: 20,
+                  color: Colors.white,
+                ),
+                if (unreadNotifications > 0)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEF4444),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 1.5,
                         ),
                       ),
-                  ],
-                ),
-              ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),

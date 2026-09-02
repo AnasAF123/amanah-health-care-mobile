@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
 /// 1. Top Screen Header with glassmorphism, back button, title, and right action
 /// Matching 1:1 with ScreenHeader.tsx in .web
@@ -152,8 +153,7 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool dark = theme.brightness == Brightness.dark;
+    final bool dark = Theme.of(context).brightness == Brightness.dark;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -262,8 +262,8 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                       '$bookedCount',
                       style: TextStyle(
                         color: dark
-                            ? const Color(0xFF38BDF8)
-                            : const Color(0xFF2563EB),
+                            ? AmanahColorTokens.brandAccent
+                            : AmanahColorTokens.brand,
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
@@ -306,6 +306,7 @@ class _RadialArcPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Offset center = Offset(size.width / 2, size.height / 2);
     final double radius = (size.width - 6) / 2;
+    final Rect bounds = Rect.fromCircle(center: center, radius: radius);
 
     // Background track circle
     final Paint trackPaint = Paint()
@@ -313,28 +314,30 @@ class _RadialArcPainter extends CustomPainter {
           ? Colors.white.withValues(alpha: 0.08)
           : const Color(0xFFE2E8F0)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.5;
+      ..strokeWidth = 4.0;
     canvas.drawCircle(center, radius, trackPaint);
 
-    // Active arc progress
-    final Paint arcPaint = Paint()
-      ..color = isCuti
-          ? const Color(0xFFF59E0B)
-          : (dark ? const Color(0xFF06B6D4) : const Color(0xFF2563EB))
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 3.5;
-
-    const double startAngle = -math.pi / 2;
-    final double sweepAngle = 2 * math.pi * progress;
+    // Active arc progress with gradient
     if (progress > 0) {
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        startAngle,
-        sweepAngle,
-        false,
-        arcPaint,
-      );
+      final Paint arcPaint = Paint()
+        ..shader = isCuti
+            ? const LinearGradient(
+                colors: <Color>[Color(0xFFF59E0B), Color(0xFFD97706)],
+              ).createShader(bounds)
+            : (dark
+                  ? const LinearGradient(
+                      colors: <Color>[Color(0xFF3B82F6), Color(0xFF2563EB)],
+                    ).createShader(bounds)
+                  : const LinearGradient(
+                      colors: <Color>[Color(0xFF60A5FA), Color(0xFF0D66E9)],
+                    ).createShader(bounds))
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = 4.0;
+
+      const double startAngle = -math.pi / 2;
+      final double sweepAngle = 2 * math.pi * progress;
+      canvas.drawArc(bounds, startAngle, sweepAngle, false, arcPaint);
     }
   }
 
@@ -500,8 +503,7 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool dark = theme.brightness == Brightness.dark;
+    final bool dark = Theme.of(context).brightness == Brightness.dark;
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
@@ -554,12 +556,6 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                 );
                 final bool isCloseToCenter = distanceRatio < 0.45;
 
-                final Color activePillColor = isCuti
-                    ? const Color(0xFFF59E0B)
-                    : (dark
-                          ? const Color(0xFF06B6D4)
-                          : const Color(0xFF2563EB));
-
                 return Container(
                   width: _totalItemSpace,
                   alignment: Alignment.center,
@@ -572,34 +568,61 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                         height: 84,
                         child: DecoratedBox(
                           decoration: BoxDecoration(
+                            gradient: isCloseToCenter
+                                ? (isCuti
+                                      ? const LinearGradient(
+                                          begin: Alignment.topCenter,
+                                          end: Alignment.bottomCenter,
+                                          colors: <Color>[
+                                            Color(0xFFF59E0B),
+                                            Color(0xFFD97706),
+                                          ],
+                                        )
+                                      : (dark
+                                            ? AmanahColorTokens
+                                                  .btnCrispBlueDarkGradient
+                                            : AmanahColorTokens
+                                                  .btnCrispBlueGradient))
+                                : null,
                             color: isCloseToCenter
-                                ? activePillColor
+                                ? null
                                 : (dark
-                                      ? const Color(0xFF131A2A)
+                                      ? Colors.white.withValues(alpha: 0.05)
                                       : Colors.white),
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
                               color: isCloseToCenter
-                                  ? activePillColor
+                                  ? (isCuti
+                                        ? const Color(0xFFB45309)
+                                        : (dark
+                                              ? AmanahColorTokens
+                                                    .btnCrispBlueDarkBorder
+                                              : AmanahColorTokens
+                                                    .btnCrispBlueBorder))
                                   : (dark
-                                        ? Colors.white.withValues(alpha: 0.12)
+                                        ? Colors.white.withValues(alpha: 0.10)
                                         : const Color(0xFFE2E8F0)),
                               width: 1,
                             ),
                             boxShadow: isCloseToCenter
                                 ? <BoxShadow>[
-                                    BoxShadow(
-                                      color: activePillColor.withValues(
-                                        alpha: 0.35,
-                                      ),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 4),
-                                    ),
+                                    if (isCuti)
+                                      BoxShadow(
+                                        color: const Color(
+                                          0xFFF59E0B,
+                                        ).withValues(alpha: 0.35),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 4),
+                                      )
+                                    else if (dark)
+                                      AmanahColorTokens.btnCrispBlueDarkShadow
+                                    else
+                                      AmanahColorTokens.btnCrispBlueShadow,
                                   ]
                                 : <BoxShadow>[
                                     BoxShadow(
                                       color: Colors.black.withValues(
-                                        alpha: dark ? 0.25 : 0.04,
+                                        alpha: 0.03,
                                       ),
                                       blurRadius: 4,
                                       offset: const Offset(0, 2),
@@ -616,52 +639,51 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                               },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
-                                  vertical: 6,
+                                  vertical: 8,
                                   horizontal: 4,
                                 ),
                                 child: Column(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: <Widget>[
-                                    // 1. Month (AGS)
+                                    // 1. Month Abbr
                                     Text(
                                       _getMonthAbbr(date.month),
                                       style: TextStyle(
                                         color: isCloseToCenter
-                                            ? (isCuti && dark
-                                                  ? Colors.black
-                                                  : Colors.white)
+                                            ? Colors.white
                                             : (dark
-                                                  ? const Color(0xFF94A3B8)
+                                                  ? Colors.white.withValues(
+                                                      alpha: 0.70,
+                                                    )
                                                   : const Color(0xFF64748B)),
                                         fontFamily: 'PlusJakartaSans',
                                         fontSize: 10,
-                                        fontWeight: FontWeight.w900,
+                                        fontWeight: FontWeight.w800,
                                         letterSpacing: 0.5,
-                                        height: 1,
                                       ),
                                     ),
 
-                                    // 2. Day Number (26)
+                                    // 2. Day Number
                                     Text(
                                       '${date.day}',
                                       style: TextStyle(
                                         color: isCloseToCenter
-                                            ? (isCuti && dark
-                                                  ? Colors.black
-                                                  : Colors.white)
+                                            ? Colors.white
                                             : (dark
                                                   ? Colors.white
                                                   : const Color(0xFF0F172A)),
                                         fontFamily: 'PlusJakartaSans',
-                                        fontSize: 24,
+                                        fontSize: 22,
                                         fontWeight: FontWeight.w900,
-                                        height: 1,
+                                        height: 1.0,
                                       ),
                                     ),
 
-                                    // 3. Year / Hari ini + Event Indicator Dot
+                                    // 3. Year / Hari ini + Indicator Dot (Vertical Column matching Web)
                                     Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       mainAxisSize: MainAxisSize.min,
                                       children: <Widget>[
                                         Text(
@@ -670,63 +692,55 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                               : (isCuti
                                                     ? 'Cuti'
                                                     : '${date.year}'),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             color: isCloseToCenter
-                                                ? (isCuti && dark
-                                                      ? Colors.black.withValues(
-                                                          alpha: 0.85,
-                                                        )
-                                                      : Colors.white.withValues(
-                                                          alpha: 0.90,
-                                                        ))
+                                                ? Colors.white.withValues(
+                                                    alpha: 0.95,
+                                                  )
                                                 : (dark
-                                                      ? const Color(0xFF64748B)
+                                                      ? Colors.white.withValues(
+                                                          alpha: 0.55,
+                                                        )
                                                       : const Color(
                                                           0xFF94A3B8,
                                                         )),
                                             fontFamily: 'PlusJakartaSans',
                                             fontSize: 9,
                                             fontWeight: FontWeight.w700,
-                                            height: 1,
+                                            height: 1.1,
                                           ),
                                         ),
-                                        const SizedBox(height: 3),
+                                        const SizedBox(height: 2),
                                         if (isCuti)
-                                          DecoratedBox(
+                                          Container(
+                                            width: 5,
+                                            height: 5,
                                             decoration: BoxDecoration(
                                               color: isCloseToCenter
-                                                  ? (isCuti && dark
-                                                        ? Colors.black
-                                                        : Colors.white)
+                                                  ? Colors.white
                                                   : const Color(0xFFF59E0B),
                                               shape: BoxShape.circle,
                                             ),
-                                            child: const SizedBox(
-                                              width: 5,
-                                              height: 5,
-                                            ),
                                           )
                                         else if (hasSchedules)
-                                          DecoratedBox(
+                                          Container(
+                                            width: 5,
+                                            height: 5,
                                             decoration: BoxDecoration(
                                               color: isCloseToCenter
                                                   ? Colors.white
                                                   : (dark
-                                                        ? const Color(
-                                                            0xFF38BDF8,
-                                                          )
-                                                        : const Color(
-                                                            0xFF2563EB,
-                                                          )),
+                                                        ? AmanahColorTokens
+                                                              .brandAccent
+                                                        : AmanahColorTokens
+                                                              .brand),
                                               shape: BoxShape.circle,
-                                            ),
-                                            child: const SizedBox(
-                                              width: 5,
-                                              height: 5,
                                             ),
                                           )
                                         else
-                                          const SizedBox(height: 5),
+                                          const SizedBox(width: 5, height: 5),
                                       ],
                                     ),
                                   ],

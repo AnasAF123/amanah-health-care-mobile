@@ -5,8 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:smooth_app/features/authentication/domain/amanah_auth_user.dart';
 import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
 import 'package:smooth_app/features/home/domain/amanah_notification_model.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_aurora_background.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_bottom_navigation_bar.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_clinic_analytics_section.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_home_app_bar.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_master_carousel_section.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_quick_access_section.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_schedule_card_stack.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_today_activity_section.dart';
@@ -15,6 +19,7 @@ import 'package:smooth_app/features/home/presentation/screen/amanah_doctor_id_ca
 import 'package:smooth_app/features/home/presentation/screen/amanah_notification_tab_screen.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_queue_dock_screen.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_schedule_tab_screen.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/features/permission/data/amanah_permission_store.dart';
 import 'package:smooth_app/features/permission/presentation/screen/amanah_leave_permission_tab_screen.dart';
 import 'package:smooth_app/features/presence/presentation/screen/amanah_presence_history_screen.dart';
@@ -36,14 +41,14 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
   final AmanahScheduleStore _scheduleStore = AmanahScheduleStore.instance;
   final AmanahNotificationStore _notificationStore =
       AmanahNotificationStore.instance;
-  final AmanahPermissionStore _permissionStore =
-      AmanahPermissionStore.instance;
+  final AmanahPermissionStore _permissionStore = AmanahPermissionStore.instance;
   AmanahHomeTab _selectedTab = AmanahHomeTab.home;
   String? _toastMessage;
   Timer? _toastTimer;
   String? _scheduleInitialSessionId;
   AmanahScheduleViewMode? _scheduleInitialViewMode;
   bool _scheduleOpenDetailOnLaunch = false;
+  bool _isScanDrawerOpen = false;
 
   @override
   void initState() {
@@ -73,72 +78,25 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     });
   }
 
-  void _handleLogout() {
-    showDialog<void>(
+  Future<void> _handleLogout() async {
+    final bool confirmed = await showAmanahConfirmationDialog(
       context: context,
-      builder: (BuildContext dialogContext) {
-        final bool dark = Theme.of(dialogContext).brightness == Brightness.dark;
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          backgroundColor: dark ? const Color(0xFF171717) : Colors.white,
-          title: Text(
-            'Konfirmasi Keluar',
-            style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
-              fontWeight: FontWeight.w800,
-              color: dark ? Colors.white : const Color(0xFF0F172A),
-            ),
-          ),
-          content: Text(
-            'Apakah Anda yakin ingin keluar dari akun dokter?',
-            style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
-              color: dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text(
-                'Batal',
-                style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF64748B),
-                ),
-              ),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF4444),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                _showToast('Berhasil keluar dari akun dokter');
-                if (widget.onLogout != null) {
-                  widget.onLogout?.call();
-                } else if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text(
-                'Keluar',
-                style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+      title: 'Konfirmasi Keluar',
+      message: 'Apakah Anda yakin ingin keluar dari akun dokter?',
+      confirmLabel: 'Keluar',
+      destructive: true,
     );
+
+    if (!confirmed || !mounted) {
+      return;
+    }
+
+    _showToast('Berhasil keluar dari akun dokter');
+    if (widget.onLogout != null) {
+      widget.onLogout?.call();
+    } else if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
   }
 
   void _handleQuickAction(String actionId) {
@@ -193,9 +151,9 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     final bool dark = theme.brightness == Brightness.dark;
 
     final Color bgColor = dark
-        ? const Color(0xFF0A0E1A)
+        ? AmanahColorTokens.canvasDark
         : (_selectedTab == AmanahHomeTab.home
-              ? const Color(0xFFF8FAFF)
+              ? AmanahColorTokens.canvasLight
               : Colors.white);
 
     final List<DoctorSchedule> todaySchedules = _scheduleStore
@@ -206,21 +164,22 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
       extendBody: true,
       body: Stack(
         children: <Widget>[
-          // Dynamic Aurora Ambient Glow (480px extended reach with fade starting at Poli Gigi & Mulut row)
+          // Dynamic Aurora Ambient Glow
           if (_selectedTab == AmanahHomeTab.home)
-            Positioned(
+            const Positioned(
               top: 0,
               left: 0,
               right: 0,
               height: 480,
-              child: _AmanahHomeAuroraBackground(dark: dark),
+              child: AmanahAuroraBackground(height: 480),
             ),
 
           // Main Viewport Container
           SafeArea(
+            top: _selectedTab != AmanahHomeTab.scan,
             bottom: false,
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 100),
               child: switch (_selectedTab) {
                 AmanahHomeTab.home => _AmanahHomeScreenContent(
                   key: const ValueKey<String>('home_content'),
@@ -229,9 +188,9 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   todaySchedules: todaySchedules,
                   unreadNotifications: _notificationStore.unreadCount,
                   onNotificationTap: () {
-                    Navigator.of(context).push(
-                      AmanahNotificationTabScreen.route(),
-                    );
+                    Navigator.of(
+                      context,
+                    ).push(AmanahNotificationTabScreen.route());
                   },
                   onProfileTap: () {
                     setState(() => _selectedTab = AmanahHomeTab.account);
@@ -245,6 +204,12 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   },
                   onActivityTap: (AmanahActivityMetric activity) {
                     _showToast('Membuka rincian aktivitas');
+                  },
+                  onSlideAction: (String slideId) {
+                    _showToast('Membuka program promo: $slideId');
+                  },
+                  onAnalyticsViewDetails: () {
+                    _showToast('Membuka analisis tren data klinis');
                   },
                 ),
                 AmanahHomeTab.schedule => AmanahScheduleTabScreen(
@@ -268,8 +233,16 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   user: widget.user,
                   bottomNavigationClearance:
                       96 + MediaQuery.viewPaddingOf(context).bottom,
+                  onDrawerStateChanged: (bool isOpen) {
+                    if (_isScanDrawerOpen != isOpen) {
+                      setState(() => _isScanDrawerOpen = isOpen);
+                    }
+                  },
                   onBack: () {
-                    setState(() => _selectedTab = AmanahHomeTab.home);
+                    setState(() {
+                      _isScanDrawerOpen = false;
+                      _selectedTab = AmanahHomeTab.home;
+                    });
                   },
                 ),
                 AmanahHomeTab.notifications => AmanahLeavePermissionTabScreen(
@@ -307,20 +280,23 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
             ),
         ],
       ),
-      bottomNavigationBar: AmanahBottomNavigationBar(
-        selectedTab: _selectedTab,
-        unreadNotifications: _permissionStore.pendingCount,
-        onTabSelected: (AmanahHomeTab tab) {
-          setState(() {
-            if (tab == AmanahHomeTab.schedule) {
-              _scheduleInitialSessionId = null;
-              _scheduleInitialViewMode = null;
-              _scheduleOpenDetailOnLaunch = false;
-            }
-            _selectedTab = tab;
-          });
-        },
-      ),
+      bottomNavigationBar:
+          (_selectedTab == AmanahHomeTab.scan && _isScanDrawerOpen)
+          ? null
+          : AmanahBottomNavigationBar(
+              selectedTab: _selectedTab,
+              unreadNotifications: _permissionStore.pendingCount,
+              onTabSelected: (AmanahHomeTab tab) {
+                setState(() {
+                  if (tab == AmanahHomeTab.schedule) {
+                    _scheduleInitialSessionId = null;
+                    _scheduleInitialViewMode = null;
+                    _scheduleOpenDetailOnLaunch = false;
+                  }
+                  _selectedTab = tab;
+                });
+              },
+            ),
     );
   }
 }
@@ -337,6 +313,8 @@ class _AmanahHomeScreenContent extends StatelessWidget {
     required this.onActivityTap,
     this.unreadNotifications = 0,
     this.onScheduleCardTap,
+    this.onSlideAction,
+    this.onAnalyticsViewDetails,
     super.key,
   });
 
@@ -349,6 +327,8 @@ class _AmanahHomeScreenContent extends StatelessWidget {
   final VoidCallback onDetailActivityTap;
   final ValueChanged<AmanahActivityMetric> onActivityTap;
   final ValueChanged<DoctorSchedule>? onScheduleCardTap;
+  final ValueChanged<String>? onSlideAction;
+  final VoidCallback? onAnalyticsViewDetails;
   final int unreadNotifications;
 
   @override
@@ -397,14 +377,22 @@ class _AmanahHomeScreenContent extends StatelessWidget {
           actions: data.quickActions,
           onActionTap: onQuickActionTap,
         ),
-        const SizedBox(height: 38),
+        const SizedBox(height: 16),
 
-        // 4. Today's Activity Stat Cards
+        // 4. Master 3D Deck Carousel (Promotions & Clinical Programs)
+        AmanahMasterCarouselSection(onSlideAction: onSlideAction),
+        const SizedBox(height: 20),
+
+        // 5. Today's Activity Stat Cards
         AmanahTodayActivitySection(
           activities: dynamicActivities,
           onDetailTap: onDetailActivityTap,
           onActivityTap: onActivityTap,
         ),
+        const SizedBox(height: 24),
+
+        // 6. Clinic Performance & Trends Analytics (Area Chart & Monthly Timeline)
+        AmanahClinicAnalyticsSection(onViewDetails: onAnalyticsViewDetails),
       ],
     );
   }
@@ -452,103 +440,4 @@ class _AmanahEphemeralToast extends StatelessWidget {
       ),
     );
   }
-}
-
-class _AmanahHomeAuroraBackground extends StatelessWidget {
-  const _AmanahHomeAuroraBackground({required this.dark});
-
-  final bool dark;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: CustomPaint(painter: _AmanahHomeAuroraPainter(dark: dark)),
-    );
-  }
-}
-
-class _AmanahHomeAuroraPainter extends CustomPainter {
-  const _AmanahHomeAuroraPainter({required this.dark});
-
-  final bool dark;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Rect topMask = Rect.fromLTWH(0, 0, size.width, size.height);
-    canvas.saveLayer(topMask, Paint());
-
-    if (dark) {
-      // 1. Deep Cosmic Sapphire Glow (alpha 0.62, blur 105px)
-      final Paint sapphireGlow = Paint()
-        ..color = const Color(0xFF07247A).withValues(alpha: 0.62)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 105);
-      canvas.drawOval(
-        Rect.fromLTWH(
-          -size.width * 0.20,
-          -size.height * 0.12,
-          size.width * 1.40,
-          320,
-        ),
-        sapphireGlow,
-      );
-
-      // 2. Electric Cyan/Teal Glow (alpha 0.55, blur 95px)
-      final Paint tealGlow = Paint()
-        ..color = const Color(0xFF0088CC).withValues(alpha: 0.55)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 95);
-      canvas.drawOval(
-        Rect.fromLTWH(
-          size.width * 0.20,
-          size.height * 0.05,
-          size.width * 1.0,
-          260,
-        ),
-        tealGlow,
-      );
-    } else {
-      // 1. Soft Vibrant Blue Base in top-left (alpha 0.58, blur 105px, gentle and airy)
-      final Paint blueGlow = Paint()
-        ..color = const Color(0xFF0A44FF).withValues(alpha: 0.58)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 105);
-      canvas.drawOval(
-        Rect.fromLTWH(
-          -size.width * 0.20,
-          -size.height * 0.08,
-          size.width * 1.40,
-          320,
-        ),
-        blueGlow,
-      );
-
-      // 2. Soft Radiant Cyan Glow in top-right (alpha 0.62, blur 95px)
-      final Paint cyanGlow = Paint()
-        ..color = const Color(0xFF00D4FF).withValues(alpha: 0.62)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 95);
-      canvas.drawOval(
-        Rect.fromLTWH(
-          size.width * 0.20,
-          size.height * 0.04,
-          size.width * 1.05,
-          260,
-        ),
-        cyanGlow,
-      );
-    }
-
-    // 3. Smooth Integration Mask (Fade starts right at the "Poli Gigi & Mulut" schedule text at ~53% of 480px, softly disappearing downwards)
-    final Paint fadePaint = Paint()
-      ..blendMode = BlendMode.dstIn
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: <Color>[Colors.black, Colors.black, Colors.transparent],
-        stops: <double>[0.0, 0.53, 1.0],
-      ).createShader(topMask);
-    canvas.drawRect(topMask, fadePaint);
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(covariant _AmanahHomeAuroraPainter oldDelegate) =>
-      oldDelegate.dark != dark;
 }
