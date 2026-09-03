@@ -158,7 +158,8 @@ class AmanahMasterCarouselSection extends StatefulWidget {
       _AmanahMasterCarouselSectionState();
 }
 
-class _AmanahMasterCarouselSectionState extends State<AmanahMasterCarouselSection>
+class _AmanahMasterCarouselSectionState
+    extends State<AmanahMasterCarouselSection>
     with SingleTickerProviderStateMixin {
   late final AnimationController _animController;
   Animation<double>? _posAnimation;
@@ -233,15 +234,20 @@ class _AmanahMasterCarouselSectionState extends State<AmanahMasterCarouselSectio
       CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
     );
 
-    _animController.forward(from: 0.0).orCancel.then((_) {
-      if (mounted) {
-        setState(() {
-          _pagePosition = (_pagePosition % widget.slides.length +
-                  widget.slides.length) %
-              widget.slides.length;
-        });
-      }
-    }).catchError((_) {});
+    _animController
+        .forward(from: 0.0)
+        .orCancel
+        .then((_) {
+          if (mounted) {
+            setState(() {
+              _pagePosition =
+                  (_pagePosition % widget.slides.length +
+                      widget.slides.length) %
+                  widget.slides.length;
+            });
+          }
+        })
+        .catchError((_) {});
   }
 
   void _animateToTargetIndex(int targetIndex) {
@@ -302,15 +308,20 @@ class _AmanahMasterCarouselSectionState extends State<AmanahMasterCarouselSectio
       CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
     );
 
-    _animController.forward(from: 0.0).orCancel.then((_) {
-      if (mounted) {
-        setState(() {
-          _pagePosition = (_pagePosition % widget.slides.length +
-                  widget.slides.length) %
-              widget.slides.length;
-        });
-      }
-    }).catchError((_) {});
+    _animController
+        .forward(from: 0.0)
+        .orCancel
+        .then((_) {
+          if (mounted) {
+            setState(() {
+              _pagePosition =
+                  (_pagePosition % widget.slides.length +
+                      widget.slides.length) %
+                  widget.slides.length;
+            });
+          }
+        })
+        .catchError((_) {});
 
     _startAutoplay();
   }
@@ -328,10 +339,16 @@ class _AmanahMasterCarouselSectionState extends State<AmanahMasterCarouselSectio
     // Sort cards by z-index: cards further from center (higher abs offset) are painted first (beneath)
     final List<int> sortedIndices = List<int>.generate(total, (int i) => i);
     sortedIndices.sort((int a, int b) {
-      final double offsetA =
-          _getContinuousOffset(a, _pagePosition, total).abs();
-      final double offsetB =
-          _getContinuousOffset(b, _pagePosition, total).abs();
+      final double offsetA = _getContinuousOffset(
+        a,
+        _pagePosition,
+        total,
+      ).abs();
+      final double offsetB = _getContinuousOffset(
+        b,
+        _pagePosition,
+        total,
+      ).abs();
       return offsetB.compareTo(offsetA);
     });
 
@@ -767,19 +784,21 @@ class AmanahCarouselNotchedIndicator extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isActive
                     ? (isDark
-                        ? const Color(0xFF3B82F6)
-                        : AmanahCarouselTokens.indicatorActiveColor)
+                          ? const Color(0xFF3B82F6)
+                          : AmanahCarouselTokens.indicatorActiveColor)
                     : (isDark
-                        ? const Color(0xFF475569)
-                        : AmanahCarouselTokens.indicatorInactiveColor),
+                          ? const Color(0xFF475569)
+                          : AmanahCarouselTokens.indicatorInactiveColor),
                 borderRadius: BorderRadius.circular(999),
                 boxShadow: isActive
                     ? <BoxShadow>[
                         BoxShadow(
-                          color: (isDark
-                                  ? const Color(0xFF3B82F6)
-                                  : AmanahCarouselTokens.indicatorActiveColor)
-                              .withValues(alpha: 0.35),
+                          color:
+                              (isDark
+                                      ? const Color(0xFF3B82F6)
+                                      : AmanahCarouselTokens
+                                            .indicatorActiveColor)
+                                  .withValues(alpha: 0.35),
                           blurRadius: 4,
                           offset: const Offset(0, 1),
                         ),
@@ -840,7 +859,9 @@ class AmanahCarouselNavButton extends StatelessWidget {
             child: Icon(
               isLeft ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
               size: 18,
-              color: isDark ? Colors.white : AmanahCarouselTokens.navBtnIconColor,
+              color: isDark
+                  ? Colors.white
+                  : AmanahCarouselTokens.navBtnIconColor,
             ),
           ),
         ),

@@ -22,7 +22,8 @@ class AmanahGenieCanvasPainter extends CustomPainter {
   final Offset dockPoint;
   final Rect cardRect;
 
-  static double _clamp(double v, double lo, double hi) => math.max(lo, math.min(hi, v));
+  static double _clamp(double v, double lo, double hi) =>
+      math.max(lo, math.min(hi, v));
   static double _lerp(double a, double b, double t) => a + (b - a) * t;
   static double _eioC(double t) =>
       t < 0.5 ? 4.0 * t * t * t : 1.0 - math.pow(-2.0 * t + 2.0, 3.0) / 2.0;
@@ -48,13 +49,21 @@ class AmanahGenieCanvasPainter extends CustomPainter {
       final double rowXStart = direction == AmanahGenieDirection.minimize
           ? (1.0 - prox) * 0.65
           : prox * 0.65;
-      final double xP = _clamp((rawT - rowXStart) / (1.0 - rowXStart + 0.00001), 0.0, 1.0);
+      final double xP = _clamp(
+        (rawT - rowXStart) / (1.0 - rowXStart + 0.00001),
+        0.0,
+        1.0,
+      );
       final double xE = _eioC(xP);
 
       final double rowYStart = direction == AmanahGenieDirection.minimize
           ? (1.0 - prox) * 0.20
           : prox * 0.20;
-      final double yP = _clamp((rawT - rowYStart) / (1.0 - rowYStart + 0.00001), 0.0, 1.0);
+      final double yP = _clamp(
+        (rawT - rowYStart) / (1.0 - rowYStart + 0.00001),
+        0.0,
+        1.0,
+      );
       final double yE = _eIn2(yP);
 
       double left;
@@ -76,14 +85,21 @@ class AmanahGenieCanvasPainter extends CustomPainter {
         continue;
       }
 
-      final Rect srcRect = Rect.fromLTWH(0, y * dpr, snapshot.width.toDouble(), dpr);
+      final Rect srcRect = Rect.fromLTWH(
+        0,
+        y * dpr,
+        snapshot.width.toDouble(),
+        dpr,
+      );
       final Rect dstRect = Rect.fromLTWH(left, destY, rowW, 1.0);
 
       canvas.drawImageRect(snapshot, srcRect, dstRect, paint);
     }
 
     // Radiant glow burst at dock point (brand blue with screen blend mode)
-    final double glowRaw = direction == AmanahGenieDirection.minimize ? rawT : 1.0 - rawT;
+    final double glowRaw = direction == AmanahGenieDirection.minimize
+        ? rawT
+        : 1.0 - rawT;
     if (glowRaw > 0.70) {
       final double a = _eOut2((glowRaw - 0.70) / 0.30) * 0.45;
       final Paint glowPaint = Paint()
@@ -130,11 +146,7 @@ Future<ui.Image> generateCardCoverSnapshot({
     ..shader = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: <Color>[
-        Colors.white,
-        Color(0xFFF8FAFF),
-        Color(0xFFEDF2FF),
-      ],
+      colors: <Color>[Colors.white, Color(0xFFF8FAFF), Color(0xFFEDF2FF)],
     ).createShader(rect);
 
   canvas.drawRRect(rrect, bgPaint);
@@ -172,19 +184,27 @@ Future<ui.Image> generateCardCoverSnapshot({
 
   // 5. Draw Official Watermark Vector Logo
   final Paint wmPaint = Paint()
-    ..shader = const LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: <Color>[
-        Color(0xFF0A44FF),
-        Color(0xFF1A55FF),
-        Color(0xFF3B82F6),
-      ],
-    ).createShader(Rect.fromCenter(center: rect.center, width: 140, height: 140));
+    ..shader =
+        const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            Color(0xFF0A44FF),
+            Color(0xFF1A55FF),
+            Color(0xFF3B82F6),
+          ],
+        ).createShader(
+          Rect.fromCenter(center: rect.center, width: 140, height: 140),
+        );
 
   final Path wmPath = AmanahWatermarkPathData.createPath();
   final Matrix4 matrix = Matrix4.identity()
-    ..translateByDouble((size.width - 140) / 2, (size.height - 140) / 2 - 25, 0.0, 1.0)
+    ..translateByDouble(
+      (size.width - 140) / 2,
+      (size.height - 140) / 2 - 25,
+      0.0,
+      1.0,
+    )
     ..scaleByDouble(140.0 / 188.0, 140.0 / 188.0, 1.0, 1.0);
   final Path transformed = wmPath.transform(matrix.storage);
   canvas.drawPath(transformed, wmPaint);
@@ -211,5 +231,8 @@ Future<ui.Image> generateCardCoverSnapshot({
   canvas.restore();
 
   final ui.Picture picture = recorder.endRecording();
-  return picture.toImage((size.width * pixelRatio).toInt(), (size.height * pixelRatio).toInt());
+  return picture.toImage(
+    (size.width * pixelRatio).toInt(),
+    (size.height * pixelRatio).toInt(),
+  );
 }

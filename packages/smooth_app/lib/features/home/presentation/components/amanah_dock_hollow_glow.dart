@@ -25,7 +25,9 @@ class AmanahDockHollowGlowPainter extends CustomPainter {
     final double scaleX = w / 390.0;
     final double scaleY = h / 145.0;
 
-    final double activeProgress = isActivating ? 1.0 : dragProgress.clamp(0.0, 1.0);
+    final double activeProgress = isActivating
+        ? 1.0
+        : dragProgress.clamp(0.0, 1.0);
 
     canvas.save();
     canvas.scale(scaleX, scaleY);
@@ -103,7 +105,9 @@ class AmanahDockHollowGlowPainter extends CustomPainter {
     // 1C. Semi-Circular Ambient Dome Halo
     final double domeFactor = Curves.easeOutCubic.transform(activeProgress);
     final double domeScale = isLongPressing ? 1.08 : (0.90 + domeFactor * 0.30);
-    final double domeOpacity = isLongPressing ? 0.75 : (0.20 + domeFactor * 0.50);
+    final double domeOpacity = isLongPressing
+        ? 0.75
+        : (0.20 + domeFactor * 0.50);
     final Paint domePaint = Paint()
       ..blendMode = BlendMode.screen
       ..shader = ui.Gradient.linear(
@@ -128,7 +132,9 @@ class AmanahDockHollowGlowPainter extends CustomPainter {
     // =========================================================================
     // LAYER 2: INTERIOR CAVITY APERTURE CORE GLOW
     // =========================================================================
-    final double apertureOpacity = isLongPressing ? 1.0 : (0.45 + activeProgress * 0.55);
+    final double apertureOpacity = isLongPressing
+        ? 1.0
+        : (0.45 + activeProgress * 0.55);
     final Paint aperturePaint = Paint()
       ..shader = ui.Gradient.radial(
         const Offset(195, 42),
@@ -198,8 +204,16 @@ class AmanahDockHollowGlowPainter extends CustomPainter {
         const Offset(195, 0),
         const Offset(195, 145),
         isDark
-            ? const <Color>[Color(0xFF0F1629), Color(0xFF0A0F1D), Color(0xFF050810)]
-            : const <Color>[Color(0xFFE2E8F0), Color(0xFFCBD5E1), Color(0xFF94A3B8)],
+            ? const <Color>[
+                Color(0xFF0F1629),
+                Color(0xFF0A0F1D),
+                Color(0xFF050810),
+              ]
+            : const <Color>[
+                Color(0xFFE2E8F0),
+                Color(0xFFCBD5E1),
+                Color(0xFF94A3B8),
+              ],
         const <double>[0.0, 0.35, 1.0],
       );
     canvas.drawPath(surfacePath, surfacePaint);

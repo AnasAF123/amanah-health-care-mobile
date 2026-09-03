@@ -15,6 +15,8 @@ class AuthInputField extends StatelessWidget {
     this.obscureText = false,
     this.trailing,
     this.onFieldSubmitted,
+    this.onChanged,
+    this.hasError = false,
   });
 
   final String label;
@@ -28,18 +30,32 @@ class AuthInputField extends StatelessWidget {
   final bool obscureText;
   final Widget? trailing;
   final ValueChanged<String>? onFieldSubmitted;
+  final ValueChanged<String>? onChanged;
+  final bool hasError;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final BorderRadius fieldRadius = BorderRadius.circular(16);
-    final Color borderColor = theme.colorScheme.outline.withValues(
-      alpha: theme.brightness == Brightness.dark ? 0.28 : 0.34,
+    final bool isDark = theme.brightness == Brightness.dark;
+    final Color normalBorderColor = theme.colorScheme.outline.withValues(
+      alpha: isDark ? 0.28 : 0.34,
     );
-    final Color fillColor = theme.brightness == Brightness.dark
-        ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.42)
-        : const Color(0xFFFAFAFA).withValues(alpha: 0.72);
-    final Color iconColor = theme.colorScheme.onSurface.withValues(alpha: 0.42);
+    final Color borderColor = hasError
+        ? theme.colorScheme.error.withValues(alpha: 0.85)
+        : normalBorderColor;
+    final Color fillColor = hasError
+        ? (isDark
+              ? theme.colorScheme.error.withValues(alpha: 0.08)
+              : const Color(0xFFFEF2F2))
+        : (isDark
+              ? theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.42,
+                )
+              : const Color(0xFFFAFAFA).withValues(alpha: 0.72));
+    final Color iconColor = hasError
+        ? theme.colorScheme.error
+        : theme.colorScheme.onSurface.withValues(alpha: 0.42);
 
     return Semantics(
       label: label,
@@ -52,6 +68,7 @@ class AuthInputField extends StatelessWidget {
         validator: validator,
         obscureText: obscureText,
         onFieldSubmitted: onFieldSubmitted,
+        onChanged: onChanged,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
         style: theme.textTheme.bodyMedium?.copyWith(
@@ -84,17 +101,25 @@ class AuthInputField extends StatelessWidget {
           ),
           border: OutlineInputBorder(
             borderRadius: fieldRadius,
-            borderSide: BorderSide(color: borderColor),
+            borderSide: BorderSide(
+              color: borderColor,
+              width: hasError ? 1.2 : 1.0,
+            ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: fieldRadius,
-            borderSide: BorderSide(color: borderColor),
+            borderSide: BorderSide(
+              color: borderColor,
+              width: hasError ? 1.2 : 1.0,
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: fieldRadius,
             borderSide: BorderSide(
-              color: theme.colorScheme.primary.withValues(alpha: 0.70),
-              width: 1.2,
+              color: hasError
+                  ? theme.colorScheme.error
+                  : theme.colorScheme.primary.withValues(alpha: 0.70),
+              width: hasError ? 1.4 : 1.2,
             ),
           ),
           errorBorder: OutlineInputBorder(

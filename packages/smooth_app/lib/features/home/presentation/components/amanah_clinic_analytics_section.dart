@@ -303,203 +303,149 @@ class _AmanahClinicAnalyticsSectionState
     showAmanahBottomSheet<void>(
       context: context,
       builder: (BuildContext ctx) {
-        return Container(
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            color: dark ? const Color(0xFF0F1422) : Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            border: Border.all(
-              color: dark
-                  ? Colors.white.withValues(alpha: 0.12)
-                  : const Color(0xFFE2E8F0),
-            ),
+        return AmanahBottomSheetScaffold(
+          title: 'Rincian Kunjungan Poliklinik',
+          subtitle: '${record.monthName} ${record.year} • RS Amanah Sehat',
+          fixedHeightFactor: 0.58,
+          minHeight: 360,
+          bodyPadding: const EdgeInsets.fromLTRB(
+            AmanahSpacing.xxl,
+            AmanahSpacing.lg,
+            AmanahSpacing.xxl,
+            AmanahSpacing.xxl,
           ),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                // Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFF0D66E9,
-                            ).withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.trending_up_rounded,
-                            color: Color(0xFF0D66E9),
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              'Rincian Kunjungan Poliklinik',
-                              style: TextStyle(
-                                fontFamily: 'PlusJakartaSans',
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.w800,
-                                color: dark
-                                    ? Colors.white
-                                    : const Color(0xFF0F172A),
-                              ),
-                            ),
-                            Text(
-                              '${record.monthName} ${record.year} • RS Amanah Sehat',
-                              style: TextStyle(
-                                fontFamily: 'PlusJakartaSans',
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: dark
-                                    ? const Color(0xFF94A3B8)
-                                    : const Color(0xFF64748B),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: AmanahComponentSize.iconButton),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Metrics Row
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
+          footer: AmanahButton.primary(
+            text: 'Tutup',
+            size: AmanahButtonSize.medium,
+            isFullWidth: true,
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              // Metrics Row
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: dark
+                            ? const Color(0xFF162032)
+                            : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
                           color: dark
-                              ? const Color(0xFF162032)
-                              : const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: dark
-                                ? Colors.white.withValues(alpha: 0.08)
-                                : const Color(0xFFE2E8F0),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              'Pasien Kontrol (Lama)',
-                              style: TextStyle(
-                                fontFamily: 'PlusJakartaSans',
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w600,
-                                color: dark
-                                    ? const Color(0xFF94A3B8)
-                                    : const Color(0xFF64748B),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '$returning Pasien',
-                              style: TextStyle(
-                                fontFamily: 'PlusJakartaSans',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
-                                color: dark
-                                    ? Colors.white
-                                    : const Color(0xFF0F172A),
-                              ),
-                            ),
-                          ],
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : const Color(0xFFE2E8F0),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: dark
-                              ? const Color(0xFF162032)
-                              : const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: dark
-                                ? Colors.white.withValues(alpha: 0.08)
-                                : const Color(0xFFE2E8F0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            'Pasien Kontrol (Lama)',
+                            style: TextStyle(
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w600,
+                              color: dark
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B),
+                            ),
                           ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              'Pasien Baru',
-                              style: TextStyle(
-                                fontFamily: 'PlusJakartaSans',
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w600,
-                                color: dark
-                                    ? const Color(0xFF94A3B8)
-                                    : const Color(0xFF64748B),
-                              ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '$returning Pasien',
+                            style: TextStyle(
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              color: dark
+                                  ? Colors.white
+                                  : const Color(0xFF0F172A),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '$newPatients Pasien',
-                              style: const TextStyle(
-                                fontFamily: 'PlusJakartaSans',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFF0D66E9),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 14),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: dark
+                            ? const Color(0xFF162032)
+                            : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: dark
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : const Color(0xFFE2E8F0),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            'Pasien Baru',
+                            style: TextStyle(
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w600,
+                              color: dark
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '$newPatients Pasien',
+                            style: const TextStyle(
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF0D66E9),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
 
-                // Description Box
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
+              // Description Box
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: dark
+                      ? const Color(0xFF162032)
+                      : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
                     color: dark
-                        ? const Color(0xFF162032)
-                        : const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: dark
-                          ? Colors.white.withValues(alpha: 0.08)
-                          : const Color(0xFFE2E8F0),
-                    ),
-                  ),
-                  child: Text(
-                    'Total kunjungan poli anak RS Amanah Sehat pada bulan ${record.monthName} ${record.year} mencapai $total pasien, didominasi oleh pasien kontrol rutin (${((returning / total) * 100).round()}%) dan pasien baru (${((newPatients / total) * 100).round()}%).',
-                    style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w500,
-                      height: 1.45,
-                      color: dark
-                          ? const Color(0xFFCBD5E1)
-                          : const Color(0xFF475569),
-                    ),
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : const Color(0xFFE2E8F0),
                   ),
                 ),
-                const SizedBox(height: 20),
-              ],
-            ),
+                child: Text(
+                  'Total kunjungan poli anak RS Amanah Sehat pada bulan ${record.monthName} ${record.year} mencapai $total pasien, didominasi oleh pasien kontrol rutin (${((returning / total) * 100).round()}%) dan pasien baru (${((newPatients / total) * 100).round()}%).',
+                  style: TextStyle(
+                    fontFamily: 'PlusJakartaSans',
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w500,
+                    height: 1.45,
+                    color: dark
+                        ? const Color(0xFFCBD5E1)
+                        : const Color(0xFF475569),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },

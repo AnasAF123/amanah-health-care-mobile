@@ -38,12 +38,8 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
   final GlobalKey<FormState> _signUpFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _forgotPasswordFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _changePasswordFormKey = GlobalKey<FormState>();
-  final TextEditingController _identifierController = TextEditingController(
-    text: 'dokter@amanah.health',
-  );
-  final TextEditingController _passwordController = TextEditingController(
-    text: 'dokter123',
-  );
+  final TextEditingController _identifierController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -60,6 +56,8 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
 
   AuthSheetMode _mode = AuthSheetMode.signIn;
   AuthProviderType? _loadingProvider;
+  bool _hasCredentialError = false;
+  String? _credentialErrorMessage;
   String? _statusMessage;
   bool _statusIsError = false;
   bool _sheetOpen = false;
@@ -115,6 +113,8 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     _sheetOpen = true;
     _mode = mode;
     _loadingProvider = null;
+    _hasCredentialError = false;
+    _credentialErrorMessage = null;
     _statusMessage = null;
     _statusIsError = false;
 
@@ -124,7 +124,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
           isScrollControlled: true,
           useSafeArea: false,
           enableDrag: true,
-          showDragHandle: true,
+          showDragHandle: false,
           backgroundColor: Colors.transparent,
           barrierColor: Colors.black.withValues(alpha: 0.18),
           builder: (BuildContext sheetContext) {
@@ -175,8 +175,15 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
         identifierController: _identifierController,
         passwordController: _passwordController,
         loadingProvider: _loadingProvider,
-        statusMessage: _statusMessage,
-        statusIsError: _statusIsError,
+        hasCredentialError: _hasCredentialError,
+        credentialErrorMessage: _credentialErrorMessage,
+        onCredentialChanged: () {
+          if (_hasCredentialError) {
+            _hasCredentialError = false;
+            _credentialErrorMessage = null;
+            _refreshSheet(sheetSetState);
+          }
+        },
         onForgotPassword: () {
           final String identifier = _identifierController.text.trim();
           if (identifier.contains('@')) {
@@ -292,12 +299,14 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     }
 
     _loadingProvider = AuthProviderType.email;
+    _hasCredentialError = false;
+    _credentialErrorMessage = null;
     _statusMessage = null;
     _statusIsError = false;
     _refreshSheet(sheetSetState);
 
     final AmanahAuthUser? user = await widget.repository.signIn(
-      identifier: _identifierController.text,
+      identifier: _identifierController.text.trim(),
       password: _passwordController.text,
     );
 
@@ -307,12 +316,12 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
 
     _loadingProvider = null;
     if (user == null) {
-      _statusMessage =
-          'Credential tidak cocok. Coba gunakan dokter@amanah.health / dokter123 atau staff@amanah.health / staff123.';
-      _statusIsError = true;
+      _hasCredentialError = true;
+      _credentialErrorMessage =
+          'Email atau password yang Anda masukkan salah. Silakan periksa kembali.';
     } else {
-      _statusMessage = 'Masuk sebagai ${user.fullName} (${user.roleLabel}).';
-      _statusIsError = false;
+      _hasCredentialError = false;
+      _credentialErrorMessage = null;
     }
     _refreshSheet(sheetSetState);
 
@@ -376,7 +385,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     _loadingProvider = null;
     _identifierController.text = _emailController.text;
     _statusMessage =
-        'Akun demo ${_fullNameController.text.trim()} dibuat. Silakan masuk.';
+        'Akun ${_fullNameController.text.trim()} berhasil dibuat. Silakan masuk.';
     _statusIsError = false;
     if (sheetContext.mounted) {
       Navigator.of(

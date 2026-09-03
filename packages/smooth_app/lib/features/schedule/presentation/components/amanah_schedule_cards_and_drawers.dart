@@ -1031,364 +1031,248 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
-    final double screenHeight = MediaQuery.sizeOf(context).height;
-    final double targetHeight = screenHeight * 0.85;
 
-    return SizedBox(
-      height: targetHeight,
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: dark ? const Color(0xFF0A0E1A) : Colors.white,
-            border: Border(
-              top: BorderSide(
-                color: dark
-                    ? Colors.white.withValues(alpha: 0.10)
-                    : const Color(0xFFF5F5F5),
-              ),
-            ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 45,
-                offset: const Offset(0, -12),
-              ),
-            ],
-          ),
-          child: Column(
+    return AmanahBottomSheetScaffold(
+      title: 'Detail Sesi Praktik',
+      fixedHeightFactor: 0.85,
+      bodyPadding: const EdgeInsets.fromLTRB(
+        AmanahSpacing.xxl,
+        AmanahSpacing.xl,
+        AmanahSpacing.xxl,
+        AmanahSpacing.xxl,
+      ),
+      footer: AmanahButton.primary(
+        text: 'Edit Jadwal',
+        isFullWidth: true,
+        size: AmanahButtonSize.medium,
+        onPressed: () {
+          Navigator.of(context).pop();
+          onTapEdit();
+        },
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          // Title & Date Heading + Status Badge
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              // Interactive Drag Handle
-              InkWell(
-                onTap: () => Navigator.of(context).pop(),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 40,
-                  child: Center(
-                    child: Container(
-                      width: 44,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: dark
-                            ? Colors.white.withValues(alpha: 0.25)
-                            : const Color(0xFFD4D4D8),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // Master Header (Detail Sesi Praktik)
-              Container(
-                padding: const EdgeInsets.fromLTRB(24, 2, 24, 12),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: dark
-                          ? Colors.white.withValues(alpha: 0.10)
-                          : const Color(0xFFF1F5F9),
-                    ),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      'Detail Sesi Praktik',
+                      schedule.title,
                       style: TextStyle(
-                        color: dark ? Colors.white : const Color(0xFF0F172A),
+                        color: dark ? Colors.white : const Color(0xFF020617),
                         fontFamily: 'PlusJakartaSans',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.2,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.3,
                       ),
                     ),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(999),
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: dark
-                              ? Colors.white.withValues(alpha: 0.10)
-                              : const Color(0xFFF5F5F5),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.close_rounded,
-                          size: 16,
-                          color: dark
-                              ? const Color(0xFFD4D4D8)
-                              : const Color(0xFF52525B),
-                        ),
+                    const SizedBox(height: 2),
+                    Text(
+                      schedule.date,
+                      style: TextStyle(
+                        color: dark
+                            ? const Color(0xFFA1A1AA)
+                            : const Color(0xFF64748B),
+                        fontFamily: 'PlusJakartaSans',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
               ),
-
-              // Detail Content Body
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.fromLTRB(
-                    24,
-                    20,
-                    24,
-                    28 + MediaQuery.paddingOf(context).bottom,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      // Title & Date Heading + Status Badge
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text(
-                                  schedule.title,
-                                  style: TextStyle(
-                                    color: dark
-                                        ? Colors.white
-                                        : const Color(0xFF020617),
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -0.3,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  schedule.date,
-                                  style: TextStyle(
-                                    color: dark
-                                        ? const Color(0xFFA1A1AA)
-                                        : const Color(0xFF64748B),
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isDayCuti
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: isDayCuti
+                      ? const Color(0xFFF59E0B).withValues(alpha: 0.20)
+                      : (schedule.badgeVariant == AmanahBadgeVariant.success
+                            ? (dark
+                                  ? const Color(
+                                      0xFF10B981,
+                                    ).withValues(alpha: 0.20)
+                                  : const Color(0xFFECFDF5))
+                            : schedule.badgeVariant ==
+                                  AmanahBadgeVariant.warning
+                            ? (dark
                                   ? const Color(
                                       0xFFF59E0B,
                                     ).withValues(alpha: 0.20)
-                                  : (schedule.badgeVariant ==
-                                            AmanahBadgeVariant.success
-                                        ? (dark
-                                              ? const Color(
-                                                  0xFF10B981,
-                                                ).withValues(alpha: 0.20)
-                                              : const Color(0xFFECFDF5))
-                                        : schedule.badgeVariant ==
-                                              AmanahBadgeVariant.warning
-                                        ? (dark
-                                              ? const Color(
-                                                  0xFFF59E0B,
-                                                ).withValues(alpha: 0.20)
-                                              : const Color(0xFFFEF3C7))
-                                        : (dark
-                                              ? const Color(
-                                                  0xFF3B82F6,
-                                                ).withValues(alpha: 0.20)
-                                              : const Color(0xFFEFF6FF))),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    color: isDayCuti
-                                        ? const Color(0xFFF59E0B)
-                                        : _badgeTone(
-                                            schedule.badgeVariant,
-                                          ).primary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const SizedBox(width: 6, height: 6),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  isDayCuti ? 'Cuti' : schedule.badge,
-                                  style: TextStyle(
-                                    color: isDayCuti
-                                        ? const Color(0xFFF59E0B)
-                                        : (schedule.badgeVariant ==
-                                                  AmanahBadgeVariant.success
-                                              ? (dark
-                                                    ? const Color(0xFF34D399)
-                                                    : const Color(0xFF047857))
-                                              : schedule.badgeVariant ==
-                                                    AmanahBadgeVariant.warning
-                                              ? (dark
-                                                    ? const Color(0xFFFBBF24)
-                                                    : const Color(0xFFD97706))
-                                              : (dark
-                                                    ? const Color(0xFF60A5FA)
-                                                    : const Color(0xFF1D4ED8))),
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                                  : const Color(0xFFFEF3C7))
+                            : (dark
+                                  ? const Color(
+                                      0xFF3B82F6,
+                                    ).withValues(alpha: 0.20)
+                                  : const Color(0xFFEFF6FF))),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: isDayCuti
+                            ? const Color(0xFFF59E0B)
+                            : _badgeTone(schedule.badgeVariant).primary,
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(height: 14),
-
-                      // Specification Records List
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(
-                              color: dark
-                                  ? Colors.white.withValues(alpha: 0.10)
-                                  : const Color(0xFFF1F5F9),
-                            ),
-                            bottom: BorderSide(
-                              color: dark
-                                  ? Colors.white.withValues(alpha: 0.10)
-                                  : const Color(0xFFF1F5F9),
-                            ),
-                          ),
-                        ),
-                        child: Column(
-                          children: <Widget>[
-                            _PatientSpecRow(
-                              label: 'Sesi Praktik',
-                              value: schedule.sessionType.isNotEmpty
-                                  ? 'Sesi ${schedule.sessionType}'
-                                  : schedule.title,
-                              dark: dark,
-                            ),
-                            _PatientSpecRow(
-                              label: 'Jam Praktik',
-                              value: schedule.time,
-                              dark: dark,
-                            ),
-                            _PatientSpecRow(
-                              label: 'Ruang Praktik',
-                              value: schedule.room,
-                              dark: dark,
-                            ),
-                            _PatientSpecRow(
-                              label: 'Poli / Spesialisasi',
-                              value: schedule.poli,
-                              dark: dark,
-                            ),
-                            _SessionSpecTotalPatientsRow(
-                              bookedCount: schedule.bookedPatients.length,
-                              dark: dark,
-                            ),
-                          ],
-                        ),
+                      child: const SizedBox(width: 6, height: 6),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      isDayCuti ? 'Cuti' : schedule.badge,
+                      style: TextStyle(
+                        color: isDayCuti
+                            ? const Color(0xFFF59E0B)
+                            : (schedule.badgeVariant ==
+                                      AmanahBadgeVariant.success
+                                  ? (dark
+                                        ? const Color(0xFF34D399)
+                                        : const Color(0xFF047857))
+                                  : schedule.badgeVariant ==
+                                        AmanahBadgeVariant.warning
+                                  ? (dark
+                                        ? const Color(0xFFFBBF24)
+                                        : const Color(0xFFD97706))
+                                  : (dark
+                                        ? const Color(0xFF60A5FA)
+                                        : const Color(0xFF1D4ED8))),
+                        fontFamily: 'PlusJakartaSans',
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
                       ),
-                      const SizedBox(height: 14),
-
-                      // Stacked Avatars Trigger Bar (Lihat Pasien Booking)
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(
-                              color: dark
-                                  ? Colors.white.withValues(alpha: 0.10)
-                                  : const Color(
-                                      0xFF000000,
-                                    ).withValues(alpha: 0.06),
-                            ),
-                            bottom: BorderSide(
-                              color: dark
-                                  ? Colors.white.withValues(alpha: 0.10)
-                                  : const Color(
-                                      0xFF000000,
-                                    ).withValues(alpha: 0.06),
-                            ),
-                          ),
-                        ),
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.of(context).pop();
-                            onViewPatients();
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Expanded(
-                                child: Row(
-                                  children: <Widget>[
-                                    _StackedPatientAvatars(
-                                      patients: schedule.bookedPatients,
-                                      dark: dark,
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(
-                                        'Lihat Pasien Booking (${schedule.bookedPatients.length} Pasien)',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: dark
-                                              ? const Color(0xFF60A5FA)
-                                              : const Color(0xFF2563EB),
-                                          fontFamily: 'PlusJakartaSans',
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Icon(
-                                Icons.chevron_right_rounded,
-                                size: 16,
-                                color: dark
-                                    ? const Color(0xFF60A5FA)
-                                    : const Color(0xFF2563EB),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      AmanahButton.primary(
-                        text: 'Edit Jadwal',
-                        isFullWidth: true,
-                        size: AmanahButtonSize.medium,
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          onTapEdit();
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 14),
+
+          // Specification Records List
+          DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: dark
+                      ? Colors.white.withValues(alpha: 0.10)
+                      : const Color(0xFFF1F5F9),
+                ),
+                bottom: BorderSide(
+                  color: dark
+                      ? Colors.white.withValues(alpha: 0.10)
+                      : const Color(0xFFF1F5F9),
+                ),
+              ),
+            ),
+            child: Column(
+              children: <Widget>[
+                _PatientSpecRow(
+                  label: 'Sesi Praktik',
+                  value: schedule.sessionType.isNotEmpty
+                      ? 'Sesi ${schedule.sessionType}'
+                      : schedule.title,
+                  dark: dark,
+                ),
+                _PatientSpecRow(
+                  label: 'Jam Praktik',
+                  value: schedule.time,
+                  dark: dark,
+                ),
+                _PatientSpecRow(
+                  label: 'Ruang Praktik',
+                  value: schedule.room,
+                  dark: dark,
+                ),
+                _PatientSpecRow(
+                  label: 'Poli / Spesialisasi',
+                  value: schedule.poli,
+                  dark: dark,
+                ),
+                _SessionSpecTotalPatientsRow(
+                  bookedCount: schedule.bookedPatients.length,
+                  dark: dark,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // Stacked Avatars Trigger Bar (Lihat Pasien Booking)
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: dark
+                      ? Colors.white.withValues(alpha: 0.10)
+                      : const Color(0xFF000000).withValues(alpha: 0.06),
+                ),
+                bottom: BorderSide(
+                  color: dark
+                      ? Colors.white.withValues(alpha: 0.10)
+                      : const Color(0xFF000000).withValues(alpha: 0.06),
+                ),
+              ),
+            ),
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).pop();
+                onViewPatients();
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Expanded(
+                    child: Row(
+                      children: <Widget>[
+                        _StackedPatientAvatars(
+                          patients: schedule.bookedPatients,
+                          dark: dark,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Lihat Pasien Booking (${schedule.bookedPatients.length} Pasien)',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: dark
+                                  ? const Color(0xFF60A5FA)
+                                  : const Color(0xFF2563EB),
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 16,
+                    color: dark
+                        ? const Color(0xFF60A5FA)
+                        : const Color(0xFF2563EB),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AmanahSpacing.xxl),
+        ],
       ),
     );
   }
@@ -1568,113 +1452,45 @@ class AmanahPatientDetailModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
-    final double maxHeight = MediaQuery.sizeOf(context).height * 0.92;
-    final double minHeight = math.min(540, maxHeight);
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: maxHeight, minHeight: minHeight),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: dark ? const Color(0xFF0A0E1A) : Colors.white,
-            border: Border(
-              top: BorderSide(
-                color: dark
-                    ? Colors.white.withValues(alpha: 0.10)
-                    : const Color(0xFFF5F5F5),
-              ),
+    return AmanahBottomSheetScaffold(
+      title: 'Detail rekam pasien',
+      fixedHeightFactor: 0.92,
+      minHeight: 540,
+      bodyPadding: EdgeInsets.zero,
+      extendBodyBehindHeader: true,
+      body: Stack(
+        children: <Widget>[
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 260,
+            child: CustomPaint(
+              painter: _PatientDetailAuroraPainter(dark: dark),
             ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 45,
-                offset: const Offset(0, -12),
-              ),
-            ],
           ),
-          child: Stack(
-            children: <Widget>[
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 320,
-                child: CustomPaint(
-                  painter: _PatientDetailAuroraPainter(dark: dark),
+          SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(
+              AmanahSpacing.xxl,
+              AmanahSpacing.md,
+              AmanahSpacing.xxl,
+              AmanahSpacing.xxl,
+            ),
+            child: Column(
+              children: <Widget>[
+                _PatientProfileHeader(patient: patient, dark: dark),
+                const SizedBox(height: AmanahSpacing.lg),
+                _PatientSpecificationTable(
+                  patient: patient,
+                  schedule: schedule,
+                  dark: dark,
                 ),
-              ),
-              Column(
-                children: <Widget>[
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: Center(
-                      child: Container(
-                        width: 44,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: dark
-                              ? Colors.white.withValues(alpha: 0.25)
-                              : const Color(0xFFD4D4D8),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(24, 2, 24, 10),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: dark
-                              ? Colors.white.withValues(alpha: 0.10)
-                              : const Color(0xFFF1F5F9),
-                        ),
-                      ),
-                    ),
-                    child: Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Text(
-                            'Detail rekam pasien',
-                            style: TextStyle(
-                              color: dark
-                                  ? Colors.white
-                                  : const Color(0xFF0F172A),
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AmanahComponentSize.iconButton),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
-                      child: Column(
-                        children: <Widget>[
-                          _PatientProfileHeader(patient: patient, dark: dark),
-                          const SizedBox(height: 16),
-                          _PatientSpecificationTable(
-                            patient: patient,
-                            schedule: schedule,
-                            dark: dark,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

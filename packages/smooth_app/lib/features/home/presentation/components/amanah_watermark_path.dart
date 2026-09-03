@@ -4597,7 +4597,8 @@ class AmanahWatermarkLogo extends StatelessWidget {
         child: CustomPaint(
           size: Size(size, size),
           painter: _AmanahWatermarkPainter(
-            gradient: gradient ??
+            gradient:
+                gradient ??
                 const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -4631,7 +4632,9 @@ class _AmanahWatermarkPainter extends CustomPainter {
 
     final Paint paint = Paint()..style = PaintingStyle.fill;
     if (gradient != null) {
-      paint.shader = gradient!.createShader(const Rect.fromLTWH(0, 0, 188, 188));
+      paint.shader = gradient!.createShader(
+        const Rect.fromLTWH(0, 0, 188, 188),
+      );
     } else if (color != null) {
       paint.color = color!;
     } else {
@@ -4717,12 +4720,7 @@ class AmanahPixelTexture extends StatelessWidget {
   }
 }
 
-enum AmanahPixelMaskType {
-  none,
-  fadeTop,
-  concaveTop,
-  bottomLeft,
-}
+enum AmanahPixelMaskType { none, fadeTop, concaveTop, bottomLeft }
 
 class AmanahOrganicPixelPainter extends CustomPainter {
   const AmanahOrganicPixelPainter({
@@ -4736,7 +4734,8 @@ class AmanahOrganicPixelPainter extends CustomPainter {
   final double opacity;
 
   static double _seededHash(double x, double y, double seed) {
-    final double n = math.sin(x * 12.9898 + y * 78.233 + seed * 37.719) * 43758.5453;
+    final double n =
+        math.sin(x * 12.9898 + y * 78.233 + seed * 37.719) * 43758.5453;
     return n - n.floorToDouble();
   }
 
@@ -4790,7 +4789,8 @@ class AmanahOrganicPixelPainter extends CustomPainter {
         }
 
         final double opacRand = _seededHash(r.toDouble(), c.toDouble(), 23);
-        final double cellOpacity = (0.18 + opacRand * 0.82).clamp(0.10, 1.0) * opacity * verticalFade;
+        final double cellOpacity =
+            (0.18 + opacRand * 0.82).clamp(0.10, 1.0) * opacity * verticalFade;
 
         if (cellOpacity < 0.02) {
           continue;
@@ -4803,7 +4803,8 @@ class AmanahOrganicPixelPainter extends CustomPainter {
         final double offset = (pixelSize - curSize) / 2.0;
 
         final double colorRand = _seededHash(r.toDouble(), c.toDouble(), 47);
-        final int colorIdx = (colorRand * customColors.length).floor() % customColors.length;
+        final int colorIdx =
+            (colorRand * customColors.length).floor() % customColors.length;
         final Color baseColor = customColors[colorIdx];
 
         paint.color = baseColor.withValues(alpha: cellOpacity);
@@ -4844,4 +4845,3 @@ class AmanahOrganicPixelPainter extends CustomPainter {
         oldDelegate.opacity != opacity;
   }
 }
-

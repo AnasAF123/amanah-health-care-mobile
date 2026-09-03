@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/features/presence/presentation/components/amanah_qr_code_widget.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -28,108 +29,23 @@ class AmanahDoctorIdCardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool dark = theme.brightness == Brightness.dark;
-
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: dark
-                ? const Color(0xFF0A0E1A).withValues(alpha: 0.70)
-                : Colors.white.withValues(alpha: 0.75),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
+    return AmanahScreenHeader(
+      title: 'Kartu Identitas',
+      onBack: onBack,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          AmanahScreenHeaderIconAction(
+            icon: Icons.info_outline_rounded,
+            semanticsLabel: 'Petunjuk & Informasi ID Card',
+            onPressed: onInfo,
           ),
-          child: SizedBox(
-            height: 48,
-            child: Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                Positioned.fill(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        AmanahButton.icon(
-                          icon: Icons.arrow_back,
-                          semanticsLabel: 'Kembali',
-                          onPressed: onBack,
-                          customSize: 34,
-                          customBackgroundColor: Colors.transparent,
-                          customBorder: Border.all(color: Colors.transparent),
-                          customForegroundColor: dark
-                              ? const Color(0xFFE5E7EB)
-                              : const Color(0xFF334155),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            AmanahButton.icon(
-                              icon: Icons.info_outline_rounded,
-                              semanticsLabel: 'Petunjuk & Informasi ID Card',
-                              onPressed: onInfo,
-                              customSize: 34,
-                              customBackgroundColor: dark
-                                  ? Colors.white.withValues(alpha: 0.06)
-                                  : const Color(0xFFEFF6FF),
-                              customBorder: Border.all(
-                                color: Colors.transparent,
-                              ),
-                              customForegroundColor: dark
-                                  ? const Color(0xFF60A5FA)
-                                  : const Color(0xFF0A44FF),
-                            ),
-                            const SizedBox(width: 4),
-                            AmanahButton.icon(
-                              icon: Icons.qr_code_2_rounded,
-                              semanticsLabel: 'Tampilkan QR Code Presensi',
-                              onPressed: onQr,
-                              customSize: 34,
-                              customBackgroundColor: dark
-                                  ? Colors.white.withValues(alpha: 0.06)
-                                  : const Color(0xFFEFF6FF),
-                              customBorder: Border.all(
-                                color: Colors.transparent,
-                              ),
-                              customForegroundColor: dark
-                                  ? const Color(0xFF60A5FA)
-                                  : const Color(0xFF0A44FF),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 92),
-                  child: Text(
-                    'Kartu Identitas',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: dark ? Colors.white : const Color(0xFF14103B),
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0,
-                      height: 1.1,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          AmanahScreenHeaderIconAction(
+            icon: Icons.qr_code_2_rounded,
+            semanticsLabel: 'Tampilkan QR Code Presensi',
+            onPressed: onQr,
           ),
-        ),
+        ],
       ),
     );
   }
@@ -773,144 +689,81 @@ class AmanahDoctorIdInfoDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
-    final double maxHeight = MediaQuery.sizeOf(context).height * 0.88;
-    final double bottomInset = MediaQuery.paddingOf(context).bottom;
-    final Color bgColor = dark ? const Color(0xFF0A0E1A) : Colors.white;
     final Color borderColor = dark
         ? Colors.white.withValues(alpha: 0.10)
         : const Color(0xFFF1F5F9);
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
     final Color subtextColor = dark
         ? const Color(0xFF94A3B8)
         : const Color(0xFF64748B);
 
-    return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: 380, maxHeight: maxHeight),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            border: Border(top: BorderSide(color: borderColor)),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withValues(alpha: dark ? 0.80 : 0.25),
-                blurRadius: 45,
-                offset: const Offset(0, -12),
-              ),
-            ],
+    return AmanahBottomSheetScaffold(
+      title: 'Panduan & Informasi ID Card 3D',
+      subtitle: 'RS Amanah Sehat',
+      minHeight: 380,
+      fixedHeightFactor: 0.72,
+      bodyPadding: const EdgeInsets.fromLTRB(
+        AmanahSpacing.xxl,
+        AmanahSpacing.lg,
+        AmanahSpacing.xxl,
+        AmanahSpacing.xxl,
+      ),
+      footer: AmanahButton.primary(
+        text: 'Mengerti',
+        isFullWidth: true,
+        size: AmanahButtonSize.medium,
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'ID Card Digital Terverifikasi RS Amanah Sehat dilengkapi simulasi fisika tiga dimensi dan token presensi aman:',
+            style: TextStyle(
+              color: subtextColor,
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              height: 1.45,
+            ),
           ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          const SizedBox(height: 14),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: dark
+                  ? Colors.white.withValues(alpha: 0.02)
+                  : const Color(0xFFF8FAFC).withValues(alpha: 0.50),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderColor),
+            ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 4),
-                  child: Center(
-                    child: Container(
-                      width: 44,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: dark
-                            ? Colors.white.withValues(alpha: 0.20)
-                            : AmanahColorTokens.neutral300,
-                        borderRadius: BorderRadius.circular(AmanahRadius.pill),
-                      ),
-                    ),
-                  ),
+                _InfoDrawerItem(
+                  icon: Icons.explore_outlined,
+                  title: 'Fisika 3D & Gesture Interaktif',
+                  subtitle:
+                      'Tarik tali lanyard atau ketuk sisi kartu untuk memutar balik kartu secara natural.',
+                  dark: dark,
+                  showDivider: true,
                 ),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(24, 4, 24, 10),
-                  decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(color: borderColor)),
-                  ),
-                  child: Text(
-                    'Panduan & Informasi ID Card 3D',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: textColor,
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0,
-                    ),
-                  ),
+                _InfoDrawerItem(
+                  icon: Icons.fingerprint_rounded,
+                  title: 'Barcode & Token Presensi',
+                  subtitle:
+                      'Sisi belakang memuat 1D Barcode, dan tombol QR di pojok atas menyediakan kode scanner poli/IGD.',
+                  dark: dark,
+                  showDivider: true,
                 ),
-                Flexible(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          'ID Card Digital Terverifikasi RS Amanah Sehat dilengkapi simulasi fisika tiga dimensi dan token presensi aman:',
-                          style: TextStyle(
-                            color: subtextColor,
-                            fontFamily: 'PlusJakartaSans',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            height: 1.45,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: dark
-                                ? Colors.white.withValues(alpha: 0.02)
-                                : const Color(
-                                    0xFFF8FAFC,
-                                  ).withValues(alpha: 0.50),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: borderColor),
-                          ),
-                          child: Column(
-                            children: <Widget>[
-                              _InfoDrawerItem(
-                                icon: Icons.explore_outlined,
-                                title: 'Fisika 3D & Gesture Interaktif',
-                                subtitle:
-                                    'Tarik tali lanyard atau ketuk sisi kartu untuk memutar balik kartu secara natural.',
-                                dark: dark,
-                                showDivider: true,
-                              ),
-                              _InfoDrawerItem(
-                                icon: Icons.fingerprint_rounded,
-                                title: 'Barcode & Token Presensi',
-                                subtitle:
-                                    'Sisi belakang memuat 1D Barcode, dan tombol QR di pojok atas menyediakan kode scanner poli/IGD.',
-                                dark: dark,
-                                showDivider: true,
-                              ),
-                              _InfoDrawerItem(
-                                icon: Icons.verified_user_outlined,
-                                title: 'Verifikasi Resmi KKI',
-                                subtitle:
-                                    'Nomor Surat Izin Praktik (SIP) terdaftar aktif di Konsil Kedokteran Indonesia.',
-                                dark: dark,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(24, 8, 24, bottomInset + 24),
-                  child: AmanahButton.primary(
-                    text: 'Mengerti',
-                    isFullWidth: true,
-                    size: AmanahButtonSize.medium,
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
+                _InfoDrawerItem(
+                  icon: Icons.verified_user_outlined,
+                  title: 'Verifikasi Resmi KKI',
+                  subtitle:
+                      'Nomor Surat Izin Praktik (SIP) terdaftar aktif di Konsil Kedokteran Indonesia.',
+                  dark: dark,
                 ),
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }

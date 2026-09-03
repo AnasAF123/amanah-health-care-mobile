@@ -104,7 +104,11 @@ class _BlurryMorphTextState extends State<BlurryMorphText>
           content = Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text('Memproses', style: widget.style, textAlign: widget.textAlign),
+              Text(
+                'Memproses',
+                style: widget.style,
+                textAlign: widget.textAlign,
+              ),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -142,10 +146,7 @@ class _BlurryMorphTextState extends State<BlurryMorphText>
         if (blurSigma <= 0.01) {
           return Opacity(
             opacity: opacity.clamp(0.0, 1.0),
-            child: Transform.scale(
-              scale: scale,
-              child: content,
-            ),
+            child: Transform.scale(scale: scale, child: content),
           );
         }
 

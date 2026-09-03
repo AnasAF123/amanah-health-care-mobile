@@ -63,7 +63,7 @@ void main() {
 
         // Radial Capacity Gauge
         expect(find.text('Kapasitas Hari Ini'), findsOneWidget);
-        expect(find.text('Lihat Schedule'), findsOneWidget);
+        expect(find.text('Lihat jadwal'), findsOneWidget);
 
         // Booked Patients Showcase on Aug 26
         expect(find.text('Steven Pratama'), findsOneWidget);
@@ -82,7 +82,7 @@ void main() {
       await tester.pumpWidget(createScheduleScreen());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Lihat Schedule'));
+      await tester.tap(find.text('Lihat jadwal'));
       await tester.pumpAndSettle();
 
       expect(find.byType(AmanahDocScheduleCalendarDrawer), findsOneWidget);
@@ -120,7 +120,7 @@ void main() {
       await tester.pumpWidget(createScheduleScreen());
       await tester.pumpAndSettle();
 
-      final Finder addButtons = find.byIcon(Icons.add);
+      final Finder addButtons = find.byIcon(Icons.add_rounded);
       expect(addButtons, findsOneWidget);
 
       await tester.tap(addButtons);
@@ -163,10 +163,7 @@ void main() {
         expect(find.byIcon(Icons.more_vert_rounded), findsNothing);
 
         // Verify Edit Jadwal brand button is rendered below Lihat Pasien Booking
-        expect(
-          find.textContaining('Lihat Pasien Booking'),
-          findsOneWidget,
-        );
+        expect(find.textContaining('Lihat Pasien Booking'), findsOneWidget);
         expect(find.text('Edit Jadwal'), findsOneWidget);
 
         // Tap Edit Jadwal button

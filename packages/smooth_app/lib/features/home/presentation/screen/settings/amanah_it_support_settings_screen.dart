@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/authentication/domain/amanah_auth_user.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_settings_components.dart';
 import 'package:smooth_app/features/home/presentation/screen/settings/amanah_it_chat_screen.dart';
@@ -7,11 +8,7 @@ import 'package:smooth_app/features/home/presentation/screen/settings/amanah_it_
 import 'package:smooth_app/features/home/presentation/screen/settings/amanah_it_my_reports_screen.dart';
 
 class AmanahItSupportSettingsScreen extends StatefulWidget {
-  const AmanahItSupportSettingsScreen({
-    this.user,
-    this.onBack,
-    super.key,
-  });
+  const AmanahItSupportSettingsScreen({this.user, this.onBack, super.key});
 
   final AmanahAuthUser? user;
   final VoidCallback? onBack;
@@ -154,8 +151,9 @@ class _AmanahItSupportSettingsScreenState
         ? const Color(0xFF94A3B8)
         : const Color(0xFF64748B);
 
-    final int activeReportsCount =
-        _reports.where((AmanahReportItem r) => r.status == 'proses').length;
+    final int activeReportsCount = _reports
+        .where((AmanahReportItem r) => r.status == 'proses')
+        .length;
 
     Color reportBadgeBg;
     Color reportBadgeBorder;
@@ -168,8 +166,9 @@ class _AmanahItSupportSettingsScreenState
       reportBadgeBorder = dark
           ? const Color(0xFFF59E0B).withValues(alpha: 0.30)
           : const Color(0xFFFDE68A);
-      reportBadgeText =
-          dark ? const Color(0xFFFCD34D) : const Color(0xFFB45309);
+      reportBadgeText = dark
+          ? const Color(0xFFFCD34D)
+          : const Color(0xFFB45309);
     } else {
       reportBadgeBg = dark
           ? Colors.white.withValues(alpha: 0.10)
@@ -177,8 +176,9 @@ class _AmanahItSupportSettingsScreenState
       reportBadgeBorder = dark
           ? Colors.white.withValues(alpha: 0.10)
           : const Color(0xFFE2E8F0);
-      reportBadgeText =
-          dark ? const Color(0xFFCBD5E1) : const Color(0xFF475569);
+      reportBadgeText = dark
+          ? const Color(0xFFCBD5E1)
+          : const Color(0xFF475569);
     }
 
     return Scaffold(
@@ -361,30 +361,11 @@ class _AmanahItSupportSettingsScreenState
                             ),
                           ),
                           const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: _openChat,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF0D66E9),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-                                elevation: 0,
-                              ),
-                              child: const Text(
-                                'Chat dengan tim IT',
-                                style: TextStyle(
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
+                          AmanahButton.primary(
+                            text: 'Chat dengan tim IT',
+                            isFullWidth: true,
+                            size: AmanahButtonSize.medium,
+                            onPressed: _openChat,
                           ),
                         ],
                       ),

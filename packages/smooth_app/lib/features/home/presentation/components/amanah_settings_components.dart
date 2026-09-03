@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
 /// Section container with clean Android-style header and rounded divider card.
@@ -17,18 +18,10 @@ class AmanahSettingSection extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color cardBg = dark
-        ? const Color(0xFF111624)
-        : Colors.white;
-    final Color borderColor = dark
-        ? Colors.white.withValues(alpha: 0.05)
-        : const Color(0xFFF1F5F9);
-    final Color dividerColor = dark
-        ? Colors.white.withValues(alpha: 0.05)
-        : const Color(0xFFF1F5F9);
-    final Color titleColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+    final Color cardBg = AmanahThemeTokens.elevatedSurface(context);
+    final Color borderColor = AmanahThemeTokens.outline(context);
+    final Color dividerColor = AmanahThemeTokens.outline(context);
+    final Color titleColor = AmanahThemeTokens.textTertiary(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,8 +33,9 @@ class AmanahSettingSection extends StatelessWidget {
             style: TextStyle(
               color: titleColor,
               fontFamily: 'PlusJakartaSans',
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0,
             ),
           ),
         ),
@@ -91,15 +85,10 @@ class AmanahSettingInfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool dark = theme.brightness == Brightness.dark;
-
-    final Color labelColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+    final Color labelColor = AmanahThemeTokens.textTertiary(context);
     final Color valueColor = isHighlighted
-        ? (dark ? const Color(0xFF34D399) : const Color(0xFF059669))
-        : (dark ? Colors.white : const Color(0xFF0F172A));
+        ? AmanahThemeTokens.status(AmanahStatusTone.success).onSurface
+        : AmanahThemeTokens.textPrimary(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -126,7 +115,7 @@ class AmanahSettingInfoRow extends StatelessWidget {
                     fontFamily: 'PlusJakartaSans',
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: -0.1,
+                    letterSpacing: 0,
                   ),
                 ),
               ],
@@ -155,19 +144,12 @@ class AmanahSettingEditableRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool dark = theme.brightness == Brightness.dark;
-
-    final Color labelColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
-    final Color valueColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color helperColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
-    final Color chevronColor = dark
-        ? const Color(0xFF94A3B8).withValues(alpha: 0.50)
-        : const Color(0xFF64748B).withValues(alpha: 0.50);
+    final Color labelColor = AmanahThemeTokens.textTertiary(context);
+    final Color valueColor = AmanahThemeTokens.textPrimary(context);
+    final Color helperColor = AmanahThemeTokens.textTertiary(context);
+    final Color chevronColor = AmanahThemeTokens.textTertiary(
+      context,
+    ).withValues(alpha: 0.50);
 
     return Material(
       color: Colors.transparent,
@@ -200,7 +182,7 @@ class AmanahSettingEditableRow extends StatelessWidget {
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        letterSpacing: -0.1,
+                        letterSpacing: 0,
                       ),
                     ),
                     if (helperText != null) ...<Widget>[
@@ -245,19 +227,12 @@ class AmanahSettingNavRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool dark = theme.brightness == Brightness.dark;
-
-    final Color titleColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color categoryColor = dark
-        ? const Color(0xFF38BDF8)
-        : const Color(0xFF2563EB);
-    final Color subtitleColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
-    final Color chevronColor = dark
-        ? const Color(0xFF94A3B8).withValues(alpha: 0.50)
-        : const Color(0xFF64748B).withValues(alpha: 0.50);
+    final Color titleColor = AmanahThemeTokens.textPrimary(context);
+    final Color categoryColor = AmanahThemeTokens.textTertiary(context);
+    final Color subtitleColor = AmanahThemeTokens.textTertiary(context);
+    final Color chevronColor = AmanahThemeTokens.textTertiary(
+      context,
+    ).withValues(alpha: 0.50);
 
     return Material(
       color: Colors.transparent,
@@ -279,6 +254,7 @@ class AmanahSettingNavRow extends StatelessWidget {
                           fontFamily: 'PlusJakartaSans',
                           fontSize: 10.5,
                           fontWeight: FontWeight.w600,
+                          letterSpacing: 0,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -289,7 +265,8 @@ class AmanahSettingNavRow extends StatelessWidget {
                         color: titleColor,
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 12.5,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0,
                         height: 1.3,
                       ),
                     ),
@@ -333,13 +310,8 @@ class AmanahSettingHorizontalRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool dark = theme.brightness == Brightness.dark;
-
-    final Color labelColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
-    final Color valueColor = dark ? Colors.white : const Color(0xFF0F172A);
+    final Color labelColor = AmanahThemeTokens.textTertiary(context);
+    final Color valueColor = AmanahThemeTokens.textPrimary(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -362,7 +334,7 @@ class AmanahSettingHorizontalRow extends StatelessWidget {
               fontFamily: 'PlusJakartaSans',
               fontSize: 13,
               fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
-              letterSpacing: -0.1,
+              letterSpacing: 0,
             ),
           ),
         ],
@@ -391,10 +363,8 @@ class AmanahSettingToggleRow extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color titleColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtitleColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+    final Color titleColor = AmanahThemeTokens.textPrimary(context);
+    final Color subtitleColor = AmanahThemeTokens.textTertiary(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -412,7 +382,7 @@ class AmanahSettingToggleRow extends StatelessWidget {
                     fontFamily: 'PlusJakartaSans',
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: -0.1,
+                    letterSpacing: 0,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -429,11 +399,7 @@ class AmanahSettingToggleRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          AmanahToggleSwitch(
-            active: checked,
-            onToggle: onToggle,
-            dark: dark,
-          ),
+          AmanahToggleSwitch(active: checked, onToggle: onToggle, dark: dark),
         ],
       ),
     );
@@ -522,10 +488,8 @@ class AmanahSettingActionRow extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color titleColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtitleColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+    final Color titleColor = AmanahThemeTokens.textPrimary(context);
+    final Color subtitleColor = AmanahThemeTokens.textTertiary(context);
 
     Color btnBg;
     Color btnBorder;
@@ -765,44 +729,20 @@ class _AmanahSettingEditDialogState extends State<AmanahSettingEditDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                TextButton(
+                AmanahButton.text(
+                  text: 'Batal',
+                  size: AmanahButtonSize.small,
+                  customForegroundColor: subtextColor,
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    'Batal',
-                    style: TextStyle(
-                      color: subtextColor,
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
                 ),
                 const SizedBox(width: 8),
-                ElevatedButton(
+                AmanahButton.primary(
+                  text: 'Simpan',
+                  size: AmanahButtonSize.small,
                   onPressed: () {
                     widget.onSave(_controller.text);
                     Navigator.of(context).pop();
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0D66E9),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Simpan',
-                    style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
                 ),
               ],
             ),

@@ -133,9 +133,7 @@ class _AmanahDoctorIdCardScreenState extends State<AmanahDoctorIdCardScreen> {
       body: Stack(
         children: <Widget>[
           Positioned.fill(child: ColoredBox(color: bgColor)),
-          Positioned.fill(
-            child: AmanahDoctorIdCardStage(profile: _profile),
-          ),
+          Positioned.fill(child: AmanahDoctorIdCardStage(profile: _profile)),
           Positioned(
             top: 0,
             left: 0,

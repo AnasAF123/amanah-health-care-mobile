@@ -60,7 +60,8 @@ class AmanahStatusBadge extends StatelessWidget {
               : 999,
         ),
         border: Border.all(color: style.border.withValues(alpha: 0.72)),
-        boxShadow: variant == AmanahBadgeVariant.primary ||
+        boxShadow:
+            variant == AmanahBadgeVariant.primary ||
                 variant == AmanahBadgeVariant.success
             ? <BoxShadow>[
                 BoxShadow(

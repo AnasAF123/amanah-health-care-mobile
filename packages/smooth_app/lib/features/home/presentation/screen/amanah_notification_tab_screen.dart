@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smooth_app/features/home/domain/amanah_notification_model.dart';
 import 'package:smooth_app/features/home/domain/amanah_visual_role.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_clay_icon.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_filter_bar.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
@@ -109,7 +110,13 @@ class _AmanahNotificationTabScreenState
             // 3. Notification List Area
             Expanded(
               child: filteredList.isEmpty
-                  ? _AmanahEmptyNotificationView(dark: dark)
+                  ? const AmanahEmptyState.viewport(
+                      icon: Icons.notifications_none_rounded,
+                      iconShape: AmanahEmptyStateIconShape.circle,
+                      title: 'Tidak ada notifikasi',
+                      message:
+                          'Semua pembaruan pada kategori ini sudah diperiksa.',
+                    )
                   : ListView.separated(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
                       physics: const BouncingScrollPhysics(),
@@ -294,62 +301,6 @@ class _AmanahNotificationTile extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AmanahEmptyNotificationView extends StatelessWidget {
-  const _AmanahEmptyNotificationView({required this.dark});
-
-  final bool dark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Container(
-              width: 52,
-              height: 52,
-              decoration: BoxDecoration(
-                color: dark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : const Color(0xFFF1F5F9),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.notifications_none_rounded,
-                size: 26,
-                color: dark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Tidak ada notifikasi',
-              style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: dark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Semua pembaruan pada kategori ini sudah diperiksa.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: dark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
-              ),
-            ),
-          ],
         ),
       ),
     );

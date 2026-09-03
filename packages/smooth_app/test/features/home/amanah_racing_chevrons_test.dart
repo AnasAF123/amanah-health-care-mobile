@@ -9,11 +9,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: AmanahRacingPulseChevrons(),
-            ),
-          ),
+          home: Scaffold(body: Center(child: AmanahRacingPulseChevrons())),
         ),
       );
 

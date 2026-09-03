@@ -3,10 +3,7 @@ import 'package:smooth_app/features/home/presentation/components/amanah_screen_h
 import 'package:smooth_app/features/home/presentation/components/amanah_settings_components.dart';
 
 class AmanahPrivacySecuritySettingsScreen extends StatefulWidget {
-  const AmanahPrivacySecuritySettingsScreen({
-    this.onBack,
-    super.key,
-  });
+  const AmanahPrivacySecuritySettingsScreen({this.onBack, super.key});
 
   final VoidCallback? onBack;
 

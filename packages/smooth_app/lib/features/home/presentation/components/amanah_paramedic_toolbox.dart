@@ -128,15 +128,25 @@ class _AmanahToolbox3DPainter extends CustomPainter {
 
       // Radiant Medical Energy Burst Glow
       final Paint medicalGlow = Paint()
-        ..shader = RadialGradient(
-          colors: <Color>[
-            const Color(0xFF60A5FA),
-            const Color(0xFF2563EB).withValues(alpha: 0.8),
-            const Color(0xFF1D4ED8).withValues(alpha: 0.0),
-          ],
-          stops: const <double>[0.0, 0.45, 1.0],
-        ).createShader(Rect.fromCenter(center: const Offset(50, 52), width: 32, height: 18));
-      canvas.drawOval(Rect.fromCenter(center: const Offset(50, 52), width: 32, height: 18), medicalGlow);
+        ..shader =
+            RadialGradient(
+              colors: <Color>[
+                const Color(0xFF60A5FA),
+                const Color(0xFF2563EB).withValues(alpha: 0.8),
+                const Color(0xFF1D4ED8).withValues(alpha: 0.0),
+              ],
+              stops: const <double>[0.0, 0.45, 1.0],
+            ).createShader(
+              Rect.fromCenter(
+                center: const Offset(50, 52),
+                width: 32,
+                height: 18,
+              ),
+            );
+      canvas.drawOval(
+        Rect.fromCenter(center: const Offset(50, 52), width: 32, height: 18),
+        medicalGlow,
+      );
     }
 
     // 3. Lower Base Body (Fixed Bottom Half)
@@ -174,26 +184,44 @@ class _AmanahToolbox3DPainter extends CustomPainter {
     canvas.drawLine(
       const Offset(50, 58),
       const Offset(50, 75),
-      Paint()..color = const Color(0xFFE6E6E6)..strokeWidth = 0.75,
+      Paint()
+        ..color = const Color(0xFFE6E6E6)
+        ..strokeWidth = 0.75,
     );
     canvas.drawLine(
       const Offset(28.35, 45.5),
       const Offset(28.35, 62.5),
-      Paint()..color = const Color(0xFF666666)..strokeWidth = 0.5,
+      Paint()
+        ..color = const Color(0xFF666666)
+        ..strokeWidth = 0.5,
     );
     canvas.drawLine(
       const Offset(71.65, 45.5),
       const Offset(71.65, 62.5),
-      Paint()..color = const Color(0xFFCCCCCC)..strokeWidth = 0.5,
+      Paint()
+        ..color = const Color(0xFFCCCCCC)
+        ..strokeWidth = 0.5,
     );
 
     // Red Medical Cross on Left Lower Face (Isometric transformed)
     canvas.save();
     final Matrix4 crossMatrix = Matrix4(
-      0.866, 0.5, 0, 0,
-      0.0, 1.0, 0, 0,
-      0, 0, 1, 0,
-      39.175, 60.25, 0, 1,
+      0.866,
+      0.5,
+      0,
+      0,
+      0.0,
+      1.0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      39.175,
+      60.25,
+      0,
+      1,
     );
     canvas.transform(crossMatrix.storage);
 
@@ -215,7 +243,10 @@ class _AmanahToolbox3DPainter extends CustomPainter {
     // Shadow
     canvas.save();
     canvas.translate(0, 0.75);
-    canvas.drawPath(crossPath, Paint()..color = const Color(0xFF990000).withValues(alpha: 0.8));
+    canvas.drawPath(
+      crossPath,
+      Paint()..color = const Color(0xFF990000).withValues(alpha: 0.8),
+    );
     canvas.restore();
 
     // Main Red Cross
@@ -269,17 +300,23 @@ class _AmanahToolbox3DPainter extends CustomPainter {
     canvas.drawLine(
       const Offset(28.35, 37.5),
       const Offset(50, 50),
-      Paint()..color = Colors.white.withValues(alpha: 0.9)..strokeWidth = 0.75,
+      Paint()
+        ..color = Colors.white.withValues(alpha: 0.9)
+        ..strokeWidth = 0.75,
     );
     canvas.drawLine(
       const Offset(50, 50),
       const Offset(71.65, 37.5),
-      Paint()..color = Colors.white..strokeWidth = 0.75,
+      Paint()
+        ..color = Colors.white
+        ..strokeWidth = 0.75,
     );
     canvas.drawLine(
       const Offset(50, 50),
       const Offset(50, 58),
-      Paint()..color = const Color(0xFFE6E6E6)..strokeWidth = 0.75,
+      Paint()
+        ..color = const Color(0xFFE6E6E6)
+        ..strokeWidth = 0.75,
     );
 
     // Upper Latches
@@ -298,11 +335,19 @@ class _AmanahToolbox3DPainter extends CustomPainter {
 
     // Handle Base Mounts
     canvas.drawOval(
-      Rect.fromCenter(center: const Offset(44.8, 34.5), width: 3.0, height: 1.5),
+      Rect.fromCenter(
+        center: const Offset(44.8, 34.5),
+        width: 3.0,
+        height: 1.5,
+      ),
       Paint()..color = const Color(0xFF1A1A1A),
     );
     canvas.drawOval(
-      Rect.fromCenter(center: const Offset(55.2, 40.5), width: 3.0, height: 1.5),
+      Rect.fromCenter(
+        center: const Offset(55.2, 40.5),
+        width: 3.0,
+        height: 1.5,
+      ),
       Paint()..color = const Color(0xFF1A1A1A),
     );
 
@@ -345,10 +390,22 @@ class _AmanahToolbox3DPainter extends CustomPainter {
   void _drawLatchBase(Canvas canvas, double tx, double ty) {
     canvas.save();
     final Matrix4 latchMatrix = Matrix4(
-      0.866, -0.5, 0, 0,
-      0.0, 1.0, 0, 0,
-      0, 0, 1, 0,
-      tx, ty, 0, 1,
+      0.866,
+      -0.5,
+      0,
+      0,
+      0.0,
+      1.0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      tx,
+      ty,
+      0,
+      1,
     );
     canvas.transform(latchMatrix.storage);
     canvas.drawRect(
@@ -361,10 +418,22 @@ class _AmanahToolbox3DPainter extends CustomPainter {
   void _drawLatchUpper(Canvas canvas, double tx, double ty) {
     canvas.save();
     final Matrix4 latchMatrix = Matrix4(
-      0.866, -0.5, 0, 0,
-      0.0, 1.0, 0, 0,
-      0, 0, 1, 0,
-      tx, ty, 0, 1,
+      0.866,
+      -0.5,
+      0,
+      0,
+      0.0,
+      1.0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      tx,
+      ty,
+      0,
+      1,
     );
     canvas.transform(latchMatrix.storage);
     canvas.drawRect(

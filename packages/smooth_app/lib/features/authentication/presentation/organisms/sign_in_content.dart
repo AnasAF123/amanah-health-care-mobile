@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/authentication/presentation/components/account_switch_action.dart';
 import 'package:smooth_app/features/authentication/presentation/components/auth_divider.dart';
+import 'package:smooth_app/features/authentication/presentation/components/auth_inline_validation_message.dart';
 import 'package:smooth_app/features/authentication/presentation/components/auth_input_field.dart';
 import 'package:smooth_app/features/authentication/presentation/components/auth_primary_button.dart';
-import 'package:smooth_app/features/authentication/presentation/components/auth_status_message.dart';
 import 'package:smooth_app/features/authentication/presentation/components/auth_text_action.dart';
 import 'package:smooth_app/features/authentication/presentation/components/password_input_field.dart';
 import 'package:smooth_app/features/authentication/presentation/components/social_auth_button.dart';
@@ -20,8 +20,9 @@ class SignInContent extends StatelessWidget {
     required this.onSwitchToSignUp,
     super.key,
     this.loadingProvider,
-    this.statusMessage,
-    this.statusIsError = false,
+    this.hasCredentialError = false,
+    this.credentialErrorMessage,
+    this.onCredentialChanged,
   });
 
   final GlobalKey<FormState> formKey;
@@ -32,8 +33,9 @@ class SignInContent extends StatelessWidget {
   final VoidCallback onGoogleAuth;
   final VoidCallback onSwitchToSignUp;
   final AuthProviderType? loadingProvider;
-  final String? statusMessage;
-  final bool statusIsError;
+  final bool hasCredentialError;
+  final String? credentialErrorMessage;
+  final VoidCallback? onCredentialChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +44,6 @@ class SignInContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          if (statusMessage != null) ...<Widget>[
-            AuthStatusMessage(message: statusMessage!, isError: statusIsError),
-            const SizedBox(height: LARGE_SPACE),
-          ],
           AuthInputField(
             label: 'Email atau nomor telepon',
             hintText: 'Masukkan email atau nomor telepon',
@@ -58,6 +56,8 @@ class SignInContent extends StatelessWidget {
               AutofillHints.telephoneNumber,
             ],
             validator: _validateIdentifier,
+            hasError: hasCredentialError,
+            onChanged: (_) => onCredentialChanged?.call(),
           ),
           const SizedBox(height: LARGE_SPACE),
           PasswordInputField(
@@ -67,8 +67,12 @@ class SignInContent extends StatelessWidget {
             textInputAction: TextInputAction.done,
             autofillHints: const <String>[AutofillHints.password],
             validator: _validatePassword,
+            hasError: hasCredentialError,
+            onChanged: (_) => onCredentialChanged?.call(),
             onFieldSubmitted: (_) => onEmailAuth(),
           ),
+          if (hasCredentialError && credentialErrorMessage != null)
+            AuthInlineValidationMessage(message: credentialErrorMessage!),
           const SizedBox(height: SMALL_SPACE),
           AuthTextAction(label: 'Lupa password?', onPressed: onForgotPassword),
           const SizedBox(height: MEDIUM_SPACE),

@@ -69,17 +69,21 @@ class _AmanahAuroraPainter extends CustomPainter {
         end: Alignment.bottomRight,
         colors: dark
             ? <Color>[
-                AmanahColorTokens.auroraSapphireDark
-                    .withValues(alpha: isSoft ? 0.45 : 0.75),
-                AmanahColorTokens.auroraBlueDark
-                    .withValues(alpha: isSoft ? 0.35 : 0.60),
+                AmanahColorTokens.auroraSapphireDark.withValues(
+                  alpha: isSoft ? 0.45 : 0.75,
+                ),
+                AmanahColorTokens.auroraBlueDark.withValues(
+                  alpha: isSoft ? 0.35 : 0.60,
+                ),
                 Colors.transparent,
               ]
             : <Color>[
-                AmanahColorTokens.auroraSapphireLight
-                    .withValues(alpha: isSoft ? 0.40 : 0.70),
-                AmanahColorTokens.auroraBlueLight
-                    .withValues(alpha: isSoft ? 0.35 : 0.60),
+                AmanahColorTokens.auroraSapphireLight.withValues(
+                  alpha: isSoft ? 0.40 : 0.70,
+                ),
+                AmanahColorTokens.auroraBlueLight.withValues(
+                  alpha: isSoft ? 0.35 : 0.60,
+                ),
                 Colors.transparent,
               ],
         stops: const <double>[0.0, 0.45, 1.0],
@@ -95,21 +99,27 @@ class _AmanahAuroraPainter extends CustomPainter {
       ..shader = RadialGradient(
         colors: dark
             ? <Color>[
-                AmanahColorTokens.auroraSapphireDark
-                    .withValues(alpha: isSoft ? 0.60 : 0.90),
-                AmanahColorTokens.auroraSapphireDark
-                    .withValues(alpha: isSoft ? 0.38 : 0.60),
-                AmanahColorTokens.auroraSapphireDark
-                    .withValues(alpha: isSoft ? 0.15 : 0.25),
+                AmanahColorTokens.auroraSapphireDark.withValues(
+                  alpha: isSoft ? 0.60 : 0.90,
+                ),
+                AmanahColorTokens.auroraSapphireDark.withValues(
+                  alpha: isSoft ? 0.38 : 0.60,
+                ),
+                AmanahColorTokens.auroraSapphireDark.withValues(
+                  alpha: isSoft ? 0.15 : 0.25,
+                ),
                 const Color(0x0007247A),
               ]
             : <Color>[
-                AmanahColorTokens.auroraSapphireLight
-                    .withValues(alpha: isSoft ? 0.55 : 0.92),
-                AmanahColorTokens.auroraSapphireLight
-                    .withValues(alpha: isSoft ? 0.35 : 0.62),
-                AmanahColorTokens.auroraSapphireLight
-                    .withValues(alpha: isSoft ? 0.12 : 0.22),
+                AmanahColorTokens.auroraSapphireLight.withValues(
+                  alpha: isSoft ? 0.55 : 0.92,
+                ),
+                AmanahColorTokens.auroraSapphireLight.withValues(
+                  alpha: isSoft ? 0.35 : 0.62,
+                ),
+                AmanahColorTokens.auroraSapphireLight.withValues(
+                  alpha: isSoft ? 0.12 : 0.22,
+                ),
                 const Color(0x000D66E9),
               ],
         stops: const <double>[0.0, 0.40, 0.72, 1.0],
@@ -125,21 +135,27 @@ class _AmanahAuroraPainter extends CustomPainter {
       ..shader = RadialGradient(
         colors: dark
             ? <Color>[
-                AmanahColorTokens.auroraBlueDark
-                    .withValues(alpha: isSoft ? 0.45 : 0.75),
-                AmanahColorTokens.auroraBlueDark
-                    .withValues(alpha: isSoft ? 0.25 : 0.42),
-                AmanahColorTokens.auroraBlueDark
-                    .withValues(alpha: isSoft ? 0.08 : 0.15),
+                AmanahColorTokens.auroraBlueDark.withValues(
+                  alpha: isSoft ? 0.45 : 0.75,
+                ),
+                AmanahColorTokens.auroraBlueDark.withValues(
+                  alpha: isSoft ? 0.25 : 0.42,
+                ),
+                AmanahColorTokens.auroraBlueDark.withValues(
+                  alpha: isSoft ? 0.08 : 0.15,
+                ),
                 const Color(0x001D4ED8),
               ]
             : <Color>[
-                AmanahColorTokens.auroraBlueLight
-                    .withValues(alpha: isSoft ? 0.45 : 0.82),
-                AmanahColorTokens.auroraBlueLight
-                    .withValues(alpha: isSoft ? 0.24 : 0.45),
-                AmanahColorTokens.auroraBlueLight
-                    .withValues(alpha: isSoft ? 0.08 : 0.15),
+                AmanahColorTokens.auroraBlueLight.withValues(
+                  alpha: isSoft ? 0.45 : 0.82,
+                ),
+                AmanahColorTokens.auroraBlueLight.withValues(
+                  alpha: isSoft ? 0.24 : 0.45,
+                ),
+                AmanahColorTokens.auroraBlueLight.withValues(
+                  alpha: isSoft ? 0.08 : 0.15,
+                ),
                 const Color(0x002563EB),
               ],
         stops: const <double>[0.0, 0.38, 0.70, 1.0],

@@ -574,7 +574,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                       label: 'Pilih QR dari Galeri',
                       dark: dark,
                       size: 40,
-                      isActive: _isDrawerOpen &&
+                      isActive:
+                          _isDrawerOpen &&
                           _drawerView == AmanahQrDrawerView.uploadQr,
                     ),
                     const SizedBox(width: 8),
@@ -584,7 +585,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                       label: 'Buka Menu Presensi',
                       dark: dark,
                       size: 40,
-                      isActive: _isDrawerOpen &&
+                      isActive:
+                          _isDrawerOpen &&
                           _drawerView == AmanahQrDrawerView.menu,
                     ),
                     if (!_shouldUseLegacyCameraScanner(context)) ...<Widget>[
@@ -802,7 +804,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                             title: 'Tampilkan QR',
                                             icon: Icons.qr_code_rounded,
                                             dark: dark,
-                                            isActive: _drawerView ==
+                                            isActive:
+                                                _drawerView ==
                                                 AmanahQrDrawerView.myQr,
                                             onTap: () => _openDrawer(
                                               AmanahQrDrawerView.myQr,
@@ -817,7 +820,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                             title: 'Manual',
                                             icon: Icons.password_rounded,
                                             dark: dark,
-                                            isActive: _drawerView ==
+                                            isActive:
+                                                _drawerView ==
                                                 AmanahQrDrawerView.manualPin,
                                             onTap: () {
                                               setState(() {
@@ -838,7 +842,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                             title: 'Upload QR',
                                             icon: Icons.image_outlined,
                                             dark: dark,
-                                            isActive: _drawerView ==
+                                            isActive:
+                                                _drawerView ==
                                                 AmanahQrDrawerView.uploadQr,
                                             onTap: () => _openDrawer(
                                               AmanahQrDrawerView.uploadQr,
@@ -1343,15 +1348,15 @@ class _FloatingCircularButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final Gradient? bgGradient = isActive
         ? (dark
-            ? AmanahColorTokens.btnCrispBlueDarkGradient
-            : AmanahColorTokens.btnCrispBlueGradient)
+              ? AmanahColorTokens.btnCrispBlueDarkGradient
+              : AmanahColorTokens.btnCrispBlueGradient)
         : null;
 
     final Color? bgColor = isActive
         ? null
         : (dark
-            ? const Color(0xFF1E293B).withValues(alpha: 0.75)
-            : Colors.white.withValues(alpha: 0.85));
+              ? const Color(0xFF1E293B).withValues(alpha: 0.75)
+              : Colors.white.withValues(alpha: 0.85));
 
     final Color iconColor = isActive
         ? Colors.white
@@ -1359,11 +1364,11 @@ class _FloatingCircularButton extends StatelessWidget {
 
     final Color borderColor = isActive
         ? (dark
-            ? AmanahColorTokens.btnCrispBlueDarkBorder
-            : AmanahColorTokens.btnCrispBlueBorder)
+              ? AmanahColorTokens.btnCrispBlueDarkBorder
+              : AmanahColorTokens.btnCrispBlueBorder)
         : (dark
-            ? Colors.white.withValues(alpha: 0.20)
-            : Colors.white.withValues(alpha: 0.80));
+              ? Colors.white.withValues(alpha: 0.20)
+              : Colors.white.withValues(alpha: 0.80));
 
     final List<BoxShadow> shadows = <BoxShadow>[
       BoxShadow(
@@ -1432,14 +1437,14 @@ class _ActionMenuCard extends StatelessWidget {
 
     final Gradient? bgGradient = isActive
         ? (dark
-            ? AmanahColorTokens.btnCrispBlueDarkGradient
-            : AmanahColorTokens.btnCrispBlueGradient)
+              ? AmanahColorTokens.btnCrispBlueDarkGradient
+              : AmanahColorTokens.btnCrispBlueGradient)
         : null;
 
     final Color effectiveBorderColor = isActive
         ? (dark
-            ? AmanahColorTokens.btnCrispBlueDarkBorder
-            : AmanahColorTokens.btnCrispBlueBorder)
+              ? AmanahColorTokens.btnCrispBlueDarkBorder
+              : AmanahColorTokens.btnCrispBlueBorder)
         : borderColor;
 
     final List<BoxShadow> shadows = isActive
@@ -1449,9 +1454,7 @@ class _ActionMenuCard extends StatelessWidget {
             else
               AmanahColorTokens.btnCrispBlueShadow,
             BoxShadow(
-              color: (dark
-                      ? const Color(0xFF2563EB)
-                      : const Color(0xFF0D66E9))
+              color: (dark ? const Color(0xFF2563EB) : const Color(0xFF0D66E9))
                   .withValues(alpha: 0.30),
               blurRadius: 14,
               offset: const Offset(0, 4),
@@ -1487,8 +1490,8 @@ class _ActionMenuCard extends StatelessWidget {
                 color: isActive
                     ? Colors.white.withValues(alpha: 0.22)
                     : (dark
-                        ? const Color(0xFF2563EB).withValues(alpha: 0.20)
-                        : const Color(0xFF2563EB).withValues(alpha: 0.14)),
+                          ? const Color(0xFF2563EB).withValues(alpha: 0.20)
+                          : const Color(0xFF2563EB).withValues(alpha: 0.14)),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
@@ -1497,8 +1500,8 @@ class _ActionMenuCard extends StatelessWidget {
                 color: isActive
                     ? Colors.white
                     : (dark
-                        ? const Color(0xFF60A5FA)
-                        : const Color(0xFF2563EB)),
+                          ? const Color(0xFF60A5FA)
+                          : const Color(0xFF2563EB)),
               ),
             ),
             const SizedBox(height: 10),

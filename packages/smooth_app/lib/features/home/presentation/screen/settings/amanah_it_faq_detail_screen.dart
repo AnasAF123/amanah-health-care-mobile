@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
 
 class AmanahFaqItem {
@@ -43,9 +44,7 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
     final Color subtextColor = dark
         ? const Color(0xFF94A3B8)
         : const Color(0xFF64748B);
-    final Color categoryColor = dark
-        ? const Color(0xFF38BDF8)
-        : const Color(0xFF2563EB);
+    final Color categoryColor = subtextColor;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -53,10 +52,7 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
         bottom: false,
         child: Column(
           children: <Widget>[
-            AmanahScreenHeader(
-              title: 'Pusat bantuan',
-              onBack: onBack,
-            ),
+            AmanahScreenHeader(title: 'Pusat bantuan', onBack: onBack),
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -146,7 +142,11 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 14),
-                          for (int i = 0; i < faq.solution.length; i++) ...<Widget>[
+                          for (
+                            int i = 0;
+                            i < faq.solution.length;
+                            i++
+                          ) ...<Widget>[
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
@@ -226,30 +226,11 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: onOpenChat,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF0D66E9),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-                                elevation: 0,
-                              ),
-                              child: const Text(
-                                'Chat dengan tim IT',
-                                style: TextStyle(
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
+                          AmanahButton.primary(
+                            text: 'Chat dengan tim IT',
+                            isFullWidth: true,
+                            size: AmanahButtonSize.medium,
+                            onPressed: onOpenChat,
                           ),
                         ],
                       ),

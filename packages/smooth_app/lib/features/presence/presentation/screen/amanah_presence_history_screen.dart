@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_empty_state.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:smooth_app/features/presence/data/amanah_presence_store.dart';
 import 'package:smooth_app/features/presence/domain/amanah_presence_model.dart';
 import 'package:smooth_app/features/presence/presentation/components/amanah_presence_drawers.dart';
@@ -26,22 +27,27 @@ class _AmanahPresenceHistoryScreenState
   bool _isDownloading = false;
 
   bool get _hasActiveFilters =>
-      _statusFilter != null || _unitFilter != 'all' || _selectedDayFilter != null;
+      _statusFilter != null ||
+      _unitFilter != 'all' ||
+      _selectedDayFilter != null;
 
   List<AttendanceRecord> get _filteredRecords {
-    return kAttendanceRecords.where((AttendanceRecord rec) {
-      if (_statusFilter != null && rec.status != _statusFilter) {
-        return false;
-      }
-      if (_unitFilter != 'all' &&
-          !rec.location.toLowerCase().contains(_unitFilter.toLowerCase())) {
-        return false;
-      }
-      if (_selectedDayFilter != null && rec.dayNumber != _selectedDayFilter) {
-        return false;
-      }
-      return true;
-    }).toList(growable: false);
+    return kAttendanceRecords
+        .where((AttendanceRecord rec) {
+          if (_statusFilter != null && rec.status != _statusFilter) {
+            return false;
+          }
+          if (_unitFilter != 'all' &&
+              !rec.location.toLowerCase().contains(_unitFilter.toLowerCase())) {
+            return false;
+          }
+          if (_selectedDayFilter != null &&
+              rec.dayNumber != _selectedDayFilter) {
+            return false;
+          }
+          return true;
+        })
+        .toList(growable: false);
   }
 
   void _resetFilters() {
@@ -99,12 +105,13 @@ class _AmanahPresenceHistoryScreenState
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color bgColor =
-        dark ? const Color(0xFF0A0E1A) : const Color(0xFFF8FAFF);
-    final Color textColor =
-        dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor =
-        dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final Color bgColor = dark
+        ? const Color(0xFF0A0E1A)
+        : const Color(0xFFF8FAFF);
+    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
+    final Color subtextColor = dark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
 
     final List<AttendanceRecord> records = _filteredRecords;
 
@@ -114,68 +121,25 @@ class _AmanahPresenceHistoryScreenState
         child: Column(
           children: <Widget>[
             // 1. Master Screen Header
-            _buildScreenHeader(dark, textColor, subtextColor),
+            AmanahScreenHeader(
+              title: 'Riwayat Presensi',
+              onBack: () => Navigator.of(context).pop(),
+              showDivider: true,
+            ),
 
             // 2. Main Content Viewport
             Expanded(
               child: records.isEmpty
                   ? _buildEmptyState(dark, textColor, subtextColor)
-                  : _buildTimelineViewport(records, dark, textColor, subtextColor),
+                  : _buildTimelineViewport(
+                      records,
+                      dark,
+                      textColor,
+                      subtextColor,
+                    ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildScreenHeader(bool dark, Color textColor, Color subtextColor) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: dark
-            ? const Color(0xFF0A0E1A).withValues(alpha: 0.85)
-            : Colors.white.withValues(alpha: 0.85),
-        border: Border(
-          bottom: BorderSide(
-            color: dark
-                ? Colors.white.withValues(alpha: 0.05)
-                : const Color(0xFFF1F5F9),
-          ),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          // Back Button
-          IconButton(
-            onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.arrow_back_rounded, size: 22),
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-            style: IconButton.styleFrom(
-              backgroundColor: dark
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : const Color(0xFFF8FAFC),
-              foregroundColor: textColor,
-              shape: const CircleBorder(),
-            ),
-          ),
-
-          // Title
-          Text(
-            'Riwayat Presensi',
-            style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: textColor,
-            ),
-          ),
-
-          // Spacer for balance
-          const SizedBox(width: 36, height: 36),
-        ],
       ),
     );
   }
@@ -242,18 +206,18 @@ class _AmanahPresenceHistoryScreenState
                       decoration: BoxDecoration(
                         color: _hasActiveFilters
                             ? (dark
-                                ? const Color(0x332563EB)
-                                : const Color(0xFFEFF6FF))
+                                  ? const Color(0x332563EB)
+                                  : const Color(0xFFEFF6FF))
                             : (dark
-                                ? Colors.white.withValues(alpha: 0.05)
-                                : Colors.white),
+                                  ? Colors.white.withValues(alpha: 0.05)
+                                  : Colors.white),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _hasActiveFilters
                               ? const Color(0xFF2563EB)
                               : (dark
-                                  ? Colors.white.withValues(alpha: 0.10)
-                                  : const Color(0xFFE2E8F0)),
+                                    ? Colors.white.withValues(alpha: 0.10)
+                                    : const Color(0xFFE2E8F0)),
                         ),
                       ),
                       child: Stack(
@@ -528,22 +492,10 @@ class _AmanahPresenceHistoryScreenState
                 spacing: 8,
                 runSpacing: 4,
                 children: <Widget>[
-                  _LegendIndicator(
-                    color: Color(0xFF10B981),
-                    label: 'Hadir',
-                  ),
-                  _LegendIndicator(
-                    color: Color(0xFFFBBF24),
-                    label: 'Telat',
-                  ),
-                  _LegendIndicator(
-                    color: Color(0xFFF43F5E),
-                    label: 'Missed',
-                  ),
-                  _LegendIndicator(
-                    color: Color(0xFF6366F1),
-                    label: 'Cuti',
-                  ),
+                  _LegendIndicator(color: Color(0xFF10B981), label: 'Hadir'),
+                  _LegendIndicator(color: Color(0xFFFBBF24), label: 'Telat'),
+                  _LegendIndicator(color: Color(0xFFF43F5E), label: 'Missed'),
+                  _LegendIndicator(color: Color(0xFF6366F1), label: 'Cuti'),
                 ],
               ),
             ],
@@ -558,7 +510,13 @@ class _AmanahPresenceHistoryScreenState
             itemBuilder: (BuildContext context, int index) {
               final AttendanceRecord item = records[index];
               final bool isLast = index == records.length - 1;
-              return _buildTimelineItem(item, isLast, dark, textColor, subtextColor);
+              return _buildTimelineItem(
+                item,
+                isLast,
+                dark,
+                textColor,
+                subtextColor,
+              );
             },
           ),
         ],
@@ -597,8 +555,9 @@ class _AmanahPresenceHistoryScreenState
     Color iconBorderColor = dark
         ? Colors.white.withValues(alpha: 0.15)
         : const Color(0xFFCBD5E1);
-    Color iconBgColor =
-        dark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF8FAFC);
+    Color iconBgColor = dark
+        ? Colors.white.withValues(alpha: 0.05)
+        : const Color(0xFFF8FAFC);
     Color iconColor = subtextColor;
     Color titleColor = textColor;
     IconData iconData = Icons.login_rounded;
@@ -721,8 +680,9 @@ class _AmanahPresenceHistoryScreenState
                   style: TextStyle(
                     fontFamily: 'PlusJakartaSans',
                     fontSize: 13,
-                    fontWeight:
-                        item.isLatest ? FontWeight.w700 : FontWeight.w600,
+                    fontWeight: item.isLatest
+                        ? FontWeight.w700
+                        : FontWeight.w600,
                     color: titleColor,
                     height: 1.1,
                   ),
@@ -767,95 +727,17 @@ class _AmanahPresenceHistoryScreenState
   }
 
   Widget _buildEmptyState(bool dark, Color textColor, Color subtextColor) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: dark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : const Color(0xFFF1F5F9),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: dark
-                      ? Colors.white.withValues(alpha: 0.10)
-                      : const Color(0xFFE2E8F0),
-                ),
-              ),
-              child: Icon(Icons.tune_rounded, size: 28, color: subtextColor),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Tidak ada data presensi',
-              style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: textColor,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Tidak ditemukan riwayat presensi yang sesuai dengan filter yang diterapkan.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-                color: subtextColor,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                OutlinedButton.icon(
-                  onPressed: _openFilterDrawer,
-                  icon: const Icon(Icons.tune_rounded, size: 14),
-                  label: const Text('Ubah Filter'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    side: BorderSide(
-                      color: dark
-                          ? Colors.white.withValues(alpha: 0.15)
-                          : const Color(0xFFE2E8F0),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                ElevatedButton.icon(
-                  onPressed: _resetFilters,
-                  icon: const Icon(Icons.restart_alt_rounded, size: 14),
-                  label: const Text('Reset Filter'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AmanahColorTokens.brand,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+    return AmanahEmptyState.viewport(
+      icon: Icons.tune_rounded,
+      title: 'Tidak ada data presensi',
+      message:
+          'Tidak ditemukan riwayat presensi yang sesuai dengan filter yang diterapkan.',
+      actionText: 'Ubah Filter',
+      actionLeadingIcon: Icons.tune_rounded,
+      onAction: _openFilterDrawer,
+      secondaryActionText: 'Reset Filter',
+      secondaryActionLeadingIcon: Icons.restart_alt_rounded,
+      onSecondaryAction: _resetFilters,
     );
   }
 }

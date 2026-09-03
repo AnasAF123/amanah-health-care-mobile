@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
 
 class AmanahReportItem {
@@ -54,10 +56,7 @@ class AmanahItMyReportsScreen extends StatelessWidget {
         bottom: false,
         child: Column(
           children: <Widget>[
-            AmanahScreenHeader(
-              title: 'Laporan saya',
-              onBack: onBack,
-            ),
+            AmanahScreenHeader(title: 'Laporan saya', onBack: onBack),
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -69,22 +68,19 @@ class AmanahItMyReportsScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: <Widget>[
-                    if (reports.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 48),
-                        child: Center(
-                          child: Text(
-                            'Belum ada riwayat laporan kendala teknis.',
-                            style: TextStyle(
-                              color: subtextColor,
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      )
-                    else
-                      for (final AmanahReportItem report in reports) ...<Widget>[
+                    if (reports.isEmpty) ...<Widget>[
+                      AmanahEmptyState.card(
+                        icon: Icons.assignment_outlined,
+                        title: 'Belum Ada Laporan Kendala',
+                        message:
+                            'Belum ada riwayat laporan kendala teknis yang Anda ajukan.',
+                        actionText: 'Laporkan kendala baru via chat IT',
+                        actionLeadingIcon: Icons.chat_bubble_outline_rounded,
+                        onAction: onOpenChat,
+                      ),
+                    ] else ...<Widget>[
+                      for (final AmanahReportItem report
+                          in reports) ...<Widget>[
                         _ReportCard(
                           report: report,
                           dark: dark,
@@ -95,30 +91,14 @@ class AmanahItMyReportsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                       ],
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
+                      const SizedBox(height: 12),
+                      AmanahButton.primary(
+                        text: 'Laporkan kendala baru via chat IT',
+                        isFullWidth: true,
+                        size: AmanahButtonSize.medium,
                         onPressed: onOpenChat,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0D66E9),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          'Laporkan kendala baru via chat IT',
-                          style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -207,10 +187,7 @@ class _ReportCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 3,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: badgeBg,
                   borderRadius: BorderRadius.circular(6),

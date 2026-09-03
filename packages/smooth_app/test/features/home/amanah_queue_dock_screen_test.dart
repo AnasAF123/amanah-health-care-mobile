@@ -25,7 +25,9 @@ void main() {
       tester.view.devicePixelRatio = 2.75;
       addTearDown(() => tester.view.reset());
 
-      await tester.pumpWidget(createQueueDockScreen(brightness: Brightness.light));
+      await tester.pumpWidget(
+        createQueueDockScreen(brightness: Brightness.light),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -45,12 +47,17 @@ void main() {
       tester.view.devicePixelRatio = 2.75;
       addTearDown(() => tester.view.reset());
 
-      await tester.pumpWidget(createQueueDockScreen(brightness: Brightness.light));
+      await tester.pumpWidget(
+        createQueueDockScreen(brightness: Brightness.light),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
       // Drag left
-      await tester.drag(find.byType(GestureDetector).first, const Offset(-150, 0));
+      await tester.drag(
+        find.byType(GestureDetector).first,
+        const Offset(-150, 0),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -64,37 +71,44 @@ void main() {
       await tester.pump(const Duration(milliseconds: 600));
     });
 
-    testWidgets('Rapid multiple long-presses and release do not crash with double dispose', (
-      WidgetTester tester,
-    ) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.75;
-      addTearDown(() => tester.view.reset());
+    testWidgets(
+      'Rapid multiple long-presses and release do not crash with double dispose',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.75;
+        addTearDown(() => tester.view.reset());
 
-      await tester.pumpWidget(createQueueDockScreen(brightness: Brightness.light));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+        await tester.pumpWidget(
+          createQueueDockScreen(brightness: Brightness.light),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
-      const Offset center = Offset(200, 350);
+        const Offset center = Offset(200, 350);
 
-      // 1st Long-press
-      TestGesture gesture = await tester.startGesture(center);
-      await tester.pump(const Duration(milliseconds: 600));
-      await gesture.up();
-      await tester.pump(const Duration(milliseconds: 100)); // Interrupted before deceleration finishes
+        // 1st Long-press
+        TestGesture gesture = await tester.startGesture(center);
+        await tester.pump(const Duration(milliseconds: 600));
+        await gesture.up();
+        await tester.pump(
+          const Duration(milliseconds: 100),
+        ); // Interrupted before deceleration finishes
 
-      // 2nd Rapid Long-press immediately
-      gesture = await tester.startGesture(center);
-      await tester.pump(const Duration(milliseconds: 800));
-      await gesture.up();
-      await tester.pump(const Duration(milliseconds: 600)); // Complete deceleration
+        // 2nd Rapid Long-press immediately
+        gesture = await tester.startGesture(center);
+        await tester.pump(const Duration(milliseconds: 800));
+        await gesture.up();
+        await tester.pump(
+          const Duration(milliseconds: 600),
+        ); // Complete deceleration
 
-      // 3rd Long-press
-      gesture = await tester.startGesture(center);
-      await tester.pump(const Duration(milliseconds: 500));
-      await gesture.up();
-      await tester.pump(const Duration(milliseconds: 600));
-    });
+        // 3rd Long-press
+        gesture = await tester.startGesture(center);
+        await tester.pump(const Duration(milliseconds: 500));
+        await gesture.up();
+        await tester.pump(const Duration(milliseconds: 600));
+      },
+    );
 
     testWidgets('Can drag down to activate queue card', (
       WidgetTester tester,
@@ -103,7 +117,9 @@ void main() {
       tester.view.devicePixelRatio = 2.75;
       addTearDown(() => tester.view.reset());
 
-      await tester.pumpWidget(createQueueDockScreen(brightness: Brightness.light));
+      await tester.pumpWidget(
+        createQueueDockScreen(brightness: Brightness.light),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -127,7 +143,9 @@ void main() {
       tester.view.devicePixelRatio = 2.75;
       addTearDown(() => tester.view.reset());
 
-      await tester.pumpWidget(createQueueDockScreen(brightness: Brightness.light));
+      await tester.pumpWidget(
+        createQueueDockScreen(brightness: Brightness.light),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -141,40 +159,51 @@ void main() {
       // Tap 'Pilih Antrean Lain'
       await tester.tap(find.text('Pilih Antrean Lain'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 700)); // Genie minimize runs & completes
-      await tester.pump(const Duration(milliseconds: 2500)); // ATM rail return choreography completes
+      await tester.pump(
+        const Duration(milliseconds: 700),
+      ); // Genie minimize runs & completes
+      await tester.pump(
+        const Duration(milliseconds: 2500),
+      ); // ATM rail return choreography completes
       await tester.pump(const Duration(milliseconds: 300));
 
       // Should be back on main dock screen
       expect(find.text('Pilih antrean\npasien'), findsOneWidget);
     });
 
-    testWidgets('Can tap Panggil & Proses Pasien to collect card into history', (
-      WidgetTester tester,
-    ) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.75;
-      addTearDown(() => tester.view.reset());
+    testWidgets(
+      'Can tap Panggil & Proses Pasien to collect card into history',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.75;
+        addTearDown(() => tester.view.reset());
 
-      await tester.pumpWidget(createQueueDockScreen(brightness: Brightness.light));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+        await tester.pumpWidget(
+          createQueueDockScreen(brightness: Brightness.light),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
 
-      // Activate card
-      await tester.dragFrom(const Offset(200, 400), const Offset(0, 120));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 2000));
-      await tester.pump(const Duration(milliseconds: 1000));
+        // Activate card
+        await tester.dragFrom(const Offset(200, 400), const Offset(0, 120));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+        await tester.pump(const Duration(milliseconds: 2000));
+        await tester.pump(const Duration(milliseconds: 1000));
 
-      // Tap 'Panggil & Proses Pasien'
-      await tester.tap(find.text('Panggil & Proses Pasien'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 900)); // Retreat animation
-      await tester.pump(const Duration(milliseconds: 600)); // Navigation transition
+        // Tap 'Panggil & Proses Pasien'
+        await tester.tap(find.text('Panggil & Proses Pasien'));
+        await tester.pump();
+        await tester.pump(
+          const Duration(milliseconds: 900),
+        ); // Retreat animation
+        await tester.pump(
+          const Duration(milliseconds: 600),
+        ); // Navigation transition
 
-      // Navigates to history screen
-      expect(find.text('Riwayat antrean diproses'), findsOneWidget);
-    });
+        // Navigates to history screen
+        expect(find.text('Riwayat antrean diproses'), findsOneWidget);
+      },
+    );
   });
 }

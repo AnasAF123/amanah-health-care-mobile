@@ -9,10 +9,12 @@ import 'package:smooth_app/features/home/presentation/components/amanah_blurry_m
 import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_confetti_canvas.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_dock_hollow_glow.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_genie_effect.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_paramedic_toolbox.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_racing_chevrons.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_watermark_path.dart';
 import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart';
@@ -853,97 +855,77 @@ class _QueueHeaderBar extends StatelessWidget {
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 250),
       opacity: showSuccess ? 0.0 : 1.0,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            IconButton(
-              onPressed: onBack,
-              icon: const Icon(Icons.arrow_back_rounded),
-              color: const Color(0xFF1E293B),
-              iconSize: 24,
+      child: AmanahScreenHeader.actionOnly(
+        onBack: onBack,
+        backgroundColor: Colors.transparent,
+        trailing: PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert_rounded, color: Color(0xFF1E293B)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          color: Colors.white,
+          onSelected: (String val) {
+            if (val == 'guide') {
+              onOpenGuide();
+            } else if (val == 'history') {
+              onOpenHistory();
+            }
+          },
+          itemBuilder: (_) => <PopupMenuEntry<String>>[
+            const PopupMenuItem<String>(
+              value: 'guide',
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.info_outline_rounded,
+                    color: Color(0xFF0A44FF),
+                    size: 18,
+                  ),
+                  SizedBox(width: 10),
+                  Text(
+                    'Panduan antrean',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
             ),
-            PopupMenuButton<String>(
-              icon: const Icon(
-                Icons.more_vert_rounded,
-                color: Color(0xFF1E293B),
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              color: Colors.white,
-              onSelected: (String val) {
-                if (val == 'guide') {
-                  onOpenGuide();
-                } else if (val == 'history') {
-                  onOpenHistory();
-                }
-              },
-              itemBuilder: (_) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
-                  value: 'guide',
-                  child: Row(
-                    children: <Widget>[
-                      Icon(
-                        Icons.info_outline_rounded,
-                        color: Color(0xFF0A44FF),
-                        size: 18,
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        'Panduan antrean',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+            PopupMenuItem<String>(
+              value: 'history',
+              child: Row(
+                children: <Widget>[
+                  const Icon(
+                    Icons.history_rounded,
+                    color: Color(0xFF0A44FF),
+                    size: 18,
                   ),
-                ),
-                PopupMenuItem<String>(
-                  value: 'history',
-                  child: Row(
-                    children: <Widget>[
-                      const Icon(
-                        Icons.history_rounded,
-                        color: Color(0xFF0A44FF),
-                        size: 18,
-                      ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'Riwayat antrean',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      if (historyCount > 0) ...<Widget>[
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEFF6FF),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFFBFDBFE)),
-                          ),
-                          child: Text(
-                            '$historyCount',
-                            style: const TextStyle(
-                              color: Color(0xFF0A44FF),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
+                  const SizedBox(width: 10),
+                  const Text(
+                    'Riwayat antrean',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                   ),
-                ),
-              ],
+                  if (historyCount > 0) ...<Widget>[
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFDBEAFE),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '$historyCount',
+                        style: const TextStyle(
+                          color: Color(0xFF0A44FF),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ],
         ),
@@ -1821,275 +1803,309 @@ class AmanahQueueHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool dark = theme.brightness == Brightness.dark;
+    final Color bgColor = AmanahThemeTokens.canvas(context);
+    final Color cardBg = AmanahThemeTokens.surface(context);
+    final Color textColor = AmanahThemeTokens.textPrimary(context);
+    final Color subtextColor = AmanahThemeTokens.textSecondary(context);
+    final Color borderColor = AmanahThemeTokens.outline(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7FF),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF1E293B)),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          'Riwayat antrean diproses',
-          style: TextStyle(
-            color: Color(0xFF0F172A),
-            fontFamily: 'PlusJakartaSans',
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: collectedCards.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFBFDBFE)),
-                    ),
-                    child: const Center(
-                      child: Text(
+      backgroundColor: bgColor,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: <Widget>[
+            // 1. Master Screen Header (Respects Top Bar & Safe Area)
+            AmanahScreenHeader.standard(
+              title: 'Riwayat antrean diproses',
+              onBack: () => Navigator.of(context).pop(),
+              showDivider: true,
+            ),
+
+            // 2. Body Viewport
+            Expanded(
+              child: collectedCards.isEmpty
+                  ? AmanahEmptyState.viewport(
+                      tone: AmanahEmptyStateTone.brand,
+                      iconShape: AmanahEmptyStateIconShape.squircle,
+                      customIcon: Text(
                         '#',
                         style: TextStyle(
-                          color: Color(0xFF0A44FF),
+                          color: dark
+                              ? AmanahColorTokens.brandAccent
+                              : const Color(0xFF0A44FF),
                           fontSize: 32,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Belum ada antrean diproses',
-                    style: TextStyle(
-                      color: Color(0xFF0F172A),
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 40),
-                    child: Text(
-                      'Tarik kartu antrean pasien ke bawah pada rel 3D untuk memproses dan memanggil pasien!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.15,
-              ),
-              itemCount: collectedCards.length,
-              itemBuilder: (BuildContext context, int index) {
-                final AmanahQueueCardData card = collectedCards[index];
-                return GestureDetector(
-                  onTap: () {
-                    AmanahPatientDetailModal.show(
-                      context,
-                      BookedPatient(
-                        id: card.id,
-                        patientName: card.patientName,
-                        patientComplaint: card.complaint,
-                        queueNumber: card.queueNumber,
-                        timeSlot: card.timeSlot,
-                        avatarUrl: card.doctorImage,
-                        patientAge: '${card.age} Thn',
-                        patientRm: card.patientRm,
-                        badge: card.priority,
-                        badgeVariant: card.priority == 'Prioritas'
-                            ? AmanahBadgeVariant.warning
-                            : AmanahBadgeVariant.primary,
-                      ),
-                      DoctorSchedule(
-                        id: 'sch_${card.id}',
-                        title: 'Praktik Dokter',
-                        date: 'Hari ini',
-                        time: card.timeSlot,
-                        poli: card.poly,
-                        room: card.room,
-                        slotCount: '1',
-                        slotText: 'Antrean',
-                        badge: card.priority,
-                        badgeVariant: AmanahBadgeVariant.primary,
-                      ),
-                    );
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Stack(
-                        children: <Widget>[
-                          // Watermark Silhouette (Left side behind Queue Number area)
-                          const Positioned(
-                            top: -6,
-                            left: -8,
-                            child: Opacity(
-                              opacity: 0.07,
-                              child: AmanahWatermarkLogo(size: 72),
-                            ),
+                      title: 'Belum ada antrean diproses',
+                      message:
+                          'Tarik kartu antrean pasien ke bawah pada rel 3D untuk memproses dan memanggil pasien!',
+                    )
+                  : GridView.builder(
+                      padding: const EdgeInsets.all(AmanahSpacing.lg),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 1.15,
                           ),
-
-                          Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                // Top Row: Queue Number + Poly Tag
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: <Widget>[
-                                    Text(
-                                      card.queueNumber,
-                                      style: const TextStyle(
-                                        color: Color(0xFF0A44FF),
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w900,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Flexible(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 7,
-                                          vertical: 3,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFEFF6FF),
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                          border: Border.all(
-                                            color: const Color(0xFFDBEAFE),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          card.poly,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            color: Color(0xFF0A44FF),
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-
-                                // Bottom Group: User Avatar + Name + Complaint
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Row(
-                                      children: <Widget>[
-                                        SizedBox(
-                                          width: 24,
-                                          height: 24,
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                            child: Image.asset(
-                                              card.doctorImage,
-                                              width: 24,
-                                              height: 24,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (
-                                                    BuildContext context,
-                                                    Object error,
-                                                    StackTrace? stackTrace,
-                                                  ) {
-                                                    return Container(
-                                                      color: const Color(
-                                                        0xFFEFF6FF,
-                                                      ),
-                                                      alignment:
-                                                          Alignment.center,
-                                                      child: const Icon(
-                                                        Icons.person,
-                                                        size: 14,
-                                                        color: Color(
-                                                          0xFF0A44FF,
-                                                        ),
-                                                      ),
-                                                    );
-                                                  },
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Expanded(
-                                          child: Text(
-                                            card.patientName,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              color: Color(0xFF0F172A),
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 3),
-                                    Text(
-                                      card.complaint,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        color: Color(0xFF64748B),
-                                        fontSize: 10.5,
-                                        fontWeight: FontWeight.w500,
-                                        height: 1.2,
-                                      ),
-                                    ),
-                                  ],
+                      itemCount: collectedCards.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final AmanahQueueCardData card = collectedCards[index];
+                        return GestureDetector(
+                          onTap: () {
+                            AmanahPatientDetailModal.show(
+                              context,
+                              BookedPatient(
+                                id: card.id,
+                                patientName: card.patientName,
+                                patientComplaint: card.complaint,
+                                queueNumber: card.queueNumber,
+                                timeSlot: card.timeSlot,
+                                avatarUrl: card.doctorImage,
+                                patientAge: '${card.age} Thn',
+                                patientRm: card.patientRm,
+                                badge: card.priority,
+                                badgeVariant: card.priority == 'Prioritas'
+                                    ? AmanahBadgeVariant.warning
+                                    : AmanahBadgeVariant.primary,
+                              ),
+                              DoctorSchedule(
+                                id: 'sch_${card.id}',
+                                title: 'Praktik Dokter',
+                                date: 'Hari ini',
+                                time: card.timeSlot,
+                                poli: card.poly,
+                                room: card.room,
+                                slotCount: '1',
+                                slotText: 'Antrean',
+                                badge: card.priority,
+                                badgeVariant: AmanahBadgeVariant.primary,
+                              ),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: cardBg,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: borderColor),
+                              boxShadow: <BoxShadow>[
+                                BoxShadow(
+                                  color: Colors.black.withValues(
+                                    alpha: dark ? 0.30 : 0.04,
+                                  ),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Stack(
+                                children: <Widget>[
+                                  // Watermark Silhouette (Left side behind Queue Number area)
+                                  const Positioned(
+                                    top: -6,
+                                    left: -8,
+                                    child: Opacity(
+                                      opacity: 0.07,
+                                      child: AmanahWatermarkLogo(size: 72),
+                                    ),
+                                  ),
+
+                                  Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        // Top Row: Queue Number + Poly Tag
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            Text(
+                                              card.queueNumber,
+                                              style: TextStyle(
+                                                color: dark
+                                                    ? AmanahColorTokens
+                                                          .brandAccent
+                                                    : const Color(0xFF0A44FF),
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w900,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Flexible(
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 7,
+                                                      vertical: 3,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: dark
+                                                      ? AmanahColorTokens.brand
+                                                            .withValues(
+                                                              alpha: 0.15,
+                                                            )
+                                                      : const Color(0xFFEFF6FF),
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                  border: Border.all(
+                                                    color: dark
+                                                        ? AmanahColorTokens
+                                                              .brand
+                                                              .withValues(
+                                                                alpha: 0.30,
+                                                              )
+                                                        : const Color(
+                                                            0xFFDBEAFE,
+                                                          ),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  card.poly,
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    color: dark
+                                                        ? AmanahColorTokens
+                                                              .brandAccent
+                                                        : const Color(
+                                                            0xFF0A44FF,
+                                                          ),
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        // Bottom Group: User Avatar + Name + Complaint
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: <Widget>[
+                                            Row(
+                                              children: <Widget>[
+                                                SizedBox(
+                                                  width: 24,
+                                                  height: 24,
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          12,
+                                                        ),
+                                                    child: Image.asset(
+                                                      card.doctorImage,
+                                                      width: 24,
+                                                      height: 24,
+                                                      fit: BoxFit.cover,
+                                                      errorBuilder:
+                                                          (
+                                                            BuildContext
+                                                            context,
+                                                            Object error,
+                                                            StackTrace?
+                                                            stackTrace,
+                                                          ) {
+                                                            return Container(
+                                                              color: dark
+                                                                  ? AmanahColorTokens
+                                                                        .brand
+                                                                        .withValues(
+                                                                          alpha:
+                                                                              0.20,
+                                                                        )
+                                                                  : const Color(
+                                                                      0xFFEFF6FF,
+                                                                    ),
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              child: Icon(
+                                                                Icons.person,
+                                                                size: 14,
+                                                                color: dark
+                                                                    ? AmanahColorTokens
+                                                                          .brandAccent
+                                                                    : const Color(
+                                                                        0xFF0A44FF,
+                                                                      ),
+                                                              ),
+                                                            );
+                                                          },
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Expanded(
+                                                  child: Text(
+                                                    card.patientName,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      color: textColor,
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 3),
+                                            Text(
+                                              card.complaint,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                color: subtextColor,
+                                                fontSize: 10.5,
+                                                fontWeight: FontWeight.w500,
+                                                height: 1.2,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  ),
-                );
-              },
             ),
+          ],
+        ),
+      ),
       bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        top: false,
+        child: Container(
+          decoration: BoxDecoration(
+            color: bgColor,
+            border: Border(top: BorderSide(color: borderColor)),
+          ),
+          padding: const EdgeInsets.fromLTRB(
+            AmanahSpacing.lg,
+            8,
+            AmanahSpacing.lg,
+            16,
+          ),
           child: AmanahButton.primary(
             text: 'Panggil Antrean Lain',
             isFullWidth: true,
@@ -2112,41 +2128,20 @@ class _AmanahQueueGuideDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double bottomNavPadding = MediaQuery.viewPaddingOf(context).bottom;
-    return Container(
-      padding: EdgeInsets.fromLTRB(24, 12, 24, 32.0 + bottomNavPadding),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+    return AmanahBottomSheetScaffold(
+      title: 'Panduan alur sistem antrean',
+      subtitle: 'Sistem rel antrean 3D interaktif Klinik Amanah',
+      fixedHeightFactor: 0.65,
+      minHeight: 400,
+      footer: AmanahButton.primary(
+        text: 'Mengerti',
+        isFullWidth: true,
+        size: AmanahButtonSize.medium,
+        onPressed: () => Navigator.of(context).pop(),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // Drag Handle
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFFCBD5E1),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          const Text(
-            'Panduan alur sistem antrean',
-            style: TextStyle(
-              color: Color(0xFF0F172A),
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-
-          const SizedBox(height: 8),
           const Text(
             'Sistem rel antrean 3D interaktif Klinik Amanah mempermudah dokter & staf dalam memproses dan memanggil pasien:',
             style: TextStyle(
@@ -2155,8 +2150,7 @@ class _AmanahQueueGuideDrawer extends StatelessWidget {
               height: 1.4,
             ),
           ),
-
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           _buildStep(
             '1. Geser Rel 3D',
             'Geser kartu ke kiri/kanan untuk memilih nomor antrean pasien',
@@ -2176,15 +2170,6 @@ class _AmanahQueueGuideDrawer extends StatelessWidget {
             '4. Panggil Pasien',
             'Tekan "Panggil Pasien" untuk aktivasi atau simpan ke riwayat antrean',
             AmanahColorTokens.violet,
-          ),
-
-          const SizedBox(height: 20),
-          AmanahButton.ghost(
-            text: 'Mengerti',
-            isFullWidth: true,
-            size: AmanahButtonSize.medium,
-            customForegroundColor: AmanahColorTokens.neutral700,
-            onPressed: () => Navigator.of(context).pop(),
           ),
         ],
       ),

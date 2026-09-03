@@ -8,20 +8,23 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Amanah Genie Effect Unit & Rendering Tests', () {
-    test('generateCardCoverSnapshot creates a sharp ui.Image with correct pixelRatio', () async {
-      const Size cardSize = Size(320, 445);
-      final AmanahQueueCardData card = defaultAmanahQueueCards[0];
+    test(
+      'generateCardCoverSnapshot creates a sharp ui.Image with correct pixelRatio',
+      () async {
+        const Size cardSize = Size(320, 445);
+        final AmanahQueueCardData card = defaultAmanahQueueCards[0];
 
-      final ui.Image snapshot = await generateCardCoverSnapshot(
-        card: card,
-        size: cardSize,
-        pixelRatio: 2.0,
-      );
+        final ui.Image snapshot = await generateCardCoverSnapshot(
+          card: card,
+          size: cardSize,
+          pixelRatio: 2.0,
+        );
 
-      expect(snapshot.width, 640);
-      expect(snapshot.height, 890);
-      snapshot.dispose();
-    });
+        expect(snapshot.width, 640);
+        expect(snapshot.height, 890);
+        snapshot.dispose();
+      },
+    );
 
     test('AmanahGenieCanvasPainter repaints when progress changes', () async {
       const Size cardSize = Size(320, 445);

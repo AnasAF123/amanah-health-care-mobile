@@ -144,17 +144,21 @@ class AmanahActivityCard extends StatelessWidget {
                       gradient: RadialGradient(
                         colors: isBlue
                             ? <Color>[
-                                const Color(0xFF0D66E9)
-                                    .withValues(alpha: dark ? 0.30 : 0.20),
-                                const Color(0xFF3B82F6)
-                                    .withValues(alpha: dark ? 0.15 : 0.10),
+                                const Color(
+                                  0xFF0D66E9,
+                                ).withValues(alpha: dark ? 0.30 : 0.20),
+                                const Color(
+                                  0xFF3B82F6,
+                                ).withValues(alpha: dark ? 0.15 : 0.10),
                                 const Color(0x003B82F6),
                               ]
                             : <Color>[
-                                const Color(0xFF0D66E9)
-                                    .withValues(alpha: dark ? 0.28 : 0.20),
-                                const Color(0xFF2563EB)
-                                    .withValues(alpha: dark ? 0.20 : 0.15),
+                                const Color(
+                                  0xFF0D66E9,
+                                ).withValues(alpha: dark ? 0.28 : 0.20),
+                                const Color(
+                                  0xFF2563EB,
+                                ).withValues(alpha: dark ? 0.20 : 0.15),
                                 const Color(0x002563EB),
                               ],
                         stops: const <double>[0.0, 0.55, 1.0],

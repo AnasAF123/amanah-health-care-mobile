@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_status_badge.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/features/home/presentation/theme/amanah_schedule_card_tokens.dart';
 import 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart';
 
@@ -12,11 +14,13 @@ class AmanahScheduleCardStack extends StatefulWidget {
   const AmanahScheduleCardStack({
     required this.schedules,
     this.onCardTap,
+    this.onCreateSchedule,
     super.key,
   });
 
   final List<DoctorSchedule> schedules;
   final ValueChanged<DoctorSchedule>? onCardTap;
+  final VoidCallback? onCreateSchedule;
 
   @override
   State<AmanahScheduleCardStack> createState() =>
@@ -38,39 +42,45 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
   @override
   void initState() {
     super.initState();
-    _shuffleController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 380),
-    )..addListener(() {
-        if (mounted) {
-          setState(() {});
-        }
-      })..addStatusListener((AnimationStatus status) {
-        if (status == AnimationStatus.completed && mounted) {
-          setState(() {
-            _currentIndex = (_currentIndex + 1) % widget.schedules.length;
-            _dragOffset = 0.0;
-            _startDragX = 0.0;
-            _shuffleController.reset();
+    _shuffleController =
+        AnimationController(
+            vsync: this,
+            duration: const Duration(milliseconds: 380),
+          )
+          ..addListener(() {
+            if (mounted) {
+              setState(() {});
+            }
+          })
+          ..addStatusListener((AnimationStatus status) {
+            if (status == AnimationStatus.completed && mounted) {
+              setState(() {
+                _currentIndex = (_currentIndex + 1) % widget.schedules.length;
+                _dragOffset = 0.0;
+                _startDragX = 0.0;
+                _shuffleController.reset();
+              });
+            }
           });
-        }
-      });
 
-    _cancelController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 220),
-    )..addListener(() {
-        if (mounted) {
-          setState(() {});
-        }
-      })..addStatusListener((AnimationStatus status) {
-        if (status == AnimationStatus.completed && mounted) {
-          setState(() {
-            _dragOffset = 0.0;
-            _cancelController.reset();
+    _cancelController =
+        AnimationController(
+            vsync: this,
+            duration: const Duration(milliseconds: 220),
+          )
+          ..addListener(() {
+            if (mounted) {
+              setState(() {});
+            }
+          })
+          ..addStatusListener((AnimationStatus status) {
+            if (status == AnimationStatus.completed && mounted) {
+              setState(() {
+                _dragOffset = 0.0;
+                _cancelController.reset();
+              });
+            }
           });
-        }
-      });
   }
 
   void _dismissCard() {
@@ -103,7 +113,9 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
     final double vx = details?.velocity.pixelsPerSecond.dx ?? 0.0;
     // Drag past 45px or swift flick triggers shuffle animation
     if (_dragOffset.abs() > 45 || vx.abs() > 300) {
-      _shuffleDirection = _dragOffset != 0 ? _dragOffset.sign : (vx != 0 ? vx.sign : 1.0);
+      _shuffleDirection = _dragOffset != 0
+          ? _dragOffset.sign
+          : (vx != 0 ? vx.sign : 1.0);
       _startDragX = _dragOffset;
       _shuffleController.forward(from: 0.0);
     } else {
@@ -159,7 +171,15 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
   @override
   Widget build(BuildContext context) {
     if (widget.schedules.isEmpty) {
-      return const SizedBox.shrink();
+      return SizedBox(
+        height: AmanahScheduleCardTokens.cardHeight,
+        width: double.infinity,
+        child: RepaintBoundary(
+          child: AmanahScheduleEmptyCard(
+            onCreateSchedule: widget.onCreateSchedule,
+          ),
+        ),
+      );
     }
 
     final int total = widget.schedules.length;
@@ -186,8 +206,10 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
     final double tCancel = _cancelController.value;
 
     final DoctorSchedule schedule0 = widget.schedules[_currentIndex % total];
-    final DoctorSchedule schedule1 = widget.schedules[(_currentIndex + 1) % total];
-    final DoctorSchedule schedule2 = widget.schedules[(_currentIndex + (total > 2 ? 2 : 0)) % total];
+    final DoctorSchedule schedule1 =
+        widget.schedules[(_currentIndex + 1) % total];
+    final DoctorSchedule schedule2 =
+        widget.schedules[(_currentIndex + (total > 2 ? 2 : 0)) % total];
 
     double card0X = 0.0;
     double card0Y = 0.0;
@@ -241,7 +263,8 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
       card2Opacity = 0.80 + 0.15 * dragProg;
     } else if (isShuffling) {
       final double screenW = MediaQuery.sizeOf(context).width;
-      final double peakX = _shuffleDirection * (screenW * 0.72).clamp(240.0, 320.0);
+      final double peakX =
+          _shuffleDirection * (screenW * 0.72).clamp(240.0, 320.0);
 
       if (tShuffle < 0.48) {
         // Phase 1: Fly outward
@@ -251,7 +274,9 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
         card0X = _startDragX + (peakX - _startDragX) * curve1;
         card0Y = 10.0 * curve1;
         card0Scale = 1.0 - 0.06 * curve1;
-        card0Rot = (_startDragX * 0.035 + _shuffleDirection * 7.0 * curve1) * (math.pi / 180.0);
+        card0Rot =
+            (_startDragX * 0.035 + _shuffleDirection * 7.0 * curve1) *
+            (math.pi / 180.0);
         card0Opacity = 1.0 - 0.08 * curve1;
         card0InBack = false;
       } else {
@@ -262,7 +287,8 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
         card0X = peakX * (1.0 - curve2);
         card0Y = 10.0 + (28.0 - 10.0) * curve2;
         card0Scale = 0.94 - 0.10 * curve2;
-        card0Rot = (_shuffleDirection * 7.0 * (1.0 - curve2)) * (math.pi / 180.0);
+        card0Rot =
+            (_shuffleDirection * 7.0 * (1.0 - curve2)) * (math.pi / 180.0);
         card0Opacity = 0.92 - 0.12 * curve2;
         card0InBack = true;
       }
@@ -309,11 +335,11 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
 
     final List<Widget> stackChildren = total == 2
         ? (card0InBack
-            ? <Widget>[card0Widget, card1Widget]
-            : <Widget>[card1Widget, card0Widget])
+              ? <Widget>[card0Widget, card1Widget]
+              : <Widget>[card1Widget, card0Widget])
         : (card0InBack
-            ? <Widget>[card0Widget, card2Widget, card1Widget]
-            : <Widget>[card2Widget, card1Widget, card0Widget]);
+              ? <Widget>[card0Widget, card2Widget, card1Widget]
+              : <Widget>[card2Widget, card1Widget, card0Widget]);
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
@@ -351,9 +377,174 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
       child: SizedBox(
         height: AmanahScheduleCardTokens.stackHeight,
         width: double.infinity,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: stackChildren,
+        child: Stack(clipBehavior: Clip.none, children: stackChildren),
+      ),
+    );
+  }
+}
+
+class AmanahScheduleEmptyCard extends StatelessWidget {
+  const AmanahScheduleEmptyCard({this.onCreateSchedule, super.key});
+
+  final VoidCallback? onCreateSchedule;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool dark = Theme.of(context).brightness == Brightness.dark;
+    final String bgAsset = dark
+        ? AmanahScheduleCardTokens.bgImageDark
+        : AmanahScheduleCardTokens.bgImageLight;
+
+    return Semantics(
+      label: 'Belum ada jadwal praktik hari ini',
+      child: Container(
+        height: AmanahScheduleCardTokens.cardHeight,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          boxShadow: dark
+              ? AmanahScheduleCardTokens.cardShadowDark
+              : AmanahScheduleCardTokens.cardShadowLight,
+        ),
+        child: ClipPath(
+          clipper: const AmanahTicketClipper(),
+          child: Stack(
+            children: <Widget>[
+              Positioned.fill(
+                child: CustomPaint(painter: _AmanahCardBasePainter(dark: dark)),
+              ),
+              Positioned.fill(
+                child: Image.asset(
+                  bgAsset,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.centerRight,
+                  errorBuilder:
+                      (BuildContext context, Object error, StackTrace? stack) {
+                        return DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: dark
+                                  ? const <Color>[
+                                      Color(0xFF0D1B2A),
+                                      Color(0xFF060B18),
+                                    ]
+                                  : const <Color>[
+                                      Color(0xFFE0F2FE),
+                                      Color(0xFFF8FAFF),
+                                    ],
+                            ),
+                          ),
+                        );
+                      },
+                ),
+              ),
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: dark
+                        ? AmanahScheduleCardTokens.liquidGlassGradientDark
+                        : AmanahScheduleCardTokens.liquidGlassGradientLight,
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: dark
+                        ? AmanahScheduleCardTokens.glassSpecularSheenDark
+                        : AmanahScheduleCardTokens.glassSpecularSheenLight,
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _AmanahPerforatedLinePainter(dark: dark),
+                ),
+              ),
+              Padding(
+                padding: AmanahScheduleCardTokens.padding,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            'Jadwal Hari Ini',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0,
+                              height: 1.15,
+                              color: dark
+                                  ? AmanahScheduleCardTokens.titleColorDark
+                                  : AmanahScheduleCardTokens.titleColorLight,
+                            ),
+                          ),
+                        ),
+                        const AmanahStatusBadge(
+                          variant: AmanahBadgeVariant.primary,
+                          text: 'Kosong',
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'Hari ini masih nyantai',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: 'PlusJakartaSans',
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0,
+                            height: 1.1,
+                            color: dark
+                                ? AmanahScheduleCardTokens.timeColorDark
+                                : AmanahScheduleCardTokens.timeColorLight,
+                          ),
+                        ),
+                        const SizedBox(height: AmanahSpacing.xs),
+                        Text(
+                          'Belum ada sesi praktik untuk hari ini.',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: 'PlusJakartaSans',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0,
+                            height: 1.35,
+                            color: dark
+                                ? AmanahScheduleCardTokens.roomColorDark
+                                : AmanahScheduleCardTokens.roomColorLight,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: AmanahButton.text(
+                        text: 'Buat jadwal',
+                        trailingIcon: Icons.arrow_forward_rounded,
+                        customForegroundColor: dark
+                            ? AmanahColorTokens.brandSoft
+                            : AmanahColorTokens.brand,
+                        onPressed: onCreateSchedule,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -379,8 +570,9 @@ class AmanahScheduleCard extends StatelessWidget {
     if (schedule.bookedPatients.isNotEmpty) {
       return '${schedule.bookedPatients.length} Pasien';
     }
-    final String raw =
-        schedule.slotCount.replaceAll(RegExp(r'\s*/\s*\d+'), '').trim();
+    final String raw = schedule.slotCount
+        .replaceAll(RegExp(r'\s*/\s*\d+'), '')
+        .trim();
     if (int.tryParse(raw) != null) {
       return '$raw Pasien';
     }
@@ -420,9 +612,7 @@ class AmanahScheduleCard extends StatelessWidget {
             children: <Widget>[
               // Layer 1: Solid Card Base & Outer Border
               Positioned.fill(
-                child: CustomPaint(
-                  painter: _AmanahCardBasePainter(dark: dark),
-                ),
+                child: CustomPaint(painter: _AmanahCardBasePainter(dark: dark)),
               ),
 
               // Layer 2: Authentic 3D Geometric Crystal Texture Asset
@@ -431,25 +621,26 @@ class AmanahScheduleCard extends StatelessWidget {
                   bgAsset,
                   fit: BoxFit.cover,
                   alignment: Alignment.centerRight,
-                  errorBuilder: (BuildContext context, Object error, StackTrace? stack) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: dark
-                              ? const <Color>[
-                                  Color(0xFF0D1B2A),
-                                  Color(0xFF060B18),
-                                ]
-                              : const <Color>[
-                                  Color(0xFFE0F2FE),
-                                  Color(0xFFF8FAFF),
-                                ],
-                        ),
-                      ),
-                    );
-                  },
+                  errorBuilder:
+                      (BuildContext context, Object error, StackTrace? stack) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: dark
+                                  ? const <Color>[
+                                      Color(0xFF0D1B2A),
+                                      Color(0xFF060B18),
+                                    ]
+                                  : const <Color>[
+                                      Color(0xFFE0F2FE),
+                                      Color(0xFFF8FAFF),
+                                    ],
+                            ),
+                          ),
+                        );
+                      },
                 ),
               ),
 
@@ -516,8 +707,10 @@ class AmanahScheduleCard extends StatelessWidget {
                                             letterSpacing: -0.2,
                                             height: 1.15,
                                             color: dark
-                                                ? AmanahScheduleCardTokens.titleColorDark
-                                                : AmanahScheduleCardTokens.titleColorLight,
+                                                ? AmanahScheduleCardTokens
+                                                      .titleColorDark
+                                                : AmanahScheduleCardTokens
+                                                      .titleColorLight,
                                           ),
                                         ),
                                       ),
@@ -525,12 +718,18 @@ class AmanahScheduleCard extends StatelessWidget {
                                         Container(
                                           width: 1.5,
                                           height: 11,
-                                          margin: const EdgeInsets.symmetric(horizontal: 6),
+                                          margin: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                          ),
                                           decoration: BoxDecoration(
                                             color: dark
-                                                ? Colors.white.withValues(alpha: 0.25)
+                                                ? Colors.white.withValues(
+                                                    alpha: 0.25,
+                                                  )
                                                 : const Color(0xFFCBD5E1),
-                                            borderRadius: BorderRadius.circular(1),
+                                            borderRadius: BorderRadius.circular(
+                                              1,
+                                            ),
                                           ),
                                         ),
                                         Flexible(
@@ -561,8 +760,10 @@ class AmanahScheduleCard extends StatelessWidget {
                                       fontSize: 11.5,
                                       fontWeight: FontWeight.w500,
                                       color: dark
-                                          ? AmanahScheduleCardTokens.dateColorDark
-                                          : AmanahScheduleCardTokens.dateColorLight,
+                                          ? AmanahScheduleCardTokens
+                                                .dateColorDark
+                                          : AmanahScheduleCardTokens
+                                                .dateColorLight,
                                     ),
                                   ),
                                 ],
@@ -621,8 +822,10 @@ class AmanahScheduleCard extends StatelessWidget {
                                       fontWeight: FontWeight.w800,
                                       height: 1.15,
                                       color: dark
-                                          ? AmanahScheduleCardTokens.poliColorDark
-                                          : AmanahScheduleCardTokens.poliColorLight,
+                                          ? AmanahScheduleCardTokens
+                                                .poliColorDark
+                                          : AmanahScheduleCardTokens
+                                                .poliColorLight,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -636,8 +839,10 @@ class AmanahScheduleCard extends StatelessWidget {
                                       fontWeight: FontWeight.w500,
                                       height: 1.15,
                                       color: dark
-                                          ? AmanahScheduleCardTokens.roomColorDark
-                                          : AmanahScheduleCardTokens.roomColorLight,
+                                          ? AmanahScheduleCardTokens
+                                                .roomColorDark
+                                          : AmanahScheduleCardTokens
+                                                .roomColorLight,
                                     ),
                                   ),
                                 ],

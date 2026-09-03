@@ -5,10 +5,7 @@ import 'package:smooth_app/features/home/presentation/components/amanah_screen_h
 import 'package:smooth_app/features/home/presentation/components/amanah_settings_components.dart';
 
 class AmanahDataStorageSettingsScreen extends StatefulWidget {
-  const AmanahDataStorageSettingsScreen({
-    this.onBack,
-    super.key,
-  });
+  const AmanahDataStorageSettingsScreen({this.onBack, super.key});
 
   final VoidCallback? onBack;
 

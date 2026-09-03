@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_empty_state.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/features/schedule/data/amanah_schedule_store.dart';
 import 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart';
@@ -192,15 +194,13 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                 title: screenTitle,
                 subtitle: screenSubtitle,
                 onBack: backAction,
-                rightAction: _viewMode != AmanahScheduleViewMode.sessionPatients
-                    ? IconButton(
-                        icon: Icon(
-                          Icons.add,
-                          size: 26,
-                          color: dark
-                              ? AmanahColorTokens.brandAccent
-                              : AmanahColorTokens.brand,
-                        ),
+                trailing: _viewMode != AmanahScheduleViewMode.sessionPatients
+                    ? AmanahScreenHeaderIconAction(
+                        icon: Icons.add_rounded,
+                        semanticsLabel: 'Tambah jadwal praktik',
+                        foregroundColor: dark
+                            ? AmanahColorTokens.brandAccent
+                            : AmanahColorTokens.brand,
                         onPressed: () {
                           AmanahAddEditScheduleDrawer.show(
                             context,
@@ -282,13 +282,13 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            TextButton.icon(
-              style: TextButton.styleFrom(
-                foregroundColor: dark
-                    ? AmanahColorTokens.brandAccent
-                    : AmanahColorTokens.brand,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              ),
+            AmanahButton.text(
+              text: 'Lihat jadwal',
+              trailingIcon: Icons.chevron_right_rounded,
+              size: AmanahButtonSize.small,
+              customForegroundColor: dark
+                  ? AmanahColorTokens.brandAccent
+                  : AmanahColorTokens.brand,
               onPressed: () {
                 AmanahDocScheduleCalendarDrawer.show(
                   context,
@@ -300,15 +300,6 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                   }),
                 );
               },
-              icon: const Text(
-                'Lihat Schedule',
-                style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              label: const Icon(Icons.chevron_right_rounded, size: 16),
             ),
           ],
         ),
@@ -355,27 +346,14 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                     ),
                   ),
                 ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF59E0B),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+                AmanahButton.secondary(
+                  text: 'Buka Jadwal',
+                  size: AmanahButtonSize.small,
+                  customForegroundColor: const Color(0xFFF59E0B),
+                  customBackgroundColor: const Color(
+                    0xFFF59E0B,
+                  ).withValues(alpha: 0.12),
                   onPressed: () => _store.setDayCuti(_selectedDate, false),
-                  child: const Text(
-                    'Buka Jadwal',
-                    style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -442,24 +420,23 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
             },
           )
         else
-          _buildEmptyState(
-            context: context,
-            dark: dark,
-            icon: Icons.people_outline_rounded,
+          AmanahEmptyState.box(
             title: 'Belum Ada Pasien Booking',
             message: isCuti
                 ? 'Dokter sedang cuti pada tanggal ini.'
                 : 'Belum ada pasien yang mendaftar pada sesi praktik di tanggal ini.',
-            buttonText: 'Tambah Jadwal',
-            onTapButton: () {
+            actionText: 'Tambah Jadwal',
+            actionLeadingIcon: Icons.add_rounded,
+            onAction: () {
               AmanahAddEditScheduleDrawer.show(
                 context,
                 initialDate: _selectedDate,
                 onSavedDate: _handleSavedDate,
               );
             },
-            secondaryButtonText: 'Lihat Sesi Dokter',
-            onTapSecondaryButton: () {
+            secondaryActionText: 'Lihat Sesi Dokter',
+            secondaryActionLeadingIcon: Icons.calendar_month_outlined,
+            onSecondaryAction: () {
               setState(() => _viewMode = AmanahScheduleViewMode.sessions);
             },
           ),
@@ -542,16 +519,15 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
             },
           )
         else
-          _buildEmptyState(
-            context: context,
-            dark: dark,
+          AmanahEmptyState.card(
             icon: Icons.calendar_today_outlined,
             title: 'Belum Ada Sesi Praktik',
             message: isCuti
                 ? 'Dokter sedang cuti pada tanggal ini.'
                 : 'Belum ada sesi praktik dokter yang ditambahkan pada tanggal ini.',
-            buttonText: 'Tambah Jadwal Dokter',
-            onTapButton: () {
+            actionText: 'Tambah Jadwal Dokter',
+            actionLeadingIcon: Icons.add_rounded,
+            onAction: () {
               AmanahAddEditScheduleDrawer.show(
                 context,
                 initialDate: _selectedDate,
@@ -660,103 +636,17 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
             },
           )
         else
-          _buildEmptyState(
-            context: context,
-            dark: dark,
+          AmanahEmptyState.card(
             icon: Icons.people_outline_rounded,
             title: 'Belum Ada Pasien Booking',
             message: 'Belum ada pasien yang mendaftar pada sesi praktik ini.',
-            buttonText: 'Kembali ke Sesi Praktik',
-            onTapButton: () {
+            actionText: 'Kembali ke Sesi Praktik',
+            actionLeadingIcon: Icons.arrow_back_rounded,
+            onAction: () {
               setState(() => _viewMode = AmanahScheduleViewMode.sessions);
             },
           ),
       ],
-    );
-  }
-
-  Widget _buildEmptyState({
-    required BuildContext context,
-    required bool dark,
-    required IconData icon,
-    required String title,
-    required String message,
-    required String buttonText,
-    required VoidCallback onTapButton,
-    String? secondaryButtonText,
-    VoidCallback? onTapSecondaryButton,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
-      decoration: BoxDecoration(
-        color: dark ? Colors.white.withValues(alpha: 0.04) : Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(
-          color: dark
-              ? Colors.white.withValues(alpha: 0.08)
-              : const Color(0xFFE2E8F0),
-        ),
-      ),
-      child: Column(
-        children: <Widget>[
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: dark
-                  ? Colors.white.withValues(alpha: 0.06)
-                  : const Color(0xFFF1F5F9),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              size: 26,
-              color: dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-            ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            title,
-            style: TextStyle(
-              color: dark ? Colors.white : const Color(0xFF0F172A),
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 18),
-          AmanahButton.primary(
-            text: buttonText,
-            isFullWidth: true,
-            size: AmanahButtonSize.medium,
-            onPressed: onTapButton,
-          ),
-          if (secondaryButtonText != null) ...<Widget>[
-            const SizedBox(height: 8),
-            AmanahButton.ghost(
-              text: secondaryButtonText,
-              isFullWidth: true,
-              size: AmanahButtonSize.medium,
-              customForegroundColor: dark
-                  ? AmanahColorTokens.neutral200
-                  : AmanahColorTokens.neutral700,
-              onPressed: onTapSecondaryButton,
-            ),
-          ],
-        ],
-      ),
     );
   }
 

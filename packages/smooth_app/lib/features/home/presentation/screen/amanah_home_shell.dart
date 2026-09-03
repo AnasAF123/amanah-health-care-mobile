@@ -26,18 +26,29 @@ import 'package:smooth_app/features/presence/presentation/screen/amanah_presence
 import 'package:smooth_app/features/presence/presentation/screen/amanah_qr_scanner_tab_screen.dart';
 import 'package:smooth_app/features/schedule/data/amanah_schedule_store.dart';
 import 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart';
+import 'package:smooth_app/features/schedule/presentation/components/amanah_schedule_form_and_calendar_dialog.dart';
 
 class AmanahHomeShell extends StatefulWidget {
-  const AmanahHomeShell({required this.user, this.onLogout, super.key});
+  const AmanahHomeShell({this.user, this.onLogout, super.key});
 
-  final AmanahAuthUser user;
+  final AmanahAuthUser? user;
   final VoidCallback? onLogout;
+
+  static const AmanahAuthUser defaultUser = AmanahAuthUser(
+    id: 'doc-001',
+    role: AmanahUserRole.doctor,
+    fullName: 'dr. Rayhan Pratama, Sp.A',
+    email: 'dokter@amanah.health',
+    phone: '081234567890',
+    password: '',
+  );
 
   @override
   State<AmanahHomeShell> createState() => _AmanahHomeShellState();
 }
 
 class _AmanahHomeShellState extends State<AmanahHomeShell> {
+  AmanahAuthUser get _currentUser => widget.user ?? AmanahHomeShell.defaultUser;
   final AmanahScheduleStore _scheduleStore = AmanahScheduleStore.instance;
   final AmanahNotificationStore _notificationStore =
       AmanahNotificationStore.instance;
@@ -118,7 +129,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
       case 'kartu-id':
         Navigator.of(context).push(
           AmanahDoctorIdCardScreen.route(
-            user: widget.user,
+            user: _currentUser,
             profile: amanahHomeDashboardData.profile,
           ),
         );
@@ -183,7 +194,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
               child: switch (_selectedTab) {
                 AmanahHomeTab.home => _AmanahHomeScreenContent(
                   key: const ValueKey<String>('home_content'),
-                  user: widget.user,
+                  user: _currentUser,
                   data: amanahHomeDashboardData,
                   todaySchedules: todaySchedules,
                   unreadNotifications: _notificationStore.unreadCount,
@@ -199,6 +210,15 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                     _handleQuickAction(action.id);
                   },
                   onScheduleCardTap: _navigateToScheduleWithSession,
+                  onCreateScheduleTap: () {
+                    AmanahAddEditScheduleDrawer.show(
+                      context,
+                      initialDate: AmanahScheduleStore.baseToday,
+                      onSavedDate: (_) {
+                        _showToast('Jadwal praktik berhasil disimpan');
+                      },
+                    );
+                  },
                   onDetailActivityTap: () {
                     _handleQuickAction('queue');
                   },
@@ -213,9 +233,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   },
                 ),
                 AmanahHomeTab.schedule => AmanahScheduleTabScreen(
-                  key: ValueKey<String>(
-                    'schedule_content_${_scheduleInitialSessionId ?? "all"}_${_scheduleInitialViewMode?.name ?? "default"}',
-                  ),
+                  key: const ValueKey<String>('schedule_content'),
                   initialSessionId: _scheduleInitialSessionId,
                   initialViewMode: _scheduleInitialViewMode,
                   openDetailOnLaunch: _scheduleOpenDetailOnLaunch,
@@ -230,7 +248,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                 ),
                 AmanahHomeTab.scan => AmanahQrScannerTabScreen(
                   key: const ValueKey<String>('scan_content'),
-                  user: widget.user,
+                  user: _currentUser,
                   bottomNavigationClearance:
                       96 + MediaQuery.viewPaddingOf(context).bottom,
                   onDrawerStateChanged: (bool isOpen) {
@@ -247,7 +265,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                 ),
                 AmanahHomeTab.notifications => AmanahLeavePermissionTabScreen(
                   key: const ValueKey<String>('permissions_content'),
-                  doctorName: widget.user.fullName,
+                  doctorName: _currentUser.fullName,
                   doctorRole: 'Dokter Spesialis Anak',
                   onBack: () {
                     setState(() => _selectedTab = AmanahHomeTab.home);
@@ -255,7 +273,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                 ),
                 AmanahHomeTab.account => AmanahAccountTabScreen(
                   key: const ValueKey<String>('account_content'),
-                  user: widget.user,
+                  user: _currentUser,
                   onBack: () {
                     setState(() => _selectedTab = AmanahHomeTab.home);
                   },
@@ -313,6 +331,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
     required this.onActivityTap,
     this.unreadNotifications = 0,
     this.onScheduleCardTap,
+    this.onCreateScheduleTap,
     this.onSlideAction,
     this.onAnalyticsViewDetails,
     super.key,
@@ -327,6 +346,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
   final VoidCallback onDetailActivityTap;
   final ValueChanged<AmanahActivityMetric> onActivityTap;
   final ValueChanged<DoctorSchedule>? onScheduleCardTap;
+  final VoidCallback? onCreateScheduleTap;
   final ValueChanged<String>? onSlideAction;
   final VoidCallback? onAnalyticsViewDetails;
   final int unreadNotifications;
@@ -351,11 +371,9 @@ class _AmanahHomeScreenContent extends StatelessWidget {
       return act;
     }).toList();
 
-    return ListView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
+    return Column(
       children: <Widget>[
-        // 1. Doctor Profile Header
+        // 1. Doctor Profile Header (Fixed master header, 100% aligned with other tab headers)
         AmanahHomeAppBar(
           user: user,
           greeting: data.profile.greeting,
@@ -363,36 +381,47 @@ class _AmanahHomeScreenContent extends StatelessWidget {
           onNotificationTap: onNotificationTap,
           onProfileTap: onProfileTap,
         ),
-        const SizedBox(height: 10),
 
-        // 2. 3D Stack of Schedule Cards with Staggered Depth & Wave Petal Texture
-        AmanahScheduleCardStack(
-          schedules: todaySchedules,
-          onCardTap: onScheduleCardTap,
+        // Scrollable home dashboard body
+        Expanded(
+          child: ListView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+            children: <Widget>[
+              // 2. 3D Stack of Schedule Cards with Staggered Depth & Wave Petal Texture
+              AmanahScheduleCardStack(
+                schedules: todaySchedules,
+                onCardTap: onScheduleCardTap,
+                onCreateSchedule: onCreateScheduleTap,
+              ),
+              const SizedBox(height: 16),
+
+              // 3. Quick Access Menu Grid (Raised closer to the card stack)
+              AmanahQuickAccessSection(
+                actions: data.quickActions,
+                onActionTap: onQuickActionTap,
+              ),
+              const SizedBox(height: 16),
+
+              // 4. Master 3D Deck Carousel (Promotions & Clinical Programs)
+              AmanahMasterCarouselSection(onSlideAction: onSlideAction),
+              const SizedBox(height: 20),
+
+              // 5. Today's Activity Stat Cards
+              AmanahTodayActivitySection(
+                activities: dynamicActivities,
+                onDetailTap: onDetailActivityTap,
+                onActivityTap: onActivityTap,
+              ),
+              const SizedBox(height: 24),
+
+              // 6. Clinic Performance & Trends Analytics (Area Chart & Monthly Timeline)
+              AmanahClinicAnalyticsSection(
+                onViewDetails: onAnalyticsViewDetails,
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 16),
-
-        // 3. Quick Access Menu Grid (Raised closer to the card stack)
-        AmanahQuickAccessSection(
-          actions: data.quickActions,
-          onActionTap: onQuickActionTap,
-        ),
-        const SizedBox(height: 16),
-
-        // 4. Master 3D Deck Carousel (Promotions & Clinical Programs)
-        AmanahMasterCarouselSection(onSlideAction: onSlideAction),
-        const SizedBox(height: 20),
-
-        // 5. Today's Activity Stat Cards
-        AmanahTodayActivitySection(
-          activities: dynamicActivities,
-          onDetailTap: onDetailActivityTap,
-          onActivityTap: onActivityTap,
-        ),
-        const SizedBox(height: 24),
-
-        // 6. Clinic Performance & Trends Analytics (Area Chart & Monthly Timeline)
-        AmanahClinicAnalyticsSection(onViewDetails: onAnalyticsViewDetails),
       ],
     );
   }

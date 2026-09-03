@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/authentication/domain/amanah_auth_user.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
 
 class AmanahChatMessage {
@@ -125,9 +126,7 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
     final Color bgColor = dark
         ? const Color(0xFF0A0E1A)
         : const Color(0xFFF8FAFF);
-    final Color bottomBarBg = dark
-        ? const Color(0xFF0A0E1A)
-        : Colors.white;
+    final Color bottomBarBg = dark ? const Color(0xFF0A0E1A) : Colors.white;
     final Color bottomBarBorder = dark
         ? Colors.white.withValues(alpha: 0.10)
         : const Color(0xFFF1F5F9);
@@ -186,12 +185,16 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                             height: 26,
                             decoration: BoxDecoration(
                               color: dark
-                                  ? const Color(0xFF0369A1).withValues(alpha: 0.3)
+                                  ? const Color(
+                                      0xFF0369A1,
+                                    ).withValues(alpha: 0.3)
                                   : const Color(0xFFEFF6FF),
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: dark
-                                    ? const Color(0xFF38BDF8).withValues(alpha: 0.3)
+                                    ? const Color(
+                                        0xFF38BDF8,
+                                      ).withValues(alpha: 0.3)
                                     : const Color(0xFFDBEAFE),
                               ),
                             ),
@@ -214,7 +217,8 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                         Flexible(
                           child: Container(
                             constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width * 0.76,
+                              maxWidth:
+                                  MediaQuery.of(context).size.width * 0.76,
                             ),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 14,
@@ -224,8 +228,8 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                               color: isUser
                                   ? const Color(0xFF0D66E9)
                                   : (dark
-                                      ? const Color(0xFF111624)
-                                      : const Color(0xFFF1F5F9)),
+                                        ? const Color(0xFF111624)
+                                        : const Color(0xFFF1F5F9)),
                               borderRadius: BorderRadius.only(
                                 topLeft: const Radius.circular(16),
                                 topRight: const Radius.circular(16),
@@ -234,7 +238,9 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                               ),
                               border: !isUser && dark
                                   ? Border.all(
-                                      color: Colors.white.withValues(alpha: 0.08),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.08,
+                                      ),
                                     )
                                   : null,
                             ),
@@ -249,8 +255,8 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                                     color: isUser
                                         ? Colors.white
                                         : (dark
-                                            ? const Color(0xFFE2E8F0)
-                                            : const Color(0xFF1E293B)),
+                                              ? const Color(0xFFE2E8F0)
+                                              : const Color(0xFF1E293B)),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 12.5,
                                     height: 1.45,
@@ -263,8 +269,8 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                                     color: isUser
                                         ? Colors.white.withValues(alpha: 0.70)
                                         : (dark
-                                            ? const Color(0xFF94A3B8)
-                                            : const Color(0xFF64748B)),
+                                              ? const Color(0xFF94A3B8)
+                                              : const Color(0xFF64748B)),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 9.5,
                                   ),
@@ -355,28 +361,10 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                     ),
                   ),
                   const SizedBox(width: 8),
-                  ElevatedButton(
+                  AmanahButton.primary(
+                    text: 'Kirim',
+                    size: AmanahButtonSize.medium,
                     onPressed: _handleSendMessage,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0D66E9),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'Kirim',
-                      style: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -420,9 +408,7 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: dark
-                  ? const Color(0xFF111624)
-                  : const Color(0xFFF1F5F9),
+              color: dark ? const Color(0xFF111624) : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(

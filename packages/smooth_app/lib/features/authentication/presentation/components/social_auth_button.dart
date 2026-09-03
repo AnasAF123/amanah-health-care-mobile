@@ -21,18 +21,22 @@ class SocialAuthButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color backgroundColor = provider == AuthProviderType.email
-        ? theme.colorScheme.secondary.withValues(alpha: 0.72)
-        : theme.colorScheme.surface;
+    final bool dark = theme.brightness == Brightness.dark;
+    final Color backgroundColor = provider == AuthProviderType.google
+        ? (dark
+              ? theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.50,
+                )
+              : const Color(0xFFF1F5F9))
+        : (provider == AuthProviderType.email
+              ? theme.colorScheme.secondary.withValues(alpha: 0.72)
+              : theme.colorScheme.surface);
     final Color foregroundColor = theme.colorScheme.onSurface;
-    final Color borderColor = theme.colorScheme.outlineVariant.withValues(
-      alpha: 0.9,
-    );
 
     return AmanahButton(
       text: label,
       onPressed: onPressed,
-      variant: AmanahButtonVariant.secondary,
+      variant: AmanahButtonVariant.ghost,
       size: AmanahButtonSize.large,
       leadingIcon: _ProviderIcon(provider: provider, color: foregroundColor),
       isLoading: loading,
@@ -40,7 +44,6 @@ class SocialAuthButton extends StatelessWidget {
       isFullWidth: true,
       customBackgroundColor: backgroundColor,
       customForegroundColor: foregroundColor,
-      customBorder: Border.all(color: borderColor),
       boxShadow: const <BoxShadow>[],
       semanticsLabel: label,
     );

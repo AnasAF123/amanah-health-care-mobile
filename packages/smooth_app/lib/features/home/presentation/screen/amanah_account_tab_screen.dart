@@ -58,28 +58,28 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
         AmanahSettingsItemData(
           id: 'account',
           title: 'Akun & identitas dokter',
-          subtitle: 'SIP, STR, NIK, bio medis',
+          subtitle: 'Data dokter dan kontak',
           tone: AmanahIconTone.account,
           icon: Icons.person_outline_rounded,
         ),
         AmanahSettingsItemData(
           id: 'security',
           title: 'Privasi & keamanan',
-          subtitle: 'PIN presensi, biometrik, akses data',
+          subtitle: 'PIN dan akses masuk',
           tone: AmanahIconTone.security,
           icon: Icons.verified_user_outlined,
         ),
         AmanahSettingsItemData(
           id: 'data',
           title: 'Data & penyimpanan',
-          subtitle: 'Unduh laporan PDF, cache SIMRS',
+          subtitle: 'Cache dan laporan',
           tone: AmanahIconTone.data,
           icon: Icons.storage_rounded,
         ),
         AmanahSettingsItemData(
           id: 'help',
           title: 'Bantuan teknisi IT',
-          subtitle: 'Helpdesk SIMRS, panduan presensi',
+          subtitle: 'Kontak bantuan IT',
           tone: AmanahIconTone.help,
           icon: Icons.help_outline_rounded,
         ),
@@ -272,9 +272,9 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
             // 2. Settings Items Container (3D ClayIcon Style in Rounded-3xl Card)
             Padding(
               padding: EdgeInsets.fromLTRB(
-                20,
+                AmanahSpacing.lg,
                 4,
-                20,
+                AmanahSpacing.lg,
                 130 + MediaQuery.paddingOf(context).bottom,
               ),
               child: Column(
@@ -307,9 +307,8 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                               dark: dark,
                               textColor: textColor,
                               subtextColor: subtextColor,
-                              onTap: () => _handleMenuItemTap(
-                                _settingsItems[i].id,
-                              ),
+                              onTap: () =>
+                                  _handleMenuItemTap(_settingsItems[i].id),
                             ),
                             if (i < _settingsItems.length - 1)
                               Divider(
@@ -366,19 +365,23 @@ class _AccountHeaderBanner extends StatelessWidget {
     final Color subtextColor = dark
         ? const Color(0xFF94A3B8)
         : const Color(0xFF64748B);
+    final Color coverBorder = dark
+        ? Colors.white.withValues(alpha: 0.08)
+        : AmanahColorTokens.brandMuted;
 
     return Container(
       color: solidBg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // Scenic Nature Cover Photo with Linear Mask
+          // Scenic Mountain / Nature Banner with Gradient Fade
           SizedBox(
-            height: 135,
+            height: 168.0 + MediaQuery.paddingOf(context).top,
             width: double.infinity,
             child: Stack(
               clipBehavior: Clip.none,
               children: <Widget>[
+                // 1. Scenic Nature Cover Image with local meadow asset & medical gradient fallback
                 Positioned.fill(
                   child: Image.network(
                     'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800&auto=format&fit=crop',
@@ -390,34 +393,46 @@ class _AccountHeaderBanner extends StatelessWidget {
                           Object error,
                           StackTrace? stackTrace,
                         ) {
-                          return Container(
-                            decoration: const BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: <Color>[
-                                  Color(0xFF1E3A8A),
-                                  Color(0xFF1D4ED8),
-                                  Color(0xFF3B82F6),
-                                ],
-                              ),
-                            ),
+                          return Image.asset(
+                            'assets/amanah/images/schedule-meadow-bg.png',
+                            fit: BoxFit.cover,
+                            alignment: Alignment.center,
+                            errorBuilder:
+                                (
+                                  BuildContext context,
+                                  Object error,
+                                  StackTrace? stackTrace,
+                                ) {
+                                  return Container(
+                                    decoration: const BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: <Color>[
+                                          Color(0xFF1E3A8A),
+                                          Color(0xFF1D4ED8),
+                                          Color(0xFF3B82F6),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
                           );
                         },
                   ),
                 ),
 
-                // Smooth Linear Gradient Fade to bottom
+                // 2. Smooth Linear Gradient Fade to bottom
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        stops: const <double>[0.15, 0.65, 1.0],
+                        stops: const <double>[0.15, 0.70, 1.0],
                         colors: <Color>[
                           Colors.transparent,
-                          solidBg.withValues(alpha: 0.30),
+                          solidBg.withValues(alpha: 0.35),
                           solidBg,
                         ],
                       ),
@@ -425,55 +440,52 @@ class _AccountHeaderBanner extends StatelessWidget {
                   ),
                 ),
 
-                // Floating Liquid Glassmorphism Back Button
+                // 3. Back Button
                 if (onBack != null)
                   Positioned(
-                    top: 16,
-                    left: 16,
-                    child: InkWell(
-                      onTap: onBack,
-                      borderRadius: BorderRadius.circular(100),
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: dark
-                              ? Colors.black.withValues(alpha: 0.40)
-                              : Colors.white.withValues(alpha: 0.75),
-                          border: Border.all(
-                            color: dark
-                                ? Colors.white.withValues(alpha: 0.20)
-                                : Colors.white.withValues(alpha: 0.80),
-                          ),
-                          boxShadow: <BoxShadow>[
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.15),
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.chevron_left_rounded,
-                          size: 20,
-                          color: dark ? Colors.white : const Color(0xFF1E293B),
-                        ),
+                    top: MediaQuery.paddingOf(context).top > 0
+                        ? MediaQuery.paddingOf(context).top + 8
+                        : 16,
+                    left: AmanahSpacing.lg,
+                    child: AmanahButton.icon(
+                      icon: Icons.arrow_back_rounded,
+                      customSize: AmanahComponentSize.iconButton,
+                      customBackgroundColor: solidBg.withValues(
+                        alpha: dark ? 0.35 : 0.88,
                       ),
+                      customForegroundColor: textColor,
+                      customBorder: Border.all(color: coverBorder),
+                      boxShadow: <BoxShadow>[
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: dark ? 0.25 : 0.10,
+                          ),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                      semanticsLabel: 'Kembali',
+                      onPressed: onBack,
                     ),
                   ),
               ],
             ),
           ),
 
-          // Profile Identity Body
+          // Profile Identity Body (Aligned with AmanahSpacing.lg = 16.0)
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+            padding: const EdgeInsets.fromLTRB(
+              AmanahSpacing.lg,
+              0,
+              AmanahSpacing.lg,
+              14,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 // Overlapping Avatar with Pure White Ring and Floating Camera Button
                 Transform.translate(
-                  offset: const Offset(0, -36),
+                  offset: const Offset(0, -42),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -546,7 +558,7 @@ class _AccountHeaderBanner extends StatelessWidget {
                 ),
 
                 Transform.translate(
-                  offset: const Offset(0, -22),
+                  offset: const Offset(0, -28),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
@@ -566,9 +578,7 @@ class _AccountHeaderBanner extends StatelessWidget {
                       Text(
                         doctorRole,
                         style: TextStyle(
-                          color: dark
-                              ? const Color(0xFF60A5FA)
-                              : const Color(0xFF2563EB),
+                          color: subtextColor,
                           fontFamily: 'PlusJakartaSans',
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -583,9 +593,7 @@ class _AccountHeaderBanner extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: dark
-                                ? const Color(0xFFCBD5E1)
-                                : const Color(0xFF475569),
+                            color: subtextColor,
                             fontFamily: 'PlusJakartaSans',
                             fontSize: 11.5,
                             fontWeight: FontWeight.w400,
@@ -601,7 +609,7 @@ class _AccountHeaderBanner extends StatelessWidget {
                         children: <Widget>[
                           Expanded(
                             child: Text(
-                              'ID: DOC-2026-0819 • RS Amanah Sehat',
+                              'ID DOC-2026-0819',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -614,40 +622,11 @@ class _AccountHeaderBanner extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
 
-                          // Compose: [Leading Icon + Text] Edit Profil
-                          InkWell(
-                            onTap: onEditProfile,
-                            borderRadius: BorderRadius.circular(8),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 2,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Icon(
-                                    Icons.edit_outlined,
-                                    size: 13,
-                                    color: dark
-                                        ? const Color(0xFF60A5FA)
-                                        : const Color(0xFF2563EB),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Edit Profil',
-                                    style: TextStyle(
-                                      color: dark
-                                          ? const Color(0xFF60A5FA)
-                                          : const Color(0xFF2563EB),
-                                      fontFamily: 'PlusJakartaSans',
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          AmanahButton.text(
+                            text: 'Edit profil',
+                            leadingIcon: Icons.edit_outlined,
+                            size: AmanahButtonSize.small,
+                            onPressed: onEditProfile,
                           ),
                         ],
                       ),

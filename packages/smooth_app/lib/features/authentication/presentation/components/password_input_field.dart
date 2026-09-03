@@ -11,6 +11,8 @@ class PasswordInputField extends StatefulWidget {
     this.autofillHints,
     this.validator,
     this.onFieldSubmitted,
+    this.onChanged,
+    this.hasError = false,
   });
 
   final String label;
@@ -20,6 +22,8 @@ class PasswordInputField extends StatefulWidget {
   final Iterable<String>? autofillHints;
   final String? Function(String?)? validator;
   final ValueChanged<String>? onFieldSubmitted;
+  final ValueChanged<String>? onChanged;
+  final bool hasError;
 
   @override
   State<PasswordInputField> createState() => _PasswordInputFieldState();
@@ -40,6 +44,8 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
       autofillHints: widget.autofillHints,
       validator: widget.validator,
       onFieldSubmitted: widget.onFieldSubmitted,
+      onChanged: widget.onChanged,
+      hasError: widget.hasError,
       trailing: IconButton(
         tooltip: _obscureText ? 'Tampilkan password' : 'Sembunyikan password',
         onPressed: () => setState(() => _obscureText = !_obscureText),

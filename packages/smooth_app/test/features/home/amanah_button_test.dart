@@ -4,7 +4,9 @@ import 'package:smooth_app/features/home/presentation/components/amanah_button.d
 
 void main() {
   group('AmanahButton Master Component Tests', () {
-    testWidgets('Renders primary bold button and handles tap event', (WidgetTester tester) async {
+    testWidgets('Renders primary bold button and handles tap event', (
+      WidgetTester tester,
+    ) async {
       bool tapped = false;
       await tester.pumpWidget(
         MaterialApp(
@@ -23,7 +25,9 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('Renders secondary subtle button with leading icon', (WidgetTester tester) async {
+    testWidgets('Renders secondary subtle button with leading icon', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -39,14 +43,13 @@ void main() {
       expect(find.byIcon(Icons.history_rounded), findsOneWidget);
     });
 
-    testWidgets('Renders outline stroke button with trailing text badge', (WidgetTester tester) async {
+    testWidgets('Renders outline stroke button with trailing text badge', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: AmanahButton.outline(
-              text: 'Filter',
-              trailingText: '3',
-            ),
+            body: AmanahButton.outline(text: 'Filter', trailingText: '3'),
           ),
         ),
       );
@@ -55,14 +58,12 @@ void main() {
       expect(find.text('3'), findsOneWidget);
     });
 
-    testWidgets('Renders ghost transparent button', (WidgetTester tester) async {
+    testWidgets('Renders ghost transparent button', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: AmanahButton.ghost(
-              text: 'Batal',
-            ),
-          ),
+          home: Scaffold(body: AmanahButton.ghost(text: 'Batal')),
         ),
       );
 
@@ -72,18 +73,16 @@ void main() {
     testWidgets('Renders text-only button', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: AmanahButton.text(
-              text: 'Selengkapnya',
-            ),
-          ),
+          home: Scaffold(body: AmanahButton.text(text: 'Selengkapnya')),
         ),
       );
 
       expect(find.text('Selengkapnya'), findsOneWidget);
     });
 
-    testWidgets('Renders circular icon-only action button', (WidgetTester tester) async {
+    testWidgets('Renders circular icon-only action button', (
+      WidgetTester tester,
+    ) async {
       bool iconTapped = false;
       await tester.pumpWidget(
         MaterialApp(
@@ -102,29 +101,34 @@ void main() {
       expect(iconTapped, isTrue);
     });
 
-    testWidgets('Renders loading spinner when isLoading is true and prevents tap', (WidgetTester tester) async {
-      bool tapped = false;
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: AmanahButton.primary(
-              text: 'Kirim',
-              isLoading: true,
-              onPressed: () => tapped = true,
+    testWidgets(
+      'Renders loading spinner when isLoading is true and prevents tap',
+      (WidgetTester tester) async {
+        bool tapped = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AmanahButton.primary(
+                text: 'Kirim',
+                isLoading: true,
+                onPressed: () => tapped = true,
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.text('Kirim'), findsNothing);
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(find.text('Kirim'), findsNothing);
 
-      await tester.tap(find.byType(CircularProgressIndicator));
-      await tester.pump();
-      expect(tapped, isFalse);
-    });
+        await tester.tap(find.byType(CircularProgressIndicator));
+        await tester.pump();
+        expect(tapped, isFalse);
+      },
+    );
 
-    testWidgets('Disabled button does not trigger onPressed callback', (WidgetTester tester) async {
+    testWidgets('Disabled button does not trigger onPressed callback', (
+      WidgetTester tester,
+    ) async {
       bool tapped = false;
       await tester.pumpWidget(
         MaterialApp(

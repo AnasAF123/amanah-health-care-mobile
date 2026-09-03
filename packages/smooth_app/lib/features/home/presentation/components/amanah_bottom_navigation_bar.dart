@@ -176,7 +176,11 @@ class _AmanahNavigationItem extends StatelessWidget {
                 Stack(
                   clipBehavior: Clip.none,
                   children: <Widget>[
-                    Icon(selected ? selectedIcon : icon, size: 24, color: color),
+                    Icon(
+                      selected ? selectedIcon : icon,
+                      size: 24,
+                      color: color,
+                    ),
                     if (badgeCount > 0)
                       Positioned(
                         top: -2,
@@ -188,7 +192,9 @@ class _AmanahNavigationItem extends StatelessWidget {
                             color: const Color(0xFFEF4444),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Theme.of(context).brightness == Brightness.dark
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
                                   ? const Color(0xFF171717)
                                   : Colors.white,
                               width: 1.5,

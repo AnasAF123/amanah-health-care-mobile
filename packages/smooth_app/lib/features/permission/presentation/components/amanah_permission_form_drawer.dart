@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
@@ -248,13 +246,6 @@ class _AmanahPermissionFormDrawerState
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
-    final double screenHeight = MediaQuery.sizeOf(context).height;
-    final double bottomInset = MediaQuery.viewInsetsOf(context).bottom;
-    final double bottomNavPadding = MediaQuery.viewPaddingOf(context).bottom;
-
-    final Color bgColor = dark
-        ? const Color(0xFF0A0E1A)
-        : const Color(0xFFFFFFFF);
     final Color borderColor = dark
         ? Colors.white.withValues(alpha: 0.10)
         : const Color(0xFFE2E8F0);
@@ -270,419 +261,340 @@ class _AmanahPermissionFormDrawerState
 
     final bool isEditing = widget.editingRecord != null;
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: screenHeight * 0.92,
-        minHeight: 520,
+    return AmanahBottomSheetScaffold(
+      title: isEditing ? 'Edit perizinan' : 'Pengajuan izin baru',
+      fixedHeightFactor: 0.92,
+      minHeight: 520,
+      bodyPadding: const EdgeInsets.fromLTRB(
+        AmanahSpacing.xxl,
+        AmanahSpacing.lg,
+        AmanahSpacing.xxl,
+        AmanahSpacing.xxl,
       ),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        border: Border(top: BorderSide(color: borderColor)),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withValues(alpha: dark ? 0.80 : 0.30),
-            blurRadius: 45,
-            offset: const Offset(0, -12),
-          ),
-        ],
+      footer: AmanahActionRow(
+        secondary: AmanahButton.ghost(
+          text: 'Batal',
+          size: AmanahButtonSize.medium,
+          isFullWidth: true,
+          customForegroundColor: subtextColor,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        primary: AmanahButton.primary(
+          text: isEditing ? 'Simpan Perubahan' : 'Kirim Pengajuan Izin',
+          isLoading: _isSubmitting,
+          isFullWidth: true,
+          size: AmanahButtonSize.medium,
+          onPressed: _handleSubmit,
+        ),
       ),
-      child: Column(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // Drag Handle
-          Padding(
-            padding: const EdgeInsets.only(top: 14, bottom: 4),
-            child: Center(
-              child: Container(
-                width: 44,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: dark
-                      ? Colors.white.withValues(alpha: 0.25)
-                      : const Color(0xFFCBD5E1),
-                  borderRadius: BorderRadius.circular(3),
+          // Field 1: Subjek Perizinan
+          Text(
+            'Subjek Perizinan *',
+            style: TextStyle(
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: textColor,
+            ),
+          ),
+          const SizedBox(height: 6),
+          TextField(
+            controller: _typeController,
+            style: TextStyle(
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Contoh: Urusan Keluarga, Seminar / Simposium, Cuti...',
+              hintStyle: TextStyle(
+                fontFamily: 'PlusJakartaSans',
+                fontSize: 12,
+                color: subtextColor,
+              ),
+              filled: true,
+              fillColor: inputBg,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 12,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: _typeError != null
+                      ? const Color(0xFFFB2C36)
+                      : borderColor,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(
+                  color: AmanahColorTokens.brand,
+                  width: 1.5,
                 ),
               ),
             ),
           ),
-
-          // Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: borderColor)),
+          if (_typeError != null) ...<Widget>[
+            const SizedBox(height: 4),
+            Text(
+              _typeError!,
+              style: const TextStyle(
+                fontFamily: 'PlusJakartaSans',
+                fontSize: 11,
+                color: Color(0xFFFB2C36),
+                fontWeight: FontWeight.w500,
+              ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Expanded(
+          ],
+
+          // Quick Suggestion Chips
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: _typeSuggestions.map((String s) {
+              return InkWell(
+                onTap: () {
+                  setState(() {
+                    _typeController.text = s;
+                    _typeError = null;
+                  });
+                },
+                borderRadius: BorderRadius.circular(100),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: dark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(100),
+                    border: Border.all(
+                      color: dark
+                          ? Colors.white.withValues(alpha: 0.10)
+                          : const Color(0xFFE2E8F0),
+                    ),
+                  ),
                   child: Text(
-                    isEditing ? 'Edit perizinan' : 'Pengajuan izin baru',
+                    s,
                     style: TextStyle(
                       fontFamily: 'PlusJakartaSans',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
-                      color: textColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: subtextColor,
                     ),
                   ),
                 ),
-                const SizedBox(width: AmanahComponentSize.iconButton),
-              ],
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 18),
+
+          // Field 2: Rentang Tanggal
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  'Rentang Tanggal *',
+                  style: TextStyle(
+                    fontFamily: 'PlusJakartaSans',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: textColor,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$_calculatedDays Hari Kerja',
+                style: TextStyle(
+                  fontFamily: 'PlusJakartaSans',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: textColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Start Date Selector Button
+          _buildDatePickerTile(
+            label: 'Mulai Izin',
+            dateString: _formatDateIndo(_startDate),
+            onTap: _pickStartDate,
+            dark: dark,
+            borderColor: borderColor,
+            textColor: textColor,
+          ),
+          const SizedBox(height: 8),
+
+          // End Date Selector Button
+          _buildDatePickerTile(
+            label: 'Selesai Izin',
+            dateString: _formatDateIndo(_endDate),
+            onTap: _pickEndDate,
+            dark: dark,
+            borderColor: _endDateError != null
+                ? const Color(0xFFFB2C36)
+                : borderColor,
+            textColor: textColor,
+          ),
+          if (_endDateError != null) ...<Widget>[
+            const SizedBox(height: 4),
+            Text(
+              _endDateError!,
+              style: const TextStyle(
+                fontFamily: 'PlusJakartaSans',
+                fontSize: 11,
+                color: Color(0xFFFB2C36),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+          const SizedBox(height: 18),
+
+          // Field 3: Pesan / Alasan Perizinan
+          Text(
+            'Pesan / Alasan Perizinan *',
+            style: TextStyle(
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: textColor,
             ),
           ),
-
-          // Form Body
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(
-                24,
-                16,
-                24,
-                math.max(bottomInset, bottomNavPadding) + 96,
+          const SizedBox(height: 6),
+          TextField(
+            controller: _reasonController,
+            maxLines: 3,
+            style: TextStyle(
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: textColor,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Tuliskan keterangan keperluan izin...',
+              hintStyle: TextStyle(
+                fontFamily: 'PlusJakartaSans',
+                fontSize: 12,
+                color: subtextColor,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  // Field 1: Subjek Perizinan
-                  Text(
-                    'Subjek Perizinan *',
-                    style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: textColor,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  TextField(
-                    controller: _typeController,
-                    style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: textColor,
-                    ),
-                    decoration: InputDecoration(
-                      hintText:
-                          'Contoh: Urusan Keluarga, Seminar / Simposium, Cuti...',
-                      hintStyle: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 12,
-                        color: subtextColor,
-                      ),
-                      filled: true,
-                      fillColor: inputBg,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: borderColor),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(
-                          color: _typeError != null
-                              ? const Color(0xFFFB2C36)
-                              : borderColor,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: AmanahColorTokens.brand,
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (_typeError != null) ...<Widget>[
-                    const SizedBox(height: 4),
-                    Text(
-                      _typeError!,
-                      style: const TextStyle(
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 11,
-                        color: Color(0xFFFB2C36),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-
-                  // Quick Suggestion Chips
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: _typeSuggestions.map((String s) {
-                      return InkWell(
-                        onTap: () {
-                          setState(() {
-                            _typeController.text = s;
-                            _typeError = null;
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(100),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: dark
-                                ? Colors.white.withValues(alpha: 0.05)
-                                : const Color(0xFFF1F5F9),
-                            borderRadius: BorderRadius.circular(100),
-                            border: Border.all(
-                              color: dark
-                                  ? Colors.white.withValues(alpha: 0.10)
-                                  : const Color(0xFFE2E8F0),
-                            ),
-                          ),
-                          child: Text(
-                            s,
-                            style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: subtextColor,
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 18),
-
-                  // Field 2: Rentang Tanggal
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Expanded(
-                        child: Text(
-                          'Rentang Tanggal *',
-                          style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: textColor,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '$_calculatedDays Hari Kerja',
-                        style: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: textColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Start Date Selector Button
-                  _buildDatePickerTile(
-                    label: 'Mulai Izin',
-                    dateString: _formatDateIndo(_startDate),
-                    onTap: _pickStartDate,
-                    dark: dark,
-                    borderColor: borderColor,
-                    textColor: textColor,
-                  ),
-                  const SizedBox(height: 8),
-
-                  // End Date Selector Button
-                  _buildDatePickerTile(
-                    label: 'Selesai Izin',
-                    dateString: _formatDateIndo(_endDate),
-                    onTap: _pickEndDate,
-                    dark: dark,
-                    borderColor: _endDateError != null
-                        ? const Color(0xFFFB2C36)
-                        : borderColor,
-                    textColor: textColor,
-                  ),
-                  if (_endDateError != null) ...<Widget>[
-                    const SizedBox(height: 4),
-                    Text(
-                      _endDateError!,
-                      style: const TextStyle(
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 11,
-                        color: Color(0xFFFB2C36),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 18),
-
-                  // Field 3: Pesan / Alasan Perizinan
-                  Text(
-                    'Pesan / Alasan Perizinan *',
-                    style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: textColor,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  TextField(
-                    controller: _reasonController,
-                    maxLines: 3,
-                    style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: textColor,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Tuliskan keterangan keperluan izin...',
-                      hintStyle: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 12,
-                        color: subtextColor,
-                      ),
-                      filled: true,
-                      fillColor: inputBg,
-                      contentPadding: const EdgeInsets.all(14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: borderColor),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(
-                          color: _reasonError != null
-                              ? const Color(0xFFFB2C36)
-                              : borderColor,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: AmanahColorTokens.brand,
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (_reasonError != null) ...<Widget>[
-                    const SizedBox(height: 4),
-                    Text(
-                      _reasonError!,
-                      style: const TextStyle(
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 11,
-                        color: Color(0xFFFB2C36),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 18),
-
-                  // Field 4: Dokter Pengganti (Opsional)
-                  Row(
-                    children: <Widget>[
-                      Text(
-                        'Dokter Pengganti',
-                        style: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: textColor,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '(Opsional)',
-                        style: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w500,
-                          color: subtextColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  TextField(
-                    controller: _substituteDoctorController,
-                    style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: textColor,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: 'Nama dokter pengganti...',
-                      hintStyle: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 12,
-                        color: subtextColor,
-                      ),
-                      filled: true,
-                      fillColor: inputBg,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: borderColor),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: borderColor),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: AmanahColorTokens.brand,
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
+              filled: true,
+              fillColor: inputBg,
+              contentPadding: const EdgeInsets.all(14),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: _reasonError != null
+                      ? const Color(0xFFFB2C36)
+                      : borderColor,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(
+                  color: AmanahColorTokens.brand,
+                  width: 1.5,
+                ),
               ),
             ),
           ),
-
-          Container(
-            padding: EdgeInsets.fromLTRB(
-              24,
-              12,
-              24,
-              bottomInset > 0 ? 16 : (28 + bottomNavPadding),
-            ),
-            decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: borderColor)),
-            ),
-            child: AmanahActionRow(
-              secondary: AmanahButton.ghost(
-                text: 'Batal',
-                size: AmanahButtonSize.medium,
-                isFullWidth: true,
-                customForegroundColor: subtextColor,
-                onPressed: () => Navigator.of(context).pop(),
+          if (_reasonError != null) ...<Widget>[
+            const SizedBox(height: 4),
+            Text(
+              _reasonError!,
+              style: const TextStyle(
+                fontFamily: 'PlusJakartaSans',
+                fontSize: 11,
+                color: Color(0xFFFB2C36),
+                fontWeight: FontWeight.w500,
               ),
-              primary: AmanahButton.primary(
-                text: isEditing ? 'Simpan Perubahan' : 'Kirim Pengajuan Izin',
-                isLoading: _isSubmitting,
-                isFullWidth: true,
-                size: AmanahButtonSize.medium,
-                onPressed: _handleSubmit,
+            ),
+          ],
+          const SizedBox(height: 18),
+
+          // Field 4: Dokter Pengganti (Opsional)
+          Row(
+            children: <Widget>[
+              Text(
+                'Dokter Pengganti',
+                style: TextStyle(
+                  fontFamily: 'PlusJakartaSans',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: textColor,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                '(Opsional)',
+                style: TextStyle(
+                  fontFamily: 'PlusJakartaSans',
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w500,
+                  color: subtextColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          TextField(
+            controller: _substituteDoctorController,
+            style: TextStyle(
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Nama dokter pengganti...',
+              hintStyle: TextStyle(
+                fontFamily: 'PlusJakartaSans',
+                fontSize: 12,
+                color: subtextColor,
+              ),
+              filled: true,
+              fillColor: inputBg,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 12,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(
+                  color: AmanahColorTokens.brand,
+                  width: 1.5,
+                ),
               ),
             ),
           ),
+          const SizedBox(height: AmanahSpacing.xxl),
         ],
       ),
     );

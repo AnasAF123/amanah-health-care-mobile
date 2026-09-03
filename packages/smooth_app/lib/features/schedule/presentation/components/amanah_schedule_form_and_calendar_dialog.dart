@@ -145,7 +145,6 @@ class _AmanahDocScheduleCalendarDrawerState
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
     final AmanahScheduleStore store = AmanahScheduleStore.instance;
-    final double bottomNavPadding = MediaQuery.viewPaddingOf(context).bottom;
 
     final DateTime firstDayOfMonth = DateTime(
       _currentMonth.year,
@@ -164,56 +163,19 @@ class _AmanahDocScheduleCalendarDrawerState
     );
     final int gridDayCount = gridEnd.difference(gridStart).inDays + 1;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: dark ? const Color(0xFF0A0E1A) : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+    return AmanahBottomSheetScaffold(
+      title: 'Kalender Jadwal Praktik',
+      maxHeightFactor: 0.76,
+      minHeight: 430,
+      bodyPadding: const EdgeInsets.fromLTRB(
+        AmanahSpacing.xxl,
+        AmanahSpacing.lg,
+        AmanahSpacing.xxl,
+        AmanahSpacing.xxl,
       ),
-      padding: EdgeInsets.fromLTRB(20, 12, 20, 32.0 + bottomNavPadding),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // Drag Handle
-          Center(
-            child: Container(
-              width: 44,
-              height: 5,
-              decoration: BoxDecoration(
-                color: dark
-                    ? Colors.white.withValues(alpha: 0.20)
-                    : const Color(0xFFCBD5E1),
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  'Kalender Jadwal Praktik',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: dark ? Colors.white : const Color(0xFF0F172A),
-                    fontFamily: 'PlusJakartaSans',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close_rounded, size: 20),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
           // Month Switcher
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -919,369 +881,227 @@ class _AmanahAddEditScheduleDrawerState
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
     final bool isEditing = widget.scheduleToEdit != null;
-    final double screenHeight = MediaQuery.sizeOf(context).height;
 
-    return SizedBox(
-      height: screenHeight * 0.90,
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: dark ? const Color(0xFF0A0E1A) : Colors.white,
-            border: Border(
-              top: BorderSide(
-                color: dark
-                    ? Colors.white.withValues(alpha: 0.10)
-                    : const Color(0xFFF1F5F9),
+    return AmanahBottomSheetScaffold(
+      title: isEditing ? 'Edit Jadwal' : 'Tambah Jadwal',
+      fixedHeightFactor: 0.90,
+      minHeight: 520,
+      bodyPadding: const EdgeInsets.fromLTRB(
+        AmanahSpacing.xxl,
+        AmanahSpacing.lg,
+        AmanahSpacing.xxl,
+        AmanahSpacing.xxl,
+      ),
+      footer: AmanahActionRow(
+        axis: isEditing
+            ? AmanahActionRowAxis.vertical
+            : AmanahActionRowAxis.horizontal,
+        primary: AmanahButton.primary(
+          text: isEditing ? 'Simpan Perubahan' : 'Tambah Jadwal',
+          size: AmanahButtonSize.medium,
+          isFullWidth: true,
+          onPressed: _saveSchedule,
+        ),
+        secondary: isEditing
+            ? AmanahButton.ghost(
+                text: 'Hapus',
+                size: AmanahButtonSize.medium,
+                isFullWidth: true,
+                customForegroundColor: AmanahColorTokens.dangerDark,
+                onPressed: _deleteSchedule,
+              )
+            : null,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          // 0. Status Jadwal Praktik: Menunggu | Buka | Cuti (Only displayed when editing)
+          if (isEditing) ...<Widget>[
+            Text(
+              'Status Praktik',
+              style: TextStyle(
+                color: dark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
+                fontFamily: 'PlusJakartaSans',
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
               ),
             ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 45,
-                offset: const Offset(0, -12),
-              ),
-            ],
-          ),
-          child: Column(
-            children: <Widget>[
-              // Interactive Drag Handle
-              InkWell(
-                onTap: () => Navigator.of(context).pop(),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 40,
-                  child: Center(
-                    child: Container(
-                      width: 44,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: dark
-                            ? Colors.white.withValues(alpha: 0.25)
-                            : const Color(0xFFD4D4D8),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                  ),
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: dark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: dark
+                      ? Colors.white.withValues(alpha: 0.10)
+                      : const Color(0xFFE2E8F0),
                 ),
               ),
+              child: Row(
+                children:
+                    <Map<String, dynamic>>[
+                      <String, dynamic>{
+                        'label': 'Menunggu',
+                        'activeBg': const Color(0xFFF59E0B),
+                        'activeText': Colors.white,
+                        'dotColor': const Color(0xFFFBBF24),
+                      },
+                      <String, dynamic>{
+                        'label': 'Buka',
+                        'activeBg': const Color(0xFF059669),
+                        'activeText': Colors.white,
+                        'dotColor': const Color(0xFF34D399),
+                      },
+                      <String, dynamic>{
+                        'label': 'Cuti',
+                        'activeBg': const Color(0xFFE11D48),
+                        'activeText': Colors.white,
+                        'dotColor': const Color(0xFFFB7185),
+                      },
+                    ].map((Map<String, dynamic> item) {
+                      final String label = item['label'] as String;
+                      final bool active = _status == label;
+                      final Color activeBg = item['activeBg'] as Color;
+                      final Color activeText = item['activeText'] as Color;
+                      final Color dotColor = item['dotColor'] as Color;
 
-              // Master Header
-              Container(
-                padding: const EdgeInsets.fromLTRB(24, 2, 24, 12),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: dark
-                          ? Colors.white.withValues(alpha: 0.10)
-                          : const Color(0xFFF1F5F9),
-                    ),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(
-                      isEditing ? 'Edit Jadwal' : 'Tambah Jadwal',
-                      style: TextStyle(
-                        color: dark ? Colors.white : const Color(0xFF0F172A),
-                        fontFamily: 'PlusJakartaSans',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(999),
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: dark
-                              ? Colors.white.withValues(alpha: 0.10)
-                              : const Color(0xFFF5F5F5),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.close_rounded,
-                          size: 16,
-                          color: dark
-                              ? const Color(0xFFD4D4D8)
-                              : const Color(0xFF52525B),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Form Scrollable Body
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.fromLTRB(
-                    24,
-                    14,
-                    24,
-                    130 + MediaQuery.paddingOf(context).bottom,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      // 0. Status Jadwal Praktik: Menunggu | Buka | Cuti (Only displayed when editing)
-                      if (isEditing) ...<Widget>[
-                        Text(
-                          'Status Praktik',
-                          style: TextStyle(
-                            color: dark
-                                ? const Color(0xFFE2E8F0)
-                                : const Color(0xFF334155),
-                            fontFamily: 'PlusJakartaSans',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: dark
-                                ? Colors.white.withValues(alpha: 0.05)
-                                : const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: dark
-                                  ? Colors.white.withValues(alpha: 0.10)
-                                  : const Color(0xFFE2E8F0),
-                            ),
-                          ),
-                          child: Row(
-                            children:
-                                <Map<String, dynamic>>[
-                                  <String, dynamic>{
-                                    'label': 'Menunggu',
-                                    'activeBg': const Color(0xFFF59E0B),
-                                    'activeText': Colors.white,
-                                    'dotColor': const Color(0xFFFBBF24),
-                                  },
-                                  <String, dynamic>{
-                                    'label': 'Buka',
-                                    'activeBg': const Color(0xFF059669),
-                                    'activeText': Colors.white,
-                                    'dotColor': const Color(0xFF34D399),
-                                  },
-                                  <String, dynamic>{
-                                    'label': 'Cuti',
-                                    'activeBg': const Color(0xFFE11D48),
-                                    'activeText': Colors.white,
-                                    'dotColor': const Color(0xFFFB7185),
-                                  },
-                                ].map((Map<String, dynamic> item) {
-                                  final String label = item['label'] as String;
-                                  final bool active = _status == label;
-                                  final Color activeBg =
-                                      item['activeBg'] as Color;
-                                  final Color activeText =
-                                      item['activeText'] as Color;
-                                  final Color dotColor =
-                                      item['dotColor'] as Color;
-
-                                  return Expanded(
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(12),
-                                      onTap: () =>
-                                          setState(() => _status = label),
-                                      child: AnimatedContainer(
-                                        duration: const Duration(
-                                          milliseconds: 160,
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: active
-                                              ? activeBg
-                                              : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          boxShadow: active
-                                              ? <BoxShadow>[
-                                                  BoxShadow(
-                                                    color: activeBg.withValues(
-                                                      alpha: 0.25,
-                                                    ),
-                                                    blurRadius: 6,
-                                                    offset: const Offset(0, 2),
-                                                  ),
-                                                ]
-                                              : null,
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: <Widget>[
-                                            DecoratedBox(
-                                              decoration: BoxDecoration(
-                                                color: active
-                                                    ? Colors.white
-                                                    : dotColor,
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: const SizedBox(
-                                                width: 6,
-                                                height: 6,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              label,
-                                              style: TextStyle(
-                                                color: active
-                                                    ? activeText
-                                                    : (dark
-                                                          ? const Color(
-                                                              0xFFA1A1AA,
-                                                            )
-                                                          : const Color(
-                                                              0xFF475569,
-                                                            )),
-                                                fontFamily: 'PlusJakartaSans',
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                      return Expanded(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () => setState(() => _status = label),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 160),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: BoxDecoration(
+                              color: active ? activeBg : Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: active
+                                  ? <BoxShadow>[
+                                      BoxShadow(
+                                        color: activeBg.withValues(alpha: 0.25),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
                                       ),
-                                    ),
-                                  );
-                                }).toList(),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                      ],
-
-                      // 1. Tanggal Praktik (Date Picker)
-                      Text(
-                        'Tanggal Praktik',
-                        style: TextStyle(
-                          color: dark
-                              ? const Color(0xFFE2E8F0)
-                              : const Color(0xFF334155),
-                          fontFamily: 'PlusJakartaSans',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      _ScheduleSelectorButton(
-                        value:
-                            '${_getDayName(_selectedDate.weekday)}, ${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
-                        icon: Icons.calendar_today_rounded,
-                        dark: dark,
-                        expanded: _isCalendarOpen,
-                        onTap: () =>
-                            setState(() => _isCalendarOpen = !_isCalendarOpen),
-                      ),
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 220),
-                        switchInCurve: Curves.easeOutCubic,
-                        switchOutCurve: Curves.easeInCubic,
-                        child: _isCalendarOpen
-                            ? Padding(
-                                key: const ValueKey<String>(
-                                  'inline-form-calendar',
+                                    ]
+                                  : null,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: active ? Colors.white : dotColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const SizedBox(width: 6, height: 6),
                                 ),
-                                padding: const EdgeInsets.only(top: 8),
-                                child: _buildInlineCalendar(dark),
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-                      const SizedBox(height: 14),
-
-                      // 2. Sesi Praktik & Jam
-                      Text(
-                        'Sesi Praktik & Jam',
-                        style: TextStyle(
-                          color: dark
-                              ? const Color(0xFFE2E8F0)
-                              : const Color(0xFF334155),
-                          fontFamily: 'PlusJakartaSans',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Column(
-                        children: <Widget>[
-                          for (final _ScheduleFormSession session
-                              in _sessions) ...<Widget>[
-                            _ScheduleSessionPanel(
-                              session: session,
-                              dark: dark,
-                              onToggle: (bool value) =>
-                                  _toggleSession(session.id, value),
-                              onSlotChanged:
-                                  ({
-                                    required int slotIndex,
-                                    String? from,
-                                    String? to,
-                                    String? room,
-                                    String? poli,
-                                  }) {
-                                    _updateSlot(
-                                      session.id,
-                                      slotIndex,
-                                      from: from,
-                                      to: to,
-                                      room: room,
-                                      poli: poli,
-                                    );
-                                  },
-                              onAddSlot: () => _addTimeSlot(session.id),
-                              onRemoveSlot: (int slotIndex) =>
-                                  _removeTimeSlot(session.id, slotIndex),
-                              onOpenSelection: _openSelectionSheet,
+                                const SizedBox(width: 6),
+                                Text(
+                                  label,
+                                  style: TextStyle(
+                                    color: active
+                                        ? activeText
+                                        : (dark
+                                              ? const Color(0xFFA1A1AA)
+                                              : const Color(0xFF475569)),
+                                    fontFamily: 'PlusJakartaSans',
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 10),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-
-                      // 3. Actions (Simpan Perubahan & Hapus in vertical layout)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          AmanahButton.primary(
-                            text: isEditing
-                                ? 'Simpan Perubahan'
-                                : 'Tambah Jadwal',
-                            size: AmanahButtonSize.medium,
-                            isFullWidth: true,
-                            onPressed: _saveSchedule,
                           ),
-                          if (isEditing) ...<Widget>[
-                            const SizedBox(height: 10),
-                            AmanahButton.ghost(
-                              text: 'Hapus',
-                              size: AmanahButtonSize.medium,
-                              isFullWidth: true,
-                              customForegroundColor: const Color(0xFFE11D48),
-                              onPressed: _deleteSchedule,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                        ),
+                      );
+                    }).toList(),
               ),
+            ),
+            const SizedBox(height: 14),
+          ],
+
+          // 1. Tanggal Praktik (Date Picker)
+          Text(
+            'Tanggal Praktik',
+            style: TextStyle(
+              color: dark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          _ScheduleSelectorButton(
+            value:
+                '${_getDayName(_selectedDate.weekday)}, ${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
+            icon: Icons.calendar_today_rounded,
+            dark: dark,
+            expanded: _isCalendarOpen,
+            onTap: () => setState(() => _isCalendarOpen = !_isCalendarOpen),
+          ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            child: _isCalendarOpen
+                ? Padding(
+                    key: const ValueKey<String>('inline-form-calendar'),
+                    padding: const EdgeInsets.only(top: 8),
+                    child: _buildInlineCalendar(dark),
+                  )
+                : const SizedBox.shrink(),
+          ),
+          const SizedBox(height: 14),
+
+          // 2. Sesi Praktik & Jam
+          Text(
+            'Sesi Praktik & Jam',
+            style: TextStyle(
+              color: dark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Column(
+            children: <Widget>[
+              for (final _ScheduleFormSession session in _sessions) ...<Widget>[
+                _ScheduleSessionPanel(
+                  session: session,
+                  dark: dark,
+                  onToggle: (bool value) => _toggleSession(session.id, value),
+                  onSlotChanged:
+                      ({
+                        required int slotIndex,
+                        String? from,
+                        String? to,
+                        String? room,
+                        String? poli,
+                      }) {
+                        _updateSlot(
+                          session.id,
+                          slotIndex,
+                          from: from,
+                          to: to,
+                          room: room,
+                          poli: poli,
+                        );
+                      },
+                  onAddSlot: () => _addTimeSlot(session.id),
+                  onRemoveSlot: (int slotIndex) =>
+                      _removeTimeSlot(session.id, slotIndex),
+                  onOpenSelection: _openSelectionSheet,
+                ),
+                const SizedBox(height: 10),
+              ],
             ],
           ),
-        ),
+          const SizedBox(height: AmanahSpacing.xxl),
+        ],
       ),
     );
   }
@@ -2113,378 +1933,227 @@ class _AmanahScheduleSelectionSheetState
         .where((String option) => option.toLowerCase().contains(query))
         .toList();
 
-    return SizedBox(
-      height: MediaQuery.sizeOf(context).height * 0.82,
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: dark ? const Color(0xFF0A0E1A) : Colors.white,
-            border: Border(
-              top: BorderSide(
-                color: dark
-                    ? Colors.white.withValues(alpha: 0.10)
-                    : const Color(0xFFF1F5F9),
-              ),
-            ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 45,
-                offset: const Offset(0, -12),
-              ),
-            ],
-          ),
-          child: Column(
-            children: <Widget>[
-              // Interactive Drag Handle
-              InkWell(
-                onTap: () => Navigator.of(context).pop(),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 40,
-                  child: Center(
-                    child: Container(
-                      width: 44,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: dark
-                            ? Colors.white.withValues(alpha: 0.25)
-                            : const Color(0xFFD4D4D8),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // Master Header
-              Container(
-                padding: const EdgeInsets.fromLTRB(24, 2, 24, 12),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
+    return AmanahBottomSheetScaffold(
+      title: widget.title,
+      subtitle: widget.subtitle.isEmpty ? null : widget.subtitle,
+      fixedHeightFactor: 0.82,
+      bodyPadding: EdgeInsets.zero,
+      extendBodyBehindHeader: true,
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(
+          AmanahSpacing.xxl,
+          AmanahSpacing.lg,
+          AmanahSpacing.xxl,
+          AmanahSpacing.xxl + MediaQuery.viewPaddingOf(context).bottom,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            // Search & Manual Entry Form
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    height: 38,
+                    decoration: BoxDecoration(
                       color: dark
-                          ? Colors.white.withValues(alpha: 0.10)
-                          : const Color(0xFFF1F5F9),
-                    ),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            widget.title,
-                            style: TextStyle(
-                              color: dark
-                                  ? Colors.white
-                                  : const Color(0xFF0F172A),
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.2,
-                            ),
-                          ),
-                          if (widget.subtitle.isNotEmpty) ...<Widget>[
-                            const SizedBox(height: 2),
-                            Text(
-                              widget.subtitle,
-                              style: TextStyle(
-                                color: dark
-                                    ? const Color(0xFFA1A1AA)
-                                    : const Color(0xFF64748B),
-                                fontFamily: 'PlusJakartaSans',
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ],
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: dark
+                            ? Colors.white.withValues(alpha: 0.15)
+                            : const Color(0xFFE2E8F0),
                       ),
                     ),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(999),
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
+                    child: TextField(
+                      controller: _controller,
+                      onChanged: (_) => setState(() {}),
+                      style: TextStyle(
+                        color: dark ? Colors.white : const Color(0xFF0F172A),
+                        fontFamily: 'PlusJakartaSans',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Cari atau ketik manual...',
+                        hintStyle: TextStyle(
                           color: dark
-                              ? Colors.white.withValues(alpha: 0.10)
-                              : const Color(0xFFF5F5F5),
-                          shape: BoxShape.circle,
+                              ? const Color(0xFF71717A)
+                              : const Color(0xFF94A3B8),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
                         ),
-                        child: Icon(
-                          Icons.close_rounded,
+                        prefixIcon: Icon(
+                          Icons.search_rounded,
                           size: 16,
                           color: dark
-                              ? const Color(0xFFD4D4D8)
-                              : const Color(0xFF52525B),
+                              ? const Color(0xFFA1A1AA)
+                              : const Color(0xFF94A3B8),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 8,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-
-              // Body Content
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    24,
-                    14,
-                    24,
-                    24 + MediaQuery.paddingOf(context).bottom,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      // Search & Manual Entry Form
-                      Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: Container(
-                              height: 38,
-                              decoration: BoxDecoration(
-                                color: dark
-                                    ? Colors.white.withValues(alpha: 0.05)
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: dark
-                                      ? Colors.white.withValues(alpha: 0.15)
-                                      : const Color(0xFFE2E8F0),
-                                ),
-                              ),
-                              child: TextField(
-                                controller: _controller,
-                                onChanged: (_) => setState(() {}),
-                                style: TextStyle(
-                                  color: dark
-                                      ? Colors.white
-                                      : const Color(0xFF0F172A),
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: 'Cari atau ketik manual...',
-                                  hintStyle: TextStyle(
-                                    color: dark
-                                        ? const Color(0xFF71717A)
-                                        : const Color(0xFF94A3B8),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  prefixIcon: Icon(
-                                    Icons.search_rounded,
-                                    size: 16,
-                                    color: dark
-                                        ? const Color(0xFFA1A1AA)
-                                        : const Color(0xFF94A3B8),
-                                  ),
-                                  border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 8,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          if (_controller.text.trim().isNotEmpty) ...<Widget>[
-                            const SizedBox(width: 8),
-                            AmanahButton.primary(
-                              text: 'Gunakan',
-                              size: AmanahButtonSize.small,
-                              onPressed: () {
-                                Navigator.of(
-                                  context,
-                                ).pop(_controller.text.trim());
-                              },
-                            ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 14),
+                ),
+                if (_controller.text.trim().isNotEmpty) ...<Widget>[
+                  const SizedBox(width: 8),
+                  AmanahButton.primary(
+                    text: 'Gunakan',
+                    size: AmanahButtonSize.small,
+                    onPressed: () {
+                      Navigator.of(context).pop(_controller.text.trim());
+                    },
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 14),
 
-                      Text(
-                        'Pilihan Tersedia',
+            Text(
+              'Pilihan Tersedia',
+              style: TextStyle(
+                color: dark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B),
+                fontFamily: 'PlusJakartaSans',
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Options Grid
+            Expanded(
+              child: filtered.isEmpty
+                  ? Center(
+                      child: Text(
+                        'Tidak ada pilihan ditemukan',
                         style: TextStyle(
                           color: dark
                               ? const Color(0xFFA1A1AA)
-                              : const Color(0xFF64748B),
+                              : const Color(0xFF94A3B8),
                           fontFamily: 'PlusJakartaSans',
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                    )
+                  : GridView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: filtered.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisExtent: 44,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
+                          ),
+                      itemBuilder: (BuildContext context, int index) {
+                        final String option = filtered[index];
+                        final bool isSelected =
+                            widget.currentValue.trim().toLowerCase() ==
+                            option.trim().toLowerCase();
+                        final bool isDisabled =
+                            !isSelected &&
+                            widget.disabledOptions.any(
+                              (String d) =>
+                                  d.trim().toLowerCase() ==
+                                  option.trim().toLowerCase(),
+                            );
 
-                      // Options Grid
-                      Expanded(
-                        child: filtered.isEmpty
-                            ? Center(
-                                child: Text(
-                                  'Tidak ada pilihan ditemukan',
-                                  style: TextStyle(
-                                    color: dark
-                                        ? const Color(0xFFA1A1AA)
-                                        : const Color(0xFF94A3B8),
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              )
-                            : GridView.builder(
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: filtered.length,
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      mainAxisExtent: 44,
-                                      crossAxisSpacing: 8,
-                                      mainAxisSpacing: 8,
-                                    ),
-                                itemBuilder: (BuildContext context, int index) {
-                                  final String option = filtered[index];
-                                  final bool isSelected =
-                                      widget.currentValue
-                                          .trim()
-                                          .toLowerCase() ==
-                                      option.trim().toLowerCase();
-                                  final bool isDisabled =
-                                      !isSelected &&
-                                      widget.disabledOptions.any(
-                                        (String d) =>
-                                            d.trim().toLowerCase() ==
-                                            option.trim().toLowerCase(),
-                                      );
-
-                                  return InkWell(
-                                    borderRadius: BorderRadius.circular(12),
-                                    onTap: isDisabled
-                                        ? null
-                                        : () =>
-                                              Navigator.of(context).pop(option),
-                                    child: AnimatedContainer(
-                                      duration: const Duration(
-                                        milliseconds: 140,
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: isSelected
-                                            ? (dark
-                                                  ? const Color(0xFF2563EB)
-                                                  : const Color(0xFF2563EB))
-                                            : isDisabled
-                                            ? (dark
-                                                  ? Colors.white.withValues(
-                                                      alpha: 0.02,
-                                                    )
-                                                  : const Color(0xFFF1F5F9))
-                                            : (dark
-                                                  ? Colors.white.withValues(
-                                                      alpha: 0.05,
-                                                    )
-                                                  : Colors.white),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: isSelected
-                                              ? (dark
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: isDisabled
+                              ? null
+                              : () => Navigator.of(context).pop(option),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 140),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? (dark
+                                        ? const Color(0xFF2563EB)
+                                        : const Color(0xFF2563EB))
+                                  : isDisabled
+                                  ? (dark
+                                        ? Colors.white.withValues(alpha: 0.02)
+                                        : const Color(0xFFF1F5F9))
+                                  : (dark
+                                        ? Colors.white.withValues(alpha: 0.05)
+                                        : Colors.white),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isSelected
+                                    ? (dark
+                                          ? const Color(0xFF2563EB)
+                                          : const Color(0xFF2563EB))
+                                    : (dark
+                                          ? Colors.white.withValues(alpha: 0.10)
+                                          : const Color(0xFFE2E8F0)),
+                              ),
+                              boxShadow: isSelected
+                                  ? <BoxShadow>[
+                                      BoxShadow(
+                                        color:
+                                            (dark
                                                     ? const Color(0xFF2563EB)
                                                     : const Color(0xFF2563EB))
-                                              : (dark
-                                                    ? Colors.white.withValues(
-                                                        alpha: 0.10,
-                                                      )
-                                                    : const Color(0xFFE2E8F0)),
-                                        ),
-                                        boxShadow: isSelected
-                                            ? <BoxShadow>[
-                                                BoxShadow(
-                                                  color:
-                                                      (dark
-                                                              ? const Color(
-                                                                  0xFF2563EB,
-                                                                )
-                                                              : const Color(
-                                                                  0xFF2563EB,
-                                                                ))
-                                                          .withValues(
-                                                            alpha: 0.25,
-                                                          ),
-                                                  blurRadius: 8,
-                                                  offset: const Offset(0, 3),
-                                                ),
-                                              ]
-                                            : null,
+                                                .withValues(alpha: 0.25),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 3),
                                       ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: <Widget>[
-                                          Expanded(
-                                            child: Text(
-                                              option,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                color: isSelected
-                                                    ? (dark
-                                                          ? const Color(
-                                                              0xFF083344,
-                                                            )
-                                                          : Colors.white)
-                                                    : isDisabled
-                                                    ? (dark
-                                                          ? const Color(
-                                                              0xFF52525B,
-                                                            )
-                                                          : const Color(
-                                                              0xFF94A3B8,
-                                                            ))
-                                                    : (dark
-                                                          ? Colors.white
-                                                          : const Color(
-                                                              0xFF0F172A,
-                                                            )),
-                                                fontFamily: 'PlusJakartaSans',
-                                                fontSize: 12,
-                                                fontWeight: isSelected
-                                                    ? FontWeight.w800
-                                                    : FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                          if (isSelected)
-                                            Icon(
-                                              Icons.check_circle_rounded,
-                                              size: 15,
-                                              color: dark
-                                                  ? const Color(0xFF083344)
-                                                  : Colors.white,
-                                            ),
-                                        ],
-                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Expanded(
+                                  child: Text(
+                                    option,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? (dark
+                                                ? const Color(0xFF083344)
+                                                : Colors.white)
+                                          : isDisabled
+                                          ? (dark
+                                                ? const Color(0xFF52525B)
+                                                : const Color(0xFF94A3B8))
+                                          : (dark
+                                                ? Colors.white
+                                                : const Color(0xFF0F172A)),
+                                      fontFamily: 'PlusJakartaSans',
+                                      fontSize: 12,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w800
+                                          : FontWeight.w600,
                                     ),
-                                  );
-                                },
-                              ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  Icon(
+                                    Icons.check_circle_rounded,
+                                    size: 15,
+                                    color: dark
+                                        ? const Color(0xFF083344)
+                                        : Colors.white,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
         ),
       ),
     );

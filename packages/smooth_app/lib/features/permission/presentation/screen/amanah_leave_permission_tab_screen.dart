@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_filter_bar.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
@@ -303,58 +304,15 @@ class _EmptyPermissionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: dark
-                ? Colors.white.withValues(alpha: 0.05)
-                : const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: dark
-                  ? Colors.white.withValues(alpha: 0.10)
-                  : const Color(0xFFE2E8F0),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Icon(
-                Icons.calendar_today_rounded,
-                size: 36,
-                color: dark
-                    ? Colors.white.withValues(alpha: 0.40)
-                    : const Color(0xFF94A3B8),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Tidak ada perizinan',
-                style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.w800,
-                  color: dark ? Colors.white : const Color(0xFF0F172A),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Belum ada riwayat perizinan pada filter ini. Tekan tombol tambah di atas untuk membuat izin baru.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: dark
-                      ? const Color(0xFF94A3B8)
-                      : const Color(0xFF64748B),
-                  height: 1.4,
-                ),
-              ),
-            ],
-          ),
+        padding: EdgeInsets.all(24),
+        child: AmanahEmptyState.card(
+          icon: Icons.calendar_today_rounded,
+          iconShape: AmanahEmptyStateIconShape.squircle,
+          title: 'Tidak ada perizinan',
+          message:
+              'Belum ada riwayat perizinan pada filter ini. Tekan tombol tambah di atas untuk membuat izin baru.',
         ),
       ),
     );
