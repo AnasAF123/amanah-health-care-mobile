@@ -6,6 +6,7 @@ import 'package:smooth_app/features/authentication/domain/amanah_auth_user.dart'
 import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_doctor_id_card_components.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahDoctorIdCardScreen extends StatefulWidget {
   const AmanahDoctorIdCardScreen({
@@ -125,8 +126,8 @@ class _AmanahDoctorIdCardScreenState extends State<AmanahDoctorIdCardScreen> {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     final EdgeInsets safePadding = MediaQuery.paddingOf(context);
     final Color bgColor = dark
-        ? const Color(0xFF070B14)
-        : const Color(0xFFF8FAFF);
+        ? AmanahColorTokens.canvasDark
+        : AmanahColorTokens.canvasLight;
 
     return Scaffold(
       backgroundColor: bgColor,

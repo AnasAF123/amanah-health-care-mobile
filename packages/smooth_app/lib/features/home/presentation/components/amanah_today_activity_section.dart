@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_status_badge.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
 /// Organism: TodayActivitySection matching TodayActivitySection.tsx (.web)
 /// Displays today's patient queue and completed practice metrics with 1:1 fidelity.
@@ -19,9 +20,6 @@ class AmanahTodayActivitySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool dark = theme.brightness == Brightness.dark;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -42,7 +40,7 @@ class AmanahTodayActivitySection extends StatelessWidget {
                     fontSize: 16.0,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.3,
-                    color: dark ? Colors.white : const Color(0xFF1A1D2E),
+                    color: AmanahThemeTokens.textPrimary(context),
                   ),
                 ),
               ),
@@ -93,14 +91,14 @@ class AmanahActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool dark = Theme.of(context).brightness == Brightness.dark;
+    final bool dark = AmanahThemeTokens.isDark(context);
     final bool isBlue = item.icon == AmanahActivityIcon.users;
 
-    final Color iconBg = isBlue
-        ? (dark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF))
-        : (dark ? const Color(0xFF1E293B) : const Color(0xFFEFF6FF));
+    final Color iconBg = dark
+        ? AmanahThemeTokens.surfaceSecondary(context)
+        : AmanahColorTokens.brandSurface;
 
-    const Color iconColor = Color(0xFF0D66E9);
+    const Color iconColor = AmanahColorTokens.brand;
 
     return Material(
       color: Colors.transparent,
@@ -110,21 +108,14 @@ class AmanahActivityCard extends StatelessWidget {
         child: Container(
           height: 146,
           decoration: BoxDecoration(
-            color: dark ? const Color(0xF0121727) : Colors.white,
+            color: AmanahThemeTokens.surface(context),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: dark
-                  ? Colors.white.withValues(alpha: 0.10)
-                  : const Color(0xFFF1F5F9),
+              color: AmanahThemeTokens.outline(context),
               width: 1.0,
             ),
             boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withValues(alpha: dark ? 0.40 : 0.04),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-                spreadRadius: -6,
-              ),
+              AmanahElevation.soft(dark: dark),
             ],
           ),
           child: ClipRRect(
@@ -212,9 +203,7 @@ class AmanahActivityCard extends StatelessWidget {
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 11.0,
                               fontWeight: FontWeight.w600,
-                              color: dark
-                                  ? const Color(0xFF94A3B8)
-                                  : const Color(0xFF64748B),
+                              color: AmanahThemeTokens.textSecondary(context),
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -230,19 +219,17 @@ class AmanahActivityCard extends StatelessWidget {
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: -1.0,
                                   height: 1.0,
-                                  color: dark
-                                      ? Colors.white
-                                      : const Color(0xFF1E293B),
+                                  color: AmanahThemeTokens.textPrimary(context),
                                 ),
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 item.unit,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'PlusJakartaSans',
                                   fontSize: 11.0,
                                   fontWeight: FontWeight.w500,
-                                  color: Color(0xFF94A3B8),
+                                  color: AmanahThemeTokens.textTertiary(context),
                                 ),
                               ),
                             ],

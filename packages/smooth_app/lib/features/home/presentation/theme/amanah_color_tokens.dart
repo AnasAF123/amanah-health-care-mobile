@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_classes_with_only_static_members
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/home/domain/amanah_visual_role.dart';
 
@@ -55,12 +56,17 @@ abstract final class AmanahRadius {
   static const double pill = 999;
 }
 
-// ignore: avoid_classes_with_only_static_members
 abstract final class AmanahElevation {
   static BoxShadow soft({required bool dark}) => BoxShadow(
-    color: Colors.black.withValues(alpha: dark ? 0.22 : 0.06),
+    color: Colors.black.withValues(alpha: dark ? 0.28 : 0.06),
     blurRadius: 16,
     offset: const Offset(0, 6),
+  );
+
+  static BoxShadow card({required bool dark}) => BoxShadow(
+    color: Colors.black.withValues(alpha: dark ? 0.35 : 0.04),
+    blurRadius: 12,
+    offset: const Offset(0, 3),
   );
 
   static BoxShadow sheet({required bool dark}) => BoxShadow(
@@ -81,49 +87,172 @@ abstract final class AmanahComponentSize {
   static const double filterBar = 48;
 }
 
-// ignore: avoid_classes_with_only_static_members
+/// Centralized Semantic Theme Tokens for Amanah Mobile Application.
+///
+/// Complies with the production dark mode design system and the extracted CSS palette
+/// from color-palette-1788452212858.css.
+///
+/// Components consume these semantic roles rather than guessing raw hex colors.
 abstract final class AmanahThemeTokens {
   static bool isDark(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark;
 
-  static Color canvas(BuildContext context) => isDark(context)
-      ? AmanahColorTokens.canvasDark
-      : AmanahColorTokens.canvasLight;
+  // ---------------------------------------------------------------------------
+  // Surface & Canvas Hierarchy
+  // ---------------------------------------------------------------------------
+  /// Deepest screen canvas background (#060B18 in dark, #F8FAFF in light)
+  static Color canvas(BuildContext context) =>
+      isDark(context) ? AmanahColorTokens.canvasDark : AmanahColorTokens.canvasLight;
 
-  static Color surface(BuildContext context) => isDark(context)
-      ? AmanahColorTokens.surfaceDark
-      : AmanahColorTokens.surfaceLight;
+  /// Secondary screen canvas background (#0A0F1D in dark, #F8FAFC in light)
+  static Color canvasAlt(BuildContext context) =>
+      isDark(context) ? AmanahColorTokens.canvasAltDark : AmanahColorTokens.neutral50;
 
+  /// Level 1 Card Surface (#0B1329 in dark, #FFFFFF in light)
+  static Color surface(BuildContext context) =>
+      isDark(context) ? AmanahColorTokens.surfaceDark : AmanahColorTokens.surfaceLight;
+
+  /// Level 2 Inset / Sub-card Container Surface (#0F1629 in dark, #F8FAFC in light)
+  static Color surfaceSecondary(BuildContext context) =>
+      isDark(context) ? AmanahColorTokens.surfaceSecondaryDark : AmanahColorTokens.neutral50;
+
+  /// Level 3 Elevated Surface for Modals, Drawers, Sheets (#131B2E in dark, #FFFFFF in light)
   static Color elevatedSurface(BuildContext context) =>
       isDark(context) ? AmanahColorTokens.surfaceElevatedDark : Colors.white;
 
+  /// Level 4 High Elevation for Popovers, Dialogs (#16233D in dark, #FFFFFF in light)
+  static Color surfaceHighest(BuildContext context) =>
+      isDark(context) ? AmanahColorTokens.surfaceHighestDark : Colors.white;
+
+  /// Highlight Surface: Navy-Blue Tinted (#082F49 in dark, #EFF6FF in light)
+  static Color surfaceHighlight(BuildContext context) =>
+      isDark(context) ? AmanahColorTokens.surfaceAccentDark : AmanahColorTokens.brandSurface;
+
+  /// Subtle muted container surface (fields, chips, inactive tabs)
   static Color surfaceMuted(BuildContext context) => isDark(context)
       ? Colors.white.withValues(alpha: 0.05)
-      : AmanahColorTokens.neutral50;
+      : AmanahColorTokens.neutral100;
 
+  // ---------------------------------------------------------------------------
+  // Outlines & Dividers
+  // ---------------------------------------------------------------------------
+  /// Standard structural outline/border (rgba(255,255,255,0.08) in dark, #E2E8F0 in light)
   static Color outline(BuildContext context) => isDark(context)
-      ? Colors.white.withValues(alpha: 0.10)
+      ? Colors.white.withValues(alpha: 0.08)
       : AmanahColorTokens.neutral200;
 
+  /// High-emphasis structural outline (rgba(255,255,255,0.16) in dark, #CBD5E1 in light)
   static Color outlineStrong(BuildContext context) => isDark(context)
-      ? Colors.white.withValues(alpha: 0.18)
+      ? Colors.white.withValues(alpha: 0.16)
       : AmanahColorTokens.neutral300;
 
-  static Color textPrimary(BuildContext context) =>
-      isDark(context) ? Colors.white : AmanahColorTokens.neutral950;
+  /// Structural horizontal/vertical divider
+  static Color divider(BuildContext context) => isDark(context)
+      ? Colors.white.withValues(alpha: 0.08)
+      : AmanahColorTokens.neutral200;
 
+  // ---------------------------------------------------------------------------
+  // Typography & Foregrounds
+  // ---------------------------------------------------------------------------
+  /// High-emphasis primary text (#FFFFFF in dark, #0F172A in light)
+  static Color textPrimary(BuildContext context) =>
+      isDark(context) ? Colors.white : AmanahColorTokens.neutral900;
+
+  /// Medium-emphasis secondary text (#CBD5E1 in dark, #475569 in light)
   static Color textSecondary(BuildContext context) => isDark(context)
       ? AmanahColorTokens.neutral300
       : AmanahColorTokens.neutral600;
 
+  /// Low-emphasis tertiary text (#94A3B8 in dark, #64748B in light)
   static Color textTertiary(BuildContext context) => isDark(context)
       ? AmanahColorTokens.neutral400
       : AmanahColorTokens.neutral500;
 
+  /// Muted / placeholder text (#64748B in dark, #94A3B8 in light)
+  static Color textMuted(BuildContext context) => isDark(context)
+      ? AmanahColorTokens.neutral500
+      : AmanahColorTokens.neutral400;
+
+  /// Backdrop scrim for modal sheets and overlays
   static Color scrim(BuildContext context) =>
       Colors.black.withValues(alpha: isDark(context) ? 0.72 : 0.60);
 
-  static AmanahTone status(AmanahStatusTone tone) {
+  // ---------------------------------------------------------------------------
+  // Adaptive Semantic Status Tones
+  // ---------------------------------------------------------------------------
+  /// Returns a semantically adapted status tone for the given theme context.
+  static AmanahTone statusAdaptive(BuildContext context, AmanahStatusTone tone) =>
+      status(tone, isDark: isDark(context));
+
+  /// Resolves [AmanahStatusTone] to light or dark adapted [AmanahTone].
+  static AmanahTone status(AmanahStatusTone tone, {bool? isDark, BuildContext? context}) {
+    final bool dark = isDark ?? (context != null && AmanahThemeTokens.isDark(context));
+
+    if (dark) {
+      switch (tone) {
+        case AmanahStatusTone.brand:
+        case AmanahStatusTone.info:
+        case AmanahStatusTone.pending:
+          return AmanahTone(
+            primary: AmanahColorTokens.brand,
+            light: AmanahColorTokens.brand.withValues(alpha: 0.16),
+            dark: AmanahColorTokens.brandAccent,
+            surface: AmanahColorTokens.brand.withValues(alpha: 0.16),
+            onSurface: const Color(0xFF60A5FA),
+            border: AmanahColorTokens.brand.withValues(alpha: 0.32),
+          );
+        case AmanahStatusTone.success:
+        case AmanahStatusTone.approved:
+          return AmanahTone(
+            primary: AmanahColorTokens.success,
+            light: AmanahColorTokens.success.withValues(alpha: 0.16),
+            dark: const Color(0xFF34D399),
+            surface: AmanahColorTokens.success.withValues(alpha: 0.16),
+            onSurface: const Color(0xFF34D399),
+            border: AmanahColorTokens.success.withValues(alpha: 0.32),
+          );
+        case AmanahStatusTone.warning:
+          return AmanahTone(
+            primary: AmanahColorTokens.warning,
+            light: AmanahColorTokens.warning.withValues(alpha: 0.16),
+            dark: const Color(0xFFFBBF24),
+            surface: AmanahColorTokens.warning.withValues(alpha: 0.16),
+            onSurface: const Color(0xFFFBBF24),
+            border: AmanahColorTokens.warning.withValues(alpha: 0.32),
+          );
+        case AmanahStatusTone.danger:
+        case AmanahStatusTone.rejected:
+          return AmanahTone(
+            primary: AmanahColorTokens.danger,
+            light: AmanahColorTokens.danger.withValues(alpha: 0.16),
+            dark: const Color(0xFFF87171),
+            surface: AmanahColorTokens.danger.withValues(alpha: 0.16),
+            onSurface: const Color(0xFFF87171),
+            border: AmanahColorTokens.danger.withValues(alpha: 0.32),
+          );
+        case AmanahStatusTone.violet:
+          return AmanahTone(
+            primary: AmanahColorTokens.violet,
+            light: AmanahColorTokens.violet.withValues(alpha: 0.16),
+            dark: const Color(0xFFA78BFA),
+            surface: AmanahColorTokens.violet.withValues(alpha: 0.16),
+            onSurface: const Color(0xFFA78BFA),
+            border: AmanahColorTokens.violet.withValues(alpha: 0.32),
+          );
+        case AmanahStatusTone.cancelled:
+        case AmanahStatusTone.neutral:
+          return AmanahTone(
+            primary: AmanahColorTokens.neutral400,
+            light: Colors.white.withValues(alpha: 0.08),
+            dark: AmanahColorTokens.neutral300,
+            surface: Colors.white.withValues(alpha: 0.08),
+            onSurface: AmanahColorTokens.neutral300,
+            border: Colors.white.withValues(alpha: 0.14),
+          );
+      }
+    }
+
+    // Light Theme fallback (preserved 1:1)
     switch (tone) {
       case AmanahStatusTone.brand:
       case AmanahStatusTone.info:
@@ -181,7 +310,76 @@ abstract final class AmanahThemeTokens {
     }
   }
 
-  static AmanahTone iconTone(AmanahIconTone tone) {
+  // ---------------------------------------------------------------------------
+  // Category & Functional Icon Tones
+  // ---------------------------------------------------------------------------
+  static AmanahTone iconTone(AmanahIconTone tone, {bool? isDark, BuildContext? context}) {
+    final bool dark = isDark ?? (context != null && AmanahThemeTokens.isDark(context));
+
+    if (dark) {
+      switch (tone) {
+        case AmanahIconTone.brand:
+        case AmanahIconTone.account:
+        case AmanahIconTone.queue:
+        case AmanahIconTone.info:
+          return const AmanahTone(
+            primary: AmanahColorTokens.brandLight,
+            light: Color(0xFF1E3A8A),
+            dark: Color(0xFF60A5FA),
+          );
+        case AmanahIconTone.practice:
+        case AmanahIconTone.shift:
+        case AmanahIconTone.warning:
+          return const AmanahTone(
+            primary: AmanahColorTokens.warning,
+            light: Color(0xFF78350F),
+            dark: Color(0xFFFBBF24),
+          );
+        case AmanahIconTone.security:
+        case AmanahIconTone.success:
+          return const AmanahTone(
+            primary: AmanahColorTokens.success,
+            light: Color(0xFF064E3B),
+            dark: Color(0xFF34D399),
+          );
+        case AmanahIconTone.notifications:
+        case AmanahIconTone.clinicalCritical:
+        case AmanahIconTone.danger:
+          return const AmanahTone(
+            primary: AmanahColorTokens.danger,
+            light: Color(0xFF7F1D1D),
+            dark: Color(0xFFF87171),
+          );
+        case AmanahIconTone.help:
+        case AmanahIconTone.clinicalConsult:
+        case AmanahIconTone.violet:
+          return const AmanahTone(
+            primary: AmanahColorTokens.violet,
+            light: Color(0xFF4C1D95),
+            dark: Color(0xFFA78BFA),
+          );
+        case AmanahIconTone.data:
+          return const AmanahTone(
+            primary: AmanahColorTokens.brandLight,
+            light: Color(0xFF1E3A8A),
+            dark: Color(0xFF93C5FD),
+          );
+        case AmanahIconTone.documents:
+          return const AmanahTone(
+            primary: AmanahColorTokens.brand,
+            light: Color(0xFF1E3A8A),
+            dark: Color(0xFF60A5FA),
+          );
+        case AmanahIconTone.neutral:
+          return const AmanahTone(
+            primary: AmanahColorTokens.neutral400,
+            light: Color(0xFF1E293B),
+            dark: AmanahColorTokens.neutral300,
+          );
+      }
+    }
+
+    // Light Theme
     switch (tone) {
       case AmanahIconTone.brand:
       case AmanahIconTone.account:
@@ -245,13 +443,15 @@ abstract final class AmanahThemeTokens {
   }
 }
 
-/// Centralized Design System & Color Tokens for Amanah Healthcare Portal
-/// Matching 1:1 with global.css and Tailwind design tokens in .web/src/styles/global.css
+/// Centralized Design System & Color Tokens for Amanah Healthcare Portal.
+///
+/// Blue accent system is preserved unchanged (#0D66E9, #2563EB, #0A44FF, etc.).
+/// Dark neutral/navy surfaces are aligned with color-palette-1788452212858.css.
 abstract final class AmanahColorTokens {
   // ---------------------------------------------------------------------------
-  // 1. Core Brand Colors (Established Medical Blue System)
+  // 1. Core Brand Colors (Preserved Established Medical Blue System)
   // ---------------------------------------------------------------------------
-  /// --color-portal-brand: #0d66e9 (Amanah Electric Sapphire Brand Blue)
+  /// --color-portal-brand: #0D66E9 (Amanah Electric Sapphire Brand Blue)
   static const Color brand = Color(0xFF0D66E9);
 
   /// Primary Bold Electric Blue (#0A44FF)
@@ -275,7 +475,10 @@ abstract final class AmanahColorTokens {
   /// Muted Border Blue 100 (#DBEAFE)
   static const Color brandMuted = Color(0xFFDBEAFE);
 
-  /// --color-portal-emerald: #38c474 (Medical Success Emerald)
+  // ---------------------------------------------------------------------------
+  // 2. Semantic Non-Blue Colors (Green, Yellow, Red, Violet)
+  // ---------------------------------------------------------------------------
+  /// --color-portal-emerald: #38C474 (Medical Success Emerald)
   static const Color emerald = Color(0xFF38C474);
 
   static const Color success = Color(0xFF10B981);
@@ -299,6 +502,9 @@ abstract final class AmanahColorTokens {
   static const Color violetSurface = Color(0xFFF5F3FF);
   static const Color violetBorder = Color(0xFFDDD6FE);
 
+  // ---------------------------------------------------------------------------
+  // 3. Neutrals (Light & Dark Foundations)
+  // ---------------------------------------------------------------------------
   static const Color neutral50 = Color(0xFFF8FAFC);
   static const Color neutral100 = Color(0xFFF1F5F9);
   static const Color neutral200 = Color(0xFFE2E8F0);
@@ -307,33 +513,53 @@ abstract final class AmanahColorTokens {
   static const Color neutral500 = Color(0xFF64748B);
   static const Color neutral600 = Color(0xFF475569);
   static const Color neutral700 = Color(0xFF334155);
+  static const Color neutral800 = Color(0xFF1E293B);
   static const Color neutral900 = Color(0xFF0F172A);
   static const Color neutral950 = Color(0xFF020617);
 
+  // ---------------------------------------------------------------------------
+  // 4. Surfaces Aligned with color-palette-1788452212858.css
+  // ---------------------------------------------------------------------------
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceDark = Color(0xFF0A0E1A);
-  static const Color surfaceElevatedDark = Color(0xFF111624);
 
-  /// --color-portal-navy: #1c1645 (Deep Royal Navy)
-  static const Color navy = Color(0xFF1C1645);
+  /// Level 1 Card Surface (#0B1329 - CSS --color-7, used 135x)
+  static const Color surfaceDark = Color(0xFF0B1329);
 
-  /// --color-portal-dark-navy: #14103b (Cosmic Dark Midnight Navy)
-  static const Color darkNavy = Color(0xFF14103B);
+  /// Level 2 Inset / Sub-card Container Surface (#0F1629 - CSS --color-49)
+  static const Color surfaceSecondaryDark = Color(0xFF0F1629);
 
-  /// --color-portal-heading: #1a1d2e (Primary Heading Charcoal)
-  static const Color heading = Color(0xFF1A1D2E);
+  /// Level 3 Elevated Surface: Modals, Drawers, Sheets (#131B2E - CSS --color-47)
+  static const Color surfaceElevatedDark = Color(0xFF131B2E);
 
-  /// --color-portal-muted: #4a4f63 (Muted Subtitle Grey)
-  static const Color muted = Color(0xFF4A4F63);
+  /// Level 4 Highest Elevation: Popovers, Dialogs (#16233D - CSS --color-48)
+  static const Color surfaceHighestDark = Color(0xFF16233D);
 
-  /// --color-portal-bg: #f8faff (Crisp Healthcare Portal Canvas Background)
+  /// Level 5 Accent Container Navy (#082F49 - CSS --color-6)
+  static const Color surfaceAccentDark = Color(0xFF082F49);
+
+  /// Deep Canvas Background (#060B18 - CSS --color-9)
+  static const Color canvasDark = Color(0xFF060B18);
+
+  /// Secondary Canvas Background (#0A0F1D - CSS --color-50)
+  static const Color canvasAltDark = Color(0xFF0A0F1D);
+
+  /// Crisp Healthcare Portal Canvas Background (#F8FAFF)
   static const Color canvasLight = Color(0xFFF8FAFF);
 
-  /// Dark Mode Canvas Background (#0a0e1a)
-  static const Color canvasDark = Color(0xFF0A0E1A);
+  /// --color-portal-navy: #1C1645 (Deep Royal Navy)
+  static const Color navy = Color(0xFF1C1645);
+
+  /// --color-portal-dark-navy: #14103B (Cosmic Dark Midnight Navy)
+  static const Color darkNavy = Color(0xFF14103B);
+
+  /// --color-portal-heading: #1A1D2E (Primary Heading Charcoal)
+  static const Color heading = Color(0xFF1A1D2E);
+
+  /// --color-portal-muted: #4A4F63 (Muted Subtitle Grey)
+  static const Color muted = Color(0xFF4A4F63);
 
   // ---------------------------------------------------------------------------
-  // 2. Harmonized Crisp Button System (.btn-crisp-blue from global.css)
+  // 5. Harmonized Crisp Button System (.btn-crisp-blue from global.css)
   // ---------------------------------------------------------------------------
   /// Light Mode Crisp Blue Button Linear Gradient (#3B8AEB top sheen -> #0D66E9 base sapphire)
   static const LinearGradient btnCrispBlueGradient = LinearGradient(
@@ -387,57 +613,39 @@ abstract final class AmanahColorTokens {
   );
 
   // ---------------------------------------------------------------------------
-  // 3. Floating Heroic QR Action Button (from BottomNavBar.tsx)
+  // 6. Floating Heroic QR Action Button (from BottomNavBar.tsx)
   // ---------------------------------------------------------------------------
-  /// QR Button Outer Halo Shadow in Light Mode (0px 8px 24px rgba(13, 102, 233, 0.35))
   static const BoxShadow qrButtonShadowLight = BoxShadow(
     color: Color(0x590D66E9),
     blurRadius: 24,
     offset: Offset(0, 8),
   );
 
-  /// QR Button Outer Halo Shadow in Dark Mode (0px 8px 24px rgba(37, 99, 235, 0.30))
   static const BoxShadow qrButtonShadowDark = BoxShadow(
     color: Color(0x4D2563EB),
     blurRadius: 24,
     offset: Offset(0, 8),
   );
 
-  /// QR Outer Ring Color Light (4px white ring)
   static const Color qrRingLight = Colors.white;
-
-  /// QR Outer Ring Color Dark (4px neutral-950 ring)
-  static const Color qrRingDark = Color(0xFF0A0A0A);
+  static const Color qrRingDark = Color(0xFF0B1329);
 
   // ---------------------------------------------------------------------------
-  // 4. Navigation & Tab Accent Tokens (from BottomNavBar.tsx)
+  // 7. Navigation & Tab Accent Tokens (from BottomNavBar.tsx)
   // ---------------------------------------------------------------------------
-  /// Active tab text & icon in Light Mode (#0D66E9)
   static const Color tabActiveLight = Color(0xFF0D66E9);
-
-  /// Active tab text & icon in Dark Mode (text-blue-400: #60A5FA)
   static const Color tabActiveDark = Color(0xFF60A5FA);
-
-  /// Inactive tab text & icon in Light Mode (#9CA3AF)
   static const Color tabInactiveLight = Color(0xFF9CA3AF);
-
-  /// Inactive tab text & icon in Dark Mode (#737373)
   static const Color tabInactiveDark = Color(0xFF737373);
 
   // ---------------------------------------------------------------------------
-  // 5. Dynamic Aurora Ambient Atmosphere Tokens (from AuroraBackground.tsx)
+  // 8. Dynamic Aurora Ambient Atmosphere Tokens (from AuroraBackground.tsx)
   // ---------------------------------------------------------------------------
-  /// Light Mode Aurora Primary Glow (Amanah Electric Sapphire #0D66E9)
   static const Color auroraSapphireLight = Color(0xFF0D66E9);
-
-  /// Light Mode Aurora Secondary Glow (Cobalt Blue #2563EB)
   static const Color auroraAccentLight = Color(0xFF2563EB);
   static const Color auroraBlueLight = Color(0xFF2563EB);
 
-  /// Dark Mode Aurora Primary Glow (Deep Cosmic Sapphire #07247A)
   static const Color auroraSapphireDark = Color(0xFF07247A);
-
-  /// Dark Mode Aurora Secondary Glow (Royal Blue #1D4ED8)
   static const Color auroraAccentDark = Color(0xFF1D4ED8);
   static const Color auroraBlueDark = Color(0xFF1D4ED8);
 }

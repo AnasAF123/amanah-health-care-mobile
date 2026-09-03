@@ -15,9 +15,6 @@ class ThemeProvider with ChangeNotifier {
 
   final UserPreferences _userPreferences;
 
-  // The onboarding needs the light mode.
-  bool _forceLight = false;
-
   // Local cache for [_userPreferences.currentTheme]
   String _theme;
 
@@ -29,17 +26,15 @@ class ThemeProvider with ChangeNotifier {
     }
   }
 
-  String get currentTheme => _forceLight ? THEME_LIGHT : _theme;
+  String get currentTheme => _theme;
 
-  void setOnboardingComplete(final bool onboardingComplete) {
-    _forceLight = !onboardingComplete;
-  }
+  void setOnboardingComplete(final bool onboardingComplete) {}
 
-  bool get isLightTheme => _forceLight || currentTheme == THEME_LIGHT;
+  bool get isLightTheme => currentTheme == THEME_LIGHT;
 
-  bool get isDarkTheme => !_forceLight && currentTheme == THEME_DARK;
+  bool get isDarkTheme => currentTheme == THEME_DARK;
 
-  bool get isAmoledTheme => !_forceLight && currentTheme == THEME_AMOLED;
+  bool get isAmoledTheme => currentTheme == THEME_AMOLED;
 
   void finishOnboarding() {
     setOnboardingComplete(true);

@@ -51,9 +51,7 @@ class AmanahBottomNavigationBar extends StatelessWidget {
                   color: surfaceColor,
                   border: Border(
                     top: BorderSide(
-                      color: dark
-                          ? Colors.white.withValues(alpha: 0.10)
-                          : const Color(0xFFF3F4F6),
+                      color: AmanahThemeTokens.outline(context),
                     ),
                   ),
                   boxShadow: <BoxShadow>[

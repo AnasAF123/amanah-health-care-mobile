@@ -23,6 +23,7 @@ import 'package:smooth_app/data_models/user_management_provider.dart';
 import 'package:smooth_app/database/dao_string.dart';
 import 'package:smooth_app/database/local_database.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_home_shell.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/generic_lib/animations/rive_animation.dart';
 import 'package:smooth_app/helpers/analytics_helper.dart';
 import 'package:smooth_app/helpers/camera_helper.dart';
@@ -33,7 +34,6 @@ import 'package:smooth_app/helpers/permission_helper.dart';
 import 'package:smooth_app/l10n/app_localizations.dart';
 import 'package:smooth_app/pages/app_review.dart';
 import 'package:smooth_app/pages/navigator/app_navigator.dart';
-import 'package:smooth_app/pages/onboarding/onboarding_flow_navigator.dart';
 import 'package:smooth_app/query/product_query.dart';
 import 'package:smooth_app/services/smooth_services.dart';
 import 'package:smooth_app/themes/color_provider.dart';
@@ -41,7 +41,6 @@ import 'package:smooth_app/themes/contrast_provider.dart';
 import 'package:smooth_app/themes/smooth_theme.dart';
 import 'package:smooth_app/themes/theme_provider.dart';
 import 'package:smooth_app/widgets/amanah_launch_splash.dart';
-import 'package:smooth_app/widgets/smooth_scaffold.dart';
 
 void main() {
   debugPrint('--------');
@@ -264,12 +263,7 @@ class _SmoothAppState extends State<SmoothApp> {
 
   Widget _buildApp(BuildContext context) {
     final ThemeProvider themeProvider = context.watch<ThemeProvider>();
-    final OnboardingPage lastVisitedOnboardingPage =
-        _userPreferences.lastVisitedOnboardingPage;
-    OnboardingFlowNavigator(_userPreferences);
-    final bool isOnboardingComplete = lastVisitedOnboardingPage
-        .isOnboardingComplete();
-    themeProvider.setOnboardingComplete(isOnboardingComplete);
+    themeProvider.setOnboardingComplete(true);
 
     // Still need the value from the UserPreferences here, not the ProductQuery
     // as the value is not available at this time
@@ -304,10 +298,27 @@ class _SmoothAppState extends State<SmoothApp> {
   }
 
   Widget _buildError(AsyncSnapshot<void> snapshot) {
+    final Brightness brightness = MediaQuery.platformBrightnessOf(context);
+    final bool isDark = brightness == Brightness.dark;
+    final Color background =
+        isDark ? AmanahColorTokens.canvasDark : AmanahColorTokens.canvasLight;
+    final Color textColor = isDark ? Colors.white : AmanahColorTokens.neutral900;
+
     return MaterialApp(
-      theme: ThemeData(),
-      home: SmoothScaffold(
-        body: Center(child: Text('Fatal Error: ${snapshot.error}')),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'PlusJakartaSans',
+        brightness: brightness,
+        scaffoldBackgroundColor: background,
+      ),
+      home: Scaffold(
+        backgroundColor: background,
+        body: Center(
+          child: Text(
+            'Fatal Error: ${snapshot.error}',
+            style: TextStyle(color: textColor, fontFamily: 'PlusJakartaSans'),
+          ),
+        ),
       ),
     );
   }

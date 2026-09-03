@@ -5,7 +5,7 @@ const Color seed = Color(0xFF0F0A5A);
 
 const ColorScheme lightColorScheme = ColorScheme(
   brightness: Brightness.light,
-  primary: Color(0xFF0F0A5A),
+  primary: Color(0xFF0D66E9),
   inversePrimary: Color(0xFF2563EB),
   onPrimary: Color(0xFFFFFFFF),
   secondary: Color(0xFFEFF6FF),
@@ -18,15 +18,15 @@ const ColorScheme lightColorScheme = ColorScheme(
 
 const ColorScheme darkColorScheme = ColorScheme(
   brightness: Brightness.dark,
-  primary: Color(0xFF93C5FD),
-  inversePrimary: Color(0xFFFFFFFF),
-  onPrimary: Color(0xFF0F172A),
-  secondary: Color(0xFF1E293B),
-  onSecondary: Color(0xFFE2E8F0),
+  primary: Color(0xFF0D66E9),
+  inversePrimary: Color(0xFF38BDF8),
+  onPrimary: Color(0xFFFFFFFF),
+  secondary: Color(0xFF0F1629),
+  onSecondary: Color(0xFFCBD5E1),
   error: Color(0xFFF87171),
   onError: Color(0xFFFFFFFF),
-  surface: Color(0xFF0F172A),
-  onSurface: Color(0xFFF8FAFC),
+  surface: Color(0xFF0B1329),
+  onSurface: Color(0xFFFFFFFF),
 );
 
 const ColorScheme trueDarkColorScheme = ColorScheme(

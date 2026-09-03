@@ -47,12 +47,10 @@ class AmanahQuickActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
-    final Color foreground = dark
-        ? AmanahColorTokens.brandLight
-        : AmanahColorTokens.brand;
-    final Color labelColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+    const Color foreground = AmanahColorTokens.brand;
+    final Color labelColor = AmanahThemeTokens.textSecondary(context);
+    final Color buttonBg = AmanahThemeTokens.surface(context);
+    final Color buttonBorder = AmanahThemeTokens.outline(context);
 
     return Semantics(
       button: true,
@@ -71,14 +69,10 @@ class AmanahQuickActionButton extends StatelessWidget {
                 children: <Widget>[
                   DecoratedBox(
                     decoration: BoxDecoration(
-                      color: dark
-                          ? const Color(0xE6171717)
-                          : const Color(0xFFFFFFFF),
+                      color: buttonBg,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: dark
-                            ? Colors.white.withValues(alpha: 0.15)
-                            : const Color(0xFFF8FAFC),
+                        color: buttonBorder,
                       ),
                       boxShadow: <BoxShadow>[
                         BoxShadow(

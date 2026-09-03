@@ -95,16 +95,12 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+    final Color textColor = AmanahThemeTokens.textPrimary(context);
+    final Color subtextColor = AmanahThemeTokens.textSecondary(context);
     final Color fieldBg = dark
-        ? Colors.white.withValues(alpha: 0.05)
+        ? AmanahThemeTokens.surfaceSecondary(context)
         : Colors.white;
-    final Color fieldBorder = dark
-        ? Colors.white.withValues(alpha: 0.10)
-        : const Color(0xFFE2E8F0);
+    final Color fieldBorder = AmanahThemeTokens.outline(context);
 
     return AmanahBottomSheetScaffold(
       title: 'Edit Profil Dokter',

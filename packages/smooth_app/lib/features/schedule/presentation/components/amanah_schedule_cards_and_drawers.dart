@@ -8,17 +8,17 @@ import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.
 import 'package:smooth_app/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:smooth_app/features/schedule/presentation/components/amanah_queue_badge.dart';
 
-AmanahTone _badgeTone(AmanahBadgeVariant variant) {
+AmanahTone _badgeTone(AmanahBadgeVariant variant, [BuildContext? context]) {
   switch (variant) {
     case AmanahBadgeVariant.success:
-      return AmanahThemeTokens.status(AmanahStatusTone.success);
+      return AmanahThemeTokens.status(AmanahStatusTone.success, context: context);
     case AmanahBadgeVariant.primary:
     case AmanahBadgeVariant.live:
-      return AmanahThemeTokens.status(AmanahStatusTone.brand);
+      return AmanahThemeTokens.status(AmanahStatusTone.brand, context: context);
     case AmanahBadgeVariant.warning:
-      return AmanahThemeTokens.status(AmanahStatusTone.warning);
+      return AmanahThemeTokens.status(AmanahStatusTone.warning, context: context);
     case AmanahBadgeVariant.trend:
-      return AmanahThemeTokens.status(AmanahStatusTone.violet);
+      return AmanahThemeTokens.status(AmanahStatusTone.violet, context: context);
   }
 }
 
@@ -132,21 +132,13 @@ class AmanahBookedPatientCard extends StatelessWidget {
           width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(32),
-            color: dark ? const Color(0xFF060B18) : Colors.white,
+            color: AmanahThemeTokens.surface(context),
             border: Border.all(
-              color: dark
-                  ? Colors.white.withValues(alpha: 0.10)
-                  : const Color(0xFFE2E8F0),
+              color: AmanahThemeTokens.outline(context),
               width: 1,
             ),
             boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: dark
-                    ? Colors.black.withValues(alpha: 0.50)
-                    : const Color(0xFF03045E).withValues(alpha: 0.08),
-                blurRadius: 36,
-                offset: const Offset(0, 16),
-              ),
+              AmanahElevation.soft(dark: dark),
             ],
           ),
           clipBehavior: Clip.antiAlias,
@@ -332,9 +324,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    color: dark
-                                        ? Colors.white
-                                        : const Color(0xFF0F172A),
+                                    color: AmanahThemeTokens.textPrimary(context),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 20,
                                     fontWeight: FontWeight.w900,
@@ -345,9 +335,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                 Text(
                                   patient.patientRm,
                                   style: TextStyle(
-                                    color: dark
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFF64748B),
+                                    color: AmanahThemeTokens.textSecondary(context),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w600,
@@ -376,9 +364,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    color: dark
-                                        ? const Color(0xFFE2E8F0)
-                                        : const Color(0xFF0F172A),
+                                    color: AmanahThemeTokens.textPrimary(context),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
@@ -390,9 +376,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    color: dark
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFF94A3B8),
+                                    color: AmanahThemeTokens.textTertiary(context),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
@@ -407,9 +391,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                             width: 1,
                             height: 28,
                             margin: const EdgeInsets.symmetric(horizontal: 6),
-                            color: dark
-                                ? Colors.white.withValues(alpha: 0.20)
-                                : const Color(0xFFE2E8F0),
+                            color: AmanahThemeTokens.divider(context),
                           ),
 
                           // Slot 2: Jam Mulai
@@ -424,17 +406,13 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                     Icon(
                                       Icons.access_time_rounded,
                                       size: 13,
-                                      color: dark
-                                          ? const Color(0xFFE2E8F0)
-                                          : const Color(0xFF0F172A),
+                                      color: AmanahThemeTokens.textPrimary(context),
                                     ),
                                     const SizedBox(width: 3),
                                     Text(
                                       startTime,
                                       style: TextStyle(
-                                        color: dark
-                                            ? const Color(0xFFE2E8F0)
-                                            : const Color(0xFF0F172A),
+                                        color: AmanahThemeTokens.textPrimary(context),
                                         fontFamily: 'PlusJakartaSans',
                                         fontSize: 13,
                                         fontWeight: FontWeight.w800,
@@ -446,12 +424,10 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                 Text(
                                   'Mulai',
                                   style: TextStyle(
-                                    color: dark
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFF94A3B8),
+                                    color: AmanahThemeTokens.textTertiary(context),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 11,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
@@ -463,9 +439,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                             width: 1,
                             height: 28,
                             margin: const EdgeInsets.symmetric(horizontal: 6),
-                            color: dark
-                                ? Colors.white.withValues(alpha: 0.20)
-                                : const Color(0xFFE2E8F0),
+                            color: AmanahThemeTokens.divider(context),
                           ),
 
                           // Slot 3: Jam Selesai
@@ -478,19 +452,15 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
                                     Icon(
-                                      Icons.access_time_rounded,
+                                      Icons.schedule_rounded,
                                       size: 13,
-                                      color: dark
-                                          ? const Color(0xFFE2E8F0)
-                                          : const Color(0xFF0F172A),
+                                      color: AmanahThemeTokens.textPrimary(context),
                                     ),
                                     const SizedBox(width: 3),
                                     Text(
                                       endTime,
                                       style: TextStyle(
-                                        color: dark
-                                            ? const Color(0xFFE2E8F0)
-                                            : const Color(0xFF0F172A),
+                                        color: AmanahThemeTokens.textPrimary(context),
                                         fontFamily: 'PlusJakartaSans',
                                         fontSize: 13,
                                         fontWeight: FontWeight.w800,
@@ -502,12 +472,10 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                 Text(
                                   'Selesai',
                                   style: TextStyle(
-                                    color: dark
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFF94A3B8),
+                                    color: AmanahThemeTokens.textTertiary(context),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 11,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],

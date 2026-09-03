@@ -50,17 +50,20 @@ class SmoothTheme {
 
     return ThemeData(
       fontFamily: 'PlusJakartaSans',
+      brightness: brightness,
       primaryColor: myColorScheme.primary,
       extensions: <ThemeExtension<dynamic>>[smoothExtension],
       colorScheme: myColorScheme,
       canvasColor: themeProvider.currentTheme == THEME_AMOLED
           ? myColorScheme.surface
-          : null,
+          : (brightness == Brightness.dark
+              ? const Color(0xFF060B18)
+              : const Color(0xFFF8FAFF)),
       scaffoldBackgroundColor:
           themeProvider.currentTheme == THEME_DARK ||
               (!lightTheme && themeProvider.currentTheme != THEME_AMOLED)
-          ? const Color(0xFF0F172A)
-          : const Color(0xFFF8FAFC),
+          ? const Color(0xFF060B18)
+          : const Color(0xFFF8FAFF),
       shadowColor: brightness == Brightness.light
           ? Colors.black54
           : Colors.white12,
@@ -93,11 +96,15 @@ class SmoothTheme {
         systemOverlayStyle: SystemUiOverlayStyle.light,
         titleTextStyle: textTheme.titleLarge,
       ),
-      dividerTheme: const DividerThemeData(
-        color: Color(0xFFE2E8F0),
+      dividerTheme: DividerThemeData(
+        color: brightness == Brightness.dark
+            ? Colors.white.withValues(alpha: 0.08)
+            : const Color(0xFFE2E8F0),
         space: 1.0,
       ),
-      dividerColor: const Color(0xFFE2E8F0),
+      dividerColor: brightness == Brightness.dark
+          ? Colors.white.withValues(alpha: 0.08)
+          : const Color(0xFFE2E8F0),
       inputDecorationTheme: InputDecorationTheme(
         fillColor: myColorScheme.secondary,
       ),
@@ -192,16 +199,9 @@ class SmoothTheme {
         ? getTextContrastLevel(textContrastProvider().currentContrastLevel)
         : Colors.white;
 
-    return _TEXT_THEME.copyWith(
-      displayMedium: _TEXT_THEME.displayMedium?.copyWith(color: contrastLevel),
-      headlineMedium: _TEXT_THEME.headlineMedium?.copyWith(
-        color: contrastLevel,
-      ),
-      bodyMedium: _TEXT_THEME.bodyMedium?.copyWith(color: contrastLevel),
-      displaySmall: _TEXT_THEME.bodySmall?.copyWith(color: contrastLevel),
-      titleLarge: _TEXT_THEME.titleLarge?.copyWith(color: contrastLevel),
-      titleMedium: _TEXT_THEME.titleMedium?.copyWith(color: contrastLevel),
-      titleSmall: _TEXT_THEME.titleSmall?.copyWith(color: contrastLevel),
+    return _TEXT_THEME.apply(
+      bodyColor: contrastLevel,
+      displayColor: contrastLevel,
     );
   }
 

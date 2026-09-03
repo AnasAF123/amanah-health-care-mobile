@@ -69,7 +69,7 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
         minHeight: minHeight ?? 0,
       ),
       decoration: BoxDecoration(
-        color: AmanahThemeTokens.surface(context),
+        color: AmanahThemeTokens.elevatedSurface(context),
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AmanahRadius.sheet),
         ),
@@ -156,8 +156,6 @@ class _AmanahSheetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool dark = AmanahThemeTokens.isDark(context);
-
     return DecoratedBox(
       decoration: BoxDecoration(
         border: showDivider
@@ -195,9 +193,7 @@ class _AmanahSheetHeader extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: dark
-                            ? AmanahColorTokens.neutral400
-                            : AmanahColorTokens.neutral500,
+                        color: AmanahThemeTokens.textSecondary(context),
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
@@ -235,7 +231,7 @@ class _AmanahSheetFooter extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: AmanahThemeTokens.surface(context).withValues(alpha: 0.96),
+            color: AmanahThemeTokens.elevatedSurface(context).withValues(alpha: 0.96),
             border: Border(
               top: BorderSide(color: AmanahThemeTokens.outline(context)),
             ),

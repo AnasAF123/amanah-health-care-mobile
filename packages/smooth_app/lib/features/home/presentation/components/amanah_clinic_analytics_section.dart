@@ -289,7 +289,6 @@ class _AmanahClinicAnalyticsSectionState
   int? _selectedPointIndex;
 
   void _showDetailSheet(BuildContext context, ClinicMonthRecord record) {
-    final bool dark = Theme.of(context).brightness == Brightness.dark;
     final int total = record.data.fold<int>(
       0,
       (int a, ClinicDayData b) => a + b.patients,
@@ -330,14 +329,10 @@ class _AmanahClinicAnalyticsSectionState
                     child: Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: dark
-                            ? const Color(0xFF162032)
-                            : const Color(0xFFF8FAFC),
+                        color: AmanahThemeTokens.surfaceSecondary(context),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: dark
-                              ? Colors.white.withValues(alpha: 0.08)
-                              : const Color(0xFFE2E8F0),
+                          color: AmanahThemeTokens.outline(context),
                         ),
                       ),
                       child: Column(
@@ -349,9 +344,7 @@ class _AmanahClinicAnalyticsSectionState
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 10.5,
                               fontWeight: FontWeight.w600,
-                              color: dark
-                                  ? const Color(0xFF94A3B8)
-                                  : const Color(0xFF64748B),
+                              color: AmanahThemeTokens.textSecondary(context),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -361,9 +354,7 @@ class _AmanahClinicAnalyticsSectionState
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 16,
                               fontWeight: FontWeight.w900,
-                              color: dark
-                                  ? Colors.white
-                                  : const Color(0xFF0F172A),
+                              color: AmanahThemeTokens.textPrimary(context),
                             ),
                           ),
                         ],
@@ -375,14 +366,10 @@ class _AmanahClinicAnalyticsSectionState
                     child: Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: dark
-                            ? const Color(0xFF162032)
-                            : const Color(0xFFF8FAFC),
+                        color: AmanahThemeTokens.surfaceSecondary(context),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: dark
-                              ? Colors.white.withValues(alpha: 0.08)
-                              : const Color(0xFFE2E8F0),
+                          color: AmanahThemeTokens.outline(context),
                         ),
                       ),
                       child: Column(
@@ -394,9 +381,7 @@ class _AmanahClinicAnalyticsSectionState
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 10.5,
                               fontWeight: FontWeight.w600,
-                              color: dark
-                                  ? const Color(0xFF94A3B8)
-                                  : const Color(0xFF64748B),
+                              color: AmanahThemeTokens.textSecondary(context),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -406,7 +391,7 @@ class _AmanahClinicAnalyticsSectionState
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 16,
                               fontWeight: FontWeight.w900,
-                              color: Color(0xFF0D66E9),
+                              color: AmanahColorTokens.brand,
                             ),
                           ),
                         ],
@@ -422,14 +407,10 @@ class _AmanahClinicAnalyticsSectionState
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: dark
-                      ? const Color(0xFF162032)
-                      : const Color(0xFFF8FAFC),
+                  color: AmanahThemeTokens.surfaceSecondary(context),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: dark
-                        ? Colors.white.withValues(alpha: 0.08)
-                        : const Color(0xFFE2E8F0),
+                    color: AmanahThemeTokens.outline(context),
                   ),
                 ),
                 child: Text(
@@ -439,9 +420,7 @@ class _AmanahClinicAnalyticsSectionState
                     fontSize: 11.5,
                     fontWeight: FontWeight.w500,
                     height: 1.45,
-                    color: dark
-                        ? const Color(0xFFCBD5E1)
-                        : const Color(0xFF475569),
+                    color: AmanahThemeTokens.textSecondary(context),
                   ),
                 ),
               ),
@@ -490,7 +469,7 @@ class _AmanahClinicAnalyticsSectionState
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -0.3,
-                          color: dark ? Colors.white : const Color(0xFF1A1D2E),
+                          color: AmanahThemeTokens.textPrimary(context),
                         ),
                       ),
                     ),
@@ -538,20 +517,12 @@ class _AmanahClinicAnalyticsSectionState
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(28),
-            color: dark ? const Color(0xFF0F1422) : Colors.white,
+            color: AmanahThemeTokens.surface(context),
             border: Border.all(
-              color: dark
-                  ? Colors.white.withValues(alpha: 0.10)
-                  : const Color(0xFFF1F5F9),
+              color: AmanahThemeTokens.outline(context),
             ),
             boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: dark
-                    ? Colors.black.withValues(alpha: 0.35)
-                    : Colors.black.withValues(alpha: 0.03),
-                blurRadius: 28,
-                offset: const Offset(0, 8),
-              ),
+              AmanahElevation.soft(dark: dark),
             ],
           ),
           child: Column(
@@ -585,9 +556,7 @@ class _AmanahClinicAnalyticsSectionState
                       fontFamily: 'PlusJakartaSans',
                       fontSize: 13.5,
                       fontWeight: FontWeight.w800,
-                      color: dark
-                          ? const Color(0xFFE2E8F0)
-                          : const Color(0xFF1E293B),
+                      color: AmanahThemeTokens.textPrimary(context),
                     ),
                   ),
                   IconButton(
@@ -628,9 +597,7 @@ class _AmanahClinicAnalyticsSectionState
                             fontSize: 30,
                             fontWeight: FontWeight.w900,
                             letterSpacing: -1.0,
-                            color: dark
-                                ? Colors.white
-                                : const Color(0xFF0F172A),
+                            color: AmanahThemeTokens.textPrimary(context),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -643,9 +610,7 @@ class _AmanahClinicAnalyticsSectionState
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 11.5,
                               fontWeight: FontWeight.w700,
-                              color: dark
-                                  ? const Color(0xFF94A3B8)
-                                  : const Color(0xFF64748B),
+                              color: AmanahThemeTokens.textSecondary(context),
                             ),
                           ),
                         ),
@@ -756,14 +721,10 @@ class _AmanahClinicAnalyticsSectionState
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: dark
-                            ? const Color(0xFF131A2B)
-                            : const Color(0xFFF8FAFC),
+                        color: AmanahThemeTokens.surfaceSecondary(context),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: dark
-                              ? Colors.white.withValues(alpha: 0.05)
-                              : const Color(0xFFF1F5F9),
+                          color: AmanahThemeTokens.outline(context),
                         ),
                       ),
                       child: Row(
@@ -776,7 +737,7 @@ class _AmanahClinicAnalyticsSectionState
                                   width: 6,
                                   height: 6,
                                   decoration: const BoxDecoration(
-                                    color: Color(0xFF2563EB),
+                                    color: AmanahColorTokens.brand,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -790,9 +751,7 @@ class _AmanahClinicAnalyticsSectionState
                                       fontFamily: 'PlusJakartaSans',
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: dark
-                                          ? const Color(0xFF94A3B8)
-                                          : const Color(0xFF64748B),
+                                      color: AmanahThemeTokens.textSecondary(context),
                                     ),
                                   ),
                                 ),
@@ -806,9 +765,7 @@ class _AmanahClinicAnalyticsSectionState
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 12.5,
                               fontWeight: FontWeight.w900,
-                              color: dark
-                                  ? Colors.white
-                                  : const Color(0xFF0F172A),
+                              color: AmanahThemeTokens.textPrimary(context),
                             ),
                           ),
                         ],
@@ -823,14 +780,10 @@ class _AmanahClinicAnalyticsSectionState
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: dark
-                            ? const Color(0xFF131A2B)
-                            : const Color(0xFFF8FAFC),
+                        color: AmanahThemeTokens.surfaceSecondary(context),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: dark
-                              ? Colors.white.withValues(alpha: 0.05)
-                              : const Color(0xFFF1F5F9),
+                          color: AmanahThemeTokens.outline(context),
                         ),
                       ),
                       child: Row(
@@ -843,12 +796,12 @@ class _AmanahClinicAnalyticsSectionState
                                   width: 6,
                                   height: 6,
                                   decoration: const BoxDecoration(
-                                    color: Color(0xFF2563EB),
+                                    color: AmanahColorTokens.brand,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
                                 const SizedBox(width: 5),
-                                const Flexible(
+                                Flexible(
                                   child: Text(
                                     'Baru',
                                     maxLines: 1,
@@ -857,7 +810,7 @@ class _AmanahClinicAnalyticsSectionState
                                       fontFamily: 'PlusJakartaSans',
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: Color(0xFF0D66E9),
+                                      color: AmanahThemeTokens.textSecondary(context),
                                     ),
                                   ),
                                 ),
@@ -867,11 +820,11 @@ class _AmanahClinicAnalyticsSectionState
                           const SizedBox(width: 4),
                           Text(
                             '$totalNewPatients',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 12.5,
                               fontWeight: FontWeight.w900,
-                              color: Color(0xFF0D66E9),
+                              color: AmanahThemeTokens.textPrimary(context),
                             ),
                           ),
                         ],
