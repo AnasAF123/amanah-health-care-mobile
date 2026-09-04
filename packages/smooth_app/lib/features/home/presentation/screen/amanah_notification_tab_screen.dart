@@ -366,10 +366,12 @@ class _AmanahNotificationOptionsMenu extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const Icon(
+              Icon(
                 Icons.done_all_rounded,
                 size: 18,
-                color: AmanahColorTokens.brandAccent,
+                color: dark
+                    ? AmanahColorTokens.tabActiveDark
+                    : AmanahColorTokens.brandAccent,
               ),
               const SizedBox(width: 8),
               Flexible(

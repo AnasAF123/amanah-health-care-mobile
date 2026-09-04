@@ -78,6 +78,12 @@ class _AmanahPresenceFilterDrawerState
     final Color subtextColor = dark
         ? const Color(0xFF94A3B8)
         : const Color(0xFF64748B);
+    final Color selectedAccent = dark
+        ? AmanahColorTokens.tabActiveDark
+        : AmanahColorTokens.brand;
+    final Color selectedForeground = dark
+        ? AmanahColorTokens.canvasDark
+        : Colors.white;
 
     return AmanahBottomSheetScaffold(
       title: 'Filter Presensi',
@@ -135,29 +141,18 @@ class _AmanahPresenceFilterDrawerState
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AmanahColorTokens.brand
+                            ? selectedAccent
                             : (dark
                                   ? Colors.white.withValues(alpha: 0.05)
                                   : const Color(0xFFF8FAFC)),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isSelected
-                              ? AmanahColorTokens.brand
+                              ? selectedAccent
                               : (dark
                                     ? Colors.white.withValues(alpha: 0.10)
                                     : const Color(0xFFE2E8F0)),
                         ),
-                        boxShadow: isSelected
-                            ? <BoxShadow>[
-                                BoxShadow(
-                                  color: AmanahColorTokens.brand.withValues(
-                                    alpha: 0.28,
-                                  ),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
                       ),
                       child: Text(
                         opt.label,
@@ -168,7 +163,7 @@ class _AmanahPresenceFilterDrawerState
                               ? FontWeight.w700
                               : FontWeight.w500,
                           color: isSelected
-                              ? Colors.white
+                              ? selectedForeground
                               : (dark
                                     ? const Color(0xFFCBD5E1)
                                     : const Color(0xFF334155)),
@@ -209,29 +204,18 @@ class _AmanahPresenceFilterDrawerState
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? AmanahColorTokens.brand
+                            ? selectedAccent
                             : (dark
                                   ? Colors.white.withValues(alpha: 0.05)
                                   : const Color(0xFFF8FAFC)),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isSelected
-                              ? AmanahColorTokens.brand
+                              ? selectedAccent
                               : (dark
                                     ? Colors.white.withValues(alpha: 0.10)
                                     : const Color(0xFFE2E8F0)),
                         ),
-                        boxShadow: isSelected
-                            ? <BoxShadow>[
-                                BoxShadow(
-                                  color: AmanahColorTokens.brand.withValues(
-                                    alpha: 0.28,
-                                  ),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
                       ),
                       child: Text(
                         opt.label,
@@ -242,7 +226,7 @@ class _AmanahPresenceFilterDrawerState
                               ? FontWeight.w700
                               : FontWeight.w500,
                           color: isSelected
-                              ? Colors.white
+                              ? selectedForeground
                               : (dark
                                     ? const Color(0xFFCBD5E1)
                                     : const Color(0xFF334155)),
@@ -369,12 +353,20 @@ class _AmanahPresenceFilterDrawerState
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: isSelected ? AmanahColorTokens.brand : Colors.transparent,
+              color: isSelected
+                  ? (dark
+                        ? AmanahColorTokens.tabActiveDark
+                        : AmanahColorTokens.brand)
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
               boxShadow: isSelected
                   ? <BoxShadow>[
                       BoxShadow(
-                        color: AmanahColorTokens.brand.withValues(alpha: 0.35),
+                        color:
+                            (dark
+                                    ? AmanahColorTokens.tabActiveDark
+                                    : AmanahColorTokens.brand)
+                                .withValues(alpha: 0.35),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
@@ -391,7 +383,7 @@ class _AmanahPresenceFilterDrawerState
                     fontSize: 11,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                     color: isSelected
-                        ? Colors.white
+                        ? (dark ? AmanahColorTokens.canvasDark : Colors.white)
                         : (dark
                               ? const Color(0xFFE2E8F0)
                               : const Color(0xFF334155)),
@@ -404,7 +396,7 @@ class _AmanahPresenceFilterDrawerState
                       width: 4,
                       height: 4,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF2563EB),
+                        color: AmanahColorTokens.brandAccent,
                         shape: BoxShape.circle,
                       ),
                     ),

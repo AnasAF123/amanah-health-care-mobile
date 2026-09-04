@@ -188,7 +188,8 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
 
           // Main Viewport Container
           SafeArea(
-            top: _selectedTab != AmanahHomeTab.scan,
+            top: _selectedTab != AmanahHomeTab.scan &&
+                _selectedTab != AmanahHomeTab.account,
             bottom: false,
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 100),

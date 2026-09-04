@@ -192,7 +192,7 @@ class _AmanahLeavePermissionTabScreenState
                     customBackgroundColor: Colors.transparent,
                     customBorder: Border.all(color: Colors.transparent),
                     customForegroundColor: dark
-                        ? AmanahColorTokens.brandSoft
+                        ? AmanahColorTokens.tabActiveDark
                         : AmanahColorTokens.brand,
                     semanticsLabel: 'Tambah Perizinan Baru',
                   ),

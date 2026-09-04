@@ -522,26 +522,26 @@ abstract final class AmanahColorTokens {
   // ---------------------------------------------------------------------------
   static const Color surfaceLight = Color(0xFFFFFFFF);
 
-  /// Level 1 Card Surface (#0B1329 - CSS --color-7, used 135x)
-  static const Color surfaceDark = Color(0xFF0B1329);
+  /// Level 1 Card Surface (#0F1422 from .web MasterCarousel, ClinicAnalytics, etc.)
+  static const Color surfaceDark = Color(0xFF0F1422);
 
-  /// Level 2 Inset / Sub-card Container Surface (#0F1629 - CSS --color-49)
-  static const Color surfaceSecondaryDark = Color(0xFF0F1629);
+  /// Level 2 Inset / Sub-card Container Surface (#131B2E from .web)
+  static const Color surfaceSecondaryDark = Color(0xFF131B2E);
 
-  /// Level 3 Elevated Surface: Modals, Drawers, Sheets (#131B2E - CSS --color-47)
-  static const Color surfaceElevatedDark = Color(0xFF131B2E);
+  /// Level 3 Elevated Surface: Modals, Drawers, Sheets (#16233D from .web)
+  static const Color surfaceElevatedDark = Color(0xFF16233D);
 
-  /// Level 4 Highest Elevation: Popovers, Dialogs (#16233D - CSS --color-48)
-  static const Color surfaceHighestDark = Color(0xFF16233D);
+  /// Level 4 Highest Elevation: Popovers, Dialogs (#1C2740 from .web)
+  static const Color surfaceHighestDark = Color(0xFF1C2740);
 
   /// Level 5 Accent Container Navy (#082F49 - CSS --color-6)
   static const Color surfaceAccentDark = Color(0xFF082F49);
 
-  /// Deep Canvas Background (#060B18 - CSS --color-9)
-  static const Color canvasDark = Color(0xFF060B18);
+  /// Deep Canvas Background (#0A0E1A from .web DoctorDashboard, ScheduleTab, etc.)
+  static const Color canvasDark = Color(0xFF0A0E1A);
 
-  /// Secondary Canvas Background (#0A0F1D - CSS --color-50)
-  static const Color canvasAltDark = Color(0xFF0A0F1D);
+  /// Secondary Canvas Background (#0F1422)
+  static const Color canvasAltDark = Color(0xFF0F1422);
 
   /// Crisp Healthcare Portal Canvas Background (#F8FAFF)
   static const Color canvasLight = Color(0xFFF8FAFF);
@@ -559,7 +559,7 @@ abstract final class AmanahColorTokens {
   static const Color muted = Color(0xFF4A4F63);
 
   // ---------------------------------------------------------------------------
-  // 5. Harmonized Crisp Button System (.btn-crisp-blue from global.css)
+  // 5. Harmonized Crisp Button System (.btn-crisp-blue & .btn-crisp-soft from global.css)
   // ---------------------------------------------------------------------------
   /// Light Mode Crisp Blue Button Linear Gradient (#3B8AEB top sheen -> #0D66E9 base sapphire)
   static const LinearGradient btnCrispBlueGradient = LinearGradient(
@@ -571,22 +571,22 @@ abstract final class AmanahColorTokens {
     ],
   );
 
-  /// Dark Mode Crisp Blue Button Gradient (.btn-crisp-blue-dark)
+  /// Dark Mode Crisp Blue Button Gradient (.btn-crisp-blue-dark: sky-400 highlight -> sky-600 base -> sky-700)
   static const LinearGradient btnCrispBlueDarkGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: <Color>[
-      Color(0xFF3B82F6), // blue 500 highlight
-      Color(0xFF2563EB), // cobalt blue 600
-      Color(0xFF1D4ED8), // deep royal blue 700
+      Color(0xFF38BDF8), // sky 400 top specular highlight
+      Color(0xFF0284C7), // sky 600 base
+      Color(0xFF0369A1), // sky 700 bottom extrusion
     ],
   );
 
   /// Light Mode Crisp Blue Stroke Border (#1D58AC)
   static const Color btnCrispBlueBorder = Color(0xFF1D58AC);
 
-  /// Dark Mode Crisp Blue Stroke Border (rgba(59, 130, 246, 0.55))
-  static const Color btnCrispBlueDarkBorder = Color(0x8C3B82F6);
+  /// Dark Mode Crisp Blue Stroke Border (0.8px solid rgba(56, 189, 248, 0.55))
+  static const Color btnCrispBlueDarkBorder = Color(0x8C38BDF8);
 
   /// Crisp Blue Button Inset Specular Sheen (rgba(255, 255, 255, 0.28))
   static const Color btnSpecularSheen = Color(0x47FFFFFF);
@@ -605,12 +605,31 @@ abstract final class AmanahColorTokens {
     offset: Offset(0, 4),
   );
 
-  /// Crisp Blue Button Glow Shadow in Dark Mode
+  /// Crisp Blue Button Glow Shadow in Dark Mode (rgba(0, 0, 0, 0.4) + subtle sky glow)
   static const BoxShadow btnCrispBlueDarkShadow = BoxShadow(
-    color: Color(0x4D2563EB),
-    blurRadius: 10,
-    offset: Offset(0, 4),
+    color: Color(0x66000000),
+    blurRadius: 3,
+    offset: Offset(0, 1),
   );
+
+  /// Dark Mode Crisp Soft Button Gradient (.btn-crisp-soft-dark)
+  static const LinearGradient btnCrispSoftDarkGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[
+      Color(0x3338BDF8), // rgba(56, 189, 248, 0.20)
+      Color(0x0D0284C7), // rgba(2, 132, 199, 0.05)
+    ],
+  );
+
+  /// Dark Mode Crisp Soft Button Background (rgba(2, 132, 199, 0.16))
+  static const Color btnCrispSoftDarkBg = Color(0x290284C7);
+
+  /// Dark Mode Crisp Soft Button Border (0.8px solid rgba(56, 189, 248, 0.32))
+  static const Color btnCrispSoftDarkBorder = Color(0x5238BDF8);
+
+  /// Dark Mode Crisp Soft Button Foreground (#38bdf8)
+  static const Color btnCrispSoftDarkText = Color(0xFF38BDF8);
 
   // ---------------------------------------------------------------------------
   // 6. Floating Heroic QR Action Button (from BottomNavBar.tsx)
@@ -622,21 +641,21 @@ abstract final class AmanahColorTokens {
   );
 
   static const BoxShadow qrButtonShadowDark = BoxShadow(
-    color: Color(0x4D2563EB),
+    color: Color(0x4D38BDF8), // shadow-[0_8px_24px_rgba(56,189,248,0.3)]
     blurRadius: 24,
     offset: Offset(0, 8),
   );
 
   static const Color qrRingLight = Colors.white;
-  static const Color qrRingDark = Color(0xFF0B1329);
+  static const Color qrRingDark = Color(0xFF0A0E1A);
 
   // ---------------------------------------------------------------------------
   // 7. Navigation & Tab Accent Tokens (from BottomNavBar.tsx)
   // ---------------------------------------------------------------------------
   static const Color tabActiveLight = Color(0xFF0D66E9);
-  static const Color tabActiveDark = Color(0xFF60A5FA);
+  static const Color tabActiveDark = Color(0xFF22D3EE); // text-cyan-400 from .web
   static const Color tabInactiveLight = Color(0xFF9CA3AF);
-  static const Color tabInactiveDark = Color(0xFF737373);
+  static const Color tabInactiveDark = Color(0xFF737373); // text-neutral-500 from .web
 
   // ---------------------------------------------------------------------------
   // 8. Dynamic Aurora Ambient Atmosphere Tokens (from AuroraBackground.tsx)
@@ -648,4 +667,6 @@ abstract final class AmanahColorTokens {
   static const Color auroraSapphireDark = Color(0xFF07247A);
   static const Color auroraAccentDark = Color(0xFF1D4ED8);
   static const Color auroraBlueDark = Color(0xFF1D4ED8);
+  static const Color auroraCyanDark = Color(0xFF06B6D4); // Soft medical cyan accent in dark mode
+  static const Color auroraCyanLuminousDark = Color(0xFF22D3EE);
 }

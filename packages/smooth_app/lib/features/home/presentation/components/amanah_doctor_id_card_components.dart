@@ -29,6 +29,11 @@ class AmanahDoctorIdCardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool dark = Theme.of(context).brightness == Brightness.dark;
+    final Color actionColor = dark
+        ? AmanahColorTokens.tabActiveDark
+        : AmanahColorTokens.brand;
+
     return AmanahScreenHeader(
       title: 'Kartu Identitas',
       onBack: onBack,
@@ -38,11 +43,13 @@ class AmanahDoctorIdCardHeader extends StatelessWidget {
           AmanahScreenHeaderIconAction(
             icon: Icons.info_outline_rounded,
             semanticsLabel: 'Petunjuk & Informasi ID Card',
+            foregroundColor: actionColor,
             onPressed: onInfo,
           ),
           AmanahScreenHeaderIconAction(
             icon: Icons.qr_code_2_rounded,
             semanticsLabel: 'Tampilkan QR Code Presensi',
+            foregroundColor: actionColor,
             onPressed: onQr,
           ),
         ],

@@ -409,9 +409,7 @@ class _AmanahClinicAnalyticsSectionState
                 decoration: BoxDecoration(
                   color: AmanahThemeTokens.surfaceSecondary(context),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AmanahThemeTokens.outline(context),
-                  ),
+                  border: Border.all(color: AmanahThemeTokens.outline(context)),
                 ),
                 child: Text(
                   'Total kunjungan poli anak RS Amanah Sehat pada bulan ${record.monthName} ${record.year} mencapai $total pasien, didominasi oleh pasien kontrol rutin (${((returning / total) * 100).round()}%) dan pasien baru (${((newPatients / total) * 100).round()}%).',
@@ -493,11 +491,13 @@ class _AmanahClinicAnalyticsSectionState
                 ),
               ),
               const SizedBox(width: 8),
-              AmanahButton.secondary(
+              AmanahButton.text(
                 text: 'Rincian',
+                trailingIcon: Icons.chevron_right_rounded,
                 size: AmanahButtonSize.small,
-                customHeight: 30,
-                borderRadius: BorderRadius.circular(999),
+                customForegroundColor: dark
+                    ? AmanahColorTokens.tabActiveDark
+                    : AmanahColorTokens.brand,
                 onPressed: () {
                   if (widget.onViewDetails != null) {
                     widget.onViewDetails?.call();
@@ -518,12 +518,8 @@ class _AmanahClinicAnalyticsSectionState
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(28),
             color: AmanahThemeTokens.surface(context),
-            border: Border.all(
-              color: AmanahThemeTokens.outline(context),
-            ),
-            boxShadow: <BoxShadow>[
-              AmanahElevation.soft(dark: dark),
-            ],
+            border: Border.all(color: AmanahThemeTokens.outline(context)),
+            boxShadow: <BoxShadow>[AmanahElevation.soft(dark: dark)],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -751,7 +747,9 @@ class _AmanahClinicAnalyticsSectionState
                                       fontFamily: 'PlusJakartaSans',
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: AmanahThemeTokens.textSecondary(context),
+                                      color: AmanahThemeTokens.textSecondary(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -810,7 +808,9 @@ class _AmanahClinicAnalyticsSectionState
                                       fontFamily: 'PlusJakartaSans',
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: AmanahThemeTokens.textSecondary(context),
+                                      color: AmanahThemeTokens.textSecondary(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                 ),

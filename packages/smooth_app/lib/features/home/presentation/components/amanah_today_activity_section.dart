@@ -3,6 +3,7 @@ import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_status_badge.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_watermark_path.dart';
 import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
 /// Organism: TodayActivitySection matching TodayActivitySection.tsx (.web)
@@ -46,12 +47,13 @@ class AmanahTodayActivitySection extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              AmanahButton.secondary(
+              AmanahButton.text(
                 text: 'Detail',
                 trailingIcon: Icons.chevron_right_rounded,
                 size: AmanahButtonSize.small,
-                customHeight: 30,
-                borderRadius: BorderRadius.circular(999),
+                customForegroundColor: AmanahThemeTokens.isDark(context)
+                    ? AmanahColorTokens.tabActiveDark
+                    : AmanahColorTokens.brand,
                 onPressed: onDetailTap,
               ),
             ],
@@ -104,10 +106,14 @@ class AmanahActivityCard extends StatelessWidget {
     final bool isBlue = item.icon == AmanahActivityIcon.users;
 
     final Color iconBg = dark
-        ? AmanahThemeTokens.surfaceSecondary(context)
-        : AmanahColorTokens.brandSurface;
+        ? (isBlue
+              ? const Color(0xB3082F49) // bg-blue-950/70 from .web
+              : const Color(0xB31E1B4B)) // bg-indigo-950/70 from .web
+        : (isBlue ? AmanahColorTokens.brandSurface : const Color(0xFFF0F9FF));
 
-    const Color iconColor = AmanahColorTokens.brand;
+    final Color iconColor = dark
+        ? (isBlue ? const Color(0xFF22D3EE) : const Color(0xFF38BDF8))
+        : (isBlue ? AmanahColorTokens.brand : const Color(0xFF0284C7));
 
     return Material(
       color: Colors.transparent,
@@ -123,48 +129,19 @@ class AmanahActivityCard extends StatelessWidget {
               color: AmanahThemeTokens.outline(context),
               width: 1.0,
             ),
-            boxShadow: <BoxShadow>[
-              AmanahElevation.soft(dark: dark),
-            ],
+            boxShadow: <BoxShadow>[AmanahElevation.soft(dark: dark)],
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(24),
             child: Stack(
               children: <Widget>[
-                // Corner Ambient Gradient Glow (Matching web -top-6 / -bottom-6)
-                Positioned(
-                  right: -24,
-                  top: isBlue ? -24 : null,
-                  bottom: !isBlue ? -24 : null,
-                  child: Container(
-                    width: 112,
-                    height: 112,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: isBlue
-                            ? <Color>[
-                                const Color(
-                                  0xFF0D66E9,
-                                ).withValues(alpha: dark ? 0.30 : 0.20),
-                                const Color(
-                                  0xFF3B82F6,
-                                ).withValues(alpha: dark ? 0.15 : 0.10),
-                                const Color(0x003B82F6),
-                              ]
-                            : <Color>[
-                                const Color(
-                                  0xFF0D66E9,
-                                ).withValues(alpha: dark ? 0.28 : 0.20),
-                                const Color(
-                                  0xFF2563EB,
-                                ).withValues(alpha: dark ? 0.20 : 0.15),
-                                const Color(0x002563EB),
-                              ],
-                        stops: const <double>[0.0, 0.55, 1.0],
-                      ),
-                    ),
-                  ),
+                // Queue-card pixel texture masked to the old ambient corner.
+                AmanahPixelTexture(
+                  isDark: dark,
+                  opacity: dark ? 0.58 : 0.46,
+                  maskType: isBlue
+                      ? AmanahPixelMaskType.topRight
+                      : AmanahPixelMaskType.bottomRight,
                 ),
 
                 // Foreground Content Hierarchy
@@ -238,7 +215,9 @@ class AmanahActivityCard extends StatelessWidget {
                                   fontFamily: 'PlusJakartaSans',
                                   fontSize: 11.0,
                                   fontWeight: FontWeight.w500,
-                                  color: AmanahThemeTokens.textTertiary(context),
+                                  color: AmanahThemeTokens.textTertiary(
+                                    context,
+                                  ),
                                 ),
                               ),
                             ],

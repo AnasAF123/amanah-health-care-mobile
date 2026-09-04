@@ -155,7 +155,8 @@ void main() {
       expect(find.text('Nomor STR'), findsNothing);
       expect(find.text('Nomor KKI'), findsNothing);
       expect(find.text('Status STR/SIP'), findsNothing);
-      expect(find.text('Penugasan dan fasilitas kesehatan'), findsOneWidget);
+      expect(find.text('NIK'), findsNothing);
+      expect(find.text('Penugasan dan fasilitas kesehatan'), findsNothing);
 
       // Pop back
       await tester.tap(find.bySemanticsLabel('Kembali'));
@@ -204,7 +205,7 @@ void main() {
 
       expect(find.byType(AmanahDataStorageSettingsScreen), findsOneWidget);
       expect(find.text('Ruang penyimpanan'), findsOneWidget);
-      expect(find.text('Sinkronisasi data'), findsOneWidget);
+      expect(find.text('Sinkronisasi data'), findsNothing);
       expect(find.text('Tindakan penyimpanan'), findsOneWidget);
 
       // Pop back
@@ -229,7 +230,7 @@ void main() {
         expect(find.byType(AmanahItSupportSettingsScreen), findsOneWidget);
         expect(find.text('Laporan saya'), findsOneWidget);
         expect(find.text('Pertanyaan sering diajukan'), findsOneWidget);
-        expect(find.text('Kontak helpdesk IT'), findsOneWidget);
+        expect(find.text('Kontak helpdesk IT'), findsNothing);
 
         // Open FAQ Detail
         await tester.tap(

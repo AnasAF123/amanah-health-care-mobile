@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_dock_hollow_glow.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_queue_dock_screen.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
 void main() {
   Widget createQueueDockScreen({Brightness brightness = Brightness.light}) {
@@ -62,7 +63,7 @@ void main() {
       final Scaffold scaffold = tester.widget<Scaffold>(
         find.byType(Scaffold).first,
       );
-      expect(scaffold.backgroundColor, const Color(0xFF060B18));
+      expect(scaffold.backgroundColor, AmanahColorTokens.canvasDark);
 
       // Verify custom painter is dark
       final CustomPaint dockPainter = tester.widget<CustomPaint>(

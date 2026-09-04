@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
-import 'package:smooth_app/features/home/presentation/components/amanah_medical_3d_icons.dart';
 import 'package:smooth_app/features/home/presentation/theme/amanah_carousel_tokens.dart';
 
 /// Clinic Promotional Slide Model matching ClinicSlide in MasterCarouselSection.tsx (.web)
@@ -16,6 +14,7 @@ class AmanahClinicSlide {
     required this.ctaText,
     required this.ctaIcon,
     required this.iconType,
+    required this.imagePath,
   });
 
   final String id;
@@ -25,6 +24,7 @@ class AmanahClinicSlide {
   final String ctaText;
   final IconData ctaIcon;
   final String iconType;
+  final String imagePath;
 }
 
 const List<AmanahClinicSlide> kClinicSlides = <AmanahClinicSlide>[
@@ -37,6 +37,7 @@ const List<AmanahClinicSlide> kClinicSlides = <AmanahClinicSlide>[
     ctaText: 'Jadwalkan',
     ctaIcon: Icons.auto_awesome_rounded,
     iconType: 'briefcase',
+    imagePath: 'assets/amanah/images/carousel/konsultasi-anak.jpg',
   ),
   AmanahClinicSlide(
     id: 'slide-2',
@@ -47,26 +48,29 @@ const List<AmanahClinicSlide> kClinicSlides = <AmanahClinicSlide>[
     ctaText: 'Lihat Paket',
     ctaIcon: Icons.verified_user_rounded,
     iconType: 'syringe',
+    imagePath: 'assets/amanah/images/carousel/imunasi-anak.jpg',
   ),
   AmanahClinicSlide(
     id: 'slide-3',
-    eyebrow: 'Tumbuh Kembang',
-    title: 'Skrining Tumbuh Kembang',
+    eyebrow: 'Layanan USG',
+    title: 'Pemeriksaan USG Spesialis',
     description:
-        'Evaluasi berkala nutrisi dan motorik buah hati bersama tenaga ahli.',
+        'Layanan ultrasonografi diagnostik akurat dengan dokter spesialis terpadu.',
     ctaText: 'Reservasi',
     ctaIcon: Icons.event_available_rounded,
     iconType: 'dna',
+    imagePath: 'assets/amanah/images/carousel/usg.jpg',
   ),
   AmanahClinicSlide(
     id: 'slide-4',
-    eyebrow: 'Layanan 24 Jam',
-    title: 'Instalasi Gawat Darurat',
+    eyebrow: 'Ibu & Anak',
+    title: 'Persalinan & Rawat Inap',
     description:
-        'Kesiapan dokter jaga dan fasilitas darurat anak responsif 24 jam.',
-    ctaText: 'Hubungi IGD',
-    ctaIcon: Icons.phone_in_talk_rounded,
+        'Fasilitas persalinan terpadu dan rawat inap ibu & buah hati siaga 24 jam.',
+    ctaText: 'Lihat Fasilitas',
+    ctaIcon: Icons.favorite_rounded,
     iconType: 'shield',
+    imagePath: 'assets/amanah/images/carousel/persalinan-ibu-anak.jpg',
   ),
 ];
 
@@ -644,161 +648,197 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        boxShadow: AmanahCarouselTokens.cardShadow,
+      decoration: BoxDecoration(
+        boxShadow: widget.isDark
+            ? AmanahCarouselTokens.cardShadowDark
+            : AmanahCarouselTokens.cardShadow,
       ),
       child: ClipPath(
         clipper: const AmanahCarouselInwardNotchClipper(),
-        child: Stack(
-          children: <Widget>[
-            // Layer 1: Solid/Gradient Card Background
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: widget.isDark
-                      ? const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: <Color>[
-                            Color(0xFF0F1422),
-                            Color(0xFF131B2E),
-                            Color(0xFF16233D),
-                          ],
-                        )
-                      : AmanahCarouselTokens.cardBgGradient,
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final double cardWidth = constraints.maxWidth;
+
+            return Stack(
+              children: <Widget>[
+                // Layer 1: Solid Base Card Compartment (Clean White in light mode, Slate-900 in dark mode)
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: widget.isDark
+                          ? const Color(0xFF0F172A)
+                          : Colors.white,
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
-            // Layer 2: Subtle Organic Ribbon Waves (0.09 Opacity)
-            Positioned.fill(
-              child: CustomPaint(
-                painter: _OrganicRibbonWavesPainter(isDark: widget.isDark),
-              ),
-            ),
-
-            // Layer 3: Heroic 3D SVG Medical Icon - Rotated & Cropped in Bottom-Right Corner
-            Positioned(
-              right: -8,
-              bottom: -12,
-              child: Transform.rotate(
-                angle: -12 * math.pi / 180,
-                child: AmanahMedical3DIcon(
-                  name: widget.slide.iconType,
-                  size: 130,
-                  isDark: widget.isDark,
-                ),
-              ),
-            ),
-
-            // Layer 4: Foreground Content Hierarchy with Smooth Slide-Down Stagger
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  // Top Left: Title and Description with Morph Animation
-                  SizedBox(
-                    width: MediaQuery.sizeOf(context).width * 0.54,
-                    child: AnimatedBuilder(
-                      animation: _animController,
-                      builder: (BuildContext context, Widget? child) {
-                        final double tSlide = widget.isActive
-                            ? _titleSlideAnim.value
-                            : 0.0;
-                        final double tOpacity = widget.isActive
-                            ? _titleOpacityAnim.value
-                            : (widget.isSideCard ? 0.70 : 1.0);
-
-                        final double dSlide = widget.isActive
-                            ? _descSlideAnim.value
-                            : 0.0;
-                        final double dOpacity = widget.isActive
-                            ? _descOpacityAnim.value
-                            : (widget.isSideCard ? 0.65 : 1.0);
-
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Transform.translate(
-                              offset: Offset(0, tSlide),
-                              child: Opacity(
-                                opacity: tOpacity.clamp(0.0, 1.0),
-                                child: Text(
-                                  widget.slide.title,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 15.5,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -0.2,
-                                    height: 1.15,
-                                    color: widget.isDark
-                                        ? Colors.white
-                                        : AmanahCarouselTokens.titleColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Transform.translate(
-                              offset: Offset(0, dSlide),
-                              child: Opacity(
-                                opacity: dOpacity.clamp(0.0, 1.0),
-                                child: Text(
-                                  widget.slide.description,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    fontSize: 11.0,
-                                    fontWeight: FontWeight.w500,
-                                    height: 1.35,
-                                    color: widget.isDark
-                                        ? const Color(0xFFCBD5E1)
-                                        : AmanahCarouselTokens.descriptionColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
+                // Layer 2: Photographic Artwork with Wide Feathered Masking Blend
+                Positioned.fill(
+                  child: ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return const LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        stops: <double>[0.0, 0.26, 0.42, 0.58, 0.74, 0.88, 1.0],
+                        colors: <Color>[
+                          Colors.transparent,
+                          Colors.transparent,
+                          Color(0x24FFFFFF), // ~14% opacity
+                          Color(0x66FFFFFF), // ~40% opacity
+                          Color(0xB3FFFFFF), // ~70% opacity
+                          Color(0xF0FFFFFF), // ~94% opacity
+                          Colors.white,      // 100% full opacity
+                        ],
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstIn,
+                    child: Image.asset(
+                      widget.slide.imagePath,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.centerRight,
+                      errorBuilder: (
+                        BuildContext context,
+                        Object error,
+                        StackTrace? stackTrace,
+                      ) {
+                        return const SizedBox.shrink();
                       },
                     ),
                   ),
+                ),
 
-                  // Bottom Row: Theme-Respecting Crisp Blue Action Button (.btn-crisp-blue)
-                  AmanahCrispActionButton(
-                    text: widget.slide.ctaText,
-                    icon: widget.slide.ctaIcon,
-                    isDark: widget.isDark,
-                    onTap: widget.onActionClick,
+                // Layer 3: Dark theme ambient integration (seamless blend into slate-900)
+                if (widget.isDark)
+                  const Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          stops: <double>[0.0, 0.35, 0.75, 1.0],
+                          colors: <Color>[
+                            Color(0xFF0F172A),
+                            Color(0xBF0F172A),
+                            Color(0x330F172A),
+                            Color(0x000F172A),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ],
-              ),
-            ),
 
-            // Layer 5: Inward Notched Rim Stroke Overlay
-            Positioned.fill(
-              child: CustomPaint(
-                painter: _InwardNotchRimPainter(isDark: widget.isDark),
-              ),
-            ),
+                // Layer 4: Foreground Content Hierarchy (Left White Compartment)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      // Top Left: Title and Description with Morph Animation
+                      SizedBox(
+                        width: cardWidth * 0.49,
+                        child: AnimatedBuilder(
+                          animation: _animController,
+                          builder: (BuildContext context, Widget? child) {
+                            final double tSlide = widget.isActive
+                                ? _titleSlideAnim.value
+                                : 0.0;
+                            final double tOpacity = widget.isActive
+                                ? _titleOpacityAnim.value
+                                : (widget.isSideCard ? 0.70 : 1.0);
 
-            // Layer 6: Frosted Soft Depth Shade on Side Background Cards (Hardware-Accelerated)
-            if (widget.isSideCard)
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: widget.isDark
-                        ? const Color(0x33000000)
-                        : const Color(0x1AFFFFFF),
+                            final double dSlide = widget.isActive
+                                ? _descSlideAnim.value
+                                : 0.0;
+                            final double dOpacity = widget.isActive
+                                ? _descOpacityAnim.value
+                                : (widget.isSideCard ? 0.65 : 1.0);
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Transform.translate(
+                                  offset: Offset(0, tSlide),
+                                  child: Opacity(
+                                    opacity: tOpacity.clamp(0.0, 1.0),
+                                    child: Text(
+                                      widget.slide.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontFamily: 'PlusJakartaSans',
+                                        fontSize: 15.0,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: -0.2,
+                                        height: 1.15,
+                                        color: widget.isDark
+                                            ? Colors.white
+                                            : AmanahCarouselTokens.titleColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Transform.translate(
+                                  offset: Offset(0, dSlide),
+                                  child: Opacity(
+                                    opacity: dOpacity.clamp(0.0, 1.0),
+                                    child: Text(
+                                      widget.slide.description,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontFamily: 'PlusJakartaSans',
+                                        fontSize: 11.0,
+                                        fontWeight: FontWeight.w500,
+                                        height: 1.35,
+                                        color: widget.isDark
+                                            ? AmanahCarouselTokens
+                                                .descriptionDarkColor
+                                            : AmanahCarouselTokens
+                                                .descriptionColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+
+                      // Bottom Row: Theme-Respecting Crisp Blue Action Button (.btn-crisp-blue)
+                      AmanahCrispActionButton(
+                        text: widget.slide.ctaText,
+                        icon: widget.slide.ctaIcon,
+                        isDark: widget.isDark,
+                        onTap: widget.onActionClick,
+                      ),
+                    ],
                   ),
                 ),
-              ),
-          ],
+
+                // Layer 5: Inward Notched Rim Stroke Overlay
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: _InwardNotchRimPainter(isDark: widget.isDark),
+                  ),
+                ),
+
+                // Layer 6: Frosted Soft Depth Shade on Side Background Cards (Hardware-Accelerated)
+                if (widget.isSideCard)
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: widget.isDark
+                            ? const Color(0x33000000)
+                            : const Color(0x1AFFFFFF),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -872,23 +912,22 @@ class AmanahCarouselNotchedIndicator extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isActive
                     ? (isDark
-                          ? const Color(0xFF3B82F6)
+                          ? AmanahCarouselTokens.indicatorActiveDarkColor
                           : AmanahCarouselTokens.indicatorActiveColor)
                     : (isDark
-                          ? const Color(0xFF475569)
+                          ? AmanahCarouselTokens.indicatorInactiveDarkColor
                           : AmanahCarouselTokens.indicatorInactiveColor),
                 borderRadius: BorderRadius.circular(999),
                 boxShadow: isActive
                     ? <BoxShadow>[
                         BoxShadow(
-                          color:
-                              (isDark
-                                      ? const Color(0xFF3B82F6)
-                                      : AmanahCarouselTokens
-                                            .indicatorActiveColor)
-                                  .withValues(alpha: 0.35),
-                          blurRadius: 4,
-                          offset: const Offset(0, 1),
+                          color: (isDark
+                                  ? const Color(0x6638BDF8)
+                                  : AmanahCarouselTokens
+                                        .indicatorActiveColor
+                                        .withValues(alpha: 0.35)),
+                          blurRadius: isDark ? 8 : 4,
+                          offset: isDark ? Offset.zero : const Offset(0, 1),
                         ),
                       ]
                     : null,
@@ -927,17 +966,17 @@ class AmanahCarouselNavButton extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isDark
-                ? const Color(0xD90F1422)
+                ? AmanahCarouselTokens.navBtnDarkBg
                 : AmanahCarouselTokens.navBtnBg,
             border: Border.all(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.20)
+                  ? AmanahCarouselTokens.navBtnDarkBorder
                   : AmanahCarouselTokens.navBtnBorder,
               width: 1.0,
             ),
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.08),
+                color: Colors.black.withValues(alpha: isDark ? 0.50 : 0.08),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
@@ -948,7 +987,7 @@ class AmanahCarouselNavButton extends StatelessWidget {
               isLeft ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
               size: 18,
               color: isDark
-                  ? Colors.white
+                  ? AmanahCarouselTokens.navBtnDarkIconColor
                   : AmanahCarouselTokens.navBtnIconColor,
             ),
           ),
@@ -1030,7 +1069,7 @@ class _InwardNotchRimPainter extends CustomPainter {
 
     final Paint strokePaint = Paint()
       ..color = isDark
-          ? Colors.white.withValues(alpha: 0.15)
+          ? AmanahCarouselTokens.rimStrokeDarkColor
           : AmanahCarouselTokens.rimStrokeColor
       ..strokeWidth = AmanahCarouselTokens.rimStrokeWidth
       ..style = PaintingStyle.stroke;
@@ -1043,96 +1082,4 @@ class _InwardNotchRimPainter extends CustomPainter {
       oldDelegate.isDark != isDark;
 }
 
-/// Custom Painter for Organic Ribbon Waves
-class _OrganicRibbonWavesPainter extends CustomPainter {
-  const _OrganicRibbonWavesPainter({required this.isDark});
 
-  final bool isDark;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Rect rect = Offset.zero & size;
-
-    final Paint ribbonPaint1 = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: isDark
-            ? <Color>[
-                const Color(0xFF3B82F6).withValues(alpha: 0.15),
-                const Color(0xFF2563EB).withValues(alpha: 0.10),
-                const Color(0xFF1D4ED8).withValues(alpha: 0.08),
-              ]
-            : <Color>[
-                Colors.white.withValues(alpha: 0.09),
-                const Color(0xFF0D66E9).withValues(alpha: 0.08),
-                const Color(0xFF1D58AC).withValues(alpha: 0.06),
-              ],
-      ).createShader(rect)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 28
-      ..strokeCap = StrokeCap.round;
-
-    final Path path1 = Path()
-      ..moveTo(-20, size.height * 0.33)
-      ..cubicTo(
-        size.width * 0.20,
-        size.height * 0.77,
-        size.width * 0.45,
-        -size.height * 0.11,
-        size.width * 0.75,
-        size.height * 0.50,
-      )
-      ..cubicTo(
-        size.width * 0.90,
-        size.height * 0.77,
-        size.width * 1.05,
-        size.height * 0.38,
-        size.width * 1.10,
-        size.height * 0.27,
-      );
-    canvas.drawPath(path1, ribbonPaint1);
-
-    final Paint ribbonPaint2 = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: isDark
-            ? <Color>[
-                const Color(0xFF3B82F6).withValues(alpha: 0.12),
-                const Color(0xFF2563EB).withValues(alpha: 0.07),
-              ]
-            : <Color>[
-                Colors.white.withValues(alpha: 0.08),
-                const Color(0xFF0D66E9).withValues(alpha: 0.06),
-              ],
-      ).createShader(rect)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 14
-      ..strokeCap = StrokeCap.round;
-
-    final Path path2 = Path()
-      ..moveTo(-10, size.height * 0.72)
-      ..cubicTo(
-        size.width * 0.30,
-        size.height * 0.22,
-        size.width * 0.55,
-        size.height * 1.00,
-        size.width * 0.85,
-        size.height * 0.44,
-      )
-      ..cubicTo(
-        size.width * 0.97,
-        size.height * 0.22,
-        size.width * 1.07,
-        size.height * 0.55,
-        size.width * 1.12,
-        size.height * 0.61,
-      );
-    canvas.drawPath(path2, ribbonPaint2);
-  }
-
-  @override
-  bool shouldRepaint(covariant _OrganicRibbonWavesPainter oldDelegate) =>
-      oldDelegate.isDark != isDark;
-}

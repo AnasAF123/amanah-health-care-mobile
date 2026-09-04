@@ -135,10 +135,6 @@ class _AmanahAccountIdentitySettingsScreenState
                           value: _email,
                           onEdit: _editEmail,
                         ),
-                        const AmanahSettingInfoRow(
-                          label: 'NIK',
-                          value: '3171015508920003',
-                        ),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -154,26 +150,6 @@ class _AmanahAccountIdentitySettingsScreenState
                         AmanahSettingInfoRow(
                           label: 'Nomor NIB',
                           value: '9120001234567',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    // 3. Penugasan dan fasilitas kesehatan
-                    const AmanahSettingSection(
-                      title: 'Penugasan dan fasilitas kesehatan',
-                      children: <Widget>[
-                        AmanahSettingInfoRow(
-                          label: 'Fasilitas kesehatan',
-                          value: 'RS Amanah Sehat',
-                        ),
-                        AmanahSettingInfoRow(
-                          label: 'Departemen',
-                          value: 'Departemen ilmu kesehatan anak',
-                        ),
-                        AmanahSettingInfoRow(
-                          label: 'Status kepegawaian',
-                          value: 'Dokter spesialis tetap',
                         ),
                       ],
                     ),

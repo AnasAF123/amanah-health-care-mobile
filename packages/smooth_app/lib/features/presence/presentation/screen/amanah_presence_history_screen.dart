@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/features/presence/data/amanah_presence_store.dart';
 import 'package:smooth_app/features/presence/domain/amanah_presence_model.dart';
 import 'package:smooth_app/features/presence/presentation/components/amanah_presence_drawers.dart';
@@ -124,7 +125,6 @@ class _AmanahPresenceHistoryScreenState
             AmanahScreenHeader(
               title: 'Riwayat Presensi',
               onBack: () => Navigator.of(context).pop(),
-              showDivider: true,
             ),
 
             // 2. Main Content Viewport
@@ -206,7 +206,9 @@ class _AmanahPresenceHistoryScreenState
                       decoration: BoxDecoration(
                         color: _hasActiveFilters
                             ? (dark
-                                  ? const Color(0x332563EB)
+                                  ? AmanahColorTokens.tabActiveDark.withValues(
+                                      alpha: 0.16,
+                                    )
                                   : const Color(0xFFEFF6FF))
                             : (dark
                                   ? Colors.white.withValues(alpha: 0.05)
@@ -214,7 +216,10 @@ class _AmanahPresenceHistoryScreenState
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _hasActiveFilters
-                              ? const Color(0xFF2563EB)
+                              ? (dark
+                                    ? AmanahColorTokens.tabActiveDark
+                                          .withValues(alpha: 0.50)
+                                    : const Color(0xFF2563EB))
                               : (dark
                                     ? Colors.white.withValues(alpha: 0.10)
                                     : const Color(0xFFE2E8F0)),
@@ -227,7 +232,9 @@ class _AmanahPresenceHistoryScreenState
                             Icons.tune_rounded,
                             size: 16,
                             color: _hasActiveFilters
-                                ? const Color(0xFF1D4ED8)
+                                ? (dark
+                                      ? AmanahColorTokens.tabActiveDark
+                                      : const Color(0xFF1D4ED8))
                                 : subtextColor,
                           ),
                           if (_hasActiveFilters)
@@ -237,8 +244,10 @@ class _AmanahPresenceHistoryScreenState
                               child: Container(
                                 width: 6,
                                 height: 6,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF2563EB),
+                                decoration: BoxDecoration(
+                                  color: dark
+                                      ? AmanahColorTokens.tabActiveDark
+                                      : const Color(0xFF2563EB),
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -348,15 +357,17 @@ class _AmanahPresenceHistoryScreenState
                   ),
                   InkWell(
                     onTap: _resetFilters,
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: Text(
                         'Reset',
                         style: TextStyle(
                           fontFamily: 'PlusJakartaSans',
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF2563EB),
+                          color: dark
+                              ? AmanahColorTokens.tabActiveDark
+                              : AmanahColorTokens.brandAccent,
                           decoration: TextDecoration.underline,
                         ),
                       ),
@@ -529,9 +540,14 @@ class _AmanahPresenceHistoryScreenState
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: dark
-            ? Colors.white.withValues(alpha: 0.10)
+            ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.16)
             : const Color(0xFFE2E8F0),
         borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: dark
+              ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.34)
+              : const Color(0xFFE2E8F0),
+        ),
       ),
       child: Text(
         label,
@@ -539,7 +555,9 @@ class _AmanahPresenceHistoryScreenState
           fontFamily: 'PlusJakartaSans',
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: dark ? Colors.white : const Color(0xFF0F172A),
+          color: dark
+              ? AmanahColorTokens.tabActiveDark
+              : const Color(0xFF0F172A),
         ),
       ),
     );

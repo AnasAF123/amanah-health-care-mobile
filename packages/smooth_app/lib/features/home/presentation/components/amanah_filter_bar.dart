@@ -75,10 +75,12 @@ class _AmanahFilterChip<T> extends StatelessWidget {
     final Color badgeForegroundColor;
 
     if (selected) {
-      backgroundColor = AmanahColorTokens.brand;
-      foregroundColor = Colors.white;
+      backgroundColor = dark
+          ? AmanahColorTokens.tabActiveDark
+          : AmanahColorTokens.brand;
+      foregroundColor = dark ? AmanahColorTokens.canvasDark : Colors.white;
       badgeBackgroundColor = Colors.white.withValues(alpha: 0.24);
-      badgeForegroundColor = Colors.white;
+      badgeForegroundColor = foregroundColor;
     } else {
       backgroundColor = dark
           ? Colors.white.withValues(alpha: 0.05)
@@ -113,15 +115,6 @@ class _AmanahFilterChip<T> extends StatelessWidget {
             decoration: BoxDecoration(
               color: backgroundColor,
               borderRadius: BorderRadius.circular(AmanahRadius.pill),
-              boxShadow: selected
-                  ? <BoxShadow>[
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

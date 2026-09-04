@@ -332,7 +332,7 @@ void main() {
     );
 
     testWidgets(
-      'Quick access buttons use active color matching App Bar when active',
+      'Quick access buttons render cropped PNG assets and dim inactive actions',
       (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
@@ -359,23 +359,101 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // Check active action icon color in dark mode matches App Bar active color (tabActiveDark / 0xFF60A5FA)
-        final Icon activeIcon = tester.widget<Icon>(
+        final Image activeImage = tester.widget<Image>(
           find.descendant(
             of: find.widgetWithText(AmanahQuickActionButton, 'Presensi'),
-            matching: find.byType(Icon),
+            matching: find.byType(Image),
           ),
         );
-        expect(activeIcon.color, const Color(0xFF60A5FA));
+        expect(
+          (activeImage.image as AssetImage).assetName,
+          'assets/amanah/images/quick_access/quick-access-history.png',
+        );
 
-        // Check inactive action icon color in dark mode matches inactive tab color (tabInactiveDark / 0xFF737373)
-        final Icon inactiveIcon = tester.widget<Icon>(
+        final Opacity activeOpacity = tester.widget<Opacity>(
+          find.ancestor(
+            of: find.descendant(
+              of: find.widgetWithText(AmanahQuickActionButton, 'Presensi'),
+              matching: find.byType(Image),
+            ),
+            matching: find.byType(Opacity),
+          ),
+        );
+        expect(activeOpacity.opacity, 1.0);
+
+        final Image inactiveImage = tester.widget<Image>(
           find.descendant(
             of: find.widgetWithText(AmanahQuickActionButton, 'Jadwal'),
-            matching: find.byType(Icon),
+            matching: find.byType(Image),
           ),
         );
-        expect(inactiveIcon.color, const Color(0xFF737373));
+        expect(
+          (inactiveImage.image as AssetImage).assetName,
+          'assets/amanah/images/quick_access/quick-access-schedule.png',
+        );
+
+        final Opacity inactiveOpacity = tester.widget<Opacity>(
+          find.ancestor(
+            of: find.descendant(
+              of: find.widgetWithText(AmanahQuickActionButton, 'Jadwal'),
+              matching: find.byType(Image),
+            ),
+            matching: find.byType(Opacity),
+          ),
+        );
+        expect(inactiveOpacity.opacity, 0.42);
+      },
+    );
+
+    testWidgets(
+      'Quick access buttons render light cropped PNG assets in light mode',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData.light(),
+            home: const Scaffold(
+              body: AmanahQuickAccessSection(
+                actions: <AmanahQuickAction>[
+                  AmanahQuickAction(
+                    id: 'act-1',
+                    label: 'Presensi',
+                    icon: AmanahQuickActionIcon.history,
+                  ),
+                  AmanahQuickAction(
+                    id: 'act-2',
+                    label: 'Jadwal',
+                    icon: AmanahQuickActionIcon.schedule,
+                  ),
+                ],
+                activeActionId: 'act-1',
+                onActionTap: _dummyQuickActionTap,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final Image activeImage = tester.widget<Image>(
+          find.descendant(
+            of: find.widgetWithText(AmanahQuickActionButton, 'Presensi'),
+            matching: find.byType(Image),
+          ),
+        );
+        expect(
+          (activeImage.image as AssetImage).assetName,
+          'assets/amanah/images/quick_access/quick-access-history-light.png',
+        );
+
+        final Image inactiveImage = tester.widget<Image>(
+          find.descendant(
+            of: find.widgetWithText(AmanahQuickActionButton, 'Jadwal'),
+            matching: find.byType(Image),
+          ),
+        );
+        expect(
+          (inactiveImage.image as AssetImage).assetName,
+          'assets/amanah/images/quick_access/quick-access-schedule-light.png',
+        );
       },
     );
   });

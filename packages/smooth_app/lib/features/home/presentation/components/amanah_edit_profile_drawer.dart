@@ -114,19 +114,21 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
         AmanahSpacing.xxl,
       ),
       footer: AmanahActionRow(
-        secondary: AmanahButton.ghost(
-          text: 'Batal',
-          size: AmanahButtonSize.medium,
-          isFullWidth: true,
-          customForegroundColor: subtextColor,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        axis: AmanahActionRowAxis.vertical,
+        spacing: AmanahSpacing.sm,
         primary: AmanahButton.primary(
           text: _isSaved ? 'Tersimpan' : 'Simpan Perubahan',
           leadingIcon: _isSaved ? Icons.check_rounded : null,
           size: AmanahButtonSize.medium,
           isFullWidth: true,
           onPressed: _isSaved ? null : _handleSave,
+        ),
+        secondary: AmanahButton.ghost(
+          text: 'Batal',
+          size: AmanahButtonSize.medium,
+          isFullWidth: true,
+          customForegroundColor: subtextColor,
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: Column(

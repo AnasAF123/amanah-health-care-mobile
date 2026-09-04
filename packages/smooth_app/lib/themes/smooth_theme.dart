@@ -57,12 +57,12 @@ class SmoothTheme {
       canvasColor: themeProvider.currentTheme == THEME_AMOLED
           ? myColorScheme.surface
           : (brightness == Brightness.dark
-              ? const Color(0xFF060B18)
+              ? const Color(0xFF0A0E1A)
               : const Color(0xFFF8FAFF)),
       scaffoldBackgroundColor:
           themeProvider.currentTheme == THEME_DARK ||
               (!lightTheme && themeProvider.currentTheme != THEME_AMOLED)
-          ? const Color(0xFF060B18)
+          ? const Color(0xFF0A0E1A)
           : const Color(0xFFF8FAFF),
       shadowColor: brightness == Brightness.light
           ? Colors.black54

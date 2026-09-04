@@ -11,43 +11,83 @@ import 'package:smooth_app/features/schedule/presentation/components/amanah_queu
 AmanahTone _badgeTone(AmanahBadgeVariant variant, [BuildContext? context]) {
   switch (variant) {
     case AmanahBadgeVariant.success:
-      return AmanahThemeTokens.status(AmanahStatusTone.success, context: context);
+      return AmanahThemeTokens.status(
+        AmanahStatusTone.success,
+        context: context,
+      );
     case AmanahBadgeVariant.primary:
     case AmanahBadgeVariant.live:
       return AmanahThemeTokens.status(AmanahStatusTone.brand, context: context);
     case AmanahBadgeVariant.warning:
-      return AmanahThemeTokens.status(AmanahStatusTone.warning, context: context);
+      return AmanahThemeTokens.status(
+        AmanahStatusTone.warning,
+        context: context,
+      );
     case AmanahBadgeVariant.trend:
-      return AmanahThemeTokens.status(AmanahStatusTone.violet, context: context);
+      return AmanahThemeTokens.status(
+        AmanahStatusTone.violet,
+        context: context,
+      );
   }
 }
 
-class _ProgressiveBackdropBlurLayer extends StatelessWidget {
-  const _ProgressiveBackdropBlurLayer();
+class _ProfileReadabilityMaskLayer extends StatelessWidget {
+  const _ProfileReadabilityMaskLayer({
+    required this.dark,
+    required this.height,
+  });
+
+  final bool dark;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: height,
+      child: IgnorePointer(
         child: ShaderMask(
           blendMode: BlendMode.dstIn,
           shaderCallback: (Rect bounds) {
             return const LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              stops: <double>[0.0, 0.38, 0.68, 1.0],
+              stops: <double>[0.0, 0.22, 0.42, 1.0],
               colors: <Color>[
                 Colors.transparent,
-                Colors.transparent,
-                Color(0x66000000),
+                Color(0x73000000),
+                Colors.black,
                 Colors.black,
               ],
             ).createShader(bounds);
           },
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-            child: const ColoredBox(color: Color(0x01FFFFFF)),
+          child: ClipRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const <double>[0.0, 0.44, 1.0],
+                    colors: dark
+                        ? const <Color>[
+                            Color(0x00060B18),
+                            Color(0xB8060B18),
+                            Color(0xF8060B18),
+                          ]
+                        : const <Color>[
+                            Color(0x00FFFFFF),
+                            Color(0xDBFFFFFF),
+                            Color(0xFAFFFFFF),
+                          ],
+                  ),
+                ),
+                child: const SizedBox.expand(),
+              ),
+            ),
           ),
         ),
       ),
@@ -137,9 +177,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
               color: AmanahThemeTokens.outline(context),
               width: 1,
             ),
-            boxShadow: <BoxShadow>[
-              AmanahElevation.soft(dark: dark),
-            ],
+            boxShadow: <BoxShadow>[AmanahElevation.soft(dark: dark)],
           ),
           clipBehavior: Clip.antiAlias,
           child: Stack(
@@ -175,8 +213,8 @@ class AmanahBookedPatientCard extends StatelessWidget {
                 ),
               ),
 
-              // Layer 2: Real-time GPU Progressive Liquid Glass Backdrop Blur
-              const _ProgressiveBackdropBlurLayer(),
+              // Layer 2: Profile-to-bottom readability blur with a soft top fade
+              _ProfileReadabilityMaskLayer(dark: dark, height: 210),
 
               // Layer 3: Smooth High-Contrast Ambient Gradient (Masking Putih / Obsidian)
               _AmbientCardGradientLayer(dark: dark),
@@ -324,7 +362,9 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    color: AmanahThemeTokens.textPrimary(context),
+                                    color: AmanahThemeTokens.textPrimary(
+                                      context,
+                                    ),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 20,
                                     fontWeight: FontWeight.w900,
@@ -335,7 +375,9 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                 Text(
                                   patient.patientRm,
                                   style: TextStyle(
-                                    color: AmanahThemeTokens.textSecondary(context),
+                                    color: AmanahThemeTokens.textSecondary(
+                                      context,
+                                    ),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w600,
@@ -364,7 +406,9 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    color: AmanahThemeTokens.textPrimary(context),
+                                    color: AmanahThemeTokens.textPrimary(
+                                      context,
+                                    ),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
@@ -376,7 +420,9 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    color: AmanahThemeTokens.textTertiary(context),
+                                    color: AmanahThemeTokens.textTertiary(
+                                      context,
+                                    ),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
@@ -406,13 +452,17 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                     Icon(
                                       Icons.access_time_rounded,
                                       size: 13,
-                                      color: AmanahThemeTokens.textPrimary(context),
+                                      color: AmanahThemeTokens.textPrimary(
+                                        context,
+                                      ),
                                     ),
                                     const SizedBox(width: 3),
                                     Text(
                                       startTime,
                                       style: TextStyle(
-                                        color: AmanahThemeTokens.textPrimary(context),
+                                        color: AmanahThemeTokens.textPrimary(
+                                          context,
+                                        ),
                                         fontFamily: 'PlusJakartaSans',
                                         fontSize: 13,
                                         fontWeight: FontWeight.w800,
@@ -424,7 +474,9 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                 Text(
                                   'Mulai',
                                   style: TextStyle(
-                                    color: AmanahThemeTokens.textTertiary(context),
+                                    color: AmanahThemeTokens.textTertiary(
+                                      context,
+                                    ),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
@@ -454,13 +506,17 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                     Icon(
                                       Icons.schedule_rounded,
                                       size: 13,
-                                      color: AmanahThemeTokens.textPrimary(context),
+                                      color: AmanahThemeTokens.textPrimary(
+                                        context,
+                                      ),
                                     ),
                                     const SizedBox(width: 3),
                                     Text(
                                       endTime,
                                       style: TextStyle(
-                                        color: AmanahThemeTokens.textPrimary(context),
+                                        color: AmanahThemeTokens.textPrimary(
+                                          context,
+                                        ),
                                         fontFamily: 'PlusJakartaSans',
                                         fontSize: 13,
                                         fontWeight: FontWeight.w800,
@@ -472,7 +528,9 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                 Text(
                                   'Selesai',
                                   style: TextStyle(
-                                    color: AmanahThemeTokens.textTertiary(context),
+                                    color: AmanahThemeTokens.textTertiary(
+                                      context,
+                                    ),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
@@ -640,8 +698,8 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                 ),
               ),
 
-              // Layer 2: Real-time GPU Progressive Liquid Glass Backdrop Blur
-              const _ProgressiveBackdropBlurLayer(),
+              // Layer 2: Lower text readability blur with a soft top fade
+              _ProfileReadabilityMaskLayer(dark: dark, height: 220),
 
               // Layer 3: Smooth High-Contrast Ambient Gradient (Masking Putih / Obsidian)
               _AmbientCardGradientLayer(dark: dark),

@@ -16,8 +16,6 @@ class AmanahDataStorageSettingsScreen extends StatefulWidget {
 
 class _AmanahDataStorageSettingsScreenState
     extends State<AmanahDataStorageSettingsScreen> {
-  bool _autoSyncEnabled = true;
-  bool _wifiOnlySync = false;
   bool _cacheCleaned = false;
   String _exportState = 'idle'; // 'idle' | 'exporting' | 'done'
 
@@ -112,37 +110,7 @@ class _AmanahDataStorageSettingsScreenState
                     ),
                     const SizedBox(height: 20),
 
-                    // 2. Sinkronisasi data
-                    AmanahSettingSection(
-                      title: 'Sinkronisasi data',
-                      children: <Widget>[
-                        AmanahSettingToggleRow(
-                          title: 'Sinkronisasi otomatis',
-                          subtitle: 'Perbarui jadwal dan status berkala',
-                          checked: _autoSyncEnabled,
-                          onToggle: () {
-                            setState(
-                              () => _autoSyncEnabled = !_autoSyncEnabled,
-                            );
-                          },
-                        ),
-                        AmanahSettingToggleRow(
-                          title: 'Hanya melalui Wi-Fi',
-                          subtitle: 'Hemat pemakaian kuota data seluler',
-                          checked: _wifiOnlySync,
-                          onToggle: () {
-                            setState(() => _wifiOnlySync = !_wifiOnlySync);
-                          },
-                        ),
-                        const AmanahSettingInfoRow(
-                          label: 'Sinkronisasi terakhir',
-                          value: 'Hari ini, 07:15 WIB',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    // 3. Tindakan penyimpanan
+                    // 2. Tindakan penyimpanan
                     AmanahSettingSection(
                       title: 'Tindakan penyimpanan',
                       children: <Widget>[

@@ -199,7 +199,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                         icon: Icons.add_rounded,
                         semanticsLabel: 'Tambah jadwal praktik',
                         foregroundColor: dark
-                            ? AmanahColorTokens.brandSoft
+                            ? AmanahColorTokens.tabActiveDark
                             : AmanahColorTokens.brand,
                         onPressed: () {
                           AmanahAddEditScheduleDrawer.show(
@@ -287,7 +287,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
               trailingIcon: Icons.chevron_right_rounded,
               size: AmanahButtonSize.small,
               customForegroundColor: dark
-                  ? AmanahColorTokens.brandAccent
+                  ? AmanahColorTokens.tabActiveDark
                   : AmanahColorTokens.brand,
               onPressed: () {
                 AmanahDocScheduleCalendarDrawer.show(

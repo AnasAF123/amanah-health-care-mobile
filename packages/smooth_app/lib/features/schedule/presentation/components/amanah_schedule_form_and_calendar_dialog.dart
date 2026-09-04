@@ -270,21 +270,23 @@ class _AmanahDocScheduleCalendarDrawerState
               Color? dotColor;
 
               if (isSelected) {
-                bgColor = isCuti
-                    ? const Color(0xFFF59E0B)
-                    : (dark
-                          ? const Color(0xFF3B82F6)
+                bgColor = dark
+                    ? AmanahColorTokens.tabActiveDark
+                    : (isCuti
+                          ? const Color(0xFFF59E0B)
                           : const Color(0xFF0A44FF));
-                textColor = (isCuti && dark) ? Colors.black : Colors.white;
+                textColor = dark ? AmanahColorTokens.canvasDark : Colors.white;
               } else if (isToday) {
                 bgColor =
-                    (dark ? const Color(0xFF3B82F6) : const Color(0xFF0A44FF))
+                    (dark
+                            ? AmanahColorTokens.tabActiveDark
+                            : const Color(0xFF0A44FF))
                         .withValues(alpha: 0.15);
                 textColor = dark
-                    ? const Color(0xFF60A5FA)
+                    ? AmanahColorTokens.tabActiveDark
                     : const Color(0xFF0A44FF);
                 dotColor = dark
-                    ? const Color(0xFF60A5FA)
+                    ? AmanahColorTokens.tabActiveDark
                     : const Color(0xFF0A44FF);
               } else if (isPast) {
                 textColor = dark
@@ -344,14 +346,25 @@ class _AmanahDocScheduleCalendarDrawerState
             },
           ),
           const SizedBox(height: 14),
-          const Wrap(
+          Wrap(
             spacing: 12,
             runSpacing: 8,
             children: <Widget>[
-              _CalendarLegendDot(color: Color(0xFF0A44FF), label: 'Hari ini'),
-              _CalendarLegendDot(color: Color(0xFF10B981), label: 'Ada sesi'),
-              _CalendarLegendDot(color: Color(0xFFF59E0B), label: 'Cuti'),
-              _CalendarLegendDot(color: Color(0xFF94A3B8), label: 'Tutup'),
+              _CalendarLegendDot(
+                color: dark
+                    ? AmanahColorTokens.tabActiveDark
+                    : const Color(0xFF0A44FF),
+                label: 'Hari ini',
+              ),
+              const _CalendarLegendDot(
+                color: Color(0xFF10B981),
+                label: 'Ada sesi',
+              ),
+              const _CalendarLegendDot(color: Color(0xFFF59E0B), label: 'Cuti'),
+              const _CalendarLegendDot(
+                color: Color(0xFF94A3B8),
+                label: 'Tutup',
+              ),
             ],
           ),
         ],
@@ -967,6 +980,12 @@ class _AmanahAddEditScheduleDrawerState
                       final Color activeBg = item['activeBg'] as Color;
                       final Color activeText = item['activeText'] as Color;
                       final Color dotColor = item['dotColor'] as Color;
+                      final Color selectedBg = dark
+                          ? AmanahColorTokens.tabActiveDark
+                          : activeBg;
+                      final Color selectedText = dark
+                          ? AmanahColorTokens.canvasDark
+                          : activeText;
 
                       return Expanded(
                         child: InkWell(
@@ -976,12 +995,14 @@ class _AmanahAddEditScheduleDrawerState
                             duration: const Duration(milliseconds: 160),
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             decoration: BoxDecoration(
-                              color: active ? activeBg : Colors.transparent,
+                              color: active ? selectedBg : Colors.transparent,
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: active
                                   ? <BoxShadow>[
                                       BoxShadow(
-                                        color: activeBg.withValues(alpha: 0.25),
+                                        color: selectedBg.withValues(
+                                          alpha: 0.25,
+                                        ),
                                         blurRadius: 6,
                                         offset: const Offset(0, 2),
                                       ),
@@ -993,7 +1014,7 @@ class _AmanahAddEditScheduleDrawerState
                               children: <Widget>[
                                 DecoratedBox(
                                   decoration: BoxDecoration(
-                                    color: active ? Colors.white : dotColor,
+                                    color: active ? selectedText : dotColor,
                                     shape: BoxShape.circle,
                                   ),
                                   child: const SizedBox(width: 6, height: 6),
@@ -1003,7 +1024,7 @@ class _AmanahAddEditScheduleDrawerState
                                   label,
                                   style: TextStyle(
                                     color: active
-                                        ? activeText
+                                        ? selectedText
                                         : (dark
                                               ? const Color(0xFFA1A1AA)
                                               : const Color(0xFF475569)),
@@ -1255,15 +1276,15 @@ class _AmanahAddEditScheduleDrawerState
                   : (dark ? const Color(0xFF52525B) : const Color(0xFFCBD5E1));
               if (isSelected) {
                 bgColor = dark
-                    ? const Color(0xFF3B82F6)
+                    ? AmanahColorTokens.tabActiveDark
                     : const Color(0xFF2563EB);
-                textColor = Colors.white;
+                textColor = dark ? AmanahColorTokens.canvasDark : Colors.white;
               } else if (isToday) {
                 bgColor = dark
-                    ? const Color(0xFF3B82F6).withValues(alpha: 0.15)
+                    ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.15)
                     : const Color(0xFFEFF6FF);
                 textColor = dark
-                    ? const Color(0xFF60A5FA)
+                    ? AmanahColorTokens.tabActiveDark
                     : const Color(0xFF2563EB);
               }
 
@@ -1286,7 +1307,7 @@ class _AmanahAddEditScheduleDrawerState
                             BoxShadow(
                               color:
                                   (dark
-                                          ? const Color(0xFF3B82F6)
+                                          ? AmanahColorTokens.tabActiveDark
                                           : const Color(0xFF2563EB))
                                       .withValues(alpha: 0.24),
                               blurRadius: 12,
@@ -1339,10 +1360,10 @@ class _ScheduleSelectorButton extends StatelessWidget {
               : Colors.white.withValues(alpha: 0.05))
         : (expanded ? const Color(0xFFE2E8F0) : const Color(0xFFF8FAFC));
     final Color iconBackground = dark
-        ? const Color(0xFF172554).withValues(alpha: 0.60)
+        ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.12)
         : const Color(0xFFEFF6FF);
     final Color accent = dark
-        ? const Color(0xFF60A5FA)
+        ? AmanahColorTokens.tabActiveDark
         : const Color(0xFF2563EB);
 
     return InkWell(
@@ -1864,7 +1885,7 @@ class _ScheduleToggleSwitch extends StatelessWidget {
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: active
-            ? (dark ? const Color(0xFF2563EB) : const Color(0xFF0D66E9))
+            ? (dark ? AmanahColorTokens.tabActiveDark : const Color(0xFF0D66E9))
             : (dark
                   ? Colors.white.withValues(alpha: 0.20)
                   : const Color(0xFFE5E5EA)),
@@ -1932,6 +1953,12 @@ class _AmanahScheduleSelectionSheetState
     final List<String> filtered = widget.options
         .where((String option) => option.toLowerCase().contains(query))
         .toList();
+    final Color selectedAccent = dark
+        ? AmanahColorTokens.tabActiveDark
+        : const Color(0xFF2563EB);
+    final Color selectedForeground = dark
+        ? AmanahColorTokens.canvasDark
+        : Colors.white;
 
     return AmanahBottomSheetScaffold(
       title: widget.title,
@@ -2076,9 +2103,7 @@ class _AmanahScheduleSelectionSheetState
                             ),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? (dark
-                                        ? const Color(0xFF2563EB)
-                                        : const Color(0xFF2563EB))
+                                  ? selectedAccent
                                   : isDisabled
                                   ? (dark
                                         ? Colors.white.withValues(alpha: 0.02)
@@ -2089,9 +2114,7 @@ class _AmanahScheduleSelectionSheetState
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: isSelected
-                                    ? (dark
-                                          ? const Color(0xFF2563EB)
-                                          : const Color(0xFF2563EB))
+                                    ? selectedAccent
                                     : (dark
                                           ? Colors.white.withValues(alpha: 0.10)
                                           : const Color(0xFFE2E8F0)),
@@ -2099,11 +2122,9 @@ class _AmanahScheduleSelectionSheetState
                               boxShadow: isSelected
                                   ? <BoxShadow>[
                                       BoxShadow(
-                                        color:
-                                            (dark
-                                                    ? const Color(0xFF2563EB)
-                                                    : const Color(0xFF2563EB))
-                                                .withValues(alpha: 0.25),
+                                        color: selectedAccent.withValues(
+                                          alpha: 0.25,
+                                        ),
                                         blurRadius: 8,
                                         offset: const Offset(0, 3),
                                       ),
@@ -2120,9 +2141,7 @@ class _AmanahScheduleSelectionSheetState
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       color: isSelected
-                                          ? (dark
-                                                ? const Color(0xFF083344)
-                                                : Colors.white)
+                                          ? selectedForeground
                                           : isDisabled
                                           ? (dark
                                                 ? const Color(0xFF52525B)
@@ -2142,9 +2161,7 @@ class _AmanahScheduleSelectionSheetState
                                   Icon(
                                     Icons.check_circle_rounded,
                                     size: 15,
-                                    color: dark
-                                        ? const Color(0xFF083344)
-                                        : Colors.white,
+                                    color: selectedForeground,
                                   ),
                               ],
                             ),

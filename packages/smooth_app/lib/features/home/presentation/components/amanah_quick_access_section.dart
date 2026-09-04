@@ -3,6 +3,22 @@ import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
 import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
+String _quickActionImageAsset(AmanahQuickActionIcon icon, {required bool dark}) {
+  final String suffix = dark ? '' : '-light';
+  return switch (icon) {
+    AmanahQuickActionIcon.history =>
+      'assets/amanah/images/quick_access/quick-access-history$suffix.png',
+    AmanahQuickActionIcon.presence =>
+      'assets/amanah/images/quick_access/quick-access-history$suffix.png',
+    AmanahQuickActionIcon.schedule =>
+      'assets/amanah/images/quick_access/quick-access-schedule$suffix.png',
+    AmanahQuickActionIcon.search =>
+      'assets/amanah/images/quick_access/quick-access-queue$suffix.png',
+    AmanahQuickActionIcon.idCard =>
+      'assets/amanah/images/quick_access/quick-access-id-card$suffix.png',
+  };
+}
+
 class AmanahQuickAccessSection extends StatelessWidget {
   const AmanahQuickAccessSection({
     required this.actions,
@@ -53,18 +69,8 @@ class AmanahQuickActionButton extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    // Vector color matches the active color used in the App Bar
-    final Color activeColor = dark
-        ? AmanahColorTokens.tabActiveDark
-        : AmanahColorTokens.tabActiveLight;
-    final Color inactiveColor = dark
-        ? AmanahColorTokens.tabInactiveDark
-        : AmanahColorTokens.tabInactiveLight;
-    final Color foreground = isActive ? activeColor : inactiveColor;
-
     final Color labelColor = AmanahThemeTokens.textSecondary(context);
-    final Color buttonBg = AmanahThemeTokens.surface(context);
-    final Color buttonBorder = AmanahThemeTokens.outline(context);
+    final String iconAsset = _quickActionImageAsset(action.icon, dark: dark);
 
     return Semantics(
       button: true,
@@ -82,31 +88,18 @@ class AmanahQuickActionButton extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: buttonBg,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: buttonBorder,
-                      ),
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                          color: Colors.black.withValues(
-                            alpha: dark ? 0.36 : 0.06,
-                          ),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                          spreadRadius: -6,
+                  SizedBox(
+                    width: 60,
+                    height: 60,
+                    child: Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Opacity(
+                        opacity: isActive ? 1.0 : 0.42,
+                        child: Image.asset(
+                          iconAsset,
+                          fit: BoxFit.contain,
+                          filterQuality: FilterQuality.high,
                         ),
-                      ],
-                    ),
-                    child: SizedBox(
-                      width: 60,
-                      height: 60,
-                      child: Icon(
-                        amanahQuickActionIconData(action.icon),
-                        color: foreground,
-                        size: 25,
                       ),
                     ),
                   ),

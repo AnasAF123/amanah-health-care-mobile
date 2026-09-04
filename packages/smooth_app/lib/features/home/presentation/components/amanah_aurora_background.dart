@@ -75,6 +75,9 @@ class _AmanahAuroraPainter extends CustomPainter {
                 AmanahColorTokens.auroraBlueDark.withValues(
                   alpha: isSoft ? 0.35 : 0.60,
                 ),
+                AmanahColorTokens.auroraCyanDark.withValues(
+                  alpha: isSoft ? 0.08 : 0.15,
+                ),
                 Colors.transparent,
               ]
             : <Color>[
@@ -86,7 +89,9 @@ class _AmanahAuroraPainter extends CustomPainter {
                 ),
                 Colors.transparent,
               ],
-        stops: const <double>[0.0, 0.45, 1.0],
+        stops: dark
+            ? const <double>[0.0, 0.38, 0.68, 1.0]
+            : const <double>[0.0, 0.45, 1.0],
       ).createShader(fullRect);
     canvas.drawRect(fullRect, baseWashPaint);
 
@@ -162,7 +167,32 @@ class _AmanahAuroraPainter extends CustomPainter {
       ).createShader(blueLobeRect);
     canvas.drawRect(fullRect, bluePaint);
 
-    // 4. Subtle Tertiary Fluid Haze (Center-Mid blend at 50% 40%)
+    // 4. Soft Cyan Accent Radiance Lobe (Integrated softly in dark mode)
+    if (dark) {
+      final Rect cyanLobeRect = Rect.fromCircle(
+        center: Offset(size.width * 0.66, size.height * 0.16),
+        radius: size.width * 0.65,
+      );
+      final Paint cyanPaint = Paint()
+        ..shader = RadialGradient(
+          colors: <Color>[
+            AmanahColorTokens.auroraCyanDark.withValues(
+              alpha: isSoft ? 0.14 : 0.22,
+            ),
+            AmanahColorTokens.auroraCyanDark.withValues(
+              alpha: isSoft ? 0.06 : 0.10,
+            ),
+            AmanahColorTokens.auroraCyanDark.withValues(
+              alpha: isSoft ? 0.01 : 0.03,
+            ),
+            const Color(0x0006B6D4),
+          ],
+          stops: const <double>[0.0, 0.38, 0.72, 1.0],
+        ).createShader(cyanLobeRect);
+      canvas.drawRect(fullRect, cyanPaint);
+    }
+
+    // 5. Subtle Tertiary Fluid Haze (Center-Mid blend at 50% 40%)
     final Rect centerHazeRect = Rect.fromCircle(
       center: Offset(size.width * 0.50, size.height * 0.40),
       radius: size.width * 0.65,

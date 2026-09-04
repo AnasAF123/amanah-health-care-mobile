@@ -61,6 +61,9 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
     final double? fixedHeight = fixedHeightFactor == null
         ? null
         : screenSize.height * fixedHeightFactor!.clamp(0.0, 1.0);
+    final Color sheetBackgroundColor = dark
+        ? AmanahThemeTokens.canvas(context)
+        : AmanahThemeTokens.elevatedSurface(context);
 
     final Widget sheet = Container(
       height: fixedHeight ?? maxHeight,
@@ -69,7 +72,7 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
         minHeight: minHeight ?? 0,
       ),
       decoration: BoxDecoration(
-        color: AmanahThemeTokens.elevatedSurface(context),
+        color: sheetBackgroundColor,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AmanahRadius.sheet),
         ),
@@ -226,12 +229,17 @@ class _AmanahSheetFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool dark = AmanahThemeTokens.isDark(context);
+    final Color footerBackgroundColor = dark
+        ? AmanahThemeTokens.canvas(context)
+        : AmanahThemeTokens.elevatedSurface(context).withValues(alpha: 0.96);
+
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: AmanahThemeTokens.elevatedSurface(context).withValues(alpha: 0.96),
+            color: footerBackgroundColor,
             border: Border(
               top: BorderSide(color: AmanahThemeTokens.outline(context)),
             ),

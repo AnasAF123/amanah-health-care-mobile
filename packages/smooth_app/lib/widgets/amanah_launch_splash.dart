@@ -5,8 +5,8 @@ import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.
 class AmanahLaunchSplash extends StatelessWidget {
   const AmanahLaunchSplash({super.key});
 
-  static const String _logoPath = 'assets/amanah/launch_logo.png';
-  static const double _nativeSplashLogoSize = 288;
+  static const String _emblemPath = 'assets/amanah/launch_emblem.png';
+  static const double _emblemSize = 104;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class AmanahLaunchSplash extends StatelessWidget {
     final Color background =
         isDark ? AmanahColorTokens.canvasDark : AmanahColorTokens.canvasLight;
     final Color foreground =
-        isDark ? Colors.white : AmanahColorTokens.neutral900;
+        isDark ? Colors.white : const Color(0xFF13195C);
     final Color secondary =
         isDark ? AmanahColorTokens.neutral300 : AmanahColorTokens.neutral600;
 
@@ -40,11 +40,28 @@ class AmanahLaunchSplash extends StatelessWidget {
           alignment: Alignment.center,
           children: <Widget>[
             Center(
-              child: Image.asset(
-                _logoPath,
-                width: _nativeSplashLogoSize,
-                height: _nativeSplashLogoSize,
-                fit: BoxFit.contain,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Image.asset(
+                    _emblemPath,
+                    width: _emblemSize,
+                    height: _emblemSize,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Amanah',
+                    style: TextStyle(
+                      fontFamily: 'PlusJakartaSans',
+                      fontSize: 32,
+                      fontWeight: FontWeight.w700,
+                      color: foreground,
+                      letterSpacing: -0.4,
+                      height: 1.15,
+                    ),
+                  ),
+                ],
               ),
             ),
             Positioned.fill(

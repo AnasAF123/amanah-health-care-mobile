@@ -498,7 +498,9 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     final double screenHeight = MediaQuery.sizeOf(context).height;
 
     const Color bgColor = Colors.black;
-    final Color drawerBg = dark ? const Color(0xFF111827) : Colors.white;
+    final Color drawerBg = dark
+        ? AmanahThemeTokens.canvas(context)
+        : Colors.white;
     final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
     final Color subtextColor = dark
         ? const Color(0xFF94A3B8)

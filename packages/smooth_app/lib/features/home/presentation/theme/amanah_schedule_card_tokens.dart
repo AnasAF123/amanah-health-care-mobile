@@ -29,7 +29,7 @@ abstract final class AmanahScheduleCardTokens {
   static const Color titleColorDark = Colors.white;
 
   static const Color dateColorLight = Color(0xFF64748B); // text-[#64748b]
-  static const Color dateColorDark = Color(0xFF94A3B8);
+  static const Color dateColorDark = Color(0xFFCBD5E1); // text-slate-300 from .web
 
   static const Color timeColorLight = Color(0xFF0F172A); // text-slate-900
   static const Color timeColorDark = Colors.white;
@@ -38,19 +38,19 @@ abstract final class AmanahScheduleCardTokens {
   static const Color poliColorDark = Color(0xFFE2E8F0);
 
   static const Color roomColorLight = Color(0xFF64748B); // text-[#64748b]
-  static const Color roomColorDark = Color(0xFF94A3B8);
+  static const Color roomColorDark = Color(0xFFCBD5E1); // text-slate-300 from .web
 
   static const Color bookingPillBgLight = Color(0xFFF1F5F9); // bg-slate-100
-  static const Color bookingPillBgDark = Color(0x26FFFFFF); // bg-white/15
+  static const Color bookingPillBgDark = Color(0x1AFFFFFF); // bg-white/10 from .web
 
   static const Color bookingPillTextLight = Color(0xFF0F172B); // text-[#0f172b]
   static const Color bookingPillTextDark = Colors.white;
 
   static const Color dismissBtnBgLight = Color(0xCCF1F5F9); // bg-slate-100/80
-  static const Color dismissBtnBgDark = Color(0x26FFFFFF); // bg-white/15
+  static const Color dismissBtnBgDark = Color(0x1AFFFFFF); // bg-white/10 from .web
 
   static const Color dismissBtnIconColorLight = Color(0xFF64748B); // text-slate-500
-  static const Color dismissBtnIconColorDark = Color(0xFF94A3B8);
+  static const Color dismissBtnIconColorDark = Color(0xFFCBD5E1);
 
   // --- Gradients ---
   /// Seamless horizontal Liquid Glass Gradient Mask (Light Theme)
@@ -100,7 +100,7 @@ abstract final class AmanahScheduleCardTokens {
     stops: <double>[0.0, 0.35, 1.0],
     colors: <Color>[
       Color(0x1FFFFFFF), // 0%: 0.12 opacity
-      Color(0x0A3B82F6), // 35%: 0.04 opacity blue sheen
+      Color(0x0A38BDF8), // 35%: 0.04 opacity sky-400 sheen from .web
       Color(0x00000000), // 100%: 0.00 opacity
     ],
   );

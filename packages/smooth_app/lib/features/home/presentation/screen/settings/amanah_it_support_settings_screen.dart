@@ -299,27 +299,7 @@ class _AmanahItSupportSettingsScreenState
                     ),
                     const SizedBox(height: 20),
 
-                    // 3. Kontak helpdesk IT
-                    const AmanahSettingSection(
-                      title: 'Kontak helpdesk IT',
-                      children: <Widget>[
-                        AmanahSettingInfoRow(
-                          label: 'Telepon ekstensi internal',
-                          value: 'Ext. 1044 / 1045',
-                        ),
-                        AmanahSettingInfoRow(
-                          label: 'WhatsApp IT support',
-                          value: '+62 811-9876-5432',
-                        ),
-                        AmanahSettingInfoRow(
-                          label: 'Jam layanan siaga',
-                          value: '24 jam (siaga IGD & poliklinik)',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    // 4. Chat callout card
+                    // 3. Chat callout card
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),

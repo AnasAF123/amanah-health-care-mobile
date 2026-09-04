@@ -130,7 +130,7 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                       '$bookedCount',
                       style: TextStyle(
                         color: dark
-                            ? AmanahColorTokens.brandAccent
+                            ? AmanahColorTokens.tabActiveDark
                             : AmanahColorTokens.brand,
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 11,
@@ -145,7 +145,7 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                             : const Color(0xFF64748B),
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 11,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -194,7 +194,7 @@ class _RadialArcPainter extends CustomPainter {
               ).createShader(bounds)
             : (dark
                   ? const LinearGradient(
-                      colors: <Color>[Color(0xFF3B82F6), Color(0xFF2563EB)],
+                      colors: <Color>[Color(0xFF22D3EE), Color(0xFF06B6D4)],
                     ).createShader(bounds)
                   : const LinearGradient(
                       colors: <Color>[Color(0xFF60A5FA), Color(0xFF0D66E9)],
@@ -601,7 +601,7 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                                   ? Colors.white
                                                   : (dark
                                                         ? AmanahColorTokens
-                                                              .brandAccent
+                                                              .tabActiveDark
                                                         : AmanahColorTokens
                                                               .brand),
                                               shape: BoxShape.circle,

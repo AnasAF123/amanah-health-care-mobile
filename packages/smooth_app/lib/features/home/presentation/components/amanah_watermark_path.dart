@@ -4716,13 +4716,68 @@ class AmanahPixelTexture extends StatelessWidget {
         blendMode: BlendMode.dstIn,
         child: content,
       );
+    } else if (maskType == AmanahPixelMaskType.topRight ||
+        maskType == AmanahPixelMaskType.bottomRight) {
+      content = ShaderMask(
+        shaderCallback: (Rect bounds) {
+          final Alignment center = maskType == AmanahPixelMaskType.topRight
+              ? const Alignment(1.05, -1.0)
+              : const Alignment(1.05, 1.0);
+
+          return RadialGradient(
+            center: center,
+            radius: 1.15,
+            colors: const <Color>[
+              Colors.black,
+              Colors.black,
+              Color(0xCC000000),
+              Color(0x80000000),
+              Color(0x2B000000),
+              Colors.transparent,
+            ],
+            stops: const <double>[0.0, 0.22, 0.45, 0.68, 0.88, 1.0],
+          ).createShader(bounds);
+        },
+        blendMode: BlendMode.dstIn,
+        child: content,
+      );
+    } else if (maskType == AmanahPixelMaskType.horizontalEdges) {
+      content = ShaderMask(
+        shaderCallback: (Rect bounds) {
+          return const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: <Color>[
+              Colors.black,
+              Color(0xD9000000),
+              Color(0x59000000),
+              Colors.transparent,
+              Colors.transparent,
+              Color(0x59000000),
+              Color(0xD9000000),
+              Colors.black,
+            ],
+            stops: <double>[0.0, 0.10, 0.24, 0.40, 0.60, 0.76, 0.90, 1.0],
+          ).createShader(bounds);
+        },
+        blendMode: BlendMode.dstIn,
+        child: content,
+      );
     }
 
     return Positioned.fill(child: content);
   }
 }
 
-enum AmanahPixelMaskType { none, fadeTop, concaveTop, bottomLeft }
+enum AmanahPixelMaskType {
+  none,
+  fadeTop,
+  concaveTop,
+  bottomLeft,
+  topRight,
+  bottomRight,
+  horizontalEdges,
+}
 
 class AmanahOrganicPixelPainter extends CustomPainter {
   const AmanahOrganicPixelPainter({
@@ -4792,7 +4847,7 @@ class AmanahOrganicPixelPainter extends CustomPainter {
 
         final double opacRand = _seededHash(r.toDouble(), c.toDouble(), 23);
         final double cellOpacity =
-            (0.18 + opacRand * 0.82).clamp(0.10, 1.0) * opacity * verticalFade;
+            (0.28 + opacRand * 0.72).clamp(0.12, 1.0) * opacity * verticalFade;
 
         if (cellOpacity < 0.02) {
           continue;

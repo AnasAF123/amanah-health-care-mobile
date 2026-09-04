@@ -568,50 +568,61 @@ class AmanahButton extends StatelessWidget {
       case AmanahButtonVariant.secondary:
         fgColor =
             customForegroundColor ??
-            (dark ? AmanahColorTokens.brandSubtle : AmanahColorTokens.brand);
+            (dark
+                ? AmanahColorTokens.btnCrispSoftDarkText
+                : AmanahColorTokens.brand);
+        gradient = customGradient ?? (dark ? AmanahColorTokens.btnCrispSoftDarkGradient : null);
         bgColor =
             customBackgroundColor ??
             (dark
-                ? AmanahColorTokens.neutral700
+                ? AmanahColorTokens.btnCrispSoftDarkBg
                 : AmanahColorTokens.brandSurface);
         border =
             border ??
             Border.all(
               color: dark
-                  ? AmanahColorTokens.neutral600
+                  ? AmanahColorTokens.btnCrispSoftDarkBorder
                   : AmanahColorTokens.brandMuted,
-              width: 1.2,
+              width: 0.8,
             );
         break;
 
       case AmanahButtonVariant.outline:
         fgColor =
             customForegroundColor ??
-            (dark ? AmanahColorTokens.brandSubtle : AmanahColorTokens.brand);
+            (dark
+                ? AmanahColorTokens.btnCrispSoftDarkText
+                : AmanahColorTokens.brand);
         bgColor =
             customBackgroundColor ??
             (dark
-                ? Colors.white.withValues(alpha: 0.04)
+                ? Colors.white.withValues(alpha: 0.03)
                 : Colors.white.withValues(alpha: 0.85));
         border =
             border ??
             Border.all(
-              color: dark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB),
-              width: 1.5,
+              color: dark
+                  ? const Color(0x5938BDF8)
+                  : const Color(0xFF2563EB),
+              width: 1.0,
             );
         break;
 
       case AmanahButtonVariant.ghost:
         fgColor =
             customForegroundColor ??
-            (dark ? AmanahColorTokens.brandSubtle : AmanahColorTokens.brand);
+            (dark
+                ? AmanahColorTokens.btnCrispSoftDarkText
+                : AmanahColorTokens.brand);
         bgColor = customBackgroundColor ?? Colors.transparent;
         break;
 
       case AmanahButtonVariant.text:
         fgColor =
             customForegroundColor ??
-            (dark ? AmanahColorTokens.brandSubtle : AmanahColorTokens.brand);
+            (dark
+                ? AmanahColorTokens.btnCrispSoftDarkText
+                : AmanahColorTokens.brand);
         bgColor = Colors.transparent;
         break;
 

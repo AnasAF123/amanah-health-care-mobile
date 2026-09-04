@@ -604,9 +604,9 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                       radius: 0.95,
                       colors: isDark
                           ? const <Color>[
-                              Color(0xFF0F1A36),
-                              Color(0xFF090E1E),
-                              Color(0xFF060B18),
+                              Color(0xFF131B2E),
+                              Color(0xFF0F1422),
+                              Color(0xFF0A0E1A),
                             ]
                           : const <Color>[
                               Color(0xFFDBEAFE),
@@ -680,7 +680,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                                     style: TextStyle(
                                       color: isNearSlot || isMorphingActive
                                           ? (isDark
-                                              ? const Color(0xFF60A5FA)
+                                              ? AmanahColorTokens.tabActiveDark
                                               : const Color(0xFF0A44FF))
                                           : (isDark
                                               ? Colors.white
@@ -907,7 +907,7 @@ class _QueueHeaderBar extends StatelessWidget {
                   Icon(
                     Icons.info_outline_rounded,
                     color: isDark
-                        ? const Color(0xFF60A5FA)
+                        ? AmanahColorTokens.tabActiveDark
                         : const Color(0xFF0A44FF),
                     size: 18,
                   ),
@@ -930,7 +930,7 @@ class _QueueHeaderBar extends StatelessWidget {
                   Icon(
                     Icons.history_rounded,
                     color: isDark
-                        ? const Color(0xFF60A5FA)
+                        ? AmanahColorTokens.tabActiveDark
                         : const Color(0xFF0A44FF),
                     size: 18,
                   ),
