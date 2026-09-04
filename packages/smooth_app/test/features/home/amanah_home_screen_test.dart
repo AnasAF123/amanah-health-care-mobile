@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smooth_app/features/authentication/domain/amanah_auth_user.dart';
+import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_bottom_navigation_bar.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_home_app_bar.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_quick_access_section.dart';
@@ -297,5 +298,87 @@ void main() {
         expect(cardSize.height, 172.0);
       },
     );
+
+    testWidgets(
+      'Empty schedules in AmanahScheduleCardStack renders restored AmanahScheduleEmptyCard',
+      (WidgetTester tester) async {
+        bool createTapped = false;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AmanahScheduleCardStack(
+                schedules: const <DoctorSchedule>[],
+                onCreateSchedule: () => createTapped = true,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AmanahScheduleEmptyCard), findsOneWidget);
+        expect(find.text('Hari ini masih nyantai'), findsOneWidget);
+        expect(
+          find.text('Belum ada sesi praktik untuk hari ini.'),
+          findsOneWidget,
+        );
+        expect(find.text('Buat jadwal'), findsOneWidget);
+
+        // Tap 'Buat jadwal' button
+        await tester.tap(find.text('Buat jadwal'));
+        await tester.pump();
+
+        expect(createTapped, isTrue);
+      },
+    );
+
+    testWidgets(
+      'Quick access buttons use active color matching App Bar when active',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData.dark(),
+            home: const Scaffold(
+              body: AmanahQuickAccessSection(
+                actions: <AmanahQuickAction>[
+                  AmanahQuickAction(
+                    id: 'act-1',
+                    label: 'Presensi',
+                    icon: AmanahQuickActionIcon.history,
+                  ),
+                  AmanahQuickAction(
+                    id: 'act-2',
+                    label: 'Jadwal',
+                    icon: AmanahQuickActionIcon.schedule,
+                  ),
+                ],
+                activeActionId: 'act-1',
+                onActionTap: _dummyQuickActionTap,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Check active action icon color in dark mode matches App Bar active color (tabActiveDark / 0xFF60A5FA)
+        final Icon activeIcon = tester.widget<Icon>(
+          find.descendant(
+            of: find.widgetWithText(AmanahQuickActionButton, 'Presensi'),
+            matching: find.byType(Icon),
+          ),
+        );
+        expect(activeIcon.color, const Color(0xFF60A5FA));
+
+        // Check inactive action icon color in dark mode matches inactive tab color (tabInactiveDark / 0xFF737373)
+        final Icon inactiveIcon = tester.widget<Icon>(
+          find.descendant(
+            of: find.widgetWithText(AmanahQuickActionButton, 'Jadwal'),
+            matching: find.byType(Icon),
+          ),
+        );
+        expect(inactiveIcon.color, const Color(0xFF737373));
+      },
+    );
   });
 }
+
+void _dummyQuickActionTap(AmanahQuickAction _) {}

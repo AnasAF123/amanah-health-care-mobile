@@ -15,10 +15,7 @@ class AmanahPrivacySecuritySettingsScreen extends StatefulWidget {
 class _AmanahPrivacySecuritySettingsScreenState
     extends State<AmanahPrivacySecuritySettingsScreen> {
   String _passwordStatus = 'Terakhir diubah 30 hari yang lalu';
-  String _pinValue = '******';
   bool _biometricEnabled = true;
-  bool _autoLockEnabled = true;
-  bool _maskPatientNotif = true;
 
   void _editPassword() {
     AmanahSettingEditDialog.show(
@@ -31,23 +28,6 @@ class _AmanahPrivacySecuritySettingsScreenState
       onSave: (String val) {
         if (val.trim().isNotEmpty) {
           setState(() => _passwordStatus = 'Baru saja diperbarui');
-        }
-      },
-    );
-  }
-
-  void _editPin() {
-    AmanahSettingEditDialog.show(
-      context: context,
-      title: 'Ubah PIN presensi',
-      label: 'Masukkan 6-digit PIN baru',
-      initialValue: '',
-      keyboardType: TextInputType.number,
-      obscureText: true,
-      placeholder: '6 digit angka...',
-      onSave: (String val) {
-        if (val.trim().isNotEmpty) {
-          setState(() => _pinValue = '******');
         }
       },
     );
@@ -93,12 +73,6 @@ class _AmanahPrivacySecuritySettingsScreenState
                           value: _passwordStatus,
                           onEdit: _editPassword,
                         ),
-                        AmanahSettingEditableRow(
-                          label: 'PIN presensi dokter',
-                          value: _pinValue,
-                          helperText: 'PIN 6-digit untuk presensi manual',
-                          onEdit: _editPin,
-                        ),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -114,36 +88,6 @@ class _AmanahPrivacySecuritySettingsScreenState
                           onToggle: () {
                             setState(
                               () => _biometricEnabled = !_biometricEnabled,
-                            );
-                          },
-                        ),
-                        AmanahSettingToggleRow(
-                          title: 'Kunci otomatis aplikasi',
-                          subtitle:
-                              'Kunci saat aplikasi tidak aktif selama 5 menit',
-                          checked: _autoLockEnabled,
-                          onToggle: () {
-                            setState(
-                              () => _autoLockEnabled = !_autoLockEnabled,
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    // 3. Privasi data pasien
-                    AmanahSettingSection(
-                      title: 'Privasi data pasien',
-                      children: <Widget>[
-                        AmanahSettingToggleRow(
-                          title: 'Samarkan nama pasien di notifikasi',
-                          subtitle:
-                              'Tampilkan inisial saja pada layar terkunci',
-                          checked: _maskPatientNotif,
-                          onToggle: () {
-                            setState(
-                              () => _maskPatientNotif = !_maskPatientNotif,
                             );
                           },
                         ),

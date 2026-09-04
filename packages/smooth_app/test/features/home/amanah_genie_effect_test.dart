@@ -9,20 +9,32 @@ void main() {
 
   group('Amanah Genie Effect Unit & Rendering Tests', () {
     test(
-      'generateCardCoverSnapshot creates a sharp ui.Image with correct pixelRatio',
+      'generateCardCoverSnapshot creates a sharp ui.Image with correct pixelRatio in light and dark mode',
       () async {
         const Size cardSize = Size(320, 445);
         final AmanahQueueCardData card = defaultAmanahQueueCards[0];
 
-        final ui.Image snapshot = await generateCardCoverSnapshot(
+        final ui.Image lightSnapshot = await generateCardCoverSnapshot(
           card: card,
           size: cardSize,
           pixelRatio: 2.0,
+          isDark: false,
         );
 
-        expect(snapshot.width, 640);
-        expect(snapshot.height, 890);
-        snapshot.dispose();
+        expect(lightSnapshot.width, 640);
+        expect(lightSnapshot.height, 890);
+        lightSnapshot.dispose();
+
+        final ui.Image darkSnapshot = await generateCardCoverSnapshot(
+          card: card,
+          size: cardSize,
+          pixelRatio: 2.0,
+          isDark: true,
+        );
+
+        expect(darkSnapshot.width, 640);
+        expect(darkSnapshot.height, 890);
+        darkSnapshot.dispose();
       },
     );
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
@@ -59,19 +60,27 @@ class AmanahTodayActivitySection extends StatelessWidget {
         const SizedBox(height: 10),
 
         // Activity Cards Row (Flex 1:1)
-        Row(
-          children: <Widget>[
-            for (int i = 0; i < activities.length; i++) ...<Widget>[
-              if (i > 0) const SizedBox(width: 12),
-              Expanded(
-                child: AmanahActivityCard(
-                  item: activities[i],
-                  onTap: () => onActivityTap(activities[i]),
+        if (activities.isEmpty)
+          const AmanahEmptyState.card(
+            icon: Icons.insights_rounded,
+            title: 'Belum Ada Data Aktivitas',
+            message:
+                'Tidak ada ringkasan aktivitas dan antrean klinis untuk hari ini.',
+          )
+        else
+          Row(
+            children: <Widget>[
+              for (int i = 0; i < activities.length; i++) ...<Widget>[
+                if (i > 0) const SizedBox(width: 12),
+                Expanded(
+                  child: AmanahActivityCard(
+                    item: activities[i],
+                    onTap: () => onActivityTap(activities[i]),
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
-        ),
+          ),
       ],
     );
   }

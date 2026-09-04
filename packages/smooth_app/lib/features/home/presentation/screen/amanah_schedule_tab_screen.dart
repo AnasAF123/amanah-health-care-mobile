@@ -199,7 +199,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                         icon: Icons.add_rounded,
                         semanticsLabel: 'Tambah jadwal praktik',
                         foregroundColor: dark
-                            ? AmanahColorTokens.brandAccent
+                            ? AmanahColorTokens.brandSoft
                             : AmanahColorTokens.brand,
                         onPressed: () {
                           AmanahAddEditScheduleDrawer.show(
@@ -519,8 +519,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
             },
           )
         else
-          AmanahEmptyState.card(
-            icon: Icons.calendar_today_outlined,
+          AmanahEmptyState.box(
             title: 'Belum Ada Sesi Praktik',
             message: isCuti
                 ? 'Dokter sedang cuti pada tanggal ini.'
@@ -636,8 +635,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
             },
           )
         else
-          AmanahEmptyState.card(
-            icon: Icons.people_outline_rounded,
+          AmanahEmptyState.box(
             title: 'Belum Ada Pasien Booking',
             message: 'Belum ada pasien yang mendaftar pada sesi praktik ini.',
             actionText: 'Kembali ke Sesi Praktik',

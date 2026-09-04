@@ -132,5 +132,46 @@ void main() {
         expect(find.text('Anak'), findsOneWidget);
       },
     );
+
+    testWidgets('Empty state displays when no records match filter, and allows reset', (
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.75;
+      addTearDown(() => tester.view.reset());
+
+      await tester.pumpWidget(createPresenceHistoryScreen());
+      await tester.pumpAndSettle();
+
+      // Open filter
+      await tester.tap(find.byIcon(Icons.tune_rounded).first);
+      await tester.pumpAndSettle();
+
+      // Select 'Poli Anak' and 'Missed' (0 matches)
+      await tester.tap(find.text('Poli Anak'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AmanahPresenceFilterDrawer),
+          matching: find.text('Missed'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Terapkan Filter'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Tidak Ada Data Presensi'), findsOneWidget);
+      expect(find.text('Ubah Filter'), findsOneWidget);
+      expect(find.text('Reset Filter'), findsOneWidget);
+
+      // Tap Reset Filter
+      await tester.tap(find.text('Reset Filter'));
+      await tester.pumpAndSettle();
+
+      // Records should reappear
+      expect(find.text('Timeline'), findsOneWidget);
+      expect(find.text('Tidak Ada Data Presensi'), findsNothing);
+    });
   });
 }

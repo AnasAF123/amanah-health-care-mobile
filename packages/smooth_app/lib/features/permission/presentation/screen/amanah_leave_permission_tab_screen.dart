@@ -232,7 +232,13 @@ class _AmanahLeavePermissionTabScreenState
                 // 3. Cards List Viewport
                 Expanded(
                   child: filteredList.isEmpty
-                      ? _EmptyPermissionView(dark: dark)
+                      ? _EmptyPermissionView(
+                          onAddPermission: _handleOpenCreateForm,
+                          selectedStatus: _statusFilter,
+                          onResetFilter: _statusFilter != null
+                              ? () => setState(() => _statusFilter = null)
+                              : null,
+                        )
                       : ListView.separated(
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
                           physics: const BouncingScrollPhysics(),
@@ -298,22 +304,35 @@ class _AmanahLeavePermissionTabScreenState
 }
 
 class _EmptyPermissionView extends StatelessWidget {
-  const _EmptyPermissionView({required this.dark});
+  const _EmptyPermissionView({
+    required this.onAddPermission,
+    this.selectedStatus,
+    this.onResetFilter,
+  });
 
-  final bool dark;
+  final VoidCallback onAddPermission;
+  final AmanahPermissionStatus? selectedStatus;
+  final VoidCallback? onResetFilter;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(24),
-        child: AmanahEmptyState.card(
-          icon: Icons.calendar_today_rounded,
-          iconShape: AmanahEmptyStateIconShape.squircle,
-          title: 'Tidak ada perizinan',
-          message:
-              'Belum ada riwayat perizinan pada filter ini. Tekan tombol tambah di atas untuk membuat izin baru.',
-        ),
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: AmanahEmptyState.box(
+        title: selectedStatus == null
+            ? 'Belum Ada Pengajuan Izin'
+            : 'Tidak Ada Izin ${selectedStatus!.label}',
+        message: selectedStatus == null
+            ? 'Belum ada riwayat perizinan cuti, sakit, atau dinas luar yang terdaftar.'
+            : 'Tidak ditemukan riwayat perizinan dengan status "${selectedStatus!.label}".',
+        actionText: 'Ajukan Izin',
+        actionLeadingIcon: Icons.add_rounded,
+        onAction: onAddPermission,
+        secondaryActionText: selectedStatus != null ? 'Tampilkan Semua' : null,
+        secondaryActionLeadingIcon:
+            selectedStatus != null ? Icons.filter_alt_off_rounded : null,
+        onSecondaryAction: onResetFilter,
       ),
     );
   }

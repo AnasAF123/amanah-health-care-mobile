@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_dock_hollow_glow.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_queue_dock_screen.dart';
 
 void main() {
@@ -34,6 +35,45 @@ void main() {
       // Check header and title
       expect(find.text('Pilih antrean\npasien'), findsOneWidget);
       expect(find.text('Tarik antrean ke bawah untuk proses'), findsOneWidget);
+
+      // Check default cards on rail
+      expect(find.text('#01'), findsWidgets);
+      expect(find.text('#02'), findsWidgets);
+    });
+
+    testWidgets('Renders Queue Dock screen and respects Dark theme', (
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.75;
+      addTearDown(() => tester.view.reset());
+
+      await tester.pumpWidget(
+        createQueueDockScreen(brightness: Brightness.dark),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Check header and title
+      expect(find.text('Pilih antrean\npasien'), findsOneWidget);
+      expect(find.text('Tarik antrean ke bawah untuk proses'), findsOneWidget);
+
+      // Verify scaffold background matches dark canvas token
+      final Scaffold scaffold = tester.widget<Scaffold>(
+        find.byType(Scaffold).first,
+      );
+      expect(scaffold.backgroundColor, const Color(0xFF060B18));
+
+      // Verify custom painter is dark
+      final CustomPaint dockPainter = tester.widget<CustomPaint>(
+        find.byWidgetPredicate(
+          (Widget w) =>
+              w is CustomPaint && w.painter is AmanahDockHollowGlowPainter,
+        ),
+      );
+      final AmanahDockHollowGlowPainter painter =
+          dockPainter.painter! as AmanahDockHollowGlowPainter;
+      expect(painter.isDark, isTrue);
 
       // Check default cards on rail
       expect(find.text('#01'), findsWidgets);

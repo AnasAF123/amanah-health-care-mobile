@@ -317,6 +317,11 @@ class AmanahPermissionStore extends ChangeNotifier {
     );
   }
 
+  void clear() {
+    _records = <AmanahPermissionRecord>[];
+    notifyListeners();
+  }
+
   void reset() {
     _records = List<AmanahPermissionRecord>.from(_seedRecords);
     notifyListeners();

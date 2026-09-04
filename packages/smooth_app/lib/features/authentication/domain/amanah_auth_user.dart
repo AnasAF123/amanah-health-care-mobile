@@ -8,6 +8,7 @@ class AmanahAuthUser {
     required this.email,
     required this.phone,
     required this.password,
+    this.isEmailVerified = false,
   });
 
   factory AmanahAuthUser.fromJson(Map<String, dynamic> json) {
@@ -22,6 +23,7 @@ class AmanahAuthUser {
       email: json['email'] as String,
       phone: json['phone'] as String,
       password: json['password'] as String,
+      isEmailVerified: json['isEmailVerified'] as bool? ?? false,
     );
   }
 
@@ -31,6 +33,7 @@ class AmanahAuthUser {
   final String email;
   final String phone;
   final String password;
+  final bool isEmailVerified;
 
   String get roleLabel => switch (role) {
     AmanahUserRole.doctor => 'Dokter',

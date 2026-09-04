@@ -55,11 +55,11 @@ class _AmanahItSupportSettingsScreenState
     AmanahFaqItem(
       id: 'faq-4',
       category: 'Akun & keamanan',
-      title: 'Cara reset PIN presensi mandiri jika lupa',
+      title: 'Cara ubah kata sandi akun jika ingin memperbarui',
       solution: <String>[
-        'Buka halaman pengaturan lalu pilih menu Privasi & keamanan.',
-        'Pilih opsi Ubah PIN presensi dokter.',
-        'Masukkan 6 digit angka PIN baru lalu tekan Simpan.',
+        'Buka halaman pengaturan lalu pilih menu Keamanan akun & PIN.',
+        'Pilih opsi Ubah kata sandi akun.',
+        'Masukkan kata sandi baru (minimal 8 karakter) lalu tekan Simpan.',
       ],
     ),
   ];

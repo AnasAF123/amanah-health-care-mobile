@@ -294,9 +294,11 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     final double cardW = math.min(screenSize.width - 64, 320.0);
     final double cardH = cardW / 0.718;
 
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final ui.Image coverSnapshot = await generateCardCoverSnapshot(
       card: chosen,
       size: Size(cardW, cardH),
+      isDark: isDark,
     );
 
     if (!mounted) {
@@ -362,9 +364,11 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     final double cardW = math.min(screenSize.width - 64, 320.0);
     final double cardH = cardW / 0.718;
 
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final ui.Image coverSnapshot = await generateCardCoverSnapshot(
       card: chosen,
       size: Size(cardW, cardH),
+      isDark: isDark,
     );
 
     if (!mounted) {
@@ -467,9 +471,11 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     final double cardW = math.min(screenSize.width - 64, 320.0);
     final double cardH = cardW / 0.718;
 
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final ui.Image coverSnapshot = await generateCardCoverSnapshot(
       card: card,
       size: Size(cardW, cardH),
+      isDark: isDark,
     );
 
     if (!mounted) {
@@ -581,23 +587,33 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
           ((entranceT - 0.45) / 0.40).clamp(0.0, 1.0),
         );
 
+        final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
         return Scaffold(
-          backgroundColor: const Color(0xFFF4F7FF),
+          backgroundColor: isDark
+              ? AmanahColorTokens.canvasDark
+              : const Color(0xFFF4F7FF),
           body: Stack(
             children: <Widget>[
               // Background Gradient matching web
-              const Positioned.fill(
+              Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: RadialGradient(
-                      center: Alignment(0, -0.2),
+                      center: const Alignment(0, -0.2),
                       radius: 0.95,
-                      colors: <Color>[
-                        Color(0xFFDBEAFE),
-                        Color(0xFFEFF6FF),
-                        Color(0xFFF4F7FF),
-                      ],
-                      stops: <double>[0, 0.45, 1.0],
+                      colors: isDark
+                          ? const <Color>[
+                              Color(0xFF0F1A36),
+                              Color(0xFF090E1E),
+                              Color(0xFF060B18),
+                            ]
+                          : const <Color>[
+                              Color(0xFFDBEAFE),
+                              Color(0xFFEFF6FF),
+                              Color(0xFFF4F7FF),
+                            ],
+                      stops: const <double>[0, 0.45, 1.0],
                     ),
                   ),
                 ),
@@ -663,8 +679,12 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                                     dotCount: _dotCount,
                                     style: TextStyle(
                                       color: isNearSlot || isMorphingActive
-                                          ? const Color(0xFF0A44FF)
-                                          : const Color(0xFF0F172A),
+                                          ? (isDark
+                                              ? const Color(0xFF60A5FA)
+                                              : const Color(0xFF0A44FF))
+                                          : (isDark
+                                              ? Colors.white
+                                              : const Color(0xFF0F172A)),
                                       fontFamily: 'PlusJakartaSans',
                                       fontSize: 22,
                                       fontWeight: FontWeight.w800,
@@ -852,6 +872,8 @@ class _QueueHeaderBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 250),
       opacity: showSuccess ? 0.0 : 1.0,
@@ -859,11 +881,17 @@ class _QueueHeaderBar extends StatelessWidget {
         onBack: onBack,
         backgroundColor: Colors.transparent,
         trailing: PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert_rounded, color: Color(0xFF1E293B)),
+          icon: Icon(
+            Icons.more_vert_rounded,
+            color: isDark ? Colors.white : const Color(0xFF1E293B),
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
+            side: isDark
+                ? BorderSide(color: Colors.white.withValues(alpha: 0.12))
+                : BorderSide.none,
           ),
-          color: Colors.white,
+          color: isDark ? AmanahColorTokens.surfaceElevatedDark : Colors.white,
           onSelected: (String val) {
             if (val == 'guide') {
               onOpenGuide();
@@ -872,19 +900,25 @@ class _QueueHeaderBar extends StatelessWidget {
             }
           },
           itemBuilder: (_) => <PopupMenuEntry<String>>[
-            const PopupMenuItem<String>(
+            PopupMenuItem<String>(
               value: 'guide',
               child: Row(
                 children: <Widget>[
                   Icon(
                     Icons.info_outline_rounded,
-                    color: Color(0xFF0A44FF),
+                    color: isDark
+                        ? const Color(0xFF60A5FA)
+                        : const Color(0xFF0A44FF),
                     size: 18,
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Text(
                     'Panduan antrean',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    ),
                   ),
                 ],
               ),
@@ -893,15 +927,21 @@ class _QueueHeaderBar extends StatelessWidget {
               value: 'history',
               child: Row(
                 children: <Widget>[
-                  const Icon(
+                  Icon(
                     Icons.history_rounded,
-                    color: Color(0xFF0A44FF),
+                    color: isDark
+                        ? const Color(0xFF60A5FA)
+                        : const Color(0xFF0A44FF),
                     size: 18,
                   ),
                   const SizedBox(width: 10),
-                  const Text(
+                  Text(
                     'Riwayat antrean',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    ),
                   ),
                   if (historyCount > 0) ...<Widget>[
                     const Spacer(),
@@ -911,13 +951,17 @@ class _QueueHeaderBar extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFDBEAFE),
+                        color: isDark
+                            ? const Color(0xFF1E3A8A)
+                            : const Color(0xFFDBEAFE),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         '$historyCount',
-                        style: const TextStyle(
-                          color: Color(0xFF0A44FF),
+                        style: TextStyle(
+                          color: isDark
+                              ? const Color(0xFF93C5FD)
+                              : const Color(0xFF0A44FF),
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
                         ),
@@ -1124,6 +1168,7 @@ class _AmanahQueueCardCover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final double cardW = width ?? 212.0;
     final double cardH = height ?? 335.0;
     final double logoSize = cardW * 0.46;
@@ -1134,20 +1179,37 @@ class _AmanahQueueCardCover extends StatelessWidget {
         height: cardH,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: <Color>[Colors.white, Color(0xFFF8FAFF), Color(0xFFEDF2FF)],
+            colors: isDark
+                ? const <Color>[
+                    Color(0xFF162238),
+                    Color(0xFF0F172A),
+                    Color(0xFF0B1220),
+                  ]
+                : const <Color>[
+                    Colors.white,
+                    Color(0xFFF8FAFF),
+                    Color(0xFFEDF2FF),
+                  ],
           ),
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: const Color(0xFF0A1E50).withValues(alpha: 0.14),
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.65)
+                  : const Color(0xFF0A1E50).withValues(alpha: 0.14),
               blurRadius: 32,
               offset: const Offset(0, 14),
-              spreadRadius: -6,
+              spreadRadius: isDark ? -2 : -6,
             ),
           ],
-          border: Border.all(color: Colors.white, width: 1.5),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.14)
+                : Colors.white,
+            width: 1.5,
+          ),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
@@ -1161,20 +1223,26 @@ class _AmanahQueueCardCover extends StatelessWidget {
                     gradient: LinearGradient(
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
-                      colors: <Color>[
-                        const Color(0xFFDBEAFE).withValues(alpha: 0.50),
-                        const Color(0xFFEFF6FF).withValues(alpha: 0.15),
-                        Colors.transparent,
-                      ],
+                      colors: isDark
+                          ? <Color>[
+                              const Color(0xFF1E3A8A).withValues(alpha: 0.35),
+                              const Color(0xFF1E293B).withValues(alpha: 0.15),
+                              Colors.transparent,
+                            ]
+                          : <Color>[
+                              const Color(0xFFDBEAFE).withValues(alpha: 0.50),
+                              const Color(0xFFEFF6FF).withValues(alpha: 0.15),
+                              Colors.transparent,
+                            ],
                     ),
                   ),
                 ),
               ),
 
               // 2. Organic Cybernetic Pixel Texture (Faded bottom-to-top, 1:1 with Web)
-              const AmanahPixelTexture(
-                isDark: false,
-                opacity: 0.38,
+              AmanahPixelTexture(
+                isDark: isDark,
+                opacity: isDark ? 0.45 : 0.38,
                 maskType: AmanahPixelMaskType.fadeTop,
               ),
 
@@ -1185,14 +1253,20 @@ class _AmanahQueueCardCover extends StatelessWidget {
                   // Vector Watermark with Theme Gradient Fill (wm.svg 1:1, crisp and clean)
                   AmanahWatermarkLogo(
                     size: logoSize,
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: <Color>[
-                        Color(0xFF0A44FF),
-                        Color(0xFF1A55FF),
-                        Color(0xFF3B82F6),
-                      ],
+                      colors: isDark
+                          ? const <Color>[
+                              Color(0xFF3B82F6),
+                              Color(0xFF60A5FA),
+                              Color(0xFF93C5FD),
+                            ]
+                          : const <Color>[
+                              Color(0xFF0A44FF),
+                              Color(0xFF1A55FF),
+                              Color(0xFF3B82F6),
+                            ],
                     ),
                   ),
 
@@ -1202,7 +1276,9 @@ class _AmanahQueueCardCover extends StatelessWidget {
                   Text(
                     card.queueNumber,
                     style: TextStyle(
-                      color: const Color(0xFF0A44FF),
+                      color: isDark
+                          ? const Color(0xFF60A5FA)
+                          : const Color(0xFF0A44FF),
                       fontFamily: 'PlusJakartaSans',
                       fontSize: cardW > 250 ? 44 : 38,
                       fontWeight: FontWeight.w900,
@@ -1221,7 +1297,7 @@ class _AmanahQueueCardCover extends StatelessWidget {
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
                       colors: <Color>[
-                        Colors.white.withValues(alpha: 0.10),
+                        Colors.white.withValues(alpha: isDark ? 0.05 : 0.10),
                         Colors.transparent,
                       ],
                       stops: const <double>[0.0, 0.45],
@@ -1254,6 +1330,8 @@ class _AmanahBottomNotchedDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 450),
       curve: Curves.easeOut,
@@ -1275,7 +1353,7 @@ class _AmanahBottomNotchedDock extends StatelessWidget {
                     dragProgress: dragProgress,
                     isLongPressing: isLongPressing,
                     isActivating: isActivating,
-                    isDark: false,
+                    isDark: isDark,
                   ),
                 ),
               ),
@@ -1294,7 +1372,9 @@ class _AmanahBottomNotchedDock extends StatelessWidget {
                     style: TextStyle(
                       color: dragProgress > 0.05
                           ? const Color(0xFF3B82F6)
-                          : const Color(0xFF334155),
+                          : (isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF334155)),
                       fontFamily: 'PlusJakartaSans',
                       fontSize: 12,
                       fontWeight: dragProgress > 0.05
@@ -1318,7 +1398,9 @@ class _AmanahBottomNotchedDock extends StatelessWidget {
                   width: 112,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.35),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.25)
+                        : Colors.black.withValues(alpha: 0.35),
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -1442,6 +1524,7 @@ class _AmanahQueueActivationOverlayState
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final Size size = MediaQuery.sizeOf(context);
     final double cardW = math.min(size.width - 64, 320.0);
     final double cardH = cardW / 0.718;
@@ -1459,7 +1542,11 @@ class _AmanahQueueActivationOverlayState
               opacity: widget.isGenieSettled
                   ? 1.0
                   : (widget.isGenieRunning ? 0.0 : 0.95),
-              child: Container(color: const Color(0xF8F8FAFF)),
+              child: Container(
+                color: isDark
+                    ? const Color(0xF2060B18)
+                    : const Color(0xF8F8FAFF),
+              ),
             ),
           ),
 
@@ -1489,12 +1576,16 @@ class _AmanahQueueActivationOverlayState
                           IconButton(
                             onPressed: widget.onClose,
                             icon: const Icon(Icons.arrow_back_rounded),
-                            color: const Color(0xFF1E293B),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF1E293B),
                           ),
-                          const Text(
+                          Text(
                             'Antrean terpilih',
                             style: TextStyle(
-                              color: Color(0xFF14103B),
+                              color: isDark
+                                  ? Colors.white
+                                  : const Color(0xFF14103B),
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -1631,45 +1722,66 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: <Color>[Colors.white, Color(0xFFF8FAFF), Color(0xFFEDF2FF)],
+          colors: isDark
+              ? const <Color>[
+                  Color(0xFF162238),
+                  Color(0xFF0F172A),
+                  Color(0xFF0B1220),
+                ]
+              : const <Color>[
+                  Colors.white,
+                  Color(0xFFF8FAFF),
+                  Color(0xFFEDF2FF),
+                ],
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: const Color(0xFF0A1E50).withValues(alpha: 0.18),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.70)
+                : const Color(0xFF0A1E50).withValues(alpha: 0.18),
             blurRadius: 40,
             offset: const Offset(0, 18),
-            spreadRadius: -12,
+            spreadRadius: isDark ? -4 : -12,
           ),
         ],
-        border: Border.all(color: Colors.white, width: 1.5),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.14)
+              : Colors.white,
+          width: 1.5,
+        ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(21),
         child: Stack(
           children: <Widget>[
             // 1. Official Vector Watermark switched to Top-Left (-top-4 -left-6)
-            const Positioned(
+            Positioned(
               top: -16,
               left: -24,
               child: AmanahWatermarkLogo(
                 size: 200,
-                color: Color(0xFF0A44FF),
-                opacity: 0.25,
+                color: isDark
+                    ? const Color(0xFF60A5FA)
+                    : const Color(0xFF0A44FF),
+                opacity: isDark ? 0.18 : 0.25,
               ),
             ),
 
             // 2. Cybernetic Pixel Matrix Texture (bottom-left feathering)
-            const AmanahPixelTexture(
-              isDark: false,
-              opacity: 0.22,
+            AmanahPixelTexture(
+              isDark: isDark,
+              opacity: isDark ? 0.30 : 0.22,
               maskType: AmanahPixelMaskType.bottomLeft,
             ),
 
@@ -1679,8 +1791,10 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
               left: 20,
               child: Text(
                 card.queueNumber,
-                style: const TextStyle(
-                  color: Color(0xFF0A44FF),
+                style: TextStyle(
+                  color: isDark
+                      ? const Color(0xFF60A5FA)
+                      : const Color(0xFF0A44FF),
                   fontFamily: 'PlusJakartaSans',
                   fontSize: 38,
                   fontWeight: FontWeight.w900,
@@ -1730,9 +1844,11 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      const Icon(
+                      Icon(
                         Icons.arrow_outward_rounded,
-                        color: Color(0xFF0A44FF),
+                        color: isDark
+                            ? const Color(0xFF60A5FA)
+                            : const Color(0xFF0A44FF),
                         size: 20,
                       ),
                       const SizedBox(width: 4),
@@ -1741,8 +1857,10 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
                           card.patientName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Color(0xFF0F172A),
+                          style: TextStyle(
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                             fontFamily: 'PlusJakartaSans',
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
@@ -1757,8 +1875,10 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
                     card.complaint,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Color(0xFF64748B),
+                    style: TextStyle(
+                      color: isDark
+                          ? const Color(0xFF94A3B8)
+                          : const Color(0xFF64748B),
                       fontFamily: 'PlusJakartaSans',
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -1774,8 +1894,10 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
               right: 20,
               child: Text(
                 card.poly,
-                style: const TextStyle(
-                  color: Color(0xFF0A44FF),
+                style: TextStyle(
+                  color: isDark
+                      ? const Color(0xFF60A5FA)
+                      : const Color(0xFF0A44FF),
                   fontFamily: 'PlusJakartaSans',
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
@@ -2128,6 +2250,8 @@ class _AmanahQueueGuideDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool dark = Theme.of(context).brightness == Brightness.dark;
+
     return AmanahBottomSheetScaffold(
       title: 'Panduan alur sistem antrean',
       subtitle: 'Sistem rel antrean 3D interaktif Klinik Amanah',
@@ -2142,10 +2266,12 @@ class _AmanahQueueGuideDrawer extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text(
+          Text(
             'Sistem rel antrean 3D interaktif Klinik Amanah mempermudah dokter & staf dalam memproses dan memanggil pasien:',
             style: TextStyle(
-              color: Color(0xFF64748B),
+              color: dark
+                  ? const Color(0xFF94A3B8)
+                  : const Color(0xFF64748B),
               fontSize: 12,
               height: 1.4,
             ),
@@ -2155,28 +2281,32 @@ class _AmanahQueueGuideDrawer extends StatelessWidget {
             '1. Geser Rel 3D',
             'Geser kartu ke kiri/kanan untuk memilih nomor antrean pasien',
             AmanahColorTokens.brandPrimary,
+            dark: dark,
           ),
           _buildStep(
             '2. Tarik ke Bawah',
             'Tarik kartu ke slot bawah hingga kotak paramedis terbuka untuk memproses',
-            AmanahColorTokens.brandLight,
+            dark ? const Color(0xFF60A5FA) : AmanahColorTokens.brandLight,
+            dark: dark,
           ),
           _buildStep(
             '3. Putar & Cek Kartu',
             'Kartu berputar 3D menampilkan nama pasien, keluhan, dan poli tujuan',
             AmanahColorTokens.success,
+            dark: dark,
           ),
           _buildStep(
             '4. Panggil Pasien',
             'Tekan "Panggil Pasien" untuk aktivasi atau simpan ke riwayat antrean',
             AmanahColorTokens.violet,
+            dark: dark,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStep(String title, String desc, Color dotColor) {
+  Widget _buildStep(String title, String desc, Color dotColor, {required bool dark}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -2195,16 +2325,18 @@ class _AmanahQueueGuideDrawer extends StatelessWidget {
               children: <Widget>[
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Color(0xFF0F172A),
+                  style: TextStyle(
+                    color: dark ? Colors.white : const Color(0xFF0F172A),
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 Text(
                   desc,
-                  style: const TextStyle(
-                    color: Color(0xFF64748B),
+                  style: TextStyle(
+                    color: dark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
                     fontSize: 11,
                   ),
                 ),

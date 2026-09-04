@@ -32,9 +32,11 @@ class AmanahAccountTabScreen extends StatefulWidget {
 }
 
 class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
-  late String _phone;
-  late String _email;
-  late String _bio;
+  String _phone = '+62 812-3456-7890';
+  String _email = 'rayhan.pratama@rsamanah.co.id';
+  String _bio =
+      'Dokter Spesialis Anak di RS Amanah Sehat, melayani konsultasi rawat jalan & rawat inap anak.';
+  bool _isEmailVerified = false;
   String? _customAvatarPath;
   String? _presetAvatarUrl;
 
@@ -42,9 +44,55 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   void initState() {
     super.initState();
     _phone = '+62 812-3456-7890';
-    _email = 'rayhan.pratama@rsamanah.co.id';
+    _email = widget.user.email.isNotEmpty
+        ? widget.user.email
+        : 'rayhan.pratama@rsamanah.co.id';
     _bio =
         'Dokter Spesialis Anak di RS Amanah Sehat, melayani konsultasi rawat jalan & rawat inap anak.';
+    _isEmailVerified = widget.user.isEmailVerified;
+  }
+
+  @override
+  void didUpdateWidget(AmanahAccountTabScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.user.isEmailVerified != widget.user.isEmailVerified) {
+      _isEmailVerified = widget.user.isEmailVerified;
+    }
+  }
+
+  void _handleVerifyEmail() {
+    setState(() {
+      _isEmailVerified = true;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Tautan verifikasi telah dikirim ke $_email. Email berhasil diverifikasi.',
+        ),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF0284C7),
+      ),
+    );
+  }
+
+  void _handleToggleVerification() {
+    setState(() {
+      _isEmailVerified = !_isEmailVerified;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _isEmailVerified
+              ? 'Status email diubah ke: Terverifikasi (Mode Dummy)'
+              : 'Status email diubah ke: Belum Terverifikasi (Mode Dummy)',
+        ),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: _isEmailVerified
+            ? const Color(0xFF0284C7)
+            : const Color(0xFFD97706),
+      ),
+    );
   }
 
   AmanahDoctorProfile get _doctorProfile => AmanahDoctorProfile(
@@ -256,8 +304,11 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: _WingedMailBanner(
                   email: _email,
+                  isVerified: _isEmailVerified,
                   dark: dark,
                   onActionTap: _openEditProfileDrawer,
+                  onVerifyTap: _handleVerifyEmail,
+                  onToggleVerification: _handleToggleVerification,
                 ),
               ),
             ),
@@ -274,19 +325,13 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
               ),
             ),
 
-            // 5. Medical Services & Activities Summary ("Aktivitas Medis & Layanan")
+            // 5. Logout Button
             Transform.translate(
               offset: const Offset(0, -14),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _MedicalActivitySummary(dark: dark),
+                child: _LogoutButton(onTap: widget.onLogout, dark: dark),
               ),
-            ),
-
-            // 6. Logout Button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _LogoutButton(onTap: widget.onLogout, dark: dark),
             ),
           ],
         ),
@@ -957,28 +1002,38 @@ class _DualStackProfileCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   // Left side: Badge icon + "SIP Terverifikasi"
-                  Row(
-                    children: <Widget>[
-                      Icon(
-                        Icons.verified_rounded,
-                        size: 18,
-                        color: dark ? const Color(0xFF67E8F9) : const Color(0xFF082F49),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'SIP Terverifikasi',
-                        style: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          color: dark ? Colors.white : const Color(0xFF082F49),
+                  Flexible(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Icon(
+                          Icons.verified_rounded,
+                          size: 18,
+                          color: dark ? const Color(0xFF67E8F9) : const Color(0xFF082F49),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'SIP Terverifikasi',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: dark ? Colors.white : const Color(0xFF082F49),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+
+                  const SizedBox(width: 8),
 
                   // Right side: "Kartu ID Dokter" + circular button with arrow
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
                         'Kartu ID Dokter',
@@ -1058,31 +1113,63 @@ class _DualStackProfileCard extends StatelessWidget {
 class _WingedMailBanner extends StatelessWidget {
   const _WingedMailBanner({
     required this.email,
+    required this.isVerified,
     required this.dark,
     required this.onActionTap,
+    this.onVerifyTap,
+    this.onToggleVerification,
   });
 
   final String email;
+  final bool isVerified;
   final bool dark;
   final VoidCallback onActionTap;
+  final VoidCallback? onVerifyTap;
+  final VoidCallback? onToggleVerification;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final String titleText =
+        isVerified ? 'Email terverifikasi' : 'Belum verifikasi email';
+
+    final Color titleColor = isVerified
+        ? (dark ? const Color(0xFF38BDF8) : const Color(0xFF0369A1))
+        : (dark ? const Color(0xFFFBBF24) : const Color(0xFFB45309));
+
+    final IconData statusIcon =
+        isVerified ? Icons.verified_rounded : Icons.mark_email_unread_outlined;
+
+    final String buttonLabel = isVerified ? 'Perbarui' : 'Verifikasi email';
+
+    return GestureDetector(
+      onLongPress: onToggleVerification,
+      child: Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
         gradient: dark
-            ? const LinearGradient(
-                colors: <Color>[Color(0xFF0B1329), Color(0xFF0F1629)],
-              )
-            : const LinearGradient(
-                colors: <Color>[Color(0xFFF0F9FF), Color(0xFFE0F2FE)],
-              ),
+            ? (isVerified
+                ? const LinearGradient(
+                    colors: <Color>[Color(0xFF0B1329), Color(0xFF0F1629)],
+                  )
+                : const LinearGradient(
+                    colors: <Color>[Color(0xFF1E170A), Color(0xFF191308)],
+                  ))
+            : (isVerified
+                ? const LinearGradient(
+                    colors: <Color>[Color(0xFFF0F9FF), Color(0xFFE0F2FE)],
+                  )
+                : const LinearGradient(
+                    colors: <Color>[Color(0xFFFFFBEB), Color(0xFFFEF3C7)],
+                  )),
         border: Border.all(
           color: dark
-              ? AmanahThemeTokens.outline(context)
-              : const Color(0xFFBAE6FD),
+              ? (isVerified
+                  ? AmanahThemeTokens.outline(context)
+                  : const Color(0xFF78350F))
+              : (isVerified
+                  ? const Color(0xFFBAE6FD)
+                  : const Color(0xFFFDE68A)),
           width: 1,
         ),
         boxShadow: <BoxShadow>[
@@ -1102,20 +1189,29 @@ class _WingedMailBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  email.isNotEmpty
-                      ? 'Email resmi RS terhubung:'
-                      : 'Kamu belum menambahkan email ke akunmu.',
-                  style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.2,
-                    color: dark ? Colors.white : const Color(0xFF0369A1),
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Icon(statusIcon, size: 16, color: titleColor),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        titleText,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'PlusJakartaSans',
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.2,
+                          color: titleColor,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 if (email.isNotEmpty) ...<Widget>[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
                     email,
                     maxLines: 1,
@@ -1134,17 +1230,24 @@ class _WingedMailBanner extends StatelessWidget {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFF0284C7),
+                    backgroundColor: isVerified
+                        ? const Color(0xFF0284C7)
+                        : const Color(0xFFD97706),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
                     visualDensity: VisualDensity.compact,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                  onPressed: onActionTap,
+                  onPressed: isVerified
+                      ? onActionTap
+                      : (onVerifyTap ?? onActionTap),
                   child: Text(
-                    email.isNotEmpty ? 'Perbarui' : 'Tambah',
+                    buttonLabel,
                     style: const TextStyle(
                       fontFamily: 'PlusJakartaSans',
                       fontSize: 12,
@@ -1166,8 +1269,9 @@ class _WingedMailBanner extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 /// Precise Vector Painter for the Winged Mail with golden wax seal and spring antenna
@@ -1444,15 +1548,6 @@ class _PreferencesCard extends StatelessWidget {
                   dark: dark,
                   onTap: () => onItemTap('help'),
                 ),
-                _divider(context),
-                _PreferenceRowItem(
-                  icon: Icons.qr_code_2_rounded,
-                  title: 'Kartu Identitas Digital (ID Card)',
-                  badgeText: '3D View ⚡',
-                  badgeColor: const Color(0xFF00D3F2),
-                  dark: dark,
-                  onTap: () => onItemTap('idcard'),
-                ),
               ],
             ),
           ),
@@ -1560,138 +1655,7 @@ class _PreferenceRowItem extends StatelessWidget {
 }
 
 // =============================================================================
-// COMPONENT 5: Medical Activity Summary ("Aktivitas Medis & Layanan")
-// =============================================================================
-
-class _MedicalActivitySummary extends StatelessWidget {
-  const _MedicalActivitySummary({required this.dark});
-
-  final bool dark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Text(
-            'Aktivitas Medis & Layanan',
-            style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 13.5,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.2,
-              color: dark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
-            ),
-          ),
-        ),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: _MetricCard(
-                title: 'Poliklinik Aktif',
-                value: 'Poli Anak',
-                subtitle: 'Sesi Pagi & Sore',
-                icon: Icons.medical_services_outlined,
-                dark: dark,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _MetricCard(
-                title: 'Presensi Hari Ini',
-                value: 'Hadir',
-                subtitle: 'Tepat Waktu',
-                icon: Icons.fact_check_outlined,
-                dark: dark,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _MetricCard extends StatelessWidget {
-  const _MetricCard({
-    required this.title,
-    required this.value,
-    required this.subtitle,
-    required this.icon,
-    required this.dark,
-  });
-
-  final String title;
-  final String value;
-  final String subtitle;
-  final IconData icon;
-  final bool dark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: dark ? AmanahThemeTokens.surface(context) : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: dark
-              ? AmanahThemeTokens.outline(context)
-              : const Color(0xFFE2E8F0),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Icon(icon, size: 18, color: const Color(0xFF0284C7)),
-              Container(
-                width: 6,
-                height: 6,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFF10B981),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: dark ? Colors.white : const Color(0xFF082F49),
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            subtitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// =============================================================================
-// COMPONENT 6: Clean Logout Action Button
+// COMPONENT 5: Clean Logout Action Button
 // =============================================================================
 
 class _LogoutButton extends StatelessWidget {

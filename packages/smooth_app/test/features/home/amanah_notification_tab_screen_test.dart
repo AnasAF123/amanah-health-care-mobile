@@ -170,9 +170,11 @@ void main() {
         await tester.pumpAndSettle();
 
         // Empty state
-        expect(find.text('Tidak ada notifikasi'), findsOneWidget);
+        expect(find.text('Belum Ada Notifikasi'), findsOneWidget);
         expect(
-          find.text('Semua pembaruan pada kategori ini sudah diperiksa.'),
+          find.text(
+            'Semua pembaruan operasional klinis dan jadwal praktik sudah diperiksa.',
+          ),
           findsOneWidget,
         );
       },

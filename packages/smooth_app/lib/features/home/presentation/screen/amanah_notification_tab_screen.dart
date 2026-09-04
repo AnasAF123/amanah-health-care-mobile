@@ -110,12 +110,33 @@ class _AmanahNotificationTabScreenState
             // 3. Notification List Area
             Expanded(
               child: filteredList.isEmpty
-                  ? const AmanahEmptyState.viewport(
-                      icon: Icons.notifications_none_rounded,
-                      iconShape: AmanahEmptyStateIconShape.circle,
-                      title: 'Tidak ada notifikasi',
-                      message:
-                          'Semua pembaruan pada kategori ini sudah diperiksa.',
+                  ? SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
+                      child: AmanahEmptyState.box(
+                        title: 'Belum Ada Notifikasi',
+                        message: _activeCategory == AmanahNotificationCategory.all
+                            ? 'Semua pembaruan operasional klinis dan jadwal praktik sudah diperiksa.'
+                            : 'Tidak ada pemberitahuan pada kategori "${_activeCategory.label}".',
+                        actionText: _activeCategory !=
+                                AmanahNotificationCategory.all
+                            ? 'Lihat Semua Kategori'
+                            : null,
+                        actionLeadingIcon: _activeCategory !=
+                                AmanahNotificationCategory.all
+                            ? Icons.clear_all_rounded
+                            : null,
+                        onAction: _activeCategory !=
+                                AmanahNotificationCategory.all
+                            ? () => setState(
+                                () => _activeCategory =
+                                    AmanahNotificationCategory.all,
+                              )
+                            : null,
+                      ),
                     )
                   : ListView.separated(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),

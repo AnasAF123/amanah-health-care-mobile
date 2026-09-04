@@ -41,6 +41,7 @@ class AmanahHomeShell extends StatefulWidget {
     email: 'dokter@amanah.health',
     phone: '081234567890',
     password: '',
+    isEmailVerified: false,
   );
 
   @override

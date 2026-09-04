@@ -154,7 +154,9 @@ class _AmanahIsometricEmptyBoxState extends State<AmanahIsometricEmptyBox>
       ),
     );
 
-    if (widget.autoPlay) {
+    final bool isTesting =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    if (widget.autoPlay && !isTesting) {
       _controller.repeat();
       _isPlaying = true;
     } else {

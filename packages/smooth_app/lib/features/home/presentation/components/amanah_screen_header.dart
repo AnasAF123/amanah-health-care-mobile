@@ -112,6 +112,15 @@ class AmanahScreenHeader extends StatelessWidget
         ? AmanahColorTokens.canvasDark.withValues(alpha: 0.85)
         : Colors.white.withValues(alpha: 0.85);
 
+    final Widget? leadingWidget = _buildLeadingSlot(context);
+    final Widget? trailingWidget = _buildTrailingSlot(context);
+    final bool isCentered =
+        titleAlignment == AmanahScreenHeaderTitleAlignment.center;
+    final Widget middleWidget = _buildTitleBlock(
+      context,
+      isCentered ? TextAlign.center : TextAlign.start,
+    );
+
     final Widget header = SizedBox(
       width: double.infinity,
       height: AmanahComponentSize.topAppBar,
@@ -126,39 +135,12 @@ class AmanahScreenHeader extends StatelessWidget
         ),
         child: Padding(
           padding: contentPadding,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              // 1. Leading Action Slot (Far Left)
-              _buildLeadingSlot(
-                context,
-                reserveEmptySlot:
-                    titleAlignment == AmanahScreenHeaderTitleAlignment.center,
-              ),
-
-              // 2. Title & Subtitle Block (Centered or Start-aligned in remaining space)
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AmanahSpacing.sm,
-                  ),
-                  child: _buildTitleBlock(
-                    context,
-                    titleAlignment == AmanahScreenHeaderTitleAlignment.start
-                        ? TextAlign.start
-                        : TextAlign.center,
-                  ),
-                ),
-              ),
-
-              // 3. Trailing Action Slot (Far Right, e.g. more_vert, add, icons)
-              _buildTrailingSlot(
-                context,
-                reserveEmptySlot:
-                    titleAlignment == AmanahScreenHeaderTitleAlignment.center,
-              ),
-            ],
+          child: NavigationToolbar(
+            leading: leadingWidget,
+            middle: middleWidget,
+            trailing: trailingWidget,
+            centerMiddle: isCentered,
+            middleSpacing: AmanahSpacing.sm,
           ),
         ),
       ),
@@ -182,58 +164,54 @@ class AmanahScreenHeader extends StatelessWidget
       return const SizedBox.shrink();
     }
 
-    final Widget content = Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: textAlign == TextAlign.center
-          ? CrossAxisAlignment.center
-          : CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Text(
-          resolvedTitle,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: textAlign,
-          style: TextStyle(
-            fontFamily: 'PlusJakartaSans',
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0,
-            color: AmanahThemeTokens.textPrimary(context),
-            height: 1.2,
-          ),
-        ),
-        if (subtitle != null && subtitle!.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: AmanahSpacing.xxs),
-            child: Text(
-              subtitle!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: textAlign,
-              style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0,
-                color: AmanahThemeTokens.textSecondary(context),
-                height: 1.1,
-              ),
+    final Widget content = IntrinsicWidth(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: textAlign == TextAlign.center
+            ? CrossAxisAlignment.center
+            : CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            resolvedTitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: textAlign,
+            style: TextStyle(
+              fontFamily: 'PlusJakartaSans',
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
+              color: AmanahThemeTokens.textPrimary(context),
+              height: 1.2,
             ),
           ),
-      ],
+          if (subtitle != null && subtitle!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: AmanahSpacing.xxs),
+              child: Text(
+                subtitle!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: textAlign,
+                style: TextStyle(
+                  fontFamily: 'PlusJakartaSans',
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0,
+                  color: AmanahThemeTokens.textSecondary(context),
+                  height: 1.1,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
 
-    if (textAlign == TextAlign.center) {
-      return Center(child: content);
-    }
     return content;
   }
 
-  Widget _buildLeadingSlot(
-    BuildContext context, {
-    required bool reserveEmptySlot,
-  }) {
+  Widget? _buildLeadingSlot(BuildContext context) {
     if (leadingAction != null) {
       return _AmanahHeaderSlot(child: leadingAction);
     }
@@ -246,20 +224,13 @@ class AmanahScreenHeader extends StatelessWidget
       );
     }
 
-    return reserveEmptySlot
-        ? const SizedBox.square(dimension: AmanahComponentSize.iconButton)
-        : const SizedBox.shrink();
+    return null;
   }
 
-  Widget _buildTrailingSlot(
-    BuildContext context, {
-    required bool reserveEmptySlot,
-  }) {
+  Widget? _buildTrailingSlot(BuildContext context) {
     final Widget? resolvedTrailing = trailing ?? rightAction;
     if (resolvedTrailing == null) {
-      return reserveEmptySlot
-          ? const SizedBox.square(dimension: AmanahComponentSize.iconButton)
-          : const SizedBox.shrink();
+      return null;
     }
     return _AmanahHeaderSlot(child: resolvedTrailing);
   }
@@ -316,7 +287,11 @@ class _AmanahHeaderSlot extends StatelessWidget {
         minHeight: AmanahComponentSize.iconButton,
         maxHeight: AmanahComponentSize.iconButton,
       ),
-      child: Center(child: child),
+      child: Center(
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: child,
+      ),
     );
   }
 }

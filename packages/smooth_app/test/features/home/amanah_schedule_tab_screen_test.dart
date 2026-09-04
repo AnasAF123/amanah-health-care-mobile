@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smooth_app/features/authentication/domain/amanah_auth_user.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_isometric_empty_box.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_home_shell.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_schedule_tab_screen.dart';
 import 'package:smooth_app/features/schedule/data/amanah_schedule_store.dart';
@@ -212,6 +213,29 @@ void main() {
 
         expect(find.byType(AmanahScheduleTabScreen), findsOneWidget);
         expect(find.text('Kapasitas Hari Ini'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Sessions view empty state uses shared Master Empty State box component',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.75;
+        addTearDown(() => tester.view.reset());
+
+        // Clear all schedules to trigger empty state
+        AmanahScheduleStore.instance.schedulesMap.clear();
+
+        await tester.pumpWidget(
+          createScheduleScreen(
+            initialViewMode: AmanahScheduleViewMode.sessions,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Belum Ada Sesi Praktik'), findsOneWidget);
+        expect(find.text('Tambah Jadwal Dokter'), findsOneWidget);
+        expect(find.byType(AmanahIsometricEmptyBox), findsOneWidget);
       },
     );
   });

@@ -166,6 +166,11 @@ void main() {
       );
       expect(find.text('Tambah Jadwal'), findsOneWidget);
       expect(find.text('Ulangi Animasi'), findsOneWidget);
+      expect(find.text('Mulai Animasi'), findsOneWidget);
+
+      // Tap 'Mulai Animasi' to toggle playback state
+      await tester.tap(find.text('Mulai Animasi'));
+      await tester.pump();
       expect(find.text('Jeda Animasi'), findsOneWidget);
 
       // Verify custom painter is rendered

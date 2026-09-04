@@ -133,6 +133,7 @@ Future<ui.Image> generateCardCoverSnapshot({
   required AmanahQueueCardData card,
   required Size size,
   double pixelRatio = 2.0,
+  bool isDark = false,
 }) async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final Canvas canvas = Canvas(recorder);
@@ -143,32 +144,52 @@ Future<ui.Image> generateCardCoverSnapshot({
 
   // 1. Card Container Background
   final Paint bgPaint = Paint()
-    ..shader = const LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: <Color>[Colors.white, Color(0xFFF8FAFF), Color(0xFFEDF2FF)],
-    ).createShader(rect);
+    ..shader = (isDark
+        ? const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: <Color>[
+              Color(0xFF162238),
+              Color(0xFF0F172A),
+              Color(0xFF0B1220),
+            ],
+          )
+        : const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: <Color>[Colors.white, Color(0xFFF8FAFF), Color(0xFFEDF2FF)],
+          )).createShader(rect);
 
   canvas.drawRRect(rrect, bgPaint);
 
-  // 2. White Border
+  // 2. Border
   final Paint borderPaint = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1.5
-    ..color = Colors.white;
+    ..color = isDark ? Colors.white.withValues(alpha: 0.14) : Colors.white;
   canvas.drawRRect(rrect, borderPaint);
 
   // 3. Bottom Gradient Sheen
   final Paint sheenPaint = Paint()
-    ..shader = LinearGradient(
-      begin: Alignment.bottomCenter,
-      end: Alignment.topCenter,
-      colors: <Color>[
-        const Color(0xFFDBEAFE).withValues(alpha: 0.50),
-        const Color(0xFFEFF6FF).withValues(alpha: 0.15),
-        const Color(0x00EFF6FF),
-      ],
-    ).createShader(rect);
+    ..shader = (isDark
+        ? LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: <Color>[
+              const Color(0xFF1E3A8A).withValues(alpha: 0.35),
+              const Color(0xFF1E293B).withValues(alpha: 0.15),
+              const Color(0x001E293B),
+            ],
+          )
+        : LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: <Color>[
+              const Color(0xFFDBEAFE).withValues(alpha: 0.50),
+              const Color(0xFFEFF6FF).withValues(alpha: 0.15),
+              const Color(0x00EFF6FF),
+            ],
+          )).createShader(rect);
   canvas.save();
   canvas.clipRRect(rrect);
   canvas.drawRect(rect, sheenPaint);
@@ -177,25 +198,34 @@ Future<ui.Image> generateCardCoverSnapshot({
   AmanahOrganicPixelPainter.drawPixelsToCanvas(
     canvas,
     size,
-    isDark: false,
-    opacity: 0.38,
+    isDark: isDark,
+    opacity: isDark ? 0.45 : 0.38,
     fadeTop: true,
   );
 
   // 5. Draw Official Watermark Vector Logo
   final Paint wmPaint = Paint()
-    ..shader =
-        const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            Color(0xFF0A44FF),
-            Color(0xFF1A55FF),
-            Color(0xFF3B82F6),
-          ],
-        ).createShader(
-          Rect.fromCenter(center: rect.center, width: 140, height: 140),
-        );
+    ..shader = (isDark
+        ? const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              Color(0xFF3B82F6),
+              Color(0xFF60A5FA),
+              Color(0xFF93C5FD),
+            ],
+          )
+        : const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[
+              Color(0xFF0A44FF),
+              Color(0xFF1A55FF),
+              Color(0xFF3B82F6),
+            ],
+          )).createShader(
+      Rect.fromCenter(center: rect.center, width: 140, height: 140),
+    );
 
   final Path wmPath = AmanahWatermarkPathData.createPath();
   final Matrix4 matrix = Matrix4.identity()
@@ -213,8 +243,8 @@ Future<ui.Image> generateCardCoverSnapshot({
   final TextPainter tp = TextPainter(
     text: TextSpan(
       text: card.queueNumber,
-      style: const TextStyle(
-        color: Color(0xFF0A44FF),
+      style: TextStyle(
+        color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF0A44FF),
         fontFamily: 'PlusJakartaSans',
         fontSize: 40,
         fontWeight: FontWeight.w900,
@@ -227,6 +257,19 @@ Future<ui.Image> generateCardCoverSnapshot({
     canvas,
     Offset((size.width - tp.width) / 2, (size.height - 140) / 2 + 120),
   );
+
+  // 7. Glossy Sheen Overlay
+  final Paint glossPaint = Paint()
+    ..shader = LinearGradient(
+      begin: Alignment.topRight,
+      end: Alignment.bottomLeft,
+      colors: <Color>[
+        Colors.white.withValues(alpha: isDark ? 0.05 : 0.10),
+        Colors.transparent,
+      ],
+      stops: const <double>[0.0, 0.45],
+    ).createShader(rect);
+  canvas.drawRect(rect, glossPaint);
 
   canvas.restore();
 

@@ -160,11 +160,12 @@ class AmanahMasterCarouselSection extends StatefulWidget {
 
 class _AmanahMasterCarouselSectionState
     extends State<AmanahMasterCarouselSection>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _animController;
   Animation<double>? _posAnimation;
 
-  double _pagePosition = 0.0;
+  static double _savedPagePosition = 0.0;
+  late double _pagePosition;
   double _dragStartPos = 0.0;
   double _dragAccumulatedDx = 0.0;
   bool _isDragging = false;
@@ -179,9 +180,33 @@ class _AmanahMasterCarouselSectionState
         widget.slides.length;
   }
 
+  void _snapToInteger() {
+    if (widget.slides.isEmpty || _isDragging || _animController.isAnimating) {
+      return;
+    }
+    final int total = widget.slides.length;
+    final double snapped =
+        (_pagePosition.roundToDouble() % total + total) % total;
+    if ((_pagePosition - snapped).abs() > 0.001) {
+      if (mounted) {
+        setState(() {
+          _pagePosition = snapped;
+          _savedPagePosition = snapped;
+        });
+      } else {
+        _pagePosition = snapped;
+        _savedPagePosition = snapped;
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    final int total = widget.slides.isEmpty ? 1 : widget.slides.length;
+    _pagePosition = (_savedPagePosition.roundToDouble() % total + total) % total;
+
     _animController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
@@ -198,14 +223,49 @@ class _AmanahMasterCarouselSectionState
     _startAutoplay();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ModalRoute<dynamic>? route = ModalRoute.of(context);
+    final bool isVisible = route?.isCurrent ?? true;
+    final bool tickerActive = TickerMode.of(context);
+
+    if (!isVisible || !tickerActive) {
+      _stopAutoplay();
+      _snapToInteger();
+    } else if (_autoplayTimer == null && mounted) {
+      _snapToInteger();
+      _startAutoplay();
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _snapToInteger();
+      _startAutoplay();
+    } else {
+      _stopAutoplay();
+      _snapToInteger();
+    }
+  }
+
   void _startAutoplay() {
     _autoplayTimer?.cancel();
     _autoplayTimer = Timer.periodic(
       const Duration(milliseconds: AmanahCarouselTokens.autoplayDelayMs),
       (_) {
-        if (mounted && !_isDragging && widget.slides.isNotEmpty) {
-          _animateToOffsetDelta(1.0);
+        if (!mounted || _isDragging || widget.slides.isEmpty) {
+          return;
         }
+        if (!TickerMode.of(context)) {
+          return;
+        }
+        final ModalRoute<dynamic>? route = ModalRoute.of(context);
+        if (route != null && !route.isCurrent) {
+          return;
+        }
+        _animateToOffsetDelta(1.0);
       },
     );
   }
@@ -217,6 +277,7 @@ class _AmanahMasterCarouselSectionState
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _stopAutoplay();
     _animController.dispose();
     super.dispose();
@@ -227,8 +288,11 @@ class _AmanahMasterCarouselSectionState
       return;
     }
     _animController.stop();
+
+    final int total = widget.slides.length;
     final double start = _pagePosition;
-    final double target = start + delta;
+    // Always target an exact integer card index to prevent fractional drift
+    final double target = (_pagePosition + delta).roundToDouble();
 
     _posAnimation = Tween<double>(begin: start, end: target).animate(
       CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
@@ -240,14 +304,20 @@ class _AmanahMasterCarouselSectionState
         .then((_) {
           if (mounted) {
             setState(() {
-              _pagePosition =
-                  (_pagePosition % widget.slides.length +
-                      widget.slides.length) %
-                  widget.slides.length;
+              _pagePosition = (target.roundToDouble() % total + total) % total;
+              _savedPagePosition = _pagePosition;
             });
           }
         })
-        .catchError((_) {});
+        .catchError((_) {
+          if (mounted && !_isDragging) {
+            setState(() {
+              _pagePosition =
+                  (_pagePosition.roundToDouble() % total + total) % total;
+              _savedPagePosition = _pagePosition;
+            });
+          }
+        });
   }
 
   void _animateToTargetIndex(int targetIndex) {
@@ -255,7 +325,8 @@ class _AmanahMasterCarouselSectionState
       return;
     }
     final int total = widget.slides.length;
-    final double currentMod = ((_pagePosition % total) + total) % total;
+    final double currentMod =
+        ((_pagePosition.roundToDouble() % total) + total) % total;
     double delta = targetIndex - currentMod;
 
     if (delta > total / 2.0) {
@@ -294,6 +365,7 @@ class _AmanahMasterCarouselSectionState
     }
     _isDragging = false;
 
+    final int total = widget.slides.length;
     final double velocity = details?.primaryVelocity ?? 0.0;
     double target = _pagePosition.roundToDouble();
 
@@ -314,14 +386,20 @@ class _AmanahMasterCarouselSectionState
         .then((_) {
           if (mounted) {
             setState(() {
-              _pagePosition =
-                  (_pagePosition % widget.slides.length +
-                      widget.slides.length) %
-                  widget.slides.length;
+              _pagePosition = (target.roundToDouble() % total + total) % total;
+              _savedPagePosition = _pagePosition;
             });
           }
         })
-        .catchError((_) {});
+        .catchError((_) {
+          if (mounted && !_isDragging) {
+            setState(() {
+              _pagePosition =
+                  (_pagePosition.roundToDouble() % total + total) % total;
+              _savedPagePosition = _pagePosition;
+            });
+          }
+        });
 
     _startAutoplay();
   }
@@ -330,6 +408,16 @@ class _AmanahMasterCarouselSectionState
   Widget build(BuildContext context) {
     if (widget.slides.isEmpty) {
       return const SizedBox.shrink();
+    }
+
+    // Safety guard: if resting and not actively dragging or animating, guarantee snapped integer
+    if (!_isDragging && !_animController.isAnimating) {
+      final int total = widget.slides.length;
+      final double snapped =
+          (_pagePosition.roundToDouble() % total + total) % total;
+      if ((_pagePosition - snapped).abs() > 0.001) {
+        _pagePosition = snapped;
+      }
     }
 
     final bool dark = Theme.of(context).brightness == Brightness.dark;

@@ -727,17 +727,20 @@ class _AmanahPresenceHistoryScreenState
   }
 
   Widget _buildEmptyState(bool dark, Color textColor, Color subtextColor) {
-    return AmanahEmptyState.viewport(
-      icon: Icons.tune_rounded,
-      title: 'Tidak ada data presensi',
-      message:
-          'Tidak ditemukan riwayat presensi yang sesuai dengan filter yang diterapkan.',
-      actionText: 'Ubah Filter',
-      actionLeadingIcon: Icons.tune_rounded,
-      onAction: _openFilterDrawer,
-      secondaryActionText: 'Reset Filter',
-      secondaryActionLeadingIcon: Icons.restart_alt_rounded,
-      onSecondaryAction: _resetFilters,
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: AmanahEmptyState.box(
+        title: 'Tidak Ada Data Presensi',
+        message:
+            'Tidak ditemukan riwayat presensi yang sesuai dengan filter tanggal atau status yang diterapkan.',
+        actionText: 'Ubah Filter',
+        actionLeadingIcon: Icons.tune_rounded,
+        onAction: _openFilterDrawer,
+        secondaryActionText: 'Reset Filter',
+        secondaryActionLeadingIcon: Icons.restart_alt_rounded,
+        onSecondaryAction: _resetFilters,
+      ),
     );
   }
 }

@@ -7,11 +7,13 @@ class AmanahQuickAccessSection extends StatelessWidget {
   const AmanahQuickAccessSection({
     required this.actions,
     required this.onActionTap,
+    this.activeActionId,
     super.key,
   });
 
   final List<AmanahQuickAction> actions;
   final ValueChanged<AmanahQuickAction> onActionTap;
+  final String? activeActionId;
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +26,7 @@ class AmanahQuickAccessSection extends StatelessWidget {
             .map(
               (AmanahQuickAction action) => AmanahQuickActionButton(
                 action: action,
+                isActive: activeActionId == null || activeActionId == action.id,
                 onTap: () => onActionTap(action),
               ),
             )
@@ -37,23 +40,35 @@ class AmanahQuickActionButton extends StatelessWidget {
   const AmanahQuickActionButton({
     required this.action,
     required this.onTap,
+    this.isActive = true,
     super.key,
   });
 
   final AmanahQuickAction action;
   final VoidCallback onTap;
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
-    const Color foreground = AmanahColorTokens.brand;
+
+    // Vector color matches the active color used in the App Bar
+    final Color activeColor = dark
+        ? AmanahColorTokens.tabActiveDark
+        : AmanahColorTokens.tabActiveLight;
+    final Color inactiveColor = dark
+        ? AmanahColorTokens.tabInactiveDark
+        : AmanahColorTokens.tabInactiveLight;
+    final Color foreground = isActive ? activeColor : inactiveColor;
+
     final Color labelColor = AmanahThemeTokens.textSecondary(context);
     final Color buttonBg = AmanahThemeTokens.surface(context);
     final Color buttonBorder = AmanahThemeTokens.outline(context);
 
     return Semantics(
       button: true,
+      selected: isActive,
       label: action.label,
       child: SizedBox(
         width: 72,

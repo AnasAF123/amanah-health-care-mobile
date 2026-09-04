@@ -4653,21 +4653,23 @@ class _AmanahWatermarkPainter extends CustomPainter {
 
 class AmanahPixelTexture extends StatelessWidget {
   const AmanahPixelTexture({
-    this.isDark = false,
+    this.isDark,
     this.opacity = 0.35,
     this.maskType = AmanahPixelMaskType.fadeTop,
     super.key,
   });
 
-  final bool isDark;
+  final bool? isDark;
   final double opacity;
   final AmanahPixelMaskType maskType;
 
   @override
   Widget build(BuildContext context) {
+    final bool dark =
+        isDark ?? (Theme.of(context).brightness == Brightness.dark);
     Widget content = CustomPaint(
       painter: AmanahOrganicPixelPainter(
-        isDark: isDark,
+        isDark: dark,
         opacity: opacity,
         fadeTop: maskType == AmanahPixelMaskType.fadeTop,
       ),

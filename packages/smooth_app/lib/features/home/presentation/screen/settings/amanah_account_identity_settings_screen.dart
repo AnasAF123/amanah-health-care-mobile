@@ -20,9 +20,9 @@ class AmanahAccountIdentitySettingsScreen extends StatefulWidget {
 
 class _AmanahAccountIdentitySettingsScreenState
     extends State<AmanahAccountIdentitySettingsScreen> {
-  late String _name;
-  late String _phone;
-  late String _email;
+  String _name = '';
+  String _phone = '+62 812-3456-7890';
+  String _email = 'rayhan.pratama@rsamanah.co.id';
 
   @override
   void initState() {
@@ -148,21 +148,12 @@ class _AmanahAccountIdentitySettingsScreenState
                       title: 'Kredensial medis dan legalitas',
                       children: <Widget>[
                         AmanahSettingInfoRow(
-                          label: 'Nomor SIP',
-                          value: 'SIP. 503/442.1/SIP-D/2026',
+                          label: 'NPWP',
+                          value: '09.254.382.1-013.000',
                         ),
                         AmanahSettingInfoRow(
-                          label: 'Nomor STR',
-                          value: 'STR. 31.2.1.100.1.20.123456',
-                        ),
-                        AmanahSettingInfoRow(
-                          label: 'Nomor KKI',
-                          value: 'KKI-ID-2026-98124',
-                        ),
-                        AmanahSettingInfoRow(
-                          label: 'Status STR/SIP',
-                          value: 'Aktif s/d Mei 2029 (terverifikasi)',
-                          isHighlighted: true,
+                          label: 'Nomor NIB',
+                          value: '9120001234567',
                         ),
                       ],
                     ),

@@ -194,5 +194,31 @@ void main() {
         expect(find.text('Perizinan'), findsWidgets);
       },
     );
+
+    testWidgets('Empty state displays when no permissions exist, and allows action', (
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.75;
+      addTearDown(() => tester.view.reset());
+
+      // Clear all records
+      AmanahPermissionStore.instance.clear();
+
+      await tester.pumpWidget(createPermissionScreen());
+      await tester.pumpAndSettle();
+
+      // Empty state should be visible
+      expect(find.text('Belum Ada Pengajuan Izin'), findsOneWidget);
+      expect(find.text('Ajukan Izin'), findsOneWidget);
+
+      // Reset store
+      AmanahPermissionStore.instance.reset();
+      await tester.pumpAndSettle();
+
+      // List should be restored
+      expect(find.text('Seminar / Simposium'), findsOneWidget);
+      expect(find.text('Belum Ada Pengajuan Izin'), findsNothing);
+    });
   });
 }
