@@ -13,8 +13,10 @@ import 'package:smooth_app/features/authentication/presentation/organisms/passwo
 import 'package:smooth_app/features/authentication/presentation/organisms/sign_in_content.dart';
 import 'package:smooth_app/features/authentication/presentation/organisms/sign_up_content.dart';
 import 'package:smooth_app/features/authentication/presentation/state/auth_ui_state.dart';
+import 'package:smooth_app/features/authentication/presentation/state/password_requirements.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_home_shell.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class AuthBottomSheetScreen extends StatefulWidget {
@@ -85,7 +87,12 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
   Widget build(BuildContext context) {
     final AmanahAuthUser? user = _authenticatedUser;
     if (user != null) {
-      return AmanahHomeShell(user: user);
+      return AmanahHomeShell(
+        user: user,
+        onLogout: () {
+          setState(() => _authenticatedUser = null);
+        },
+      );
     }
 
     return Scaffold(
@@ -126,7 +133,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
           enableDrag: true,
           showDragHandle: false,
           backgroundColor: Colors.transparent,
-          barrierColor: Colors.black.withValues(alpha: 0.18),
+          barrierColor: AmanahThemeTokens.scrim(context),
           builder: (BuildContext sheetContext) {
             return StatefulBuilder(
               builder: (BuildContext context, StateSetter sheetSetState) {
@@ -370,6 +377,11 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     if (!(_signUpFormKey.currentState?.validate() ?? false)) {
       return;
     }
+    if (!AmanahPasswordRequirements.evaluate(
+      _newPasswordController.text,
+    ).isComplete) {
+      return;
+    }
 
     _loadingProvider = AuthProviderType.email;
     _statusMessage = null;
@@ -470,6 +482,11 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
   ) async {
     FocusManager.instance.primaryFocus?.unfocus();
     if (!(_changePasswordFormKey.currentState?.validate() ?? false)) {
+      return;
+    }
+    if (!AmanahPasswordRequirements.evaluate(
+      _resetPasswordController.text,
+    ).isComplete) {
       return;
     }
 
@@ -582,7 +599,6 @@ class _AuthClosedActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color primary = theme.colorScheme.primary;
 
     return SafeArea(
       child: Padding(
@@ -620,16 +636,11 @@ class _AuthClosedActions extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
-            AmanahButton(
+            AmanahButton.primary(
               text: 'Mulai',
               onPressed: onSignUp,
-              variant: AmanahButtonVariant.secondary,
               size: AmanahButtonSize.large,
               isFullWidth: true,
-              customBackgroundColor: Colors.white,
-              customForegroundColor: primary,
-              customBorder: Border.all(color: Colors.transparent),
-              boxShadow: const <BoxShadow>[],
             ),
             const SizedBox(height: MEDIUM_SPACE),
             AmanahButton.ghost(

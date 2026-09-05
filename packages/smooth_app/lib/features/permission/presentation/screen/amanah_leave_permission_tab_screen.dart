@@ -4,6 +4,7 @@ import 'package:smooth_app/features/home/presentation/components/amanah_button.d
 import 'package:smooth_app/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_filter_bar.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_pull_to_refresh.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/features/permission/data/amanah_permission_store.dart';
@@ -231,29 +232,38 @@ class _AmanahLeavePermissionTabScreenState
 
                 // 3. Cards List Viewport
                 Expanded(
-                  child: filteredList.isEmpty
-                      ? _EmptyPermissionView(
-                          onAddPermission: _handleOpenCreateForm,
-                          selectedStatus: _statusFilter,
-                          onResetFilter: _statusFilter != null
-                              ? () => setState(() => _statusFilter = null)
-                              : null,
-                        )
-                      : ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: filteredList.length,
-                          separatorBuilder: (BuildContext context, int index) =>
-                              const SizedBox(height: 14),
-                          itemBuilder: (BuildContext context, int index) {
-                            final AmanahPermissionRecord item =
-                                filteredList[index];
-                            return AmanahPermissionCard(
-                              item: item,
-                              onTap: () => _handleOpenDetail(item),
-                            );
-                          },
-                        ),
+                  child: AmanahPullToRefresh(
+                    onRefresh: () async {
+                      await Future<void>.delayed(
+                        const Duration(milliseconds: 900),
+                      );
+                    },
+                    child: filteredList.isEmpty
+                        ? _EmptyPermissionView(
+                            onAddPermission: _handleOpenCreateForm,
+                            selectedStatus: _statusFilter,
+                            onResetFilter: _statusFilter != null
+                                ? () => setState(() => _statusFilter = null)
+                                : null,
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+                            physics: const BouncingScrollPhysics(
+                              parent: AlwaysScrollableScrollPhysics(),
+                            ),
+                            itemCount: filteredList.length,
+                            separatorBuilder: (BuildContext context, int index) =>
+                                const SizedBox(height: 14),
+                            itemBuilder: (BuildContext context, int index) {
+                              final AmanahPermissionRecord item =
+                                  filteredList[index];
+                              return AmanahPermissionCard(
+                                item: item,
+                                onTap: () => _handleOpenDetail(item),
+                              );
+                            },
+                          ),
+                  ),
                 ),
               ],
             ),
@@ -317,7 +327,9 @@ class _EmptyPermissionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: AmanahEmptyState.box(
         title: selectedStatus == null

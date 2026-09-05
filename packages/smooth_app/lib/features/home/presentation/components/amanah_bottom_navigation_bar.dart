@@ -22,7 +22,7 @@ class AmanahBottomNavigationBar extends StatelessWidget {
     final bool dark = theme.brightness == Brightness.dark;
     final double bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     final Color surfaceColor = dark
-        ? theme.colorScheme.surface
+        ? AmanahThemeTokens.canvas(context)
         : const Color(0xFFFFFFFF);
     final Color activeColor = dark
         ? AmanahColorTokens.tabActiveDark
@@ -277,20 +277,6 @@ class _AmanahScanButton extends StatelessWidget {
                 : AmanahColorTokens.btnCrispBlueBorder,
             width: 0.8,
           ),
-          boxShadow: <BoxShadow>[
-            // 4px Ring halo (White on light, Dark neutral on dark)
-            BoxShadow(
-              color: dark
-                  ? AmanahColorTokens.qrRingDark
-                  : AmanahColorTokens.qrRingLight,
-              spreadRadius: 4.0,
-            ),
-            // Outer dynamic ambient brand-blue glow.
-            if (dark)
-              AmanahColorTokens.qrButtonShadowDark
-            else
-              AmanahColorTokens.qrButtonShadowLight,
-          ],
         ),
         child: Material(
           color: Colors.transparent,

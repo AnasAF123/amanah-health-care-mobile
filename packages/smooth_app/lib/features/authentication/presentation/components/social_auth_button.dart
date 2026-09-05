@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
 enum AuthProviderType { google, email }
 
@@ -24,13 +25,13 @@ class SocialAuthButton extends StatelessWidget {
     final bool dark = theme.brightness == Brightness.dark;
     final Color backgroundColor = provider == AuthProviderType.google
         ? (dark
-              ? theme.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.50,
-                )
+              ? AmanahThemeTokens.surfaceSecondary(context)
               : const Color(0xFFF1F5F9))
         : (provider == AuthProviderType.email
-              ? theme.colorScheme.secondary.withValues(alpha: 0.72)
-              : theme.colorScheme.surface);
+              ? (dark
+                    ? AmanahColorTokens.brand.withValues(alpha: 0.16)
+                    : theme.colorScheme.secondary.withValues(alpha: 0.72))
+              : (dark ? AmanahColorTokens.canvasDark : theme.colorScheme.surface));
     final Color foregroundColor = theme.colorScheme.onSurface;
 
     return AmanahButton(

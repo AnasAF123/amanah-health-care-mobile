@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class AuthSheetContainer extends StatelessWidget {
@@ -34,7 +35,7 @@ class AuthSheetContainer extends StatelessWidget {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(34)),
           border: Border.all(
             color: dark
-                ? Colors.white.withValues(alpha: 0.12)
+                ? AmanahThemeTokens.outline(context)
                 : Colors.white.withValues(alpha: 0.62),
           ),
           boxShadow: <BoxShadow>[
@@ -48,10 +49,10 @@ class AuthSheetContainer extends StatelessWidget {
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(34)),
           child: Material(
-            color: dark ? theme.colorScheme.surface : Colors.white,
+            color: dark ? AmanahColorTokens.canvasDark : Colors.white,
             child: Stack(
               children: <Widget>[
-                const Positioned.fill(child: _AuthSheetBottomGradient()),
+                if (!dark) const Positioned.fill(child: _AuthSheetBottomGradient()),
                 SafeArea(
                   top: false,
                   child: LayoutBuilder(

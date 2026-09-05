@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class AuthInputField extends StatelessWidget {
@@ -38,9 +39,9 @@ class AuthInputField extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final BorderRadius fieldRadius = BorderRadius.circular(16);
     final bool isDark = theme.brightness == Brightness.dark;
-    final Color normalBorderColor = theme.colorScheme.outline.withValues(
-      alpha: isDark ? 0.28 : 0.34,
-    );
+    final Color normalBorderColor = isDark
+        ? AmanahThemeTokens.outline(context)
+        : theme.colorScheme.outline.withValues(alpha: 0.34);
     final Color borderColor = hasError
         ? theme.colorScheme.error.withValues(alpha: 0.85)
         : normalBorderColor;
@@ -49,9 +50,7 @@ class AuthInputField extends StatelessWidget {
               ? theme.colorScheme.error.withValues(alpha: 0.08)
               : const Color(0xFFFEF2F2))
         : (isDark
-              ? theme.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.42,
-                )
+              ? AmanahThemeTokens.surfaceSecondary(context)
               : const Color(0xFFFAFAFA).withValues(alpha: 0.72));
     final Color iconColor = hasError
         ? theme.colorScheme.error

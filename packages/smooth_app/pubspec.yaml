@@ -123,10 +123,10 @@ dev_dependencies:
 
 # 'flutter pub run flutter_native_splash:create' to update
 flutter_native_splash:
-  color: "#FFFFFF"
-  color_dark: "#0F172A"
+  color: "#F8FAFF"
+  color_dark: "#0A0E1A"
   #It must be a png file and should be sized for 4x pixel density.
-  image: "assets/amanah/launch_logo.png"
+  image: "assets/amanah/launch_emblem.png"
 
   # The branding property allows you to specify an image used as branding in the splash screen.
   # It must be a png file. Currently, it is only supported for Android < v12 and iOS.
@@ -141,7 +141,7 @@ flutter_native_splash:
     # 640 pixels in diameter.
     # App icon without an icon background: This should be 1152×1152 pixels, and fit within a circle
     # 768 pixels in diameter.
-    image: "assets/amanah/launch_logo.png"
+    image: "assets/amanah/launch_emblem.png"
 
 flutter:
   generate: true

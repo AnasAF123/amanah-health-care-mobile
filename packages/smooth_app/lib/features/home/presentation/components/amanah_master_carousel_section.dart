@@ -37,7 +37,7 @@ const List<AmanahClinicSlide> kClinicSlides = <AmanahClinicSlide>[
     ctaText: 'Jadwalkan',
     ctaIcon: Icons.auto_awesome_rounded,
     iconType: 'briefcase',
-    imagePath: 'assets/amanah/images/carousel/konsultasi-anak.jpg',
+    imagePath: 'assets/amanah/images/carousel/konsultasi-anak.png',
   ),
   AmanahClinicSlide(
     id: 'slide-2',
@@ -70,7 +70,7 @@ const List<AmanahClinicSlide> kClinicSlides = <AmanahClinicSlide>[
     ctaText: 'Lihat Fasilitas',
     ctaIcon: Icons.favorite_rounded,
     iconType: 'shield',
-    imagePath: 'assets/amanah/images/carousel/persalinan-ibu-anak.jpg',
+    imagePath: 'assets/amanah/images/carousel/persalinan-ibu-anak.png',
   ),
 ];
 
@@ -661,71 +661,56 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
 
             return Stack(
               children: <Widget>[
-                // Layer 1: Solid Base Card Compartment (Clean White in light mode, Slate-900 in dark mode)
+                // Layer 1: Solid Fallback Base Card Compartment
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: widget.isDark
                           ? const Color(0xFF0F172A)
-                          : Colors.white,
+                          : const Color(0xFF1E293B),
                     ),
                   ),
                 ),
 
-                // Layer 2: Photographic Artwork with Wide Feathered Masking Blend
+                // Layer 2: Full Photographic Background Artwork
                 Positioned.fill(
-                  child: ShaderMask(
-                    shaderCallback: (Rect bounds) {
-                      return const LinearGradient(
+                  child: Image.asset(
+                    widget.slide.imagePath,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.centerRight,
+                    errorBuilder: (
+                      BuildContext context,
+                      Object error,
+                      StackTrace? stackTrace,
+                    ) {
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ),
+
+                // Layer 3: Contrast Scrim Gradient Overlay for Text Readability
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
-                        stops: <double>[0.0, 0.26, 0.42, 0.58, 0.74, 0.88, 1.0],
-                        colors: <Color>[
-                          Colors.transparent,
-                          Colors.transparent,
-                          Color(0x24FFFFFF), // ~14% opacity
-                          Color(0x66FFFFFF), // ~40% opacity
-                          Color(0xB3FFFFFF), // ~70% opacity
-                          Color(0xF0FFFFFF), // ~94% opacity
-                          Colors.white,      // 100% full opacity
-                        ],
-                      ).createShader(bounds);
-                    },
-                    blendMode: BlendMode.dstIn,
-                    child: Image.asset(
-                      widget.slide.imagePath,
-                      fit: BoxFit.cover,
-                      alignment: Alignment.centerRight,
-                      errorBuilder: (
-                        BuildContext context,
-                        Object error,
-                        StackTrace? stackTrace,
-                      ) {
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                  ),
-                ),
-
-                // Layer 3: Dark theme ambient integration (seamless blend into slate-900)
-                if (widget.isDark)
-                  const Positioned.fill(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          stops: <double>[0.0, 0.35, 0.75, 1.0],
-                          colors: <Color>[
-                            Color(0xFF0F172A),
-                            Color(0xBF0F172A),
-                            Color(0x330F172A),
-                            Color(0x000F172A),
-                          ],
-                        ),
+                        stops: const <double>[0.0, 0.58, 1.0],
+                        colors: widget.isDark
+                            ? const <Color>[
+                                Color(0xF20B1120), // ~95% dark slate
+                                Color(0xB30F172A), // ~70% dark slate
+                                Color(0x4D0F172A), // ~30% dark slate
+                              ]
+                            : const <Color>[
+                                Color(0xD90F172A), // ~85% deep navy
+                                Color(0x800F172A), // ~50% deep navy
+                                Color(0x260F172A), // ~15% soft tint
+                              ],
                       ),
                     ),
                   ),
+                ),
 
                 // Layer 4: Foreground Content Hierarchy (Left White Compartment)
                 Padding(
@@ -736,7 +721,7 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
                     children: <Widget>[
                       // Top Left: Title and Description with Morph Animation
                       SizedBox(
-                        width: cardWidth * 0.49,
+                        width: cardWidth * 0.52,
                         child: AnimatedBuilder(
                           animation: _animController,
                           builder: (BuildContext context, Widget? child) {
@@ -765,15 +750,13 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
                                       widget.slide.title,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontFamily: 'PlusJakartaSans',
                                         fontSize: 15.0,
                                         fontWeight: FontWeight.w900,
                                         letterSpacing: -0.2,
                                         height: 1.15,
-                                        color: widget.isDark
-                                            ? Colors.white
-                                            : AmanahCarouselTokens.titleColor,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   ),
@@ -785,18 +768,14 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
                                     opacity: dOpacity.clamp(0.0, 1.0),
                                     child: Text(
                                       widget.slide.description,
-                                      maxLines: 2,
+                                      maxLines: 3,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontFamily: 'PlusJakartaSans',
                                         fontSize: 11.0,
                                         fontWeight: FontWeight.w500,
-                                        height: 1.35,
-                                        color: widget.isDark
-                                            ? AmanahCarouselTokens
-                                                .descriptionDarkColor
-                                            : AmanahCarouselTokens
-                                                .descriptionColor,
+                                        height: 1.30,
+                                        color: Color(0xFFE2E8F0),
                                       ),
                                     ),
                                   ),

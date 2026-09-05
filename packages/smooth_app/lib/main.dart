@@ -22,7 +22,7 @@ import 'package:smooth_app/data_models/product_preferences.dart';
 import 'package:smooth_app/data_models/user_management_provider.dart';
 import 'package:smooth_app/database/dao_string.dart';
 import 'package:smooth_app/database/local_database.dart';
-import 'package:smooth_app/features/home/presentation/screen/amanah_home_shell.dart';
+import 'package:smooth_app/features/authentication/presentation/screen/auth_bottom_sheet_screen.dart';
 import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/generic_lib/animations/rive_animation.dart';
 import 'package:smooth_app/helpers/analytics_helper.dart';
@@ -292,7 +292,7 @@ class _SmoothAppState extends State<SmoothApp> {
           () => context.watch<TextContrastProvider>(),
         ),
         themeMode: themeProvider.currentThemeMode,
-        home: const AmanahHomeShell(),
+        home: const AuthBottomSheetScreen(),
       ),
     );
   }

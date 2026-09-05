@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 import 'package:smooth_app/themes/color_provider.dart';
 import 'package:smooth_app/themes/color_schemes.dart';
@@ -57,13 +58,13 @@ class SmoothTheme {
       canvasColor: themeProvider.currentTheme == THEME_AMOLED
           ? myColorScheme.surface
           : (brightness == Brightness.dark
-              ? const Color(0xFF0A0E1A)
-              : const Color(0xFFF8FAFF)),
+              ? AmanahColorTokens.canvasDark
+              : AmanahColorTokens.canvasLight),
       scaffoldBackgroundColor:
           themeProvider.currentTheme == THEME_DARK ||
               (!lightTheme && themeProvider.currentTheme != THEME_AMOLED)
-          ? const Color(0xFF0A0E1A)
-          : const Color(0xFFF8FAFF),
+          ? AmanahColorTokens.canvasDark
+          : AmanahColorTokens.canvasLight,
       shadowColor: brightness == Brightness.light
           ? Colors.black54
           : Colors.white12,
@@ -91,7 +92,9 @@ class SmoothTheme {
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
         centerTitle: false,
-        backgroundColor: myColorScheme.surface,
+        backgroundColor: brightness == Brightness.dark
+            ? AmanahColorTokens.canvasDark
+            : AmanahColorTokens.canvasLight,
         foregroundColor: myColorScheme.onSurface,
         systemOverlayStyle: SystemUiOverlayStyle.light,
         titleTextStyle: textTheme.titleLarge,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_empty_state.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_pull_to_refresh.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/features/schedule/data/amanah_schedule_store.dart';
@@ -163,53 +164,55 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
           ? AmanahColorTokens.canvasDark
           : AmanahColorTokens.canvasLight,
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: <Widget>[
-            // Main Scrollable Viewport
-            Positioned.fill(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(16, 72, 16, 100),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 260),
-                  child: _buildCurrentView(
-                    context: context,
-                    dark: dark,
-                    daySetting: daySetting,
-                    isCuti: isCuti,
-                    schedules: schedules,
-                    bookedPatients: bookedPatients,
-                    capacityPercentage: capacityPercentage,
-                  ),
-                ),
-              ),
+            // Top Overlay Screen Header
+            AmanahScreenHeader(
+              title: screenTitle,
+              subtitle: screenSubtitle,
+              onBack: backAction,
+              trailing: _viewMode != AmanahScheduleViewMode.sessionPatients
+                  ? AmanahScreenHeaderIconAction(
+                      icon: Icons.add_rounded,
+                      semanticsLabel: 'Tambah jadwal praktik',
+                      foregroundColor: dark
+                          ? AmanahColorTokens.tabActiveDark
+                          : AmanahColorTokens.brand,
+                      onPressed: () {
+                        AmanahAddEditScheduleDrawer.show(
+                          context,
+                          initialDate: _selectedDate,
+                          onSavedDate: _handleSavedDate,
+                        );
+                      },
+                    )
+                  : null,
             ),
 
-            // Top Overlay Screen Header
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: AmanahScreenHeader(
-                title: screenTitle,
-                subtitle: screenSubtitle,
-                onBack: backAction,
-                trailing: _viewMode != AmanahScheduleViewMode.sessionPatients
-                    ? AmanahScreenHeaderIconAction(
-                        icon: Icons.add_rounded,
-                        semanticsLabel: 'Tambah jadwal praktik',
-                        foregroundColor: dark
-                            ? AmanahColorTokens.tabActiveDark
-                            : AmanahColorTokens.brand,
-                        onPressed: () {
-                          AmanahAddEditScheduleDrawer.show(
-                            context,
-                            initialDate: _selectedDate,
-                            onSavedDate: _handleSavedDate,
-                          );
-                        },
-                      )
-                    : null,
+            // Main Scrollable Viewport
+            Expanded(
+              child: AmanahPullToRefresh(
+                onRefresh: () async {
+                  await Future<void>.delayed(const Duration(milliseconds: 900));
+                },
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 260),
+                    child: _buildCurrentView(
+                      context: context,
+                      dark: dark,
+                      daySetting: daySetting,
+                      isCuti: isCuti,
+                      schedules: schedules,
+                      bookedPatients: bookedPatients,
+                      capacityPercentage: capacityPercentage,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

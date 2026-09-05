@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class AuthSheetHeader extends StatelessWidget {
@@ -35,7 +36,7 @@ class AuthSheetHeader extends StatelessWidget {
                 style: IconButton.styleFrom(
                   fixedSize: const Size(MINIMUM_TOUCH_SIZE, MINIMUM_TOUCH_SIZE),
                   backgroundColor: theme.brightness == Brightness.dark
-                      ? theme.colorScheme.secondary.withValues(alpha: 0.36)
+                      ? AmanahThemeTokens.surfaceSecondary(context)
                       : const Color(0xFFF3F7FB),
                   foregroundColor: theme.colorScheme.onSurface,
                 ),

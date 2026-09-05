@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class OtpCodeField extends StatefulWidget {
@@ -36,9 +37,10 @@ class _OtpCodeFieldState extends State<OtpCodeField> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color borderColor = theme.colorScheme.outlineVariant.withValues(
-      alpha: 0.9,
-    );
+    final bool isDark = theme.brightness == Brightness.dark;
+    final Color borderColor = isDark
+        ? AmanahThemeTokens.outline(context)
+        : theme.colorScheme.outlineVariant.withValues(alpha: 0.9);
 
     return Row(
       children: List<Widget>.generate(6, (int index) {
@@ -73,7 +75,9 @@ class _OtpCodeFieldState extends State<OtpCodeField> {
                   decoration: InputDecoration(
                     counterText: '',
                     filled: true,
-                    fillColor: theme.colorScheme.surface,
+                    fillColor: isDark
+                        ? AmanahThemeTokens.surfaceSecondary(context)
+                        : theme.colorScheme.surface,
                     contentPadding: EdgeInsets.zero,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(LARGE_SPACE),

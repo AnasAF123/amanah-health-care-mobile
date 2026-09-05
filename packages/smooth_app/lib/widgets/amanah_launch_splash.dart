@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
+import 'package:smooth_app/widgets/amanah_brand_logo.dart';
+
 class AmanahLaunchSplash extends StatelessWidget {
   const AmanahLaunchSplash({super.key});
-
-  static const String _emblemPath = 'assets/amanah/launch_emblem.png';
-  static const double _emblemSize = 104;
 
   @override
   Widget build(BuildContext context) {
@@ -40,29 +39,7 @@ class AmanahLaunchSplash extends StatelessWidget {
           alignment: Alignment.center,
           children: <Widget>[
             Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Image.asset(
-                    _emblemPath,
-                    width: _emblemSize,
-                    height: _emblemSize,
-                    fit: BoxFit.contain,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Amanah',
-                    style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                      color: foreground,
-                      letterSpacing: -0.4,
-                      height: 1.15,
-                    ),
-                  ),
-                ],
-              ),
+              child: AmanahBrandLogo(isDark: isDark),
             ),
             Positioned.fill(
               child: SafeArea(

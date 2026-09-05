@@ -11,6 +11,7 @@ import 'package:smooth_app/features/home/presentation/components/amanah_clinic_a
 import 'package:smooth_app/features/home/presentation/components/amanah_home_app_bar.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_master_carousel_section.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_pull_to_refresh.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_quick_access_section.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_schedule_card_stack.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_today_activity_section.dart';
@@ -188,8 +189,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
 
           // Main Viewport Container
           SafeArea(
-            top: _selectedTab != AmanahHomeTab.scan &&
-                _selectedTab != AmanahHomeTab.account,
+            top: _selectedTab != AmanahHomeTab.scan,
             bottom: false,
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 100),
@@ -386,42 +386,49 @@ class _AmanahHomeScreenContent extends StatelessWidget {
 
         // Scrollable home dashboard body
         Expanded(
-          child: ListView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-            children: <Widget>[
-              // 2. 3D Stack of Schedule Cards with Staggered Depth & Wave Petal Texture
-              AmanahScheduleCardStack(
-                schedules: todaySchedules,
-                onCardTap: onScheduleCardTap,
-                onCreateSchedule: onCreateScheduleTap,
+          child: AmanahPullToRefresh(
+            onRefresh: () async {
+              await Future<void>.delayed(const Duration(milliseconds: 900));
+            },
+            child: ListView(
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
               ),
-              const SizedBox(height: 16),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+              children: <Widget>[
+                // 2. 3D Stack of Schedule Cards with Staggered Depth & Wave Petal Texture
+                AmanahScheduleCardStack(
+                  schedules: todaySchedules,
+                  onCardTap: onScheduleCardTap,
+                  onCreateSchedule: onCreateScheduleTap,
+                ),
+                const SizedBox(height: 16),
 
-              // 3. Quick Access Menu Grid (Raised closer to the card stack)
-              AmanahQuickAccessSection(
-                actions: data.quickActions,
-                onActionTap: onQuickActionTap,
-              ),
-              const SizedBox(height: 16),
+                // 3. Quick Access Menu Grid (Raised closer to the card stack)
+                AmanahQuickAccessSection(
+                  actions: data.quickActions,
+                  onActionTap: onQuickActionTap,
+                ),
+                const SizedBox(height: 16),
 
-              // 4. Master 3D Deck Carousel (Promotions & Clinical Programs)
-              AmanahMasterCarouselSection(onSlideAction: onSlideAction),
-              const SizedBox(height: 20),
+                // 4. Master 3D Deck Carousel (Promotions & Clinical Programs)
+                AmanahMasterCarouselSection(onSlideAction: onSlideAction),
+                const SizedBox(height: 20),
 
-              // 5. Today's Activity Stat Cards
-              AmanahTodayActivitySection(
-                activities: dynamicActivities,
-                onDetailTap: onDetailActivityTap,
-                onActivityTap: onActivityTap,
-              ),
-              const SizedBox(height: 24),
+                // 5. Today's Activity Stat Cards
+                AmanahTodayActivitySection(
+                  activities: dynamicActivities,
+                  onDetailTap: onDetailActivityTap,
+                  onActivityTap: onActivityTap,
+                ),
+                const SizedBox(height: 24),
 
-              // 6. Clinic Performance & Trends Analytics (Area Chart & Monthly Timeline)
-              AmanahClinicAnalyticsSection(
-                onViewDetails: onAnalyticsViewDetails,
-              ),
-            ],
+                // 6. Clinic Performance & Trends Analytics (Area Chart & Monthly Timeline)
+                AmanahClinicAnalyticsSection(
+                  onViewDetails: onAnalyticsViewDetails,
+                ),
+              ],
+            ),
           ),
         ),
       ],

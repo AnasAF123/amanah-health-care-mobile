@@ -6,6 +6,8 @@ import 'package:smooth_app/features/authentication/domain/amanah_auth_user.dart'
 import 'package:smooth_app/features/home/domain/amanah_home_data.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_button.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_edit_profile_drawer.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_pull_to_refresh.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_watermark_path.dart';
 import 'package:smooth_app/features/home/presentation/screen/amanah_doctor_id_card_screen.dart';
 import 'package:smooth_app/features/home/presentation/screen/settings/amanah_account_identity_settings_screen.dart';
@@ -264,187 +266,167 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
 
     return ColoredBox(
       color: bgColor,
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.only(
-          bottom: 120 + MediaQuery.paddingOf(context).bottom,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            // 1. Top Header Region with Medical Hero Illustration & Navigation
-            _MedicalHeroHeader(
-              dark: dark,
-              onBack: widget.onBack,
-              onIdCardTap: _handleOpenDoctorIdCard,
-            ),
+      child: Column(
+        children: <Widget>[
+          // Pinned App Header (100% consistent with Home, Schedule, Permissions)
+          AmanahScreenHeader(
+            title: 'Profil Dokter',
+            onBack: widget.onBack,
+            titleAlignment: AmanahScreenHeaderTitleAlignment.start,
+          ),
 
-            // 2. Signature Dual-Stack Profile Card (Stack 1 on Stack 2)
-            Transform.translate(
-              offset: const Offset(0, -56),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _DualStackProfileCard(
-                  userName: widget.user.fullName,
-                  roleText: 'Dokter Spesialis Anak',
-                  phoneText: _phone,
-                  customAvatarPath: _customAvatarPath,
-                  presetAvatarUrl: _presetAvatarUrl,
-                  dark: dark,
-                  onEditTap: _openEditProfileDrawer,
-                  onAvatarTap: _openAvatarPhotoSheet,
-                  onLoyaltyTap: _handleOpenDoctorIdCard,
+          // Scrollable Viewport with Pull-to-Refresh
+          Expanded(
+            child: AmanahPullToRefresh(
+              onRefresh: () async {
+                await Future<void>.delayed(const Duration(milliseconds: 900));
+              },
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                padding: EdgeInsets.only(
+                  bottom: 120 + MediaQuery.paddingOf(context).bottom,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    // 1. Top Header Region with Medical Hero Illustration
+                    _MedicalHeroBanner(
+                      dark: dark,
+                      onIdCardTap: _handleOpenDoctorIdCard,
+                    ),
+
+                    // 2. Signature Dual-Stack Profile Card (Stack 1 on Stack 2)
+                    Transform.translate(
+                      offset: const Offset(0, -56),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _DualStackProfileCard(
+                          userName: widget.user.fullName,
+                          roleText: 'Dokter Spesialis Anak',
+                          phoneText: _phone,
+                          customAvatarPath: _customAvatarPath,
+                          presetAvatarUrl: _presetAvatarUrl,
+                          dark: dark,
+                          onEditTap: _openEditProfileDrawer,
+                          onAvatarTap: _openAvatarPhotoSheet,
+                          onLoyaltyTap: _handleOpenDoctorIdCard,
+                        ),
+                      ),
+                    ),
+
+                    // 3. Pixel-Perfect Winged Mail Banner (Email Sync Banner)
+                    Transform.translate(
+                      offset: const Offset(0, -42),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _WingedMailBanner(
+                          email: _email,
+                          isVerified: _isEmailVerified,
+                          dark: dark,
+                          onActionTap: _openEditProfileDrawer,
+                          onVerifyTap: _handleVerifyEmail,
+                          onToggleVerification: _handleToggleVerification,
+                        ),
+                      ),
+                    ),
+
+                    // 4. Grouped Preferences Menu List ("Preferensi")
+                    Transform.translate(
+                      offset: const Offset(0, -28),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _PreferencesCard(
+                          dark: dark,
+                          onItemTap: _handleMenuItemTap,
+                        ),
+                      ),
+                    ),
+
+                    // 5. Logout Button
+                    Transform.translate(
+                      offset: const Offset(0, -14),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _LogoutButton(onTap: widget.onLogout, dark: dark),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-
-            // 3. Pixel-Perfect Winged Mail Banner (Email Sync Banner)
-            Transform.translate(
-              offset: const Offset(0, -42),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _WingedMailBanner(
-                  email: _email,
-                  isVerified: _isEmailVerified,
-                  dark: dark,
-                  onActionTap: _openEditProfileDrawer,
-                  onVerifyTap: _handleVerifyEmail,
-                  onToggleVerification: _handleToggleVerification,
-                ),
-              ),
-            ),
-
-            // 4. Grouped Preferences Menu List ("Preferensi")
-            Transform.translate(
-              offset: const Offset(0, -28),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _PreferencesCard(
-                  dark: dark,
-                  onItemTap: _handleMenuItemTap,
-                ),
-              ),
-            ),
-
-            // 5. Logout Button
-            Transform.translate(
-              offset: const Offset(0, -14),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _LogoutButton(onTap: widget.onLogout, dark: dark),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
 // =============================================================================
-// COMPONENT 1: Medical Hero Header with Canvas Vector Waves & Telehealth Artwork
+// COMPONENT 1: Medical Hero Banner with Canvas Vector Waves & Telehealth Artwork
 // =============================================================================
 
-class _MedicalHeroHeader extends StatelessWidget {
-  const _MedicalHeroHeader({required this.dark, this.onBack, this.onIdCardTap});
+class _MedicalHeroBanner extends StatelessWidget {
+  const _MedicalHeroBanner({required this.dark, this.onIdCardTap});
 
   final bool dark;
-  final VoidCallback? onBack;
   final VoidCallback? onIdCardTap;
 
   @override
   Widget build(BuildContext context) {
-    final double topInset = MediaQuery.paddingOf(context).top;
-    final double headerHeight = 175.0 + topInset;
+    const double bannerHeight = 148.0;
 
     return SizedBox(
-      height: headerHeight,
+      height: bannerHeight,
       width: double.infinity,
-      child: Stack(
-        children: <Widget>[
-          Positioned.fill(
-            child: ShaderMask(
-              blendMode: BlendMode.dstIn,
-              shaderCallback: (Rect bounds) {
-                if (dark) {
-                  return const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: <Color>[
-                      Color(0x99000000), // ~60% subtle at top status bar
-                      Colors.black,      // full opacity in title zone
-                      Color(0xCC000000), // 80%
-                      Color(0x40000000), // 25%
-                      Colors.transparent,
-                    ],
-                    stops: <double>[0.0, 0.28, 0.60, 0.82, 1.0],
-                  ).createShader(bounds);
-                } else {
-                  return const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: <Color>[
-                      Color(0x22000000), // ~13% soft dissolve at top status bar
-                      Color(0x8A000000), // ~54% max opacity in light mode for non-contrasting soft look
-                      Color(0x70000000), // ~44%
-                      Color(0x20000000), // ~12%
-                      Colors.transparent,
-                    ],
-                    stops: <double>[0.0, 0.30, 0.62, 0.84, 1.0],
-                  ).createShader(bounds);
-                }
-              },
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: <Widget>[
-                  // Background Vector Canvas: Grid, Waves, ECG Line, Sparkles
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: _MedicalHeroIllustrationPainter(dark: dark),
-                    ),
-                  ),
-
-                  // Right Telehealth Tablet & Badges Illustration
-                  Positioned(
-                    right: 8,
-                    bottom: 36,
-                    child: _TelehealthArtwork(dark: dark, onTap: onIdCardTap),
-                  ),
-                ],
+      child: ShaderMask(
+        blendMode: BlendMode.dstIn,
+        shaderCallback: (Rect bounds) {
+          if (dark) {
+            return const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: <Color>[
+                Colors.black,
+                Color(0xCC000000), // 80%
+                Color(0x40000000), // 25%
+                Colors.transparent,
+              ],
+              stops: <double>[0.0, 0.45, 0.75, 1.0],
+            ).createShader(bounds);
+          } else {
+            return const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: <Color>[
+                Color(0x8A000000), // ~54% max opacity in light mode for non-contrasting soft look
+                Color(0x70000000), // ~44%
+                Color(0x20000000), // ~12%
+                Colors.transparent,
+              ],
+              stops: <double>[0.0, 0.45, 0.75, 1.0],
+            ).createShader(bounds);
+          }
+        },
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: <Widget>[
+            // Background Vector Canvas: Grid, Waves, ECG Line, Sparkles
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _MedicalHeroIllustrationPainter(dark: dark),
               ),
             ),
-          ),
 
-          // Top Navigation Bar
-          Positioned(
-            top: topInset + 6,
-            left: 12,
-            right: 16,
-            child: Row(
-              children: <Widget>[
-                if (onBack != null || Navigator.of(context).canPop())
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_rounded),
-                    iconSize: 22,
-                    color: dark ? Colors.white : const Color(0xFF082F49),
-                    onPressed: onBack ?? () => Navigator.of(context).maybePop(),
-                  )
-                else
-                  const SizedBox(width: 8),
-                Text(
-                  'Profil Dokter',
-                  style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
-                    fontSize: 19,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.4,
-                    color: dark ? Colors.white : const Color(0xFF082F49),
-                  ),
-                ),
-              ],
+            // Right Telehealth Tablet & Badges Illustration
+            Positioned(
+              right: 8,
+              bottom: 24,
+              child: _TelehealthArtwork(dark: dark, onTap: onIdCardTap),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

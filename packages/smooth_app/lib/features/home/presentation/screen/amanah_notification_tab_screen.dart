@@ -5,6 +5,7 @@ import 'package:smooth_app/features/home/presentation/components/amanah_clay_ico
 import 'package:smooth_app/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_filter_bar.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_modal_scaffold.dart';
+import 'package:smooth_app/features/home/presentation/components/amanah_pull_to_refresh.dart';
 import 'package:smooth_app/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:smooth_app/features/home/presentation/theme/amanah_color_tokens.dart';
 
@@ -109,56 +110,65 @@ class _AmanahNotificationTabScreenState
 
             // 3. Notification List Area
             Expanded(
-              child: filteredList.isEmpty
-                  ? SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
+              child: AmanahPullToRefresh(
+                onRefresh: () async {
+                  await Future<void>.delayed(const Duration(milliseconds: 900));
+                },
+                child: filteredList.isEmpty
+                    ? SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(
+                          parent: AlwaysScrollableScrollPhysics(),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                        child: AmanahEmptyState.box(
+                          title: 'Belum Ada Notifikasi',
+                          message: _activeCategory == AmanahNotificationCategory.all
+                              ? 'Semua pembaruan operasional klinis dan jadwal praktik sudah diperiksa.'
+                              : 'Tidak ada pemberitahuan pada kategori "${_activeCategory.label}".',
+                          actionText: _activeCategory !=
+                                  AmanahNotificationCategory.all
+                              ? 'Lihat Semua Kategori'
+                              : null,
+                          actionLeadingIcon: _activeCategory !=
+                                  AmanahNotificationCategory.all
+                              ? Icons.clear_all_rounded
+                              : null,
+                          onAction: _activeCategory !=
+                                  AmanahNotificationCategory.all
+                              ? () => setState(
+                                  () => _activeCategory =
+                                      AmanahNotificationCategory.all,
+                                )
+                              : null,
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
+                        physics: const BouncingScrollPhysics(
+                          parent: AlwaysScrollableScrollPhysics(),
+                        ),
+                        itemCount: filteredList.length,
+                        separatorBuilder: (BuildContext context, int index) =>
+                            Divider(
+                              height: 1,
+                              thickness: 1,
+                              color: dark
+                                  ? Colors.white.withValues(alpha: 0.05)
+                                  : const Color(0xFFF1F5F9),
+                            ),
+                        itemBuilder: (BuildContext context, int index) {
+                          final AmanahNotificationItem item = filteredList[index];
+                          return _AmanahNotificationTile(
+                            item: item,
+                            dark: dark,
+                            onTap: () => _handleItemClick(item),
+                          );
+                        },
                       ),
-                      child: AmanahEmptyState.box(
-                        title: 'Belum Ada Notifikasi',
-                        message: _activeCategory == AmanahNotificationCategory.all
-                            ? 'Semua pembaruan operasional klinis dan jadwal praktik sudah diperiksa.'
-                            : 'Tidak ada pemberitahuan pada kategori "${_activeCategory.label}".',
-                        actionText: _activeCategory !=
-                                AmanahNotificationCategory.all
-                            ? 'Lihat Semua Kategori'
-                            : null,
-                        actionLeadingIcon: _activeCategory !=
-                                AmanahNotificationCategory.all
-                            ? Icons.clear_all_rounded
-                            : null,
-                        onAction: _activeCategory !=
-                                AmanahNotificationCategory.all
-                            ? () => setState(
-                                () => _activeCategory =
-                                    AmanahNotificationCategory.all,
-                              )
-                            : null,
-                      ),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: filteredList.length,
-                      separatorBuilder: (BuildContext context, int index) =>
-                          Divider(
-                            height: 1,
-                            thickness: 1,
-                            color: dark
-                                ? Colors.white.withValues(alpha: 0.05)
-                                : const Color(0xFFF1F5F9),
-                          ),
-                      itemBuilder: (BuildContext context, int index) {
-                        final AmanahNotificationItem item = filteredList[index];
-                        return _AmanahNotificationTile(
-                          item: item,
-                          dark: dark,
-                          onTap: () => _handleItemClick(item),
-                        );
-                      },
-                    ),
+              ),
             ),
           ],
         ),

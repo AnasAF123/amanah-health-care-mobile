@@ -4,7 +4,6 @@ import 'package:smooth_app/features/authentication/presentation/components/auth_
 import 'package:smooth_app/features/authentication/presentation/components/password_input_field.dart';
 import 'package:smooth_app/features/authentication/presentation/components/password_strength_meter.dart';
 import 'package:smooth_app/features/authentication/presentation/components/social_auth_button.dart';
-import 'package:smooth_app/features/authentication/presentation/state/password_requirements.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
 
 class ChangePasswordContent extends StatelessWidget {
@@ -78,9 +77,10 @@ class ChangePasswordContent extends StatelessWidget {
   }
 
   String? _validatePassword(String? value) {
-    return AmanahPasswordRequirements.validate(
-      value,
-      requiredMessage: 'Password baru wajib diisi.',
-    );
+    final String input = value ?? '';
+    if (input.isEmpty) {
+      return 'Password baru wajib diisi.';
+    }
+    return null;
   }
 }
