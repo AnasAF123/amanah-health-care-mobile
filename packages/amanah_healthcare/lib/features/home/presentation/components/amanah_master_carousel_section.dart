@@ -1,8 +1,9 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_carousel_tokens.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 /// Clinic Promotional Slide Model matching ClinicSlide in MasterCarouselSection.tsx (.web)
 class AmanahClinicSlide {
@@ -666,8 +667,8 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: widget.isDark
-                          ? const Color(0xFF0F172A)
-                          : const Color(0xFF1E293B),
+                          ? AmanahColorTokens.neutral900
+                          : AmanahColorTokens.neutral800,
                     ),
                   ),
                 ),
@@ -697,15 +698,15 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
                         end: Alignment.centerRight,
                         stops: const <double>[0.0, 0.58, 1.0],
                         colors: widget.isDark
-                            ? const <Color>[
-                                Color(0xF20B1120), // ~95% dark slate
-                                Color(0xB30F172A), // ~70% dark slate
-                                Color(0x4D0F172A), // ~30% dark slate
+                            ? <Color>[
+                                AmanahColorTokens.canvasDark.withValues(alpha: 0.95),
+                                AmanahColorTokens.neutral900.withValues(alpha: 0.70),
+                                AmanahColorTokens.neutral900.withValues(alpha: 0.30),
                               ]
-                            : const <Color>[
-                                Color(0xD90F172A), // ~85% deep navy
-                                Color(0x800F172A), // ~50% deep navy
-                                Color(0x260F172A), // ~15% soft tint
+                            : <Color>[
+                                AmanahColorTokens.neutral900.withValues(alpha: 0.85),
+                                AmanahColorTokens.neutral900.withValues(alpha: 0.50),
+                                AmanahColorTokens.neutral900.withValues(alpha: 0.15),
                               ],
                       ),
                     ),
@@ -756,7 +757,7 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
                                         fontWeight: FontWeight.w900,
                                         letterSpacing: -0.2,
                                         height: 1.15,
-                                        color: Colors.white,
+                                        color: AmanahColorTokens.surfaceLight,
                                       ),
                                     ),
                                   ),
@@ -775,7 +776,7 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
                                         fontSize: 11.0,
                                         fontWeight: FontWeight.w500,
                                         height: 1.30,
-                                        color: Color(0xFFE2E8F0),
+                                        color: AmanahColorTokens.neutral200,
                                       ),
                                     ),
                                   ),
@@ -810,8 +811,8 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: widget.isDark
-                            ? const Color(0x33000000)
-                            : const Color(0x1AFFFFFF),
+                            ? AmanahColorTokens.pureBlack.withValues(alpha: 0.20)
+                            : AmanahColorTokens.surfaceLight.withValues(alpha: 0.10),
                       ),
                     ),
                   ),
@@ -901,7 +902,7 @@ class AmanahCarouselNotchedIndicator extends StatelessWidget {
                     ? <BoxShadow>[
                         BoxShadow(
                           color: (isDark
-                                  ? const Color(0x6638BDF8)
+                                  ? AmanahColorTokens.brandSoft.withValues(alpha: 0.40)
                                   : AmanahCarouselTokens
                                         .indicatorActiveColor
                                         .withValues(alpha: 0.35)),
@@ -955,7 +956,7 @@ class AmanahCarouselNavButton extends StatelessWidget {
             ),
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.50 : 0.08),
+                color: AmanahColorTokens.pureBlack.withValues(alpha: isDark ? 0.50 : 0.08),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),

@@ -1,4 +1,4 @@
-﻿// ignore_for_file: avoid_classes_with_only_static_members
+// ignore_for_file: avoid_classes_with_only_static_members
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_visual_role.dart';
 
@@ -501,6 +501,35 @@ abstract final class AmanahColorTokens {
   static const Color violetDark = Color(0xFF6D28D9);
   static const Color violetSurface = Color(0xFFF5F3FF);
   static const Color violetBorder = Color(0xFFDDD6FE);
+  static const Color sky = Color(0xFF0284C7);
+  static const Color skySoft = Color(0xFF38BDF8);
+  static const Color skySurface = Color(0xFFF0F9FF);
+  static const Color skyLight = Color(0xFFE0F2FE);
+  static const Color skySubtle = Color(0xFFBAE6FD);
+  static const Color skyDark = Color(0xFF0369A1);
+  static const Color skyDeep = Color(0xFF0096C7);
+  static const Color skyMedium = Color(0xFF0EA5E9);
+  static const Color cyanDark = Color(0xFF0E7490);
+  static const Color cyanBright = Color(0xFF00D3F2);
+  static const Color cyanLight = Color(0xFF67E8F9);
+  static const Color indigoDark = Color(0xFF1E1B4B);
+  static const Color cyanAccent = Color(0xFF22D3EE);
+  static const Color brandNavy = Color(0xFF082F49);
+  static const Color brandNavyDark = Color(0xFF060B18);
+  static const Color navySurface = Color(0xFF0B1329);
+  static const Color amberDark = Color(0xFFB45309);
+  static const Color amberLight = Color(0xFFFBBF24);
+  static const Color amberBorderDark = Color(0xFF78350F);
+  static const Color amberBgDark = Color(0xFF1E170A);
+  static const Color amberBgDarker = Color(0xFF191308);
+  static const Color amberSurfaceLight = Color(0xFFFFFBEB);
+  static const Color amberSurfaceSoft = Color(0xFFFEF3C7);
+  static const Color amberBorderLight = Color(0xFFFDE68A);
+  static const Color featherGrayLight = Color(0xFFD5DBE3);
+  static const Color featherGray = Color(0xFFB4BECC);
+  static const Color mailAirLight = Color(0xFFBBF2F6);
+  static const Color mailAir = Color(0xFF8DE0F7);
+  static const Color mailAirBorder = Color(0xFF74C5E3);
 
   // ---------------------------------------------------------------------------
   // 3. Neutrals (Light & Dark Foundations)
@@ -516,6 +545,10 @@ abstract final class AmanahColorTokens {
   static const Color neutral800 = Color(0xFF1E293B);
   static const Color neutral900 = Color(0xFF0F172A);
   static const Color neutral950 = Color(0xFF020617);
+  static const Color pureBlack = Color(0xFF000000);
+  static const Color pureWhite = Color(0xFFFFFFFF);
+  static const Color textShadowBlack20 = Color(0x33000000);
+  static const Color textWhite85 = Color(0xD9FFFFFF);
 
   // ---------------------------------------------------------------------------
   // 4. Surfaces Aligned with color-palette-1788452212858.css
@@ -669,4 +702,114 @@ abstract final class AmanahColorTokens {
   static const Color auroraBlueDark = Color(0xFF1D4ED8);
   static const Color auroraCyanDark = Color(0xFF06B6D4); // Soft medical cyan accent in dark mode
   static const Color auroraCyanLuminousDark = Color(0xFF22D3EE);
+  static const Color brandNavyBold = Color(0xFF1E40AF);
+  static const Color brandDarkNavy = Color(0xFF1E3A8A);
+  static const Color brandIndigoNavy = Color(0xFF0E3A7A);
+  static const Color brandPale = Color(0xFFBFDBFE);
+  static const Color badgeDepthDark = Color(0xFF041F3D);
+  static const Color badgeDepthLight = Color(0xFF0F2B66);
+  static const Color brandMidnight = Color(0xFF172554);
+  static const Color surfaceSecondaryLight = Color(0xFFF8FAFC);
+  static const Color warningLight = Color(0xFFFBBF24);
+  static const Color emeraldLight = Color(0xFF34D399);
+  static const Color roseLight = Color(0xFFFB7185);
+  static const Color auroraFluidHazeLight = Color(0xFF70A6FF);
+  static const Color dockCavityDark = Color(0xFF060913);
+  static const Color dockCavityDeep = Color(0xFF020306);
+  static const Color dockSurfaceDarkTop = Color(0xFF0F1629);
+  static const Color dockSurfaceDarkMid = Color(0xFF0A0F1D);
+  static const Color dockSurfaceDarkBottom = Color(0xFF050810);
+  static const Color cardCoverDarkTop = Color(0xFF162238);
+  static const Color cardCoverDarkBottom = Color(0xFF0B1220);
+  static const Color cardCoverLightBottom = Color(0xFFEDF2FF);
+  static const Color brandVividBlue = Color(0xFF1A55FF);
+  static const Color isoBoxLightExteriorRight = Color(0xFFD8E1ED);
+  static const Color isoBoxLightInteriorBackLeft = Color(0xFFB9C6D8);
+  static const Color isoBoxLightInteriorBackRight = Color(0xFFA4B4CC);
+  static const Color isoBoxLightInteriorFloor = Color(0xFF91A2BC);
+  static const Color isoBoxLightFlapBackLeft = Color(0xFFE2E9F3);
+  static const Color isoBoxLightFlapBackRight = Color(0xFFCBD6E6);
+  static const Color isoBoxLightFlapFrontRight = Color(0xFFC6D3E4);
+  static const Color isoBoxLightStrokeBox = Color(0x73B4C3D7);
+  static const Color isoBoxLightStrokeTrail = Color(0xFFA4B3C8);
+  static const Color isoBoxLightSparkle = Color(0xFFB8C5D8);
+  static const Color isoBoxLightInsectBody = Color(0xFF59667A);
+  static const Color isoBoxLightInsectWing = Color(0xBFC3D0E2);
+  static const Color isoBoxDarkInteriorBackLeft = Color(0xFF162032);
+  static const Color isoBoxDarkInteriorBackRight = Color(0xFF0D1524);
+  static const Color isoBoxDarkInteriorFloor = Color(0xFF0B111C);
+  static const Color isoBoxDarkFlapBackLeft = Color(0xFF243247);
+  static const Color isoBoxDarkFlapBackRight = Color(0xFF1A2536);
+  static const Color isoBoxDarkFlapFrontLeft = Color(0xFF223043);
+  static const Color isoBoxDarkFlapFrontRight = Color(0xFF182332);
+  static const Color cyanSubtle = Color(0xFFF0FDFA);
+  static const Color skyDarkest = Color(0xFF0C4A6E);
+  static const Color toolboxCavityBackLeft = Color(0xFF111827);
+  static const Color toolboxCavityBackRight = Color(0xFF1F2937);
+  static const Color toolboxCavityLeftTop = Color(0xFF2A303C);
+  static const Color toolboxCavityLeftBottom = Color(0xFF141822);
+  static const Color toolboxCavityRightTop = Color(0xFF374151);
+  static const Color toolboxFaceLeftTop = Color(0xFFB3B3B3);
+  static const Color toolboxFaceLeftBottom = Color(0xFF808080);
+  static const Color toolboxFaceRightTop = Color(0xFFD9D9D9);
+  static const Color toolboxFaceRightBottom = Color(0xFFA6A6A6);
+  static const Color toolboxFaceTopEnd = Color(0xFFE8E8E8);
+  static const Color toolboxSeamLight = Color(0xFFE6E6E6);
+  static const Color toolboxSeamMid = Color(0xFFCCCCCC);
+  static const Color toolboxSeamDark = Color(0xFF666666);
+  static const Color toolboxCrossRed = Color(0xFFE60000);
+  static const Color toolboxCrossShadow = Color(0xFF990000);
+  static const Color toolboxHandleShadow = Color(0x66646464);
+  static const Color toolboxHandleMount = Color(0xFF1A1A1A);
+  static const Color toolboxHandle = Color(0xFF333333);
+  static const Color toolboxHandleShimmer = Color(0xFF777777);
+  static const Color toolboxLatchBase = Color(0xFF888888);
+  static const Color toolboxLatchUpper = Color(0xFFDDDDDD);
+  static const Color maskConcave40 = Color(0x40000000);
+  static const Color maskConcaveA6 = Color(0xA6000000);
+  static const Color maskConcaveEB = Color(0xEB000000);
+  static const Color maskRadialBF = Color(0xBF000000);
+  static const Color maskRadial73 = Color(0x73000000);
+  static const Color maskRadial33 = Color(0x33000000);
+  static const Color maskRadial0F = Color(0x0F000000);
+  static const Color maskRadialCC = Color(0xCC000000);
+  static const Color maskRadial80 = Color(0x80000000);
+  static const Color maskRadial2B = Color(0x2B000000);
+  static const Color maskLinearD9 = Color(0xD9000000);
+  static const Color maskLinear59 = Color(0x59000000);
+  static const Color carouselBgLightMid = Color(0xFFF4F7FF);
+  static const Color carouselBgLightBottom = Color(0xFFEAF0FF);
+  static const Color carouselRimStrokeLight = Color(0xF2DBEAFE);
+  static const Color carouselRimStrokeDark = Color(0x26FFFFFF);
+  static const Color carouselDescriptionDark = Color(0xFFD4D4D4);
+  static const Color carouselIndicatorInactiveDark = Color(0xFF525252);
+  static const Color carouselNavBtnBgLight = Color(0xF2FFFFFF);
+  static const Color carouselNavBtnBorderLight = Color(0xE6DBEAFE);
+  static const Color carouselNavBtnBgDark = Color(0xD90F1422);
+  static const Color carouselNavBtnBorderDark = Color(0x33FFFFFF);
+  static const Color carouselShadowLight = Color(0x0F0A44FF);
+  static const Color cardShadowDark = Color(0x66000000);
+  static const Color scheduleBorderLight = Color(0xF2E2E8F0);
+  static const Color scheduleBorderDark = Color(0x29FFFFFF);
+  static const Color scheduleDashedLight = Color(0xE6CBD5E1);
+  static const Color scheduleDashedDark = Color(0x33FFFFFF);
+  static const Color schedulePoliLight = Color(0xFF0F172B);
+  static const Color schedulePillBgDark = Color(0x1AFFFFFF);
+  static const Color scheduleDismissBgLight = Color(0xCCF1F5F9);
+  static const Color scheduleGlassLight45 = Color(0xE6FFFFFF);
+  static const Color scheduleGlassLight64 = Color(0x73FFFFFF);
+  static const Color scheduleGlassLight82 = Color(0x1AFFFFFF);
+  static const Color scheduleGlassLight100 = Color(0x00FFFFFF);
+  static const Color scheduleGlassDark0 = Color(0xF5060B18);
+  static const Color scheduleGlassDark45 = Color(0xEB060B18);
+  static const Color scheduleGlassDark64 = Color(0x990B1329);
+  static const Color scheduleGlassDark82 = Color(0x260B1329);
+  static const Color scheduleGlassDark100 = Color(0x000B1329);
+  static const Color scheduleSheenLight0 = Color(0x66FFFFFF);
+  static const Color scheduleSheenLight35 = Color(0x26FFFFFF);
+  static const Color scheduleSheenDark0 = Color(0x1FFFFFFF);
+  static const Color scheduleSheenDark35 = Color(0x0A38BDF8);
+  static const Color scheduleTransparent = Color(0x00000000);
+  static const Color scheduleShadowLight = Color(0x0F000000);
 }
+

@@ -1,4 +1,4 @@
-﻿// ignore_for_file: avoid_classes_with_only_static_members
+// ignore_for_file: avoid_classes_with_only_static_members
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/permission/domain/amanah_permission_model.dart';
@@ -41,15 +41,20 @@ abstract final class AmanahPermissionTokens {
   static const Color cardWrapperLight = AmanahColorTokens.surfaceLight;
   static const Color cardWrapperDark = AmanahColorTokens.surfaceDark;
   static const Color cardBorderLight = AmanahColorTokens.neutral100;
-  static const Color cardBorderDark = Color(0x1AFFFFFF);
-  static const Color innerStitchBgLight = Color(0x66F8FAFC);
-  static const Color innerStitchBgDark = Color(0x0AFFFFFF);
-  static const Color dashedStrokeLight = Color(0xE6E2E8F0);
-  static const Color dashedStrokeDark = Color(0x26FFFFFF);
+  static final Color cardBorderDark =
+      AmanahColorTokens.surfaceLight.withValues(alpha: 0.10);
+  static final Color innerStitchBgLight =
+      AmanahColorTokens.neutral50.withValues(alpha: 0.40);
+  static final Color innerStitchBgDark =
+      AmanahColorTokens.surfaceLight.withValues(alpha: 0.04);
+  static final Color dashedStrokeLight =
+      AmanahColorTokens.neutral200.withValues(alpha: 0.90);
+  static final Color dashedStrokeDark =
+      AmanahColorTokens.surfaceLight.withValues(alpha: 0.15);
   static const Color textTitleLight = AmanahColorTokens.neutral900;
-  static const Color textTitleDark = Colors.white;
+  static const Color textTitleDark = AmanahColorTokens.surfaceLight;
   static const Color textMutedLight = AmanahColorTokens.neutral500;
   static const Color textMutedDark = AmanahColorTokens.neutral400;
-  static const Color textDetailBodyLight = Color(0xFF314158);
-  static const Color textDetailBodyDark = Color(0xFFE2E8F0);
+  static const Color textDetailBodyLight = AmanahColorTokens.neutral700;
+  static const Color textDetailBodyDark = AmanahColorTokens.neutral200;
 }

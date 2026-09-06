@@ -1,7 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahReportItem {
   const AmanahReportItem({
@@ -38,17 +39,11 @@ class AmanahItMyReportsScreen extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color bgColor = dark
-        ? const Color(0xFF0A0E1A)
-        : const Color(0xFFF8FAFF);
-    final Color cardBg = dark ? const Color(0xFF111624) : Colors.white;
-    final Color borderColor = dark
-        ? Colors.white.withValues(alpha: 0.05)
-        : const Color(0xFFF1F5F9);
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+    final Color bgColor = AmanahThemeTokens.canvas(context);
+    final Color cardBg = AmanahThemeTokens.surface(context);
+    final Color borderColor = AmanahThemeTokens.outline(context);
+    final Color textColor = AmanahThemeTokens.textPrimary(context);
+    final Color subtextColor = AmanahThemeTokens.textSecondary(context);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -131,30 +126,15 @@ class _ReportCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isProcessing = report.status == 'proses';
 
-    Color badgeBg;
-    Color badgeBorder;
-    Color badgeText;
-    String badgeLabel;
-
-    if (isProcessing) {
-      badgeBg = dark
-          ? const Color(0xFF78350F).withValues(alpha: 0.40)
-          : const Color(0xFFFFFBEB);
-      badgeBorder = dark
-          ? const Color(0xFFF59E0B).withValues(alpha: 0.30)
-          : const Color(0xFFFDE68A);
-      badgeText = dark ? const Color(0xFFFCD34D) : const Color(0xFFB45309);
-      badgeLabel = 'Sedang ditangani';
-    } else {
-      badgeBg = dark
-          ? const Color(0xFF064E3B).withValues(alpha: 0.40)
-          : const Color(0xFFECFDF5);
-      badgeBorder = dark
-          ? const Color(0xFF10B981).withValues(alpha: 0.30)
-          : const Color(0xFFA7F3D0);
-      badgeText = dark ? const Color(0xFF34D399) : const Color(0xFF047857);
-      badgeLabel = 'Selesai ditangani';
-    }
+    final AmanahTone badgeTone = AmanahThemeTokens.status(
+      isProcessing ? AmanahStatusTone.warning : AmanahStatusTone.success,
+      isDark: dark,
+    );
+    final Color badgeBg = badgeTone.surface;
+    final Color badgeBorder = badgeTone.border;
+    final Color badgeText = badgeTone.onSurface;
+    final String badgeLabel =
+        isProcessing ? 'Sedang ditangani' : 'Selesai ditangani';
 
     return Container(
       width: double.infinity,
@@ -165,7 +145,9 @@ class _ReportCard extends StatelessWidget {
         border: Border.all(color: borderColor),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withValues(alpha: dark ? 0.35 : 0.03),
+            color: AmanahColorTokens.pureBlack.withValues(
+              alpha: dark ? 0.35 : 0.03,
+            ),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -221,19 +203,21 @@ class _ReportCard extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: dark
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : const Color(0xFFF8FAFC),
+                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                  : AmanahColorTokens.neutral50,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: dark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : const Color(0xFFF1F5F9),
+                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                    : AmanahColorTokens.neutral100,
               ),
             ),
             child: Text(
               report.technicianNote,
               style: TextStyle(
-                color: dark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                color: dark
+                    ? AmanahColorTokens.neutral300
+                    : AmanahColorTokens.neutral600,
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 11,
                 height: 1.45,

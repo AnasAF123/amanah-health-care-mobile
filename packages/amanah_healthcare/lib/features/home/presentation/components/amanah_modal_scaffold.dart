@@ -1,4 +1,4 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
@@ -131,7 +131,7 @@ class _AmanahSheetHandle extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: dark
-                ? Colors.white.withValues(alpha: 0.25)
+                ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.25)
                 : AmanahColorTokens.neutral300,
             borderRadius: BorderRadius.circular(AmanahRadius.pill),
           ),

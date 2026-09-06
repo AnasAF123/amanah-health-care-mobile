@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
@@ -6,6 +6,7 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_s
 import 'package:amanah_healthcare/features/home/presentation/screen/settings/amanah_it_chat_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/settings/amanah_it_faq_detail_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/settings/amanah_it_my_reports_screen.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahItSupportSettingsScreen extends StatefulWidget {
   const AmanahItSupportSettingsScreen({this.user, this.onBack, super.key});
@@ -139,47 +140,25 @@ class _AmanahItSupportSettingsScreenState
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color bgColor = dark
-        ? const Color(0xFF0A0E1A)
-        : const Color(0xFFF8FAFF);
-    final Color cardBg = dark ? const Color(0xFF111624) : Colors.white;
-    final Color borderColor = dark
-        ? Colors.white.withValues(alpha: 0.05)
-        : const Color(0xFFF1F5F9);
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+    final Color bgColor = AmanahThemeTokens.canvas(context);
+    final Color cardBg = AmanahThemeTokens.surface(context);
+    final Color borderColor = AmanahThemeTokens.outline(context);
+    final Color textColor = AmanahThemeTokens.textPrimary(context);
+    final Color subtextColor = AmanahThemeTokens.textSecondary(context);
 
     final int activeReportsCount = _reports
         .where((AmanahReportItem r) => r.status == 'proses')
         .length;
 
-    Color reportBadgeBg;
-    Color reportBadgeBorder;
-    Color reportBadgeText;
-
-    if (activeReportsCount > 0) {
-      reportBadgeBg = dark
-          ? const Color(0xFF78350F).withValues(alpha: 0.40)
-          : const Color(0xFFFFFBEB);
-      reportBadgeBorder = dark
-          ? const Color(0xFFF59E0B).withValues(alpha: 0.30)
-          : const Color(0xFFFDE68A);
-      reportBadgeText = dark
-          ? const Color(0xFFFCD34D)
-          : const Color(0xFFB45309);
-    } else {
-      reportBadgeBg = dark
-          ? Colors.white.withValues(alpha: 0.10)
-          : const Color(0xFFF1F5F9);
-      reportBadgeBorder = dark
-          ? Colors.white.withValues(alpha: 0.10)
-          : const Color(0xFFE2E8F0);
-      reportBadgeText = dark
-          ? const Color(0xFFCBD5E1)
-          : const Color(0xFF475569);
-    }
+    final AmanahTone reportBadgeTone = AmanahThemeTokens.status(
+      activeReportsCount > 0
+          ? AmanahStatusTone.warning
+          : AmanahStatusTone.neutral,
+      isDark: dark,
+    );
+    final Color reportBadgeBg = reportBadgeTone.surface;
+    final Color reportBadgeBorder = reportBadgeTone.border;
+    final Color reportBadgeText = reportBadgeTone.onSurface;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -215,7 +194,7 @@ class _AmanahItSupportSettingsScreenState
                           border: Border.all(color: borderColor),
                           boxShadow: <BoxShadow>[
                             BoxShadow(
-                              color: Colors.black.withValues(
+                              color: AmanahColorTokens.pureBlack.withValues(
                                 alpha: dark ? 0.35 : 0.03,
                               ),
                               blurRadius: 10,
@@ -305,13 +284,17 @@ class _AmanahItSupportSettingsScreenState
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: dark
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : const Color(0xFFEFF6FF),
+                            ? AmanahColorTokens.surfaceLight.withValues(
+                                alpha: 0.05,
+                              )
+                            : AmanahColorTokens.brandSurface,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: dark
-                              ? Colors.white.withValues(alpha: 0.10)
-                              : const Color(0xFFDBEAFE),
+                              ? AmanahColorTokens.surfaceLight.withValues(
+                                  alpha: 0.10,
+                                )
+                              : AmanahColorTokens.brandMuted,
                         ),
                       ),
                       child: Column(
@@ -321,8 +304,8 @@ class _AmanahItSupportSettingsScreenState
                             'Butuh bantuan teknisi langsung?',
                             style: TextStyle(
                               color: dark
-                                  ? Colors.white
-                                  : const Color(0xFF1E3A8A),
+                                  ? AmanahColorTokens.surfaceLight
+                                  : AmanahColorTokens.navy,
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
@@ -333,8 +316,8 @@ class _AmanahItSupportSettingsScreenState
                             'Hubungi petugas IT melalui percakapan langsung untuk penanganan kendala cepat.',
                             style: TextStyle(
                               color: dark
-                                  ? const Color(0xFF94A3B8)
-                                  : const Color(0xFF475569),
+                                  ? AmanahColorTokens.neutral400
+                                  : AmanahColorTokens.neutral600,
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 11.5,
                               height: 1.4,

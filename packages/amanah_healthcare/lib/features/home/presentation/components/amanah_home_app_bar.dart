@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
@@ -49,7 +49,7 @@ class AmanahHomeAppBar extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AmanahColorTokens.surfaceLight,
                           fontFamily: 'PlusJakartaSans',
                           fontSize: 15.5,
                           fontWeight: FontWeight.w800,
@@ -57,7 +57,7 @@ class AmanahHomeAppBar extends StatelessWidget {
                           height: 1.15,
                           shadows: <Shadow>[
                             Shadow(
-                              color: Color(0x33000000),
+                              color: AmanahColorTokens.textShadowBlack20,
                               blurRadius: 3,
                               offset: Offset(0, 1),
                             ),
@@ -70,7 +70,7 @@ class AmanahHomeAppBar extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Color(0xD9FFFFFF),
+                          color: AmanahColorTokens.textWhite85,
                           fontFamily: 'PlusJakartaSans',
                           fontSize: 11.5,
                           fontWeight: FontWeight.w500,
@@ -109,12 +109,12 @@ class _DoctorAvatar extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.35),
+            color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.35),
             width: 1.5,
           ),
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.12),
+              color: AmanahColorTokens.pureBlack.withValues(alpha: 0.12),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -129,11 +129,11 @@ class _DoctorAvatar extends StatelessWidget {
             errorBuilder:
                 (BuildContext context, Object error, StackTrace? stackTrace) {
                   return Container(
-                    color: const Color(0xFF0D66E9).withValues(alpha: 0.40),
+                    color: AmanahColorTokens.brand.withValues(alpha: 0.40),
                     alignment: Alignment.center,
                     child: const Icon(
                       Icons.person,
-                      color: Colors.white,
+                      color: AmanahColorTokens.surfaceLight,
                       size: 22,
                     ),
                   );
@@ -173,14 +173,14 @@ class _NotificationButton extends StatelessWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.12),
+                  color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.12),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.20),
+                    color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.20),
                     width: 1.0,
                   ),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
+                      color: AmanahColorTokens.pureBlack.withValues(alpha: 0.08),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -192,7 +192,7 @@ class _NotificationButton extends StatelessWidget {
                     const Icon(
                       Icons.notifications_none_rounded,
                       size: 20,
-                      color: Colors.white,
+                      color: AmanahColorTokens.surfaceLight,
                     ),
                     if (unreadNotifications > 0)
                       Positioned(
@@ -202,9 +202,9 @@ class _NotificationButton extends StatelessWidget {
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEF4444),
+                            color: AmanahColorTokens.danger,
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 1.5),
+                            border: Border.all(color: AmanahColorTokens.surfaceLight, width: 1.5),
                           ),
                         ),
                       ),

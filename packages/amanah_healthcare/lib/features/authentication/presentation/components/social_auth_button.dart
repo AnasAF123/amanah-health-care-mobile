@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
@@ -26,7 +26,7 @@ class SocialAuthButton extends StatelessWidget {
     final Color backgroundColor = provider == AuthProviderType.google
         ? (dark
               ? AmanahThemeTokens.surfaceSecondary(context)
-              : const Color(0xFFF1F5F9))
+              : AmanahColorTokens.neutral100)
         : (provider == AuthProviderType.email
               ? (dark
                     ? AmanahColorTokens.brand.withValues(alpha: 0.16)

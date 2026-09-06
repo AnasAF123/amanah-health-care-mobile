@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
@@ -47,7 +47,9 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
               Text(
                 isCuti ? '0%' : '$capacityPercentage%',
                 style: TextStyle(
-                  color: dark ? Colors.white : const Color(0xFF0F172A),
+                  color: dark
+                      ? AmanahColorTokens.surfaceLight
+                      : AmanahColorTokens.neutral900,
                   fontFamily: 'PlusJakartaSans',
                   fontSize: 9.5,
                   fontWeight: FontWeight.w800,
@@ -57,8 +59,6 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-
-        // Capacity Labels
         Flexible(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +73,9 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                     Text(
                       'Kapasitas Hari Ini',
                       style: TextStyle(
-                        color: dark ? Colors.white : const Color(0xFF0F172A),
+                        color: dark
+                            ? AmanahColorTokens.surfaceLight
+                            : AmanahColorTokens.neutral900,
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 12,
                         fontWeight: FontWeight.w800,
@@ -87,9 +89,9 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                           vertical: 1,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(
-                            0xFFF59E0B,
-                          ).withValues(alpha: 0.20),
+                          color: AmanahColorTokens.warning.withValues(
+                            alpha: 0.20,
+                          ),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Row(
@@ -97,7 +99,7 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                           children: <Widget>[
                             DecoratedBox(
                               decoration: BoxDecoration(
-                                color: Color(0xFFF59E0B),
+                                color: AmanahColorTokens.warning,
                                 shape: BoxShape.circle,
                               ),
                               child: SizedBox(width: 5, height: 5),
@@ -106,7 +108,7 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                             Text(
                               'Cuti',
                               style: TextStyle(
-                                color: Color(0xFFF59E0B),
+                                color: AmanahColorTokens.warning,
                                 fontFamily: 'PlusJakartaSans',
                                 fontSize: 9.5,
                                 fontWeight: FontWeight.w800,
@@ -141,8 +143,8 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                       ' / $targetQuota Pasien Terdaftar',
                       style: TextStyle(
                         color: dark
-                            ? const Color(0xFF94A3B8)
-                            : const Color(0xFF64748B),
+                            ? AmanahColorTokens.neutral400
+                            : AmanahColorTokens.neutral500,
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -176,28 +178,35 @@ class _RadialArcPainter extends CustomPainter {
     final double radius = (size.width - 6) / 2;
     final Rect bounds = Rect.fromCircle(center: center, radius: radius);
 
-    // Background track circle
     final Paint trackPaint = Paint()
       ..color = dark
-          ? Colors.white.withValues(alpha: 0.08)
-          : const Color(0xFFE2E8F0)
+          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.08)
+          : AmanahColorTokens.neutral200
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4.0;
     canvas.drawCircle(center, radius, trackPaint);
 
-    // Active arc progress with gradient
     if (progress > 0) {
       final Paint arcPaint = Paint()
         ..shader = isCuti
             ? const LinearGradient(
-                colors: <Color>[Color(0xFFF59E0B), Color(0xFFD97706)],
+                colors: <Color>[
+                  AmanahColorTokens.warning,
+                  AmanahColorTokens.warningDark,
+                ],
               ).createShader(bounds)
             : (dark
                   ? const LinearGradient(
-                      colors: <Color>[Color(0xFF22D3EE), Color(0xFF06B6D4)],
+                      colors: <Color>[
+                        AmanahColorTokens.cyanAccent,
+                        AmanahColorTokens.auroraCyanDark,
+                      ],
                     ).createShader(bounds)
                   : const LinearGradient(
-                      colors: <Color>[Color(0xFF60A5FA), Color(0xFF0D66E9)],
+                      colors: <Color>[
+                        AmanahColorTokens.brandSoft,
+                        AmanahColorTokens.brand,
+                      ],
                     ).createShader(bounds))
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
@@ -442,8 +451,8 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                           begin: Alignment.topCenter,
                                           end: Alignment.bottomCenter,
                                           colors: <Color>[
-                                            Color(0xFFF59E0B),
-                                            Color(0xFFD97706),
+                                            AmanahColorTokens.warning,
+                                            AmanahColorTokens.warningDark,
                                           ],
                                         )
                                       : (dark
@@ -455,30 +464,31 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                             color: isCloseToCenter
                                 ? null
                                 : (dark
-                                      ? Colors.white.withValues(alpha: 0.05)
-                                      : Colors.white),
+                                      ? AmanahColorTokens.surfaceLight
+                                            .withValues(alpha: 0.05)
+                                      : AmanahColorTokens.surfaceLight),
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
                               color: isCloseToCenter
                                   ? (isCuti
-                                        ? const Color(0xFFB45309)
+                                        ? AmanahColorTokens.amberDark
                                         : (dark
                                               ? AmanahColorTokens
                                                     .btnCrispBlueDarkBorder
                                               : AmanahColorTokens
                                                     .btnCrispBlueBorder))
                                   : (dark
-                                        ? Colors.white.withValues(alpha: 0.10)
-                                        : const Color(0xFFE2E8F0)),
+                                        ? AmanahColorTokens.surfaceLight
+                                              .withValues(alpha: 0.10)
+                                        : AmanahColorTokens.neutral200),
                               width: 1,
                             ),
                             boxShadow: isCloseToCenter
                                 ? <BoxShadow>[
                                     if (isCuti)
                                       BoxShadow(
-                                        color: const Color(
-                                          0xFFF59E0B,
-                                        ).withValues(alpha: 0.35),
+                                        color: AmanahColorTokens.warning
+                                            .withValues(alpha: 0.35),
                                         blurRadius: 10,
                                         offset: const Offset(0, 4),
                                       )
@@ -489,9 +499,8 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                   ]
                                 : <BoxShadow>[
                                     BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.03,
-                                      ),
+                                      color: AmanahColorTokens.pureBlack
+                                          .withValues(alpha: 0.03),
                                       blurRadius: 4,
                                       offset: const Offset(0, 2),
                                     ),
@@ -514,41 +523,39 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: <Widget>[
-                                    // 1. Month Abbr
                                     Text(
                                       _getMonthAbbr(date.month),
                                       style: TextStyle(
                                         color: isCloseToCenter
-                                            ? Colors.white
+                                            ? AmanahColorTokens.surfaceLight
                                             : (dark
-                                                  ? Colors.white.withValues(
-                                                      alpha: 0.70,
-                                                    )
-                                                  : const Color(0xFF64748B)),
+                                                  ? AmanahColorTokens
+                                                        .surfaceLight
+                                                        .withValues(alpha: 0.70)
+                                                  : AmanahColorTokens
+                                                        .neutral500),
                                         fontFamily: 'PlusJakartaSans',
                                         fontSize: 10,
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: 0.5,
                                       ),
                                     ),
-
-                                    // 2. Day Number
                                     Text(
                                       '${date.day}',
                                       style: TextStyle(
                                         color: isCloseToCenter
-                                            ? Colors.white
+                                            ? AmanahColorTokens.surfaceLight
                                             : (dark
-                                                  ? Colors.white
-                                                  : const Color(0xFF0F172A)),
+                                                  ? AmanahColorTokens
+                                                        .surfaceLight
+                                                  : AmanahColorTokens
+                                                        .neutral900),
                                         fontFamily: 'PlusJakartaSans',
                                         fontSize: 22,
                                         fontWeight: FontWeight.w900,
                                         height: 1.0,
                                       ),
                                     ),
-
-                                    // 3. Year / Hari ini + Indicator Dot (Vertical Column matching Web)
                                     Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
@@ -564,16 +571,16 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             color: isCloseToCenter
-                                                ? Colors.white.withValues(
-                                                    alpha: 0.95,
-                                                  )
+                                                ? AmanahColorTokens.surfaceLight
+                                                      .withValues(alpha: 0.95)
                                                 : (dark
-                                                      ? Colors.white.withValues(
-                                                          alpha: 0.55,
-                                                        )
-                                                      : const Color(
-                                                          0xFF94A3B8,
-                                                        )),
+                                                      ? AmanahColorTokens
+                                                            .surfaceLight
+                                                            .withValues(
+                                                              alpha: 0.55,
+                                                            )
+                                                      : AmanahColorTokens
+                                                            .neutral400),
                                             fontFamily: 'PlusJakartaSans',
                                             fontSize: 9,
                                             fontWeight: FontWeight.w700,
@@ -587,8 +594,9 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                             height: 5,
                                             decoration: BoxDecoration(
                                               color: isCloseToCenter
-                                                  ? Colors.white
-                                                  : const Color(0xFFF59E0B),
+                                                  ? AmanahColorTokens
+                                                        .surfaceLight
+                                                  : AmanahColorTokens.warning,
                                               shape: BoxShape.circle,
                                             ),
                                           )
@@ -598,7 +606,8 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                             height: 5,
                                             decoration: BoxDecoration(
                                               color: isCloseToCenter
-                                                  ? Colors.white
+                                                  ? AmanahColorTokens
+                                                        .surfaceLight
                                                   : (dark
                                                         ? AmanahColorTokens
                                                               .tabActiveDark

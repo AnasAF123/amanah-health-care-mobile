@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahQrCodeWidget extends StatelessWidget {
   const AmanahQrCodeWidget({
     required this.value,
     super.key,
     this.size = 152.0,
-    this.fgColor = const Color(0xFF0A0E1A),
-    this.bgColor = Colors.white,
+    this.fgColor = AmanahColorTokens.canvasDark,
+    this.bgColor = AmanahColorTokens.surfaceLight,
     this.borderRadius = 16.0,
   });
 
@@ -28,7 +29,7 @@ class AmanahQrCodeWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: AmanahColorTokens.pureBlack.withValues(alpha: 0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

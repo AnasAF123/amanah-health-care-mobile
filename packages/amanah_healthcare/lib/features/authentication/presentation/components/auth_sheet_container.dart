@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 
@@ -36,11 +36,11 @@ class AuthSheetContainer extends StatelessWidget {
           border: Border.all(
             color: dark
                 ? AmanahThemeTokens.outline(context)
-                : Colors.white.withValues(alpha: 0.62),
+                : AmanahColorTokens.surfaceLight.withValues(alpha: 0.62),
           ),
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: Colors.black.withValues(alpha: dark ? 0.34 : 0.16),
+              color: AmanahElevation.sheet(dark: dark).color.withValues(alpha: dark ? 0.34 : 0.16),
               blurRadius: 28,
               offset: const Offset(0, -8),
             ),
@@ -49,7 +49,7 @@ class AuthSheetContainer extends StatelessWidget {
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(34)),
           child: Material(
-            color: dark ? AmanahColorTokens.canvasDark : Colors.white,
+            color: AmanahThemeTokens.canvas(context),
             child: Stack(
               children: <Widget>[
                 if (!dark) const Positioned.fill(child: _AuthSheetBottomGradient()),

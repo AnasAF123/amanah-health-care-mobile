@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 /// 3D Paramedic Toolbox Vector Master Component
 /// Faithful 1:1 native Flutter translation of ParamedicToolbox3DSvg.tsx from web.
@@ -41,7 +42,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
 
     // 1. Ambient Drop Shadow under the toolbox
     final Paint shadowPaint1 = Paint()
-      ..color = Colors.black.withValues(alpha: 0.16)
+      ..color = AmanahColorTokens.pureBlack.withValues(alpha: 0.16)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5);
     canvas.drawOval(
       Rect.fromCenter(center: const Offset(52, 74), width: 40, height: 14),
@@ -49,7 +50,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
     );
 
     final Paint shadowPaint2 = Paint()
-      ..color = Colors.black.withValues(alpha: 0.25)
+      ..color = AmanahColorTokens.pureBlack.withValues(alpha: 0.25)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5);
     canvas.drawOval(
       Rect.fromCenter(center: const Offset(51, 73.5), width: 30, height: 10),
@@ -65,7 +66,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
         ..lineTo(31, 58)
         ..lineTo(50, 50)
         ..close();
-      canvas.drawPath(backLeftWall, Paint()..color = const Color(0xFF111827));
+      canvas.drawPath(backLeftWall, Paint()..color = AmanahColorTokens.toolboxCavityBackLeft);
 
       final Path backRightWall = Path()
         ..moveTo(50, 38)
@@ -73,7 +74,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
         ..lineTo(69, 58)
         ..lineTo(50, 50)
         ..close();
-      canvas.drawPath(backRightWall, Paint()..color = const Color(0xFF1F2937));
+      canvas.drawPath(backRightWall, Paint()..color = AmanahColorTokens.toolboxCavityBackRight);
 
       // Deep Interior Floor
       final Path interiorFloor = Path()
@@ -82,7 +83,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
         ..lineTo(50, 66)
         ..lineTo(31, 58)
         ..close();
-      canvas.drawPath(interiorFloor, Paint()..color = const Color(0xFF0F172A));
+      canvas.drawPath(interiorFloor, Paint()..color = AmanahColorTokens.neutral900);
 
       // Front-Facing Interior Walls
       final Path frontInsideLeft = Path()
@@ -93,7 +94,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
         ..close();
       final Paint insideLeftPaint = Paint()
         ..shader = const LinearGradient(
-          colors: <Color>[Color(0xFF2A303C), Color(0xFF141822)],
+          colors: <Color>[AmanahColorTokens.toolboxCavityLeftTop, AmanahColorTokens.toolboxCavityLeftBottom],
         ).createShader(const Rect.fromLTWH(31, 45.5, 19, 20.5));
       canvas.drawPath(frontInsideLeft, insideLeftPaint);
 
@@ -105,7 +106,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
         ..close();
       final Paint insideRightPaint = Paint()
         ..shader = const LinearGradient(
-          colors: <Color>[Color(0xFF374151), Color(0xFF1F2937)],
+          colors: <Color>[AmanahColorTokens.toolboxCavityRightTop, AmanahColorTokens.toolboxCavityBackRight],
         ).createShader(const Rect.fromLTWH(50, 45.5, 19, 20.5));
       canvas.drawPath(frontInsideRight, insideRightPaint);
 
@@ -116,7 +117,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
         ..lineTo(50, 55)
         ..lineTo(31, 45.5)
         ..close();
-      canvas.drawPath(lipLeft, Paint()..color = const Color(0xFFE2E8F0));
+      canvas.drawPath(lipLeft, Paint()..color = AmanahColorTokens.neutral200);
 
       final Path lipRight = Path()
         ..moveTo(50, 58)
@@ -124,16 +125,16 @@ class _AmanahToolbox3DPainter extends CustomPainter {
         ..lineTo(69, 45.5)
         ..lineTo(50, 55)
         ..close();
-      canvas.drawPath(lipRight, Paint()..color = const Color(0xFFCBD5E1));
+      canvas.drawPath(lipRight, Paint()..color = AmanahColorTokens.neutral300);
 
       // Radiant Medical Energy Burst Glow
       final Paint medicalGlow = Paint()
         ..shader =
             RadialGradient(
               colors: <Color>[
-                const Color(0xFF60A5FA),
-                const Color(0xFF2563EB).withValues(alpha: 0.8),
-                const Color(0xFF1D4ED8).withValues(alpha: 0.0),
+                AmanahColorTokens.brandSoft,
+                AmanahColorTokens.brandAccent.withValues(alpha: 0.8),
+                AmanahColorTokens.auroraAccentDark.withValues(alpha: 0.0),
               ],
               stops: const <double>[0.0, 0.45, 1.0],
             ).createShader(
@@ -161,7 +162,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
       ..shader = const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: <Color>[Color(0xFFB3B3B3), Color(0xFF808080)],
+        colors: <Color>[AmanahColorTokens.toolboxFaceLeftTop, AmanahColorTokens.toolboxFaceLeftBottom],
       ).createShader(const Rect.fromLTWH(28.35, 45.5, 21.65, 29.5));
     canvas.drawPath(lowerLeftFace, leftFacePaint);
 
@@ -176,7 +177,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
       ..shader = const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: <Color>[Color(0xFFD9D9D9), Color(0xFFA6A6A6)],
+        colors: <Color>[AmanahColorTokens.toolboxFaceRightTop, AmanahColorTokens.toolboxFaceRightBottom],
       ).createShader(const Rect.fromLTWH(50, 45.5, 21.65, 29.5));
     canvas.drawPath(lowerRightFace, rightFacePaint);
 
@@ -185,21 +186,21 @@ class _AmanahToolbox3DPainter extends CustomPainter {
       const Offset(50, 58),
       const Offset(50, 75),
       Paint()
-        ..color = const Color(0xFFE6E6E6)
+        ..color = AmanahColorTokens.toolboxSeamLight
         ..strokeWidth = 0.75,
     );
     canvas.drawLine(
       const Offset(28.35, 45.5),
       const Offset(28.35, 62.5),
       Paint()
-        ..color = const Color(0xFF666666)
+        ..color = AmanahColorTokens.toolboxSeamDark
         ..strokeWidth = 0.5,
     );
     canvas.drawLine(
       const Offset(71.65, 45.5),
       const Offset(71.65, 62.5),
       Paint()
-        ..color = const Color(0xFFCCCCCC)
+        ..color = AmanahColorTokens.toolboxSeamMid
         ..strokeWidth = 0.5,
     );
 
@@ -245,12 +246,12 @@ class _AmanahToolbox3DPainter extends CustomPainter {
     canvas.translate(0, 0.75);
     canvas.drawPath(
       crossPath,
-      Paint()..color = const Color(0xFF990000).withValues(alpha: 0.8),
+      Paint()..color = AmanahColorTokens.toolboxCrossShadow.withValues(alpha: 0.8),
     );
     canvas.restore();
 
     // Main Red Cross
-    canvas.drawPath(crossPath, Paint()..color = const Color(0xFFE60000));
+    canvas.drawPath(crossPath, Paint()..color = AmanahColorTokens.toolboxCrossRed);
     canvas.restore();
 
     // Latches on Base
@@ -292,7 +293,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
       ..close();
     final Paint topFacePaint = Paint()
       ..shader = const LinearGradient(
-        colors: <Color>[Color(0xFFFFFFFF), Color(0xFFE8E8E8)],
+        colors: <Color>[AmanahColorTokens.pureWhite, AmanahColorTokens.toolboxFaceTopEnd],
       ).createShader(const Rect.fromLTWH(28.35, 25, 43.3, 25));
     canvas.drawPath(topFace, topFacePaint);
 
@@ -301,21 +302,21 @@ class _AmanahToolbox3DPainter extends CustomPainter {
       const Offset(28.35, 37.5),
       const Offset(50, 50),
       Paint()
-        ..color = Colors.white.withValues(alpha: 0.9)
+        ..color = AmanahColorTokens.pureWhite.withValues(alpha: 0.9)
         ..strokeWidth = 0.75,
     );
     canvas.drawLine(
       const Offset(50, 50),
       const Offset(71.65, 37.5),
       Paint()
-        ..color = Colors.white
+        ..color = AmanahColorTokens.pureWhite
         ..strokeWidth = 0.75,
     );
     canvas.drawLine(
       const Offset(50, 50),
       const Offset(50, 58),
       Paint()
-        ..color = const Color(0xFFE6E6E6)
+        ..color = AmanahColorTokens.toolboxSeamLight
         ..strokeWidth = 0.75,
     );
 
@@ -328,7 +329,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
       const Offset(45, 35.5),
       const Offset(55, 41.5),
       Paint()
-        ..color = const Color(0x66646464)
+        ..color = AmanahColorTokens.toolboxHandleShadow
         ..strokeWidth = 3.0
         ..strokeCap = StrokeCap.round,
     );
@@ -340,7 +341,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
         width: 3.0,
         height: 1.5,
       ),
-      Paint()..color = const Color(0xFF1A1A1A),
+      Paint()..color = AmanahColorTokens.toolboxHandleMount,
     );
     canvas.drawOval(
       Rect.fromCenter(
@@ -348,7 +349,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
         width: 3.0,
         height: 1.5,
       ),
-      Paint()..color = const Color(0xFF1A1A1A),
+      Paint()..color = AmanahColorTokens.toolboxHandleMount,
     );
 
     // Main 3D Handle
@@ -360,7 +361,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
     canvas.drawPath(
       handlePath,
       Paint()
-        ..color = const Color(0xFF333333)
+        ..color = AmanahColorTokens.toolboxHandle
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.5
         ..strokeJoin = StrokeJoin.round
@@ -376,7 +377,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
     canvas.drawPath(
       handleShimmer,
       Paint()
-        ..color = const Color(0xFF777777)
+        ..color = AmanahColorTokens.toolboxHandleShimmer
         ..style = PaintingStyle.stroke
         ..strokeWidth = 0.75
         ..strokeJoin = StrokeJoin.round
@@ -410,7 +411,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
     canvas.transform(latchMatrix.storage);
     canvas.drawRect(
       const Rect.fromLTWH(-1.5, 0, 3.0, 3.5),
-      Paint()..color = const Color(0xFF888888),
+      Paint()..color = AmanahColorTokens.toolboxLatchBase,
     );
     canvas.restore();
   }
@@ -438,7 +439,7 @@ class _AmanahToolbox3DPainter extends CustomPainter {
     canvas.transform(latchMatrix.storage);
     canvas.drawRect(
       const Rect.fromLTWH(-1.5, -3.5, 3.0, 3.5),
-      Paint()..color = const Color(0xFFDDDDDD),
+      Paint()..color = AmanahColorTokens.toolboxLatchUpper,
     );
     canvas.restore();
   }

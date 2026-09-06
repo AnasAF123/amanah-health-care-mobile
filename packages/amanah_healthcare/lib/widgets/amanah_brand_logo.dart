@@ -1,8 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
-/// Reusable Master Branding Component for Amanah Healthcare.
-/// Displays the circular emblem alongside the official 'Amanah' Plus Jakarta Sans typography.
-/// Fully theme-adaptive: foreground switches between #13195C in light mode and Colors.white in dark mode.
 class AmanahBrandLogo extends StatelessWidget {
   const AmanahBrandLogo({
     super.key,
@@ -22,7 +20,7 @@ class AmanahBrandLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = isDark ?? (Theme.of(context).brightness == Brightness.dark);
-    final Color foreground = dark ? Colors.white : const Color(0xFF13195C);
+    final Color foreground = dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.navy;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

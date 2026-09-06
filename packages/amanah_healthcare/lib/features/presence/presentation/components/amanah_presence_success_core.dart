@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
@@ -105,7 +105,7 @@ class _AmanahPresenceSuccessCoreState extends State<AmanahPresenceSuccessCore>
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: dark ? 0.46 : 0.18),
+                color: AmanahColorTokens.pureBlack.withValues(alpha: dark ? 0.46 : 0.18),
                 blurRadius: 40,
                 offset: const Offset(0, -14),
               ),
@@ -666,7 +666,8 @@ class _SuccessPalette {
 
   static _SuccessPalette resolve(ThemeData theme) {
     final bool dark = theme.brightness == Brightness.dark;
-    final Color surface = dark ? theme.colorScheme.surface : Colors.white;
+    final Color surface =
+        dark ? theme.colorScheme.surface : AmanahColorTokens.surfaceLight;
     final Color primary = dark
         ? AmanahColorTokens.brandSoft
         : AmanahColorTokens.brand;
@@ -697,7 +698,7 @@ class _SuccessPalette {
           ? AmanahColorTokens.brandSubtle
           : AmanahColorTokens.brand,
       primarySoft: primarySoft,
-      onPrimary: Colors.white,
+      onPrimary: AmanahColorTokens.surfaceLight,
     );
   }
 }

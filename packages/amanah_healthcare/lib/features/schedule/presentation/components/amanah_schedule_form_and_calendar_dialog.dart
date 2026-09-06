@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
@@ -194,7 +194,9 @@ class _AmanahDocScheduleCalendarDrawerState
               Text(
                 '${_getMonthName(_currentMonth.month)} ${_currentMonth.year}',
                 style: TextStyle(
-                  color: dark ? Colors.white : const Color(0xFF0F172A),
+                  color: dark
+                      ? AmanahColorTokens.surfaceLight
+                      : AmanahColorTokens.neutral900,
                   fontFamily: 'PlusJakartaSans',
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -214,8 +216,6 @@ class _AmanahDocScheduleCalendarDrawerState
             ],
           ),
           const SizedBox(height: 8),
-
-          // Days Header (Min, Sen, Sel, ...)
           const Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
@@ -229,8 +229,6 @@ class _AmanahDocScheduleCalendarDrawerState
             ],
           ),
           const SizedBox(height: 8),
-
-          // Month Days Grid
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -266,40 +264,44 @@ class _AmanahDocScheduleCalendarDrawerState
               final bool hasSchedules = schedules.isNotEmpty;
 
               Color bgColor = Colors.transparent;
-              Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
+              Color textColor = dark
+                  ? AmanahColorTokens.surfaceLight
+                  : AmanahColorTokens.neutral900;
               Color? dotColor;
 
               if (isSelected) {
                 bgColor = dark
                     ? AmanahColorTokens.tabActiveDark
                     : (isCuti
-                          ? const Color(0xFFF59E0B)
-                          : const Color(0xFF0A44FF));
-                textColor = dark ? AmanahColorTokens.canvasDark : Colors.white;
+                          ? AmanahColorTokens.warning
+                          : AmanahColorTokens.brand);
+                textColor = dark
+                    ? AmanahColorTokens.canvasDark
+                    : AmanahColorTokens.surfaceLight;
               } else if (isToday) {
                 bgColor =
                     (dark
                             ? AmanahColorTokens.tabActiveDark
-                            : const Color(0xFF0A44FF))
+                            : AmanahColorTokens.brand)
                         .withValues(alpha: 0.15);
                 textColor = dark
                     ? AmanahColorTokens.tabActiveDark
-                    : const Color(0xFF0A44FF);
+                    : AmanahColorTokens.brand;
                 dotColor = dark
                     ? AmanahColorTokens.tabActiveDark
-                    : const Color(0xFF0A44FF);
+                    : AmanahColorTokens.brand;
               } else if (isPast) {
                 textColor = dark
-                    ? const Color(0xFF64748B)
-                    : const Color(0xFFCBD5E1);
+                    ? AmanahColorTokens.neutral500
+                    : AmanahColorTokens.neutral300;
               } else if (isCuti) {
-                dotColor = const Color(0xFFF59E0B);
+                dotColor = AmanahColorTokens.warning;
               } else if (hasSchedules) {
-                dotColor = const Color(0xFF10B981);
+                dotColor = AmanahColorTokens.success;
               } else {
                 dotColor = dark
-                    ? const Color(0xFF64748B)
-                    : const Color(0xFFCBD5E1);
+                    ? AmanahColorTokens.neutral500
+                    : AmanahColorTokens.neutral300;
               }
 
               return InkWell(
@@ -353,16 +355,19 @@ class _AmanahDocScheduleCalendarDrawerState
               _CalendarLegendDot(
                 color: dark
                     ? AmanahColorTokens.tabActiveDark
-                    : const Color(0xFF0A44FF),
+                    : AmanahColorTokens.brand,
                 label: 'Hari ini',
               ),
               const _CalendarLegendDot(
-                color: Color(0xFF10B981),
+                color: AmanahColorTokens.success,
                 label: 'Ada sesi',
               ),
-              const _CalendarLegendDot(color: Color(0xFFF59E0B), label: 'Cuti'),
               const _CalendarLegendDot(
-                color: Color(0xFF94A3B8),
+                color: AmanahColorTokens.warning,
+                label: 'Cuti',
+              ),
+              const _CalendarLegendDot(
+                color: AmanahColorTokens.neutral400,
                 label: 'Tutup',
               ),
             ],
@@ -411,7 +416,9 @@ class _CalendarLegendDot extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+            color: dark
+                ? AmanahColorTokens.neutral400
+                : AmanahColorTokens.neutral500,
             fontFamily: 'PlusJakartaSans',
             fontSize: 11,
             fontWeight: FontWeight.w700,
@@ -434,7 +441,7 @@ class _DayHeader extends StatelessWidget {
         text,
         textAlign: TextAlign.center,
         style: const TextStyle(
-          color: Color(0xFF94A3B8),
+          color: AmanahColorTokens.neutral400,
           fontFamily: 'PlusJakartaSans',
           fontSize: 11,
           fontWeight: FontWeight.w700,
@@ -928,12 +935,13 @@ class _AmanahAddEditScheduleDrawerState
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // 0. Status Jadwal Praktik: Menunggu | Buka | Cuti (Only displayed when editing)
           if (isEditing) ...<Widget>[
             Text(
               'Status Praktik',
               style: TextStyle(
-                color: dark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
+                color: dark
+                    ? AmanahColorTokens.neutral200
+                    : AmanahColorTokens.neutral700,
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -944,13 +952,13 @@ class _AmanahAddEditScheduleDrawerState
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: dark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : const Color(0xFFF8FAFC),
+                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                    : AmanahColorTokens.surfaceSecondaryLight,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: dark
-                      ? Colors.white.withValues(alpha: 0.10)
-                      : const Color(0xFFE2E8F0),
+                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                      : AmanahColorTokens.neutral200,
                 ),
               ),
               child: Row(
@@ -958,21 +966,21 @@ class _AmanahAddEditScheduleDrawerState
                     <Map<String, dynamic>>[
                       <String, dynamic>{
                         'label': 'Menunggu',
-                        'activeBg': const Color(0xFFF59E0B),
-                        'activeText': Colors.white,
-                        'dotColor': const Color(0xFFFBBF24),
+                        'activeBg': AmanahColorTokens.warning,
+                        'activeText': AmanahColorTokens.surfaceLight,
+                        'dotColor': AmanahColorTokens.warningLight,
                       },
                       <String, dynamic>{
                         'label': 'Buka',
-                        'activeBg': const Color(0xFF059669),
-                        'activeText': Colors.white,
-                        'dotColor': const Color(0xFF34D399),
+                        'activeBg': AmanahColorTokens.success,
+                        'activeText': AmanahColorTokens.surfaceLight,
+                        'dotColor': AmanahColorTokens.emeraldLight,
                       },
                       <String, dynamic>{
                         'label': 'Cuti',
-                        'activeBg': const Color(0xFFE11D48),
-                        'activeText': Colors.white,
-                        'dotColor': const Color(0xFFFB7185),
+                        'activeBg': AmanahColorTokens.danger,
+                        'activeText': AmanahColorTokens.surfaceLight,
+                        'dotColor': AmanahColorTokens.roseLight,
                       },
                     ].map((Map<String, dynamic> item) {
                       final String label = item['label'] as String;
@@ -1026,8 +1034,8 @@ class _AmanahAddEditScheduleDrawerState
                                     color: active
                                         ? selectedText
                                         : (dark
-                                              ? const Color(0xFFA1A1AA)
-                                              : const Color(0xFF475569)),
+                                              ? AmanahColorTokens.neutral400
+                                              : AmanahColorTokens.neutral600),
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
@@ -1043,12 +1051,12 @@ class _AmanahAddEditScheduleDrawerState
             ),
             const SizedBox(height: 14),
           ],
-
-          // 1. Tanggal Praktik (Date Picker)
           Text(
             'Tanggal Praktik',
             style: TextStyle(
-              color: dark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
+              color: dark
+                  ? AmanahColorTokens.neutral200
+                  : AmanahColorTokens.neutral700,
               fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -1076,12 +1084,12 @@ class _AmanahAddEditScheduleDrawerState
                 : const SizedBox.shrink(),
           ),
           const SizedBox(height: 14),
-
-          // 2. Sesi Praktik & Jam
           Text(
             'Sesi Praktik & Jam',
             style: TextStyle(
-              color: dark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
+              color: dark
+                  ? AmanahColorTokens.neutral200
+                  : AmanahColorTokens.neutral700,
               fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -1197,8 +1205,8 @@ class _AmanahAddEditScheduleDrawerState
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: dark
-            ? Colors.white.withValues(alpha: 0.05)
-            : const Color(0xFFF8FAFC),
+            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+            : AmanahColorTokens.surfaceSecondaryLight,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
@@ -1220,7 +1228,9 @@ class _AmanahAddEditScheduleDrawerState
                   '${_getMonthName(_calendarMonth.month)} ${_calendarMonth.year}',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: dark ? Colors.white : const Color(0xFF0F172A),
+                    color: dark
+                        ? AmanahColorTokens.surfaceLight
+                        : AmanahColorTokens.neutral900,
                     fontFamily: 'PlusJakartaSans',
                     fontSize: 12,
                     fontWeight: FontWeight.w900,
@@ -1272,20 +1282,26 @@ class _AmanahAddEditScheduleDrawerState
               );
               Color bgColor = Colors.transparent;
               Color textColor = inCurrentMonth
-                  ? (dark ? Colors.white : const Color(0xFF0F172A))
-                  : (dark ? const Color(0xFF52525B) : const Color(0xFFCBD5E1));
+                  ? (dark
+                        ? AmanahColorTokens.surfaceLight
+                        : AmanahColorTokens.neutral900)
+                  : (dark
+                        ? AmanahColorTokens.neutral600
+                        : AmanahColorTokens.neutral300);
               if (isSelected) {
                 bgColor = dark
                     ? AmanahColorTokens.tabActiveDark
-                    : const Color(0xFF2563EB);
-                textColor = dark ? AmanahColorTokens.canvasDark : Colors.white;
+                    : AmanahColorTokens.brand;
+                textColor = dark
+                    ? AmanahColorTokens.canvasDark
+                    : AmanahColorTokens.surfaceLight;
               } else if (isToday) {
                 bgColor = dark
                     ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.15)
-                    : const Color(0xFFEFF6FF);
+                    : AmanahColorTokens.brandLight;
                 textColor = dark
                     ? AmanahColorTokens.tabActiveDark
-                    : const Color(0xFF2563EB);
+                    : AmanahColorTokens.brand;
               }
 
               return InkWell(
@@ -1308,7 +1324,7 @@ class _AmanahAddEditScheduleDrawerState
                               color:
                                   (dark
                                           ? AmanahColorTokens.tabActiveDark
-                                          : const Color(0xFF2563EB))
+                                          : AmanahColorTokens.brand)
                                       .withValues(alpha: 0.24),
                               blurRadius: 12,
                               offset: const Offset(0, 5),
@@ -1356,15 +1372,17 @@ class _ScheduleSelectorButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color background = dark
         ? (expanded
-              ? Colors.white.withValues(alpha: 0.10)
-              : Colors.white.withValues(alpha: 0.05))
-        : (expanded ? const Color(0xFFE2E8F0) : const Color(0xFFF8FAFC));
+              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+              : AmanahColorTokens.surfaceLight.withValues(alpha: 0.05))
+        : (expanded
+              ? AmanahColorTokens.neutral200
+              : AmanahColorTokens.surfaceSecondaryLight);
     final Color iconBackground = dark
         ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.12)
-        : const Color(0xFFEFF6FF);
+        : AmanahColorTokens.brandLight;
     final Color accent = dark
         ? AmanahColorTokens.tabActiveDark
-        : const Color(0xFF2563EB);
+        : AmanahColorTokens.brand;
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
@@ -1394,7 +1412,9 @@ class _ScheduleSelectorButton extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: dark ? Colors.white : const Color(0xFF0F172A),
+                  color: dark
+                      ? AmanahColorTokens.surfaceLight
+                      : AmanahColorTokens.neutral900,
                   fontFamily: 'PlusJakartaSans',
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -1406,10 +1426,10 @@ class _ScheduleSelectorButton extends StatelessWidget {
               turns: expanded ? 0.5 : 0,
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
-              child: Icon(
+              child: const Icon(
                 Icons.keyboard_arrow_down_rounded,
                 size: 18,
-                color: dark ? const Color(0xFFA1A1AA) : const Color(0xFF94A3B8),
+                color: AmanahColorTokens.neutral400,
               ),
             ),
           ],
@@ -1498,20 +1518,20 @@ class _ScheduleSessionPanel extends StatelessWidget {
           : const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: dark
-            ? Colors.white.withValues(alpha: 0.05)
-            : const Color(0xFFF8FAFC),
+            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+            : AmanahColorTokens.surfaceSecondaryLight,
         borderRadius: BorderRadius.circular(expanded ? 22 : 20),
         border: Border.all(
           color: expanded
               ? (dark
-                    ? Colors.white.withValues(alpha: 0.15)
-                    : const Color(0xFFE2E8F0))
+                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
+                    : AmanahColorTokens.neutral200)
               : Colors.transparent,
         ),
         boxShadow: expanded && !dark
             ? <BoxShadow>[
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: AmanahColorTokens.pureBlack.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -1532,10 +1552,12 @@ class _ScheduleSessionPanel extends StatelessWidget {
                       session.name,
                       style: TextStyle(
                         color: expanded
-                            ? (dark ? Colors.white : const Color(0xFF0F172A))
+                            ? (dark
+                                  ? AmanahColorTokens.surfaceLight
+                                  : AmanahColorTokens.neutral900)
                             : (dark
-                                  ? const Color(0xFFD4D4D8)
-                                  : const Color(0xFF334155)),
+                                  ? AmanahColorTokens.neutral300
+                                  : AmanahColorTokens.neutral700),
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 13.5,
                         fontWeight: FontWeight.w700,
@@ -1577,13 +1599,17 @@ class _ScheduleSessionPanel extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
                             color: dark
-                                ? Colors.white.withValues(alpha: 0.05)
-                                : Colors.white,
+                                ? AmanahColorTokens.surfaceLight.withValues(
+                                    alpha: 0.05,
+                                  )
+                                : AmanahColorTokens.surfaceLight,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: dark
-                                  ? Colors.white.withValues(alpha: 0.10)
-                                  : const Color(0xFFE2E8F0),
+                                  ? AmanahColorTokens.surfaceLight.withValues(
+                                      alpha: 0.10,
+                                    )
+                                  : AmanahColorTokens.neutral200,
                             ),
                           ),
                           child: Row(
@@ -1593,16 +1619,16 @@ class _ScheduleSessionPanel extends StatelessWidget {
                                 Icons.add_rounded,
                                 size: 16,
                                 color: dark
-                                    ? Colors.white
-                                    : const Color(0xFF1E293B),
+                                    ? AmanahColorTokens.surfaceLight
+                                    : AmanahColorTokens.neutral800,
                               ),
                               const SizedBox(width: 6),
                               Text(
                                 'Add More',
                                 style: TextStyle(
                                   color: dark
-                                      ? Colors.white
-                                      : const Color(0xFF1E293B),
+                                      ? AmanahColorTokens.surfaceLight
+                                      : AmanahColorTokens.neutral800,
                                   fontFamily: 'PlusJakartaSans',
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
@@ -1653,8 +1679,8 @@ class _ScheduleSlotRow extends StatelessWidget {
               border: Border(
                 top: BorderSide(
                   color: dark
-                      ? Colors.white.withValues(alpha: 0.15)
-                      : const Color(0xFFCBD5E1),
+                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
+                      : AmanahColorTokens.neutral300,
                   style: BorderStyle.solid,
                 ),
               ),
@@ -1699,15 +1725,13 @@ class _ScheduleSlotRow extends StatelessWidget {
             InkWell(
               borderRadius: BorderRadius.circular(10),
               onTap: onRemove,
-              child: SizedBox(
+              child: const SizedBox(
                 width: 28,
                 height: 28,
                 child: Icon(
                   Icons.close_rounded,
                   size: 16,
-                  color: dark
-                      ? const Color(0xFFA1A1AA)
-                      : const Color(0xFF94A3B8),
+                  color: AmanahColorTokens.neutral400,
                 ),
               ),
             ),
@@ -1778,7 +1802,9 @@ class _SlotFieldColumn extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: dark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B),
+            color: dark
+                ? AmanahColorTokens.neutral400
+                : AmanahColorTokens.neutral500,
             fontFamily: 'PlusJakartaSans',
             fontSize: 10.5,
             fontWeight: FontWeight.w600,
@@ -1804,7 +1830,9 @@ class _SlotLabel extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: dark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B),
+          color: dark
+              ? AmanahColorTokens.neutral400
+              : AmanahColorTokens.neutral500,
           fontFamily: 'PlusJakartaSans',
           fontSize: 11,
           fontWeight: FontWeight.w600,
@@ -1834,12 +1862,14 @@ class _MiniSlotButton extends StatelessWidget {
         height: 32,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
-          color: dark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+          color: dark
+              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+              : AmanahColorTokens.surfaceLight,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: dark
-                ? Colors.white.withValues(alpha: 0.15)
-                : const Color(0xFFE2E8F0),
+                ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
+                : AmanahColorTokens.neutral200,
           ),
         ),
         child: Row(
@@ -1850,17 +1880,19 @@ class _MiniSlotButton extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: dark ? Colors.white : const Color(0xFF0F172A),
+                  color: dark
+                      ? AmanahColorTokens.surfaceLight
+                      : AmanahColorTokens.neutral900,
                   fontFamily: 'PlusJakartaSans',
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
               ),
             ),
-            Icon(
+            const Icon(
               Icons.keyboard_arrow_down_rounded,
               size: 15,
-              color: dark ? const Color(0xFFA1A1AA) : const Color(0xFF94A3B8),
+              color: AmanahColorTokens.neutral400,
             ),
           ],
         ),
@@ -1885,10 +1917,10 @@ class _ScheduleToggleSwitch extends StatelessWidget {
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: active
-            ? (dark ? AmanahColorTokens.tabActiveDark : const Color(0xFF0D66E9))
+            ? (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
             : (dark
-                  ? Colors.white.withValues(alpha: 0.20)
-                  : const Color(0xFFE5E5EA)),
+                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.20)
+                  : AmanahColorTokens.neutral200),
         borderRadius: BorderRadius.circular(999),
       ),
       child: AnimatedAlign(
@@ -1899,11 +1931,11 @@ class _ScheduleToggleSwitch extends StatelessWidget {
           width: 22,
           height: 22,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AmanahColorTokens.surfaceLight,
             shape: BoxShape.circle,
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.20),
+                color: AmanahColorTokens.pureBlack.withValues(alpha: 0.20),
                 blurRadius: 5,
                 offset: const Offset(0, 2),
               ),
@@ -1955,10 +1987,10 @@ class _AmanahScheduleSelectionSheetState
         .toList();
     final Color selectedAccent = dark
         ? AmanahColorTokens.tabActiveDark
-        : const Color(0xFF2563EB);
+        : AmanahColorTokens.brand;
     final Color selectedForeground = dark
         ? AmanahColorTokens.canvasDark
-        : Colors.white;
+        : AmanahColorTokens.surfaceLight;
 
     return AmanahBottomSheetScaffold(
       title: widget.title,
@@ -1976,7 +2008,6 @@ class _AmanahScheduleSelectionSheetState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // Search & Manual Entry Form
             Row(
               children: <Widget>[
                 Expanded(
@@ -1984,20 +2015,26 @@ class _AmanahScheduleSelectionSheetState
                     height: 38,
                     decoration: BoxDecoration(
                       color: dark
-                          ? Colors.white.withValues(alpha: 0.05)
+                          ? AmanahColorTokens.surfaceLight.withValues(
+                              alpha: 0.05,
+                            )
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: dark
-                            ? Colors.white.withValues(alpha: 0.15)
-                            : const Color(0xFFE2E8F0),
+                            ? AmanahColorTokens.surfaceLight.withValues(
+                                alpha: 0.15,
+                              )
+                            : AmanahColorTokens.neutral200,
                       ),
                     ),
                     child: TextField(
                       controller: _controller,
                       onChanged: (_) => setState(() {}),
                       style: TextStyle(
-                        color: dark ? Colors.white : const Color(0xFF0F172A),
+                        color: dark
+                            ? AmanahColorTokens.surfaceLight
+                            : AmanahColorTokens.neutral900,
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -2006,17 +2043,15 @@ class _AmanahScheduleSelectionSheetState
                         hintText: 'Cari atau ketik manual...',
                         hintStyle: TextStyle(
                           color: dark
-                              ? const Color(0xFF71717A)
-                              : const Color(0xFF94A3B8),
+                              ? AmanahColorTokens.neutral500
+                              : AmanahColorTokens.neutral400,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
-                        prefixIcon: Icon(
+                        prefixIcon: const Icon(
                           Icons.search_rounded,
                           size: 16,
-                          color: dark
-                              ? const Color(0xFFA1A1AA)
-                              : const Color(0xFF94A3B8),
+                          color: AmanahColorTokens.neutral400,
                         ),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
@@ -2040,28 +2075,25 @@ class _AmanahScheduleSelectionSheetState
               ],
             ),
             const SizedBox(height: 14),
-
             Text(
               'Pilihan Tersedia',
               style: TextStyle(
-                color: dark ? const Color(0xFFA1A1AA) : const Color(0xFF64748B),
+                color: dark
+                    ? AmanahColorTokens.neutral400
+                    : AmanahColorTokens.neutral500,
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 8),
-
-            // Options Grid
             Expanded(
               child: filtered.isEmpty
-                  ? Center(
+                  ? const Center(
                       child: Text(
                         'Tidak ada pilihan ditemukan',
                         style: TextStyle(
-                          color: dark
-                              ? const Color(0xFFA1A1AA)
-                              : const Color(0xFF94A3B8),
+                          color: AmanahColorTokens.neutral400,
                           fontFamily: 'PlusJakartaSans',
                           fontSize: 12,
                         ),
@@ -2106,18 +2138,21 @@ class _AmanahScheduleSelectionSheetState
                                   ? selectedAccent
                                   : isDisabled
                                   ? (dark
-                                        ? Colors.white.withValues(alpha: 0.02)
-                                        : const Color(0xFFF1F5F9))
+                                        ? AmanahColorTokens.surfaceLight
+                                              .withValues(alpha: 0.02)
+                                        : AmanahColorTokens.neutral100)
                                   : (dark
-                                        ? Colors.white.withValues(alpha: 0.05)
-                                        : Colors.white),
+                                        ? AmanahColorTokens.surfaceLight
+                                              .withValues(alpha: 0.05)
+                                        : AmanahColorTokens.surfaceLight),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: isSelected
                                     ? selectedAccent
                                     : (dark
-                                          ? Colors.white.withValues(alpha: 0.10)
-                                          : const Color(0xFFE2E8F0)),
+                                          ? AmanahColorTokens.surfaceLight
+                                                .withValues(alpha: 0.10)
+                                          : AmanahColorTokens.neutral200),
                               ),
                               boxShadow: isSelected
                                   ? <BoxShadow>[
@@ -2144,11 +2179,11 @@ class _AmanahScheduleSelectionSheetState
                                           ? selectedForeground
                                           : isDisabled
                                           ? (dark
-                                                ? const Color(0xFF52525B)
-                                                : const Color(0xFF94A3B8))
+                                                ? AmanahColorTokens.neutral600
+                                                : AmanahColorTokens.neutral400)
                                           : (dark
-                                                ? Colors.white
-                                                : const Color(0xFF0F172A)),
+                                                ? AmanahColorTokens.surfaceLight
+                                                : AmanahColorTokens.neutral900),
                                       fontFamily: 'PlusJakartaSans',
                                       fontSize: 12,
                                       fontWeight: isSelected

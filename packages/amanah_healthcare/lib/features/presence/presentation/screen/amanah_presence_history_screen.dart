@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
@@ -106,13 +106,12 @@ class _AmanahPresenceHistoryScreenState
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color bgColor = dark
-        ? const Color(0xFF0A0E1A)
-        : const Color(0xFFF8FAFF);
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+    final Color bgColor =
+        dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.canvasLight;
+    final Color textColor =
+        dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
+    final Color subtextColor =
+        dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
 
     final List<AttendanceRecord> records = _filteredRecords;
 
@@ -181,8 +180,8 @@ class _AmanahPresenceHistoryScreenState
                       height: 20,
                       decoration: BoxDecoration(
                         color: dark
-                            ? Colors.white.withValues(alpha: 0.10)
-                            : const Color(0xFFF1F5F9),
+                            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                            : AmanahColorTokens.canvasLight,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -209,20 +208,20 @@ class _AmanahPresenceHistoryScreenState
                                   ? AmanahColorTokens.tabActiveDark.withValues(
                                       alpha: 0.16,
                                     )
-                                  : const Color(0xFFEFF6FF))
+                                  : AmanahColorTokens.brandSurface)
                             : (dark
-                                  ? Colors.white.withValues(alpha: 0.05)
-                                  : Colors.white),
+                                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                                  : AmanahColorTokens.surfaceLight),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: _hasActiveFilters
                               ? (dark
                                     ? AmanahColorTokens.tabActiveDark
                                           .withValues(alpha: 0.50)
-                                    : const Color(0xFF2563EB))
+                                    : AmanahColorTokens.brandAccent)
                               : (dark
-                                    ? Colors.white.withValues(alpha: 0.10)
-                                    : const Color(0xFFE2E8F0)),
+                                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                                    : AmanahColorTokens.neutral200),
                         ),
                       ),
                       child: Stack(
@@ -234,7 +233,7 @@ class _AmanahPresenceHistoryScreenState
                             color: _hasActiveFilters
                                 ? (dark
                                       ? AmanahColorTokens.tabActiveDark
-                                      : const Color(0xFF1D4ED8))
+                                      : AmanahColorTokens.brandPrimary)
                                 : subtextColor,
                           ),
                           if (_hasActiveFilters)
@@ -247,7 +246,7 @@ class _AmanahPresenceHistoryScreenState
                                 decoration: BoxDecoration(
                                   color: dark
                                       ? AmanahColorTokens.tabActiveDark
-                                      : const Color(0xFF2563EB),
+                                      : AmanahColorTokens.brandAccent,
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -267,13 +266,13 @@ class _AmanahPresenceHistoryScreenState
                       height: 32,
                       decoration: BoxDecoration(
                         color: dark
-                            ? Colors.white.withValues(alpha: 0.05)
-                            : Colors.white,
+                            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                            : AmanahColorTokens.surfaceLight,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: dark
-                              ? Colors.white.withValues(alpha: 0.10)
-                              : const Color(0xFFE2E8F0),
+                              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                              : AmanahColorTokens.neutral200,
                         ),
                       ),
                       child: _isDownloading
@@ -284,7 +283,7 @@ class _AmanahPresenceHistoryScreenState
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    Color(0xFF0A44FF),
+                                    AmanahColorTokens.brandPrimary,
                                   ),
                                 ),
                               ),
@@ -308,13 +307,13 @@ class _AmanahPresenceHistoryScreenState
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: dark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : const Color(0xFFF1F5F9),
+                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                    : AmanahColorTokens.canvasLight,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: dark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : const Color(0xFFE2E8F0),
+                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                      : AmanahColorTokens.neutral200,
                 ),
               ),
               child: Row(
@@ -386,8 +385,8 @@ class _AmanahPresenceHistoryScreenState
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
               color: dark
-                  ? Colors.white.withValues(alpha: 0.10)
-                  : const Color(0xFFF1F5F9),
+                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                  : AmanahColorTokens.canvasLight,
               borderRadius: BorderRadius.circular(100),
             ),
             child: Row(
@@ -396,7 +395,7 @@ class _AmanahPresenceHistoryScreenState
                   flex: 60,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF10B981),
+                      color: AmanahColorTokens.success,
                       borderRadius: BorderRadius.circular(100),
                     ),
                   ),
@@ -406,7 +405,7 @@ class _AmanahPresenceHistoryScreenState
                   flex: 15,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFBBF24),
+                      color: AmanahColorTokens.amberLight,
                       borderRadius: BorderRadius.circular(100),
                     ),
                   ),
@@ -416,7 +415,7 @@ class _AmanahPresenceHistoryScreenState
                   flex: 10,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF43F5E),
+                      color: AmanahColorTokens.danger,
                       borderRadius: BorderRadius.circular(100),
                     ),
                   ),
@@ -426,7 +425,7 @@ class _AmanahPresenceHistoryScreenState
                   flex: 15,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF6366F1),
+                      color: AmanahColorTokens.violet,
                       borderRadius: BorderRadius.circular(100),
                     ),
                   ),
@@ -503,10 +502,10 @@ class _AmanahPresenceHistoryScreenState
                 spacing: 8,
                 runSpacing: 4,
                 children: <Widget>[
-                  _LegendIndicator(color: Color(0xFF10B981), label: 'Hadir'),
-                  _LegendIndicator(color: Color(0xFFFBBF24), label: 'Telat'),
-                  _LegendIndicator(color: Color(0xFFF43F5E), label: 'Missed'),
-                  _LegendIndicator(color: Color(0xFF6366F1), label: 'Cuti'),
+                  _LegendIndicator(color: AmanahColorTokens.success, label: 'Hadir'),
+                  _LegendIndicator(color: AmanahColorTokens.amberLight, label: 'Telat'),
+                  _LegendIndicator(color: AmanahColorTokens.danger, label: 'Missed'),
+                  _LegendIndicator(color: AmanahColorTokens.violet, label: 'Cuti'),
                 ],
               ),
             ],
@@ -541,12 +540,12 @@ class _AmanahPresenceHistoryScreenState
       decoration: BoxDecoration(
         color: dark
             ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.16)
-            : const Color(0xFFE2E8F0),
+            : AmanahColorTokens.neutral200,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: dark
               ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.34)
-              : const Color(0xFFE2E8F0),
+              : AmanahColorTokens.neutral200,
         ),
       ),
       child: Text(
@@ -557,7 +556,7 @@ class _AmanahPresenceHistoryScreenState
           fontWeight: FontWeight.w700,
           color: dark
               ? AmanahColorTokens.tabActiveDark
-              : const Color(0xFF0F172A),
+              : AmanahColorTokens.neutral900,
         ),
       ),
     );
@@ -571,48 +570,48 @@ class _AmanahPresenceHistoryScreenState
     Color subtextColor,
   ) {
     Color iconBorderColor = dark
-        ? Colors.white.withValues(alpha: 0.15)
-        : const Color(0xFFCBD5E1);
+        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
+        : AmanahColorTokens.neutral300;
     Color iconBgColor = dark
-        ? Colors.white.withValues(alpha: 0.05)
-        : const Color(0xFFF8FAFC);
+        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+        : AmanahColorTokens.canvasLight;
     Color iconColor = subtextColor;
     Color titleColor = textColor;
     IconData iconData = Icons.login_rounded;
     Color lineColor = dark
-        ? Colors.white.withValues(alpha: 0.15)
-        : const Color(0xFFCBD5E1);
+        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
+        : AmanahColorTokens.neutral300;
 
     if (item.isLatest) {
       switch (item.status) {
         case AttendanceStatus.hadir:
-          iconBorderColor = const Color(0xFF059669);
-          iconBgColor = const Color(0xFFECFDF5);
-          iconColor = const Color(0xFF059669);
-          titleColor = const Color(0xFF059669);
+          iconBorderColor = AmanahColorTokens.successDark;
+          iconBgColor = AmanahColorTokens.successSurface;
+          iconColor = AmanahColorTokens.successDark;
+          titleColor = AmanahColorTokens.successDark;
           iconData = Icons.login_rounded;
-          lineColor = const Color(0xFF10B981);
+          lineColor = AmanahColorTokens.success;
         case AttendanceStatus.telat:
-          iconBorderColor = const Color(0xFFD97706);
-          iconBgColor = const Color(0xFFFFFBEB);
-          iconColor = const Color(0xFFD97706);
-          titleColor = const Color(0xFFD97706);
+          iconBorderColor = AmanahColorTokens.warningDark;
+          iconBgColor = AmanahColorTokens.warningSurface;
+          iconColor = AmanahColorTokens.warningDark;
+          titleColor = AmanahColorTokens.warningDark;
           iconData = Icons.schedule_rounded;
-          lineColor = const Color(0xFFFBBF24);
+          lineColor = AmanahColorTokens.amberLight;
         case AttendanceStatus.missed:
-          iconBorderColor = const Color(0xFFE11D48);
-          iconBgColor = const Color(0xFFFFF1F2);
-          iconColor = const Color(0xFFE11D48);
-          titleColor = const Color(0xFFE11D48);
+          iconBorderColor = AmanahColorTokens.dangerDark;
+          iconBgColor = AmanahColorTokens.dangerSurface;
+          iconColor = AmanahColorTokens.dangerDark;
+          titleColor = AmanahColorTokens.dangerDark;
           iconData = Icons.close_rounded;
-          lineColor = const Color(0xFFF43F5E);
+          lineColor = AmanahColorTokens.danger;
         case AttendanceStatus.cuti:
-          iconBorderColor = const Color(0xFF4F46E5);
-          iconBgColor = const Color(0xFFEEF2FF);
-          iconColor = const Color(0xFF4F46E5);
-          titleColor = const Color(0xFF4F46E5);
+          iconBorderColor = AmanahColorTokens.violetDark;
+          iconBgColor = AmanahColorTokens.violetSurface;
+          iconColor = AmanahColorTokens.violetDark;
+          titleColor = AmanahColorTokens.violetDark;
           iconData = Icons.event_note_rounded;
-          lineColor = const Color(0xFF6366F1);
+          lineColor = AmanahColorTokens.violet;
       }
     } else {
       switch (item.status) {
@@ -730,7 +729,7 @@ class _AmanahPresenceHistoryScreenState
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF4F46E5),
+                        color: AmanahColorTokens.violetDark,
                         decoration: TextDecoration.underline,
                       ),
                     ),
@@ -776,7 +775,7 @@ class _DateTickText extends StatelessWidget {
         fontFamily: 'PlusJakartaSans',
         fontSize: 11,
         fontWeight: FontWeight.w600,
-        color: Color(0xFF94A3B8),
+        color: AmanahColorTokens.neutral400,
       ),
     );
   }
@@ -805,7 +804,7 @@ class _LegendIndicator extends StatelessWidget {
             fontFamily: 'PlusJakartaSans',
             fontSize: 11,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF64748B),
+            color: AmanahColorTokens.neutral500,
           ),
         ),
       ],

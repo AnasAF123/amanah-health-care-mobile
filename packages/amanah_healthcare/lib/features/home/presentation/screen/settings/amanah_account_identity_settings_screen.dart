@@ -1,7 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_settings_components.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahAccountIdentitySettingsScreen extends StatefulWidget {
   const AmanahAccountIdentitySettingsScreen({
@@ -83,12 +84,7 @@ class _AmanahAccountIdentitySettingsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool dark = theme.brightness == Brightness.dark;
-
-    final Color bgColor = dark
-        ? const Color(0xFF0A0E1A)
-        : const Color(0xFFF8FAFF);
+    final Color bgColor = AmanahThemeTokens.canvas(context);
 
     return Scaffold(
       backgroundColor: bgColor,

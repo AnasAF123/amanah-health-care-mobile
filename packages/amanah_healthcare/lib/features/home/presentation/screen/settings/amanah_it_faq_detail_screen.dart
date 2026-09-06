@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahFaqItem {
   const AmanahFaqItem({
@@ -33,18 +34,12 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color bgColor = dark
-        ? const Color(0xFF0A0E1A)
-        : const Color(0xFFF8FAFF);
-    final Color cardBg = dark ? const Color(0xFF111624) : Colors.white;
-    final Color borderColor = dark
-        ? Colors.white.withValues(alpha: 0.05)
-        : const Color(0xFFF1F5F9);
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
-    final Color categoryColor = subtextColor;
+    final Color bgColor = AmanahThemeTokens.canvas(context);
+    final Color cardBg = AmanahThemeTokens.surface(context);
+    final Color borderColor = AmanahThemeTokens.outline(context);
+    final Color textColor = AmanahThemeTokens.textPrimary(context);
+    final Color subtextColor = AmanahThemeTokens.textSecondary(context);
+    final Color categoryColor = AmanahThemeTokens.textTertiary(context);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -75,7 +70,7 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                         border: Border.all(color: borderColor),
                         boxShadow: <BoxShadow>[
                           BoxShadow(
-                            color: Colors.black.withValues(
+                            color: AmanahColorTokens.pureBlack.withValues(
                               alpha: dark ? 0.35 : 0.03,
                             ),
                             blurRadius: 10,
@@ -121,7 +116,7 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                         border: Border.all(color: borderColor),
                         boxShadow: <BoxShadow>[
                           BoxShadow(
-                            color: Colors.black.withValues(
+                            color: AmanahColorTokens.pureBlack.withValues(
                               alpha: dark ? 0.35 : 0.03,
                             ),
                             blurRadius: 10,
@@ -156,8 +151,9 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                                   margin: const EdgeInsets.only(top: 1),
                                   decoration: BoxDecoration(
                                     color: dark
-                                        ? Colors.white.withValues(alpha: 0.10)
-                                        : const Color(0xFFF1F5F9),
+                                        ? AmanahColorTokens.surfaceLight
+                                            .withValues(alpha: 0.10)
+                                        : AmanahColorTokens.neutral100,
                                     shape: BoxShape.circle,
                                   ),
                                   child: Center(
@@ -165,8 +161,8 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                                       '${i + 1}',
                                       style: TextStyle(
                                         color: dark
-                                            ? const Color(0xFFE2E8F0)
-                                            : const Color(0xFF334155),
+                                            ? AmanahColorTokens.neutral200
+                                            : AmanahColorTokens.neutral700,
                                         fontFamily: 'PlusJakartaSans',
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
@@ -180,8 +176,8 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                                     faq.solution[i],
                                     style: TextStyle(
                                       color: dark
-                                          ? const Color(0xFFCBD5E1)
-                                          : const Color(0xFF334155),
+                                          ? AmanahColorTokens.neutral300
+                                          : AmanahColorTokens.neutral700,
                                       fontFamily: 'PlusJakartaSans',
                                       fontSize: 12,
                                       height: 1.5,
@@ -204,13 +200,17 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: dark
-                            ? Colors.white.withValues(alpha: 0.04)
-                            : const Color(0xFFF8FAFC),
+                            ? AmanahColorTokens.surfaceLight.withValues(
+                                alpha: 0.04,
+                              )
+                            : AmanahColorTokens.neutral50,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: dark
-                              ? Colors.white.withValues(alpha: 0.06)
-                              : const Color(0xFFE2E8F0),
+                              ? AmanahColorTokens.surfaceLight.withValues(
+                                  alpha: 0.06,
+                                )
+                              : AmanahColorTokens.neutral200,
                         ),
                       ),
                       child: Column(

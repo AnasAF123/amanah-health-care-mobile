@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
@@ -74,16 +74,16 @@ class _AmanahPresenceFilterDrawerState
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+    final Color textColor =
+        dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
+    final Color subtextColor =
+        dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
     final Color selectedAccent = dark
         ? AmanahColorTokens.tabActiveDark
         : AmanahColorTokens.brand;
     final Color selectedForeground = dark
         ? AmanahColorTokens.canvasDark
-        : Colors.white;
+        : AmanahColorTokens.surfaceLight;
 
     return AmanahBottomSheetScaffold(
       title: 'Filter Presensi',
@@ -143,15 +143,17 @@ class _AmanahPresenceFilterDrawerState
                         color: isSelected
                             ? selectedAccent
                             : (dark
-                                  ? Colors.white.withValues(alpha: 0.05)
-                                  : const Color(0xFFF8FAFC)),
+                                  ? AmanahColorTokens.surfaceLight
+                                        .withValues(alpha: 0.05)
+                                  : AmanahColorTokens.canvasLight),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isSelected
                               ? selectedAccent
                               : (dark
-                                    ? Colors.white.withValues(alpha: 0.10)
-                                    : const Color(0xFFE2E8F0)),
+                                    ? AmanahColorTokens.surfaceLight
+                                          .withValues(alpha: 0.10)
+                                    : AmanahColorTokens.neutral200),
                         ),
                       ),
                       child: Text(
@@ -165,8 +167,8 @@ class _AmanahPresenceFilterDrawerState
                           color: isSelected
                               ? selectedForeground
                               : (dark
-                                    ? const Color(0xFFCBD5E1)
-                                    : const Color(0xFF334155)),
+                                    ? AmanahColorTokens.neutral300
+                                    : AmanahColorTokens.neutral700),
                         ),
                       ),
                     ),
@@ -206,15 +208,17 @@ class _AmanahPresenceFilterDrawerState
                         color: isSelected
                             ? selectedAccent
                             : (dark
-                                  ? Colors.white.withValues(alpha: 0.05)
-                                  : const Color(0xFFF8FAFC)),
+                                  ? AmanahColorTokens.surfaceLight
+                                        .withValues(alpha: 0.05)
+                                  : AmanahColorTokens.canvasLight),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: isSelected
                               ? selectedAccent
                               : (dark
-                                    ? Colors.white.withValues(alpha: 0.10)
-                                    : const Color(0xFFE2E8F0)),
+                                    ? AmanahColorTokens.surfaceLight
+                                          .withValues(alpha: 0.10)
+                                    : AmanahColorTokens.neutral200),
                         ),
                       ),
                       child: Text(
@@ -228,8 +232,8 @@ class _AmanahPresenceFilterDrawerState
                           color: isSelected
                               ? selectedForeground
                               : (dark
-                                    ? const Color(0xFFCBD5E1)
-                                    : const Color(0xFF334155)),
+                                    ? AmanahColorTokens.neutral300
+                                    : AmanahColorTokens.neutral700),
                         ),
                       ),
                     ),
@@ -286,13 +290,13 @@ class _AmanahPresenceFilterDrawerState
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: dark
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : const Color(0xFFF8FAFC),
+                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                  : AmanahColorTokens.canvasLight,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: dark
-                    ? Colors.white.withValues(alpha: 0.10)
-                    : const Color(0xFFE2E8F0),
+                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                    : AmanahColorTokens.neutral200,
               ),
             ),
             child: Column(
@@ -383,10 +387,12 @@ class _AmanahPresenceFilterDrawerState
                     fontSize: 11,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                     color: isSelected
-                        ? (dark ? AmanahColorTokens.canvasDark : Colors.white)
+                        ? (dark
+                              ? AmanahColorTokens.canvasDark
+                              : AmanahColorTokens.surfaceLight)
                         : (dark
-                              ? const Color(0xFFE2E8F0)
-                              : const Color(0xFF334155)),
+                              ? AmanahColorTokens.neutral200
+                              : AmanahColorTokens.neutral700),
                   ),
                 ),
                 if (hasEvent && !isSelected)
@@ -447,7 +453,7 @@ class _CalendarHeaderDay extends StatelessWidget {
           fontFamily: 'PlusJakartaSans',
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF94A3B8),
+          color: AmanahColorTokens.neutral400,
         ),
       ),
     );
@@ -473,10 +479,10 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+    final Color textColor =
+        dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
+    final Color subtextColor =
+        dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
 
     return AmanahBottomSheetScaffold(
       title: 'Alasan Cuti Dokter',
@@ -511,8 +517,8 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: dark
-                      ? const Color(0x336366F1)
-                      : const Color(0xFFEEF2FF),
+                      ? AmanahColorTokens.violet.withValues(alpha: 0.20)
+                      : AmanahColorTokens.violetSurface,
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Row(
@@ -522,7 +528,7 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
                       width: 6,
                       height: 6,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF6366F1),
+                        color: AmanahColorTokens.violet,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -533,7 +539,7 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF4F46E5),
+                        color: AmanahColorTokens.violetDark,
                       ),
                     ),
                   ],
@@ -576,9 +582,8 @@ class AmanahPresenceInfoDrawer extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+    final Color subtextColor =
+        dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
 
     return AmanahBottomSheetScaffold(
       title: 'Keterangan Timeline Presensi',
@@ -605,22 +610,22 @@ class AmanahPresenceInfoDrawer extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           const _InfoStatusRow(
-            dotColor: Color(0xFF10B981),
+            dotColor: AmanahColorTokens.success,
             title: 'Hadir',
             description: 'Tepat waktu sesuai shift',
           ),
           const _InfoStatusRow(
-            dotColor: Color(0xFFFBBF24),
+            dotColor: AmanahColorTokens.amberLight,
             title: 'Telat',
             description: 'Melewati toleransi shift',
           ),
           const _InfoStatusRow(
-            dotColor: Color(0xFFF43F5E),
+            dotColor: AmanahColorTokens.danger,
             title: 'Missed',
             description: 'Tidak tercatat check-in',
           ),
           const _InfoStatusRow(
-            dotColor: Color(0xFF6366F1),
+            dotColor: AmanahColorTokens.violet,
             title: 'Cuti',
             description: 'Izin atau cuti resmi HRD',
             isLast: true,
@@ -658,8 +663,8 @@ class _InfoStatusRow extends StatelessWidget {
             : Border(
                 bottom: BorderSide(
                   color: dark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : const Color(0xFFF1F5F9),
+                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                      : AmanahColorTokens.neutral100,
                 ),
               ),
       ),
@@ -684,7 +689,9 @@ class _InfoStatusRow extends StatelessWidget {
                   fontFamily: 'PlusJakartaSans',
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: dark ? Colors.white : const Color(0xFF0F172A),
+                  color: dark
+                      ? AmanahColorTokens.surfaceLight
+                      : AmanahColorTokens.neutral900,
                 ),
               ),
             ],
@@ -698,7 +705,9 @@ class _InfoStatusRow extends StatelessWidget {
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                color: dark
+                    ? AmanahColorTokens.neutral400
+                    : AmanahColorTokens.neutral500,
               ),
             ),
           ),

@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui';
@@ -644,11 +644,11 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
                                   ),
                                   end: Alignment(-0.5 + sheenShift * 3.0, 1.0),
                                   colors: <Color>[
-                                    Colors.white.withValues(alpha: 0.0),
-                                    Colors.white.withValues(
+                                    AmanahColorTokens.surfaceLight.withValues(alpha: 0.0),
+                                    AmanahColorTokens.surfaceLight.withValues(
                                       alpha: dark ? 0.08 : 0.18,
                                     ),
-                                    Colors.white.withValues(alpha: 0.0),
+                                    AmanahColorTokens.surfaceLight.withValues(alpha: 0.0),
                                   ],
                                   stops: const <double>[0.0, 0.5, 1.0],
                                 ),
@@ -697,11 +697,11 @@ class AmanahDoctorIdInfoDrawer extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
     final Color borderColor = dark
-        ? Colors.white.withValues(alpha: 0.10)
-        : const Color(0xFFF1F5F9);
+        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+        : AmanahColorTokens.neutral100;
     final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+        ? AmanahColorTokens.neutral400
+        : AmanahColorTokens.neutral500;
 
     return AmanahBottomSheetScaffold(
       title: 'Panduan & Informasi ID Card 3D',
@@ -737,8 +737,8 @@ class AmanahDoctorIdInfoDrawer extends StatelessWidget {
           DecoratedBox(
             decoration: BoxDecoration(
               color: dark
-                  ? Colors.white.withValues(alpha: 0.02)
-                  : const Color(0xFFF8FAFC).withValues(alpha: 0.50),
+                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.02)
+                  : AmanahColorTokens.neutral50.withValues(alpha: 0.50),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: borderColor),
             ),
@@ -786,7 +786,7 @@ class AmanahDoctorIdQrDialog extends StatelessWidget {
       context: context,
       barrierDismissible: true,
       barrierLabel: 'Tutup QR Presensi',
-      barrierColor: Colors.black.withValues(alpha: 0.60),
+      barrierColor: AmanahColorTokens.pureBlack.withValues(alpha: 0.60),
       transitionDuration: const Duration(milliseconds: 200),
       pageBuilder:
           (
@@ -821,10 +821,12 @@ class AmanahDoctorIdQrDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
+    final Color textColor = dark
+        ? AmanahColorTokens.surfaceLight
+        : AmanahColorTokens.neutral900;
     final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+        ? AmanahColorTokens.neutral400
+        : AmanahColorTokens.neutral500;
     final String payload = 'AMANAH-DOC-${profile.sip}';
 
     return BackdropFilter(
@@ -837,17 +839,17 @@ class AmanahDoctorIdQrDialog extends StatelessWidget {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: dark
-                  ? const Color(0xFF0F1422).withValues(alpha: 0.95)
-                  : Colors.white.withValues(alpha: 0.95),
+                  ? AmanahColorTokens.surfaceDark.withValues(alpha: 0.95)
+                  : AmanahColorTokens.surfaceLight.withValues(alpha: 0.95),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: dark
-                    ? Colors.white.withValues(alpha: 0.10)
-                    : const Color(0xFFF1F5F9),
+                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                    : AmanahColorTokens.neutral100,
               ),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: dark ? 0.80 : 0.20),
+                  color: AmanahColorTokens.pureBlack.withValues(alpha: dark ? 0.80 : 0.20),
                   blurRadius: 32,
                   offset: const Offset(0, 18),
                 ),
@@ -860,12 +862,12 @@ class AmanahDoctorIdQrDialog extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2563EB).withValues(alpha: 0.10),
+                    color: AmanahColorTokens.brandAccent.withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Icon(
                     Icons.qr_code_2_rounded,
-                    color: Color(0xFF2563EB),
+                    color: AmanahColorTokens.brandAccent,
                     size: 24,
                   ),
                 ),
@@ -898,16 +900,16 @@ class AmanahDoctorIdQrDialog extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AmanahColorTokens.surfaceLight,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(color: AmanahColorTokens.neutral200),
                   ),
                   child: AmanahQrCodeWidget(
                     value: payload,
                     size: 160,
                     borderRadius: 8,
-                    fgColor: const Color(0xFF0F172A),
-                    bgColor: Colors.white,
+                    fgColor: AmanahColorTokens.neutral900,
+                    bgColor: AmanahColorTokens.surfaceLight,
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -973,13 +975,13 @@ class _DoctorIdCardFace extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: dark ? const Color(0xFF08141E) : Colors.white,
+        color: dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.surfaceLight,
         borderRadius: BorderRadius.circular(22),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: dark
-                ? Colors.black.withValues(alpha: 0.62)
-                : const Color(0xFF0A44FF).withValues(alpha: 0.12),
+                ? AmanahColorTokens.pureBlack.withValues(alpha: 0.62)
+                : AmanahColorTokens.brandPrimary.withValues(alpha: 0.12),
             blurRadius: 34,
             offset: const Offset(0, 18),
           ),
@@ -994,10 +996,12 @@ class _DoctorIdCardFace extends StatelessWidget {
 
   Widget _buildFront() {
     final double panelHeight = height * 0.245;
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
+    final Color textColor = dark
+        ? AmanahColorTokens.surfaceLight
+        : AmanahColorTokens.neutral900;
     final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+        ? AmanahColorTokens.neutral400
+        : AmanahColorTokens.neutral500;
 
     return Stack(
       children: <Widget>[
@@ -1033,13 +1037,13 @@ class _DoctorIdCardFace extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: dark
-                  ? const Color(0xFF0F172A).withValues(alpha: 0.65)
-                  : const Color(0xFF0A0E1A).withValues(alpha: 0.16),
+                  ? AmanahColorTokens.neutral900.withValues(alpha: 0.65)
+                  : AmanahColorTokens.canvasDark.withValues(alpha: 0.16),
               borderRadius: BorderRadius.circular(width * 0.035),
               border: Border.all(
                 color: dark
-                    ? Colors.white.withValues(alpha: 0.35)
-                    : Colors.white.withValues(alpha: 0.90),
+                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.35)
+                    : AmanahColorTokens.surfaceLight.withValues(alpha: 0.90),
                 width: 1.5,
               ),
             ),
@@ -1068,12 +1072,12 @@ class _DoctorIdCardFace extends StatelessWidget {
           height: panelHeight,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: dark ? const Color(0xFF0C1B29) : Colors.white,
+              color: dark ? AmanahColorTokens.surfaceSecondaryDark : AmanahColorTokens.surfaceLight,
               border: Border(
                 top: BorderSide(
                   color: dark
-                      ? const Color(0xFF3B82F6).withValues(alpha: 0.25)
-                      : const Color(0xFF0A44FF).withValues(alpha: 0.15),
+                      ? AmanahColorTokens.brandLight.withValues(alpha: 0.25)
+                      : AmanahColorTokens.brandPrimary.withValues(alpha: 0.15),
                 ),
               ),
             ),
@@ -1135,7 +1139,7 @@ class _DoctorIdCardFace extends StatelessWidget {
                           maxLines: 1,
                           textAlign: TextAlign.right,
                           style: TextStyle(
-                            color: const Color(0xFF94A3B8),
+                            color: AmanahColorTokens.neutral400,
                             fontFamily: 'PlusJakartaSans',
                             fontSize: width * 0.028,
                             fontWeight: FontWeight.w900,
@@ -1166,8 +1170,8 @@ class _DoctorIdCardFace extends StatelessWidget {
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: dark
-                                ? const Color(0xFF2DD4BF)
-                                : const Color(0xFF0A44FF),
+                                ? AmanahColorTokens.auroraCyanLuminousDark
+                                : AmanahColorTokens.brandPrimary,
                             fontFamily: 'PlusJakartaSans',
                             fontSize: width * 0.033,
                             fontWeight: FontWeight.w900,
@@ -1190,8 +1194,8 @@ class _DoctorIdCardFace extends StatelessWidget {
     final String barcodeValue =
         '*DOC-${profile.sip.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')}*';
     final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+        ? AmanahColorTokens.neutral400
+        : AmanahColorTokens.neutral500;
 
     return Stack(
       children: <Widget>[
@@ -1207,13 +1211,13 @@ class _DoctorIdCardFace extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: dark
-                  ? const Color(0xFF0F172A).withValues(alpha: 0.65)
-                  : const Color(0xFF0A0E1A).withValues(alpha: 0.16),
+                  ? AmanahColorTokens.neutral900.withValues(alpha: 0.65)
+                  : AmanahColorTokens.canvasDark.withValues(alpha: 0.16),
               borderRadius: BorderRadius.circular(width * 0.035),
               border: Border.all(
                 color: dark
-                    ? Colors.white.withValues(alpha: 0.35)
-                    : Colors.white.withValues(alpha: 0.90),
+                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.35)
+                    : AmanahColorTokens.surfaceLight.withValues(alpha: 0.90),
                 width: 1.5,
               ),
             ),
@@ -1230,7 +1234,7 @@ class _DoctorIdCardFace extends StatelessWidget {
               vertical: height * 0.018,
             ),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AmanahColorTokens.surfaceLight,
               borderRadius: BorderRadius.circular(14),
             ),
             child: BarcodeWidget(
@@ -1238,13 +1242,13 @@ class _DoctorIdCardFace extends StatelessWidget {
               data: barcodeValue,
               drawText: true,
               style: const TextStyle(
-                color: Color(0xFF334155),
+                color: AmanahColorTokens.neutral700,
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0,
               ),
-              color: const Color(0xFF0F172A),
-              backgroundColor: Colors.white,
+              color: AmanahColorTokens.neutral900,
+              backgroundColor: AmanahColorTokens.surfaceLight,
             ),
           ),
         ),
@@ -1275,7 +1279,7 @@ class _DoctorIdCardFace extends StatelessWidget {
               Text(
                 'HEALTHCARE IDENTITY SYSTEM',
                 style: TextStyle(
-                  color: const Color(0xFF94A3B8),
+                  color: AmanahColorTokens.neutral400,
                   fontFamily: 'PlusJakartaSans',
                   fontSize: width * 0.032,
                   fontWeight: FontWeight.w900,
@@ -1339,12 +1343,12 @@ class _InfoDrawerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color borderColor = dark
-        ? Colors.white.withValues(alpha: 0.05)
-        : const Color(0xFFF1F5F9);
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
+        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+        : AmanahColorTokens.neutral100;
+    final Color textColor = dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
     final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+        ? AmanahColorTokens.neutral400
+        : AmanahColorTokens.neutral500;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -1363,14 +1367,14 @@ class _InfoDrawerItem extends StatelessWidget {
               margin: const EdgeInsets.only(top: 2),
               decoration: BoxDecoration(
                 color: dark
-                    ? const Color(0xFF2563EB).withValues(alpha: 0.10)
-                    : const Color(0xFFEFF6FF),
+                    ? AmanahColorTokens.brandAccent.withValues(alpha: 0.10)
+                    : AmanahColorTokens.brandSurface,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
                 size: 16,
-                color: dark ? const Color(0xFF60A5FA) : const Color(0xFF0A44FF),
+                color: dark ? AmanahColorTokens.brandSoft : AmanahColorTokens.brandPrimary,
               ),
             ),
             const SizedBox(width: 12),
@@ -1422,7 +1426,7 @@ class _AmanahMark extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: dark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB),
+        color: dark ? AmanahColorTokens.brandLight : AmanahColorTokens.brandAccent,
         borderRadius: BorderRadius.circular(size * 0.27),
       ),
       child: CustomPaint(painter: _AmanahCrossPainter(dark: dark)),
@@ -1438,7 +1442,7 @@ class _AmanahCrossPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-      ..color = dark ? const Color(0xFF93C5FD) : const Color(0xFF0A44FF)
+      ..color = dark ? AmanahColorTokens.brandSubtle : AmanahColorTokens.brandPrimary
       ..style = PaintingStyle.fill;
     canvas.drawRRect(
       RRect.fromRectAndRadius(
@@ -1468,7 +1472,7 @@ class _AmanahCrossPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _AmanahCrossPainter oldDelegate) =>
-      oldDelegate.dark != dark;
+  oldDelegate.dark != dark;
 }
 
 class _BauhausGridPainter extends CustomPainter {
@@ -1522,7 +1526,7 @@ class _BauhausGridPainter extends CustomPainter {
               AmanahColorTokens.brandAccent,
               AmanahColorTokens.brand,
             ),
-            _BauhausColorPair(AmanahColorTokens.brandPrimary, Colors.white),
+            _BauhausColorPair(AmanahColorTokens.brandPrimary, AmanahColorTokens.surfaceLight),
             _BauhausColorPair(
               AmanahColorTokens.brand,
               AmanahColorTokens.brandMuted,
@@ -1682,7 +1686,7 @@ class _LanyardPhysicsPainter extends CustomPainter {
 
     // 2. Drop Shadow underneath the ribbon
     final Paint shadowPaint = Paint()
-      ..color = Colors.black.withValues(alpha: dark ? 0.45 : 0.12)
+      ..color = AmanahColorTokens.pureBlack.withValues(alpha: dark ? 0.45 : 0.12)
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 18
@@ -1691,7 +1695,7 @@ class _LanyardPhysicsPainter extends CustomPainter {
 
     // 3. Main Lanyard Ribbon Body (Sleek dark ribbon)
     final Paint ribbonPaint = Paint()
-      ..color = dark ? const Color(0xFF050B14) : const Color(0xFF081326)
+      ..color = dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.darkNavy
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
@@ -1700,7 +1704,7 @@ class _LanyardPhysicsPainter extends CustomPainter {
 
     // 4. White Micro-Stitches along Left and Right Edges
     final Paint stitchPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.28)
+      ..color = AmanahColorTokens.surfaceLight.withValues(alpha: 0.28)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
@@ -1752,7 +1756,7 @@ class _LanyardPhysicsPainter extends CustomPainter {
       text: const TextSpan(
         text: 'RS AMANAH SEHAT',
         style: TextStyle(
-          color: Colors.white,
+          color: AmanahColorTokens.surfaceLight,
           fontFamily: 'PlusJakartaSans',
           fontSize: 6.5,
           fontWeight: FontWeight.w800,
@@ -1763,11 +1767,11 @@ class _LanyardPhysicsPainter extends CustomPainter {
     )..layout();
 
     final Paint badgePaint = Paint()
-      ..color = const Color(0xFF3B82F6)
+      ..color = AmanahColorTokens.brandLight
       ..style = PaintingStyle.fill;
 
     final Paint crossPaint = Paint()
-      ..color = const Color(0xFF091B36)
+      ..color = AmanahColorTokens.surfaceAccentDark
       ..style = PaintingStyle.fill;
 
     final int repeats = math.max(1, (dist / 140).floor());
@@ -1871,9 +1875,9 @@ class _IdCardClipPainter extends CustomPainter {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: <Color>[
-          Color(0xFF334155),
-          Color(0xFF0F172A),
-          Color(0xFF1E293B),
+          AmanahColorTokens.neutral700,
+          AmanahColorTokens.neutral900,
+          AmanahColorTokens.neutral800,
         ],
       ).createShader(topLoop)
       ..style = PaintingStyle.stroke
@@ -1890,7 +1894,7 @@ class _IdCardClipPainter extends CustomPainter {
       height: 7,
     );
     final Paint collarPaint = Paint()
-      ..color = const Color(0xFF0F172A)
+      ..color = AmanahColorTokens.neutral900
       ..style = PaintingStyle.fill;
     canvas.drawRRect(
       RRect.fromRectAndRadius(collar, const Radius.circular(2)),
@@ -1898,7 +1902,7 @@ class _IdCardClipPainter extends CustomPainter {
     );
 
     final Paint collarRim = Paint()
-      ..color = const Color(0xFF475569)
+      ..color = AmanahColorTokens.neutral600
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
     canvas.drawRRect(
@@ -1916,7 +1920,7 @@ class _IdCardClipPainter extends CustomPainter {
       ..cubicTo(cx - 13, 52, cx - 11, 46, cx - 9, 44);
 
     final Paint hookShadow = Paint()
-      ..color = Colors.black.withValues(alpha: 0.35)
+      ..color = AmanahColorTokens.pureBlack.withValues(alpha: 0.35)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 6.0
       ..strokeCap = StrokeCap.round
@@ -1929,10 +1933,10 @@ class _IdCardClipPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: <Color>[
-          Color(0xFF334155),
-          Color(0xFF0F172A),
-          Color(0xFF020617),
-          Color(0xFF1E293B),
+          AmanahColorTokens.neutral700,
+          AmanahColorTokens.neutral900,
+          AmanahColorTokens.neutral950,
+          AmanahColorTokens.neutral800,
         ],
       ).createShader(const Rect.fromLTWH(0, 24, 36, 48))
       ..style = PaintingStyle.stroke
@@ -1946,7 +1950,7 @@ class _IdCardClipPainter extends CustomPainter {
       ..moveTo(cx + 1, 32)
       ..lineTo(cx - 4, 39);
     final Paint triggerPaint = Paint()
-      ..color = const Color(0xFF64748B)
+      ..color = AmanahColorTokens.neutral500
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.4
       ..strokeCap = StrokeCap.round;
@@ -1957,7 +1961,7 @@ class _IdCardClipPainter extends CustomPainter {
       ..moveTo(cx + 5, 34)
       ..cubicTo(cx + 6, 46, cx + 4, 56, cx - 1, 63);
     final Paint sheenPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.22)
+      ..color = AmanahColorTokens.surfaceLight.withValues(alpha: 0.22)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2
       ..strokeCap = StrokeCap.round;
@@ -1977,7 +1981,7 @@ class _UnderglowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-      ..color = (dark ? const Color(0xFF3B82F6) : const Color(0xFF60A5FA))
+      ..color = (dark ? AmanahColorTokens.brandLight : AmanahColorTokens.brandSoft)
           .withValues(alpha: dark ? 0.20 : 0.25)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 80);
     canvas.drawCircle(size.center(Offset.zero), size.width / 2.2, paint);

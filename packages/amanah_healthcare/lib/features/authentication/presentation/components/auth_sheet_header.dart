@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 
@@ -35,9 +35,7 @@ class AuthSheetHeader extends StatelessWidget {
                 onPressed: onDismiss,
                 style: IconButton.styleFrom(
                   fixedSize: const Size(MINIMUM_TOUCH_SIZE, MINIMUM_TOUCH_SIZE),
-                  backgroundColor: theme.brightness == Brightness.dark
-                      ? AmanahThemeTokens.surfaceSecondary(context)
-                      : const Color(0xFFF3F7FB),
+                  backgroundColor: AmanahThemeTokens.surfaceSecondary(context),
                   foregroundColor: theme.colorScheme.onSurface,
                 ),
                 icon: const Icon(Icons.close_rounded, size: 20),

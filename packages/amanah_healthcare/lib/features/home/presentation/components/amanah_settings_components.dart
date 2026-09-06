@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
@@ -46,7 +46,9 @@ class AmanahSettingSection extends StatelessWidget {
             border: Border.all(color: borderColor),
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: dark ? 0.35 : 0.03),
+                color: AmanahColorTokens.pureBlack.withValues(
+                  alpha: dark ? 0.35 : 0.03,
+                ),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -433,10 +435,10 @@ class AmanahToggleSwitch extends StatelessWidget {
         padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
           color: active
-              ? const Color(0xFF0D66E9)
+              ? AmanahColorTokens.brand
               : (isDark
-                    ? Colors.white.withValues(alpha: 0.20)
-                    : const Color(0xFFE5E5EA)),
+                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.20)
+                    : AmanahColorTokens.neutral200),
           borderRadius: BorderRadius.circular(999),
         ),
         child: AnimatedAlign(
@@ -447,11 +449,11 @@ class AmanahToggleSwitch extends StatelessWidget {
             width: 22,
             height: 22,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AmanahColorTokens.surfaceLight,
               shape: BoxShape.circle,
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.20),
+                  color: AmanahColorTokens.pureBlack.withValues(alpha: 0.20),
                   blurRadius: 5,
                   offset: const Offset(0, 2),
                 ),
@@ -496,21 +498,21 @@ class AmanahSettingActionRow extends StatelessWidget {
     Color btnText;
 
     if (isSuccess) {
-      btnBg = dark
-          ? const Color(0xFF064E3B).withValues(alpha: 0.40)
-          : const Color(0xFFECFDF5);
-      btnBorder = dark
-          ? const Color(0xFF10B981).withValues(alpha: 0.30)
-          : const Color(0xFFA7F3D0);
-      btnText = dark ? const Color(0xFF34D399) : const Color(0xFF047857);
+      final AmanahTone tone = AmanahThemeTokens.status(
+        AmanahStatusTone.success,
+        isDark: dark,
+      );
+      btnBg = tone.surface;
+      btnBorder = tone.border;
+      btnText = tone.onSurface;
     } else if (dark) {
-      btnBg = Colors.white.withValues(alpha: 0.05);
-      btnBorder = Colors.white.withValues(alpha: 0.10);
-      btnText = const Color(0xFFE2E8F0);
+      btnBg = AmanahColorTokens.surfaceLight.withValues(alpha: 0.05);
+      btnBorder = AmanahColorTokens.surfaceLight.withValues(alpha: 0.10);
+      btnText = AmanahColorTokens.neutral200;
     } else {
-      btnBg = const Color(0xFFF8FAFC);
-      btnBorder = const Color(0xFFE2E8F0);
-      btnText = const Color(0xFF334155);
+      btnBg = AmanahColorTokens.neutral50;
+      btnBorder = AmanahColorTokens.neutral200;
+      btnText = AmanahColorTokens.neutral700;
     }
 
     return Padding(
@@ -643,17 +645,21 @@ class _AmanahSettingEditDialogState extends State<AmanahSettingEditDialog> {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color dialogBg = dark ? const Color(0xFF111624) : Colors.white;
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
+    final Color dialogBg = dark
+        ? AmanahColorTokens.surfaceElevatedDark
+        : AmanahColorTokens.surfaceLight;
+    final Color textColor = dark
+        ? AmanahColorTokens.surfaceLight
+        : AmanahColorTokens.neutral900;
     final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+        ? AmanahColorTokens.neutral400
+        : AmanahColorTokens.neutral500;
     final Color inputBg = dark
-        ? Colors.white.withValues(alpha: 0.05)
-        : const Color(0xFFF8FAFC);
+        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+        : AmanahColorTokens.neutral50;
     final Color inputBorder = dark
-        ? Colors.white.withValues(alpha: 0.10)
-        : const Color(0xFFE2E8F0);
+        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+        : AmanahColorTokens.neutral200;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -719,7 +725,7 @@ class _AmanahSettingEditDialogState extends State<AmanahSettingEditDialog> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(
-                    color: Color(0xFF0D66E9),
+                    color: AmanahColorTokens.brand,
                     width: 1.5,
                   ),
                 ),

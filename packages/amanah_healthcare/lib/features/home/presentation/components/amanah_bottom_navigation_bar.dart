@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 
@@ -23,7 +23,7 @@ class AmanahBottomNavigationBar extends StatelessWidget {
     final double bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     final Color surfaceColor = dark
         ? AmanahThemeTokens.canvas(context)
-        : const Color(0xFFFFFFFF);
+        : AmanahColorTokens.surfaceLight;
     final Color activeColor = dark
         ? AmanahColorTokens.tabActiveDark
         : AmanahColorTokens.tabActiveLight;
@@ -56,7 +56,7 @@ class AmanahBottomNavigationBar extends StatelessWidget {
                   ),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: dark ? 0.22 : 0.03),
+                      color: AmanahElevation.soft(dark: dark).color.withValues(alpha: dark ? 0.22 : 0.03),
                       blurRadius: 30,
                       offset: const Offset(0, -10),
                     ),
@@ -187,14 +187,14 @@ class _AmanahNavigationItem extends StatelessWidget {
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEF4444),
+                            color: AmanahColorTokens.danger,
                             shape: BoxShape.circle,
                             border: Border.all(
                               color:
                                   Theme.of(context).brightness ==
                                       Brightness.dark
-                                  ? const Color(0xFF171717)
-                                  : Colors.white,
+                                  ? AmanahColorTokens.canvasDark
+                                  : AmanahColorTokens.surfaceLight,
                               width: 1.5,
                             ),
                           ),
@@ -288,7 +288,7 @@ class _AmanahScanButton extends StatelessWidget {
               child: Icon(
                 Icons.qr_code_2_rounded,
                 size: 30,
-                color: Colors.white,
+                color: AmanahColorTokens.surfaceLight,
               ),
             ),
           ),

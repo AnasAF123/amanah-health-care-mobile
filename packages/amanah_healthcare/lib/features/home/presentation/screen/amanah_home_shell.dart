@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -167,7 +167,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
         ? AmanahColorTokens.canvasDark
         : (_selectedTab == AmanahHomeTab.home
               ? AmanahColorTokens.canvasLight
-              : Colors.white);
+              : AmanahColorTokens.surfaceLight);
 
     final List<DoctorSchedule> todaySchedules = _scheduleStore
         .getSchedulesForDate(AmanahScheduleStore.baseToday);
@@ -450,15 +450,15 @@ class _AmanahEphemeralToast extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0xE6171717),
+            color: AmanahColorTokens.neutral900.withValues(alpha: 0.90),
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.20),
+              color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.20),
               width: 1,
             ),
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.28),
+                color: AmanahColorTokens.pureBlack.withValues(alpha: 0.28),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -467,7 +467,7 @@ class _AmanahEphemeralToast extends StatelessWidget {
           child: Text(
             message,
             style: const TextStyle(
-              color: Colors.white,
+              color: AmanahColorTokens.surfaceLight,
               fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w600,

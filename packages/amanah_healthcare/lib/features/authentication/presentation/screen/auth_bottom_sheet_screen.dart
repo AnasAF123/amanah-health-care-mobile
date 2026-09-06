@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_repository.dart';
@@ -543,6 +543,7 @@ class _AuthBackgroundScrim extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
+    final Color baseColor = AmanahElevation.sheet(dark: dark).color;
 
     return Stack(
       fit: StackFit.expand,
@@ -553,11 +554,11 @@ class _AuthBackgroundScrim extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: <Color>[
-                Colors.black.withValues(alpha: dark ? 0.10 : 0.03),
+                baseColor.withValues(alpha: dark ? 0.10 : 0.03),
                 Colors.transparent,
-                Colors.black.withValues(alpha: 0.14),
-                Colors.black.withValues(alpha: 0.36),
-                Colors.black.withValues(alpha: 0.78),
+                baseColor.withValues(alpha: 0.14),
+                baseColor.withValues(alpha: 0.36),
+                baseColor.withValues(alpha: 0.78),
               ],
               stops: const <double>[0, 0.36, 0.56, 0.76, 1],
             ),
@@ -575,9 +576,9 @@ class _AuthBackgroundScrim extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: <Color>[
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.08),
-                    Colors.black.withValues(alpha: 0.28),
-                    Colors.black.withValues(alpha: 0.54),
+                    baseColor.withValues(alpha: 0.08),
+                    baseColor.withValues(alpha: 0.28),
+                    baseColor.withValues(alpha: 0.54),
                   ],
                   stops: const <double>[0, 0.30, 0.66, 1],
                 ),
@@ -614,7 +615,7 @@ class _AuthClosedActions extends StatelessWidget {
                   Text(
                     'Sehat Bersama Amanah',
                     style: theme.textTheme.displaySmall?.copyWith(
-                      color: Colors.white,
+                      color: AmanahColorTokens.surfaceLight,
                       fontFamily: 'PlusJakartaSans',
                       fontSize: 31,
                       fontWeight: FontWeight.w900,
@@ -625,7 +626,7 @@ class _AuthClosedActions extends StatelessWidget {
                   Text(
                     'Menemukan layanan kesehatan dan perawatan terbaik yang dirancang khusus untuk kebutuhanmu',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.82),
+                      color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.82),
                       fontFamily: 'PlusJakartaSans',
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
@@ -648,7 +649,7 @@ class _AuthClosedActions extends StatelessWidget {
               onPressed: onSignIn,
               size: AmanahButtonSize.large,
               isFullWidth: true,
-              customForegroundColor: Colors.white,
+              customForegroundColor: AmanahColorTokens.surfaceLight,
             ),
             const SizedBox(height: 24),
             Text.rich(
@@ -658,7 +659,7 @@ class _AuthClosedActions extends StatelessWidget {
                   TextSpan(
                     text: 'syarat penggunaan',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AmanahColorTokens.surfaceLight,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -666,7 +667,7 @@ class _AuthClosedActions extends StatelessWidget {
                   TextSpan(
                     text: 'kebijakan privasi',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AmanahColorTokens.surfaceLight,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -675,7 +676,7 @@ class _AuthClosedActions extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: Colors.white.withValues(alpha: 0.78),
+                color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.78),
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 height: 1.35,

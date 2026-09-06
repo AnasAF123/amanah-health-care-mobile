@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 /// AuroraBackground - Dynamic Aurora Ambient Atmosphere master component in Flutter.
@@ -26,19 +26,19 @@ class AmanahAuroraBackground extends StatelessWidget {
         child: ShaderMask(
           blendMode: BlendMode.dstIn,
           shaderCallback: (Rect bounds) {
-            return const LinearGradient(
+            return LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: <Color>[
-                Colors.black,
-                Colors.black,
-                Color(0xCC000000), // 80%
-                Color(0x80000000), // 50%
-                Color(0x40000000), // 25%
-                Color(0x14000000), // 8%
-                Color(0x00000000), // 0%
+                AmanahColorTokens.pureBlack,
+                AmanahColorTokens.pureBlack,
+                AmanahColorTokens.pureBlack.withValues(alpha: 0.80),
+                AmanahColorTokens.pureBlack.withValues(alpha: 0.50),
+                AmanahColorTokens.pureBlack.withValues(alpha: 0.25),
+                AmanahColorTokens.pureBlack.withValues(alpha: 0.08),
+                Colors.transparent,
               ],
-              stops: <double>[0.0, 0.28, 0.48, 0.66, 0.80, 0.92, 1.0],
+              stops: const <double>[0.0, 0.28, 0.48, 0.66, 0.80, 0.92, 1.0],
             ).createShader(bounds);
           },
           child: CustomPaint(
@@ -51,7 +51,6 @@ class AmanahAuroraBackground extends StatelessWidget {
   }
 }
 
-/// Canvas painter that renders full-bleed multi-lobe ambient fluid radiance without clipping
 class _AmanahAuroraPainter extends CustomPainter {
   const _AmanahAuroraPainter({required this.dark, required this.isSoft});
 
@@ -62,7 +61,6 @@ class _AmanahAuroraPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Rect fullRect = Offset.zero & size;
 
-    // 1. Base Atmospheric Sky Wash (Top horizontal blend)
     final Paint baseWashPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topLeft,
@@ -95,7 +93,6 @@ class _AmanahAuroraPainter extends CustomPainter {
       ).createShader(fullRect);
     canvas.drawRect(fullRect, baseWashPaint);
 
-    // 2. Primary Lobe (Electric Sapphire Blue at ~20% 10% top-left)
     final Rect primaryLobeRect = Rect.fromCircle(
       center: Offset(size.width * 0.20, size.height * 0.10),
       radius: size.width * 0.85,
@@ -113,7 +110,7 @@ class _AmanahAuroraPainter extends CustomPainter {
                 AmanahColorTokens.auroraSapphireDark.withValues(
                   alpha: isSoft ? 0.15 : 0.25,
                 ),
-                const Color(0x0007247A),
+                AmanahColorTokens.auroraSapphireDark.withValues(alpha: 0.0),
               ]
             : <Color>[
                 AmanahColorTokens.auroraSapphireLight.withValues(
@@ -125,13 +122,12 @@ class _AmanahAuroraPainter extends CustomPainter {
                 AmanahColorTokens.auroraSapphireLight.withValues(
                   alpha: isSoft ? 0.12 : 0.22,
                 ),
-                const Color(0x000D66E9),
+                AmanahColorTokens.auroraSapphireLight.withValues(alpha: 0.0),
               ],
         stops: const <double>[0.0, 0.40, 0.72, 1.0],
       ).createShader(primaryLobeRect);
     canvas.drawRect(fullRect, primaryPaint);
 
-    // 3. Secondary Lobe (Radiant Cobalt / Sky Blue at ~82% 18% top-right)
     final Rect blueLobeRect = Rect.fromCircle(
       center: Offset(size.width * 0.82, size.height * 0.18),
       radius: size.width * 0.75,
@@ -149,7 +145,7 @@ class _AmanahAuroraPainter extends CustomPainter {
                 AmanahColorTokens.auroraBlueDark.withValues(
                   alpha: isSoft ? 0.08 : 0.15,
                 ),
-                const Color(0x001D4ED8),
+                AmanahColorTokens.auroraBlueDark.withValues(alpha: 0.0),
               ]
             : <Color>[
                 AmanahColorTokens.auroraBlueLight.withValues(
@@ -161,13 +157,12 @@ class _AmanahAuroraPainter extends CustomPainter {
                 AmanahColorTokens.auroraBlueLight.withValues(
                   alpha: isSoft ? 0.08 : 0.15,
                 ),
-                const Color(0x002563EB),
+                AmanahColorTokens.auroraBlueLight.withValues(alpha: 0.0),
               ],
         stops: const <double>[0.0, 0.38, 0.70, 1.0],
       ).createShader(blueLobeRect);
     canvas.drawRect(fullRect, bluePaint);
 
-    // 4. Soft Cyan Accent Radiance Lobe (Integrated softly in dark mode)
     if (dark) {
       final Rect cyanLobeRect = Rect.fromCircle(
         center: Offset(size.width * 0.66, size.height * 0.16),
@@ -185,14 +180,13 @@ class _AmanahAuroraPainter extends CustomPainter {
             AmanahColorTokens.auroraCyanDark.withValues(
               alpha: isSoft ? 0.01 : 0.03,
             ),
-            const Color(0x0006B6D4),
+            AmanahColorTokens.auroraCyanDark.withValues(alpha: 0.0),
           ],
           stops: const <double>[0.0, 0.38, 0.72, 1.0],
         ).createShader(cyanLobeRect);
       canvas.drawRect(fullRect, cyanPaint);
     }
 
-    // 5. Subtle Tertiary Fluid Haze (Center-Mid blend at 50% 40%)
     final Rect centerHazeRect = Rect.fromCircle(
       center: Offset(size.width * 0.50, size.height * 0.40),
       radius: size.width * 0.65,
@@ -201,12 +195,16 @@ class _AmanahAuroraPainter extends CustomPainter {
       ..shader = RadialGradient(
         colors: dark
             ? <Color>[
-                const Color(0xFF14103B).withValues(alpha: isSoft ? 0.20 : 0.35),
-                const Color(0x0014103B),
+                AmanahColorTokens.darkNavy.withValues(
+                  alpha: isSoft ? 0.20 : 0.35,
+                ),
+                AmanahColorTokens.darkNavy.withValues(alpha: 0.0),
               ]
             : <Color>[
-                const Color(0xFF70A6FF).withValues(alpha: isSoft ? 0.15 : 0.28),
-                const Color(0x0070A6FF),
+                AmanahColorTokens.auroraFluidHazeLight.withValues(
+                  alpha: isSoft ? 0.15 : 0.28,
+                ),
+                AmanahColorTokens.auroraFluidHazeLight.withValues(alpha: 0.0),
               ],
         stops: const <double>[0.0, 1.0],
       ).createShader(centerHazeRect);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahOtpInput extends StatefulWidget {
   const AmanahOtpInput({
@@ -119,7 +120,7 @@ class _AmanahOtpInputState extends State<AmanahOtpInput> {
               fontFamily: 'PlusJakartaSans',
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: Color(0xFFEF4444),
+              color: AmanahColorTokens.danger,
             ),
           ),
         ],
@@ -147,21 +148,23 @@ class _DigitBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color bgColor = dark
         ? (controller.text.isNotEmpty
-            ? const Color(0xFF1E293B)
-            : const Color(0xFF111827))
+            ? AmanahColorTokens.neutral800
+            : AmanahColorTokens.surfaceDark)
         : (controller.text.isNotEmpty
-            ? const Color(0xFFF8FAFC)
-            : Colors.white);
+            ? AmanahColorTokens.neutral50
+            : AmanahColorTokens.surfaceLight);
 
     final Color borderColor = hasError
-        ? const Color(0xFFEF4444)
+        ? AmanahColorTokens.danger
         : (controller.text.isNotEmpty
-            ? (dark ? const Color(0xFF3B82F6) : const Color(0xFF0F172A))
+            ? (dark ? AmanahColorTokens.brandLight : AmanahColorTokens.neutral900)
             : (dark
-                ? Colors.white.withValues(alpha: 0.15)
-                : const Color(0xFFCBD5E1)));
+                ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
+                : AmanahColorTokens.neutral300));
 
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
+    final Color textColor = dark
+        ? AmanahColorTokens.surfaceLight
+        : AmanahColorTokens.neutral900;
 
     return SizedBox(
       width: 44,
@@ -197,7 +200,9 @@ class _DigitBox extends StatelessWidget {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(
-              color: dark ? const Color(0xFF3B82F6) : const Color(0xFF0A44FF),
+              color: dark
+                  ? AmanahColorTokens.brandLight
+                  : AmanahColorTokens.brandPrimary,
               width: 2.0,
             ),
           ),

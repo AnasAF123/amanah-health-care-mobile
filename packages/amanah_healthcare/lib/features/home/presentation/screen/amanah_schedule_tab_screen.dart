@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_pull_to_refresh.dart';
@@ -324,10 +324,10 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
+              color: AmanahColorTokens.warning.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
+                color: AmanahColorTokens.warning.withValues(alpha: 0.35),
               ),
             ),
             child: Row(
@@ -335,14 +335,14 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                 const Icon(
                   Icons.info_outline_rounded,
                   size: 20,
-                  color: Color(0xFFF59E0B),
+                  color: AmanahColorTokens.warning,
                 ),
                 const SizedBox(width: 10),
                 const Expanded(
                   child: Text(
                     'Dokter Cuti Praktik: Seluruh jadwal dinonaktifkan.',
                     style: TextStyle(
-                      color: Color(0xFFF59E0B),
+                      color: AmanahColorTokens.warning,
                       fontFamily: 'PlusJakartaSans',
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -352,10 +352,10 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                 AmanahButton.secondary(
                   text: 'Buka Jadwal',
                   size: AmanahButtonSize.small,
-                  customForegroundColor: const Color(0xFFF59E0B),
-                  customBackgroundColor: const Color(
-                    0xFFF59E0B,
-                  ).withValues(alpha: 0.12),
+                  customForegroundColor: AmanahColorTokens.warning,
+                  customBackgroundColor: AmanahColorTokens.warning.withValues(
+                    alpha: 0.12,
+                  ),
                   onPressed: () => _store.setDayCuti(_selectedDate, false),
                 ),
               ],
@@ -375,8 +375,8 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: dark
-                      ? const Color(0xFF94A3B8)
-                      : const Color(0xFF64748B),
+                      ? AmanahColorTokens.neutral400
+                      : AmanahColorTokens.neutral500,
                   fontFamily: 'PlusJakartaSans',
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
@@ -387,7 +387,9 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
             Text(
               '${bookedPatients.length} Pasien Booking',
               style: TextStyle(
-                color: dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                color: dark
+                    ? AmanahColorTokens.neutral400
+                    : AmanahColorTokens.neutral500,
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 11.5,
                 fontWeight: FontWeight.w600,
@@ -470,8 +472,8 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: dark
-                      ? const Color(0xFF94A3B8)
-                      : const Color(0xFF64748B),
+                      ? AmanahColorTokens.neutral400
+                      : AmanahColorTokens.neutral500,
                   fontFamily: 'PlusJakartaSans',
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
@@ -482,7 +484,9 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
             Text(
               '${schedules.length} Sesi Aktif',
               style: TextStyle(
-                color: dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                color: dark
+                    ? AmanahColorTokens.neutral400
+                    : AmanahColorTokens.neutral500,
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 11.5,
                 fontWeight: FontWeight.w600,
@@ -567,7 +571,9 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                     Text(
                       '${sch?.title} • ${sch?.poli}',
                       style: TextStyle(
-                        color: dark ? Colors.white : const Color(0xFF0F172A),
+                        color: dark
+                            ? AmanahColorTokens.surfaceLight
+                            : AmanahColorTokens.neutral900,
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
@@ -578,8 +584,8 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                       '${sch?.room} • ${sch?.time}',
                       style: TextStyle(
                         color: dark
-                            ? const Color(0xFF94A3B8)
-                            : const Color(0xFF64748B),
+                            ? AmanahColorTokens.neutral400
+                            : AmanahColorTokens.neutral500,
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 12,
                         fontWeight: FontWeight.w600,

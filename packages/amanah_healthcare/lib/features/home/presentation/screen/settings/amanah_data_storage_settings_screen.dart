@@ -1,8 +1,9 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_settings_components.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahDataStorageSettingsScreen extends StatefulWidget {
   const AmanahDataStorageSettingsScreen({this.onBack, super.key});
@@ -44,12 +45,7 @@ class _AmanahDataStorageSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool dark = theme.brightness == Brightness.dark;
-
-    final Color bgColor = dark
-        ? const Color(0xFF0A0E1A)
-        : const Color(0xFFF8FAFF);
+    final Color bgColor = AmanahThemeTokens.canvas(context);
 
     String exportLabel = 'Ekspor PDF';
     if (_exportState == 'exporting') {

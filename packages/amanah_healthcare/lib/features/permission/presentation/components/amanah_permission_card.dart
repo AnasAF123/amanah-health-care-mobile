@@ -1,5 +1,6 @@
-﻿import 'dart:ui' as ui;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/permission/domain/amanah_permission_model.dart';
 import 'package:amanah_healthcare/features/permission/presentation/theme/amanah_permission_tokens.dart';
 
@@ -65,7 +66,7 @@ class AmanahPermissionCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(24),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: dark ? 0.40 : 0.04),
+                  color: AmanahColorTokens.pureBlack.withValues(alpha: dark ? 0.40 : 0.04),
                   blurRadius: 12,
                   offset: const Offset(0, 3),
                 ),

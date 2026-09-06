@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -73,7 +73,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
           'Tautan verifikasi telah dikirim ke $_email. Email berhasil diverifikasi.',
         ),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF0284C7),
+        backgroundColor: AmanahColorTokens.sky,
       ),
     );
   }
@@ -92,8 +92,8 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
         backgroundColor: _isEmailVerified
-            ? const Color(0xFF0284C7)
-            : const Color(0xFFD97706),
+            ? AmanahColorTokens.sky
+            : AmanahColorTokens.warningDark,
       ),
     );
   }
@@ -130,7 +130,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
         SnackBar(
           content: const Row(
             children: <Widget>[
-              Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+              Icon(Icons.check_circle_rounded, color: AmanahColorTokens.surfaceLight, size: 18),
               SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -144,7 +144,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
               ),
             ],
           ),
-          backgroundColor: const Color(0xFF0F172A),
+          backgroundColor: AmanahColorTokens.neutral900,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -178,7 +178,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
         SnackBar(
           content: const Row(
             children: <Widget>[
-              Icon(Icons.camera_alt_rounded, color: Colors.white, size: 18),
+              Icon(Icons.camera_alt_rounded, color: AmanahColorTokens.surfaceLight, size: 18),
               SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -192,7 +192,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
               ),
             ],
           ),
-          backgroundColor: const Color(0xFF0F172A),
+          backgroundColor: AmanahColorTokens.neutral900,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -384,42 +384,39 @@ class _MedicalHeroBanner extends StatelessWidget {
         blendMode: BlendMode.dstIn,
         shaderCallback: (Rect bounds) {
           if (dark) {
-            return const LinearGradient(
+            return LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: <Color>[
-                Colors.black,
-                Color(0xCC000000), // 80%
-                Color(0x40000000), // 25%
+                AmanahColorTokens.pureBlack,
+                AmanahColorTokens.pureBlack.withValues(alpha: 0.80),
+                AmanahColorTokens.pureBlack.withValues(alpha: 0.25),
                 Colors.transparent,
               ],
-              stops: <double>[0.0, 0.45, 0.75, 1.0],
+              stops: const <double>[0.0, 0.45, 0.75, 1.0],
             ).createShader(bounds);
           } else {
-            return const LinearGradient(
+            return LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: <Color>[
-                Color(0x8A000000), // ~54% max opacity in light mode for non-contrasting soft look
-                Color(0x70000000), // ~44%
-                Color(0x20000000), // ~12%
+                AmanahColorTokens.pureBlack.withValues(alpha: 0.54),
+                AmanahColorTokens.pureBlack.withValues(alpha: 0.44),
+                AmanahColorTokens.pureBlack.withValues(alpha: 0.12),
                 Colors.transparent,
               ],
-              stops: <double>[0.0, 0.45, 0.75, 1.0],
+              stops: const <double>[0.0, 0.45, 0.75, 1.0],
             ).createShader(bounds);
           }
         },
         child: Stack(
           clipBehavior: Clip.none,
           children: <Widget>[
-            // Background Vector Canvas: Grid, Waves, ECG Line, Sparkles
             Positioned.fill(
               child: CustomPaint(
                 painter: _MedicalHeroIllustrationPainter(dark: dark),
               ),
             ),
-
-            // Right Telehealth Tablet & Badges Illustration
             Positioned(
               right: 8,
               bottom: 24,
@@ -432,7 +429,6 @@ class _MedicalHeroBanner extends StatelessWidget {
   }
 }
 
-/// Canvas Painter for the Medical Hero Illustration matching POC 1:1
 class _MedicalHeroIllustrationPainter extends CustomPainter {
   const _MedicalHeroIllustrationPainter({required this.dark});
 
@@ -442,28 +438,26 @@ class _MedicalHeroIllustrationPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Rect rect = Offset.zero & size;
 
-    // 1. Base Gradient Background
     final Paint bgPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: dark
             ? const <Color>[
-                Color(0xFF060B18),
-                Color(0xFF082F49),
-                Color(0xFF0B1329),
+                AmanahColorTokens.brandNavyDark,
+                AmanahColorTokens.brandNavy,
+                AmanahColorTokens.navySurface,
               ]
             : const <Color>[
-                Color(0xFFF0F9FF),
-                Color(0xFFE0F2FE),
-                Color(0xFFBAE6FD),
+                AmanahColorTokens.skySurface,
+                AmanahColorTokens.skyLight,
+                AmanahColorTokens.skySubtle,
               ],
       ).createShader(rect);
     canvas.drawRect(rect, bgPaint);
 
-    // 2. Clinical Medical Grid Pattern
     final Paint gridPaint = Paint()
-      ..color = const Color(0xFF38BDF8).withValues(alpha: dark ? 0.08 : 0.12)
+      ..color = AmanahColorTokens.skySoft.withValues(alpha: dark ? 0.08 : 0.12)
       ..strokeWidth = 0.6;
     const double gridSize = 22.0;
     for (double x = 0; x < size.width; x += gridSize) {
@@ -473,7 +467,6 @@ class _MedicalHeroIllustrationPainter extends CustomPainter {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
     }
 
-    // 3. Mid Fluid Medical Wave
     final Path midWave = Path()
       ..moveTo(-20, size.height * 0.72)
       ..quadraticBezierTo(
@@ -498,18 +491,17 @@ class _MedicalHeroIllustrationPainter extends CustomPainter {
         end: Alignment.bottomRight,
         colors: dark
             ? <Color>[
-                const Color(0xFF0E7490).withValues(alpha: 0.6),
-                const Color(0xFF082F49).withValues(alpha: 0.8),
+                AmanahColorTokens.cyanDark.withValues(alpha: 0.6),
+                AmanahColorTokens.brandNavy.withValues(alpha: 0.8),
               ]
             : <Color>[
-                const Color(0xFF38BDF8).withValues(alpha: 0.35),
-                const Color(0xFF0EA5E9).withValues(alpha: 0.45),
+                AmanahColorTokens.skySoft.withValues(alpha: 0.35),
+                AmanahColorTokens.skyMedium.withValues(alpha: 0.45),
               ],
       ).createShader(rect)
       ..style = PaintingStyle.fill;
     canvas.drawPath(midWave, midWavePaint);
 
-    // 4. Foreground Deep Clinical Wave
     final Path deepWave = Path()
       ..moveTo(-20, size.height * 0.84)
       ..quadraticBezierTo(
@@ -533,16 +525,15 @@ class _MedicalHeroIllustrationPainter extends CustomPainter {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: dark
-            ? const <Color>[Color(0xFF082F49), Color(0xFF060B18)]
+            ? const <Color>[AmanahColorTokens.brandNavy, AmanahColorTokens.brandNavyDark]
             : <Color>[
-                const Color(0xFF0284C7).withValues(alpha: 0.30),
-                const Color(0xFF0369A1).withValues(alpha: 0.38),
+                AmanahColorTokens.sky.withValues(alpha: 0.30),
+                AmanahColorTokens.skyDark.withValues(alpha: 0.38),
               ],
       ).createShader(rect)
       ..style = PaintingStyle.fill;
     canvas.drawPath(deepWave, deepWavePaint);
 
-    // 5. Glowing ECG Heartbeat Rhythm Line
     final double ecgY = size.height * 0.56;
     final Path ecgPath = Path()
       ..moveTo(-10, ecgY)
@@ -564,12 +555,12 @@ class _MedicalHeroIllustrationPainter extends CustomPainter {
       ..lineTo(size.width + 10, ecgY);
 
     final Paint ecgGlowPaint = Paint()
-      ..shader = const LinearGradient(
+      ..shader = LinearGradient(
         colors: <Color>[
-          Color(0x3338BDF8),
-          Color(0xFF00D3F2),
-          Color(0xFF67E8F9),
-          Color(0x3338BDF8),
+          AmanahColorTokens.skySoft.withValues(alpha: 0.20),
+          AmanahColorTokens.cyanBright,
+          AmanahColorTokens.cyanLight,
+          AmanahColorTokens.skySoft.withValues(alpha: 0.20),
         ],
       ).createShader(rect)
       ..style = PaintingStyle.stroke
@@ -578,35 +569,33 @@ class _MedicalHeroIllustrationPainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.round;
     canvas.drawPath(ecgPath, ecgGlowPaint);
 
-    // 6. Pulse Node Dot Highlights
     final Paint pulsePaint = Paint()
-      ..color = const Color(0xFF00D3F2)
+      ..color = AmanahColorTokens.cyanBright
       ..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(size.width * 0.29, ecgY - 34), 3.2, pulsePaint);
     canvas.drawCircle(
       Offset(size.width * 0.54, ecgY - 24),
       2.6,
-      Paint()..color = const Color(0xFF67E8F9),
+      Paint()..color = AmanahColorTokens.cyanLight,
     );
 
-    // 7. Floating Medical Plus Signs
     _drawPlusSign(
       canvas,
       Offset(size.width * 0.12, size.height * 0.26),
       7,
-      const Color(0xFF00D3F2),
+      AmanahColorTokens.cyanBright,
     );
     _drawPlusSign(
       canvas,
       Offset(size.width * 0.36, size.height * 0.18),
       6,
-      const Color(0xFF38BDF8),
+      AmanahColorTokens.skySoft,
     );
     _drawPlusSign(
       canvas,
       Offset(size.width * 0.50, size.height * 0.28),
       5,
-      Colors.white.withValues(alpha: 0.8),
+      AmanahColorTokens.surfaceLight.withValues(alpha: 0.8),
     );
   }
 
@@ -664,21 +653,21 @@ class _TelehealthArtwork extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: dark
-                          ? const <Color>[Color(0xFF0369A1), Color(0xFF082F49)]
-                          : const <Color>[Color(0xFF38BDF8), Color(0xFF0284C7)],
+                          ? const <Color>[AmanahColorTokens.skyDark, AmanahColorTokens.brandNavy]
+                          : const <Color>[AmanahColorTokens.skySoft, AmanahColorTokens.sky],
                     ),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: dark
-                          ? const Color(0xFF0284C7)
-                          : const Color(0xFFBAE6FD),
+                          ? AmanahColorTokens.sky
+                          : AmanahColorTokens.skySubtle,
                       width: 2,
                     ),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
                         color: dark
-                            ? Colors.black.withValues(alpha: 0.30)
-                            : const Color(0xFF0284C7).withValues(alpha: 0.15),
+                            ? AmanahColorTokens.pureBlack.withValues(alpha: 0.30)
+                            : AmanahColorTokens.sky.withValues(alpha: 0.15),
                         blurRadius: 18,
                         offset: const Offset(0, 8),
                       ),
@@ -687,17 +676,14 @@ class _TelehealthArtwork extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      // Tablet Speaker Notch
                       Container(
                         width: 24,
                         height: 3,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF38BDF8).withValues(alpha: 0.5),
+                          color: AmanahColorTokens.skySoft.withValues(alpha: 0.50),
                           borderRadius: BorderRadius.circular(999),
                         ),
                       ),
-
-                      // Tablet Clinical Screen
                       Container(
                         width: double.infinity,
                         height: 80,
@@ -708,12 +694,12 @@ class _TelehealthArtwork extends StatelessWidget {
                             end: Alignment.bottomCenter,
                             colors: dark
                                 ? const <Color>[
-                                    Color(0xFF0F172A),
-                                    Color(0xFF1E293B),
+                                    AmanahColorTokens.neutral900,
+                                    AmanahColorTokens.neutral800,
                                   ]
                                 : const <Color>[
-                                    Colors.white,
-                                    Color(0xFFF0F9FF),
+                                    AmanahColorTokens.surfaceLight,
+                                    AmanahColorTokens.skySurface,
                                   ],
                           ),
                           borderRadius: BorderRadius.circular(11),
@@ -721,7 +707,6 @@ class _TelehealthArtwork extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            // Heart / Stethoscope Icon Badge
                             Container(
                               width: 26,
                               height: 26,
@@ -729,40 +714,32 @@ class _TelehealthArtwork extends StatelessWidget {
                                 shape: BoxShape.circle,
                                 gradient: LinearGradient(
                                   colors: <Color>[
-                                    Color(0xFF0284C7),
-                                    Color(0xFF38BDF8),
+                                    AmanahColorTokens.sky,
+                                    AmanahColorTokens.skySoft,
                                   ],
                                 ),
                               ),
                               child: const Icon(
                                 Icons.favorite_rounded,
                                 size: 14,
-                                color: Colors.white,
+                                color: AmanahColorTokens.surfaceLight,
                               ),
                             ),
-
-                            // Miniature Vitals Wave
                             SizedBox(
                               height: 10,
                               width: 55,
                               child: CustomPaint(painter: _MiniVitalsPainter()),
                             ),
-
-                            // TeleCare Active Pill
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 5,
                                 vertical: 1.5,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(
-                                  0xFF00D3F2,
-                                ).withValues(alpha: 0.20),
+                                color: AmanahColorTokens.cyanBright.withValues(alpha: 0.20),
                                 borderRadius: BorderRadius.circular(999),
                                 border: Border.all(
-                                  color: const Color(
-                                    0xFF00D3F2,
-                                  ).withValues(alpha: 0.60),
+                                  color: AmanahColorTokens.cyanBright.withValues(alpha: 0.60),
                                   width: 0.8,
                                 ),
                               ),
@@ -773,22 +750,20 @@ class _TelehealthArtwork extends StatelessWidget {
                                   fontSize: 7,
                                   fontWeight: FontWeight.w800,
                                   color: dark
-                                      ? const Color(0xFF38BDF8)
-                                      : const Color(0xFF0369A1),
+                                      ? AmanahColorTokens.skySoft
+                                      : AmanahColorTokens.skyDark,
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
-
-                      // Tablet Home Button Dot
                       Container(
                         width: 4,
                         height: 4,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: const Color(0xFF38BDF8).withValues(alpha: 0.5),
+                          color: AmanahColorTokens.skySoft.withValues(alpha: 0.50),
                         ),
                       ),
                     ],
@@ -796,8 +771,6 @@ class _TelehealthArtwork extends StatelessWidget {
                 ),
               ),
             ),
-
-            // First Aid Cross Badge (Top Left of Tablet)
             Positioned(
               left: 18,
               top: 8,
@@ -807,15 +780,15 @@ class _TelehealthArtwork extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: const LinearGradient(
-                    colors: <Color>[Color(0xFF0284C7), Color(0xFF00D3F2)],
+                    colors: <Color>[AmanahColorTokens.sky, AmanahColorTokens.cyanBright],
                   ),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.80),
+                    color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.80),
                     width: 1.2,
                   ),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.18),
+                      color: AmanahColorTokens.pureBlack.withValues(alpha: 0.18),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -823,13 +796,11 @@ class _TelehealthArtwork extends StatelessWidget {
                 ),
                 child: const Icon(
                   Icons.add_rounded,
-                  color: Colors.white,
+                  color: AmanahColorTokens.surfaceLight,
                   size: 20,
                 ),
               ),
             ),
-
-            // Medical Shield Badge (Right of Tablet)
             Positioned(
               right: 2,
               top: 36,
@@ -839,15 +810,15 @@ class _TelehealthArtwork extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   gradient: const LinearGradient(
-                    colors: <Color>[Color(0xFF00D3F2), Color(0xFF0284C7)],
+                    colors: <Color>[AmanahColorTokens.cyanBright, AmanahColorTokens.sky],
                   ),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.80),
+                    color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.80),
                     width: 1.2,
                   ),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.18),
+                      color: AmanahColorTokens.pureBlack.withValues(alpha: 0.18),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -855,7 +826,7 @@ class _TelehealthArtwork extends StatelessWidget {
                 ),
                 child: const Icon(
                   Icons.shield_rounded,
-                  color: Colors.white,
+                  color: AmanahColorTokens.surfaceLight,
                   size: 18,
                 ),
               ),
@@ -880,7 +851,7 @@ class _MiniVitalsPainter extends CustomPainter {
       ..lineTo(size.width, size.height * 0.5);
 
     final Paint paint = Paint()
-      ..color = const Color(0xFF0284C7)
+      ..color = AmanahColorTokens.sky
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.6
       ..strokeCap = StrokeCap.round
@@ -935,8 +906,8 @@ class _DualStackProfileCard extends StatelessWidget {
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: dark
-                ? Colors.black.withValues(alpha: 0.40)
-                : const Color(0xFF0284C7).withValues(alpha: 0.18),
+                ? AmanahColorTokens.pureBlack.withValues(alpha: 0.40)
+                : AmanahColorTokens.sky.withValues(alpha: 0.18),
             blurRadius: 22,
             offset: const Offset(0, 6),
           ),
@@ -953,23 +924,22 @@ class _DualStackProfileCard extends StatelessWidget {
             ),
             Column(
               children: <Widget>[
-                // STACK 1: White / Dark Surface Profile Card overlapping Stack 2
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: dark
                         ? AmanahThemeTokens.surface(context)
-                        : Colors.white,
+                        : AmanahColorTokens.surfaceLight,
                     borderRadius: BorderRadius.circular(22),
                     border: Border.all(
                       color: dark
                           ? AmanahThemeTokens.outline(context)
-                          : const Color(0xFFE0F2FE),
+                          : AmanahColorTokens.skyLight,
                       width: 1,
                     ),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
-                        color: Colors.black.withValues(
+                        color: AmanahColorTokens.pureBlack.withValues(
                           alpha: dark ? 0.35 : 0.06,
                         ),
                         blurRadius: 14,
@@ -979,7 +949,6 @@ class _DualStackProfileCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: <Widget>[
-                      // Doctor Avatar (Clean, 56x56, tap to change)
                       GestureDetector(
                         onTap: onAvatarTap,
                         child: Container(
@@ -990,12 +959,12 @@ class _DualStackProfileCard extends StatelessWidget {
                             border: Border.all(
                               color: dark
                                   ? AmanahColorTokens.brand
-                                  : const Color(0xFFBAE6FD),
+                                  : AmanahColorTokens.skySubtle,
                               width: 2.2,
                             ),
                             boxShadow: <BoxShadow>[
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.10),
+                                color: AmanahColorTokens.pureBlack.withValues(alpha: 0.10),
                                 blurRadius: 6,
                                 offset: const Offset(0, 2),
                               ),
@@ -1005,8 +974,6 @@ class _DualStackProfileCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 14),
-
-                      // Doctor Name and Contact Info
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1021,8 +988,8 @@ class _DualStackProfileCard extends StatelessWidget {
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: -0.4,
                                 color: dark
-                                    ? Colors.white
-                                    : const Color(0xFF082F49),
+                                    ? AmanahColorTokens.surfaceLight
+                                    : AmanahColorTokens.brandNavy,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -1035,34 +1002,30 @@ class _DualStackProfileCard extends StatelessWidget {
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w500,
                                 color: dark
-                                    ? const Color(0xFF94A3B8)
-                                    : const Color(0xFF475569),
+                                    ? AmanahColorTokens.neutral400
+                                    : AmanahColorTokens.neutral600,
                               ),
                             ),
                           ],
                         ),
                       ),
-
-                      // Pencil Edit Profile Button
                       IconButton(
                         icon: const Icon(Icons.edit_rounded),
                         iconSize: 20,
                         tooltip: 'Edit Profil',
                         style: IconButton.styleFrom(
                           backgroundColor: dark
-                              ? Colors.white.withValues(alpha: 0.06)
-                              : const Color(0xFFE0F2FE).withValues(alpha: 0.60),
+                              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.06)
+                              : AmanahColorTokens.skyLight.withValues(alpha: 0.60),
                           foregroundColor: dark
-                              ? const Color(0xFF67E8F9)
-                              : const Color(0xFF082F49),
+                              ? AmanahColorTokens.cyanLight
+                              : AmanahColorTokens.brandNavy,
                         ),
                         onPressed: onEditTap,
                       ),
                     ],
                   ),
                 ),
-
-                // STACK 2: Bottom Loyalty / Status Tier Bar exposed beneath Stack 1
                 InkWell(
                   onTap: onLoyaltyTap,
                   borderRadius: const BorderRadius.vertical(
@@ -1076,7 +1039,6 @@ class _DualStackProfileCard extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        // Left side: Badge icon + "SIP Terverifikasi"
                         Flexible(
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -1085,8 +1047,8 @@ class _DualStackProfileCard extends StatelessWidget {
                                 Icons.verified_rounded,
                                 size: 18,
                                 color: dark
-                                    ? const Color(0xFF67E8F9)
-                                    : const Color(0xFF082F49),
+                                    ? AmanahColorTokens.cyanLight
+                                    : AmanahColorTokens.brandNavy,
                               ),
                               const SizedBox(width: 8),
                               Flexible(
@@ -1099,18 +1061,15 @@ class _DualStackProfileCard extends StatelessWidget {
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
                                     color: dark
-                                        ? Colors.white
-                                        : const Color(0xFF082F49),
+                                        ? AmanahColorTokens.surfaceLight
+                                        : AmanahColorTokens.brandNavy,
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-
                         const SizedBox(width: 8),
-
-                        // Right side: "Kartu ID Dokter" + circular button with arrow
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
@@ -1121,8 +1080,8 @@ class _DualStackProfileCard extends StatelessWidget {
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w700,
                                 color: dark
-                                    ? const Color(0xFF67E8F9)
-                                    : const Color(0xFF0369A1),
+                                    ? AmanahColorTokens.cyanLight
+                                    : AmanahColorTokens.skyDark,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -1133,14 +1092,14 @@ class _DualStackProfileCard extends StatelessWidget {
                                 shape: BoxShape.circle,
                                 color: dark
                                     ? AmanahColorTokens.tabActiveDark
-                                    : const Color(0xFF082F49),
+                                    : AmanahColorTokens.brandNavy,
                               ),
                               child: Icon(
                                 Icons.arrow_forward_rounded,
                                 size: 14,
                                 color: dark
-                                    ? const Color(0xFF082F49)
-                                    : const Color(0xFF67E8F9),
+                                    ? AmanahColorTokens.brandNavy
+                                    : AmanahColorTokens.cyanLight,
                               ),
                             ),
                           ],
@@ -1185,8 +1144,8 @@ class _DualStackProfileCard extends StatelessWidget {
       fit: BoxFit.cover,
       alignment: Alignment.topCenter,
       errorBuilder: (BuildContext ctx, Object err, StackTrace? st) => Container(
-        color: const Color(0xFF0284C7),
-        child: const Icon(Icons.person_rounded, color: Colors.white, size: 30),
+        color: AmanahColorTokens.sky,
+        child: const Icon(Icons.person_rounded, color: AmanahColorTokens.surfaceLight, size: 30),
       ),
     );
   }
@@ -1219,8 +1178,8 @@ class _WingedMailBanner extends StatelessWidget {
         : 'Belum verifikasi email';
 
     final Color titleColor = isVerified
-        ? (dark ? const Color(0xFF38BDF8) : const Color(0xFF0369A1))
-        : (dark ? const Color(0xFFFBBF24) : const Color(0xFFB45309));
+        ? (dark ? AmanahColorTokens.skySoft : AmanahColorTokens.skyDark)
+        : (dark ? AmanahColorTokens.amberLight : AmanahColorTokens.amberDark);
 
     final IconData statusIcon = isVerified
         ? Icons.verified_rounded
@@ -1237,33 +1196,33 @@ class _WingedMailBanner extends StatelessWidget {
           gradient: dark
               ? (isVerified
                     ? const LinearGradient(
-                        colors: <Color>[Color(0xFF0B1329), Color(0xFF0F1629)],
+                        colors: <Color>[AmanahColorTokens.navySurface, AmanahColorTokens.surfaceDark],
                       )
                     : const LinearGradient(
-                        colors: <Color>[Color(0xFF1E170A), Color(0xFF191308)],
+                        colors: <Color>[AmanahColorTokens.amberBgDark, AmanahColorTokens.amberBgDarker],
                       ))
               : (isVerified
                     ? const LinearGradient(
-                        colors: <Color>[Color(0xFFF0F9FF), Color(0xFFE0F2FE)],
+                        colors: <Color>[AmanahColorTokens.skySurface, AmanahColorTokens.skyLight],
                       )
                     : const LinearGradient(
-                        colors: <Color>[Color(0xFFFFFBEB), Color(0xFFFEF3C7)],
+                        colors: <Color>[AmanahColorTokens.amberSurfaceLight, AmanahColorTokens.amberSurfaceSoft],
                       )),
           border: Border.all(
             color: dark
                 ? (isVerified
                       ? AmanahThemeTokens.outline(context)
-                      : const Color(0xFF78350F))
+                      : AmanahColorTokens.amberBorderDark)
                 : (isVerified
-                      ? const Color(0xFFBAE6FD)
-                      : const Color(0xFFFDE68A)),
+                      ? AmanahColorTokens.skySubtle
+                      : AmanahColorTokens.amberBorderLight),
             width: 1,
           ),
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: dark
-                  ? Colors.black.withValues(alpha: 0.25)
-                  : const Color(0xFF0284C7).withValues(alpha: 0.06),
+                  ? AmanahColorTokens.pureBlack.withValues(alpha: 0.25)
+                  : AmanahColorTokens.sky.withValues(alpha: 0.06),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -1271,7 +1230,6 @@ class _WingedMailBanner extends StatelessWidget {
         ),
         child: Row(
           children: <Widget>[
-            // Left: Descriptive copy & Action Button
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1308,8 +1266,8 @@ class _WingedMailBanner extends StatelessWidget {
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
                         color: dark
-                            ? const Color(0xFF94A3B8)
-                            : const Color(0xFF475569),
+                            ? AmanahColorTokens.neutral400
+                            : AmanahColorTokens.neutral600,
                       ),
                     ),
                   ],
@@ -1318,9 +1276,9 @@ class _WingedMailBanner extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
                       backgroundColor: isVerified
-                          ? const Color(0xFF0284C7)
-                          : const Color(0xFFD97706),
-                      foregroundColor: Colors.white,
+                          ? AmanahColorTokens.sky
+                          : AmanahColorTokens.warningDark,
+                      foregroundColor: AmanahColorTokens.surfaceLight,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 6,
@@ -1345,8 +1303,6 @@ class _WingedMailBanner extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Right: Pixel-Perfect Winged Mail Vector Illustration
             const SizedBox(
               width: 105,
               height: 90,
@@ -1359,14 +1315,12 @@ class _WingedMailBanner extends StatelessWidget {
   }
 }
 
-/// Precise Vector Painter for the Winged Mail with golden wax seal and spring antenna
 class _PixelPerfectWingedMailPainter extends CustomPainter {
   const _PixelPerfectWingedMailPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
     canvas.save();
-    // Scale 120x110 design to available size
     final double scale = math.min(size.width / 120.0, size.height / 110.0);
     canvas.scale(scale, scale);
     canvas.translate(
@@ -1374,14 +1328,11 @@ class _PixelPerfectWingedMailPainter extends CustomPainter {
       (size.height / scale - 110.0) / 2.0,
     );
 
-    // Warm Background Glow
     final Paint glowPaint = Paint()
-      ..color = const Color(0xFFFEF3C7).withValues(alpha: 0.60)
+      ..color = AmanahColorTokens.amberSurfaceSoft.withValues(alpha: 0.60)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
     canvas.drawCircle(const Offset(68, 48), 28, glowPaint);
 
-    // 1. Feathered Wings at Top
-    // Left Wing (3 tiers)
     final Path leftWing = Path()
       ..moveTo(52, 31)
       ..cubicTo(45, 28, 38, 18, 34, 10)
@@ -1398,20 +1349,19 @@ class _PixelPerfectWingedMailPainter extends CustomPainter {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: <Color>[
-          Color(0xFFFFFFFF),
-          Color(0xFFD5DBE3),
-          Color(0xFFB4BECC),
+          AmanahColorTokens.surfaceLight,
+          AmanahColorTokens.featherGrayLight,
+          AmanahColorTokens.featherGray,
         ],
       ).createShader(const Rect.fromLTWH(24, 10, 28, 36));
     canvas.drawPath(leftWing, leftWingPaint);
 
     final Paint wingStroke = Paint()
-      ..color = const Color(0xFF94A3B8)
+      ..color = AmanahColorTokens.neutral400
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2;
     canvas.drawPath(leftWing, wingStroke);
 
-    // Right Wing (mirrored 3 tiers)
     final Path rightWing = Path()
       ..moveTo(64, 31)
       ..cubicTo(71, 28, 78, 18, 82, 10)
@@ -1428,15 +1378,14 @@ class _PixelPerfectWingedMailPainter extends CustomPainter {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: <Color>[
-          Color(0xFFFFFFFF),
-          Color(0xFFD5DBE3),
-          Color(0xFFB4BECC),
+          AmanahColorTokens.surfaceLight,
+          AmanahColorTokens.featherGrayLight,
+          AmanahColorTokens.featherGray,
         ],
       ).createShader(const Rect.fromLTWH(64, 10, 28, 36));
     canvas.drawPath(rightWing, rightWingPaint);
     canvas.drawPath(rightWing, wingStroke);
 
-    // 2. Coiled Wire / Spring Antenna
     final Path antennaPath = Path()
       ..moveTo(58, 52)
       ..cubicTo(57, 46, 62, 44, 62, 40)
@@ -1444,20 +1393,18 @@ class _PixelPerfectWingedMailPainter extends CustomPainter {
       ..cubicTo(55, 30, 59, 31, 58, 27);
 
     final Paint antennaPaint = Paint()
-      ..color = const Color(0xFF1E293B)
+      ..color = AmanahColorTokens.neutral800
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.4
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
     canvas.drawPath(antennaPath, antennaPaint);
 
-    // 3. Tilted Envelope Body (-3 deg)
     canvas.save();
     canvas.translate(58, 74);
     canvas.rotate(-3 * math.pi / 180);
     canvas.translate(-58, -74);
 
-    // Isometric dark blue top flap interior
     final Path topFlap = Path()
       ..moveTo(26, 47)
       ..lineTo(58, 31)
@@ -1466,11 +1413,10 @@ class _PixelPerfectWingedMailPainter extends CustomPainter {
       ..close();
     final Paint flapPaint = Paint()
       ..shader = const LinearGradient(
-        colors: <Color>[Color(0xFF0096C7), Color(0xFF0284C7)],
+        colors: <Color>[AmanahColorTokens.skyDeep, AmanahColorTokens.sky],
       ).createShader(const Rect.fromLTWH(26, 31, 64, 32));
     canvas.drawPath(topFlap, flapPaint);
 
-    // Front envelope body
     final Path frontBody = Path()
       ..moveTo(24, 48)
       ..lineTo(58, 64)
@@ -1485,19 +1431,18 @@ class _PixelPerfectWingedMailPainter extends CustomPainter {
       ..shader = const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: <Color>[Color(0xFFBBF2F6), Color(0xFF8DE0F7)],
+        colors: <Color>[AmanahColorTokens.mailAirLight, AmanahColorTokens.mailAir],
       ).createShader(const Rect.fromLTWH(24, 48, 68, 43));
     canvas.drawPath(frontBody, bodyPaint);
 
     final Paint bodyStroke = Paint()
-      ..color = const Color(0xFF74C5E3)
+      ..color = AmanahColorTokens.mailAirBorder
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2;
     canvas.drawPath(frontBody, bodyStroke);
 
-    // Envelope fold creases
     final Paint foldPaint = Paint()
-      ..color = const Color(0xFF0090C7)
+      ..color = AmanahColorTokens.skyDeep
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round
@@ -1511,33 +1456,31 @@ class _PixelPerfectWingedMailPainter extends CustomPainter {
     canvas.drawLine(const Offset(25, 89), const Offset(46, 72), foldPaint);
     canvas.drawLine(const Offset(91, 89), const Offset(70, 72), foldPaint);
 
-    // 4. Golden Wax Seal with white @ emblem
     final Paint sealOuter = Paint()
       ..shader = const LinearGradient(
-        colors: <Color>[Color(0xFFFBBF24), Color(0xFFF59E0B)],
+        colors: <Color>[AmanahColorTokens.amberLight, AmanahColorTokens.warning],
       ).createShader(const Rect.fromLTWH(46, 61, 24, 24));
     canvas.drawCircle(const Offset(58, 73), 12, sealOuter);
 
     final Paint sealBorder = Paint()
-      ..color = const Color(0xFFF59E0B)
+      ..color = AmanahColorTokens.warning
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2;
     canvas.drawCircle(const Offset(58, 73), 12, sealBorder);
 
     final Paint sealInnerRing = Paint()
-      ..color = const Color(0xFFFDE68A).withValues(alpha: 0.8)
+      ..color = AmanahColorTokens.amberBorderLight.withValues(alpha: 0.80)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.8;
     canvas.drawCircle(const Offset(58, 73), 10, sealInnerRing);
 
-    // White @ Text Symbol
     const TextSpan span = TextSpan(
       text: '@',
       style: TextStyle(
         fontFamily: 'PlusJakartaSans',
         fontSize: 12.5,
         fontWeight: FontWeight.w900,
-        color: Colors.white,
+        color: AmanahColorTokens.surfaceLight,
       ),
     );
     final TextPainter tp = TextPainter(
@@ -1579,23 +1522,23 @@ class _PreferencesCard extends StatelessWidget {
               fontSize: 13.5,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.2,
-              color: dark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+              color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral600,
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: dark ? AmanahThemeTokens.surface(context) : Colors.white,
+            color: dark ? AmanahThemeTokens.surface(context) : AmanahColorTokens.surfaceLight,
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
               color: dark
                   ? AmanahThemeTokens.outline(context)
-                  : const Color(0xFFE2E8F0),
+                  : AmanahColorTokens.neutral200,
               width: 1,
             ),
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: Colors.black.withValues(alpha: dark ? 0.35 : 0.04),
+                color: AmanahColorTokens.pureBlack.withValues(alpha: dark ? 0.35 : 0.04),
                 blurRadius: 12,
                 offset: const Offset(0, 3),
               ),
@@ -1609,7 +1552,7 @@ class _PreferencesCard extends StatelessWidget {
                   icon: Icons.shield_outlined,
                   title: 'Keamanan akun & PIN',
                   badgeText: 'PIN Aktif',
-                  badgeColor: const Color(0xFF10B981),
+                  badgeColor: AmanahColorTokens.success,
                   dark: dark,
                   onTap: () => onItemTap('security'),
                 ),
@@ -1618,7 +1561,7 @@ class _PreferencesCard extends StatelessWidget {
                   icon: Icons.badge_outlined,
                   title: 'Akun & identitas dokter',
                   badgeText: 'Terverifikasi',
-                  badgeColor: const Color(0xFF0284C7),
+                  badgeColor: AmanahColorTokens.sky,
                   dark: dark,
                   onTap: () => onItemTap('account'),
                 ),
@@ -1634,7 +1577,7 @@ class _PreferencesCard extends StatelessWidget {
                   icon: Icons.support_agent_rounded,
                   title: 'Bantuan teknisi IT RS',
                   badgeText: 'Online 24 Jam',
-                  badgeColor: const Color(0xFF0D66E9),
+                  badgeColor: AmanahColorTokens.brand,
                   dark: dark,
                   onTap: () => onItemTap('help'),
                 ),
@@ -1680,11 +1623,8 @@ class _PreferenceRowItem extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: <Widget>[
-              // Icon in brand color
-              Icon(icon, size: 20, color: const Color(0xFF0284C7)),
+              Icon(icon, size: 20, color: AmanahColorTokens.sky),
               const SizedBox(width: 14),
-
-              // Title and Badge
               Expanded(
                 child: Row(
                   children: <Widget>[
@@ -1698,7 +1638,7 @@ class _PreferenceRowItem extends StatelessWidget {
                           fontSize: 13.5,
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.2,
-                          color: dark ? Colors.white : const Color(0xFF0F172A),
+                          color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
                         ),
                       ),
                     ),
@@ -1710,7 +1650,7 @@ class _PreferenceRowItem extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: (badgeColor ?? const Color(0xFF0284C7))
+                          color: (badgeColor ?? AmanahColorTokens.sky)
                               .withValues(alpha: dark ? 0.20 : 0.12),
                           borderRadius: BorderRadius.circular(999),
                         ),
@@ -1720,7 +1660,7 @@ class _PreferenceRowItem extends StatelessWidget {
                             fontFamily: 'PlusJakartaSans',
                             fontSize: 10,
                             fontWeight: FontWeight.w800,
-                            color: badgeColor ?? const Color(0xFF0284C7),
+                            color: badgeColor ?? AmanahColorTokens.sky,
                           ),
                         ),
                       ),
@@ -1728,12 +1668,10 @@ class _PreferenceRowItem extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // Trailing Chevron
               Icon(
                 Icons.chevron_right_rounded,
                 size: 20,
-                color: dark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                color: dark ? AmanahColorTokens.neutral500 : AmanahColorTokens.neutral400,
               ),
             ],
           ),

@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -262,7 +262,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: const Row(
           children: <Widget>[
-            Icon(Icons.help_outline_rounded, color: Color(0xFF0A44FF)),
+            Icon(Icons.help_outline_rounded, color: AmanahColorTokens.brandPrimary),
             SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -292,7 +292,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
               style: TextStyle(
                 fontFamily: 'PlusJakartaSans',
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF0A44FF),
+                color: AmanahColorTokens.brandPrimary,
               ),
             ),
           ),
@@ -382,9 +382,9 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: <Color>[
-                    Colors.black.withValues(alpha: 0.35),
+                    AmanahColorTokens.pureBlack.withValues(alpha: 0.35),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.50),
+                    AmanahColorTokens.pureBlack.withValues(alpha: 0.50),
                   ],
                   stops: const <double>[0.0, 0.48, 1.0],
                 ),
@@ -424,7 +424,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
       onTap: enableTap && !_isAttendanceFlowActive ? _handleSimulateScan : null,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        color: const Color(0xFF050811),
+        color: AmanahColorTokens.canvasDark,
         child: Stack(
           children: <Widget>[
             Positioned.fill(
@@ -440,9 +440,9 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: <Color>[
-                      Colors.black.withValues(alpha: 0.65),
+                      AmanahColorTokens.pureBlack.withValues(alpha: 0.65),
                       Colors.transparent,
-                      Colors.black.withValues(alpha: 0.80),
+                      AmanahColorTokens.pureBlack.withValues(alpha: 0.80),
                     ],
                     stops: const <double>[0.0, 0.5, 1.0],
                   ),
@@ -460,7 +460,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
             if (_isFlashOn)
               Positioned.fill(
                 child: Container(
-                  color: const Color(0xFFFEF3C7).withValues(alpha: 0.20),
+                  color: AmanahColorTokens.amberSurfaceSoft.withValues(alpha: 0.20),
                 ),
               ),
           ],
@@ -515,17 +515,17 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     final bool dark = theme.brightness == Brightness.dark;
     final double screenHeight = MediaQuery.sizeOf(context).height;
 
-    const Color bgColor = Colors.black;
+    const Color bgColor = AmanahColorTokens.pureBlack;
     final Color drawerBg = dark
         ? AmanahThemeTokens.canvas(context)
-        : Colors.white;
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
-    final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+        : AmanahColorTokens.surfaceLight;
+    final Color textColor =
+        dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
+    final Color subtextColor =
+        dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
     final Color drawerBorder = dark
-        ? Colors.white.withValues(alpha: 0.10)
-        : const Color(0xFFF1F5F9);
+        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+        : AmanahColorTokens.canvasLight;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -550,7 +550,9 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                   onTap: _closeDrawer,
                   behavior: HitTestBehavior.opaque,
                   child: ColoredBox(
-                    color: Colors.black.withValues(alpha: 0.50 * progress),
+                    color: AmanahColorTokens.pureBlack.withValues(
+                      alpha: 0.50 * progress,
+                    ),
                   ),
                 );
               },
@@ -681,7 +683,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                           border: Border(top: BorderSide(color: drawerBorder)),
                           boxShadow: <BoxShadow>[
                             BoxShadow(
-                              color: Colors.black.withValues(
+                              color: AmanahColorTokens.pureBlack.withValues(
                                 alpha: 0.40 * progress,
                               ),
                               blurRadius: 32,
@@ -729,10 +731,9 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                         height: 4.5,
                                         decoration: BoxDecoration(
                                           color: dark
-                                              ? Colors.white.withValues(
-                                                  alpha: 0.25,
-                                                )
-                                              : const Color(0xFFCBD5E1),
+                                              ? AmanahColorTokens.surfaceLight
+                                                    .withValues(alpha: 0.25)
+                                              : AmanahColorTokens.neutral300,
                                           borderRadius: BorderRadius.circular(
                                             3,
                                           ),
@@ -753,16 +754,15 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                       decoration: BoxDecoration(
                                         gradient: const LinearGradient(
                                           colors: <Color>[
-                                            Color(0xFF2563EB),
-                                            Color(0xFF4338CA),
+                                            AmanahColorTokens.brandAccent,
+                                            AmanahColorTokens.indigoDark,
                                           ],
                                         ),
                                         borderRadius: BorderRadius.circular(18),
                                         boxShadow: <BoxShadow>[
                                           BoxShadow(
-                                            color: const Color(
-                                              0xFF2563EB,
-                                            ).withValues(alpha: 0.30),
+                                            color: AmanahColorTokens.brandAccent
+                                                .withValues(alpha: 0.30),
                                             blurRadius: 10,
                                             offset: const Offset(0, 3),
                                           ),
@@ -773,7 +773,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                           const Icon(
                                             Icons.auto_awesome_rounded,
                                             size: 16,
-                                            color: Color(0xFF60A5FA),
+                                            color: AmanahColorTokens.brandSoft,
                                           ),
                                           const SizedBox(width: 8),
                                           const Expanded(
@@ -785,7 +785,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                                 fontFamily: 'PlusJakartaSans',
                                                 fontSize: 11.5,
                                                 fontWeight: FontWeight.w700,
-                                                color: Colors.white,
+                                                color: AmanahColorTokens.surfaceLight,
                                               ),
                                             ),
                                           ),
@@ -798,15 +798,14 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                               padding: const EdgeInsets.all(4),
                                               decoration: BoxDecoration(
                                                 shape: BoxShape.circle,
-                                                color: Colors.black.withValues(
-                                                  alpha: 0.25,
-                                                ),
+                                                color: AmanahColorTokens.pureBlack
+                                                    .withValues(alpha: 0.25),
                                               ),
                                               child: const Icon(
                                                 Icons
                                                     .keyboard_arrow_down_rounded,
                                                 size: 16,
-                                                color: Colors.white,
+                                                color: AmanahColorTokens.surfaceLight,
                                               ),
                                             ),
                                           ),
@@ -888,7 +887,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                           icon: const Icon(
                                             Icons.arrow_back_rounded,
                                             size: 16,
-                                            color: Color(0xFF2563EB),
+                                            color: AmanahColorTokens.brandPrimary,
                                           ),
                                           label: const Text(
                                             'Kembali',
@@ -896,7 +895,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                               fontFamily: 'PlusJakartaSans',
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700,
-                                              color: Color(0xFF2563EB),
+                                              color: AmanahColorTokens.brandPrimary,
                                             ),
                                           ),
                                         ),
@@ -941,7 +940,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                           icon: const Icon(
                                             Icons.arrow_back_rounded,
                                             size: 16,
-                                            color: Color(0xFF2563EB),
+                                            color: AmanahColorTokens.brandPrimary,
                                           ),
                                           label: const Text(
                                             'Kembali',
@@ -949,7 +948,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                               fontFamily: 'PlusJakartaSans',
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700,
-                                              color: Color(0xFF2563EB),
+                                              color: AmanahColorTokens.brandPrimary,
                                             ),
                                           ),
                                         ),
@@ -966,10 +965,10 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                                   VisualDensity.compact,
                                               style: IconButton.styleFrom(
                                                 backgroundColor: dark
-                                                    ? Colors.white.withValues(
+                                                    ? AmanahColorTokens.surfaceLight.withValues(
                                                         alpha: 0.10,
                                                       )
-                                                    : const Color(0xFFF1F5F9),
+                                                    : AmanahColorTokens.canvasLight,
                                                 foregroundColor: subtextColor,
                                               ),
                                             ),
@@ -989,7 +988,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                                       ),
                                                     ),
                                                     backgroundColor:
-                                                        const Color(0xFF0F172A),
+                                                        AmanahColorTokens.neutral900,
                                                     behavior: SnackBarBehavior
                                                         .floating,
                                                     shape: RoundedRectangleBorder(
@@ -1013,10 +1012,10 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                                   VisualDensity.compact,
                                               style: IconButton.styleFrom(
                                                 backgroundColor: dark
-                                                    ? Colors.white.withValues(
+                                                    ? AmanahColorTokens.surfaceLight.withValues(
                                                         alpha: 0.10,
                                                       )
-                                                    : const Color(0xFFF1F5F9),
+                                                    : AmanahColorTokens.canvasLight,
                                                 foregroundColor: subtextColor,
                                               ),
                                             ),
@@ -1041,14 +1040,10 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                         vertical: 8,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: const Color(
-                                          0xFF2563EB,
-                                        ).withValues(alpha: 0.10),
+                                        color: AmanahColorTokens.brandAccent.withValues(alpha: 0.10),
                                         borderRadius: BorderRadius.circular(16),
                                         border: Border.all(
-                                          color: const Color(
-                                            0xFF2563EB,
-                                          ).withValues(alpha: 0.25),
+                                          color: AmanahColorTokens.brandAccent.withValues(alpha: 0.25),
                                         ),
                                       ),
                                       child: const Text(
@@ -1058,7 +1053,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                           fontSize: 26,
                                           fontWeight: FontWeight.w900,
                                           letterSpacing: 6,
-                                          color: Color(0xFF2563EB),
+                                          color: AmanahColorTokens.brandAccent,
                                         ),
                                       ),
                                     ),
@@ -1091,7 +1086,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                           icon: const Icon(
                                             Icons.arrow_back_rounded,
                                             size: 16,
-                                            color: Color(0xFF2563EB),
+                                            color: AmanahColorTokens.brandPrimary,
                                           ),
                                           label: const Text(
                                             'Kembali',
@@ -1099,7 +1094,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                               fontFamily: 'PlusJakartaSans',
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700,
-                                              color: Color(0xFF2563EB),
+                                              color: AmanahColorTokens.brandPrimary,
                                             ),
                                           ),
                                         ),
@@ -1119,19 +1114,19 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                         ),
                                         decoration: BoxDecoration(
                                           color: dark
-                                              ? Colors.white.withValues(
+                                              ? AmanahColorTokens.surfaceLight.withValues(
                                                   alpha: 0.04,
                                                 )
-                                              : const Color(0xFFF8FAFC),
+                                              : AmanahColorTokens.canvasLight,
                                           borderRadius: BorderRadius.circular(
                                             24,
                                           ),
                                           border: Border.all(
                                             color: dark
-                                                ? Colors.white.withValues(
+                                                ? AmanahColorTokens.surfaceLight.withValues(
                                                     alpha: 0.20,
                                                   )
-                                                : const Color(0xFFCBD5E1),
+                                                : AmanahColorTokens.neutral300,
                                             width: 1.5,
                                           ),
                                         ),
@@ -1140,16 +1135,14 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                             Container(
                                               padding: const EdgeInsets.all(12),
                                               decoration: BoxDecoration(
-                                                color: const Color(
-                                                  0xFF2563EB,
-                                                ).withValues(alpha: 0.12),
+                                                color: AmanahColorTokens.brandAccent.withValues(alpha: 0.12),
                                                 borderRadius:
                                                     BorderRadius.circular(16),
                                               ),
                                               child: const Icon(
                                                 Icons.cloud_upload_outlined,
                                                 size: 28,
-                                                color: Color(0xFF2563EB),
+                                                color: AmanahColorTokens.brandAccent,
                                               ),
                                             ),
                                             const SizedBox(height: 10),
@@ -1205,7 +1198,7 @@ class _AttendanceProcessingOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
-    final Color surface = dark ? theme.colorScheme.surface : Colors.white;
+    final Color surface = dark ? theme.colorScheme.surface : AmanahColorTokens.surfaceLight;
     final Color title = dark
         ? theme.colorScheme.onSurface
         : AmanahColorTokens.heading;
@@ -1218,7 +1211,7 @@ class _AttendanceProcessingOverlay extends StatelessWidget {
 
     return AbsorbPointer(
       child: DecoratedBox(
-        decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.32)),
+        decoration: BoxDecoration(color: AmanahColorTokens.pureBlack.withValues(alpha: 0.32)),
         child: Center(
           child: Container(
             width: 248,
@@ -1229,7 +1222,7 @@ class _AttendanceProcessingOverlay extends StatelessWidget {
               border: Border.all(color: border),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: dark ? 0.42 : 0.18),
+                  color: AmanahColorTokens.pureBlack.withValues(alpha: dark ? 0.42 : 0.18),
                   blurRadius: 30,
                   offset: const Offset(0, 14),
                 ),
@@ -1294,13 +1287,13 @@ class _CameraPermissionViewport extends StatelessWidget {
   Widget build(BuildContext context) {
     if (status == DevicePermissionStatus.checking) {
       return const ColoredBox(
-        color: Color(0xFF050811),
+        color: AmanahColorTokens.canvasDark,
         child: Center(child: CircularProgressIndicator.adaptive()),
       );
     }
 
     return ColoredBox(
-      color: const Color(0xFF050811),
+      color: AmanahColorTokens.canvasDark,
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -1310,7 +1303,7 @@ class _CameraPermissionViewport extends StatelessWidget {
               const Icon(
                 Icons.photo_camera_outlined,
                 size: 40,
-                color: Colors.white,
+                color: AmanahColorTokens.surfaceLight,
               ),
               const SizedBox(height: 12),
               const Text(
@@ -1320,15 +1313,15 @@ class _CameraPermissionViewport extends StatelessWidget {
                   fontFamily: 'PlusJakartaSans',
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: AmanahColorTokens.surfaceLight,
                 ),
               ),
               const SizedBox(height: 14),
               ElevatedButton(
                 onPressed: onRequestPermission,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563EB),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AmanahColorTokens.brandAccent,
+                  foregroundColor: AmanahColorTokens.surfaceLight,
                   elevation: 0,
                 ),
                 child: const Text(
@@ -1375,24 +1368,24 @@ class _FloatingCircularButton extends StatelessWidget {
     final Color? bgColor = isActive
         ? null
         : (dark
-              ? const Color(0xFF1E293B).withValues(alpha: 0.75)
-              : Colors.white.withValues(alpha: 0.85));
+              ? AmanahColorTokens.neutral800.withValues(alpha: 0.75)
+              : AmanahColorTokens.surfaceLight.withValues(alpha: 0.85));
 
     final Color iconColor = isActive
-        ? Colors.white
-        : (dark ? Colors.white : const Color(0xFF1E293B));
+        ? AmanahColorTokens.surfaceLight
+        : (dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral800);
 
     final Color borderColor = isActive
         ? (dark
               ? AmanahColorTokens.btnCrispBlueDarkBorder
               : AmanahColorTokens.btnCrispBlueBorder)
         : (dark
-              ? Colors.white.withValues(alpha: 0.20)
-              : Colors.white.withValues(alpha: 0.80));
+              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.20)
+              : AmanahColorTokens.surfaceLight.withValues(alpha: 0.80));
 
     final List<BoxShadow> shadows = <BoxShadow>[
       BoxShadow(
-        color: Colors.black.withValues(alpha: dark ? 0.35 : 0.16),
+        color: AmanahColorTokens.pureBlack.withValues(alpha: dark ? 0.35 : 0.16),
         blurRadius: 8,
         offset: const Offset(0, 2),
       ),
@@ -1447,13 +1440,13 @@ class _ActionMenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color cardBg = dark ? const Color(0xFF1F2937) : Colors.white;
+    final Color cardBg = dark ? AmanahColorTokens.surfaceSecondaryDark : AmanahColorTokens.surfaceLight;
 
     final Color borderColor = dark
-        ? Colors.white.withValues(alpha: 0.12)
-        : const Color(0xFFE2E8F0);
+        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.12)
+        : AmanahColorTokens.neutral200;
 
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
+    final Color textColor = dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
 
     final Gradient? bgGradient = isActive
         ? (dark
@@ -1474,7 +1467,7 @@ class _ActionMenuCard extends StatelessWidget {
             else
               AmanahColorTokens.btnCrispBlueShadow,
             BoxShadow(
-              color: (dark ? const Color(0xFF2563EB) : const Color(0xFF0D66E9))
+              color: (dark ? AmanahColorTokens.brandAccent : AmanahColorTokens.brand)
                   .withValues(alpha: 0.30),
               blurRadius: 14,
               offset: const Offset(0, 4),
@@ -1482,7 +1475,7 @@ class _ActionMenuCard extends StatelessWidget {
           ]
         : <BoxShadow>[
             BoxShadow(
-              color: Colors.black.withValues(alpha: dark ? 0.25 : 0.04),
+              color: AmanahColorTokens.pureBlack.withValues(alpha: dark ? 0.25 : 0.04),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -1508,20 +1501,20 @@ class _ActionMenuCard extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: isActive
-                    ? Colors.white.withValues(alpha: 0.22)
+                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.22)
                     : (dark
-                          ? const Color(0xFF2563EB).withValues(alpha: 0.20)
-                          : const Color(0xFF2563EB).withValues(alpha: 0.14)),
+                          ? AmanahColorTokens.brandAccent.withValues(alpha: 0.20)
+                          : AmanahColorTokens.brandAccent.withValues(alpha: 0.14)),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
                 icon,
                 size: 22,
                 color: isActive
-                    ? Colors.white
+                    ? AmanahColorTokens.surfaceLight
                     : (dark
-                          ? const Color(0xFF60A5FA)
-                          : const Color(0xFF2563EB)),
+                          ? AmanahColorTokens.brandSoft
+                          : AmanahColorTokens.brandAccent),
               ),
             ),
             const SizedBox(height: 10),
@@ -1534,7 +1527,7 @@ class _ActionMenuCard extends StatelessWidget {
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 11.5,
                 fontWeight: isActive ? FontWeight.w800 : FontWeight.w700,
-                color: isActive ? Colors.white : textColor,
+                color: isActive ? AmanahColorTokens.surfaceLight : textColor,
               ),
             ),
           ],
@@ -1548,7 +1541,7 @@ class _MedicalGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-      ..color = const Color(0xFF3B82F6).withValues(alpha: 0.20)
+      ..color = AmanahColorTokens.brandLight.withValues(alpha: 0.20)
       ..strokeWidth = 0.5;
 
     const double step = 32.0;
@@ -1692,7 +1685,7 @@ class _PresenceScannerFramePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     paint
-      ..color = Colors.black12
+      ..color = AmanahColorTokens.pureBlack.withValues(alpha: 0.12)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.65);
     canvas.drawPath(path, paint);
 

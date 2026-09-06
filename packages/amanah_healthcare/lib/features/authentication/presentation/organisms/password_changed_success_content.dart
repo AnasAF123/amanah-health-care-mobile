@@ -1,8 +1,9 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'dart:ui' show PathMetric;
 
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/components/auth_primary_button.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 
 class PasswordChangedSuccessContent extends StatefulWidget {
@@ -82,12 +83,12 @@ class _PasswordChangedSuccessContentState
   List<_CelebrationParticle> _createParticles() {
     final math.Random random = math.Random(42);
     const List<Color> colors = <Color>[
-      Color(0xFF0F0A5A),
-      Color(0xFF2458E6),
-      Color(0xFF2A8CA5),
-      Color(0xFF58C4B8),
-      Color(0xFFE9D7FF),
-      Color(0xFFF2C94C),
+      AmanahColorTokens.navy,
+      AmanahColorTokens.brandAccent,
+      AmanahColorTokens.auroraCyanDark,
+      AmanahColorTokens.emerald,
+      AmanahColorTokens.violetBorder,
+      AmanahColorTokens.warning,
     ];
 
     return List<_CelebrationParticle>.generate(72, (int index) {

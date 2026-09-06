@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
@@ -108,13 +108,13 @@ class _AmanahDoctorIdCardScreenState extends State<AmanahDoctorIdCardScreen> {
       content: Text(
         message,
         style: const TextStyle(
-          color: Colors.white,
+          color: AmanahColorTokens.surfaceLight,
           fontFamily: 'PlusJakartaSans',
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
       ),
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AmanahColorTokens.neutral900,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       duration: const Duration(seconds: 2),

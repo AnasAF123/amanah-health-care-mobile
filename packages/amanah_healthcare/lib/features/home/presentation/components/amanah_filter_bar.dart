@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahFilterBarItem<T> {
@@ -78,18 +78,18 @@ class _AmanahFilterChip<T> extends StatelessWidget {
       backgroundColor = dark
           ? AmanahColorTokens.tabActiveDark
           : AmanahColorTokens.brand;
-      foregroundColor = dark ? AmanahColorTokens.canvasDark : Colors.white;
-      badgeBackgroundColor = Colors.white.withValues(alpha: 0.24);
+      foregroundColor = dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.surfaceLight;
+      badgeBackgroundColor = AmanahColorTokens.surfaceLight.withValues(alpha: 0.24);
       badgeForegroundColor = foregroundColor;
     } else {
       backgroundColor = dark
-          ? Colors.white.withValues(alpha: 0.05)
+          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
           : AmanahColorTokens.neutral100;
       foregroundColor = dark
           ? AmanahColorTokens.neutral300
           : AmanahColorTokens.neutral600;
       badgeBackgroundColor = dark
-          ? Colors.white.withValues(alpha: 0.10)
+          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
           : AmanahColorTokens.neutral200;
       badgeForegroundColor = dark
           ? AmanahColorTokens.neutral300

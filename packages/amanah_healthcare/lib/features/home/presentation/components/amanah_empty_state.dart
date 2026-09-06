@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_isometric_empty_box.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
@@ -317,19 +317,13 @@ class AmanahEmptyState extends StatelessWidget {
           width: double.infinity,
           padding: resolvedPadding,
           decoration: BoxDecoration(
-            color: dark ? Colors.white.withValues(alpha: 0.04) : Colors.white,
+            color: AmanahThemeTokens.surface(context),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: dark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : const Color(0xFFF1F5F9),
+              color: AmanahThemeTokens.outline(context),
             ),
             boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withValues(alpha: dark ? 0.20 : 0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
+              AmanahElevation.soft(dark: dark),
             ],
           ),
           child: content,
@@ -400,19 +394,19 @@ class AmanahEmptyState extends StatelessWidget {
     switch (tone) {
       case AmanahEmptyStateTone.neutral:
         return (
-          dark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF1F5F9),
-          dark ? Colors.white.withValues(alpha: 0.10) : const Color(0xFFE2E8F0),
-          dark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+          dark ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05) : AmanahColorTokens.neutral100,
+          dark ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10) : AmanahColorTokens.neutral200,
+          dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
         );
       case AmanahEmptyStateTone.brand:
         return (
           dark
               ? AmanahColorTokens.brand.withValues(alpha: 0.15)
-              : const Color(0xFFEFF6FF),
+              : AmanahColorTokens.brandSurface,
           dark
               ? AmanahColorTokens.brand.withValues(alpha: 0.30)
-              : const Color(0xFFBFDBFE),
-          dark ? AmanahColorTokens.brandAccent : const Color(0xFF0A44FF),
+              : AmanahColorTokens.brandMuted,
+          dark ? AmanahColorTokens.brandAccent : AmanahColorTokens.brandPrimary,
         );
       case AmanahEmptyStateTone.warning:
         return (

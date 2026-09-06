@@ -1,5 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 
 class AmanahStatusBadge extends StatelessWidget {
@@ -19,33 +20,47 @@ class AmanahStatusBadge extends StatelessWidget {
 
     final _AmanahBadgeStyle style = switch (variant) {
       AmanahBadgeVariant.live => _AmanahBadgeStyle(
-        background: dark ? const Color(0xFF450A0A) : const Color(0xFFFEF2F2),
-        foreground: const Color(0xFFEF4444),
-        border: dark ? const Color(0xFFEF4444) : const Color(0xFFFEE2E2),
+        background: dark
+            ? AmanahColorTokens.danger.withValues(alpha: 0.18)
+            : AmanahColorTokens.dangerSurface,
+        foreground: AmanahColorTokens.danger,
+        border: dark
+            ? AmanahColorTokens.danger.withValues(alpha: 0.40)
+            : AmanahColorTokens.dangerBorder,
         icon: _AmanahBadgeIcon.live,
       ),
       AmanahBadgeVariant.trend => _AmanahBadgeStyle(
-        background: dark ? const Color(0xFF0C2445) : const Color(0xFFEFF6FF),
-        foreground: dark ? const Color(0xFF3B82F6) : const Color(0xFF0D66E9),
-        border: dark ? const Color(0xFF1D4ED8) : const Color(0xFFDBEAFE),
+        background: dark
+            ? AmanahColorTokens.brand.withValues(alpha: 0.18)
+            : AmanahColorTokens.brandSurface,
+        foreground: dark
+            ? AmanahColorTokens.brandLight
+            : AmanahColorTokens.brand,
+        border: dark
+            ? AmanahColorTokens.auroraAccentDark
+            : AmanahColorTokens.brandMuted,
         icon: _AmanahBadgeIcon.trend,
       ),
       AmanahBadgeVariant.primary => const _AmanahBadgeStyle(
-        background: Color(0xFF0D66E9),
-        foreground: Colors.white,
-        border: Color(0xFF1D58AC),
+        background: AmanahColorTokens.brand,
+        foreground: AmanahColorTokens.surfaceLight,
+        border: AmanahColorTokens.btnCrispBlueBorder,
         icon: _AmanahBadgeIcon.none,
       ),
       AmanahBadgeVariant.success => const _AmanahBadgeStyle(
-        background: Color(0xFF38C474),
-        foreground: Colors.white,
-        border: Color(0xFF38C474),
+        background: AmanahColorTokens.emerald,
+        foreground: AmanahColorTokens.surfaceLight,
+        border: AmanahColorTokens.emerald,
         icon: _AmanahBadgeIcon.none,
       ),
       AmanahBadgeVariant.warning => _AmanahBadgeStyle(
-        background: dark ? const Color(0xFF451A03) : const Color(0xFFFEF3C7),
-        foreground: const Color(0xFFF59E0B),
-        border: dark ? const Color(0xFFF59E0B) : const Color(0xFFFDE68A),
+        background: dark
+            ? AmanahColorTokens.warning.withValues(alpha: 0.18)
+            : AmanahColorTokens.warningSurface,
+        foreground: AmanahColorTokens.warning,
+        border: dark
+            ? AmanahColorTokens.warning.withValues(alpha: 0.40)
+            : AmanahColorTokens.warningBorder,
         icon: _AmanahBadgeIcon.none,
       ),
     };

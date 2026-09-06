@@ -1,4 +1,4 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
@@ -110,7 +110,7 @@ class AmanahScreenHeader extends StatelessWidget
 
     final Color defaultBg = dark
         ? AmanahColorTokens.canvasDark.withValues(alpha: 0.85)
-        : Colors.white.withValues(alpha: 0.85);
+        : AmanahColorTokens.surfaceLight.withValues(alpha: 0.85);
 
     final Widget? leadingWidget = _buildLeadingSlot(context);
     final Widget? trailingWidget = _buildTrailingSlot(context);

@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
@@ -426,12 +426,12 @@ class AmanahScheduleEmptyCard extends StatelessWidget {
                               end: Alignment.bottomRight,
                               colors: dark
                                   ? const <Color>[
-                                      Color(0xFF0D1B2A),
-                                      Color(0xFF060B18),
+                                      AmanahColorTokens.surfaceSecondaryDark,
+                                      AmanahColorTokens.canvasDark,
                                     ]
                                   : const <Color>[
-                                      Color(0xFFE0F2FE),
-                                      Color(0xFFF8FAFF),
+                                      AmanahColorTokens.brandSurface,
+                                      AmanahColorTokens.canvasLight,
                                     ],
                             ),
                           ),
@@ -630,12 +630,12 @@ class AmanahScheduleCard extends StatelessWidget {
                               end: Alignment.bottomRight,
                               colors: dark
                                   ? const <Color>[
-                                      Color(0xFF0D1B2A),
-                                      Color(0xFF060B18),
+                                      AmanahColorTokens.surfaceSecondaryDark,
+                                      AmanahColorTokens.canvasDark,
                                     ]
                                   : const <Color>[
-                                      Color(0xFFE0F2FE),
-                                      Color(0xFFF8FAFF),
+                                      AmanahColorTokens.brandSurface,
+                                      AmanahColorTokens.canvasLight,
                                     ],
                             ),
                           ),
@@ -723,10 +723,11 @@ class AmanahScheduleCard extends StatelessWidget {
                                           ),
                                           decoration: BoxDecoration(
                                             color: dark
-                                                ? Colors.white.withValues(
+                                                ? AmanahColorTokens.surfaceLight
+                                                    .withValues(
                                                     alpha: 0.25,
                                                   )
-                                                : const Color(0xFFCBD5E1),
+                                                : AmanahColorTokens.neutral300,
                                             borderRadius: BorderRadius.circular(
                                               1,
                                             ),
@@ -742,8 +743,8 @@ class AmanahScheduleCard extends StatelessWidget {
                                               fontSize: 12.5,
                                               fontWeight: FontWeight.w700,
                                               color: dark
-                                                  ? const Color(0xFF3B82F6)
-                                                  : const Color(0xFF0D66E9),
+                                                  ? AmanahColorTokens.brandLight
+                                                  : AmanahColorTokens.brand,
                                             ),
                                           ),
                                         ),

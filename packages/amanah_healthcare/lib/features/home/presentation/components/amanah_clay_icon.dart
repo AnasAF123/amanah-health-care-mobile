@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_visual_role.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
@@ -48,7 +48,7 @@ class AmanahClayIcon extends StatelessWidget {
         ],
       ),
       child: Center(
-        child: Icon(icon, size: size * 0.52, color: Colors.white),
+        child: Icon(icon, size: size * 0.52, color: AmanahColorTokens.surfaceLight),
       ),
     );
   }

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_notification_model.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_visual_role.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_clay_icon.dart';
@@ -156,8 +156,10 @@ class _AmanahNotificationTabScreenState
                               height: 1,
                               thickness: 1,
                               color: dark
-                                  ? Colors.white.withValues(alpha: 0.05)
-                                  : const Color(0xFFF1F5F9),
+                                  ? AmanahColorTokens.surfaceLight.withValues(
+                                      alpha: 0.05,
+                                    )
+                                  : AmanahColorTokens.neutral100,
                             ),
                         itemBuilder: (BuildContext context, int index) {
                           final AmanahNotificationItem item = filteredList[index];
@@ -221,8 +223,8 @@ class _AmanahNotificationTile extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: dark
-                                ? const Color(0xFF0A0E1A)
-                                : Colors.white,
+                                ? AmanahColorTokens.canvasDark
+                                : AmanahColorTokens.surfaceLight,
                             width: 1.8,
                           ),
                           boxShadow: <BoxShadow>[
@@ -256,10 +258,12 @@ class _AmanahNotificationTile extends StatelessWidget {
                             ? FontWeight.w800
                             : FontWeight.w600,
                         color: item.isUnread
-                            ? (dark ? Colors.white : const Color(0xFF0F172A))
+                            ? (dark
+                                  ? AmanahColorTokens.surfaceLight
+                                  : AmanahColorTokens.neutral900)
                             : (dark
-                                  ? const Color(0xFFCBD5E1)
-                                  : const Color(0xFF334155)),
+                                  ? AmanahColorTokens.neutral300
+                                  : AmanahColorTokens.neutral700),
                         letterSpacing: -0.2,
                         height: 1.25,
                       ),
@@ -274,8 +278,8 @@ class _AmanahNotificationTile extends StatelessWidget {
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                         color: dark
-                            ? const Color(0xFF94A3B8)
-                            : const Color(0xFF64748B),
+                            ? AmanahColorTokens.neutral400
+                            : AmanahColorTokens.neutral500,
                         height: 1.35,
                       ),
                     ),
@@ -298,7 +302,7 @@ class _AmanahNotificationTile extends StatelessWidget {
                           fontFamily: 'PlusJakartaSans',
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF94A3B8),
+                          color: AmanahColorTokens.neutral400,
                         ),
                       ),
                       if (item.isUnread) ...<Widget>[
@@ -326,7 +330,7 @@ class _AmanahNotificationTile extends StatelessWidget {
                   const Icon(
                     Icons.chevron_right_rounded,
                     size: 18,
-                    color: Color(0xFF94A3B8),
+                    color: AmanahColorTokens.neutral400,
                   ),
                 ],
               ),

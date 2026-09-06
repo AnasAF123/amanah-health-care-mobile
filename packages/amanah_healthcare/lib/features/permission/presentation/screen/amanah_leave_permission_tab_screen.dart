@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
@@ -281,14 +281,14 @@ class _AmanahLeavePermissionTabScreenState
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A).withValues(alpha: 0.95),
+                      color: AmanahColorTokens.neutral900.withValues(alpha: 0.95),
                       borderRadius: BorderRadius.circular(100),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.20),
+                        color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.20),
                       ),
                       boxShadow: <BoxShadow>[
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.25),
+                          color: AmanahColorTokens.pureBlack.withValues(alpha: 0.25),
                           blurRadius: 20,
                         ),
                       ],
@@ -300,7 +300,7 @@ class _AmanahLeavePermissionTabScreenState
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: AmanahColorTokens.surfaceLight,
                       ),
                     ),
                   ),

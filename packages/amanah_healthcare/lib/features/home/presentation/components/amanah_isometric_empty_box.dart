@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 /// Configuration parameters for the 3D Isometric Empty Box
 /// Exactly mirroring SCENE_CONFIG from emptystate.html
@@ -15,7 +16,7 @@ class AmanahIsometricBoxConfig {
   static const double flapLength = 0.52;
   static const double maxFlapAngle = 3.65;
 
-  static const double cycleDuration = 7.5; // seconds
+  static const double cycleDuration = 7.5;
   static const double boxOpenStart = 0.8;
   static const double boxOpenEnd = 2.2;
   static const double flyEmergeStart = 2.2;
@@ -23,10 +24,10 @@ class AmanahIsometricBoxConfig {
   static const double holdEnd = 6.8;
 }
 
-/// Color theme for the 3D Isometric Empty Box.
+/// Palette theme for the 3D Isometric Empty Box.
 /// Light mode values match 1:1 with emptystate.html.
-class AmanahIsometricBoxColors {
-  const AmanahIsometricBoxColors({
+class AmanahIsometricBoxPalette {
+  const AmanahIsometricBoxPalette({
     required this.exteriorLeft,
     required this.exteriorRight,
     required this.interiorBackLeft,
@@ -45,47 +46,45 @@ class AmanahIsometricBoxColors {
     required this.groundShadow,
   });
 
-  /// Exact colors from emptystate.html
-  factory AmanahIsometricBoxColors.light() {
-    return const AmanahIsometricBoxColors(
-      exteriorLeft: Color(0xFFF1F5F9),
-      exteriorRight: Color(0xFFD8E1ED),
-      interiorBackLeft: Color(0xFFB9C6D8),
-      interiorBackRight: Color(0xFFA4B4CC),
-      interiorFloor: Color(0xFF91A2BC),
-      flapBackLeft: Color(0xFFE2E9F3),
-      flapBackRight: Color(0xFFCBD6E6),
-      flapFrontLeft: Color(0xFFF1F5F9),
-      flapFrontRight: Color(0xFFC6D3E4),
-      strokeBox: Color(0x73B4C3D7), // rgba(180, 195, 215, 0.45)
-      strokeTrail: Color(0xFFA4B3C8),
-      sparkle: Color(0xFFB8C5D8),
-      insectBody: Color(0xFF59667A),
-      insectWing: Color(0xBFC3D0E2), // rgba(195, 208, 226, 0.75)
-      caption: Color(0xFF94A3B8),
-      groundShadow: Color(0xA6E2E8F0), // rgba(226, 232, 240, 0.65)
+  factory AmanahIsometricBoxPalette.light() {
+    return AmanahIsometricBoxPalette(
+      exteriorLeft: AmanahColorTokens.neutral100,
+      exteriorRight: AmanahColorTokens.isoBoxLightExteriorRight,
+      interiorBackLeft: AmanahColorTokens.isoBoxLightInteriorBackLeft,
+      interiorBackRight: AmanahColorTokens.isoBoxLightInteriorBackRight,
+      interiorFloor: AmanahColorTokens.isoBoxLightInteriorFloor,
+      flapBackLeft: AmanahColorTokens.isoBoxLightFlapBackLeft,
+      flapBackRight: AmanahColorTokens.isoBoxLightFlapBackRight,
+      flapFrontLeft: AmanahColorTokens.neutral100,
+      flapFrontRight: AmanahColorTokens.isoBoxLightFlapFrontRight,
+      strokeBox: AmanahColorTokens.isoBoxLightStrokeBox,
+      strokeTrail: AmanahColorTokens.isoBoxLightStrokeTrail,
+      sparkle: AmanahColorTokens.isoBoxLightSparkle,
+      insectBody: AmanahColorTokens.isoBoxLightInsectBody,
+      insectWing: AmanahColorTokens.isoBoxLightInsectWing,
+      caption: AmanahColorTokens.neutral400,
+      groundShadow: AmanahColorTokens.neutral200.withValues(alpha: 0.65),
     );
   }
 
-  /// Adaptive dark mode palette maintaining identical isometric contrast
-  factory AmanahIsometricBoxColors.dark() {
-    return const AmanahIsometricBoxColors(
-      exteriorLeft: Color(0xFF1E293B),
-      exteriorRight: Color(0xFF0F172A),
-      interiorBackLeft: Color(0xFF162032),
-      interiorBackRight: Color(0xFF0D1524),
-      interiorFloor: Color(0xFF0B111C),
-      flapBackLeft: Color(0xFF243247),
-      flapBackRight: Color(0xFF1A2536),
-      flapFrontLeft: Color(0xFF223043),
-      flapFrontRight: Color(0xFF182332),
-      strokeBox: Color(0x7364748B),
-      strokeTrail: Color(0xFF64748B),
-      sparkle: Color(0xFF94A3B8),
-      insectBody: Color(0xFF94A3B8),
-      insectWing: Color(0xA694A3B8),
-      caption: Color(0xFF64748B),
-      groundShadow: Color(0x66000000),
+  factory AmanahIsometricBoxPalette.dark() {
+    return AmanahIsometricBoxPalette(
+      exteriorLeft: AmanahColorTokens.neutral800,
+      exteriorRight: AmanahColorTokens.neutral900,
+      interiorBackLeft: AmanahColorTokens.isoBoxDarkInteriorBackLeft,
+      interiorBackRight: AmanahColorTokens.isoBoxDarkInteriorBackRight,
+      interiorFloor: AmanahColorTokens.isoBoxDarkInteriorFloor,
+      flapBackLeft: AmanahColorTokens.isoBoxDarkFlapBackLeft,
+      flapBackRight: AmanahColorTokens.isoBoxDarkFlapBackRight,
+      flapFrontLeft: AmanahColorTokens.isoBoxDarkFlapFrontLeft,
+      flapFrontRight: AmanahColorTokens.isoBoxDarkFlapFrontRight,
+      strokeBox: AmanahColorTokens.neutral500.withValues(alpha: 0.45),
+      strokeTrail: AmanahColorTokens.neutral500,
+      sparkle: AmanahColorTokens.neutral400,
+      insectBody: AmanahColorTokens.neutral400,
+      insectWing: AmanahColorTokens.neutral400.withValues(alpha: 0.65),
+      caption: AmanahColorTokens.neutral500,
+      groundShadow: AmanahColorTokens.pureBlack.withValues(alpha: 0.40),
     );
   }
 
@@ -191,9 +190,9 @@ class _AmanahIsometricEmptyBoxState extends State<AmanahIsometricEmptyBox>
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
-    final AmanahIsometricBoxColors colors = dark
-        ? AmanahIsometricBoxColors.dark()
-        : AmanahIsometricBoxColors.light();
+    final AmanahIsometricBoxPalette colors = dark
+        ? AmanahIsometricBoxPalette.dark()
+        : AmanahIsometricBoxPalette.light();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -265,8 +264,8 @@ class _ControlButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(6),
             border: Border.all(
               color: dark
-                  ? Colors.white.withValues(alpha: 0.12)
-                  : const Color(0xFFE2E8F0),
+                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.12)
+                  : AmanahColorTokens.neutral200,
             ),
           ),
           child: Text(
@@ -275,7 +274,9 @@ class _ControlButton extends StatelessWidget {
               fontSize: 11.5,
               fontWeight: FontWeight.w600,
               fontFamily: 'PlusJakartaSans',
-              color: dark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+              color: dark
+                  ? AmanahColorTokens.neutral400
+                  : AmanahColorTokens.neutral600,
             ),
           ),
         ),
@@ -313,7 +314,7 @@ class _IsometricBoxPainter extends CustomPainter {
   });
 
   final double progress; // 0.0 -> 1.0 (represents 0.0 -> 7.5s)
-  final AmanahIsometricBoxColors colors;
+  final AmanahIsometricBoxPalette colors;
   final bool showCaption;
   final String captionText;
 

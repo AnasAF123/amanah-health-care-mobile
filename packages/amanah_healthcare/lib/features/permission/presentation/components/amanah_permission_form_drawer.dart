@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
@@ -247,8 +247,8 @@ class _AmanahPermissionFormDrawerState
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
     final Color borderColor = dark
-        ? Colors.white.withValues(alpha: 0.10)
-        : const Color(0xFFE2E8F0);
+        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+        : AmanahColorTokens.neutral200;
     final Color textColor = dark
         ? AmanahPermissionTokens.textTitleDark
         : AmanahPermissionTokens.textTitleLight;
@@ -256,8 +256,8 @@ class _AmanahPermissionFormDrawerState
         ? AmanahPermissionTokens.textMutedDark
         : AmanahPermissionTokens.textMutedLight;
     final Color inputBg = dark
-        ? Colors.white.withValues(alpha: 0.05)
-        : const Color(0xFFFFFFFF);
+        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+        : AmanahColorTokens.surfaceLight;
 
     final bool isEditing = widget.editingRecord != null;
 
@@ -330,7 +330,7 @@ class _AmanahPermissionFormDrawerState
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(
                   color: _typeError != null
-                      ? const Color(0xFFFB2C36)
+                      ? AmanahColorTokens.danger
                       : borderColor,
                 ),
               ),
@@ -350,7 +350,7 @@ class _AmanahPermissionFormDrawerState
               style: const TextStyle(
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 11,
-                color: Color(0xFFFB2C36),
+                color: AmanahColorTokens.danger,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -377,13 +377,13 @@ class _AmanahPermissionFormDrawerState
                   ),
                   decoration: BoxDecoration(
                     color: dark
-                        ? Colors.white.withValues(alpha: 0.05)
-                        : const Color(0xFFF1F5F9),
+                        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                        : AmanahColorTokens.canvasLight,
                     borderRadius: BorderRadius.circular(100),
                     border: Border.all(
                       color: dark
-                          ? Colors.white.withValues(alpha: 0.10)
-                          : const Color(0xFFE2E8F0),
+                          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                          : AmanahColorTokens.neutral200,
                     ),
                   ),
                   child: Text(
@@ -448,7 +448,7 @@ class _AmanahPermissionFormDrawerState
             onTap: _pickEndDate,
             dark: dark,
             borderColor: _endDateError != null
-                ? const Color(0xFFFB2C36)
+                ? AmanahColorTokens.danger
                 : borderColor,
             textColor: textColor,
           ),
@@ -459,7 +459,7 @@ class _AmanahPermissionFormDrawerState
               style: const TextStyle(
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 11,
-                color: Color(0xFFFB2C36),
+                color: AmanahColorTokens.danger,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -504,7 +504,7 @@ class _AmanahPermissionFormDrawerState
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(
                   color: _reasonError != null
-                      ? const Color(0xFFFB2C36)
+                      ? AmanahColorTokens.danger
                       : borderColor,
                 ),
               ),
@@ -524,7 +524,7 @@ class _AmanahPermissionFormDrawerState
               style: const TextStyle(
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 11,
-                color: Color(0xFFFB2C36),
+                color: AmanahColorTokens.danger,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -615,8 +615,8 @@ class _AmanahPermissionFormDrawerState
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: dark
-              ? Colors.white.withValues(alpha: 0.05)
-              : const Color(0xFFF8FAFC),
+              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+              : AmanahColorTokens.canvasLight,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: borderColor),
         ),
@@ -630,16 +630,16 @@ class _AmanahPermissionFormDrawerState
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: dark
-                          ? const Color(0xFF3B82F6).withValues(alpha: 0.15)
-                          : const Color(0xFFEFF6FF),
+                          ? AmanahColorTokens.brand.withValues(alpha: 0.15)
+                          : AmanahColorTokens.brandSurface,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
                       Icons.calendar_today_rounded,
                       size: 16,
                       color: dark
-                          ? const Color(0xFF60A5FA)
-                          : const Color(0xFF0D66E9),
+                          ? AmanahColorTokens.brandSoft
+                          : AmanahColorTokens.brand,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -654,8 +654,8 @@ class _AmanahPermissionFormDrawerState
                             fontSize: 10.5,
                             fontWeight: FontWeight.w500,
                             color: dark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
+                                ? AmanahColorTokens.neutral400
+                                : AmanahColorTokens.neutral500,
                           ),
                         ),
                         Text(
@@ -679,7 +679,7 @@ class _AmanahPermissionFormDrawerState
             Icon(
               Icons.keyboard_arrow_down_rounded,
               size: 20,
-              color: dark ? const Color(0xFF94A3B8) : const Color(0xFF90A1B9),
+              color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral400,
             ),
           ],
         ),

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahWatermarkPathData {
   const AmanahWatermarkPathData._();
@@ -4603,9 +4604,9 @@ class AmanahWatermarkLogo extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: <Color>[
-                    Color(0xFF0A44FF),
-                    Color(0xFF1A55FF),
-                    Color(0xFF3B82F6),
+                    AmanahColorTokens.brandPrimary,
+                    AmanahColorTokens.brandVividBlue,
+                    AmanahColorTokens.brandLight,
                   ],
                 ),
             color: color,
@@ -4638,7 +4639,7 @@ class _AmanahWatermarkPainter extends CustomPainter {
     } else if (color != null) {
       paint.color = color!;
     } else {
-      paint.color = const Color(0xFF0A44FF);
+      paint.color = AmanahColorTokens.brandPrimary;
     }
 
     canvas.drawPath(path, paint);
@@ -4685,10 +4686,10 @@ class AmanahPixelTexture extends StatelessWidget {
             colors: <Color>[
               Colors.transparent,
               Colors.transparent,
-              Color(0x40000000),
-              Color(0xA6000000),
-              Color(0xEB000000),
-              Colors.black,
+              AmanahColorTokens.maskConcave40,
+              AmanahColorTokens.maskConcaveA6,
+              AmanahColorTokens.maskConcaveEB,
+              AmanahColorTokens.pureBlack,
             ],
             stops: <double>[0.0, 0.38, 0.54, 0.74, 0.88, 1.0],
           ).createShader(bounds);
@@ -4703,11 +4704,11 @@ class AmanahPixelTexture extends StatelessWidget {
             center: Alignment.bottomLeft,
             radius: 1.25,
             colors: <Color>[
-              Colors.black,
-              Color(0xBF000000),
-              Color(0x73000000),
-              Color(0x33000000),
-              Color(0x0F000000),
+              AmanahColorTokens.pureBlack,
+              AmanahColorTokens.maskRadialBF,
+              AmanahColorTokens.maskRadial73,
+              AmanahColorTokens.maskRadial33,
+              AmanahColorTokens.maskRadial0F,
               Colors.transparent,
             ],
             stops: <double>[0.0, 0.15, 0.32, 0.50, 0.68, 0.85],
@@ -4728,11 +4729,11 @@ class AmanahPixelTexture extends StatelessWidget {
             center: center,
             radius: 1.15,
             colors: const <Color>[
-              Colors.black,
-              Colors.black,
-              Color(0xCC000000),
-              Color(0x80000000),
-              Color(0x2B000000),
+              AmanahColorTokens.pureBlack,
+              AmanahColorTokens.pureBlack,
+              AmanahColorTokens.maskRadialCC,
+              AmanahColorTokens.maskRadial80,
+              AmanahColorTokens.maskRadial2B,
               Colors.transparent,
             ],
             stops: const <double>[0.0, 0.22, 0.45, 0.68, 0.88, 1.0],
@@ -4748,14 +4749,14 @@ class AmanahPixelTexture extends StatelessWidget {
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
             colors: <Color>[
-              Colors.black,
-              Color(0xD9000000),
-              Color(0x59000000),
+              AmanahColorTokens.pureBlack,
+              AmanahColorTokens.maskLinearD9,
+              AmanahColorTokens.maskLinear59,
               Colors.transparent,
               Colors.transparent,
-              Color(0x59000000),
-              Color(0xD9000000),
-              Colors.black,
+              AmanahColorTokens.maskLinear59,
+              AmanahColorTokens.maskLinearD9,
+              AmanahColorTokens.pureBlack,
             ],
             stops: <double>[0.0, 0.10, 0.24, 0.40, 0.60, 0.76, 0.90, 1.0],
           ).createShader(bounds);
@@ -4810,20 +4811,20 @@ class AmanahOrganicPixelPainter extends CustomPainter {
     final int rows = (size.height / step).ceil() + 1;
     const double dropoutThreshold = 0.36;
 
-    final List<Color> customColors = isDark
+    final List<Color> pixelPalette = isDark
         ? const <Color>[
-            Color(0xFF2563EB),
-            Color(0xFF3B82F6),
-            Color(0xFF0A44FF),
-            Color(0xFF60A5FA),
-            Color(0xFF93C5FD),
+            AmanahColorTokens.brandAccent,
+            AmanahColorTokens.brandLight,
+            AmanahColorTokens.brandPrimary,
+            AmanahColorTokens.brandSoft,
+            AmanahColorTokens.brandSubtle,
           ]
         : const <Color>[
-            Color(0xFF0A44FF),
-            Color(0xFF2563EB),
-            Color(0xFF60A5FA),
-            Color(0xFF93C5FD),
-            Color(0xFFBFDBFE),
+            AmanahColorTokens.brandPrimary,
+            AmanahColorTokens.brandAccent,
+            AmanahColorTokens.brandSoft,
+            AmanahColorTokens.brandSubtle,
+            AmanahColorTokens.brandPale,
           ];
 
     final Paint paint = Paint()..style = PaintingStyle.fill;
@@ -4861,8 +4862,8 @@ class AmanahOrganicPixelPainter extends CustomPainter {
 
         final double colorRand = _seededHash(r.toDouble(), c.toDouble(), 47);
         final int colorIdx =
-            (colorRand * customColors.length).floor() % customColors.length;
-        final Color baseColor = customColors[colorIdx];
+            (colorRand * pixelPalette.length).floor() % pixelPalette.length;
+        final Color baseColor = pixelPalette[colorIdx];
 
         paint.color = baseColor.withValues(alpha: cellOpacity);
 

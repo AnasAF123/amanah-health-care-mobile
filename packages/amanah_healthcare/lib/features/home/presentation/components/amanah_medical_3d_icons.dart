@@ -1,4 +1,4 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
@@ -49,9 +49,9 @@ class _Medical3DIconPainter extends CustomPainter {
         end: Alignment.bottomRight,
         colors: isDark
             ? const <Color>[
-                Color(0xFF38BDF8), // 0%: sky-400
-                Color(0xFF0284C7), // 45%: sky-600
-                Color(0xFF0369A1), // 100%: sky-700
+                AmanahColorTokens.skySoft,
+                AmanahColorTokens.sky,
+                AmanahColorTokens.skyDark,
               ]
             : const <Color>[
                 AmanahColorTokens.brandSubtle,
@@ -67,8 +67,8 @@ class _Medical3DIconPainter extends CustomPainter {
         end: Alignment.bottomCenter,
         colors: isDark
             ? const <Color>[
-                Color(0xFF0284C7), // 0%: sky-600
-                Color(0xFF082F49), // 100%: deep shadow extrusion
+                AmanahColorTokens.sky,
+                AmanahColorTokens.brandNavy,
               ]
             : const <Color>[
                 AmanahColorTokens.brand,
@@ -82,11 +82,14 @@ class _Medical3DIconPainter extends CustomPainter {
         end: Alignment.bottomRight,
         colors: isDark
             ? const <Color>[
-                Color(0xFFF0FDFA), // 0%: luminous cyan-50
-                Color(0xFF67E8F9), // 50%: luminous cyan-300
-                Color(0xFF06B6D4), // 100%: cyan-500
+                AmanahColorTokens.cyanSubtle,
+                AmanahColorTokens.cyanLight,
+                AmanahColorTokens.auroraCyanDark,
               ]
-            : const <Color>[Colors.white, AmanahColorTokens.brandMuted],
+            : const <Color>[
+                AmanahColorTokens.pureWhite,
+                AmanahColorTokens.brandMuted,
+              ],
         stops: isDark ? const <double>[0.0, 0.5, 1.0] : null,
       ).createShader(bounds);
 
@@ -95,8 +98,8 @@ class _Medical3DIconPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: <Color>[
-          Colors.white.withValues(alpha: isDark ? 0.40 : 0.85),
-          Colors.white.withValues(alpha: 0.0),
+          AmanahColorTokens.pureWhite.withValues(alpha: isDark ? 0.40 : 0.85),
+          AmanahColorTokens.pureWhite.withValues(alpha: 0.0),
         ],
       ).createShader(bounds);
 
@@ -155,7 +158,9 @@ class _Medical3DIconPainter extends CustomPainter {
     canvas.drawPath(
       handle,
       Paint()
-        ..color = isDark ? const Color(0xFF38BDF8) : const Color(0xFFBFDBFE)
+        ..color = isDark
+            ? AmanahColorTokens.skySoft
+            : AmanahColorTokens.brandPale
         ..strokeWidth = 8
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round,
@@ -192,7 +197,7 @@ class _Medical3DIconPainter extends CustomPainter {
     canvas.drawRRect(
       bodyStroke,
       Paint()
-        ..color = Colors.white.withValues(alpha: isDark ? 0.50 : 0.40)
+        ..color = AmanahColorTokens.pureWhite.withValues(alpha: isDark ? 0.50 : 0.40)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5,
     );
@@ -204,7 +209,10 @@ class _Medical3DIconPainter extends CustomPainter {
     );
     canvas.drawRRect(
       badgePlate,
-      Paint()..color = isDark ? const Color(0xFF0C4A6E) : const Color(0xFFE0F2FE),
+      Paint()
+        ..color = isDark
+            ? AmanahColorTokens.skyDarkest
+            : AmanahColorTokens.skyLight,
     );
 
     // 8. Medical Cross on Badge Plate (Dark: #38BDF8, Light: blueMain)
@@ -224,7 +232,9 @@ class _Medical3DIconPainter extends CustomPainter {
       ..close();
     canvas.drawPath(
       crossPath,
-      isDark ? (Paint()..color = const Color(0xFF38BDF8)) : blueMain,
+      isDark
+          ? (Paint()..color = AmanahColorTokens.skySoft)
+          : blueMain,
     );
   }
 
@@ -242,7 +252,7 @@ class _Medical3DIconPainter extends CustomPainter {
     // Plunger
     canvas.drawRect(
       const Rect.fromLTWH(45, 5, 10, 25),
-      Paint()..color = const Color(0xFFCBD5E1),
+      Paint()..color = AmanahColorTokens.neutral300,
     );
     canvas.drawRRect(
       RRect.fromRectAndRadius(
@@ -256,7 +266,7 @@ class _Medical3DIconPainter extends CustomPainter {
         const Rect.fromLTWH(42, 26, 16, 8),
         const Radius.circular(2),
       ),
-      Paint()..color = const Color(0xFF1E293B),
+      Paint()..color = AmanahColorTokens.neutral800,
     );
 
     // Syringe Barrel Liquid
@@ -266,7 +276,9 @@ class _Medical3DIconPainter extends CustomPainter {
         const Radius.circular(4),
       ),
       Paint()
-        ..color = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+        ..color = isDark
+            ? AmanahColorTokens.neutral900
+            : AmanahColorTokens.neutral50,
     );
     canvas.drawPath(
       Path()
@@ -280,7 +292,10 @@ class _Medical3DIconPainter extends CustomPainter {
     // Top Liquid Meniscus Ellipse
     canvas.drawOval(
       const Rect.fromLTWH(40, 37, 20, 6),
-      Paint()..color = isDark ? const Color(0xFF38BDF8) : const Color(0xFF60A5FA),
+      Paint()
+        ..color = isDark
+            ? AmanahColorTokens.skySoft
+            : AmanahColorTokens.brandSoft,
     );
 
     // Glass Barrel Outline & Specular
@@ -304,7 +319,7 @@ class _Medical3DIconPainter extends CustomPainter {
 
     // Graduated Measurement Lines
     final Paint linePaint = Paint()
-      ..color = const Color(0xFF94A3B8)
+      ..color = AmanahColorTokens.neutral400
       ..strokeWidth = 1.5;
     canvas.drawLine(const Offset(40, 45), const Offset(48, 45), linePaint);
     canvas.drawLine(const Offset(40, 52), const Offset(45, 52), linePaint);
@@ -322,7 +337,7 @@ class _Medical3DIconPainter extends CustomPainter {
     );
     canvas.drawRect(
       const Rect.fromLTWH(49, 78, 2, 20),
-      Paint()..color = const Color(0xFF94A3B8),
+      Paint()..color = AmanahColorTokens.neutral400,
     );
 
     // Droplet (Luminous Cyan Gradient in dark mode)
@@ -390,7 +405,7 @@ class _Medical3DIconPainter extends CustomPainter {
       ..cubicTo(28.5, 48.5, 28.5, 68.5, 68.5, 88.5);
 
     final Paint glintPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.60)
+      ..color = AmanahColorTokens.pureWhite.withValues(alpha: 0.60)
       ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -399,7 +414,7 @@ class _Medical3DIconPainter extends CustomPainter {
 
     // 5. Front Molecular Cross Links (Luminous Light Blue #38BDF8 / White)
     final Paint bondHighlight = Paint()
-      ..color = isDark ? const Color(0xFF38BDF8) : const Color(0xFFDBEAFE)
+      ..color = isDark ? AmanahColorTokens.skySoft : AmanahColorTokens.brandMuted
       ..strokeWidth = 4.5
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(const Offset(40, 22), const Offset(55, 32), bondHighlight);
@@ -477,7 +492,7 @@ class _Medical3DIconPainter extends CustomPainter {
       ..close();
     canvas.drawPath(
       cross,
-      isDark ? highlightGrad : (Paint()..color = Colors.white),
+      isDark ? highlightGrad : (Paint()..color = AmanahColorTokens.pureWhite),
     );
   }
 

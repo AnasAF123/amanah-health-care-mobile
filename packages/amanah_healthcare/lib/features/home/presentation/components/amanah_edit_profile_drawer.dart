@@ -99,7 +99,7 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
     final Color subtextColor = AmanahThemeTokens.textSecondary(context);
     final Color fieldBg = dark
         ? AmanahThemeTokens.surfaceSecondary(context)
-        : Colors.white;
+        : AmanahColorTokens.surfaceLight;
     final Color fieldBorder = AmanahThemeTokens.outline(context);
 
     return AmanahBottomSheetScaffold(
@@ -150,8 +150,8 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
             decoration: BoxDecoration(
               color: dark
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : const Color(0xFFF8FAFC),
+                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                  : AmanahColorTokens.neutral50,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: fieldBorder),
             ),
@@ -161,7 +161,7 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: dark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
+                color: dark ? AmanahColorTokens.neutral300 : AmanahColorTokens.neutral700,
               ),
             ),
           ),
@@ -222,7 +222,7 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(
-                  color: Color(0xFF0A44FF),
+                  color: AmanahColorTokens.brandPrimary,
                   width: 1.5,
                 ),
               ),
@@ -275,7 +275,7 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(
-                  color: Color(0xFF0A44FF),
+                  color: AmanahColorTokens.brandPrimary,
                   width: 1.5,
                 ),
               ),
@@ -322,7 +322,7 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(
-                  color: Color(0xFF0A44FF),
+                  color: AmanahColorTokens.brandPrimary,
                   width: 1.5,
                 ),
               ),
@@ -391,10 +391,12 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color textColor = dark ? Colors.white : const Color(0xFF0F172A);
+    final Color textColor = dark
+        ? AmanahColorTokens.surfaceLight
+        : AmanahColorTokens.neutral900;
     final Color subtextColor = dark
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
+        ? AmanahColorTokens.neutral400
+        : AmanahColorTokens.neutral500;
 
     return AmanahBottomSheetScaffold(
       title: 'Ganti Foto Profil Dokter',
@@ -417,12 +419,12 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB).withValues(alpha: 0.12),
+                  color: AmanahColorTokens.brandAccent.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.photo_library_outlined,
-                  color: Color(0xFF2563EB),
+                  color: AmanahColorTokens.brandAccent,
                   size: 20,
                 ),
               ),
@@ -479,7 +481,7 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: const Color(0xFF0A44FF).withValues(alpha: 0.35),
+                        color: AmanahColorTokens.brandPrimary.withValues(alpha: 0.35),
                         width: 2,
                       ),
                     ),
@@ -491,7 +493,7 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
                             (BuildContext ctx, Object err, StackTrace? st) {
                               return const Icon(
                                 Icons.person_rounded,
-                                color: Color(0xFF0A44FF),
+                                color: AmanahColorTokens.brandPrimary,
                               );
                             },
                       ),

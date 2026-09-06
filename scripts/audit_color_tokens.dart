@@ -10,12 +10,22 @@ void main(List<String> args) {
   
   String targetPath = 'packages/amanah_healthcare/lib';
   String? exportPath;
+  final List<String> excludedPatterns = <String>[];
 
   for (final String arg in args) {
     if (arg.startsWith('--path=')) {
       targetPath = arg.substring('--path='.length);
     } else if (arg.startsWith('--export-path=')) {
       exportPath = arg.substring('--export-path='.length);
+    } else if (arg.startsWith('--exclude=')) {
+      final String rawExcludes = arg.substring('--exclude='.length);
+      // Support comma-separated lists: --exclude=lib/theme,design_system
+      excludedPatterns.addAll(
+        rawExcludes
+            .split(',')
+            .map((e) => e.trim().replaceAll(r'\', '/'))
+            .where((e) => e.isNotEmpty),
+      );
     }
   }
 
@@ -29,11 +39,6 @@ void main(List<String> args) {
     r'(Color\s*\(\s*0x[0-9a-fA-F]+\s*\)|Colors\.[a-zA-Z0-9_]+|Color\.(?:fromARGB|fromRGBO)\s*\([^)]+\))',
   );
 
-  final List<String> ignoredFiles = <String>[
-    'amanah_color_tokens.dart',
-    'design_constants.dart',
-  ];
-
   int totalFilesScanned = 0;
   int totalViolations = 0;
   final Map<String, List<_Finding>> findingsByFile = <String, List<_Finding>>{};
@@ -43,8 +48,16 @@ void main(List<String> args) {
       continue;
     }
 
-    final String fileName = entity.uri.pathSegments.last;
-    if (ignoredFiles.contains(fileName)) {
+    final String normalizedPath = entity.path.replaceAll(r'\', '/');
+    bool isExcluded = false;
+    for (final String pattern in excludedPatterns) {
+      if (normalizedPath.contains(pattern)) {
+        isExcluded = true;
+        break;
+      }
+    }
+
+    if (isExcluded) {
       continue;
     }
 

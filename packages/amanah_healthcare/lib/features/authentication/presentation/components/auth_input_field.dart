@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 
@@ -48,10 +48,10 @@ class AuthInputField extends StatelessWidget {
     final Color fillColor = hasError
         ? (isDark
               ? theme.colorScheme.error.withValues(alpha: 0.08)
-              : const Color(0xFFFEF2F2))
+              : AmanahColorTokens.dangerSurface)
         : (isDark
               ? AmanahThemeTokens.surfaceSecondary(context)
-              : const Color(0xFFFAFAFA).withValues(alpha: 0.72));
+              : AmanahColorTokens.neutral50.withValues(alpha: 0.72));
     final Color iconColor = hasError
         ? theme.colorScheme.error
         : theme.colorScheme.onSurface.withValues(alpha: 0.42);

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
@@ -107,13 +107,15 @@ class AmanahActivityCard extends StatelessWidget {
 
     final Color iconBg = dark
         ? (isBlue
-              ? const Color(0xB3082F49) // bg-blue-950/70 from .web
-              : const Color(0xB31E1B4B)) // bg-indigo-950/70 from .web
-        : (isBlue ? AmanahColorTokens.brandSurface : const Color(0xFFF0F9FF));
+              ? AmanahColorTokens.surfaceAccentDark.withValues(alpha: 0.70)
+              : AmanahColorTokens.indigoDark.withValues(alpha: 0.70))
+        : (isBlue
+              ? AmanahColorTokens.brandSurface
+              : AmanahColorTokens.skySurface);
 
     final Color iconColor = dark
-        ? (isBlue ? const Color(0xFF22D3EE) : const Color(0xFF38BDF8))
-        : (isBlue ? AmanahColorTokens.brand : const Color(0xFF0284C7));
+        ? (isBlue ? AmanahColorTokens.cyanAccent : AmanahColorTokens.skySoft)
+        : (isBlue ? AmanahColorTokens.brand : AmanahColorTokens.sky);
 
     return Material(
       color: Colors.transparent,

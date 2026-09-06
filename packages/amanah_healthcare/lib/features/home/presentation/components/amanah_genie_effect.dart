@@ -1,8 +1,9 @@
-﻿import 'dart:math' as math;
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_queue_data.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_watermark_path.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 enum AmanahGenieDirection { open, minimize }
 
@@ -17,7 +18,7 @@ class AmanahGenieCanvasPainter extends CustomPainter {
   });
 
   final ui.Image snapshot;
-  final double progress; // 0.0 -> 1.0
+  final double progress;
   final AmanahGenieDirection direction;
   final Offset dockPoint;
   final Rect cardRect;
@@ -44,7 +45,7 @@ class AmanahGenieCanvasPainter extends CustomPainter {
     final double rawT = progress.clamp(0.0, 1.0);
 
     for (int y = 0; y < windowHeight; y++) {
-      final double prox = y / windowHeight; // bottom dock relative proximity
+      final double prox = y / windowHeight;
 
       final double rowXStart = direction == AmanahGenieDirection.minimize
           ? (1.0 - prox) * 0.65
@@ -96,7 +97,6 @@ class AmanahGenieCanvasPainter extends CustomPainter {
       canvas.drawImageRect(snapshot, srcRect, dstRect, paint);
     }
 
-    // Radiant glow burst at dock point (brand blue with screen blend mode)
     final double glowRaw = direction == AmanahGenieDirection.minimize
         ? rawT
         : 1.0 - rawT;
@@ -108,9 +108,9 @@ class AmanahGenieCanvasPainter extends CustomPainter {
           dockPoint,
           80,
           <Color>[
-            const Color(0xFF3B82F6).withValues(alpha: a),
-            const Color(0xFF0A44FF).withValues(alpha: a * 0.65),
-            const Color(0x000A44FF), // Explicit transparent Royal Blue
+            AmanahColorTokens.brandLight.withValues(alpha: a),
+            AmanahColorTokens.brandPrimary.withValues(alpha: a * 0.65),
+            AmanahColorTokens.brandPrimary.withValues(alpha: 0.0),
           ],
           <double>[0.0, 0.40, 1.0],
         );
@@ -128,7 +128,6 @@ class AmanahGenieCanvasPainter extends CustomPainter {
   }
 }
 
-/// Instantaneous vector snapshot recorder for the closed Card Cover
 Future<ui.Image> generateCardCoverSnapshot({
   required AmanahQueueCardData card,
   required Size size,
@@ -142,59 +141,61 @@ Future<ui.Image> generateCardCoverSnapshot({
   final Rect rect = Offset.zero & size;
   final RRect rrect = RRect.fromRectAndRadius(rect, const Radius.circular(22));
 
-  // 1. Card Container Background
   final Paint bgPaint = Paint()
     ..shader = (isDark
         ? const LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: <Color>[
-              Color(0xFF162238),
-              Color(0xFF0F172A),
-              Color(0xFF0B1220),
+              AmanahColorTokens.cardCoverDarkTop,
+              AmanahColorTokens.neutral900,
+              AmanahColorTokens.cardCoverDarkBottom,
             ],
           )
         : const LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: <Color>[Colors.white, Color(0xFFF8FAFF), Color(0xFFEDF2FF)],
+            colors: <Color>[
+              AmanahColorTokens.surfaceLight,
+              AmanahColorTokens.canvasLight,
+              AmanahColorTokens.cardCoverLightBottom,
+            ],
           )).createShader(rect);
 
   canvas.drawRRect(rrect, bgPaint);
 
-  // 2. Border
   final Paint borderPaint = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1.5
-    ..color = isDark ? Colors.white.withValues(alpha: 0.14) : Colors.white;
+    ..color = isDark
+        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.14)
+        : AmanahColorTokens.surfaceLight;
   canvas.drawRRect(rrect, borderPaint);
 
-  // 3. Bottom Gradient Sheen
   final Paint sheenPaint = Paint()
     ..shader = (isDark
         ? LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
             colors: <Color>[
-              const Color(0xFF1E3A8A).withValues(alpha: 0.35),
-              const Color(0xFF1E293B).withValues(alpha: 0.15),
-              const Color(0x001E293B),
+              AmanahColorTokens.brandDarkNavy.withValues(alpha: 0.35),
+              AmanahColorTokens.neutral800.withValues(alpha: 0.15),
+              AmanahColorTokens.neutral800.withValues(alpha: 0.0),
             ],
           )
         : LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
             colors: <Color>[
-              const Color(0xFFDBEAFE).withValues(alpha: 0.50),
-              const Color(0xFFEFF6FF).withValues(alpha: 0.15),
-              const Color(0x00EFF6FF),
+              AmanahColorTokens.brandMuted.withValues(alpha: 0.50),
+              AmanahColorTokens.brandSurface.withValues(alpha: 0.15),
+              AmanahColorTokens.brandSurface.withValues(alpha: 0.0),
             ],
           )).createShader(rect);
   canvas.save();
   canvas.clipRRect(rrect);
   canvas.drawRect(rect, sheenPaint);
 
-  // 4. Organic Cybernetic Pixel Texture (Faded bottom-to-top, 1:1 with _AmanahQueueCardCover)
   AmanahOrganicPixelPainter.drawPixelsToCanvas(
     canvas,
     size,
@@ -203,25 +204,24 @@ Future<ui.Image> generateCardCoverSnapshot({
     fadeTop: true,
   );
 
-  // 5. Draw Official Watermark Vector Logo
   final Paint wmPaint = Paint()
     ..shader = (isDark
         ? const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: <Color>[
-              Color(0xFF3B82F6),
-              Color(0xFF60A5FA),
-              Color(0xFF93C5FD),
+              AmanahColorTokens.brandLight,
+              AmanahColorTokens.brandSoft,
+              AmanahColorTokens.brandSubtle,
             ],
           )
         : const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: <Color>[
-              Color(0xFF0A44FF),
-              Color(0xFF1A55FF),
-              Color(0xFF3B82F6),
+              AmanahColorTokens.brandPrimary,
+              AmanahColorTokens.brandVividBlue,
+              AmanahColorTokens.brandLight,
             ],
           )).createShader(
       Rect.fromCenter(center: rect.center, width: 140, height: 140),
@@ -239,12 +239,13 @@ Future<ui.Image> generateCardCoverSnapshot({
   final Path transformed = wmPath.transform(matrix.storage);
   canvas.drawPath(transformed, wmPaint);
 
-  // 6. Draw Queue Number Text (#01, #02, etc.)
   final TextPainter tp = TextPainter(
     text: TextSpan(
       text: card.queueNumber,
       style: TextStyle(
-        color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF0A44FF),
+        color: isDark
+            ? AmanahColorTokens.brandSoft
+            : AmanahColorTokens.brandPrimary,
         fontFamily: 'PlusJakartaSans',
         fontSize: 40,
         fontWeight: FontWeight.w900,
@@ -258,13 +259,12 @@ Future<ui.Image> generateCardCoverSnapshot({
     Offset((size.width - tp.width) / 2, (size.height - 140) / 2 + 120),
   );
 
-  // 7. Glossy Sheen Overlay
   final Paint glossPaint = Paint()
     ..shader = LinearGradient(
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
       colors: <Color>[
-        Colors.white.withValues(alpha: isDark ? 0.05 : 0.10),
+        AmanahColorTokens.surfaceLight.withValues(alpha: isDark ? 0.05 : 0.10),
         Colors.transparent,
       ],
       stops: const <double>[0.0, 0.45],

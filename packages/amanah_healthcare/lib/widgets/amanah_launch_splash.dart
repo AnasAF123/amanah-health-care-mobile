@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
@@ -14,7 +14,7 @@ class AmanahLaunchSplash extends StatelessWidget {
     final Color background =
         isDark ? AmanahColorTokens.canvasDark : AmanahColorTokens.canvasLight;
     final Color foreground =
-        isDark ? Colors.white : const Color(0xFF13195C);
+        isDark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.navy;
     final Color secondary =
         isDark ? AmanahColorTokens.neutral300 : AmanahColorTokens.neutral600;
 
