@@ -93,7 +93,7 @@ class _AmanahAppState extends State<AmanahApp> {
         ),
       ],
       child: MaterialApp(
-        debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: true,
         title: 'Amanah Healthcare',
         theme: ThemeData(
           useMaterial3: true,
