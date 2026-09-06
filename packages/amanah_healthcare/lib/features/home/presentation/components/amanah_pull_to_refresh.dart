@@ -1,10 +1,9 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_racing_chevrons.dart';
 
 /// Interaction States matching the Blueprint:
 /// IDLE -> PULLING -> ARMED / READY -> REFRESHING -> COMPLETE -> IDLE
@@ -317,6 +316,8 @@ class _AmanahPullToRefreshState extends State<AmanahPullToRefresh>
                     child: AnimatedBuilder(
                       animation: _pulseController,
                       builder: (BuildContext context, Widget? child) {
+                        final bool isDark =
+                            Theme.of(context).brightness == Brightness.dark;
                         return CustomPaint(
                           size: const Size(36, 38),
                           painter: _AmanahPullChevronPainter(
@@ -325,6 +326,7 @@ class _AmanahPullToRefreshState extends State<AmanahPullToRefresh>
                             pulseProgress: _pulseController.value,
                             visualDistance: _visualDistance,
                             refreshHoldHeight: widget.refreshHoldHeight,
+                            isDark: isDark,
                           ),
                         );
                       },
@@ -341,8 +343,8 @@ class _AmanahPullToRefreshState extends State<AmanahPullToRefresh>
 
 /// Custom Painter for Progressive Chevrons (Pulling) and Kinetic Wave Pulse (Refreshing).
 ///
-/// Faithfully preserves the aerodynamic neon aura and metallic blade shaders
-/// from `AmanahRacingPulseChevrons` in "Pilih Antrean".
+/// Delegates all geometry, theme-adaptive neon shaders, and wing painting directly to
+/// the master renderer [AmanahChevronRenderer] from `amanah_racing_chevrons.dart`.
 class _AmanahPullChevronPainter extends CustomPainter {
   const _AmanahPullChevronPainter({
     required this.state,
@@ -350,6 +352,7 @@ class _AmanahPullChevronPainter extends CustomPainter {
     required this.pulseProgress,
     required this.visualDistance,
     required this.refreshHoldHeight,
+    required this.isDark,
   });
 
   final AmanahPullRefreshState state;
@@ -357,17 +360,13 @@ class _AmanahPullChevronPainter extends CustomPainter {
   final double pulseProgress;
   final double visualDistance;
   final double refreshHoldHeight;
-
-  static const double wingWidth = 26.0;
-  static const double wingHeight = 6.5;
-  static const double spacing = 7.5;
-  static const int count = 3;
+  final bool isDark;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double centerX = size.width / 2;
     final double centerY = size.height / 2;
-    final double topBaseY = centerY - ((count * spacing) / 2);
+    final double topBaseY = centerY -
+        ((AmanahChevronRenderer.count * AmanahChevronRenderer.spacing) / 2);
 
     final bool isRefreshing = state == AmanahPullRefreshState.refreshing;
     final bool isComplete = state == AmanahPullRefreshState.complete;
@@ -383,128 +382,24 @@ class _AmanahPullChevronPainter extends CustomPainter {
       return;
     }
 
-    for (int i = 0; i < count; i++) {
-      double chevronOpacity = 0.0;
-      double chevronScale = 1.0;
-      double yOffset = topBaseY + (i * spacing);
-      double glowIntensity = 0.0;
-
-      if (isRefreshing || isComplete) {
-        // --- REFRESHING: Sequential kinetic wave pulse matching AmanahRacingPulseChevrons ---
-        final double tierOffset = i * 0.18;
-        final double t = (pulseProgress - tierOffset) % 1.0;
-        final double normalized = t < 0 ? t + 1.0 : t;
-
-        double waveProgress;
-        if (normalized < 0.40) {
-          waveProgress = Curves.easeOutCubic.transform(normalized / 0.40);
-        } else {
-          waveProgress =
-              1.0 - Curves.easeInOut.transform((normalized - 0.40) / 0.60);
-        }
-
-        yOffset += waveProgress * 3.5;
-        chevronOpacity = (0.35 + waveProgress * 0.65) * masterOpacity;
-        chevronScale = 0.94 + (waveProgress * 0.08);
-        glowIntensity = waveProgress;
-      } else {
-        // --- PULLING: Progressive Reveal Blueprint ---
-        // Chevron 01: 15% -> 35%
-        // Chevron 02: 35% -> 60%
-        // Chevron 03: 60% -> 90%
-        final double startP = switch (i) {
-          0 => 0.15,
-          1 => 0.35,
-          _ => 0.60,
-        };
-        final double endP = switch (i) {
-          0 => 0.35,
-          1 => 0.60,
-          _ => 0.90,
-        };
-
-        final double t = ((pullProgress - startP) / (endP - startP)).clamp(
-          0.0,
-          1.0,
-        );
-
-        if (t <= 0.0) {
-          continue;
-        }
-
-        chevronOpacity = Curves.easeOutQuad.transform(t) * masterOpacity;
-        chevronScale = 0.85 + (0.15 * t);
-        // Upward offset that settles down to resting position
-        final double translateUp = -6.0 * (1.0 - t);
-        yOffset += translateUp;
-
-        // Armed state extra flare
-        if (pullProgress >= 0.95) {
-          glowIntensity = 0.85;
-        } else if (t > 0.5) {
-          glowIntensity = (t - 0.5) * 1.2;
-        }
-      }
-
-      if (chevronOpacity <= 0.01) {
-        continue;
-      }
-
-      final Path chevronPath = Path()
-        ..moveTo(centerX - (wingWidth / 2) * chevronScale, yOffset)
-        ..lineTo(centerX, yOffset + wingHeight * chevronScale)
-        ..lineTo(centerX + (wingWidth / 2) * chevronScale, yOffset);
-
-      // 1. Aerodynamic Neon Aura Blur (Glow flare)
-      if (glowIntensity > 0.10) {
-        final Shader glowShader = ui.Gradient.linear(
-          Offset(centerX - wingWidth / 2, yOffset),
-          Offset(centerX + wingWidth / 2, yOffset + wingHeight),
-          <Color>[
-            AmanahColorTokens.brandSoft.withValues(
-              alpha: 0.55 * glowIntensity * chevronOpacity,
-            ),
-            AmanahColorTokens.brandPrimary.withValues(
-              alpha: 0.85 * glowIntensity * chevronOpacity,
-            ),
-            AmanahColorTokens.brandSoft.withValues(
-              alpha: 0.55 * glowIntensity * chevronOpacity,
-            ),
-          ],
-          const <double>[0.0, 0.50, 1.0],
-        );
-
-        final Paint glowPaint = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 3.5
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round
-          ..shader = glowShader
-          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.0);
-
-        canvas.drawPath(chevronPath, glowPaint);
-      }
-
-      // 2. High-Precision Racing Metallic Blade Stroke
-      final Shader bladeShader = ui.Gradient.linear(
-        Offset(centerX - wingWidth / 2, yOffset),
-        Offset(centerX + wingWidth / 2, yOffset + wingHeight),
-        <Color>[
-          AmanahColorTokens.brandLight.withValues(alpha: chevronOpacity * 0.85),
-          AmanahColorTokens.brandPrimary.withValues(alpha: chevronOpacity),
-          AmanahColorTokens.brandLight.withValues(alpha: chevronOpacity * 0.85),
-        ],
-        const <double>[0.0, 0.50, 1.0],
+    if (isRefreshing || isComplete) {
+      AmanahChevronRenderer.paintWavePulse(
+        canvas: canvas,
+        size: size,
+        progress: pulseProgress,
+        isDark: isDark,
+        masterOpacity: masterOpacity,
+        topBaseY: topBaseY,
       );
-
-      final Paint bladePaint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.4
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round
-        ..shader = bladeShader;
-
-      canvas.drawPath(chevronPath, bladePaint);
+    } else {
+      AmanahChevronRenderer.paintPullProgress(
+        canvas: canvas,
+        size: size,
+        pullProgress: pullProgress,
+        isDark: isDark,
+        masterOpacity: masterOpacity,
+        topBaseY: topBaseY,
+      );
     }
   }
 
@@ -513,6 +408,7 @@ class _AmanahPullChevronPainter extends CustomPainter {
     return oldDelegate.pullProgress != pullProgress ||
         oldDelegate.pulseProgress != pulseProgress ||
         oldDelegate.visualDistance != visualDistance ||
-        oldDelegate.state != state;
+        oldDelegate.state != state ||
+        oldDelegate.isDark != isDark;
   }
 }
