@@ -1,4 +1,4 @@
-# Docs: https://docs.github.com/en/code-security/supply-chain-security/keeping-your-dependencies-updated-automatically
+﻿# Docs: https://docs.github.com/en/code-security/supply-chain-security/keeping-your-dependencies-updated-automatically
 version: 2
 enable-beta-ecosystems: true
 updates:
@@ -13,7 +13,7 @@ updates:
       include: "scope"
       
   - package-ecosystem: "bundler"
-    directory: "packages/smooth_app/android"
+    directory: "packages/amanah_healthcare/android"
     schedule:
       interval: "daily"
     labels:
@@ -23,7 +23,7 @@ updates:
       include: "scope"     
       
   - package-ecosystem: "bundler"
-    directory: "packages/smooth_app/ios"
+    directory: "packages/amanah_healthcare/ios"
     schedule:
       interval: "daily"
     labels:
@@ -33,7 +33,7 @@ updates:
       include: "scope"
   
   - package-ecosystem: "pub"
-    directory: "/packages/smooth_app/"
+    directory: "/packages/amanah_healthcare/"
     schedule:
       interval: "daily"
     commit-message:

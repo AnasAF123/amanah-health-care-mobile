@@ -1,4 +1,4 @@
-name: scanner_zxing
+﻿name: scanner_zxing
 description: Scanner implementation using Zxing
 version: 1.0.0
 publish_to: "none"
@@ -19,5 +19,3 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: 6.0.0
-  openfoodfacts_flutter_lints:
-    git: https://github.com/openfoodfacts/openfoodfacts_flutter_lints.git

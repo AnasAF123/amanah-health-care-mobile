@@ -1,6 +1,6 @@
-<component name="ProjectRunConfigurationManager">
+﻿<component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Android (Google Play).dart" type="FlutterRunConfigurationType" factoryName="Flutter" folderName="Android">
-    <option name="filePath" value="$PROJECT_DIR$/packages/smooth_app/lib/entrypoints/android/main_google_play.dart" />
+    <option name="filePath" value="$PROJECT_DIR$/packages/amanah_healthcare/lib/entrypoints/android/main_google_play.dart" />
     <method v="2" />
   </configuration>
 </component>

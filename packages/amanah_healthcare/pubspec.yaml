@@ -1,0 +1,104 @@
+name: amanah_healthcare
+description: Amanah Healthcare mobile application.
+version: 0.0.0+734
+publish_to: "none"
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  barcode_widget: 2.0.4
+  camera: 0.11.3
+  file_picker: 10.3.8
+  flutter_native_splash: 2.4.7
+  flutter_svg: 2.2.3
+  package_info_plus: 9.0.0
+  permission_handler: 12.0.1
+  provider: 6.1.5+1
+  share_plus: 12.0.1
+  webview_flutter: 4.13.0
+
+  # App Store implementations
+  app_store_apple_store:
+    path: ../app_store/apple_app_store
+  app_store_google_play:
+    path: ../app_store/google_play
+  app_store_shared:
+    path: ../app_store/shared
+  app_store_uri:
+    path: ../app_store/uri_store
+
+  # Scanner implementations
+  scanner_shared:
+    path: ../scanner/shared
+  scanner_ml_kit:
+    path: ../scanner/ml_kit
+  scanner_zxing:
+    path: ../scanner/zxing
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 6.0.0
+
+# 'flutter pub run flutter_native_splash:create' to update
+flutter_native_splash:
+  color: "#F8FAFF"
+  color_dark: "#0A0E1A"
+  #It must be a png file and should be sized for 4x pixel density.
+  image: "assets/amanah/launch_emblem.png"
+
+  # The branding property allows you to specify an image used as branding in the splash screen.
+  # It must be a png file. Currently, it is only supported for Android < v12 and iOS.
+  # 200dp width and 80dp height.
+  branding: assets/amanah/splash_branding.png
+  branding_dark: assets/amanah/splash_branding.png
+
+  # https://developer.android.com/guide/topics/ui/splash-screen
+  android_12:
+    # Please note that the splash screen will be clipped to a circle on the center of the screen.
+    # App icon with an icon background: This should be 960×960 pixels, and fit within a circle
+    # 640 pixels in diameter.
+    # App icon without an icon background: This should be 1152×1152 pixels, and fit within a circle
+    # 768 pixels in diameter.
+    image: "assets/amanah/launch_emblem.png"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/amanah/
+    - assets/amanah/images/
+    - assets/amanah/images/quick_access/
+    - assets/amanah/images/doctors/
+    - assets/amanah/images/carousel/
+    - assets/amanah/auth/
+    - assets/amanah/id_card/
+    - assets/amanah/id_card/3d/
+    - assets/amanah/id_card/images/
+    - assets/amanah/id_card/js/
+    - assets/amanah/id_card/web/
+    - assets/amanah/id_card/web/assets/
+    - assets/amanah/id_card/web/assets/3d/
+    - assets/amanah/id_card/web/assets/images/doctors/
+    - assets/amanah/theme/
+
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-VariableFont_wght.ttf
+
+    - family: OpenSans
+      fonts:
+        - asset: assets/fonts/OpenSans-Regular.ttf
+        - asset: assets/fonts/OpenSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/OpenSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/OpenSans-Bold.ttf
+          weight: 700

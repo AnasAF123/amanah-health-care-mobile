@@ -1,8 +1,8 @@
-# Open Food Facts Mobile App (Smooth App) - Flutter Development Guide
+﻿# Amanah Healthcare Mobile App - Flutter Development Guide
 
 Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
 
-This is a comprehensive Flutter mobile application for Open Food Facts, supporting Android and iOS platforms. The app uses a multi-package architecture with scanner integrations, app store variations, and extensive testing infrastructure.
+This is a comprehensive Flutter mobile application for Amanah Healthcare, supporting Android and iOS platforms. The app uses a multi-package architecture with scanner integrations, app store variations, and extensive testing infrastructure.
 
 ## Essential Setup and Environment
 
@@ -19,7 +19,7 @@ This is a comprehensive Flutter mobile application for Open Food Facts, supporti
 
 ### Initial Repository Setup
 - **NEVER CANCEL**: Initial Flutter setup takes 5-10 minutes. WAIT for completion.
-- Navigate to the main app directory: `cd packages/smooth_app`
+- Navigate to the main app directory: `cd packages/amanah_healthcare`
 - Install dependencies: `fvm flutter pub get .` (takes 2-3 minutes)
 
 ### Required System Dependencies
@@ -39,7 +39,7 @@ This is a comprehensive Flutter mobile application for Open Food Facts, supporti
 
 ### Running the Application
 ```bash
-cd packages/smooth_app
+cd packages/amanah_healthcare
 
 # Android (Google Play variant) - DEFAULT
 fvm flutter run -t lib/entrypoints/android/main_google_play.dart
@@ -64,7 +64,7 @@ The app supports different barcode scanner implementations. Choose one:
 ./ci/dependencies/scanner/enable_zxing_dependency.sh
 
 # ALWAYS run flutter pub get after changing scanner dependencies
-cd packages/smooth_app && fvm flutter pub get .
+cd packages/amanah_healthcare && fvm flutter pub get .
 ```
 
 ### App Store Variants Configuration
@@ -101,7 +101,7 @@ fvm flutter analyze --fatal-infos --fatal-warnings .
 # NEVER CANCEL: Complete test suite takes 5-8 minutes
 
 # Run tests for specific package
-cd packages/smooth_app && fvm flutter test --coverage
+cd packages/amanah_healthcare && fvm flutter test --coverage
 # NEVER CANCEL: Main app tests take 3-4 minutes
 
 # Integration tests (with screenshots)
@@ -134,7 +134,7 @@ If you encounter build issues:
 3. **Clear pub cache**: `fvm flutter pub cache clean` (takes 1 minute)
 4. **Reset to clean state**: 
    ```bash
-   cd packages/smooth_app
+   cd packages/amanah_healthcare
    fvm flutter clean
    fvm flutter pub get .
    ```
@@ -142,7 +142,7 @@ If you encounter build issues:
 ## Project Structure and Key Locations
 
 ### Main Directories
-- `packages/smooth_app/` - Main Flutter application
+- `packages/amanah_healthcare/` - Main Flutter application
 - `packages/scanner/` - Barcode scanning implementations (ML Kit, ZXing, shared)
 - `packages/app_store/` - App store specific implementations (Google Play, Apple, URI)
 - `ci/` - Continuous integration scripts and utilities
@@ -150,9 +150,9 @@ If you encounter build issues:
 
 ### Important Files
 - `flutter-version.txt` - Specifies required Flutter version (3.35.1)
-- `packages/smooth_app/pubspec.yaml` - Main app dependencies
-- `packages/smooth_app/lib/entrypoints/` - Platform-specific entry points
-- `packages/smooth_app/integration_test/` - End-to-end test scenarios
+- `packages/amanah_healthcare/pubspec.yaml` - Main app dependencies
+- `packages/amanah_healthcare/lib/entrypoints/` - Platform-specific entry points
+- `packages/amanah_healthcare/integration_test/` - End-to-end test scenarios
 
 ### Development Features
 - **Dev Mode**: Access via Preferences > Contribute > Software Development
@@ -223,17 +223,15 @@ The repository uses comprehensive CI/CD:
 ## Documentation and Resources
 
 ### Code Documentation
-- [Generated documentation](https://openfoodfacts.github.io/smooth-app/) - Updated automatically
+- [Generated documentation](https://amanahhealthcare.com/docs) - Updated automatically
 - Use `mkdocs serve` to run documentation locally (requires `pip install mkdocs mkdocs-material`)
 
 ### External Resources
-- [Project Smoothie Wiki](https://wiki.openfoodfacts.org/Project_Smoothie)
+- [Amanah Healthcare Docs](https://amanahhealthcare.com/docs)
 - [Flutter Documentation](https://docs.flutter.dev/)
-- [Open Food Facts API Documentation](https://openfoodfacts.github.io/openfoodfacts-dart/)
 
 ### Community
-- Weekly meetings: Thursdays 18:30 Paris Time
-- Slack: [Open Food Facts Slack](https://slack.openfoodfacts.org)
+- Slack: [Amanah Healthcare Community](https://amanahhealthcare.com/community)
 - Issues: Use GitHub Issues with appropriate labels
 
 **CRITICAL REMINDERS:**

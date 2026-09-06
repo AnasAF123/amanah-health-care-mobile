@@ -11,12 +11,8 @@
     "lerp",
     "macchiato",
     "nutri",
+    "amanah",
     "nutriscore",
-    "openbeautyfacts",
-    "openfoodfacts",
-    "openpetfoodfacts",
-    "openproductsfacts",
-    "opff",
     "packagings",
     "reorderable",
     "ristreto",
@@ -33,13 +29,12 @@
     "unfocus",
     "webview"
   ],
-  "dart.flutterSdkPath": "C:/Users/ANAS ABIYYU FALAH/development/flutter",
   "editor.formatOnSave": true,
   "files.autoSave": "afterDelay",
   "files.autoSaveDelay": 1000,
   "dart.flutterHotReloadOnSave": "all",
   "dart.hotReloadPatterns": [
-    "**/packages/smooth_app/assets/amanah/id_card/web/**"
+    "**/packages/amanah_healthcare/assets/amanah/id_card/web/**"
   ],
   "cmake.ignoreCMakeListsMissing": true
 }

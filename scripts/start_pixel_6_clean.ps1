@@ -4,13 +4,22 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$FlutterRoot = "C:\Users\ANAS ABIYYU FALAH\development\flutter"
+$FlutterRoot = if ($env:FLUTTER_ROOT) {
+  $env:FLUTTER_ROOT
+} elseif (Get-Command flutter -ErrorAction SilentlyContinue) {
+  Split-Path (Split-Path (Get-Command flutter).Source -Parent) -Parent
+} else {
+  Join-Path $env:USERPROFILE "development\flutter"
+}
+
 $AndroidSdk = if ($env:ANDROID_SDK_ROOT) {
   $env:ANDROID_SDK_ROOT
 } elseif ($env:ANDROID_HOME) {
   $env:ANDROID_HOME
-} else {
+} elseif (Test-Path "D:\Android\Sdk") {
   "D:\Android\Sdk"
+} else {
+  Join-Path $env:LOCALAPPDATA "Android\Sdk"
 }
 
 $EmulatorExe = Join-Path $AndroidSdk "emulator\emulator.exe"

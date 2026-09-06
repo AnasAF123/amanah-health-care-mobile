@@ -1,4 +1,4 @@
-name: app_store_google_play
+﻿name: app_store_google_play
 description: Google Play implementation
 version: 0.0.1
 publish_to: "none"
@@ -19,7 +19,5 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: 6.0.0
-  openfoodfacts_flutter_lints:
-    git: https://github.com/openfoodfacts/openfoodfacts_flutter_lints.git
 
 flutter:

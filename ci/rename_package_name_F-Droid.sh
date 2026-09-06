@@ -1,7 +1,5 @@
-#!/bin/bash
+﻿#!/bin/bash
 set -e
 
-
-# Replaces all occurrences of org.openfoodfacts.scanner -> openfoodfacts.github.scrachx.openfood for the F-Droid listing
-
-cd ../packages/smooth_app/android/ && grep -rli 'org.openfoodfacts.scanner' * | xargs -i@ sed -i 's/org.openfoodfacts.scanner/openfoodfacts.github.scrachx.openfood/g' @
+# Replaces package name for the F-Droid listing if needed
+cd ../packages/amanah_healthcare/android/ && grep -rli 'com.amanah.healthcare' * | xargs -i@ sed -i 's/com.amanah.healthcare/com.amanah.healthcare/g' @

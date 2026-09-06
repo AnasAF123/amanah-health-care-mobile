@@ -1,1 +1,1 @@
-A more personal, helpful & knowledgeable Open Food Facts, private by default!
+Amanah Healthcare mobile application for presence, schedules, and clinical workflows.

@@ -1,4 +1,4 @@
-name: app_store_apple_store
+﻿name: app_store_apple_store
 description: Apple App Store implementation
 version: 0.0.1
 publish_to: "none"
@@ -19,5 +19,3 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: 6.0.0
-  openfoodfacts_flutter_lints:
-    git: https://github.com/openfoodfacts/openfoodfacts_flutter_lints.git

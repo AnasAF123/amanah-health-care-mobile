@@ -231,8 +231,8 @@ generated
 key.jks
 service_account_key.json
 android_keys.zip
-/packages/smooth_app/ios/fastlane/envfiles/AuthKey_KDAUTTM76R.p8
-/packages/smooth_app/ios/fastlane/.env
+/packages/amanah_healthcare/ios/fastlane/envfiles/AuthKey_KDAUTTM76R.p8
+/packages/amanah_healthcare/ios/fastlane/.env
 
 # Flutter version manager
 .fvm/
@@ -241,41 +241,41 @@ android_keys.zip
 .tmp-sharp/
 
 # Unsupported locales
-packages/smooth_app/lib/l10n/intl_en.arb
-packages/smooth_app/lib/l10n/app_ach.arb
-packages/smooth_app/lib/l10n/app_ast.arb
-packages/smooth_app/lib/l10n/app_ber.arb
-packages/smooth_app/lib/l10n/app_crs.arb 
-packages/smooth_app/lib/l10n/app_chr.arb 
-packages/smooth_app/lib/l10n/app_fil.arb
-packages/smooth_app/lib/l10n/app_kab.arb 
-packages/smooth_app/lib/l10n/app_lol.arb 
-packages/smooth_app/lib/l10n/app_sat.arb 
-packages/smooth_app/lib/l10n/app_sco.arb 
-packages/smooth_app/lib/l10n/app_sma.arb 
-packages/smooth_app/lib/l10n/app_son.arb 
-packages/smooth_app/lib/l10n/app_tzl.arb 
-packages/smooth_app/lib/l10n/app_val.arb 
-packages/smooth_app/lib/l10n/app_vec.arb
-packages/smooth_app/lib/l10n/app_vls.arb
-packages/smooth_app/lib/l10n/app_zea.arb
-packages/smooth_app/ios/Runner/ach.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/ast.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/ber.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/chr.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/crs.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/fil.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/kab.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/lol.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/sat.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/sco.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/sma.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/son.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/tzl.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/val.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/vec.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/vls.lproj/InfoPlist.strings
-packages/smooth_app/ios/Runner/zea.lproj/InfoPlist.strings
+packages/amanah_healthcare/lib/l10n/intl_en.arb
+packages/amanah_healthcare/lib/l10n/app_ach.arb
+packages/amanah_healthcare/lib/l10n/app_ast.arb
+packages/amanah_healthcare/lib/l10n/app_ber.arb
+packages/amanah_healthcare/lib/l10n/app_crs.arb 
+packages/amanah_healthcare/lib/l10n/app_chr.arb 
+packages/amanah_healthcare/lib/l10n/app_fil.arb
+packages/amanah_healthcare/lib/l10n/app_kab.arb 
+packages/amanah_healthcare/lib/l10n/app_lol.arb 
+packages/amanah_healthcare/lib/l10n/app_sat.arb 
+packages/amanah_healthcare/lib/l10n/app_sco.arb 
+packages/amanah_healthcare/lib/l10n/app_sma.arb 
+packages/amanah_healthcare/lib/l10n/app_son.arb 
+packages/amanah_healthcare/lib/l10n/app_tzl.arb 
+packages/amanah_healthcare/lib/l10n/app_val.arb 
+packages/amanah_healthcare/lib/l10n/app_vec.arb
+packages/amanah_healthcare/lib/l10n/app_vls.arb
+packages/amanah_healthcare/lib/l10n/app_zea.arb
+packages/amanah_healthcare/ios/Runner/ach.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/ast.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/ber.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/chr.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/crs.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/fil.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/kab.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/lol.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/sat.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/sco.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/sma.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/son.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/tzl.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/val.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/vec.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/vls.lproj/InfoPlist.strings
+packages/amanah_healthcare/ios/Runner/zea.lproj/InfoPlist.strings
 *.pyc
 __pycache__/
 **/failures/
@@ -313,4 +313,7 @@ __pycache__/
 .github/agents/
 .github/skills/
 DESIGN.md
+
+# Android emulator local dumps
+bugreport-*.zip
 

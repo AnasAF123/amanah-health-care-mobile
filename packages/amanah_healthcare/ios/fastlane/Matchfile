@@ -1,0 +1,7 @@
+# git_url("https://github.com/amanah-healthcare/ios-certificates")
+storage_mode("git")
+type("appstore")
+app_identifier "com.amanah.healthcare"
+
+#username ENV["APPLE_ID"]
+#team_id ENV["TEAM_ID"]

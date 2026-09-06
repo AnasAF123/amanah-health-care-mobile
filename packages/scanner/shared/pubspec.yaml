@@ -1,4 +1,4 @@
-name: scanner_shared
+﻿name: scanner_shared
 description: Shared interface for the scanner implementations
 version: 1.0.0
 publish_to: "none"
@@ -17,7 +17,5 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: 6.0.0
-  openfoodfacts_flutter_lints:
-    git: https://github.com/openfoodfacts/openfoodfacts_flutter_lints.git
 
 flutter:

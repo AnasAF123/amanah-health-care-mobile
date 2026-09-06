@@ -1,4 +1,4 @@
-name: 🤳🥫 Open Food Facts mobile app Pre-Submit Tests
+name: 🏥 Amanah Healthcare Pre-Submit Tests
 permissions:
   contents: read
 
@@ -32,7 +32,7 @@ jobs:
           #channel: stable
           cache: true
           flutter-version: ${{ steps.flutter-version.outputs.FLUTTER_VERSION }}
-          cache-key: flutter-${{ hashFiles('flutter-version.txt')}}-${{ hashFiles('packages\smooth_app\pubspec.lock')}}
+          cache-key: flutter-${{ hashFiles('flutter-version.txt')}}-${{ hashFiles('packages/amanah_healthcare/pubspec.lock')}}
 
       - run: flutter --version
 

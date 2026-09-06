@@ -1,4 +1,4 @@
-name: flutter-analyze-commenter example
+﻿name: flutter-analyze-commenter example
 
 on: pull_request  # Only supports run by pull request
 
@@ -14,16 +14,16 @@ jobs:
       - uses: subosito/flutter-action@v2
 
       - run: flutter pub get
-        working-directory: ./packages/smooth_app
+        working-directory: ./packages/amanah_healthcare
 
       # Run flutter analyze with --write option
       - run: flutter analyze --write=flutter_analyze.log
-        working-directory: ./packages/smooth_app
+        working-directory: ./packages/amanah_healthcare
 
       # (Optional)Run custom lint with --format=json option
       - if: ${{ !cancelled() }}
         run: dart run custom_lint --format=json > custom_lint.log
-        working-directory: ./packages/smooth_app
+        working-directory: ./packages/amanah_healthcare
 
       # Use flutter-analyze-commenter
       - if: ${{ !cancelled() }}               # Required to run this step even if failure

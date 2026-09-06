@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 set -e
 
 # So that users can run this script from anywhere and it will work as expected.
@@ -10,7 +10,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   SEDOPTION="-i ''"
 fi
 
-sed $SEDOPTION 's|^  #scanner_mlkit|  scanner_mlkit|g' packages/smooth_app/pubspec.yaml
-sed $SEDOPTION 's|^    #path: ../scanner/mlkit|    path: ../scanner/mlkit|g' packages/smooth_app/pubspec.yaml
-sed $SEDOPTION 's|^  scanner_zxing|  #scanner_zxing|g' packages/smooth_app/pubspec.yaml
-sed $SEDOPTION 's|^    path: ../scanner/zxing|    #path: ../scanner/zxing|g' packages/smooth_app/pubspec.yaml
+sed $SEDOPTION 's|^  #scanner_mlkit|  scanner_mlkit|g' packages/amanah_healthcare/pubspec.yaml
+sed $SEDOPTION 's|^    #path: ../scanner/mlkit|    path: ../scanner/mlkit|g' packages/amanah_healthcare/pubspec.yaml
+sed $SEDOPTION 's|^  scanner_zxing|  #scanner_zxing|g' packages/amanah_healthcare/pubspec.yaml
+sed $SEDOPTION 's|^    path: ../scanner/zxing|    #path: ../scanner/zxing|g' packages/amanah_healthcare/pubspec.yaml

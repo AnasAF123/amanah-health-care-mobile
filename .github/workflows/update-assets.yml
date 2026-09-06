@@ -12,7 +12,7 @@ on:
 
 jobs:
   update-assets:
-    if: github.repository_owner == 'openfoodfacts'
+    if: github.repository_owner == 'amanah-healthcare'
     runs-on: ubuntu-latest
 
     steps:
@@ -40,6 +40,6 @@ jobs:
         delete-branch: true
         title: 'chore: Update assets'
         body: |
-          Automated update of asset cache - Link to revert if needed: https://world.openfoodfacts.org/product/093270067481501/a-good-product-for-you-open-food-facts
+          Automated update of asset cache - Link to revert if needed: https://world.amanahhealthcare.com/product/093270067481501/a-good-product-for-you-open-food-facts
 
 
