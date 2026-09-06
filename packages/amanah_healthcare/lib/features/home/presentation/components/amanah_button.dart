@@ -4,28 +4,14 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 
 /// Master Button Variants for the Amanah Healthcare Design System
 enum AmanahButtonVariant {
-  /// Bold established blue gradient with specular sheen & shadow
   primary,
-
-  /// Filled destructive action for confirmed dangerous flows
+  hero,
   destructive,
-
-  /// Subtle soft-blue tinted surface button
   secondary,
-
-  /// Clean stroke-only bordered button (1.5px border)
   outline,
-
-  /// Transparent background with hover/tap effect
   ghost,
-
-  /// Plain text-only button with zero container padding
   text,
-
-  /// Circular or rounded-square icon-only action button
   icon,
-
-  /// Custom vector/canvas graphic action button
   vectorOnly,
 }
 
@@ -72,6 +58,45 @@ class AmanahButton extends StatelessWidget {
     this.semanticsLabel,
     this.enableHaptics = true,
   });
+
+  const AmanahButton.hero({
+    Key? key,
+    String? text,
+    VoidCallback? onPressed,
+    AmanahButtonSize size = AmanahButtonSize.medium,
+    dynamic leadingIcon,
+    dynamic trailingIcon,
+    String? trailingText,
+    bool isLoading = false,
+    bool isDisabled = false,
+    bool isFullWidth = false,
+    double? customHeight,
+    double? customWidth,
+    BorderRadius? borderRadius,
+    Gradient? customGradient,
+    List<BoxShadow>? boxShadow,
+    String? semanticsLabel,
+    bool enableHaptics = true,
+  }) : this(
+         key: key,
+         text: text,
+         onPressed: onPressed,
+         variant: AmanahButtonVariant.hero,
+         size: size,
+         leadingIcon: leadingIcon,
+         trailingIcon: trailingIcon,
+         trailingText: trailingText,
+         isLoading: isLoading,
+         isDisabled: isDisabled,
+         isFullWidth: isFullWidth,
+         customHeight: customHeight,
+         customWidth: customWidth,
+         borderRadius: borderRadius,
+         customGradient: customGradient,
+         boxShadow: boxShadow,
+         semanticsLabel: semanticsLabel,
+         enableHaptics: enableHaptics,
+       );
 
   /// Factory: Primary Bold Button (Gradient / Solid Blue)
   const AmanahButton.primary({
@@ -514,6 +539,27 @@ class AmanahButton extends StatelessWidget {
     switch (variant) {
       case AmanahButtonVariant.primary:
         fgColor = customForegroundColor ?? AmanahColorTokens.surfaceLight;
+        bgColor =
+            customBackgroundColor ??
+            (dark ? AmanahColorTokens.brandAccent : AmanahColorTokens.brand);
+        gradient = customGradient;
+        border =
+            border ??
+            Border.all(
+              color: dark
+                  ? AmanahColorTokens.btnCrispBlueDarkBorder
+                  : AmanahColorTokens.btnCrispBlueBorder,
+              width: 1.0,
+            );
+        shadows =
+            shadows ??
+            <BoxShadow>[
+              AmanahColorTokens.btnCrispDropShadow,
+            ];
+        break;
+
+      case AmanahButtonVariant.hero:
+        fgColor = customForegroundColor ?? AmanahColorTokens.surfaceLight;
         gradient =
             customGradient ??
             (dark
@@ -758,8 +804,7 @@ class AmanahButton extends StatelessWidget {
       ),
     );
 
-    // Specular highlight sheen overlay for primary bold gradient button
-    if (variant == AmanahButtonVariant.primary && !effectiveDisabled) {
+    if (variant == AmanahButtonVariant.hero && !effectiveDisabled) {
       buttonBody = Stack(
         children: <Widget>[
           buttonBody,

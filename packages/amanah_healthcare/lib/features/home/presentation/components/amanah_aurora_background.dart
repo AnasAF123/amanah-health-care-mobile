@@ -68,13 +68,13 @@ class _AmanahAuroraPainter extends CustomPainter {
         colors: dark
             ? <Color>[
                 AmanahColorTokens.auroraSapphireDark.withValues(
-                  alpha: isSoft ? 0.45 : 0.75,
+                  alpha: isSoft ? 0.40 : 0.65,
                 ),
                 AmanahColorTokens.auroraBlueDark.withValues(
-                  alpha: isSoft ? 0.35 : 0.60,
+                  alpha: isSoft ? 0.30 : 0.50,
                 ),
                 AmanahColorTokens.auroraCyanDark.withValues(
-                  alpha: isSoft ? 0.08 : 0.15,
+                  alpha: isSoft ? 0.25 : 0.40,
                 ),
                 Colors.transparent,
               ]
@@ -85,11 +85,14 @@ class _AmanahAuroraPainter extends CustomPainter {
                 AmanahColorTokens.auroraBlueLight.withValues(
                   alpha: isSoft ? 0.35 : 0.60,
                 ),
+                AmanahColorTokens.skySubtle.withValues(
+                  alpha: isSoft ? 0.05 : 0.10,
+                ),
                 Colors.transparent,
               ],
         stops: dark
-            ? const <double>[0.0, 0.38, 0.68, 1.0]
-            : const <double>[0.0, 0.45, 1.0],
+            ? const <double>[0.0, 0.32, 0.65, 1.0]
+            : const <double>[0.0, 0.42, 0.72, 1.0],
       ).createShader(fullRect);
     canvas.drawRect(fullRect, baseWashPaint);
 
@@ -102,25 +105,25 @@ class _AmanahAuroraPainter extends CustomPainter {
         colors: dark
             ? <Color>[
                 AmanahColorTokens.auroraSapphireDark.withValues(
-                  alpha: isSoft ? 0.60 : 0.90,
+                  alpha: isSoft ? 0.50 : 0.75,
                 ),
                 AmanahColorTokens.auroraSapphireDark.withValues(
-                  alpha: isSoft ? 0.38 : 0.60,
+                  alpha: isSoft ? 0.28 : 0.45,
                 ),
                 AmanahColorTokens.auroraSapphireDark.withValues(
-                  alpha: isSoft ? 0.15 : 0.25,
+                  alpha: isSoft ? 0.10 : 0.18,
                 ),
                 AmanahColorTokens.auroraSapphireDark.withValues(alpha: 0.0),
               ]
             : <Color>[
                 AmanahColorTokens.auroraSapphireLight.withValues(
-                  alpha: isSoft ? 0.55 : 0.92,
+                  alpha: isSoft ? 0.55 : 0.90,
                 ),
                 AmanahColorTokens.auroraSapphireLight.withValues(
-                  alpha: isSoft ? 0.35 : 0.62,
+                  alpha: isSoft ? 0.35 : 0.60,
                 ),
                 AmanahColorTokens.auroraSapphireLight.withValues(
-                  alpha: isSoft ? 0.12 : 0.22,
+                  alpha: isSoft ? 0.12 : 0.20,
                 ),
                 AmanahColorTokens.auroraSapphireLight.withValues(alpha: 0.0),
               ],
@@ -137,25 +140,25 @@ class _AmanahAuroraPainter extends CustomPainter {
         colors: dark
             ? <Color>[
                 AmanahColorTokens.auroraBlueDark.withValues(
-                  alpha: isSoft ? 0.45 : 0.75,
+                  alpha: isSoft ? 0.35 : 0.55,
                 ),
                 AmanahColorTokens.auroraBlueDark.withValues(
-                  alpha: isSoft ? 0.25 : 0.42,
+                  alpha: isSoft ? 0.18 : 0.30,
                 ),
                 AmanahColorTokens.auroraBlueDark.withValues(
-                  alpha: isSoft ? 0.08 : 0.15,
+                  alpha: isSoft ? 0.05 : 0.10,
                 ),
                 AmanahColorTokens.auroraBlueDark.withValues(alpha: 0.0),
               ]
             : <Color>[
                 AmanahColorTokens.auroraBlueLight.withValues(
-                  alpha: isSoft ? 0.45 : 0.82,
+                  alpha: isSoft ? 0.45 : 0.80,
                 ),
                 AmanahColorTokens.auroraBlueLight.withValues(
-                  alpha: isSoft ? 0.24 : 0.45,
+                  alpha: isSoft ? 0.24 : 0.42,
                 ),
                 AmanahColorTokens.auroraBlueLight.withValues(
-                  alpha: isSoft ? 0.08 : 0.15,
+                  alpha: isSoft ? 0.08 : 0.14,
                 ),
                 AmanahColorTokens.auroraBlueLight.withValues(alpha: 0.0),
               ],
@@ -163,29 +166,39 @@ class _AmanahAuroraPainter extends CustomPainter {
       ).createShader(blueLobeRect);
     canvas.drawRect(fullRect, bluePaint);
 
-    if (dark) {
-      final Rect cyanLobeRect = Rect.fromCircle(
-        center: Offset(size.width * 0.66, size.height * 0.16),
-        radius: size.width * 0.65,
-      );
-      final Paint cyanPaint = Paint()
-        ..shader = RadialGradient(
-          colors: <Color>[
-            AmanahColorTokens.auroraCyanDark.withValues(
-              alpha: isSoft ? 0.14 : 0.22,
-            ),
-            AmanahColorTokens.auroraCyanDark.withValues(
-              alpha: isSoft ? 0.06 : 0.10,
-            ),
-            AmanahColorTokens.auroraCyanDark.withValues(
-              alpha: isSoft ? 0.01 : 0.03,
-            ),
-            AmanahColorTokens.auroraCyanDark.withValues(alpha: 0.0),
-          ],
-          stops: const <double>[0.0, 0.38, 0.72, 1.0],
-        ).createShader(cyanLobeRect);
-      canvas.drawRect(fullRect, cyanPaint);
-    }
+    final Rect cyanLobeRect = Rect.fromCircle(
+      center: Offset(size.width * (dark ? 0.64 : 0.70), size.height * 0.16),
+      radius: size.width * (dark ? 0.72 : 0.60),
+    );
+    final Paint cyanPaint = Paint()
+      ..shader = RadialGradient(
+        colors: dark
+            ? <Color>[
+                AmanahColorTokens.auroraCyanLuminousDark.withValues(
+                  alpha: isSoft ? 0.32 : 0.48,
+                ),
+                AmanahColorTokens.auroraCyanDark.withValues(
+                  alpha: isSoft ? 0.20 : 0.32,
+                ),
+                AmanahColorTokens.auroraCyanDark.withValues(
+                  alpha: isSoft ? 0.06 : 0.12,
+                ),
+                AmanahColorTokens.auroraCyanDark.withValues(alpha: 0.0),
+              ]
+            : <Color>[
+                AmanahColorTokens.skySoft.withValues(
+                  alpha: isSoft ? 0.08 : 0.14,
+                ),
+                AmanahColorTokens.skySoft.withValues(
+                  alpha: isSoft ? 0.03 : 0.06,
+                ),
+                AmanahColorTokens.skySoft.withValues(alpha: 0.0),
+              ],
+        stops: dark
+            ? const <double>[0.0, 0.38, 0.72, 1.0]
+            : const <double>[0.0, 0.48, 1.0],
+      ).createShader(cyanLobeRect);
+    canvas.drawRect(fullRect, cyanPaint);
 
     final Rect centerHazeRect = Rect.fromCircle(
       center: Offset(size.width * 0.50, size.height * 0.40),
@@ -196,7 +209,7 @@ class _AmanahAuroraPainter extends CustomPainter {
         colors: dark
             ? <Color>[
                 AmanahColorTokens.darkNavy.withValues(
-                  alpha: isSoft ? 0.20 : 0.35,
+                  alpha: isSoft ? 0.18 : 0.30,
                 ),
                 AmanahColorTokens.darkNavy.withValues(alpha: 0.0),
               ]

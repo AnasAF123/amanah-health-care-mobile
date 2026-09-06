@@ -50,9 +50,7 @@ class AmanahTodayActivitySection extends StatelessWidget {
                 text: 'Detail',
                 trailingIcon: Icons.chevron_right_rounded,
                 size: AmanahButtonSize.small,
-                customForegroundColor: AmanahThemeTokens.isDark(context)
-                    ? AmanahColorTokens.tabActiveDark
-                    : AmanahColorTokens.brand,
+                customForegroundColor: AmanahThemeTokens.accent(context),
                 onPressed: onDetailTap,
               ),
             ],
@@ -104,17 +102,15 @@ class AmanahActivityCard extends StatelessWidget {
     final bool dark = AmanahThemeTokens.isDark(context);
     final bool isBlue = item.icon == AmanahActivityIcon.users;
 
-    final Color iconBg = dark
-        ? (isBlue
-              ? AmanahColorTokens.surfaceAccentDark.withValues(alpha: 0.70)
-              : AmanahColorTokens.indigoDark.withValues(alpha: 0.70))
-        : (isBlue
-              ? AmanahColorTokens.brandSurface
+    final Color iconBg = isBlue
+        ? AmanahThemeTokens.accentSurface(context)
+        : (dark
+              ? AmanahColorTokens.indigoDark.withValues(alpha: 0.70)
               : AmanahColorTokens.skySurface);
 
-    final Color iconColor = dark
-        ? (isBlue ? AmanahColorTokens.cyanAccent : AmanahColorTokens.skySoft)
-        : (isBlue ? AmanahColorTokens.brand : AmanahColorTokens.sky);
+    final Color iconColor = isBlue
+        ? AmanahThemeTokens.accent(context)
+        : (dark ? AmanahColorTokens.skySoft : AmanahColorTokens.sky);
 
     return Material(
       color: Colors.transparent,

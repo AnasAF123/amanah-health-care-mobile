@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 
@@ -21,6 +21,27 @@ void main() {
 
       expect(find.text('Simpan Perubahan'), findsOneWidget);
       await tester.tap(find.text('Simpan Perubahan'));
+      await tester.pump();
+      expect(tapped, isTrue);
+    });
+
+    testWidgets('Renders hero action button and handles tap event', (
+      WidgetTester tester,
+    ) async {
+      bool tapped = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AmanahButton.hero(
+              text: 'Mulai Sekarang',
+              onPressed: () => tapped = true,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Mulai Sekarang'), findsOneWidget);
+      await tester.tap(find.text('Mulai Sekarang'));
       await tester.pump();
       expect(tapped, isTrue);
     });

@@ -177,6 +177,18 @@ abstract final class AmanahThemeTokens {
   static Color scrim(BuildContext context) =>
       Colors.black.withValues(alpha: isDark(context) ? 0.72 : 0.60);
 
+  static Color accent(BuildContext context) => isDark(context)
+      ? AmanahColorTokens.cyanAccent
+      : AmanahColorTokens.brand;
+
+  static Color accentSurface(BuildContext context) => isDark(context)
+      ? AmanahColorTokens.surfaceAccentDark.withValues(alpha: 0.70)
+      : AmanahColorTokens.brandSurface;
+
+  static Color accentBorder(BuildContext context) => isDark(context)
+      ? AmanahColorTokens.auroraCyanDark.withValues(alpha: 0.32)
+      : AmanahColorTokens.brandMuted;
+
   // ---------------------------------------------------------------------------
   // Adaptive Semantic Status Tones
   // ---------------------------------------------------------------------------

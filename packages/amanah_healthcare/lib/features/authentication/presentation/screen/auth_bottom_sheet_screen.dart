@@ -635,7 +635,7 @@ class _AuthClosedActions extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 28),
-            AmanahButton.primary(
+            AmanahButton.hero(
               text: 'Mulai',
               onPressed: onSignUp,
               size: AmanahButtonSize.large,

@@ -521,35 +521,6 @@ class _AmanahMasterCarouselSectionState
                   );
                 }),
 
-                // Left Compact Navigator Chevron Button (Continuous Dock-to-Dock Rotation)
-                Positioned(
-                  left: -6,
-                  child: AmanahCarouselNavButton(
-                    isLeft: true,
-                    isDark: dark,
-                    onTap: () {
-                      _stopAutoplay();
-                      _animateToOffsetDelta(-1.0);
-                      _startAutoplay();
-                    },
-                  ),
-                ),
-
-                // Right Compact Navigator Chevron Button (Continuous Dock-to-Dock Rotation)
-                Positioned(
-                  right: -6,
-                  child: AmanahCarouselNavButton(
-                    isLeft: false,
-                    isDark: dark,
-                    onTap: () {
-                      _stopAutoplay();
-                      _animateToOffsetDelta(1.0);
-                      _startAutoplay();
-                    },
-                  ),
-                ),
-
-                // Docked Notch Indicator Toolbar (Bottom Center inside Cavity Notch)
                 Positioned(
                   bottom: 2,
                   child: AmanahCarouselNotchedIndicator(
@@ -918,62 +889,7 @@ class AmanahCarouselNotchedIndicator extends StatelessWidget {
   }
 }
 
-/// Atom: Compact Circular Navigator Button (Chevron Left / Right)
-class AmanahCarouselNavButton extends StatelessWidget {
-  const AmanahCarouselNavButton({
-    required this.isLeft,
-    required this.isDark,
-    required this.onTap,
-    super.key,
-  });
 
-  final bool isLeft;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: Container(
-          width: AmanahCarouselTokens.navBtnSize,
-          height: AmanahCarouselTokens.navBtnSize,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isDark
-                ? AmanahCarouselTokens.navBtnDarkBg
-                : AmanahCarouselTokens.navBtnBg,
-            border: Border.all(
-              color: isDark
-                  ? AmanahCarouselTokens.navBtnDarkBorder
-                  : AmanahCarouselTokens.navBtnBorder,
-              width: 1.0,
-            ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: AmanahColorTokens.pureBlack.withValues(alpha: isDark ? 0.50 : 0.08),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Icon(
-              isLeft ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
-              size: 18,
-              color: isDark
-                  ? AmanahCarouselTokens.navBtnDarkIconColor
-                  : AmanahCarouselTokens.navBtnIconColor,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// Custom Clipper for Inward Notched Deck Card Material Silhouette.
 /// Exact formula from SVG ClipPath:
