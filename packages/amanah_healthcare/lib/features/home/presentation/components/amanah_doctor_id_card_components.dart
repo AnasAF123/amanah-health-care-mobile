@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -13,6 +11,7 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_m
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/amanah_qr_code_widget.dart';
+import 'package:amanah_healthcare/features/home/services/amanah_doctor_id_card_warm_service.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class AmanahDoctorIdCardHeader extends StatelessWidget {
@@ -93,252 +92,38 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
 
   double _ambientTime = 0.0;
 
-  WebViewController? _webController;
-  HttpServer? _server;
-  int? _port;
-  bool _useWebView = true;
-  String? _lastSyncedProfile;
-  String? _lastSyncedTheme;
-  static const String _webTheme = 'light';
+  AmanahDoctorIdCardWarmService get _warmService =>
+      AmanahDoctorIdCardWarmService.instance;
+  final bool _useWebView = true;
 
   @override
   void initState() {
     super.initState();
     _ticker = createTicker(_onTick);
-    _startLocalServerAndLoadWebView();
+    _warmService.onCardOpened(widget.profile);
+    _warmService.isReadyNotifier.addListener(_handleWarmStateChanged);
+    if (!_warmService.isReady) {
+      _warmService.warmUp(widget.profile);
+      _wakeUp();
+    }
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _syncWebRuntimeState();
+  void _handleWarmStateChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void didUpdateWidget(covariant AmanahDoctorIdCardStage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_profileSignature(oldWidget.profile) !=
-        _profileSignature(widget.profile)) {
-      _reloadWebView();
-    } else {
-      _syncWebRuntimeState(forceProfile: true);
-    }
-  }
-
-  @override
-  void reassemble() {
-    super.reassemble();
-    _reloadWebView();
-  }
-
-  Future<void> _startLocalServerAndLoadWebView() async {
-    try {
-      _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-      _port = _server!.port;
-      _server!.listen(_handleWebAssetRequest);
-
-      final WebViewController controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setBackgroundColor(Colors.transparent)
-        ..setNavigationDelegate(
-          NavigationDelegate(
-            onPageFinished: (_) {
-              if (!mounted) {
-                return;
-              }
-              _syncWebRuntimeState(forceProfile: true, forceTheme: true);
-            },
-            onWebResourceError: (WebResourceError error) {
-              debugPrint('WebView Error: ${error.description}');
-            },
-          ),
-        );
-
-      await controller.clearCache();
-      await controller.clearLocalStorage();
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _webController = controller;
-      });
-      await controller.loadRequest(_webRuntimeUri());
-    } catch (error) {
-      debugPrint('Failed to start lanyard WebView runtime: $error');
-      _switchToNativeFallback();
-    }
-  }
-
-  Future<void> _handleWebAssetRequest(HttpRequest request) async {
-    final String? assetKey = _assetKeyForRequestPath(request.uri.path);
-
-    try {
-      if (assetKey == null) {
-        request.response.statusCode = HttpStatus.notFound;
-        request.response.write('Asset not found');
-        return;
-      }
-
-      final ByteData data = await rootBundle.load(assetKey);
-      final Uint8List bytes = data.buffer.asUint8List(
-        data.offsetInBytes,
-        data.lengthInBytes,
-      );
-
-      request.response.headers.contentType = _contentTypeFor(assetKey);
-      request.response.headers.add(
-        HttpHeaders.cacheControlHeader,
-        'no-store, no-cache, must-revalidate, max-age=0',
-      );
-      request.response.headers.add(HttpHeaders.pragmaHeader, 'no-cache');
-      request.response.headers.add(HttpHeaders.expiresHeader, '0');
-      request.response.headers.add('Access-Control-Allow-Origin', '*');
-      request.response.add(bytes);
-    } catch (error) {
-      request.response.statusCode = HttpStatus.notFound;
-      request.response.write('Asset not found: $assetKey');
-      debugPrint('Lanyard WebView asset error: $error');
-    } finally {
-      await request.response.close();
-    }
-  }
-
-  String? _assetKeyForRequestPath(String requestPath) {
-    String path = requestPath.isEmpty || requestPath == '/'
-        ? '/index.html'
-        : Uri.decodeComponent(requestPath);
-    path = path.replaceAll(r'\', '/');
-    if (path.contains('..')) {
-      return null;
-    }
-    return 'assets/amanah/id_card/web${path.startsWith('/') ? path : '/$path'}';
-  }
-
-  ContentType _contentTypeFor(String assetKey) {
-    if (assetKey.endsWith('.html')) {
-      return ContentType.html;
-    }
-    if (assetKey.endsWith('.js')) {
-      return ContentType('application', 'javascript', charset: 'utf-8');
-    }
-    if (assetKey.endsWith('.wasm')) {
-      return ContentType('application', 'wasm');
-    }
-    if (assetKey.endsWith('.glb')) {
-      return ContentType('model', 'gltf-binary');
-    }
-    if (assetKey.endsWith('.png')) {
-      return ContentType('image', 'png');
-    }
-    if (assetKey.endsWith('.svg')) {
-      return ContentType('image', 'svg+xml');
-    }
-    return ContentType.binary;
-  }
-
-  Uri _webRuntimeUri() {
-    return Uri(
-      scheme: 'http',
-      host: '127.0.0.1',
-      port: _port,
-      path: '/index.html',
-      queryParameters: <String, String>{
-        'theme': _webTheme,
-        'transparent': 'true',
-        'name': widget.profile.name,
-        'role': widget.profile.role,
-        'sip': widget.profile.sip,
-        'hospital': widget.profile.hospital.toUpperCase(),
-        'department': widget.profile.department,
-        'avatarUrl': '/assets/images/doctors/woman-doctor-4.png',
-        'v': DateTime.now().millisecondsSinceEpoch.toString(),
-      },
-    );
-  }
-
-  Future<void> _reloadWebView() async {
-    final WebViewController? controller = _webController;
-    if (controller == null || _port == null) {
-      return;
-    }
-    _lastSyncedProfile = null;
-    _lastSyncedTheme = null;
-    await controller.clearCache();
-    await controller.loadRequest(_webRuntimeUri());
-  }
-
-  void _syncWebRuntimeState({
-    bool forceProfile = false,
-    bool forceTheme = false,
-  }) {
-    final WebViewController? controller = _webController;
-    if (controller == null || !mounted) {
-      return;
-    }
-
-    const String theme = _webTheme;
-    if (forceTheme || _lastSyncedTheme != theme) {
-      _lastSyncedTheme = theme;
-      final String message = jsonEncode(<String, Object>{
-        'type': 'SET_THEME',
-        'payload': theme,
-      });
-      controller.runJavaScript(
-        "window.postMessage($message, '*');"
-        "if (window.setAppTheme) window.setAppTheme('$theme');",
-      );
-    }
-
-    final Map<String, String> profilePayload = _webProfilePayload();
-    final String profileSignature = jsonEncode(profilePayload);
-    if (forceProfile || _lastSyncedProfile != profileSignature) {
-      _lastSyncedProfile = profileSignature;
-      final String message = jsonEncode(<String, Object>{
-        'type': 'UPDATE_PROFILE',
-        'payload': profilePayload,
-      });
-      controller.runJavaScript("window.postMessage($message, '*');");
-    }
-  }
-
-  Map<String, String> _webProfilePayload() {
-    return <String, String>{
-      'name': widget.profile.name,
-      'role': widget.profile.role,
-      'sip': widget.profile.sip,
-      'hospital': widget.profile.hospital.toUpperCase(),
-      'department': widget.profile.department,
-      'avatarUrl': '/assets/images/doctors/woman-doctor-4.png',
-    };
-  }
-
-  String _profileSignature(AmanahDoctorProfile profile) {
-    return jsonEncode(<String, String>{
-      'name': profile.name,
-      'role': profile.role,
-      'sip': profile.sip,
-      'hospital': profile.hospital,
-      'department': profile.department,
-      'avatarAsset': profile.avatarAsset,
-    });
-  }
-
-  void _switchToNativeFallback() {
-    if (!mounted) {
-      return;
-    }
-    _server?.close(force: true);
-    _server = null;
-    _port = null;
-    setState(() {
-      _useWebView = false;
-    });
-    _wakeUp();
+    _warmService.updateProfile(widget.profile);
   }
 
   @override
   void dispose() {
-    _server?.close(force: true);
+    _warmService.isReadyNotifier.removeListener(_handleWarmStateChanged);
+    _warmService.onCardClosed();
     _ticker.dispose();
     super.dispose();
   }
@@ -540,12 +325,13 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
 
-    if (_useWebView) {
+    final WebViewController? warmedController = _warmService.controller;
+
+    if (_useWebView && warmedController != null && _warmService.isReady) {
       return Stack(
         children: <Widget>[
           // Genuine 3D Three.js WebGL Canvas with card.glb & tag_texture.png
-          if (_webController != null)
-            Positioned.fill(child: WebViewWidget(controller: _webController!)),
+          Positioned.fill(child: WebViewWidget(controller: warmedController)),
         ],
       );
     }

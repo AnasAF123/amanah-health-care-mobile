@@ -20,6 +20,7 @@ import 'package:amanah_healthcare/features/home/presentation/screen/amanah_docto
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_notification_tab_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_queue_dock_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_schedule_tab_screen.dart';
+import 'package:amanah_healthcare/features/home/services/amanah_doctor_id_card_warm_service.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/permission/data/amanah_permission_store.dart';
 import 'package:amanah_healthcare/features/permission/presentation/screen/amanah_leave_permission_tab_screen.dart';
@@ -69,6 +70,14 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     _scheduleStore.addListener(_onStoreUpdated);
     _notificationStore.addListener(_onStoreUpdated);
     _permissionStore.addListener(_onStoreUpdated);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        AmanahDoctorIdCardWarmService.instance.warmUp(
+          amanahHomeDashboardData.profile,
+        );
+      }
+    });
   }
 
   void _onStoreUpdated() {

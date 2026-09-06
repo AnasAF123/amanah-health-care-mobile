@@ -3,13 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <title>3D Interactive Lanyard ID Card - Ultra HD</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -25,7 +19,7 @@
       height: 100%;
       overflow: hidden;
       background-color: transparent;
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     html.theme-light, body.theme-light {
       background-color: transparent !important;
@@ -77,9 +71,9 @@
   <script type="importmap">
     {
       "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
-        "@dimforge/rapier3d-compat": "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.11.2/rapier.es.min.js"
+        "three": "./vendor/three.module.js",
+        "three/addons/": "./vendor/",
+        "@dimforge/rapier3d-compat": "./vendor/rapier.es.min.js"
       }
     }
   </script>
@@ -632,7 +626,7 @@
         alpha: true,
         powerPreference: 'high-performance'
       });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.5));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.0;
@@ -721,6 +715,30 @@
         document.body.className = 'theme-light';
         document.documentElement.className = 'theme-light';
         window.regenerateTextures();
+      };
+
+      window.updateDoctorProfile = function(data) {
+        if (!data) return;
+        if (typeof data === 'string') {
+          try { data = JSON.parse(data); } catch (_) {}
+        }
+        if (data.name) profile.name = data.name;
+        if (data.role) profile.role = data.role;
+        if (data.sip) profile.sip = data.sip;
+        if (data.hospital) profile.hospital = data.hospital;
+        if (data.department) profile.department = data.department;
+        if (data.avatarUrl && data.avatarUrl !== profile.avatarUrl) {
+          profile.avatarUrl = data.avatarUrl;
+          const newImg = new Image();
+          newImg.crossOrigin = 'anonymous';
+          newImg.src = profile.avatarUrl;
+          newImg.onload = () => {
+            avatarImage = newImg;
+            if (window.regenerateTextures) window.regenerateTextures();
+          };
+        } else {
+          if (window.regenerateTextures) window.regenerateTextures();
+        }
       };
 
       if (avatarImage && avatarImage.complete) {
@@ -1044,9 +1062,43 @@
       let clock = new THREE.Clock();
       const cardQuat = new THREE.Quaternion();
       const cardNormal = new THREE.Vector3();
+      let isPaused = false;
+      let animationFrameId = null;
+
+      function pauseAnimation() {
+        isPaused = true;
+        if (animationFrameId !== null) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
+        }
+      }
+
+      function resumeAnimation() {
+        if (!isPaused && animationFrameId !== null) return;
+        isPaused = false;
+        clock.getDelta(); // Reset delta to prevent physics explosion
+        animationFrameId = requestAnimationFrame(animate);
+      }
+
+      window.pauseCardAnimation = pauseAnimation;
+      window.resumeCardAnimation = resumeAnimation;
+
+      window.addEventListener('message', (event) => {
+        const msg = event.data;
+        if (msg === 'PAUSE_ANIMATION' || (msg && msg.type === 'PAUSE_ANIMATION')) {
+          pauseAnimation();
+        } else if (msg === 'RESUME_ANIMATION' || (msg && msg.type === 'RESUME_ANIMATION')) {
+          resumeAnimation();
+        } else if (msg && msg.type === 'UPDATE_PROFILE' && msg.payload) {
+          window.updateDoctorProfile(msg.payload);
+        } else if (msg && msg.type === 'SET_THEME' && msg.payload) {
+          if (window.setAppTheme) window.setAppTheme(msg.payload);
+        }
+      });
 
       function animate() {
-        requestAnimationFrame(animate);
+        if (isPaused) return;
+        animationFrameId = requestAnimationFrame(animate);
 
         const delta = Math.min(clock.getDelta(), 0.1);
 
@@ -1158,6 +1210,13 @@
       }
 
       animate();
+
+      // Notify Flutter host that WebGL is initialized and ready
+      try {
+        if (window.AmanahChannel && typeof window.AmanahChannel.postMessage === 'function') {
+          window.AmanahChannel.postMessage('WEBVIEW_READY');
+        }
+      } catch (_) {}
     }
 
     init();
