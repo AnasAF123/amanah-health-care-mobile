@@ -157,6 +157,9 @@ class _AuthInputFieldState extends State<AuthInputField> {
                 ? activeBorderColor
                 : theme.colorScheme.onSurface.withValues(alpha: 0.48));
 
+        final double rightContentPadding =
+            widget.trailing != null ? 48.0 : LARGE_SPACE;
+
         return Semantics(
           container: true,
           label: widget.label,
@@ -165,14 +168,16 @@ class _AuthInputFieldState extends State<AuthInputField> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              // Unbroken IFTA Frame Container
+              // Unbroken IFTA Frame Container with Left-Wall Sliding Icon & Clip
               GestureDetector(
                 onTap: () => _focusNode.requestFocus(),
                 behavior: HitTestBehavior.opaque,
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
+                  duration: const Duration(milliseconds: 200),
                   curve: Curves.easeOutCubic,
+                  width: double.infinity,
                   height: 56.0,
+                  clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     color: fillColor,
                     borderRadius: BorderRadius.circular(16),
@@ -181,15 +186,19 @@ class _AuthInputFieldState extends State<AuthInputField> {
                       width: _isFocused || effectiveHasError ? 1.4 : 1.0,
                     ),
                   ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  child: Stack(
+                    clipBehavior: Clip.hardEdge,
+                    alignment: Alignment.topLeft,
                     children: <Widget>[
-                      // Leading Icon
-                      Padding(
-                        padding: const EdgeInsetsDirectional.only(
-                          start: LARGE_SPACE,
-                          end: BALANCED_SPACE,
-                        ),
+                      // 1. Leading Icon: slides into the left wall (past 0.0) with pure physical motion, no opacity
+                      AnimatedPositioned(
+                        key: const ValueKey<String>('auth_input_field_icon_pos'),
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOutCubic,
+                        left: isFloating ? -32.0 : LARGE_SPACE,
+                        top: 18.0,
+                        width: 20.0,
+                        height: 20.0,
                         child: Center(
                           child: Icon(
                             widget.leadingIcon,
@@ -198,86 +207,87 @@ class _AuthInputFieldState extends State<AuthInputField> {
                           ),
                         ),
                       ),
-                      // IFTA Morphing Label + Input Stack
-                      Expanded(
-                        child: Stack(
-                          alignment: Alignment.topLeft,
-                          children: <Widget>[
-                            // Morphing Label (slides up inside the frame)
-                            AnimatedPositioned(
-                              duration: const Duration(milliseconds: 180),
-                              curve: Curves.easeOutCubic,
-                              top: isFloating ? 11.5 : 19.0,
-                              left: 0,
-                              right: 0,
-                              child: ExcludeSemantics(
-                                child: AnimatedDefaultTextStyle(
-                                  duration: const Duration(milliseconds: 180),
-                                  curve: Curves.easeOutCubic,
-                                  style: TextStyle(
-                                    fontFamily:
-                                        theme.textTheme.bodyMedium?.fontFamily,
-                                    fontSize: isFloating ? 11.0 : 14.0,
-                                    fontWeight: isFloating
-                                        ? FontWeight.w600
-                                        : FontWeight.w500,
-                                    color: labelColor,
-                                    height: isFloating ? 1.0 : 1.1,
-                                  ),
-                                  child: Text(
-                                    widget.label,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ),
+
+                      // 2. Morphing Label: slides left from 48.0 to 16.0 and up to 11.5
+                      AnimatedPositioned(
+                        key: const ValueKey<String>('auth_input_field_label_pos'),
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOutCubic,
+                        left: isFloating ? LARGE_SPACE : 48.0,
+                        right: rightContentPadding,
+                        top: isFloating ? 11.5 : 19.0,
+                        child: ExcludeSemantics(
+                          child: AnimatedDefaultTextStyle(
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeOutCubic,
+                            style: TextStyle(
+                              fontFamily:
+                                  theme.textTheme.bodyMedium?.fontFamily,
+                              fontSize: isFloating ? 11.0 : 14.0,
+                              fontWeight: isFloating
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                              color: labelColor,
+                              height: isFloating ? 1.0 : 1.1,
                             ),
-                            // Text Input Area
-                            Positioned(
-                              top: 24.5,
-                              left: 0,
-                              right: 0,
-                              child: TextField(
-                                controller: widget.controller,
-                                focusNode: _focusNode,
-                                keyboardType: widget.keyboardType,
-                                textInputAction: widget.textInputAction,
-                                autofillHints: widget.autofillHints,
-                                obscureText: widget.obscureText,
-                                onSubmitted: widget.onFieldSubmitted,
-                                onChanged: (String val) {
-                                  _fieldState?.didChange(val);
-                                  widget.onChanged?.call(val);
-                                },
-                                scrollPadding: widget.scrollPadding,
-                                spellCheckConfiguration:
-                                    const SpellCheckConfiguration.disabled(),
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14.0,
-                                  height: 1.2,
-                                  color: isDark
-                                      ? AmanahColorTokens.neutral100
-                                      : AmanahColorTokens.neutral900,
-                                ),
-                                decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  errorBorder: InputBorder.none,
-                                  focusedErrorBorder: InputBorder.none,
-                                  contentPadding: EdgeInsets.zero,
-                                  isDense: true,
-                                ),
-                              ),
+                            child: Text(
+                              widget.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ],
+                          ),
                         ),
                       ),
-                      // Trailing Widget
+
+                      // 3. Text Input Field: slides left from 48.0 to 16.0
+                      AnimatedPositioned(
+                        key: const ValueKey<String>('auth_input_field_text_pos'),
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOutCubic,
+                        left: isFloating ? LARGE_SPACE : 48.0,
+                        right: rightContentPadding,
+                        top: 24.5,
+                        child: TextField(
+                          controller: widget.controller,
+                          focusNode: _focusNode,
+                          keyboardType: widget.keyboardType,
+                          textInputAction: widget.textInputAction,
+                          autofillHints: widget.autofillHints,
+                          obscureText: widget.obscureText,
+                          onSubmitted: widget.onFieldSubmitted,
+                          onChanged: (String val) {
+                            _fieldState?.didChange(val);
+                            widget.onChanged?.call(val);
+                          },
+                          scrollPadding: widget.scrollPadding,
+                          spellCheckConfiguration:
+                              const SpellCheckConfiguration.disabled(),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14.0,
+                            height: 1.2,
+                            color: isDark
+                                ? AmanahColorTokens.neutral100
+                                : AmanahColorTokens.neutral900,
+                          ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            focusedErrorBorder: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+
+                      // 4. Trailing Widget: anchored to the right edge
                       if (widget.trailing != null)
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 8.0),
+                        Positioned(
+                          right: 8.0,
+                          top: 0,
+                          bottom: 0,
                           child: Center(child: widget.trailing),
                         ),
                     ],
