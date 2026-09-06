@@ -44,16 +44,19 @@ class AmanahQueueDockScreen extends StatefulWidget {
   State<AmanahQueueDockScreen> createState() => _AmanahQueueDockScreenState();
 }
 
+enum _QueueDragMode { none, up, down, left }
+
 class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     with TickerProviderStateMixin {
-  final List<AmanahQueueCardData> _cards = defaultAmanahQueueCards;
+  late final List<AmanahQueueCardData> _cards =
+      List<AmanahQueueCardData>.from(defaultAmanahQueueCards);
   final List<AmanahQueueCardData> _collectedCards = <AmanahQueueCardData>[];
 
-  int _currentIndex = 1;
+  _QueueDragMode _dragMode = _QueueDragMode.none;
   double _horizontalDrag = 0.0;
   double _verticalDrag = 0.0;
-  bool _isLongPressing = false;
-  double _spinOffset = 0.0;
+  double _springStartX = 0.0;
+  double _springStartY = 0.0;
 
   // Activation & Ejection stages matching web: 'idle', 'plunging', 'activating', 'dock_appear', 'rail_converge', 'atm_peek', 'full_eject'
   String _activationStage = 'idle';
@@ -72,11 +75,10 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
 
   int _dotCount = 0;
   AnimationController? _dotsController;
-  AnimationController? _rouletteController;
-  AnimationController? _decelController;
   late final AnimationController _entranceController;
-  double _rouletteVelocity = 0.0;
-  int _lastHapticTimeMs = 0;
+  late final AnimationController _springController;
+  late final AnimationController _cancelController;
+  late final AnimationController _rotateController;
 
   @override
   void initState() {
@@ -86,6 +88,80 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..forward();
+
+    _springController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 260),
+    )
+      ..addListener(() {
+        if (mounted) {
+          final double t =
+              Curves.easeOutCubic.transform(_springController.value);
+          setState(() {
+            _horizontalDrag = _springStartX * (1.0 - t);
+            _verticalDrag = _springStartY * (1.0 - t);
+          });
+        }
+      })
+      ..addStatusListener((AnimationStatus status) {
+        if (status == AnimationStatus.completed && mounted) {
+          setState(() {
+            _horizontalDrag = 0.0;
+            _verticalDrag = 0.0;
+            _dragMode = _QueueDragMode.none;
+            _springController.reset();
+          });
+        }
+      });
+
+    _cancelController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 320),
+    )
+      ..addListener(() {
+        if (mounted) {
+          setState(() {});
+        }
+      })
+      ..addStatusListener((AnimationStatus status) {
+        if (status == AnimationStatus.completed && mounted) {
+          setState(() {
+            if (_cards.isNotEmpty) {
+              _cards.removeAt(0);
+            }
+            _horizontalDrag = 0.0;
+            _verticalDrag = 0.0;
+            _dragMode = _QueueDragMode.none;
+            _cancelController.reset();
+          });
+          HapticFeedback.mediumImpact();
+        }
+      });
+
+    _rotateController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 420),
+    )
+      ..addListener(() {
+        if (mounted) {
+          setState(() {});
+        }
+      })
+      ..addStatusListener((AnimationStatus status) {
+        if (status == AnimationStatus.completed && mounted) {
+          setState(() {
+            if (_cards.isNotEmpty) {
+              final AmanahQueueCardData skipped = _cards.removeAt(0);
+              _cards.add(skipped);
+            }
+            _horizontalDrag = 0.0;
+            _verticalDrag = 0.0;
+            _dragMode = _QueueDragMode.none;
+            _rotateController.reset();
+          });
+          HapticFeedback.lightImpact();
+        }
+      });
   }
 
   void _clearEjectionTimers() {
@@ -110,22 +186,6 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
         });
   }
 
-  void _disposeRouletteController() {
-    if (_rouletteController != null) {
-      _rouletteController!.stop();
-      _rouletteController!.dispose();
-      _rouletteController = null;
-    }
-  }
-
-  void _disposeDecelController() {
-    if (_decelController != null) {
-      _decelController!.stop();
-      _decelController!.dispose();
-      _decelController = null;
-    }
-  }
-
   void _disposeGenieController() {
     if (_genieController != null) {
       _genieController!.stop();
@@ -138,131 +198,133 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
   void dispose() {
     _clearEjectionTimers();
     _entranceController.dispose();
+    _springController.dispose();
+    _cancelController.dispose();
+    _rotateController.dispose();
     _dotsController?.dispose();
     _dotsController = null;
     _genieSnapshot?.dispose();
     _genieSnapshot = null;
-    _disposeRouletteController();
-    _disposeDecelController();
     _disposeGenieController();
     super.dispose();
   }
 
-  void _onIndexChange(int newIndex) {
-    if (_cards.isEmpty) {
+  bool get _isAnimating =>
+      _cancelController.isAnimating ||
+      _rotateController.isAnimating ||
+      _isGenieRunning;
+
+  void _onPanDown(DragDownDetails details) {
+    if (_isAnimating || _activationStage != 'idle') {
       return;
     }
-    _disposeRouletteController();
-    _disposeDecelController();
-    setState(() {
-      _currentIndex =
-          ((newIndex % _cards.length) + _cards.length) % _cards.length;
-      _horizontalDrag = 0;
-      _verticalDrag = 0;
-      _spinOffset = 0;
-    });
+    if (_springController.isAnimating) {
+      _springController.stop();
+      _springController.reset();
+    }
   }
 
-  void _startRouletteSpin() {
-    if (_activationStage != 'idle') {
+  void _onPanCancel() {
+    if (_isAnimating || _activationStage != 'idle') {
       return;
     }
-    _disposeDecelController();
-    _disposeRouletteController();
-
-    setState(() {
-      _isLongPressing = true;
-      _horizontalDrag = 0;
-      _verticalDrag = 0;
-    });
-    _lastHapticTimeMs = DateTime.now().millisecondsSinceEpoch;
-    HapticFeedback.heavyImpact();
-
-    _rouletteVelocity = 18.0 * 230.0; // ~18 cards per second
-
-    _rouletteController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 1))
-          ..addListener(() {
-            if (!_isLongPressing || !mounted) {
-              return;
-            }
-            setState(() {
-              _spinOffset += _rouletteVelocity * 0.016;
-            });
-            final int now = DateTime.now().millisecondsSinceEpoch;
-            if (now - _lastHapticTimeMs >= 90) {
-              _lastHapticTimeMs = now;
-              HapticFeedback.selectionClick();
-            }
-          });
-    _rouletteController!.repeat();
+    _springStartX = _horizontalDrag;
+    _springStartY = _verticalDrag;
+    _springController.forward(from: 0.0);
   }
 
-  void _stopRouletteSpin() {
-    if (!_isLongPressing) {
+  void _onPanUpdate(DragUpdateDetails details) {
+    if (_isAnimating || _activationStage != 'idle') {
       return;
     }
-    _disposeRouletteController();
+    final double dx = details.delta.dx;
+    final double dy = details.delta.dy;
 
+    if (_dragMode == _QueueDragMode.none) {
+      _horizontalDrag += dx;
+      _verticalDrag += dy;
+
+      if (_verticalDrag < -14 && _verticalDrag.abs() > _horizontalDrag.abs()) {
+        _dragMode = _QueueDragMode.up;
+        _horizontalDrag = 0.0;
+        HapticFeedback.selectionClick();
+      } else if (_verticalDrag > 14 &&
+          _verticalDrag.abs() > _horizontalDrag.abs()) {
+        _dragMode = _QueueDragMode.down;
+        _horizontalDrag = 0.0;
+        HapticFeedback.selectionClick();
+      } else if (_horizontalDrag < -14 &&
+          _horizontalDrag.abs() > _verticalDrag.abs()) {
+        _dragMode = _QueueDragMode.left;
+        _verticalDrag = 0.0;
+        HapticFeedback.selectionClick();
+      }
+    } else if (_dragMode == _QueueDragMode.up) {
+      _verticalDrag = (_verticalDrag + dy).clamp(-180.0, 0.0);
+      _horizontalDrag = 0.0;
+    } else if (_dragMode == _QueueDragMode.down) {
+      _verticalDrag = (_verticalDrag + dy).clamp(0.0, 110.0);
+      _horizontalDrag = 0.0;
+    } else if (_dragMode == _QueueDragMode.left) {
+      _horizontalDrag = (_horizontalDrag + dx).clamp(-220.0, 0.0);
+      _verticalDrag = 0.0;
+    }
+    setState(() {});
+  }
+
+  void _onPanEnd(DragEndDetails details) {
+    if (_isAnimating || _activationStage != 'idle') {
+      return;
+    }
+
+    final double vx = details.velocity.pixelsPerSecond.dx;
+    final double vy = details.velocity.pixelsPerSecond.dy;
+
+    if (_dragMode == _QueueDragMode.up) {
+      if (_verticalDrag <= -65 || vy < -380) {
+        _cancelController.forward(from: 0.0);
+        return;
+      }
+    } else if (_dragMode == _QueueDragMode.down) {
+      if (_verticalDrag >= 55 || vy > 380) {
+        _handleActivate();
+        return;
+      }
+    } else if (_dragMode == _QueueDragMode.left) {
+      if (_horizontalDrag <= -65 || vx < -380) {
+        _rotateController.forward(from: 0.0);
+        return;
+      }
+    }
+
+    _springStartX = _horizontalDrag;
+    _springStartY = _verticalDrag;
+    _springController.forward(from: 0.0);
+  }
+
+  void _bringCardToFront(int targetIndex) {
+    if (_isAnimating || targetIndex <= 0 || targetIndex >= _cards.length) {
+      return;
+    }
     setState(() {
-      _isLongPressing = false;
-    });
-
-    // Smooth exponential deceleration to snap firmly on selected card
-    final double startOffset = _spinOffset;
-    final int shiftCards = (startOffset / 230.0).round();
-    final double targetOffset = shiftCards * 230.0;
-    final int targetIndex =
-        (((_currentIndex + shiftCards) % _cards.length) + _cards.length) %
-        _cards.length;
-
-    _disposeDecelController();
-
-    _decelController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 550),
-    );
-    final Animation<double> decelAnimation =
-        Tween<double>(begin: startOffset, end: targetOffset).animate(
-          CurvedAnimation(
-            parent: _decelController!,
-            curve: Curves.easeOutCubic,
-          ),
-        );
-
-    decelAnimation.addListener(() {
-      if (mounted) {
-        setState(() {
-          _spinOffset = decelAnimation.value;
-        });
+      for (int i = 0; i < targetIndex; i++) {
+        final AmanahQueueCardData skipped = _cards.removeAt(0);
+        _cards.add(skipped);
       }
+      _horizontalDrag = 0.0;
+      _verticalDrag = 0.0;
+      _dragMode = _QueueDragMode.none;
     });
-
-    decelAnimation.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed) {
-        if (mounted) {
-          setState(() {
-            _currentIndex = targetIndex;
-            _spinOffset = 0;
-          });
-          HapticFeedback.mediumImpact();
-        }
-        _disposeDecelController();
-      }
-    });
-
-    _decelController!.forward();
+    HapticFeedback.selectionClick();
   }
 
   Future<void> _handleActivate() async {
-    if (_activationStage != 'idle' || _isGenieRunning) {
+    if (_activationStage != 'idle' || _isGenieRunning || _cards.isEmpty) {
       return;
     }
-    _disposeRouletteController();
-    _disposeDecelController();
     _disposeGenieController();
 
-    final AmanahQueueCardData chosen = _cards[_currentIndex];
+    final AmanahQueueCardData chosen = _cards.first;
     setState(() {
       _selectedActiveCard = chosen;
       _activationStage = 'plunging';
@@ -359,7 +421,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     });
 
     final AmanahQueueCardData chosen =
-        _selectedActiveCard ?? _cards[_currentIndex];
+        _selectedActiveCard ?? (_cards.isNotEmpty ? _cards.first : defaultAmanahQueueCards.first);
     final Size screenSize = MediaQuery.sizeOf(context);
     final double cardW = math.min(screenSize.width - 64, 320.0);
     final double cardH = cardW / 0.718;
@@ -507,6 +569,9 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
               (AmanahQueueCardData c) => c.id == card.id,
             );
             _collectedCards.insert(0, card);
+            _cards.removeWhere(
+              (AmanahQueueCardData c) => c.id == card.id,
+            );
             _showSuccess = false;
             _isGenieRunning = false;
             _isGenieSettled = false;
@@ -515,8 +580,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
             _ejectionStage = 'idle';
             _verticalDrag = 0;
             _horizontalDrag = 0;
-            _spinOffset = 0;
-            _currentIndex = (_currentIndex + 1) % _cards.length;
+            _dragMode = _QueueDragMode.none;
           });
           _disposeGenieController();
           _clearEjectionTimers();
@@ -568,6 +632,10 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
       headlineText = 'Memproses\nantrean';
     } else if (isNearSlot) {
       headlineText = 'Lepaskan untuk\nproses antrean';
+    } else if (_dragMode == _QueueDragMode.up && _verticalDrag <= -20.0) {
+      headlineText = 'Lepaskan untuk\nbatalkan antrean';
+    } else if (_dragMode == _QueueDragMode.left && _horizontalDrag <= -20.0) {
+      headlineText = 'Pindahkan ke\nurutan belakang';
     }
 
     return AnimatedBuilder(
@@ -696,7 +764,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                       ),
                     ),
 
-                    // 3. 3D Cylindrical Carousel & Deck (Sequential Entrance 3)
+                    // 3. Queue Card Rail Stack (Sequential Entrance 3)
                     Expanded(
                       child: Transform.translate(
                         offset: Offset(0, 40.0 * (1.0 - railProgress)),
@@ -706,77 +774,33 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                             opacity: railProgress,
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
-                              onLongPressStart: (_) => _startRouletteSpin(),
-                              onLongPressEnd: (_) => _stopRouletteSpin(),
-                              onPanDown: (_) {
-                                if (_decelController != null &&
-                                    _decelController!.isAnimating) {
-                                  _disposeDecelController();
-                                  setState(() {
-                                    _spinOffset = 0;
-                                  });
-                                }
-                              },
-                              onPanCancel: () {
-                                if (!_isLongPressing &&
-                                    _activationStage == 'idle') {
-                                  setState(() {
-                                    _horizontalDrag = 0;
-                                    _verticalDrag = 0;
-                                  });
-                                }
-                              },
-                              onPanUpdate: (DragUpdateDetails details) {
-                                if (_isLongPressing ||
-                                    _activationStage != 'idle') {
-                                  return;
-                                }
-                                final double dx = details.delta.dx;
-                                final double dy = details.delta.dy;
-                                if (dy > 0 || _verticalDrag > 0) {
-                                  setState(() {
-                                    _verticalDrag = (_verticalDrag + dy).clamp(
-                                      0.0,
-                                      110.0,
-                                    );
-                                  });
-                                } else {
-                                  setState(() {
-                                    _horizontalDrag += dx;
-                                  });
-                                }
-                              },
-                              onPanEnd: (DragEndDetails details) {
-                                if (_isLongPressing ||
-                                    _activationStage != 'idle') {
-                                  return;
-                                }
-                                if (_verticalDrag >= 55) {
-                                  _handleActivate();
-                                } else {
-                                  setState(() => _verticalDrag = 0);
-                                  final double vx =
-                                      details.velocity.pixelsPerSecond.dx;
-                                  if (_horizontalDrag < -45 || vx < -400) {
-                                    _onIndexChange(_currentIndex + 1);
-                                  } else if (_horizontalDrag > 45 || vx > 400) {
-                                    _onIndexChange(_currentIndex - 1);
-                                  } else {
-                                    setState(() => _horizontalDrag = 0);
-                                  }
-                                }
-                              },
+                              onPanDown: _onPanDown,
+                              onPanCancel: _onPanCancel,
+                              onPanUpdate: _onPanUpdate,
+                              onPanEnd: _onPanEnd,
                               child: RepaintBoundary(
-                                child: _AmanahQueue3DCarousel(
+                                child: _AmanahQueueRailStack(
                                   cards: _cards,
-                                  currentIndex: _currentIndex,
                                   horizontalDrag: _horizontalDrag,
                                   verticalDrag: _verticalDrag,
-                                  spinOffset: _spinOffset,
+                                  dragMode: _dragMode,
+                                  isCancelling: _cancelController.isAnimating,
+                                  cancelProgress: _cancelController.value,
+                                  isRotating: _rotateController.isAnimating,
+                                  rotateProgress: _rotateController.value,
                                   isActivating: _activationStage != 'idle',
                                   ejectionStage: _ejectionStage,
                                   showSuccess: _showSuccess,
-                                  onCardSelect: _onIndexChange,
+                                  onCardSelect: _bringCardToFront,
+                                  onResetQueue: () {
+                                    setState(() {
+                                      _cards.clear();
+                                      _cards.addAll(defaultAmanahQueueCards);
+                                      _horizontalDrag = 0;
+                                      _verticalDrag = 0;
+                                      _dragMode = _QueueDragMode.none;
+                                    });
+                                  },
                                 ),
                               ),
                             ),
@@ -794,7 +818,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                           child: _AmanahBottomNotchedDock(
                             isActivating: isMorphingActive || _showSuccess,
                             dragProgress: dragProgress,
-                            isLongPressing: _isLongPressing,
+                            isLongPressing: false,
                             label: 'Tarik antrean ke bawah untuk proses',
                           ),
                         ),
@@ -974,41 +998,144 @@ class _QueueHeaderBar extends StatelessWidget {
   }
 }
 
-class _AmanahQueue3DCarousel extends StatelessWidget {
-  const _AmanahQueue3DCarousel({
+class _AmanahQueueRailStack extends StatelessWidget {
+  const _AmanahQueueRailStack({
     required this.cards,
-    required this.currentIndex,
     required this.horizontalDrag,
     required this.verticalDrag,
-    required this.spinOffset,
+    required this.dragMode,
+    required this.isCancelling,
+    required this.cancelProgress,
+    required this.isRotating,
+    required this.rotateProgress,
     required this.isActivating,
     required this.ejectionStage,
     required this.showSuccess,
     required this.onCardSelect,
+    required this.onResetQueue,
   });
 
   final List<AmanahQueueCardData> cards;
-  final int currentIndex;
   final double horizontalDrag;
   final double verticalDrag;
-  final double spinOffset;
+  final _QueueDragMode dragMode;
+  final bool isCancelling;
+  final double cancelProgress;
+  final bool isRotating;
+  final double rotateProgress;
   final bool isActivating;
   final String ejectionStage;
   final bool showSuccess;
   final ValueChanged<int> onCardSelect;
+  final VoidCallback onResetQueue;
 
   @override
   Widget build(BuildContext context) {
+    if (cards.isEmpty) {
+      return Center(
+        child: AmanahEmptyState.viewport(
+          tone: AmanahEmptyStateTone.brand,
+          title: 'Antrean Selesai',
+          message:
+              'Semua antrean pasien pada daftar ini telah selesai diproses atau dibatalkan.',
+          actionText: 'Muat Ulang Antrean',
+          onAction: onResetQueue,
+        ),
+      );
+    }
+
     final Size screen = MediaQuery.sizeOf(context);
-    final double totalDragOffset = horizontalDrag - spinOffset;
-    final double dragUnits = totalDragOffset / 230.0;
+    const double cardW = 212.0;
+    const double cardH = 335.0;
     final double baseTop = math.max(16.0, screen.height * 0.05);
+    final double baseLeft = (screen.width - cardW) / 2;
 
-    final List<Widget> cardWidgets = <Widget>[];
+    double card0X = 0.0;
+    double card0Y = 0.0;
+    double card0Scale = 1.0;
+    double card0Rot = 0.0;
+    double card0Opacity = 1.0;
+    bool card0IsBehind = false;
+    double queueAdvanceFactor = 0.0;
 
-    cardWidgets.add(
+    if (dragMode == _QueueDragMode.up) {
+      card0Y = verticalDrag;
+      card0Scale = 1.0 - (verticalDrag.abs() / 240.0).clamp(0.0, 0.12);
+      card0Opacity = 1.0 - (verticalDrag.abs() / 180.0).clamp(0.0, 0.40);
+      queueAdvanceFactor = (verticalDrag.abs() / 90.0).clamp(0.0, 1.0);
+    } else if (dragMode == _QueueDragMode.down) {
+      card0Y = verticalDrag;
+    } else if (dragMode == _QueueDragMode.left) {
+      card0X = horizontalDrag;
+      card0Y = horizontalDrag.abs() * 0.06;
+      card0Rot =
+          (horizontalDrag * 0.035).clamp(-8.0, 0.0) * (math.pi / 180.0);
+      card0Scale = 1.0 - (horizontalDrag.abs() / 320.0).clamp(0.0, 0.08);
+      queueAdvanceFactor = (horizontalDrag.abs() / 90.0).clamp(0.0, 1.0);
+    }
+
+    if (isCancelling) {
+      final double curve = Curves.easeInCubic.transform(cancelProgress);
+      card0Y = verticalDrag + (-screen.height * 0.50 - verticalDrag) * curve;
+      card0Scale = 1.0 - 0.20 * curve;
+      card0Opacity = (1.0 - curve).clamp(0.0, 1.0);
+      queueAdvanceFactor = curve;
+    } else if (isRotating) {
+      final double peakX = -screen.width * 0.72;
+      if (rotateProgress < 0.45) {
+        final double p1 = (rotateProgress / 0.45).clamp(0.0, 1.0);
+        final double c1 = Curves.easeOutQuad.transform(p1);
+        card0X = horizontalDrag + (peakX - horizontalDrag) * c1;
+        card0Y = 10.0 * c1;
+        card0Rot =
+            (horizontalDrag * 0.035 - 7.0 * c1) * (math.pi / 180.0);
+        card0Scale = 1.0 - 0.06 * c1;
+        card0Opacity = 1.0 - 0.10 * c1;
+        card0IsBehind = false;
+        queueAdvanceFactor = c1;
+      } else {
+        final double p2 = ((rotateProgress - 0.45) / 0.55).clamp(0.0, 1.0);
+        final double c2 = Curves.easeOutCubic.transform(p2);
+        final double targetBackX =
+            math.min((cards.length - 1) * 24.0, 70.0);
+        final double targetBackY =
+            -math.min((cards.length - 1) * 3.0, 9.0);
+        final double targetBackScale =
+            math.max(1.0 - (cards.length - 1) * 0.06, 0.82);
+        final double targetBackOpacity =
+            math.max(1.0 - (cards.length - 1) * 0.16, 0.50);
+
+        card0X = peakX * (1.0 - c2) + targetBackX * c2;
+        card0Y = 10.0 * (1.0 - c2) + targetBackY * c2;
+        card0Rot = (-7.0 * (1.0 - c2)) * (math.pi / 180.0);
+        card0Scale = 0.94 - (0.94 - targetBackScale) * c2;
+        card0Opacity = 0.90 - (0.90 - targetBackOpacity) * c2;
+        card0IsBehind = true;
+        queueAdvanceFactor = 1.0;
+      }
+    }
+
+    // Downward activation & ejection stages matching existing processing animation
+    if (isActivating || showSuccess || ejectionStage == 'dock_appear') {
+      card0Y = 650.0;
+      card0Opacity = showSuccess ? 0.0 : 1.0;
+    } else if (ejectionStage == 'rail_converge') {
+      card0Y = 650.0;
+      card0Opacity = 0.0;
+    } else if (ejectionStage == 'atm_peek') {
+      card0Y = 165.0;
+      card0Opacity = 1.0;
+    } else if (ejectionStage == 'full_eject') {
+      card0Y = 0.0;
+      card0Opacity = 1.0;
+    }
+
+    final List<Widget> stackChildren = <Widget>[];
+
+    // 1. Target Frame Outline behind active front card
+    stackChildren.add(
       Positioned(
-        left: (screen.width - 218) / 2,
+        left: baseLeft - 3,
         top: baseTop - 3,
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 350),
@@ -1035,110 +1162,32 @@ class _AmanahQueue3DCarousel extends StatelessWidget {
       ),
     );
 
-    // 2. High-Performance Aerodynamic Racing Chevrons (Centered beneath target frame)
-    cardWidgets.add(
-      Positioned(
-        left: 0,
-        right: 0,
-        top: baseTop + 348,
-        child: Center(
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 200),
-            opacity: (isActivating || showSuccess || ejectionStage != 'idle')
-                ? 0.0
-                : (1.0 - (verticalDrag / 40.0)).clamp(0.0, 1.0),
-            child: const AmanahRacingPulseChevrons(),
-          ),
-        ),
-      ),
-    );
-
-    // 3. Render 3D Cards with U-Railway Geometry
-    for (int index = 0; index < cards.length; index++) {
-      double distanceFromCenter = (index - currentIndex) + dragUnits;
-
-      // Handle wrapping for infinite carousel illusion
-      while (distanceFromCenter > cards.length / 2) {
-        distanceFromCenter -= cards.length;
-      }
-      while (distanceFromCenter < -cards.length / 2) {
-        distanceFromCenter += cards.length;
-      }
-
-      if (distanceFromCenter.abs() > 2.8) {
-        continue;
-      }
-
-      final bool isCenter = index == currentIndex && totalDragOffset.abs() < 24;
-      final double angleDeg = distanceFromCenter * 19.5;
-      final double angleRad = angleDeg * math.pi / 180.0;
-
-      // U-Railway geometry matching web
-      final double x = 660.0 * math.sin(angleRad) * (screen.width / 420.0);
-      double y = -660.0 * (1.0 - math.cos(angleRad)) * 0.8;
-      final double rotateZ = -distanceFromCenter * 13.0 * math.pi / 180.0;
-      final double rotateY = distanceFromCenter * 8.0 * math.pi / 180.0;
-      final double scale =
-          1.0 - math.min(0.06, distanceFromCenter.abs() * 0.035);
-      double opacity =
-          (1.0 - (distanceFromCenter.abs() - 0.85).clamp(0.0, 1.0) * 0.95)
-              .clamp(0.0, 1.0);
-
-      // Pull down gesture on center card
-      if (isCenter && verticalDrag > 0) {
-        y += verticalDrag;
-      }
-
-      // Ejection animations
-      if (isActivating || showSuccess || ejectionStage == 'dock_appear') {
-        if (index != currentIndex) {
-          opacity = 0.0;
-        } else {
-          y = 650.0;
-          opacity = showSuccess ? 0.0 : 1.0;
-        }
-      } else if (ejectionStage == 'rail_converge') {
-        if (index == currentIndex) {
-          y = 650.0;
-          opacity = 0.0;
-        } else {
-          opacity = 1.0;
-        }
-      } else if (ejectionStage == 'atm_peek') {
-        if (index == currentIndex) {
-          y = 165.0;
-          opacity = 1.0;
-        }
-      } else if (ejectionStage == 'full_eject') {
-        if (index == currentIndex) {
-          y = 0.0;
-          opacity = 1.0;
-        }
-      }
-
-      cardWidgets.add(
-        Positioned(
-          key: ValueKey<String>(cards[index].id),
-          left: (screen.width - 212) / 2 + x,
-          top: baseTop + y,
-          child: Opacity(
-            opacity: opacity,
-            child: Transform(
-              alignment: const Alignment(0, -0.6), // center 20%
-              transform: Matrix4.identity()
-                ..setEntry(3, 2, 0.001)
-                ..rotateY(rotateY)
-                ..rotateZ(rotateZ)
-                ..scaleByDouble(scale, scale, 1, 1),
-              child: GestureDetector(
-                onTap: () {
-                  if (index != currentIndex) {
-                    onCardSelect(index);
-                  }
-                },
-                child: RepaintBoundary(
-                  child: _AmanahQueueCardCover(card: cards[index]),
-                ),
+    Widget buildCardWidget(
+      int index,
+      double x,
+      double y,
+      double scale,
+      double rot,
+      double opacity,
+      bool isInteractive,
+    ) {
+      return Positioned(
+        key: ValueKey<String>(cards[index].id),
+        left: baseLeft + x,
+        top: baseTop + y,
+        child: Opacity(
+          opacity: opacity.clamp(0.0, 1.0),
+          child: Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..rotateZ(rot)
+              ..scaleByDouble(scale, scale, 1.0, 1.0),
+            child: GestureDetector(
+              onTap: isInteractive && index != 0
+                  ? () => onCardSelect(index)
+                  : null,
+              child: RepaintBoundary(
+                child: _AmanahQueueCardCover(card: cards[index]),
               ),
             ),
           ),
@@ -1146,7 +1195,132 @@ class _AmanahQueue3DCarousel extends StatelessWidget {
       );
     }
 
-    return Stack(clipBehavior: Clip.none, children: cardWidgets);
+    // 2. Queued Background Cards (rendered from back to front)
+    final List<Widget> backgroundCardWidgets = <Widget>[];
+    final int maxQueued = math.min(cards.length - 1, 3);
+    for (int i = maxQueued; i >= 1; i--) {
+      final double baseX = i * 24.0;
+      final double baseY = -i * 3.0;
+      final double baseScale = 1.0 - (i * 0.06);
+      final double baseOpacity = 1.0 - (i * 0.12);
+
+      final double targetX = (i - 1) * 24.0;
+      final double targetY = -(i - 1) * 3.0;
+      final double targetScale = 1.0 - ((i - 1) * 0.06);
+      final double targetOpacity = 1.0 - ((i - 1) * 0.12);
+
+      final double x = baseX + (targetX - baseX) * queueAdvanceFactor;
+      final double y = baseY + (targetY - baseY) * queueAdvanceFactor;
+      final double scale =
+          baseScale + (targetScale - baseScale) * queueAdvanceFactor;
+      double opacity =
+          baseOpacity + (targetOpacity - baseOpacity) * queueAdvanceFactor;
+
+      if (isActivating || showSuccess || ejectionStage == 'dock_appear') {
+        opacity = 0.0;
+      }
+
+      backgroundCardWidgets.add(
+        buildCardWidget(i, x, y, scale, 0.0, opacity, true),
+      );
+    }
+
+    // 3. Front Card 0
+    final Widget card0Widget = buildCardWidget(
+      0,
+      card0X,
+      card0Y,
+      card0Scale,
+      card0Rot,
+      card0Opacity,
+      false,
+    );
+
+    if (card0IsBehind) {
+      stackChildren.add(card0Widget);
+      stackChildren.addAll(backgroundCardWidgets);
+    } else {
+      stackChildren.addAll(backgroundCardWidgets);
+      stackChildren.add(card0Widget);
+    }
+
+    // 4. On-Demand UP Chevron Indicator (Batalkan - Single Chevron above card)
+    double upIndicatorOpacity = 0.0;
+    if (dragMode == _QueueDragMode.up) {
+      upIndicatorOpacity = (verticalDrag.abs() / 50.0).clamp(0.0, 1.0);
+    } else if (isCancelling) {
+      upIndicatorOpacity = (1.0 - cancelProgress).clamp(0.0, 1.0);
+    }
+
+    if (!isActivating && !showSuccess) {
+      stackChildren.add(
+        Positioned(
+          left: 0,
+          right: 0,
+          top: baseTop - 40,
+          child: Center(
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 180),
+              opacity: upIndicatorOpacity,
+              child: const RotatedBox(
+                quarterTurns: 2,
+                child: AmanahRacingPulseChevrons(),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // 5. On-Demand LEFT Chevron Indicator (Antre ke Belakang - Single Chevron to the left)
+    double leftIndicatorOpacity = 0.0;
+    if (dragMode == _QueueDragMode.left) {
+      leftIndicatorOpacity = (horizontalDrag.abs() / 50.0).clamp(0.0, 1.0);
+    } else if (isRotating) {
+      leftIndicatorOpacity = (1.0 - rotateProgress).clamp(0.0, 1.0);
+    }
+
+    if (!isActivating && !showSuccess) {
+      stackChildren.add(
+        Positioned(
+          left: 18,
+          top: baseTop + (cardH - 34) / 2,
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 180),
+            opacity: leftIndicatorOpacity,
+            child: const RotatedBox(
+              quarterTurns: 1,
+              child: AmanahRacingPulseChevrons(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // 6. DOWN Chevron Indicator
+    final double downChevronOpacity =
+        (isActivating || showSuccess || ejectionStage != 'idle')
+            ? 0.0
+            : (dragMode == _QueueDragMode.down
+                ? (verticalDrag / 40.0).clamp(0.0, 1.0)
+                : (dragMode == _QueueDragMode.none ? 0.40 : 0.0));
+
+    stackChildren.add(
+      Positioned(
+        left: 0,
+        right: 0,
+        top: baseTop + 348,
+        child: Center(
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 180),
+            opacity: downChevronOpacity,
+            child: const AmanahRacingPulseChevrons(),
+          ),
+        ),
+      ),
+    );
+
+    return Stack(clipBehavior: Clip.none, children: stackChildren);
   }
 }
 
