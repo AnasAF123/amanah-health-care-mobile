@@ -33,8 +33,9 @@
   "files.autoSave": "afterDelay",
   "files.autoSaveDelay": 1000,
   "dart.flutterHotReloadOnSave": "all",
+  "dart.hotReloadOnSave": "all",
   "dart.hotReloadPatterns": [
-    "**/packages/amanah_healthcare/assets/amanah/id_card/web/**"
+    "**/packages/amanah_healthcare/**"
   ],
   "cmake.ignoreCMakeListsMissing": true
 }

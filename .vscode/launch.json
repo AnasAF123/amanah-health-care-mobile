@@ -2,48 +2,39 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Amanah Healthcare (Debug)",
+      "name": "Amanah Healthcare (Android - Google Play)",
       "type": "dart",
       "request": "launch",
-      "program": "packages/amanah_healthcare/lib/main.dart",
-      "cwd": "packages/amanah_healthcare"
-    },
-    {
-      "name": "Amanah ID Card Lanyard (Debug)",
-      "type": "dart",
-      "request": "launch",
-      "program": "packages/amanah_healthcare/lib/main.dart",
-      "cwd": "packages/amanah_healthcare"
-    },
-    {
-      "name": "Android - Google Play",
-      "type": "dart",
-      "request": "launch",
-      "program": "packages/amanah_healthcare/lib/entrypoints/android/main_google_play.dart"
-    },
-    {
-      "name": "iOS/macOS",
-      "type": "dart",
-      "request": "launch",
-      "program": "packages/amanah_healthcare/lib/entrypoints/ios/main_ios.dart"
+      "program": "lib/entrypoints/android/main_google_play.dart",
+      "cwd": "packages/amanah_healthcare",
+      "args": [
+        "--android-skip-build-dependency-validation"
+      ]
     },
     {
       "name": "Android - FDroid",
       "type": "dart",
       "request": "launch",
-      "program": "packages/amanah_healthcare/lib/entrypoints/android/main_fdroid.dart"
+      "program": "lib/entrypoints/android/main_fdroid.dart",
+      "cwd": "packages/amanah_healthcare",
+      "args": [
+        "--android-skip-build-dependency-validation"
+      ]
     },
     {
-      "name": "Android - Amazon App Store",
+      "name": "iOS/macOS",
       "type": "dart",
       "request": "launch",
-      "program": "packages/amanah_healthcare/lib/entrypoints/android/main_amazon_appstore.dart"
+      "program": "lib/entrypoints/ios/main_ios.dart",
+      "cwd": "packages/amanah_healthcare"
     },
     {
-      "name": "Android - Huawei App Gallery",
+      "name": "Windows Desktop",
       "type": "dart",
       "request": "launch",
-      "program": "packages/amanah_healthcare/lib/entrypoints/android/main_huawei_appgallery.dart"
+      "program": "lib/entrypoints/android/main_google_play.dart",
+      "cwd": "packages/amanah_healthcare",
+      "deviceId": "windows"
     }
   ]
 }
