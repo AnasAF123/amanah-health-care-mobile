@@ -87,7 +87,7 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
         ),
         child: Column(
           children: <Widget>[
-            const _AmanahSheetHandle(),
+            const AmanahSheetHandle(),
             _AmanahSheetHeader(
               title: title,
               subtitle: subtitle,
@@ -118,8 +118,8 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
   }
 }
 
-class _AmanahSheetHandle extends StatelessWidget {
-  const _AmanahSheetHandle();
+class AmanahSheetHandle extends StatelessWidget {
+  const AmanahSheetHandle({super.key});
 
   @override
   Widget build(BuildContext context) {

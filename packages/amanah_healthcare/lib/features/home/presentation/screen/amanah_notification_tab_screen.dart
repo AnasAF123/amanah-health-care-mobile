@@ -355,7 +355,7 @@ class _AmanahNotificationOptionsMenu extends StatelessWidget {
     return PopupMenuButton<String>(
       icon: Icon(
         Icons.more_vert_rounded,
-        size: 20,
+        size: 24,
         color: dark
             ? AmanahColorTokens.neutral200
             : AmanahColorTokens.neutral600,

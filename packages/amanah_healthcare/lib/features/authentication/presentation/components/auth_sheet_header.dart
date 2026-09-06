@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 
 class AuthSheetHeader extends StatelessWidget {
@@ -7,14 +6,14 @@ class AuthSheetHeader extends StatelessWidget {
     required this.titlePrefix,
     required this.brand,
     required this.description,
-    required this.onDismiss,
+    this.onDismiss,
     super.key,
   });
 
   final String titlePrefix;
   final String brand;
   final String description;
-  final VoidCallback onDismiss;
+  final VoidCallback? onDismiss;
 
   @override
   Widget build(BuildContext context) {
@@ -22,28 +21,8 @@ class AuthSheetHeader extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Align(
-          alignment: AlignmentDirectional.centerEnd,
-          child: Transform.translate(
-            offset: const Offset(8, 0),
-            child: Semantics(
-              button: true,
-              label: 'Tutup autentikasi',
-              child: IconButton(
-                tooltip: 'Tutup',
-                onPressed: onDismiss,
-                style: IconButton.styleFrom(
-                  fixedSize: const Size(MINIMUM_TOUCH_SIZE, MINIMUM_TOUCH_SIZE),
-                  backgroundColor: AmanahThemeTokens.surfaceSecondary(context),
-                  foregroundColor: theme.colorScheme.onSurface,
-                ),
-                icon: const Icon(Icons.close_rounded, size: 20),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: SMALL_SPACE),
         Text.rich(
           TextSpan(
             text: titlePrefix,

@@ -56,6 +56,7 @@ class AmanahButton extends StatelessWidget {
     this.customBorder,
     this.boxShadow,
     this.semanticsLabel,
+    this.customIconSize,
     this.enableHaptics = true,
   });
 
@@ -335,6 +336,7 @@ class AmanahButton extends StatelessWidget {
     Border? customBorder,
     List<BoxShadow>? boxShadow,
     String? semanticsLabel,
+    double? customIconSize,
     bool enableHaptics = true,
   }) : this(
          key: key,
@@ -352,6 +354,7 @@ class AmanahButton extends StatelessWidget {
          customBorder: customBorder,
          boxShadow: boxShadow,
          semanticsLabel: semanticsLabel,
+         customIconSize: customIconSize,
          enableHaptics: enableHaptics,
        );
 
@@ -398,6 +401,7 @@ class AmanahButton extends StatelessWidget {
   final Border? customBorder;
   final List<BoxShadow>? boxShadow;
   final String? semanticsLabel;
+  final double? customIconSize;
   final bool enableHaptics;
 
   double get _height {
@@ -430,6 +434,9 @@ class AmanahButton extends StatelessWidget {
   }
 
   double get _iconSize {
+    if (customIconSize != null) {
+      return customIconSize!;
+    }
     switch (size) {
       case AmanahButtonSize.small:
         return 16.0;

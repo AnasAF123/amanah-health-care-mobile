@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/components/auth_input_field.dart';
 
 class PasswordInputField extends StatefulWidget {
@@ -13,6 +13,7 @@ class PasswordInputField extends StatefulWidget {
     this.onFieldSubmitted,
     this.onChanged,
     this.hasError = false,
+    this.scrollPadding = const EdgeInsets.only(bottom: 120.0),
   });
 
   final String label;
@@ -24,6 +25,7 @@ class PasswordInputField extends StatefulWidget {
   final ValueChanged<String>? onFieldSubmitted;
   final ValueChanged<String>? onChanged;
   final bool hasError;
+  final EdgeInsets scrollPadding;
 
   @override
   State<PasswordInputField> createState() => _PasswordInputFieldState();
@@ -46,6 +48,7 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
       onFieldSubmitted: widget.onFieldSubmitted,
       onChanged: widget.onChanged,
       hasError: widget.hasError,
+      scrollPadding: widget.scrollPadding,
       trailing: IconButton(
         tooltip: _obscureText ? 'Tampilkan password' : 'Sembunyikan password',
         onPressed: () => setState(() => _obscureText = !_obscureText),

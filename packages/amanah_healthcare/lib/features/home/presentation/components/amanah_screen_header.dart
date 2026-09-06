@@ -250,18 +250,21 @@ class AmanahScreenHeaderIconAction extends StatelessWidget {
     required this.semanticsLabel,
     super.key,
     this.foregroundColor,
+    this.iconSize = 24.0,
   });
 
   final IconData icon;
   final VoidCallback onPressed;
   final String semanticsLabel;
   final Color? foregroundColor;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
     return AmanahButton.icon(
       icon: icon,
       customSize: AmanahComponentSize.iconButton,
+      customIconSize: iconSize,
       customBackgroundColor: Colors.transparent,
       customBorder: Border.all(color: Colors.transparent),
       customForegroundColor:

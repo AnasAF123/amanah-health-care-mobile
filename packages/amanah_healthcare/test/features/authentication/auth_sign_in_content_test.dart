@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/components/auth_inline_validation_message.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/components/auth_input_field.dart';
@@ -152,7 +152,7 @@ void main() {
 
         // Enter text into identifier field
         await tester.enterText(
-          find.byType(TextFormField).first,
+          find.byType(TextField).first,
           'correct@amanah.health',
         );
         expect(cleared, isTrue);

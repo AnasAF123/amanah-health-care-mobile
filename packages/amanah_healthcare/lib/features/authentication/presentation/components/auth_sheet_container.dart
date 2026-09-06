@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 
+/// Dynamic-height modal bottom sheet container for authentication flows.
+/// - Hugs dynamic content height rather than forcing full height.
+/// - Allows background image/context to remain visible at the top.
+/// - Lifts smoothly above keyboard via animated bottom padding.
+/// - Safely constrained to prevent overflowing past the status bar.
+/// - Scrollable internally without displaying visible scrollbars.
 class AuthSheetContainer extends StatelessWidget {
   const AuthSheetContainer({
     required this.child,
@@ -18,69 +25,72 @@ class AuthSheetContainer extends StatelessWidget {
     final bool dark = theme.brightness == Brightness.dark;
     final Size size = MediaQuery.sizeOf(context);
     final double topInset = MediaQuery.paddingOf(context).top;
-    final double maxHeight = size.height - topInset - MEDIUM_SPACE;
-    final double sheetHeight = (size.height * 0.95).clamp(0, maxHeight);
+    final double bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final double maxSheetHeight = size.height - topInset - MEDIUM_SPACE;
     const EdgeInsets contentPadding = EdgeInsets.fromLTRB(
       28,
-      MEDIUM_SPACE,
+      12,
       28,
       VERY_LARGE_SPACE,
     );
 
-    return SizedBox(
-      height: sheetHeight,
-      width: double.infinity,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(34)),
-          border: Border.all(
-            color: dark
-                ? AmanahThemeTokens.outline(context)
-                : AmanahColorTokens.surfaceLight.withValues(alpha: 0.62),
-          ),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: AmanahElevation.sheet(dark: dark).color.withValues(alpha: dark ? 0.34 : 0.16),
-              blurRadius: 28,
-              offset: const Offset(0, -8),
-            ),
-          ],
+    return AnimatedPadding(
+      padding: EdgeInsets.only(bottom: bottomInset),
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOutCubic,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: maxSheetHeight,
+          minWidth: double.infinity,
         ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(34)),
-          child: Material(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
             color: AmanahThemeTokens.canvas(context),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(34)),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: AmanahElevation.sheet(dark: dark).color.withValues(
+                      alpha: dark ? 0.34 : 0.16,
+                    ),
+                blurRadius: 28,
+                offset: const Offset(0, -8),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(34)),
             child: Stack(
               children: <Widget>[
-                if (!dark) const Positioned.fill(child: _AuthSheetBottomGradient()),
+                if (!dark)
+                  const Positioned.fill(child: _AuthSheetBottomGradient()),
                 SafeArea(
                   top: false,
-                  child: LayoutBuilder(
-                    builder:
-                        (BuildContext context, BoxConstraints constraints) {
-                          final double centeredContentHeight =
-                              (constraints.maxHeight - contentPadding.vertical)
-                                  .clamp(0, double.infinity);
-                          return SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      const AmanahSheetHandle(),
+                      Flexible(
+                        child: ScrollConfiguration(
+                          behavior: ScrollConfiguration.of(
+                            context,
+                          ).copyWith(scrollbars: false),
+                          child: SingleChildScrollView(
+                            physics: const ClampingScrollPhysics(),
                             keyboardDismissBehavior:
                                 ScrollViewKeyboardDismissBehavior.onDrag,
                             padding: contentPadding,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                minHeight: centerContent
-                                    ? constraints.maxHeight
-                                    : 0,
-                              ),
-                              child: centerContent
-                                  ? SizedBox(
-                                      height: centeredContentHeight,
-                                      width: double.infinity,
-                                      child: child,
-                                    )
-                                  : child,
-                            ),
-                          );
-                        },
+                            child: centerContent
+                                ? ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      minHeight: size.height * 0.35,
+                                    ),
+                                    child: Center(child: child),
+                                  )
+                                : child,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_doctor_id_card_components.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
@@ -104,6 +104,38 @@ void main() {
         // Start aligned title begins to the right of the leading back button
         expect(titleRect.left, greaterThan(leadingRect.right));
         expect(titleRect.center.dx, lessThan(screenWidth / 2));
+      },
+    );
+
+    testWidgets(
+      'AmanahScreenHeader back button and action button render with enlarged 24.0 icon size',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AmanahScreenHeader(
+                title: 'Jadwal Praktik',
+                onBack: () {},
+                trailing: AmanahScreenHeaderIconAction(
+                  icon: Icons.add_rounded,
+                  semanticsLabel: 'Tambah',
+                  onPressed: () {},
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final Finder backIcon = find.byIcon(Icons.arrow_back_rounded);
+        final Finder addIcon = find.byIcon(Icons.add_rounded);
+        expect(backIcon, findsOneWidget);
+        expect(addIcon, findsOneWidget);
+
+        final Icon backIconWidget = tester.widget<Icon>(backIcon);
+        final Icon addIconWidget = tester.widget<Icon>(addIcon);
+        expect(backIconWidget.size, equals(24.0));
+        expect(addIconWidget.size, equals(24.0));
       },
     );
   });

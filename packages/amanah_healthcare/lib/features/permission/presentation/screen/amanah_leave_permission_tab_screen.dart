@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_filter_bar.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
@@ -187,12 +186,10 @@ class _AmanahLeavePermissionTabScreenState
                 AmanahScreenHeader(
                   title: 'Perizinan',
                   onBack: widget.onBack,
-                  rightAction: AmanahButton.icon(
+                  rightAction: AmanahScreenHeaderIconAction(
                     icon: Icons.add_rounded,
                     onPressed: _handleOpenCreateForm,
-                    customBackgroundColor: Colors.transparent,
-                    customBorder: Border.all(color: Colors.transparent),
-                    customForegroundColor: dark
+                    foregroundColor: dark
                         ? AmanahColorTokens.tabActiveDark
                         : AmanahColorTokens.brand,
                     semanticsLabel: 'Tambah Perizinan Baru',

@@ -1,5 +1,5 @@
-﻿import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
+import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AccountSwitchAction extends StatelessWidget {
   const AccountSwitchAction({
@@ -16,25 +16,40 @@ class AccountSwitchAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final bool dark = theme.brightness == Brightness.dark;
+
+    final Color messageColor = dark
+        ? AmanahColorTokens.neutral400
+        : AmanahColorTokens.neutral600;
+    final Color actionColor = dark
+        ? AmanahColorTokens.tabActiveDark
+        : AmanahColorTokens.brand;
 
     return Center(
-      child: Wrap(
-        alignment: WrapAlignment.center,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: <Widget>[
-          Text(
-            message,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.62),
-              fontWeight: FontWeight.w600,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8.0),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+          child: Text.rich(
+            TextSpan(
+              text: '${message.trim()} ',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: messageColor,
+                fontWeight: FontWeight.w500,
+              ),
+              children: <TextSpan>[
+                TextSpan(
+                  text: actionLabel.trim(),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: actionColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ),
-          AmanahButton.text(
-            text: actionLabel,
-            onPressed: onTap,
-            size: AmanahButtonSize.small,
-          ),
-        ],
+        ),
       ),
     );
   }
