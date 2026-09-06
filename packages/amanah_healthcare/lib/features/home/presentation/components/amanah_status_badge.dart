@@ -31,25 +31,31 @@ class AmanahStatusBadge extends StatelessWidget {
       ),
       AmanahBadgeVariant.trend => _AmanahBadgeStyle(
         background: dark
-            ? AmanahColorTokens.brand.withValues(alpha: 0.18)
+            ? AmanahColorTokens.cyanAccent.withValues(alpha: 0.18)
             : AmanahColorTokens.brandSurface,
         foreground: dark
-            ? AmanahColorTokens.brandLight
+            ? AmanahColorTokens.cyanAccent
             : AmanahColorTokens.brand,
         border: dark
-            ? AmanahColorTokens.auroraAccentDark
+            ? AmanahColorTokens.auroraCyanDark.withValues(alpha: 0.40)
             : AmanahColorTokens.brandMuted,
         icon: _AmanahBadgeIcon.trend,
       ),
-      AmanahBadgeVariant.primary => const _AmanahBadgeStyle(
-        background: AmanahColorTokens.brand,
-        foreground: AmanahColorTokens.surfaceLight,
-        border: AmanahColorTokens.btnCrispBlueBorder,
+      AmanahBadgeVariant.primary => _AmanahBadgeStyle(
+        background: dark
+            ? AmanahColorTokens.surfaceAccentDark
+            : AmanahColorTokens.brand,
+        foreground: dark
+            ? AmanahColorTokens.cyanAccent
+            : AmanahColorTokens.pureWhite,
+        border: dark
+            ? AmanahColorTokens.btnCrispBlueDarkBorder
+            : AmanahColorTokens.btnCrispBlueBorder,
         icon: _AmanahBadgeIcon.none,
       ),
       AmanahBadgeVariant.success => const _AmanahBadgeStyle(
         background: AmanahColorTokens.emerald,
-        foreground: AmanahColorTokens.surfaceLight,
+        foreground: AmanahColorTokens.pureWhite,
         border: AmanahColorTokens.emerald,
         icon: _AmanahBadgeIcon.none,
       ),

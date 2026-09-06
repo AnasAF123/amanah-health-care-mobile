@@ -532,7 +532,7 @@ class AmanahScheduleEmptyCard extends StatelessWidget {
                         text: 'Buat jadwal',
                         trailingIcon: Icons.arrow_forward_rounded,
                         customForegroundColor: dark
-                            ? AmanahColorTokens.brandSoft
+                            ? AmanahColorTokens.cyanAccent
                             : AmanahColorTokens.brand,
                         onPressed: onCreateSchedule,
                       ),
@@ -719,8 +719,7 @@ class AmanahScheduleCard extends StatelessWidget {
                                           ),
                                           decoration: BoxDecoration(
                                             color: dark
-                                                ? AmanahColorTokens.surfaceLight
-                                                    .withValues(
+                                                ? Colors.white.withValues(
                                                     alpha: 0.25,
                                                   )
                                                 : AmanahColorTokens.neutral300,
@@ -738,7 +737,7 @@ class AmanahScheduleCard extends StatelessWidget {
                                               fontSize: 12.5,
                                               fontWeight: FontWeight.w700,
                                               color: dark
-                                                  ? AmanahColorTokens.brandLight
+                                                  ? AmanahColorTokens.cyanAccent
                                                   : AmanahColorTokens.brand,
                                             ),
                                           ),

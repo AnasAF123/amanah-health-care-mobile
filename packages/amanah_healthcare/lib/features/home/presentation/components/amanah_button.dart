@@ -538,11 +538,15 @@ class AmanahButton extends StatelessWidget {
 
     switch (variant) {
       case AmanahButtonVariant.primary:
-        fgColor = customForegroundColor ?? AmanahColorTokens.surfaceLight;
-        bgColor =
-            customBackgroundColor ??
-            (dark ? AmanahColorTokens.brandAccent : AmanahColorTokens.brand);
-        gradient = customGradient;
+        fgColor = customForegroundColor ?? AmanahColorTokens.pureWhite;
+        gradient =
+            customGradient ??
+            (customBackgroundColor != null
+                ? null
+                : (dark
+                    ? AmanahColorTokens.btnCrispBlueDarkGradient
+                    : AmanahColorTokens.btnCrispBlueGradient));
+        bgColor = customBackgroundColor;
         border =
             border ??
             Border.all(
@@ -555,11 +559,15 @@ class AmanahButton extends StatelessWidget {
             shadows ??
             <BoxShadow>[
               AmanahColorTokens.btnCrispDropShadow,
+              if (dark)
+                AmanahColorTokens.btnCrispBlueDarkShadow
+              else
+                AmanahColorTokens.btnCrispBlueShadow,
             ];
         break;
 
       case AmanahButtonVariant.hero:
-        fgColor = customForegroundColor ?? AmanahColorTokens.surfaceLight;
+        fgColor = customForegroundColor ?? AmanahColorTokens.pureWhite;
         gradient =
             customGradient ??
             (dark
@@ -585,7 +593,7 @@ class AmanahButton extends StatelessWidget {
         break;
 
       case AmanahButtonVariant.destructive:
-        fgColor = customForegroundColor ?? AmanahColorTokens.surfaceLight;
+        fgColor = customForegroundColor ?? AmanahColorTokens.pureWhite;
         gradient =
             customGradient ??
             const LinearGradient(
@@ -642,13 +650,13 @@ class AmanahButton extends StatelessWidget {
         bgColor =
             customBackgroundColor ??
             (dark
-                ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.03)
-                : AmanahColorTokens.surfaceLight.withValues(alpha: 0.85));
+                ? AmanahColorTokens.surfaceDark.withValues(alpha: 0.50)
+                : AmanahColorTokens.pureWhite.withValues(alpha: 0.85));
         border =
             border ??
             Border.all(
               color: dark
-                  ? AmanahColorTokens.brandLight.withValues(alpha: 0.35)
+                  ? AmanahColorTokens.btnCrispSoftDarkBorder
                   : AmanahColorTokens.brandAccent,
               width: 1.0,
             );
@@ -679,20 +687,20 @@ class AmanahButton extends StatelessWidget {
         bgColor =
             customBackgroundColor ??
             (dark
-                ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.08)
+                ? AmanahColorTokens.surfaceSecondaryDark
                 : AmanahColorTokens.brandSurface);
         border =
             border ??
             Border.all(
               color: dark
-                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.12)
+                  ? Colors.white.withValues(alpha: 0.12)
                   : AmanahColorTokens.brandMuted,
               width: 1.0,
             );
         break;
 
       case AmanahButtonVariant.vectorOnly:
-        fgColor = customForegroundColor ?? AmanahColorTokens.surfaceLight;
+        fgColor = customForegroundColor ?? AmanahColorTokens.pureWhite;
         break;
     }
 
@@ -823,8 +831,8 @@ class AmanahButton extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: <Color>[
-                      AmanahColorTokens.surfaceLight.withValues(alpha: 0.28),
-                      AmanahColorTokens.surfaceLight.withValues(alpha: 0.0),
+                      Colors.white.withValues(alpha: 0.28),
+                      Colors.white.withValues(alpha: 0.0),
                     ],
                   ),
                 ),

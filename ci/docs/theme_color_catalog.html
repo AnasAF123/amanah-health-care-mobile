@@ -1,0 +1,2985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amanah Healthcare - Theme Color Tokens Inspection Catalog</title>
+<style>
+
+:root {
+  --bg-app: #0A0E1A;
+  --surface-panel: #0F1422;
+  --surface-subtle: #131B2E;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text-primary: #FFFFFF;
+  --text-secondary: #CBD5E1;
+  --text-muted: #64748B;
+  --accent-cyan: #22D3EE;
+  --accent-blue: #0D66E9;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+body.theme-light {
+  --bg-app: #F8FAFF;
+  --surface-panel: #FFFFFF;
+  --surface-subtle: #F1F5F9;
+  --border-subtle: #E2E8F0;
+  --border-strong: #CBD5E1;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+}
+body.theme-neutral {
+  --bg-app: #1E293B;
+  --surface-panel: #0F172A;
+  --surface-subtle: #334155;
+  --border-subtle: #475569;
+  --border-strong: #64748B;
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 24px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+header {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 18px;
+  margin-bottom: 24px;
+}
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+h1 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-family: var(--font-mono);
+}
+.subtitle {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.btn-group {
+  display: inline-flex;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.btn-toggle {
+  background: var(--surface-panel);
+  color: var(--text-secondary);
+  border: none;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
+.btn-toggle.active {
+  background: var(--text-primary);
+  color: var(--bg-app);
+  font-weight: 600;
+}
+.search-input {
+  background: var(--surface-panel);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 4px;
+  outline: none;
+  min-width: 220px;
+  font-family: var(--font-mono);
+}
+.search-input:focus {
+  border-color: var(--accent-cyan);
+}
+.quick-stats {
+  display: flex;
+  gap: 16px;
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+.stat-tag {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.matrix-section {
+  background: var(--surface-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 32px;
+}
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-desc {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-bottom: 14px;
+}
+.table-wrap {
+  overflow-x: auto;
+}
+table.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+table.matrix-table th, table.matrix-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  vertical-align: middle;
+}
+table.matrix-table th {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--border-strong);
+}
+.matrix-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.matrix-chip:hover {
+  text-decoration: underline;
+}
+.matrix-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  border: 1px solid var(--border-strong);
+  flex-shrink: 0;
+}
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.token-card {
+  background: var(--surface-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: border-color 0.1s ease, transform 0.1s ease;
+}
+.token-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+.token-swatch-box {
+  height: 48px;
+  width: 100%;
+  position: relative;
+  border-bottom: 1px solid var(--border-subtle);
+  background-image: linear-gradient(45deg, #181f33 25%, transparent 25%),
+                    linear-gradient(-45deg, #181f33 25%, transparent 25%),
+                    linear-gradient(45deg, transparent 75%, #181f33 75%),
+                    linear-gradient(-45deg, transparent 75%, #181f33 75%);
+  background-size: 12px 12px;
+  background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+}
+body.theme-light .token-swatch-box {
+  background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+                    linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+                    linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+                    linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+}
+.token-swatch-fill {
+  position: absolute;
+  inset: 0;
+}
+.token-info {
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.token-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.token-values {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.token-hex {
+  color: var(--text-secondary);
+}
+.token-alpha {
+  font-size: 9px;
+  padding: 1px 4px;
+  background: var(--surface-subtle);
+  border-radius: 2px;
+}
+.token-css-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gradient-card {
+  grid-column: span 2;
+}
+@media (max-width: 640px) {
+  .gradient-card {
+    grid-column: span 1;
+  }
+}
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--text-primary);
+  color: var(--bg-app);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 8px 14px;
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 1000;
+}
+.toast.show {
+  opacity: 1;
+}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="header-top">
+    <div>
+      <h1>AMANAH HEALTHCARE : THEME COLOR TOKENS</h1>
+      <div class="subtitle">Systematic Color Token Inspection Catalog &bull; amanah_color_tokens.dart</div>
+    </div>
+    <div class="controls">
+      <input type="text" id="searchInput" class="search-input" placeholder="Filter token / hex..." autocomplete="off">
+      <div class="btn-group">
+        <button class="btn-toggle active" onclick="setCanvas('dark', this)">Dark #0A0E1A</button>
+        <button class="btn-toggle" onclick="setCanvas('light', this)">Light #F8FAFF</button>
+        <button class="btn-toggle" onclick="setCanvas('neutral', this)">Neutral #1E293B</button>
+      </div>
+    </div>
+  </div>
+  <div class="quick-stats">
+    <span>Total Color Tokens: <span class="stat-tag">212</span></span>
+    <span>Gradients: <span class="stat-tag">9</span></span>
+    <span>Rule: <span class="stat-tag">Light Mode = Blue (#0D66E9) &bull; Dark Mode = Cyan (#22D3EE)</span></span>
+  </div>
+</header>
+<section class="matrix-section">
+  <div class="section-title">THEME CONTRAST MATRIX (LIGHT VS DARK ADAPTATION)</div>
+  <div class="section-desc">Direct 1:1 mapping of semantic roles between Light Theme (Sapphire Blue baseline) and Dark Theme (Cyan accent baseline).</div>
+  <div class="table-wrap">
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th>SEMANTIC ROLE</th>
+          <th>LIGHT THEME (BLUE SYSTEM)</th>
+          <th>DARK THEME (CYAN SYSTEM)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Primary Accent</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('brand', '#0D66E9')">
+              <div class="matrix-swatch" style="background: #0D66E9;"></div>
+              <span>brand <span style="color: var(--text-muted);">(#0D66E9 &bull; Sapphire Blue)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('cyanAccent', '#22D3EE')">
+              <div class="matrix-swatch" style="background: #22D3EE;"></div>
+              <span>cyanAccent <span style="color: var(--text-muted);">(#22D3EE &bull; Cyan 400)</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Secondary Accent</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('brandAccent', '#2563EB')">
+              <div class="matrix-swatch" style="background: #2563EB;"></div>
+              <span>brandAccent <span style="color: var(--text-muted);">(#2563EB &bull; Cobalt Blue)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('auroraCyanDark', '#06B6D4')">
+              <div class="matrix-swatch" style="background: #06B6D4;"></div>
+              <span>auroraCyanDark <span style="color: var(--text-muted);">(#06B6D4 &bull; Cyan 500)</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Luminous Ambient Highlight</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('auroraSapphireLight', '#0D66E9')">
+              <div class="matrix-swatch" style="background: #0D66E9;"></div>
+              <span>auroraSapphireLight <span style="color: var(--text-muted);">(#0D66E9 &bull; Sapphire Blue)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('auroraCyanLuminousDark', '#22D3EE')">
+              <div class="matrix-swatch" style="background: #22D3EE;"></div>
+              <span>auroraCyanLuminousDark <span style="color: var(--text-muted);">(#22D3EE &bull; Cyan Luminous)</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Bottom Nav Tab Active</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('tabActiveLight', '#0D66E9')">
+              <div class="matrix-swatch" style="background: #0D66E9;"></div>
+              <span>tabActiveLight <span style="color: var(--text-muted);">(#0D66E9 &bull; Brand Sapphire)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('tabActiveDark', '#22D3EE')">
+              <div class="matrix-swatch" style="background: #22D3EE;"></div>
+              <span>tabActiveDark <span style="color: var(--text-muted);">(#22D3EE &bull; Cyan 400)</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Crisp Button Sheen</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('btnCrispBlueGradient', '#3B8AEB to #0D66E9')">
+              <div class="matrix-swatch" style="background: linear-gradient(180deg, #3B8AEB 0%, #0D66E9 100%);"></div>
+              <span>btnCrispBlueGradient <span style="color: var(--text-muted);">(#3B8AEB to #0D66E9 &bull; Sky 500 to Sapphire)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('btnCrispBlueDarkGradient', '#38BDF8 to #0369A1')">
+              <div class="matrix-swatch" style="background: linear-gradient(180deg, #38BDF8 0%, #0284C7 50%, #0369A1 100%);"></div>
+              <span>btnCrispBlueDarkGradient <span style="color: var(--text-muted);">(#38BDF8 to #0369A1 &bull; Sky 400 to Sky 700)</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Crisp Button Stroke</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('btnCrispBlueBorder', '#1D58AC')">
+              <div class="matrix-swatch" style="background: #1D58AC;"></div>
+              <span>btnCrispBlueBorder <span style="color: var(--text-muted);">(#1D58AC &bull; Deep Blue Stroke)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('btnCrispBlueDarkBorder', 'rgba(56, 189, 248, 0.55)')">
+              <div class="matrix-swatch" style="background: rgba(56, 189, 248, 0.55);"></div>
+              <span>btnCrispBlueDarkBorder <span style="color: var(--text-muted);">(rgba(56, 189, 248, 0.55) &bull; Sky 400 (55% Alpha))</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Base Screen Canvas</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('canvasLight', '#F8FAFF')">
+              <div class="matrix-swatch" style="background: #F8FAFF;"></div>
+              <span>canvasLight <span style="color: var(--text-muted);">(#F8FAFF &bull; Crisp Light Canvas)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('canvasDark', '#0A0E1A')">
+              <div class="matrix-swatch" style="background: #0A0E1A;"></div>
+              <span>canvasDark <span style="color: var(--text-muted);">(#0A0E1A &bull; Deep Midnight Canvas)</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Primary Card Surface</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('surfaceLight', '#FFFFFF')">
+              <div class="matrix-swatch" style="background: #FFFFFF;"></div>
+              <span>surfaceLight <span style="color: var(--text-muted);">(#FFFFFF &bull; Pure White Surface)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('surfaceDark', '#0F1422')">
+              <div class="matrix-swatch" style="background: #0F1422;"></div>
+              <span>surfaceDark <span style="color: var(--text-muted);">(#0F1422 &bull; Navy Surface L1)</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Sub-Card Container Surface</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('surfaceSecondaryLight', '#F8FAFC')">
+              <div class="matrix-swatch" style="background: #F8FAFC;"></div>
+              <span>surfaceSecondaryLight <span style="color: var(--text-muted);">(#F8FAFC &bull; Neutral 50)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('surfaceSecondaryDark', '#131B2E')">
+              <div class="matrix-swatch" style="background: #131B2E;"></div>
+              <span>surfaceSecondaryDark <span style="color: var(--text-muted);">(#131B2E &bull; Navy Surface L2)</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Elevated Modal / Drawer</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('surfaceLight', '#FFFFFF')">
+              <div class="matrix-swatch" style="background: #FFFFFF;"></div>
+              <span>surfaceLight <span style="color: var(--text-muted);">(#FFFFFF &bull; Elevated White)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('surfaceElevatedDark', '#16233D')">
+              <div class="matrix-swatch" style="background: #16233D;"></div>
+              <span>surfaceElevatedDark <span style="color: var(--text-muted);">(#16233D &bull; Navy Surface L3)</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Highest Popover / Dialog</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('surfaceLight', '#FFFFFF')">
+              <div class="matrix-swatch" style="background: #FFFFFF;"></div>
+              <span>surfaceLight <span style="color: var(--text-muted);">(#FFFFFF &bull; Highest White)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('surfaceHighestDark', '#1C2740')">
+              <div class="matrix-swatch" style="background: #1C2740;"></div>
+              <span>surfaceHighestDark <span style="color: var(--text-muted);">(#1C2740 &bull; Navy Surface L4)</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Surface Tint Highlight</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('brandSurface', '#EFF6FF')">
+              <div class="matrix-swatch" style="background: #EFF6FF;"></div>
+              <span>brandSurface <span style="color: var(--text-muted);">(#EFF6FF &bull; Blue 50 Tint)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('surfaceAccentDark', '#082F49')">
+              <div class="matrix-swatch" style="background: #082F49;"></div>
+              <span>surfaceAccentDark <span style="color: var(--text-muted);">(#082F49 &bull; Navy Blue Tint)</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Structural Outline</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('neutral200', '#E2E8F0')">
+              <div class="matrix-swatch" style="background: #E2E8F0;"></div>
+              <span>neutral200 <span style="color: var(--text-muted);">(#E2E8F0 &bull; Neutral Outline)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('outline (dark)', 'rgba(255, 255, 255, 0.08)')">
+              <div class="matrix-swatch" style="background: rgba(255, 255, 255, 0.08);"></div>
+              <span>outline (dark) <span style="color: var(--text-muted);">(rgba(255, 255, 255, 0.08) &bull; White 8% Alpha)</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Primary Text</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('neutral900', '#0F172A')">
+              <div class="matrix-swatch" style="background: #0F172A;"></div>
+              <span>neutral900 <span style="color: var(--text-muted);">(#0F172A &bull; Slate 900)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('pureWhite', '#FFFFFF')">
+              <div class="matrix-swatch" style="background: #FFFFFF;"></div>
+              <span>pureWhite <span style="color: var(--text-muted);">(#FFFFFF &bull; Pure White)</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Secondary Text</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('neutral600', '#475569')">
+              <div class="matrix-swatch" style="background: #475569;"></div>
+              <span>neutral600 <span style="color: var(--text-muted);">(#475569 &bull; Slate 600)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('neutral300', '#CBD5E1')">
+              <div class="matrix-swatch" style="background: #CBD5E1;"></div>
+              <span>neutral300 <span style="color: var(--text-muted);">(#CBD5E1 &bull; Slate 300)</span></span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Tertiary Text</td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('neutral500', '#64748B')">
+              <div class="matrix-swatch" style="background: #64748B;"></div>
+              <span>neutral500 <span style="color: var(--text-muted);">(#64748B &bull; Slate 500)</span></span>
+            </div>
+          </td>
+          <td>
+            <div class="matrix-chip" onclick="copyToken('neutral400', '#94A3B8')">
+              <div class="matrix-swatch" style="background: #94A3B8;"></div>
+              <span>neutral400 <span style="color: var(--text-muted);">(#94A3B8 &bull; Slate 400)</span></span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+<section class="matrix-section">
+  <div class="section-title">HARMONIZED GRADIENTS & SPECULAR OVERLAYS</div>
+  <div class="section-desc">Linear gradients extracted for buttons, liquid glass headers, and carousel background decks.</div>
+  <div class="grid-container">
+    <div class="token-card gradient-card" onclick="copyValue('linear-gradient(180deg, #3B8AEB 0%, #0D66E9 100%)')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: linear-gradient(180deg, #3B8AEB 0%, #0D66E9 100%);"></div></div>
+      <div class="token-info">
+        <div class="token-name">btnCrispBlueGradient</div>
+        <div class="token-values"><span class="token-hex">Light Theme Primary Button</span></div>
+        <div class="token-css-sub">#3B8AEB (top sheen) to #0D66E9 (base)</div>
+      </div>
+    </div>
+    <div class="token-card gradient-card" onclick="copyValue('linear-gradient(180deg, #38BDF8 0%, #0284C7 50%, #0369A1 100%)')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: linear-gradient(180deg, #38BDF8 0%, #0284C7 50%, #0369A1 100%);"></div></div>
+      <div class="token-info">
+        <div class="token-name">btnCrispBlueDarkGradient</div>
+        <div class="token-values"><span class="token-hex">Dark Theme Primary Button</span></div>
+        <div class="token-css-sub">#38BDF8 (top) to #0284C7 (mid) to #0369A1 (bot)</div>
+      </div>
+    </div>
+    <div class="token-card gradient-card" onclick="copyValue('linear-gradient(180deg, rgba(56, 189, 248, 0.20) 0%, rgba(2, 132, 199, 0.05) 100%)')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: linear-gradient(180deg, rgba(56, 189, 248, 0.20) 0%, rgba(2, 132, 199, 0.05) 100%);"></div></div>
+      <div class="token-info">
+        <div class="token-name">btnCrispSoftDarkGradient</div>
+        <div class="token-values"><span class="token-hex">Dark Theme Soft Secondary Button</span></div>
+        <div class="token-css-sub">rgba(56,189,248,0.20) to rgba(2,132,199,0.05)</div>
+      </div>
+    </div>
+    <div class="token-card gradient-card" onclick="copyValue('linear-gradient(135deg, #FFFFFF 0%, #F4F7FF 50%, #EAF0FF 100%)')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: linear-gradient(135deg, #FFFFFF 0%, #F4F7FF 50%, #EAF0FF 100%);"></div></div>
+      <div class="token-info">
+        <div class="token-name">cardBgGradient (Carousel Light)</div>
+        <div class="token-values"><span class="token-hex">Master Carousel Light Deck Card</span></div>
+        <div class="token-css-sub">#FFFFFF to #F4F7FF to #EAF0FF</div>
+      </div>
+    </div>
+    <div class="token-card gradient-card" onclick="copyValue('linear-gradient(135deg, #0F1422 0%, #131B2E 50%, #16233D 100%)')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: linear-gradient(135deg, #0F1422 0%, #131B2E 50%, #16233D 100%);"></div></div>
+      <div class="token-info">
+        <div class="token-name">cardBgDarkGradient (Carousel Dark)</div>
+        <div class="token-values"><span class="token-hex">Master Carousel Dark Deck Card</span></div>
+        <div class="token-css-sub">#0F1422 to #131B2E to #16233D</div>
+      </div>
+    </div>
+    <div class="token-card gradient-card" onclick="copyValue('linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.90) 45%, rgba(255,255,255,0.45) 64%, rgba(255,255,255,0.10) 82%, rgba(255,255,255,0) 100%)')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.90) 45%, rgba(255,255,255,0.45) 64%, rgba(255,255,255,0.10) 82%, rgba(255,255,255,0) 100%);"></div></div>
+      <div class="token-info">
+        <div class="token-name">liquidGlassGradientLight</div>
+        <div class="token-values"><span class="token-hex">Schedule Card Liquid Glass Overlay (Light)</span></div>
+        <div class="token-css-sub">0.95 to 0.90 to 0.45 to 0.10 to 0.00</div>
+      </div>
+    </div>
+    <div class="token-card gradient-card" onclick="copyValue('linear-gradient(90deg, rgba(6,11,24,0.96) 0%, rgba(6,11,24,0.92) 45%, rgba(11,19,41,0.60) 64%, rgba(11,19,41,0.15) 82%, rgba(11,19,41,0) 100%)')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: linear-gradient(90deg, rgba(6,11,24,0.96) 0%, rgba(6,11,24,0.92) 45%, rgba(11,19,41,0.60) 64%, rgba(11,19,41,0.15) 82%, rgba(11,19,41,0) 100%);"></div></div>
+      <div class="token-info">
+        <div class="token-name">liquidGlassGradientDark</div>
+        <div class="token-values"><span class="token-hex">Schedule Card Liquid Glass Overlay (Dark)</span></div>
+        <div class="token-css-sub">rgba(6,11,24) 0.96 to 0.92 to rgba(11,19,41) 0.60 to 0.15 to 0.00</div>
+      </div>
+    </div>
+    <div class="token-card gradient-card" onclick="copyValue('linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(255,255,255,0.15) 35%, rgba(255,255,255,0) 100%)')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: linear-gradient(180deg, rgba(255,255,255,0.40) 0%, rgba(255,255,255,0.15) 35%, rgba(255,255,255,0) 100%);"></div></div>
+      <div class="token-info">
+        <div class="token-name">glassSpecularSheenLight</div>
+        <div class="token-values"><span class="token-hex">Schedule Card Top Specular Highlight (Light)</span></div>
+        <div class="token-css-sub">0.40 (0%) to 0.15 (35%) to 0.00 (100%)</div>
+      </div>
+    </div>
+    <div class="token-card gradient-card" onclick="copyValue('linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(56,189,248,0.04) 35%, rgba(0,0,0,0) 100%)')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(56,189,248,0.04) 35%, rgba(0,0,0,0) 100%);"></div></div>
+      <div class="token-info">
+        <div class="token-name">glassSpecularSheenDark</div>
+        <div class="token-values"><span class="token-hex">Schedule Card Top Specular Highlight (Dark)</span></div>
+        <div class="token-css-sub">0.12 white to 0.04 sky to transparent</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="token-section" id="brand_sapphire">
+  <div class="section-title">Brand Sapphire Ramp (Light Theme Base) (16)</div>
+  <div class="section-desc">Established medical sapphire blue palette used for primary brand identity, light mode buttons, and light theme accents.</div>
+  <div class="grid-container">
+    <div class="token-card" data-token="brand" data-hex="#0d66e9" data-dart="0xff0d66e9" onclick="copyToken('brand', '#0D66E9')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0D66E9;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brand">brand</div>
+        <div class="token-values">
+          <span class="token-hex">#0D66E9</span>
+        </div>
+        <div class="token-css-sub">0XFF0D66E9</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandprimary" data-hex="#0a44ff" data-dart="0xff0a44ff" onclick="copyToken('brandPrimary', '#0A44FF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0A44FF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandPrimary">brandPrimary</div>
+        <div class="token-values">
+          <span class="token-hex">#0A44FF</span>
+        </div>
+        <div class="token-css-sub">0XFF0A44FF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandaccent" data-hex="#2563eb" data-dart="0xff2563eb" onclick="copyToken('brandAccent', '#2563EB')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #2563EB;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandAccent">brandAccent</div>
+        <div class="token-values">
+          <span class="token-hex">#2563EB</span>
+        </div>
+        <div class="token-css-sub">0XFF2563EB</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandlight" data-hex="#3b82f6" data-dart="0xff3b82f6" onclick="copyToken('brandLight', '#3B82F6')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #3B82F6;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandLight">brandLight</div>
+        <div class="token-values">
+          <span class="token-hex">#3B82F6</span>
+        </div>
+        <div class="token-css-sub">0XFF3B82F6</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandsoft" data-hex="#60a5fa" data-dart="0xff60a5fa" onclick="copyToken('brandSoft', '#60A5FA')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #60A5FA;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandSoft">brandSoft</div>
+        <div class="token-values">
+          <span class="token-hex">#60A5FA</span>
+        </div>
+        <div class="token-css-sub">0XFF60A5FA</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandsubtle" data-hex="#93c5fd" data-dart="0xff93c5fd" onclick="copyToken('brandSubtle', '#93C5FD')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #93C5FD;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandSubtle">brandSubtle</div>
+        <div class="token-values">
+          <span class="token-hex">#93C5FD</span>
+        </div>
+        <div class="token-css-sub">0XFF93C5FD</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandpale" data-hex="#bfdbfe" data-dart="0xffbfdbfe" onclick="copyToken('brandPale', '#BFDBFE')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #BFDBFE;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandPale">brandPale</div>
+        <div class="token-values">
+          <span class="token-hex">#BFDBFE</span>
+        </div>
+        <div class="token-css-sub">0XFFBFDBFE</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandmuted" data-hex="#dbeafe" data-dart="0xffdbeafe" onclick="copyToken('brandMuted', '#DBEAFE')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #DBEAFE;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandMuted">brandMuted</div>
+        <div class="token-values">
+          <span class="token-hex">#DBEAFE</span>
+        </div>
+        <div class="token-css-sub">0XFFDBEAFE</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandsurface" data-hex="#eff6ff" data-dart="0xffeff6ff" onclick="copyToken('brandSurface', '#EFF6FF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #EFF6FF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandSurface">brandSurface</div>
+        <div class="token-values">
+          <span class="token-hex">#EFF6FF</span>
+        </div>
+        <div class="token-css-sub">0XFFEFF6FF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandvividblue" data-hex="#1a55ff" data-dart="0xff1a55ff" onclick="copyToken('brandVividBlue', '#1A55FF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1A55FF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandVividBlue">brandVividBlue</div>
+        <div class="token-values">
+          <span class="token-hex">#1A55FF</span>
+        </div>
+        <div class="token-css-sub">0XFF1A55FF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandnavy" data-hex="#082f49" data-dart="0xff082f49" onclick="copyToken('brandNavy', '#082F49')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #082F49;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandNavy">brandNavy</div>
+        <div class="token-values">
+          <span class="token-hex">#082F49</span>
+        </div>
+        <div class="token-css-sub">0XFF082F49</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandnavybold" data-hex="#1e40af" data-dart="0xff1e40af" onclick="copyToken('brandNavyBold', '#1E40AF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1E40AF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandNavyBold">brandNavyBold</div>
+        <div class="token-values">
+          <span class="token-hex">#1E40AF</span>
+        </div>
+        <div class="token-css-sub">0XFF1E40AF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="branddarknavy" data-hex="#1e3a8a" data-dart="0xff1e3a8a" onclick="copyToken('brandDarkNavy', '#1E3A8A')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1E3A8A;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandDarkNavy">brandDarkNavy</div>
+        <div class="token-values">
+          <span class="token-hex">#1E3A8A</span>
+        </div>
+        <div class="token-css-sub">0XFF1E3A8A</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandindigonavy" data-hex="#0e3a7a" data-dart="0xff0e3a7a" onclick="copyToken('brandIndigoNavy', '#0E3A7A')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0E3A7A;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandIndigoNavy">brandIndigoNavy</div>
+        <div class="token-values">
+          <span class="token-hex">#0E3A7A</span>
+        </div>
+        <div class="token-css-sub">0XFF0E3A7A</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandmidnight" data-hex="#172554" data-dart="0xff172554" onclick="copyToken('brandMidnight', '#172554')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #172554;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandMidnight">brandMidnight</div>
+        <div class="token-values">
+          <span class="token-hex">#172554</span>
+        </div>
+        <div class="token-css-sub">0XFF172554</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandnavydark" data-hex="#060b18" data-dart="0xff060b18" onclick="copyToken('brandNavyDark', '#060B18')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #060B18;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandNavyDark">brandNavyDark</div>
+        <div class="token-values">
+          <span class="token-hex">#060B18</span>
+        </div>
+        <div class="token-css-sub">0XFF060B18</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="token-section" id="cyan_sky">
+  <div class="section-title">Cyan & Sky Accent Ramp (Dark Theme Base) (16)</div>
+  <div class="section-desc">Luminous medical cyan and sky tones designated for dark mode accents, active tabs, queue badges, and specular highlights.</div>
+  <div class="grid-container">
+    <div class="token-card" data-token="cyanaccent" data-hex="#22d3ee" data-dart="0xff22d3ee" onclick="copyToken('cyanAccent', '#22D3EE')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #22D3EE;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="cyanAccent">cyanAccent</div>
+        <div class="token-values">
+          <span class="token-hex">#22D3EE</span>
+        </div>
+        <div class="token-css-sub">0XFF22D3EE</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="cyanbright" data-hex="#00d3f2" data-dart="0xff00d3f2" onclick="copyToken('cyanBright', '#00D3F2')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #00D3F2;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="cyanBright">cyanBright</div>
+        <div class="token-values">
+          <span class="token-hex">#00D3F2</span>
+        </div>
+        <div class="token-css-sub">0XFF00D3F2</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="cyanlight" data-hex="#67e8f9" data-dart="0xff67e8f9" onclick="copyToken('cyanLight', '#67E8F9')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #67E8F9;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="cyanLight">cyanLight</div>
+        <div class="token-values">
+          <span class="token-hex">#67E8F9</span>
+        </div>
+        <div class="token-css-sub">0XFF67E8F9</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="cyansubtle" data-hex="#f0fdfa" data-dart="0xfff0fdfa" onclick="copyToken('cyanSubtle', '#F0FDFA')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #F0FDFA;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="cyanSubtle">cyanSubtle</div>
+        <div class="token-values">
+          <span class="token-hex">#F0FDFA</span>
+        </div>
+        <div class="token-css-sub">0XFFF0FDFA</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="cyandark" data-hex="#0e7490" data-dart="0xff0e7490" onclick="copyToken('cyanDark', '#0E7490')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0E7490;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="cyanDark">cyanDark</div>
+        <div class="token-values">
+          <span class="token-hex">#0E7490</span>
+        </div>
+        <div class="token-css-sub">0XFF0E7490</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="auroracyandark" data-hex="#06b6d4" data-dart="0xff06b6d4" onclick="copyToken('auroraCyanDark', '#06B6D4')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #06B6D4;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="auroraCyanDark">auroraCyanDark</div>
+        <div class="token-values">
+          <span class="token-hex">#06B6D4</span>
+        </div>
+        <div class="token-css-sub">0XFF06B6D4</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="auroracyanluminousdark" data-hex="#22d3ee" data-dart="0xff22d3ee" onclick="copyToken('auroraCyanLuminousDark', '#22D3EE')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #22D3EE;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="auroraCyanLuminousDark">auroraCyanLuminousDark</div>
+        <div class="token-values">
+          <span class="token-hex">#22D3EE</span>
+        </div>
+        <div class="token-css-sub">0XFF22D3EE</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="sky" data-hex="#0284c7" data-dart="0xff0284c7" onclick="copyToken('sky', '#0284C7')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0284C7;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="sky">sky</div>
+        <div class="token-values">
+          <span class="token-hex">#0284C7</span>
+        </div>
+        <div class="token-css-sub">0XFF0284C7</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="skysoft" data-hex="#38bdf8" data-dart="0xff38bdf8" onclick="copyToken('skySoft', '#38BDF8')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #38BDF8;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="skySoft">skySoft</div>
+        <div class="token-values">
+          <span class="token-hex">#38BDF8</span>
+        </div>
+        <div class="token-css-sub">0XFF38BDF8</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="skysurface" data-hex="#f0f9ff" data-dart="0xfff0f9ff" onclick="copyToken('skySurface', '#F0F9FF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #F0F9FF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="skySurface">skySurface</div>
+        <div class="token-values">
+          <span class="token-hex">#F0F9FF</span>
+        </div>
+        <div class="token-css-sub">0XFFF0F9FF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="skylight" data-hex="#e0f2fe" data-dart="0xffe0f2fe" onclick="copyToken('skyLight', '#E0F2FE')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #E0F2FE;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="skyLight">skyLight</div>
+        <div class="token-values">
+          <span class="token-hex">#E0F2FE</span>
+        </div>
+        <div class="token-css-sub">0XFFE0F2FE</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="skysubtle" data-hex="#bae6fd" data-dart="0xffbae6fd" onclick="copyToken('skySubtle', '#BAE6FD')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #BAE6FD;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="skySubtle">skySubtle</div>
+        <div class="token-values">
+          <span class="token-hex">#BAE6FD</span>
+        </div>
+        <div class="token-css-sub">0XFFBAE6FD</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="skymedium" data-hex="#0ea5e9" data-dart="0xff0ea5e9" onclick="copyToken('skyMedium', '#0EA5E9')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0EA5E9;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="skyMedium">skyMedium</div>
+        <div class="token-values">
+          <span class="token-hex">#0EA5E9</span>
+        </div>
+        <div class="token-css-sub">0XFF0EA5E9</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="skydark" data-hex="#0369a1" data-dart="0xff0369a1" onclick="copyToken('skyDark', '#0369A1')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0369A1;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="skyDark">skyDark</div>
+        <div class="token-values">
+          <span class="token-hex">#0369A1</span>
+        </div>
+        <div class="token-css-sub">0XFF0369A1</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="skydarkest" data-hex="#0c4a6e" data-dart="0xff0c4a6e" onclick="copyToken('skyDarkest', '#0C4A6E')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0C4A6E;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="skyDarkest">skyDarkest</div>
+        <div class="token-values">
+          <span class="token-hex">#0C4A6E</span>
+        </div>
+        <div class="token-css-sub">0XFF0C4A6E</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="skydeep" data-hex="#0096c7" data-dart="0xff0096c7" onclick="copyToken('skyDeep', '#0096C7')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0096C7;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="skyDeep">skyDeep</div>
+        <div class="token-values">
+          <span class="token-hex">#0096C7</span>
+        </div>
+        <div class="token-css-sub">0XFF0096C7</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="token-section" id="surfaces_canvas">
+  <div class="section-title">Surfaces & Canvas Architecture (22)</div>
+  <div class="section-desc">Light crisp canvases and dark midnight navy elevation layers (Level 1 card through Level 4 popovers).</div>
+  <div class="grid-container">
+    <div class="token-card" data-token="canvaslight" data-hex="#f8faff" data-dart="0xfff8faff" onclick="copyToken('canvasLight', '#F8FAFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #F8FAFF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="canvasLight">canvasLight</div>
+        <div class="token-values">
+          <span class="token-hex">#F8FAFF</span>
+        </div>
+        <div class="token-css-sub">0XFFF8FAFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="surfacelight" data-hex="#ffffff" data-dart="0xffffffff" onclick="copyToken('surfaceLight', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #FFFFFF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="surfaceLight">surfaceLight</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+        </div>
+        <div class="token-css-sub">0XFFFFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="surfacesecondarylight" data-hex="#f8fafc" data-dart="0xfff8fafc" onclick="copyToken('surfaceSecondaryLight', '#F8FAFC')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #F8FAFC;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="surfaceSecondaryLight">surfaceSecondaryLight</div>
+        <div class="token-values">
+          <span class="token-hex">#F8FAFC</span>
+        </div>
+        <div class="token-css-sub">0XFFF8FAFC</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="brandsurface" data-hex="#eff6ff" data-dart="0xffeff6ff" onclick="copyToken('brandSurface', '#EFF6FF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #EFF6FF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="brandSurface">brandSurface</div>
+        <div class="token-values">
+          <span class="token-hex">#EFF6FF</span>
+        </div>
+        <div class="token-css-sub">0XFFEFF6FF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="cardcoverlightbottom" data-hex="#edf2ff" data-dart="0xffedf2ff" onclick="copyToken('cardCoverLightBottom', '#EDF2FF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #EDF2FF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="cardCoverLightBottom">cardCoverLightBottom</div>
+        <div class="token-values">
+          <span class="token-hex">#EDF2FF</span>
+        </div>
+        <div class="token-css-sub">0XFFEDF2FF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="canvasdark" data-hex="#0a0e1a" data-dart="0xff0a0e1a" onclick="copyToken('canvasDark', '#0A0E1A')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0A0E1A;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="canvasDark">canvasDark</div>
+        <div class="token-values">
+          <span class="token-hex">#0A0E1A</span>
+        </div>
+        <div class="token-css-sub">0XFF0A0E1A</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="canvasaltdark" data-hex="#0f1422" data-dart="0xff0f1422" onclick="copyToken('canvasAltDark', '#0F1422')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0F1422;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="canvasAltDark">canvasAltDark</div>
+        <div class="token-values">
+          <span class="token-hex">#0F1422</span>
+        </div>
+        <div class="token-css-sub">0XFF0F1422</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="surfacedark" data-hex="#0f1422" data-dart="0xff0f1422" onclick="copyToken('surfaceDark', '#0F1422')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0F1422;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="surfaceDark">surfaceDark</div>
+        <div class="token-values">
+          <span class="token-hex">#0F1422</span>
+        </div>
+        <div class="token-css-sub">0XFF0F1422</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="surfacesecondarydark" data-hex="#131b2e" data-dart="0xff131b2e" onclick="copyToken('surfaceSecondaryDark', '#131B2E')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #131B2E;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="surfaceSecondaryDark">surfaceSecondaryDark</div>
+        <div class="token-values">
+          <span class="token-hex">#131B2E</span>
+        </div>
+        <div class="token-css-sub">0XFF131B2E</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="surfaceelevateddark" data-hex="#16233d" data-dart="0xff16233d" onclick="copyToken('surfaceElevatedDark', '#16233D')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #16233D;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="surfaceElevatedDark">surfaceElevatedDark</div>
+        <div class="token-values">
+          <span class="token-hex">#16233D</span>
+        </div>
+        <div class="token-css-sub">0XFF16233D</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="surfacehighestdark" data-hex="#1c2740" data-dart="0xff1c2740" onclick="copyToken('surfaceHighestDark', '#1C2740')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1C2740;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="surfaceHighestDark">surfaceHighestDark</div>
+        <div class="token-values">
+          <span class="token-hex">#1C2740</span>
+        </div>
+        <div class="token-css-sub">0XFF1C2740</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="surfaceaccentdark" data-hex="#082f49" data-dart="0xff082f49" onclick="copyToken('surfaceAccentDark', '#082F49')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #082F49;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="surfaceAccentDark">surfaceAccentDark</div>
+        <div class="token-values">
+          <span class="token-hex">#082F49</span>
+        </div>
+        <div class="token-css-sub">0XFF082F49</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="navysurface" data-hex="#0b1329" data-dart="0xff0b1329" onclick="copyToken('navySurface', '#0B1329')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0B1329;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="navySurface">navySurface</div>
+        <div class="token-values">
+          <span class="token-hex">#0B1329</span>
+        </div>
+        <div class="token-css-sub">0XFF0B1329</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="dockcavitydark" data-hex="#060913" data-dart="0xff060913" onclick="copyToken('dockCavityDark', '#060913')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #060913;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="dockCavityDark">dockCavityDark</div>
+        <div class="token-values">
+          <span class="token-hex">#060913</span>
+        </div>
+        <div class="token-css-sub">0XFF060913</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="dockcavitydeep" data-hex="#020306" data-dart="0xff020306" onclick="copyToken('dockCavityDeep', '#020306')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #020306;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="dockCavityDeep">dockCavityDeep</div>
+        <div class="token-values">
+          <span class="token-hex">#020306</span>
+        </div>
+        <div class="token-css-sub">0XFF020306</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="docksurfacedarktop" data-hex="#0f1629" data-dart="0xff0f1629" onclick="copyToken('dockSurfaceDarkTop', '#0F1629')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0F1629;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="dockSurfaceDarkTop">dockSurfaceDarkTop</div>
+        <div class="token-values">
+          <span class="token-hex">#0F1629</span>
+        </div>
+        <div class="token-css-sub">0XFF0F1629</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="docksurfacedarkmid" data-hex="#0a0f1d" data-dart="0xff0a0f1d" onclick="copyToken('dockSurfaceDarkMid', '#0A0F1D')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0A0F1D;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="dockSurfaceDarkMid">dockSurfaceDarkMid</div>
+        <div class="token-values">
+          <span class="token-hex">#0A0F1D</span>
+        </div>
+        <div class="token-css-sub">0XFF0A0F1D</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="docksurfacedarkbottom" data-hex="#050810" data-dart="0xff050810" onclick="copyToken('dockSurfaceDarkBottom', '#050810')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #050810;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="dockSurfaceDarkBottom">dockSurfaceDarkBottom</div>
+        <div class="token-values">
+          <span class="token-hex">#050810</span>
+        </div>
+        <div class="token-css-sub">0XFF050810</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="cardcoverdarktop" data-hex="#162238" data-dart="0xff162238" onclick="copyToken('cardCoverDarkTop', '#162238')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #162238;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="cardCoverDarkTop">cardCoverDarkTop</div>
+        <div class="token-values">
+          <span class="token-hex">#162238</span>
+        </div>
+        <div class="token-css-sub">0XFF162238</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="cardcoverdarkbottom" data-hex="#0b1220" data-dart="0xff0b1220" onclick="copyToken('cardCoverDarkBottom', '#0B1220')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0B1220;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="cardCoverDarkBottom">cardCoverDarkBottom</div>
+        <div class="token-values">
+          <span class="token-hex">#0B1220</span>
+        </div>
+        <div class="token-css-sub">0XFF0B1220</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="navy" data-hex="#1c1645" data-dart="0xff1c1645" onclick="copyToken('navy', '#1C1645')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1C1645;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="navy">navy</div>
+        <div class="token-values">
+          <span class="token-hex">#1C1645</span>
+        </div>
+        <div class="token-css-sub">0XFF1C1645</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="darknavy" data-hex="#14103b" data-dart="0xff14103b" onclick="copyToken('darkNavy', '#14103B')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #14103B;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="darkNavy">darkNavy</div>
+        <div class="token-values">
+          <span class="token-hex">#14103B</span>
+        </div>
+        <div class="token-css-sub">0XFF14103B</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="token-section" id="neutrals">
+  <div class="section-title">Neutrals Scale (19)</div>
+  <div class="section-desc">System grey ramp from pure white to pure black used for typography, borders, and dividers.</div>
+  <div class="grid-container">
+    <div class="token-card" data-token="purewhite" data-hex="#ffffff" data-dart="0xffffffff" onclick="copyToken('pureWhite', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #FFFFFF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="pureWhite">pureWhite</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+        </div>
+        <div class="token-css-sub">0XFFFFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="neutral50" data-hex="#f8fafc" data-dart="0xfff8fafc" onclick="copyToken('neutral50', '#F8FAFC')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #F8FAFC;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="neutral50">neutral50</div>
+        <div class="token-values">
+          <span class="token-hex">#F8FAFC</span>
+        </div>
+        <div class="token-css-sub">0XFFF8FAFC</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="neutral100" data-hex="#f1f5f9" data-dart="0xfff1f5f9" onclick="copyToken('neutral100', '#F1F5F9')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #F1F5F9;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="neutral100">neutral100</div>
+        <div class="token-values">
+          <span class="token-hex">#F1F5F9</span>
+        </div>
+        <div class="token-css-sub">0XFFF1F5F9</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="neutral200" data-hex="#e2e8f0" data-dart="0xffe2e8f0" onclick="copyToken('neutral200', '#E2E8F0')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #E2E8F0;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="neutral200">neutral200</div>
+        <div class="token-values">
+          <span class="token-hex">#E2E8F0</span>
+        </div>
+        <div class="token-css-sub">0XFFE2E8F0</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="neutral300" data-hex="#cbd5e1" data-dart="0xffcbd5e1" onclick="copyToken('neutral300', '#CBD5E1')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #CBD5E1;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="neutral300">neutral300</div>
+        <div class="token-values">
+          <span class="token-hex">#CBD5E1</span>
+        </div>
+        <div class="token-css-sub">0XFFCBD5E1</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="neutral400" data-hex="#94a3b8" data-dart="0xff94a3b8" onclick="copyToken('neutral400', '#94A3B8')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #94A3B8;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="neutral400">neutral400</div>
+        <div class="token-values">
+          <span class="token-hex">#94A3B8</span>
+        </div>
+        <div class="token-css-sub">0XFF94A3B8</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="neutral500" data-hex="#64748b" data-dart="0xff64748b" onclick="copyToken('neutral500', '#64748B')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #64748B;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="neutral500">neutral500</div>
+        <div class="token-values">
+          <span class="token-hex">#64748B</span>
+        </div>
+        <div class="token-css-sub">0XFF64748B</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="neutral600" data-hex="#475569" data-dart="0xff475569" onclick="copyToken('neutral600', '#475569')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #475569;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="neutral600">neutral600</div>
+        <div class="token-values">
+          <span class="token-hex">#475569</span>
+        </div>
+        <div class="token-css-sub">0XFF475569</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="neutral700" data-hex="#334155" data-dart="0xff334155" onclick="copyToken('neutral700', '#334155')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #334155;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="neutral700">neutral700</div>
+        <div class="token-values">
+          <span class="token-hex">#334155</span>
+        </div>
+        <div class="token-css-sub">0XFF334155</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="neutral800" data-hex="#1e293b" data-dart="0xff1e293b" onclick="copyToken('neutral800', '#1E293B')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1E293B;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="neutral800">neutral800</div>
+        <div class="token-values">
+          <span class="token-hex">#1E293B</span>
+        </div>
+        <div class="token-css-sub">0XFF1E293B</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="neutral900" data-hex="#0f172a" data-dart="0xff0f172a" onclick="copyToken('neutral900', '#0F172A')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0F172A;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="neutral900">neutral900</div>
+        <div class="token-values">
+          <span class="token-hex">#0F172A</span>
+        </div>
+        <div class="token-css-sub">0XFF0F172A</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="neutral950" data-hex="#020617" data-dart="0xff020617" onclick="copyToken('neutral950', '#020617')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #020617;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="neutral950">neutral950</div>
+        <div class="token-values">
+          <span class="token-hex">#020617</span>
+        </div>
+        <div class="token-css-sub">0XFF020617</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="pureblack" data-hex="#000000" data-dart="0xff000000" onclick="copyToken('pureBlack', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #000000;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="pureBlack">pureBlack</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+        </div>
+        <div class="token-css-sub">0XFF000000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="heading" data-hex="#1a1d2e" data-dart="0xff1a1d2e" onclick="copyToken('heading', '#1A1D2E')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1A1D2E;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="heading">heading</div>
+        <div class="token-values">
+          <span class="token-hex">#1A1D2E</span>
+        </div>
+        <div class="token-css-sub">0XFF1A1D2E</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="muted" data-hex="#4a4f63" data-dart="0xff4a4f63" onclick="copyToken('muted', '#4A4F63')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #4A4F63;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="muted">muted</div>
+        <div class="token-values">
+          <span class="token-hex">#4A4F63</span>
+        </div>
+        <div class="token-css-sub">0XFF4A4F63</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="tabinactivelight" data-hex="#9ca3af" data-dart="0xff9ca3af" onclick="copyToken('tabInactiveLight', '#9CA3AF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #9CA3AF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="tabInactiveLight">tabInactiveLight</div>
+        <div class="token-values">
+          <span class="token-hex">#9CA3AF</span>
+        </div>
+        <div class="token-css-sub">0XFF9CA3AF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="tabinactivedark" data-hex="#737373" data-dart="0xff737373" onclick="copyToken('tabInactiveDark', '#737373')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #737373;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="tabInactiveDark">tabInactiveDark</div>
+        <div class="token-values">
+          <span class="token-hex">#737373</span>
+        </div>
+        <div class="token-css-sub">0XFF737373</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="textwhite85" data-hex="#ffffff" data-dart="0xd9ffffff" onclick="copyToken('textWhite85', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.85);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="textWhite85">textWhite85</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">85%</span>
+        </div>
+        <div class="token-css-sub">0XD9FFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="textshadowblack20" data-hex="#000000" data-dart="0x33000000" onclick="copyToken('textShadowBlack20', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.2);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="textShadowBlack20">textShadowBlack20</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">20%</span>
+        </div>
+        <div class="token-css-sub">0X33000000</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="token-section" id="status_emerald">
+  <div class="section-title">Semantic Status: Success & Emerald (6)</div>
+  <div class="section-desc">Approved queues, completed states, positive clinical confirmations.</div>
+  <div class="grid-container">
+    <div class="token-card" data-token="emerald" data-hex="#38c474" data-dart="0xff38c474" onclick="copyToken('emerald', '#38C474')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #38C474;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="emerald">emerald</div>
+        <div class="token-values">
+          <span class="token-hex">#38C474</span>
+        </div>
+        <div class="token-css-sub">0XFF38C474</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="emeraldlight" data-hex="#34d399" data-dart="0xff34d399" onclick="copyToken('emeraldLight', '#34D399')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #34D399;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="emeraldLight">emeraldLight</div>
+        <div class="token-values">
+          <span class="token-hex">#34D399</span>
+        </div>
+        <div class="token-css-sub">0XFF34D399</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="success" data-hex="#10b981" data-dart="0xff10b981" onclick="copyToken('success', '#10B981')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #10B981;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="success">success</div>
+        <div class="token-values">
+          <span class="token-hex">#10B981</span>
+        </div>
+        <div class="token-css-sub">0XFF10B981</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="successdark" data-hex="#059669" data-dart="0xff059669" onclick="copyToken('successDark', '#059669')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #059669;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="successDark">successDark</div>
+        <div class="token-values">
+          <span class="token-hex">#059669</span>
+        </div>
+        <div class="token-css-sub">0XFF059669</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="successsurface" data-hex="#ecfdf5" data-dart="0xffecfdf5" onclick="copyToken('successSurface', '#ECFDF5')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #ECFDF5;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="successSurface">successSurface</div>
+        <div class="token-values">
+          <span class="token-hex">#ECFDF5</span>
+        </div>
+        <div class="token-css-sub">0XFFECFDF5</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="successborder" data-hex="#a7f3d0" data-dart="0xffa7f3d0" onclick="copyToken('successBorder', '#A7F3D0')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #A7F3D0;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="successBorder">successBorder</div>
+        <div class="token-values">
+          <span class="token-hex">#A7F3D0</span>
+        </div>
+        <div class="token-css-sub">0XFFA7F3D0</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="token-section" id="status_amber">
+  <div class="section-title">Semantic Status: Warning & Amber (13)</div>
+  <div class="section-desc">Pending reviews, attention alerts, shift warnings.</div>
+  <div class="grid-container">
+    <div class="token-card" data-token="warning" data-hex="#f59e0b" data-dart="0xfff59e0b" onclick="copyToken('warning', '#F59E0B')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #F59E0B;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="warning">warning</div>
+        <div class="token-values">
+          <span class="token-hex">#F59E0B</span>
+        </div>
+        <div class="token-css-sub">0XFFF59E0B</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="warninglight" data-hex="#fbbf24" data-dart="0xfffbbf24" onclick="copyToken('warningLight', '#FBBF24')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #FBBF24;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="warningLight">warningLight</div>
+        <div class="token-values">
+          <span class="token-hex">#FBBF24</span>
+        </div>
+        <div class="token-css-sub">0XFFFBBF24</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="warningdark" data-hex="#d97706" data-dart="0xffd97706" onclick="copyToken('warningDark', '#D97706')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #D97706;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="warningDark">warningDark</div>
+        <div class="token-values">
+          <span class="token-hex">#D97706</span>
+        </div>
+        <div class="token-css-sub">0XFFD97706</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="warningsurface" data-hex="#fffbeb" data-dart="0xfffffbeb" onclick="copyToken('warningSurface', '#FFFBEB')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #FFFBEB;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="warningSurface">warningSurface</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFBEB</span>
+        </div>
+        <div class="token-css-sub">0XFFFFFBEB</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="warningborder" data-hex="#fde68a" data-dart="0xfffde68a" onclick="copyToken('warningBorder', '#FDE68A')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #FDE68A;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="warningBorder">warningBorder</div>
+        <div class="token-values">
+          <span class="token-hex">#FDE68A</span>
+        </div>
+        <div class="token-css-sub">0XFFFDE68A</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="amberlight" data-hex="#fbbf24" data-dart="0xfffbbf24" onclick="copyToken('amberLight', '#FBBF24')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #FBBF24;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="amberLight">amberLight</div>
+        <div class="token-values">
+          <span class="token-hex">#FBBF24</span>
+        </div>
+        <div class="token-css-sub">0XFFFBBF24</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="amberdark" data-hex="#b45309" data-dart="0xffb45309" onclick="copyToken('amberDark', '#B45309')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #B45309;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="amberDark">amberDark</div>
+        <div class="token-values">
+          <span class="token-hex">#B45309</span>
+        </div>
+        <div class="token-css-sub">0XFFB45309</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="amberborderlight" data-hex="#fde68a" data-dart="0xfffde68a" onclick="copyToken('amberBorderLight', '#FDE68A')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #FDE68A;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="amberBorderLight">amberBorderLight</div>
+        <div class="token-values">
+          <span class="token-hex">#FDE68A</span>
+        </div>
+        <div class="token-css-sub">0XFFFDE68A</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="amberborderdark" data-hex="#78350f" data-dart="0xff78350f" onclick="copyToken('amberBorderDark', '#78350F')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #78350F;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="amberBorderDark">amberBorderDark</div>
+        <div class="token-values">
+          <span class="token-hex">#78350F</span>
+        </div>
+        <div class="token-css-sub">0XFF78350F</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="ambersurfacelight" data-hex="#fffbeb" data-dart="0xfffffbeb" onclick="copyToken('amberSurfaceLight', '#FFFBEB')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #FFFBEB;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="amberSurfaceLight">amberSurfaceLight</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFBEB</span>
+        </div>
+        <div class="token-css-sub">0XFFFFFBEB</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="ambersurfacesoft" data-hex="#fef3c7" data-dart="0xfffef3c7" onclick="copyToken('amberSurfaceSoft', '#FEF3C7')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #FEF3C7;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="amberSurfaceSoft">amberSurfaceSoft</div>
+        <div class="token-values">
+          <span class="token-hex">#FEF3C7</span>
+        </div>
+        <div class="token-css-sub">0XFFFEF3C7</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="amberbgdark" data-hex="#1e170a" data-dart="0xff1e170a" onclick="copyToken('amberBgDark', '#1E170A')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1E170A;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="amberBgDark">amberBgDark</div>
+        <div class="token-values">
+          <span class="token-hex">#1E170A</span>
+        </div>
+        <div class="token-css-sub">0XFF1E170A</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="amberbgdarker" data-hex="#191308" data-dart="0xff191308" onclick="copyToken('amberBgDarker', '#191308')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #191308;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="amberBgDarker">amberBgDarker</div>
+        <div class="token-values">
+          <span class="token-hex">#191308</span>
+        </div>
+        <div class="token-css-sub">0XFF191308</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="token-section" id="status_danger">
+  <div class="section-title">Semantic Status: Danger & Critical (6)</div>
+  <div class="section-desc">Critical clinical alerts, rejected items, cancellation badges.</div>
+  <div class="grid-container">
+    <div class="token-card" data-token="dangerstrong" data-hex="#fb2c36" data-dart="0xfffb2c36" onclick="copyToken('dangerStrong', '#FB2C36')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #FB2C36;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="dangerStrong">dangerStrong</div>
+        <div class="token-values">
+          <span class="token-hex">#FB2C36</span>
+        </div>
+        <div class="token-css-sub">0XFFFB2C36</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="danger" data-hex="#ef4444" data-dart="0xffef4444" onclick="copyToken('danger', '#EF4444')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #EF4444;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="danger">danger</div>
+        <div class="token-values">
+          <span class="token-hex">#EF4444</span>
+        </div>
+        <div class="token-css-sub">0XFFEF4444</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="dangerdark" data-hex="#dc2626" data-dart="0xffdc2626" onclick="copyToken('dangerDark', '#DC2626')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #DC2626;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="dangerDark">dangerDark</div>
+        <div class="token-values">
+          <span class="token-hex">#DC2626</span>
+        </div>
+        <div class="token-css-sub">0XFFDC2626</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="dangersurface" data-hex="#fff1f2" data-dart="0xfffff1f2" onclick="copyToken('dangerSurface', '#FFF1F2')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #FFF1F2;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="dangerSurface">dangerSurface</div>
+        <div class="token-values">
+          <span class="token-hex">#FFF1F2</span>
+        </div>
+        <div class="token-css-sub">0XFFFFF1F2</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="dangerborder" data-hex="#fecdd3" data-dart="0xfffecdd3" onclick="copyToken('dangerBorder', '#FECDD3')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #FECDD3;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="dangerBorder">dangerBorder</div>
+        <div class="token-values">
+          <span class="token-hex">#FECDD3</span>
+        </div>
+        <div class="token-css-sub">0XFFFECDD3</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="roselight" data-hex="#fb7185" data-dart="0xfffb7185" onclick="copyToken('roseLight', '#FB7185')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #FB7185;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="roseLight">roseLight</div>
+        <div class="token-values">
+          <span class="token-hex">#FB7185</span>
+        </div>
+        <div class="token-css-sub">0XFFFB7185</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="token-section" id="status_violet">
+  <div class="section-title">Semantic Status: Violet & Clinical Consultation (5)</div>
+  <div class="section-desc">Specialist consultations, clinical notes, secondary clinical categories.</div>
+  <div class="grid-container">
+    <div class="token-card" data-token="violet" data-hex="#8b5cf6" data-dart="0xff8b5cf6" onclick="copyToken('violet', '#8B5CF6')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #8B5CF6;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="violet">violet</div>
+        <div class="token-values">
+          <span class="token-hex">#8B5CF6</span>
+        </div>
+        <div class="token-css-sub">0XFF8B5CF6</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="violetdark" data-hex="#6d28d9" data-dart="0xff6d28d9" onclick="copyToken('violetDark', '#6D28D9')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #6D28D9;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="violetDark">violetDark</div>
+        <div class="token-values">
+          <span class="token-hex">#6D28D9</span>
+        </div>
+        <div class="token-css-sub">0XFF6D28D9</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="violetsurface" data-hex="#f5f3ff" data-dart="0xfff5f3ff" onclick="copyToken('violetSurface', '#F5F3FF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #F5F3FF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="violetSurface">violetSurface</div>
+        <div class="token-values">
+          <span class="token-hex">#F5F3FF</span>
+        </div>
+        <div class="token-css-sub">0XFFF5F3FF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="violetborder" data-hex="#ddd6fe" data-dart="0xffddd6fe" onclick="copyToken('violetBorder', '#DDD6FE')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #DDD6FE;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="violetBorder">violetBorder</div>
+        <div class="token-values">
+          <span class="token-hex">#DDD6FE</span>
+        </div>
+        <div class="token-css-sub">0XFFDDD6FE</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="indigodark" data-hex="#1e1b4b" data-dart="0xff1e1b4b" onclick="copyToken('indigoDark', '#1E1B4B')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1E1B4B;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="indigoDark">indigoDark</div>
+        <div class="token-values">
+          <span class="token-hex">#1E1B4B</span>
+        </div>
+        <div class="token-css-sub">0XFF1E1B4B</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="token-section" id="aurora">
+  <div class="section-title">Aurora Atmospheric Ambiance (9)</div>
+  <div class="section-desc">Background ambient lighting colors for light sapphire haze and dark cyan/sapphire glow.</div>
+  <div class="grid-container">
+    <div class="token-card" data-token="aurorasapphirelight" data-hex="#0d66e9" data-dart="0xff0d66e9" onclick="copyToken('auroraSapphireLight', '#0D66E9')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0D66E9;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="auroraSapphireLight">auroraSapphireLight</div>
+        <div class="token-values">
+          <span class="token-hex">#0D66E9</span>
+        </div>
+        <div class="token-css-sub">0XFF0D66E9</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="auroraaccentlight" data-hex="#2563eb" data-dart="0xff2563eb" onclick="copyToken('auroraAccentLight', '#2563EB')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #2563EB;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="auroraAccentLight">auroraAccentLight</div>
+        <div class="token-values">
+          <span class="token-hex">#2563EB</span>
+        </div>
+        <div class="token-css-sub">0XFF2563EB</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="aurorabluelight" data-hex="#2563eb" data-dart="0xff2563eb" onclick="copyToken('auroraBlueLight', '#2563EB')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #2563EB;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="auroraBlueLight">auroraBlueLight</div>
+        <div class="token-values">
+          <span class="token-hex">#2563EB</span>
+        </div>
+        <div class="token-css-sub">0XFF2563EB</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="aurorafluidhazelight" data-hex="#70a6ff" data-dart="0xff70a6ff" onclick="copyToken('auroraFluidHazeLight', '#70A6FF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #70A6FF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="auroraFluidHazeLight">auroraFluidHazeLight</div>
+        <div class="token-values">
+          <span class="token-hex">#70A6FF</span>
+        </div>
+        <div class="token-css-sub">0XFF70A6FF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="aurorasapphiredark" data-hex="#07247a" data-dart="0xff07247a" onclick="copyToken('auroraSapphireDark', '#07247A')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #07247A;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="auroraSapphireDark">auroraSapphireDark</div>
+        <div class="token-values">
+          <span class="token-hex">#07247A</span>
+        </div>
+        <div class="token-css-sub">0XFF07247A</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="auroraaccentdark" data-hex="#1d4ed8" data-dart="0xff1d4ed8" onclick="copyToken('auroraAccentDark', '#1D4ED8')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1D4ED8;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="auroraAccentDark">auroraAccentDark</div>
+        <div class="token-values">
+          <span class="token-hex">#1D4ED8</span>
+        </div>
+        <div class="token-css-sub">0XFF1D4ED8</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="aurorabluedark" data-hex="#1d4ed8" data-dart="0xff1d4ed8" onclick="copyToken('auroraBlueDark', '#1D4ED8')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1D4ED8;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="auroraBlueDark">auroraBlueDark</div>
+        <div class="token-values">
+          <span class="token-hex">#1D4ED8</span>
+        </div>
+        <div class="token-css-sub">0XFF1D4ED8</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="auroracyandark" data-hex="#06b6d4" data-dart="0xff06b6d4" onclick="copyToken('auroraCyanDark', '#06B6D4')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #06B6D4;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="auroraCyanDark">auroraCyanDark</div>
+        <div class="token-values">
+          <span class="token-hex">#06B6D4</span>
+        </div>
+        <div class="token-css-sub">0XFF06B6D4</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="auroracyanluminousdark" data-hex="#22d3ee" data-dart="0xff22d3ee" onclick="copyToken('auroraCyanLuminousDark', '#22D3EE')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #22D3EE;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="auroraCyanLuminousDark">auroraCyanLuminousDark</div>
+        <div class="token-values">
+          <span class="token-hex">#22D3EE</span>
+        </div>
+        <div class="token-css-sub">0XFF22D3EE</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="token-section" id="buttons_interactive">
+  <div class="section-title">Buttons, Borders & Navigation Tokens (10)</div>
+  <div class="section-desc">Crisp blue button strokes, QR action button rings, and navigation tab active indicators.</div>
+  <div class="grid-container">
+    <div class="token-card" data-token="btncrispblueborder" data-hex="#1d58ac" data-dart="0xff1d58ac" onclick="copyToken('btnCrispBlueBorder', '#1D58AC')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1D58AC;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="btnCrispBlueBorder">btnCrispBlueBorder</div>
+        <div class="token-values">
+          <span class="token-hex">#1D58AC</span>
+        </div>
+        <div class="token-css-sub">0XFF1D58AC</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="btncrispbluedarkborder" data-hex="#38bdf8" data-dart="0x8c38bdf8" onclick="copyToken('btnCrispBlueDarkBorder', '#38BDF8')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(56, 189, 248, 0.55);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="btnCrispBlueDarkBorder">btnCrispBlueDarkBorder</div>
+        <div class="token-values">
+          <span class="token-hex">#38BDF8</span>
+          <span class="token-alpha">55%</span>
+        </div>
+        <div class="token-css-sub">0X8C38BDF8</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="btnspecularsheen" data-hex="#ffffff" data-dart="0x47ffffff" onclick="copyToken('btnSpecularSheen', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.28);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="btnSpecularSheen">btnSpecularSheen</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">28%</span>
+        </div>
+        <div class="token-css-sub">0X47FFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="btncrispsoftdarkbg" data-hex="#0284c7" data-dart="0x290284c7" onclick="copyToken('btnCrispSoftDarkBg', '#0284C7')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(2, 132, 199, 0.16);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="btnCrispSoftDarkBg">btnCrispSoftDarkBg</div>
+        <div class="token-values">
+          <span class="token-hex">#0284C7</span>
+          <span class="token-alpha">16%</span>
+        </div>
+        <div class="token-css-sub">0X290284C7</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="btncrispsoftdarkborder" data-hex="#38bdf8" data-dart="0x5238bdf8" onclick="copyToken('btnCrispSoftDarkBorder', '#38BDF8')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(56, 189, 248, 0.32);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="btnCrispSoftDarkBorder">btnCrispSoftDarkBorder</div>
+        <div class="token-values">
+          <span class="token-hex">#38BDF8</span>
+          <span class="token-alpha">32%</span>
+        </div>
+        <div class="token-css-sub">0X5238BDF8</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="btncrispsoftdarktext" data-hex="#38bdf8" data-dart="0xff38bdf8" onclick="copyToken('btnCrispSoftDarkText', '#38BDF8')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #38BDF8;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="btnCrispSoftDarkText">btnCrispSoftDarkText</div>
+        <div class="token-values">
+          <span class="token-hex">#38BDF8</span>
+        </div>
+        <div class="token-css-sub">0XFF38BDF8</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="qrringlight" data-hex="#ffffff" data-dart="0xffffffff" onclick="copyToken('qrRingLight', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #FFFFFF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="qrRingLight">qrRingLight</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+        </div>
+        <div class="token-css-sub">0XFFFFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="qrringdark" data-hex="#0a0e1a" data-dart="0xff0a0e1a" onclick="copyToken('qrRingDark', '#0A0E1A')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0A0E1A;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="qrRingDark">qrRingDark</div>
+        <div class="token-values">
+          <span class="token-hex">#0A0E1A</span>
+        </div>
+        <div class="token-css-sub">0XFF0A0E1A</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="tabactivelight" data-hex="#0d66e9" data-dart="0xff0d66e9" onclick="copyToken('tabActiveLight', '#0D66E9')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0D66E9;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="tabActiveLight">tabActiveLight</div>
+        <div class="token-values">
+          <span class="token-hex">#0D66E9</span>
+        </div>
+        <div class="token-css-sub">0XFF0D66E9</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="tabactivedark" data-hex="#22d3ee" data-dart="0xff22d3ee" onclick="copyToken('tabActiveDark', '#22D3EE')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #22D3EE;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="tabActiveDark">tabActiveDark</div>
+        <div class="token-values">
+          <span class="token-hex">#22D3EE</span>
+        </div>
+        <div class="token-css-sub">0XFF22D3EE</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="token-section" id="schedule_carousel">
+  <div class="section-title">Schedule & Carousel UI Control Tokens (36)</div>
+  <div class="section-desc">Card rim strokes, glass overlays, specular sheens, dashed dividers, and navigation buttons.</div>
+  <div class="grid-container">
+    <div class="token-card" data-token="scheduleborderlight" data-hex="#e2e8f0" data-dart="0xf2e2e8f0" onclick="copyToken('scheduleBorderLight', '#E2E8F0')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(226, 232, 240, 0.95);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleBorderLight">scheduleBorderLight</div>
+        <div class="token-values">
+          <span class="token-hex">#E2E8F0</span>
+          <span class="token-alpha">95%</span>
+        </div>
+        <div class="token-css-sub">0XF2E2E8F0</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduleborderdark" data-hex="#ffffff" data-dart="0x29ffffff" onclick="copyToken('scheduleBorderDark', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.16);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleBorderDark">scheduleBorderDark</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">16%</span>
+        </div>
+        <div class="token-css-sub">0X29FFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduledashedlight" data-hex="#cbd5e1" data-dart="0xe6cbd5e1" onclick="copyToken('scheduleDashedLight', '#CBD5E1')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(203, 213, 225, 0.9);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleDashedLight">scheduleDashedLight</div>
+        <div class="token-values">
+          <span class="token-hex">#CBD5E1</span>
+          <span class="token-alpha">90%</span>
+        </div>
+        <div class="token-css-sub">0XE6CBD5E1</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduledasheddark" data-hex="#ffffff" data-dart="0x33ffffff" onclick="copyToken('scheduleDashedDark', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.2);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleDashedDark">scheduleDashedDark</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">20%</span>
+        </div>
+        <div class="token-css-sub">0X33FFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="schedulepolilight" data-hex="#0f172b" data-dart="0xff0f172b" onclick="copyToken('schedulePoliLight', '#0F172B')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0F172B;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="schedulePoliLight">schedulePoliLight</div>
+        <div class="token-values">
+          <span class="token-hex">#0F172B</span>
+        </div>
+        <div class="token-css-sub">0XFF0F172B</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="schedulepillbgdark" data-hex="#ffffff" data-dart="0x1affffff" onclick="copyToken('schedulePillBgDark', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.1);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="schedulePillBgDark">schedulePillBgDark</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">10%</span>
+        </div>
+        <div class="token-css-sub">0X1AFFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduledismissbglight" data-hex="#f1f5f9" data-dart="0xccf1f5f9" onclick="copyToken('scheduleDismissBgLight', '#F1F5F9')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(241, 245, 249, 0.8);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleDismissBgLight">scheduleDismissBgLight</div>
+        <div class="token-values">
+          <span class="token-hex">#F1F5F9</span>
+          <span class="token-alpha">80%</span>
+        </div>
+        <div class="token-css-sub">0XCCF1F5F9</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="badgedepthlight" data-hex="#0f2b66" data-dart="0xff0f2b66" onclick="copyToken('badgeDepthLight', '#0F2B66')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0F2B66;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="badgeDepthLight">badgeDepthLight</div>
+        <div class="token-values">
+          <span class="token-hex">#0F2B66</span>
+        </div>
+        <div class="token-css-sub">0XFF0F2B66</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="badgedepthdark" data-hex="#041f3d" data-dart="0xff041f3d" onclick="copyToken('badgeDepthDark', '#041F3D')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #041F3D;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="badgeDepthDark">badgeDepthDark</div>
+        <div class="token-values">
+          <span class="token-hex">#041F3D</span>
+        </div>
+        <div class="token-css-sub">0XFF041F3D</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="carouselbglightmid" data-hex="#f4f7ff" data-dart="0xfff4f7ff" onclick="copyToken('carouselBgLightMid', '#F4F7FF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #F4F7FF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="carouselBgLightMid">carouselBgLightMid</div>
+        <div class="token-values">
+          <span class="token-hex">#F4F7FF</span>
+        </div>
+        <div class="token-css-sub">0XFFF4F7FF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="carouselbglightbottom" data-hex="#eaf0ff" data-dart="0xffeaf0ff" onclick="copyToken('carouselBgLightBottom', '#EAF0FF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #EAF0FF;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="carouselBgLightBottom">carouselBgLightBottom</div>
+        <div class="token-values">
+          <span class="token-hex">#EAF0FF</span>
+        </div>
+        <div class="token-css-sub">0XFFEAF0FF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="carouselrimstrokelight" data-hex="#dbeafe" data-dart="0xf2dbeafe" onclick="copyToken('carouselRimStrokeLight', '#DBEAFE')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(219, 234, 254, 0.95);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="carouselRimStrokeLight">carouselRimStrokeLight</div>
+        <div class="token-values">
+          <span class="token-hex">#DBEAFE</span>
+          <span class="token-alpha">95%</span>
+        </div>
+        <div class="token-css-sub">0XF2DBEAFE</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="carouselrimstrokedark" data-hex="#ffffff" data-dart="0x26ffffff" onclick="copyToken('carouselRimStrokeDark', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.15);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="carouselRimStrokeDark">carouselRimStrokeDark</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">15%</span>
+        </div>
+        <div class="token-css-sub">0X26FFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="carouseldescriptiondark" data-hex="#d4d4d4" data-dart="0xffd4d4d4" onclick="copyToken('carouselDescriptionDark', '#D4D4D4')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #D4D4D4;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="carouselDescriptionDark">carouselDescriptionDark</div>
+        <div class="token-values">
+          <span class="token-hex">#D4D4D4</span>
+        </div>
+        <div class="token-css-sub">0XFFD4D4D4</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="carouselindicatorinactivedark" data-hex="#525252" data-dart="0xff525252" onclick="copyToken('carouselIndicatorInactiveDark', '#525252')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #525252;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="carouselIndicatorInactiveDark">carouselIndicatorInactiveDark</div>
+        <div class="token-values">
+          <span class="token-hex">#525252</span>
+        </div>
+        <div class="token-css-sub">0XFF525252</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="carouselnavbtnbglight" data-hex="#ffffff" data-dart="0xf2ffffff" onclick="copyToken('carouselNavBtnBgLight', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.95);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="carouselNavBtnBgLight">carouselNavBtnBgLight</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">95%</span>
+        </div>
+        <div class="token-css-sub">0XF2FFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="carouselnavbtnborderlight" data-hex="#dbeafe" data-dart="0xe6dbeafe" onclick="copyToken('carouselNavBtnBorderLight', '#DBEAFE')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(219, 234, 254, 0.9);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="carouselNavBtnBorderLight">carouselNavBtnBorderLight</div>
+        <div class="token-values">
+          <span class="token-hex">#DBEAFE</span>
+          <span class="token-alpha">90%</span>
+        </div>
+        <div class="token-css-sub">0XE6DBEAFE</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="carouselnavbtnbgdark" data-hex="#0f1422" data-dart="0xd90f1422" onclick="copyToken('carouselNavBtnBgDark', '#0F1422')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(15, 20, 34, 0.85);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="carouselNavBtnBgDark">carouselNavBtnBgDark</div>
+        <div class="token-values">
+          <span class="token-hex">#0F1422</span>
+          <span class="token-alpha">85%</span>
+        </div>
+        <div class="token-css-sub">0XD90F1422</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="carouselnavbtnborderdark" data-hex="#ffffff" data-dart="0x33ffffff" onclick="copyToken('carouselNavBtnBorderDark', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.2);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="carouselNavBtnBorderDark">carouselNavBtnBorderDark</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">20%</span>
+        </div>
+        <div class="token-css-sub">0X33FFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="carouselshadowlight" data-hex="#0a44ff" data-dart="0x0f0a44ff" onclick="copyToken('carouselShadowLight', '#0A44FF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(10, 68, 255, 0.06);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="carouselShadowLight">carouselShadowLight</div>
+        <div class="token-values">
+          <span class="token-hex">#0A44FF</span>
+          <span class="token-alpha">6%</span>
+        </div>
+        <div class="token-css-sub">0X0F0A44FF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="cardshadowdark" data-hex="#000000" data-dart="0x66000000" onclick="copyToken('cardShadowDark', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.4);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="cardShadowDark">cardShadowDark</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">40%</span>
+        </div>
+        <div class="token-css-sub">0X66000000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduleshadowlight" data-hex="#000000" data-dart="0x0f000000" onclick="copyToken('scheduleShadowLight', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.06);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleShadowLight">scheduleShadowLight</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">6%</span>
+        </div>
+        <div class="token-css-sub">0X0F000000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduleglasslight45" data-hex="#ffffff" data-dart="0xe6ffffff" onclick="copyToken('scheduleGlassLight45', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.9);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleGlassLight45">scheduleGlassLight45</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">90%</span>
+        </div>
+        <div class="token-css-sub">0XE6FFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduleglasslight64" data-hex="#ffffff" data-dart="0x73ffffff" onclick="copyToken('scheduleGlassLight64', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.45);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleGlassLight64">scheduleGlassLight64</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">45%</span>
+        </div>
+        <div class="token-css-sub">0X73FFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduleglasslight82" data-hex="#ffffff" data-dart="0x1affffff" onclick="copyToken('scheduleGlassLight82', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.1);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleGlassLight82">scheduleGlassLight82</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">10%</span>
+        </div>
+        <div class="token-css-sub">0X1AFFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduleglasslight100" data-hex="#ffffff" data-dart="0x00ffffff" onclick="copyToken('scheduleGlassLight100', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.0);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleGlassLight100">scheduleGlassLight100</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">0%</span>
+        </div>
+        <div class="token-css-sub">0X00FFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduleglassdark0" data-hex="#060b18" data-dart="0xf5060b18" onclick="copyToken('scheduleGlassDark0', '#060B18')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(6, 11, 24, 0.96);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleGlassDark0">scheduleGlassDark0</div>
+        <div class="token-values">
+          <span class="token-hex">#060B18</span>
+          <span class="token-alpha">96%</span>
+        </div>
+        <div class="token-css-sub">0XF5060B18</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduleglassdark45" data-hex="#060b18" data-dart="0xeb060b18" onclick="copyToken('scheduleGlassDark45', '#060B18')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(6, 11, 24, 0.92);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleGlassDark45">scheduleGlassDark45</div>
+        <div class="token-values">
+          <span class="token-hex">#060B18</span>
+          <span class="token-alpha">92%</span>
+        </div>
+        <div class="token-css-sub">0XEB060B18</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduleglassdark64" data-hex="#0b1329" data-dart="0x990b1329" onclick="copyToken('scheduleGlassDark64', '#0B1329')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(11, 19, 41, 0.6);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleGlassDark64">scheduleGlassDark64</div>
+        <div class="token-values">
+          <span class="token-hex">#0B1329</span>
+          <span class="token-alpha">60%</span>
+        </div>
+        <div class="token-css-sub">0X990B1329</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduleglassdark82" data-hex="#0b1329" data-dart="0x260b1329" onclick="copyToken('scheduleGlassDark82', '#0B1329')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(11, 19, 41, 0.15);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleGlassDark82">scheduleGlassDark82</div>
+        <div class="token-values">
+          <span class="token-hex">#0B1329</span>
+          <span class="token-alpha">15%</span>
+        </div>
+        <div class="token-css-sub">0X260B1329</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduleglassdark100" data-hex="#0b1329" data-dart="0x000b1329" onclick="copyToken('scheduleGlassDark100', '#0B1329')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(11, 19, 41, 0.0);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleGlassDark100">scheduleGlassDark100</div>
+        <div class="token-values">
+          <span class="token-hex">#0B1329</span>
+          <span class="token-alpha">0%</span>
+        </div>
+        <div class="token-css-sub">0X000B1329</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="schedulesheenlight0" data-hex="#ffffff" data-dart="0x66ffffff" onclick="copyToken('scheduleSheenLight0', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.4);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleSheenLight0">scheduleSheenLight0</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">40%</span>
+        </div>
+        <div class="token-css-sub">0X66FFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="schedulesheenlight35" data-hex="#ffffff" data-dart="0x26ffffff" onclick="copyToken('scheduleSheenLight35', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.15);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleSheenLight35">scheduleSheenLight35</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">15%</span>
+        </div>
+        <div class="token-css-sub">0X26FFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="schedulesheendark0" data-hex="#ffffff" data-dart="0x1fffffff" onclick="copyToken('scheduleSheenDark0', '#FFFFFF')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(255, 255, 255, 0.12);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleSheenDark0">scheduleSheenDark0</div>
+        <div class="token-values">
+          <span class="token-hex">#FFFFFF</span>
+          <span class="token-alpha">12%</span>
+        </div>
+        <div class="token-css-sub">0X1FFFFFFF</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="schedulesheendark35" data-hex="#38bdf8" data-dart="0x0a38bdf8" onclick="copyToken('scheduleSheenDark35', '#38BDF8')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(56, 189, 248, 0.04);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleSheenDark35">scheduleSheenDark35</div>
+        <div class="token-values">
+          <span class="token-hex">#38BDF8</span>
+          <span class="token-alpha">4%</span>
+        </div>
+        <div class="token-css-sub">0X0A38BDF8</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="scheduletransparent" data-hex="#000000" data-dart="0x00000000" onclick="copyToken('scheduleTransparent', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.0);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="scheduleTransparent">scheduleTransparent</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">0%</span>
+        </div>
+        <div class="token-css-sub">0X00000000</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="token-section" id="feather_mail">
+  <div class="section-title">Feather Gray & Mail Air Accent Scale (5)</div>
+  <div class="section-desc">Feather accents and mail status air tints.</div>
+  <div class="grid-container">
+    <div class="token-card" data-token="feathergraylight" data-hex="#d5dbe3" data-dart="0xffd5dbe3" onclick="copyToken('featherGrayLight', '#D5DBE3')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #D5DBE3;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="featherGrayLight">featherGrayLight</div>
+        <div class="token-values">
+          <span class="token-hex">#D5DBE3</span>
+        </div>
+        <div class="token-css-sub">0XFFD5DBE3</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="feathergray" data-hex="#b4becc" data-dart="0xffb4becc" onclick="copyToken('featherGray', '#B4BECC')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #B4BECC;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="featherGray">featherGray</div>
+        <div class="token-values">
+          <span class="token-hex">#B4BECC</span>
+        </div>
+        <div class="token-css-sub">0XFFB4BECC</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="mailairlight" data-hex="#bbf2f6" data-dart="0xffbbf2f6" onclick="copyToken('mailAirLight', '#BBF2F6')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #BBF2F6;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="mailAirLight">mailAirLight</div>
+        <div class="token-values">
+          <span class="token-hex">#BBF2F6</span>
+        </div>
+        <div class="token-css-sub">0XFFBBF2F6</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="mailair" data-hex="#8de0f7" data-dart="0xff8de0f7" onclick="copyToken('mailAir', '#8DE0F7')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #8DE0F7;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="mailAir">mailAir</div>
+        <div class="token-values">
+          <span class="token-hex">#8DE0F7</span>
+        </div>
+        <div class="token-css-sub">0XFF8DE0F7</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="mailairborder" data-hex="#74c5e3" data-dart="0xff74c5e3" onclick="copyToken('mailAirBorder', '#74C5E3')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #74C5E3;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="mailAirBorder">mailAirBorder</div>
+        <div class="token-values">
+          <span class="token-hex">#74C5E3</span>
+        </div>
+        <div class="token-css-sub">0XFF74C5E3</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="token-section" id="assets_geometry">
+  <div class="section-title">Asset Geometry & Masks (Isometric, Toolbox, Radial Masks) (52)</div>
+  <div class="section-desc">Micro-illustration facets, isometric box surfaces, toolbox 3D geometry, and concave radial shadow masks.</div>
+  <div class="grid-container">
+    <div class="token-card" data-token="isoboxlightexteriorright" data-hex="#d8e1ed" data-dart="0xffd8e1ed" onclick="copyToken('isoBoxLightExteriorRight', '#D8E1ED')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #D8E1ED;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxLightExteriorRight">isoBoxLightExteriorRight</div>
+        <div class="token-values">
+          <span class="token-hex">#D8E1ED</span>
+        </div>
+        <div class="token-css-sub">0XFFD8E1ED</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxlightinteriorbackleft" data-hex="#b9c6d8" data-dart="0xffb9c6d8" onclick="copyToken('isoBoxLightInteriorBackLeft', '#B9C6D8')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #B9C6D8;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxLightInteriorBackLeft">isoBoxLightInteriorBackLeft</div>
+        <div class="token-values">
+          <span class="token-hex">#B9C6D8</span>
+        </div>
+        <div class="token-css-sub">0XFFB9C6D8</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxlightinteriorbackright" data-hex="#a4b4cc" data-dart="0xffa4b4cc" onclick="copyToken('isoBoxLightInteriorBackRight', '#A4B4CC')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #A4B4CC;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxLightInteriorBackRight">isoBoxLightInteriorBackRight</div>
+        <div class="token-values">
+          <span class="token-hex">#A4B4CC</span>
+        </div>
+        <div class="token-css-sub">0XFFA4B4CC</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxlightinteriorfloor" data-hex="#91a2bc" data-dart="0xff91a2bc" onclick="copyToken('isoBoxLightInteriorFloor', '#91A2BC')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #91A2BC;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxLightInteriorFloor">isoBoxLightInteriorFloor</div>
+        <div class="token-values">
+          <span class="token-hex">#91A2BC</span>
+        </div>
+        <div class="token-css-sub">0XFF91A2BC</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxlightflapbackleft" data-hex="#e2e9f3" data-dart="0xffe2e9f3" onclick="copyToken('isoBoxLightFlapBackLeft', '#E2E9F3')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #E2E9F3;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxLightFlapBackLeft">isoBoxLightFlapBackLeft</div>
+        <div class="token-values">
+          <span class="token-hex">#E2E9F3</span>
+        </div>
+        <div class="token-css-sub">0XFFE2E9F3</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxlightflapbackright" data-hex="#cbd6e6" data-dart="0xffcbd6e6" onclick="copyToken('isoBoxLightFlapBackRight', '#CBD6E6')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #CBD6E6;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxLightFlapBackRight">isoBoxLightFlapBackRight</div>
+        <div class="token-values">
+          <span class="token-hex">#CBD6E6</span>
+        </div>
+        <div class="token-css-sub">0XFFCBD6E6</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxlightflapfrontright" data-hex="#c6d3e4" data-dart="0xffc6d3e4" onclick="copyToken('isoBoxLightFlapFrontRight', '#C6D3E4')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #C6D3E4;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxLightFlapFrontRight">isoBoxLightFlapFrontRight</div>
+        <div class="token-values">
+          <span class="token-hex">#C6D3E4</span>
+        </div>
+        <div class="token-css-sub">0XFFC6D3E4</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxlightstrokebox" data-hex="#b4c3d7" data-dart="0x73b4c3d7" onclick="copyToken('isoBoxLightStrokeBox', '#B4C3D7')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(180, 195, 215, 0.45);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxLightStrokeBox">isoBoxLightStrokeBox</div>
+        <div class="token-values">
+          <span class="token-hex">#B4C3D7</span>
+          <span class="token-alpha">45%</span>
+        </div>
+        <div class="token-css-sub">0X73B4C3D7</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxlightstroketrail" data-hex="#a4b3c8" data-dart="0xffa4b3c8" onclick="copyToken('isoBoxLightStrokeTrail', '#A4B3C8')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #A4B3C8;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxLightStrokeTrail">isoBoxLightStrokeTrail</div>
+        <div class="token-values">
+          <span class="token-hex">#A4B3C8</span>
+        </div>
+        <div class="token-css-sub">0XFFA4B3C8</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxlightsparkle" data-hex="#b8c5d8" data-dart="0xffb8c5d8" onclick="copyToken('isoBoxLightSparkle', '#B8C5D8')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #B8C5D8;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxLightSparkle">isoBoxLightSparkle</div>
+        <div class="token-values">
+          <span class="token-hex">#B8C5D8</span>
+        </div>
+        <div class="token-css-sub">0XFFB8C5D8</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxlightinsectbody" data-hex="#59667a" data-dart="0xff59667a" onclick="copyToken('isoBoxLightInsectBody', '#59667A')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #59667A;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxLightInsectBody">isoBoxLightInsectBody</div>
+        <div class="token-values">
+          <span class="token-hex">#59667A</span>
+        </div>
+        <div class="token-css-sub">0XFF59667A</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxlightinsectwing" data-hex="#c3d0e2" data-dart="0xbfc3d0e2" onclick="copyToken('isoBoxLightInsectWing', '#C3D0E2')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(195, 208, 226, 0.75);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxLightInsectWing">isoBoxLightInsectWing</div>
+        <div class="token-values">
+          <span class="token-hex">#C3D0E2</span>
+          <span class="token-alpha">75%</span>
+        </div>
+        <div class="token-css-sub">0XBFC3D0E2</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxdarkinteriorbackleft" data-hex="#162032" data-dart="0xff162032" onclick="copyToken('isoBoxDarkInteriorBackLeft', '#162032')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #162032;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxDarkInteriorBackLeft">isoBoxDarkInteriorBackLeft</div>
+        <div class="token-values">
+          <span class="token-hex">#162032</span>
+        </div>
+        <div class="token-css-sub">0XFF162032</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxdarkinteriorbackright" data-hex="#0d1524" data-dart="0xff0d1524" onclick="copyToken('isoBoxDarkInteriorBackRight', '#0D1524')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0D1524;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxDarkInteriorBackRight">isoBoxDarkInteriorBackRight</div>
+        <div class="token-values">
+          <span class="token-hex">#0D1524</span>
+        </div>
+        <div class="token-css-sub">0XFF0D1524</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxdarkinteriorfloor" data-hex="#0b111c" data-dart="0xff0b111c" onclick="copyToken('isoBoxDarkInteriorFloor', '#0B111C')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #0B111C;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxDarkInteriorFloor">isoBoxDarkInteriorFloor</div>
+        <div class="token-values">
+          <span class="token-hex">#0B111C</span>
+        </div>
+        <div class="token-css-sub">0XFF0B111C</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxdarkflapbackleft" data-hex="#243247" data-dart="0xff243247" onclick="copyToken('isoBoxDarkFlapBackLeft', '#243247')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #243247;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxDarkFlapBackLeft">isoBoxDarkFlapBackLeft</div>
+        <div class="token-values">
+          <span class="token-hex">#243247</span>
+        </div>
+        <div class="token-css-sub">0XFF243247</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxdarkflapbackright" data-hex="#1a2536" data-dart="0xff1a2536" onclick="copyToken('isoBoxDarkFlapBackRight', '#1A2536')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1A2536;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxDarkFlapBackRight">isoBoxDarkFlapBackRight</div>
+        <div class="token-values">
+          <span class="token-hex">#1A2536</span>
+        </div>
+        <div class="token-css-sub">0XFF1A2536</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxdarkflapfrontleft" data-hex="#223043" data-dart="0xff223043" onclick="copyToken('isoBoxDarkFlapFrontLeft', '#223043')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #223043;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxDarkFlapFrontLeft">isoBoxDarkFlapFrontLeft</div>
+        <div class="token-values">
+          <span class="token-hex">#223043</span>
+        </div>
+        <div class="token-css-sub">0XFF223043</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="isoboxdarkflapfrontright" data-hex="#182332" data-dart="0xff182332" onclick="copyToken('isoBoxDarkFlapFrontRight', '#182332')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #182332;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="isoBoxDarkFlapFrontRight">isoBoxDarkFlapFrontRight</div>
+        <div class="token-values">
+          <span class="token-hex">#182332</span>
+        </div>
+        <div class="token-css-sub">0XFF182332</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxcavitybackleft" data-hex="#111827" data-dart="0xff111827" onclick="copyToken('toolboxCavityBackLeft', '#111827')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #111827;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxCavityBackLeft">toolboxCavityBackLeft</div>
+        <div class="token-values">
+          <span class="token-hex">#111827</span>
+        </div>
+        <div class="token-css-sub">0XFF111827</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxcavitybackright" data-hex="#1f2937" data-dart="0xff1f2937" onclick="copyToken('toolboxCavityBackRight', '#1F2937')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1F2937;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxCavityBackRight">toolboxCavityBackRight</div>
+        <div class="token-values">
+          <span class="token-hex">#1F2937</span>
+        </div>
+        <div class="token-css-sub">0XFF1F2937</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxcavitylefttop" data-hex="#2a303c" data-dart="0xff2a303c" onclick="copyToken('toolboxCavityLeftTop', '#2A303C')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #2A303C;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxCavityLeftTop">toolboxCavityLeftTop</div>
+        <div class="token-values">
+          <span class="token-hex">#2A303C</span>
+        </div>
+        <div class="token-css-sub">0XFF2A303C</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxcavityleftbottom" data-hex="#141822" data-dart="0xff141822" onclick="copyToken('toolboxCavityLeftBottom', '#141822')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #141822;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxCavityLeftBottom">toolboxCavityLeftBottom</div>
+        <div class="token-values">
+          <span class="token-hex">#141822</span>
+        </div>
+        <div class="token-css-sub">0XFF141822</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxcavityrighttop" data-hex="#374151" data-dart="0xff374151" onclick="copyToken('toolboxCavityRightTop', '#374151')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #374151;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxCavityRightTop">toolboxCavityRightTop</div>
+        <div class="token-values">
+          <span class="token-hex">#374151</span>
+        </div>
+        <div class="token-css-sub">0XFF374151</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxfacelefttop" data-hex="#b3b3b3" data-dart="0xffb3b3b3" onclick="copyToken('toolboxFaceLeftTop', '#B3B3B3')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #B3B3B3;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxFaceLeftTop">toolboxFaceLeftTop</div>
+        <div class="token-values">
+          <span class="token-hex">#B3B3B3</span>
+        </div>
+        <div class="token-css-sub">0XFFB3B3B3</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxfaceleftbottom" data-hex="#808080" data-dart="0xff808080" onclick="copyToken('toolboxFaceLeftBottom', '#808080')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #808080;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxFaceLeftBottom">toolboxFaceLeftBottom</div>
+        <div class="token-values">
+          <span class="token-hex">#808080</span>
+        </div>
+        <div class="token-css-sub">0XFF808080</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxfacerighttop" data-hex="#d9d9d9" data-dart="0xffd9d9d9" onclick="copyToken('toolboxFaceRightTop', '#D9D9D9')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #D9D9D9;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxFaceRightTop">toolboxFaceRightTop</div>
+        <div class="token-values">
+          <span class="token-hex">#D9D9D9</span>
+        </div>
+        <div class="token-css-sub">0XFFD9D9D9</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxfacerightbottom" data-hex="#a6a6a6" data-dart="0xffa6a6a6" onclick="copyToken('toolboxFaceRightBottom', '#A6A6A6')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #A6A6A6;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxFaceRightBottom">toolboxFaceRightBottom</div>
+        <div class="token-values">
+          <span class="token-hex">#A6A6A6</span>
+        </div>
+        <div class="token-css-sub">0XFFA6A6A6</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxfacetopend" data-hex="#e8e8e8" data-dart="0xffe8e8e8" onclick="copyToken('toolboxFaceTopEnd', '#E8E8E8')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #E8E8E8;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxFaceTopEnd">toolboxFaceTopEnd</div>
+        <div class="token-values">
+          <span class="token-hex">#E8E8E8</span>
+        </div>
+        <div class="token-css-sub">0XFFE8E8E8</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxseamlight" data-hex="#e6e6e6" data-dart="0xffe6e6e6" onclick="copyToken('toolboxSeamLight', '#E6E6E6')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #E6E6E6;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxSeamLight">toolboxSeamLight</div>
+        <div class="token-values">
+          <span class="token-hex">#E6E6E6</span>
+        </div>
+        <div class="token-css-sub">0XFFE6E6E6</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxseammid" data-hex="#cccccc" data-dart="0xffcccccc" onclick="copyToken('toolboxSeamMid', '#CCCCCC')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #CCCCCC;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxSeamMid">toolboxSeamMid</div>
+        <div class="token-values">
+          <span class="token-hex">#CCCCCC</span>
+        </div>
+        <div class="token-css-sub">0XFFCCCCCC</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxseamdark" data-hex="#666666" data-dart="0xff666666" onclick="copyToken('toolboxSeamDark', '#666666')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #666666;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxSeamDark">toolboxSeamDark</div>
+        <div class="token-values">
+          <span class="token-hex">#666666</span>
+        </div>
+        <div class="token-css-sub">0XFF666666</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxcrossred" data-hex="#e60000" data-dart="0xffe60000" onclick="copyToken('toolboxCrossRed', '#E60000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #E60000;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxCrossRed">toolboxCrossRed</div>
+        <div class="token-values">
+          <span class="token-hex">#E60000</span>
+        </div>
+        <div class="token-css-sub">0XFFE60000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxcrossshadow" data-hex="#990000" data-dart="0xff990000" onclick="copyToken('toolboxCrossShadow', '#990000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #990000;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxCrossShadow">toolboxCrossShadow</div>
+        <div class="token-values">
+          <span class="token-hex">#990000</span>
+        </div>
+        <div class="token-css-sub">0XFF990000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxhandleshadow" data-hex="#646464" data-dart="0x66646464" onclick="copyToken('toolboxHandleShadow', '#646464')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(100, 100, 100, 0.4);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxHandleShadow">toolboxHandleShadow</div>
+        <div class="token-values">
+          <span class="token-hex">#646464</span>
+          <span class="token-alpha">40%</span>
+        </div>
+        <div class="token-css-sub">0X66646464</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxhandlemount" data-hex="#1a1a1a" data-dart="0xff1a1a1a" onclick="copyToken('toolboxHandleMount', '#1A1A1A')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #1A1A1A;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxHandleMount">toolboxHandleMount</div>
+        <div class="token-values">
+          <span class="token-hex">#1A1A1A</span>
+        </div>
+        <div class="token-css-sub">0XFF1A1A1A</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxhandle" data-hex="#333333" data-dart="0xff333333" onclick="copyToken('toolboxHandle', '#333333')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #333333;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxHandle">toolboxHandle</div>
+        <div class="token-values">
+          <span class="token-hex">#333333</span>
+        </div>
+        <div class="token-css-sub">0XFF333333</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxhandleshimmer" data-hex="#777777" data-dart="0xff777777" onclick="copyToken('toolboxHandleShimmer', '#777777')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #777777;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxHandleShimmer">toolboxHandleShimmer</div>
+        <div class="token-values">
+          <span class="token-hex">#777777</span>
+        </div>
+        <div class="token-css-sub">0XFF777777</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxlatchbase" data-hex="#888888" data-dart="0xff888888" onclick="copyToken('toolboxLatchBase', '#888888')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #888888;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxLatchBase">toolboxLatchBase</div>
+        <div class="token-values">
+          <span class="token-hex">#888888</span>
+        </div>
+        <div class="token-css-sub">0XFF888888</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="toolboxlatchupper" data-hex="#dddddd" data-dart="0xffdddddd" onclick="copyToken('toolboxLatchUpper', '#DDDDDD')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: #DDDDDD;"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="toolboxLatchUpper">toolboxLatchUpper</div>
+        <div class="token-values">
+          <span class="token-hex">#DDDDDD</span>
+        </div>
+        <div class="token-css-sub">0XFFDDDDDD</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="maskconcave40" data-hex="#000000" data-dart="0x40000000" onclick="copyToken('maskConcave40', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.25);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="maskConcave40">maskConcave40</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">25%</span>
+        </div>
+        <div class="token-css-sub">0X40000000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="maskconcavea6" data-hex="#000000" data-dart="0xa6000000" onclick="copyToken('maskConcaveA6', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.65);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="maskConcaveA6">maskConcaveA6</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">65%</span>
+        </div>
+        <div class="token-css-sub">0XA6000000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="maskconcaveeb" data-hex="#000000" data-dart="0xeb000000" onclick="copyToken('maskConcaveEB', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.92);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="maskConcaveEB">maskConcaveEB</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">92%</span>
+        </div>
+        <div class="token-css-sub">0XEB000000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="maskradialbf" data-hex="#000000" data-dart="0xbf000000" onclick="copyToken('maskRadialBF', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.75);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="maskRadialBF">maskRadialBF</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">75%</span>
+        </div>
+        <div class="token-css-sub">0XBF000000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="maskradial73" data-hex="#000000" data-dart="0x73000000" onclick="copyToken('maskRadial73', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.45);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="maskRadial73">maskRadial73</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">45%</span>
+        </div>
+        <div class="token-css-sub">0X73000000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="maskradial33" data-hex="#000000" data-dart="0x33000000" onclick="copyToken('maskRadial33', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.2);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="maskRadial33">maskRadial33</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">20%</span>
+        </div>
+        <div class="token-css-sub">0X33000000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="maskradial0f" data-hex="#000000" data-dart="0x0f000000" onclick="copyToken('maskRadial0F', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.06);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="maskRadial0F">maskRadial0F</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">6%</span>
+        </div>
+        <div class="token-css-sub">0X0F000000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="maskradialcc" data-hex="#000000" data-dart="0xcc000000" onclick="copyToken('maskRadialCC', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.8);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="maskRadialCC">maskRadialCC</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">80%</span>
+        </div>
+        <div class="token-css-sub">0XCC000000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="maskradial80" data-hex="#000000" data-dart="0x80000000" onclick="copyToken('maskRadial80', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.5);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="maskRadial80">maskRadial80</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">50%</span>
+        </div>
+        <div class="token-css-sub">0X80000000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="maskradial2b" data-hex="#000000" data-dart="0x2b000000" onclick="copyToken('maskRadial2B', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.17);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="maskRadial2B">maskRadial2B</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">17%</span>
+        </div>
+        <div class="token-css-sub">0X2B000000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="masklineard9" data-hex="#000000" data-dart="0xd9000000" onclick="copyToken('maskLinearD9', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.85);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="maskLinearD9">maskLinearD9</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">85%</span>
+        </div>
+        <div class="token-css-sub">0XD9000000</div>
+      </div>
+    </div>
+    <div class="token-card" data-token="masklinear59" data-hex="#000000" data-dart="0x59000000" onclick="copyToken('maskLinear59', '#000000')">
+      <div class="token-swatch-box"><div class="token-swatch-fill" style="background: rgba(0, 0, 0, 0.35);"></div></div>
+      <div class="token-info">
+        <div class="token-name" title="maskLinear59">maskLinear59</div>
+        <div class="token-values">
+          <span class="token-hex">#000000</span>
+          <span class="token-alpha">35%</span>
+        </div>
+        <div class="token-css-sub">0X59000000</div>
+      </div>
+    </div>
+  </div>
+</section>
+<div id="toast" class="toast"></div>
+<script>
+
+function setCanvas(theme, btn) {
+  document.body.className = "theme-" + theme;
+  var btns = document.querySelectorAll(".btn-toggle");
+  btns.forEach(function(b) { b.classList.remove("active"); });
+  btn.classList.add("active");
+}
+
+function showToast(msg) {
+  var t = document.getElementById("toast");
+  t.innerText = msg;
+  t.classList.add("show");
+  setTimeout(function() {
+    t.classList.remove("show");
+  }, 1800);
+}
+
+function copyToken(name, hex) {
+  var text = "AmanahColorTokens." + name;
+  navigator.clipboard.writeText(text).then(function() {
+    showToast("Copied: " + text + " (" + hex + ")");
+  });
+}
+
+function copyValue(val) {
+  navigator.clipboard.writeText(val).then(function() {
+    showToast("Copied value to clipboard");
+  });
+}
+
+document.getElementById("searchInput").addEventListener("input", function(e) {
+  var q = e.target.value.toLowerCase().trim();
+  var cards = document.querySelectorAll(".token-card:not(.gradient-card)");
+  cards.forEach(function(c) {
+    var tok = c.getAttribute("data-token") || "";
+    var hex = c.getAttribute("data-hex") || "";
+    var dart = c.getAttribute("data-dart") || "";
+    if (tok.indexOf(q) !== -1 || hex.indexOf(q) !== -1 || dart.indexOf(q) !== -1) {
+      c.style.display = "";
+    } else {
+      c.style.display = "none";
+    }
+  });
+});
+
+</script>
+</body>
+</html>
