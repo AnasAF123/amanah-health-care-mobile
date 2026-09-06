@@ -79,6 +79,7 @@ abstract final class AmanahElevation {
 abstract final class AmanahComponentSize {
   static const double minTouchTarget = 48;
   static const double iconButton = 48;
+  static const double buttonCompact = 26;
   static const double buttonSmall = 48;
   static const double buttonMedium = 48;
   static const double buttonLarge = 52;

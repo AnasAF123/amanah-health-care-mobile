@@ -17,6 +17,9 @@ enum AmanahButtonVariant {
 
 /// Master Button Sizing Scales
 enum AmanahButtonSize {
+  /// Height: 26dp, font: 11px, icon: 13px, padding: H10
+  compact,
+
   /// Height: 48dp, font: 12px, icon: 16px, padding: H12
   small,
 
@@ -409,6 +412,8 @@ class AmanahButton extends StatelessWidget {
       return customHeight!;
     }
     switch (size) {
+      case AmanahButtonSize.compact:
+        return AmanahComponentSize.buttonCompact;
       case AmanahButtonSize.small:
         return AmanahComponentSize.buttonSmall;
       case AmanahButtonSize.medium:
@@ -422,6 +427,8 @@ class AmanahButton extends StatelessWidget {
 
   double get _fontSize {
     switch (size) {
+      case AmanahButtonSize.compact:
+        return 11.0;
       case AmanahButtonSize.small:
         return 12.0;
       case AmanahButtonSize.medium:
@@ -438,6 +445,8 @@ class AmanahButton extends StatelessWidget {
       return customIconSize!;
     }
     switch (size) {
+      case AmanahButtonSize.compact:
+        return 13.0;
       case AmanahButtonSize.small:
         return 16.0;
       case AmanahButtonSize.medium:
@@ -457,6 +466,8 @@ class AmanahButton extends StatelessWidget {
       return EdgeInsets.zero;
     }
     switch (size) {
+      case AmanahButtonSize.compact:
+        return const EdgeInsets.symmetric(horizontal: 10);
       case AmanahButtonSize.small:
         return const EdgeInsets.symmetric(horizontal: 12);
       case AmanahButtonSize.medium:
@@ -476,6 +487,8 @@ class AmanahButton extends StatelessWidget {
       return borderRadius!;
     }
     switch (size) {
+      case AmanahButtonSize.compact:
+        return BorderRadius.circular(8.0);
       case AmanahButtonSize.small:
         return BorderRadius.circular(10.0);
       case AmanahButtonSize.medium:
@@ -862,8 +875,10 @@ class AmanahButton extends StatelessWidget {
           splashColor: fgColor.withValues(alpha: 0.12),
           highlightColor: fgColor.withValues(alpha: 0.08),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: AmanahComponentSize.minTouchTarget,
+            constraints: BoxConstraints(
+              minHeight: size == AmanahButtonSize.compact
+                  ? AmanahComponentSize.buttonCompact
+                  : (customHeight ?? AmanahComponentSize.minTouchTarget),
             ),
             child: buttonBody,
           ),

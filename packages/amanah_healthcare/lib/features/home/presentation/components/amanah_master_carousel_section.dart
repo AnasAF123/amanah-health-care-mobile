@@ -814,8 +814,7 @@ class AmanahCrispActionButton extends StatelessWidget {
     return AmanahButton.primary(
       text: text,
       leadingIcon: icon,
-      size: AmanahButtonSize.small,
-      customHeight: 32,
+      size: AmanahButtonSize.compact,
       borderRadius: BorderRadius.circular(AmanahCarouselTokens.btnRadius),
       onPressed: onTap,
     );

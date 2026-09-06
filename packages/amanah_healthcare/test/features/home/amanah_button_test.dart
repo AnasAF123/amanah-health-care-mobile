@@ -167,5 +167,27 @@ void main() {
       await tester.pump();
       expect(tapped, isFalse);
     });
+
+    testWidgets('Renders compact button with expected height of 26dp', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: AmanahButton.primary(
+                text: 'Compact Action',
+                size: AmanahButtonSize.compact,
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Size buttonSize = tester.getSize(find.byType(AmanahButton));
+      expect(buttonSize.height, equals(26.0));
+      expect(find.text('Compact Action'), findsOneWidget);
+    });
   });
 }
