@@ -85,7 +85,6 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                             faq.category,
                             style: TextStyle(
                               color: categoryColor,
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 10.5,
                               fontWeight: FontWeight.w600,
                             ),
@@ -95,7 +94,6 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                             faq.title,
                             style: TextStyle(
                               color: textColor,
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                               height: 1.35,
@@ -131,7 +129,6 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                             'Langkah penyelesaian',
                             style: TextStyle(
                               color: subtextColor,
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                             ),
@@ -163,7 +160,6 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                                         color: dark
                                             ? AmanahColorTokens.neutral200
                                             : AmanahColorTokens.neutral700,
-                                        fontFamily: 'PlusJakartaSans',
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
                                       ),
@@ -178,7 +174,6 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                                       color: dark
                                           ? AmanahColorTokens.neutral300
                                           : AmanahColorTokens.neutral700,
-                                      fontFamily: 'PlusJakartaSans',
                                       fontSize: 12,
                                       height: 1.5,
                                     ),
@@ -220,7 +215,6 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: subtextColor,
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),

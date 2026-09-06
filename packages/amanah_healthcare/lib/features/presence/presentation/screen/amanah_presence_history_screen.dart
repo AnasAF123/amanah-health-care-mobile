@@ -88,7 +88,7 @@ class _AmanahPresenceHistoryScreenState
           SnackBar(
             content: const Text(
               'Laporan presensi berhasil diunduh (PDF)',
-              style: TextStyle(fontFamily: 'PlusJakartaSans', fontSize: 12),
+              style: TextStyle(fontSize: 12),
             ),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -164,7 +164,6 @@ class _AmanahPresenceHistoryScreenState
                   Text(
                     'Timeline',
                     style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       color: textColor,
@@ -321,7 +320,6 @@ class _AmanahPresenceHistoryScreenState
                   Text(
                     'Filter: ',
                     style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                       color: subtextColor,
@@ -361,7 +359,6 @@ class _AmanahPresenceHistoryScreenState
                       child: Text(
                         'Reset',
                         style: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
                           color: dark
@@ -462,7 +459,6 @@ class _AmanahPresenceHistoryScreenState
                   Text(
                     'Total jam kerja · Bulan ini',
                     style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                       color: subtextColor,
@@ -477,7 +473,6 @@ class _AmanahPresenceHistoryScreenState
                       Text(
                         '168 hr',
                         style: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                           color: textColor,
@@ -488,7 +483,6 @@ class _AmanahPresenceHistoryScreenState
                       Text(
                         '(21 hari)',
                         style: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: subtextColor,
@@ -551,7 +545,6 @@ class _AmanahPresenceHistoryScreenState
       child: Text(
         label,
         style: TextStyle(
-          fontFamily: 'PlusJakartaSans',
           fontSize: 11,
           fontWeight: FontWeight.w700,
           color: dark
@@ -663,7 +656,6 @@ class _AmanahPresenceHistoryScreenState
               Text(
                 item.date,
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: textColor,
@@ -674,7 +666,6 @@ class _AmanahPresenceHistoryScreenState
               Text(
                 item.time,
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                   color: subtextColor,
@@ -695,7 +686,6 @@ class _AmanahPresenceHistoryScreenState
                   item.title,
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 13,
                     fontWeight: item.isLatest
                         ? FontWeight.w700
@@ -709,7 +699,6 @@ class _AmanahPresenceHistoryScreenState
                   item.location,
                   textAlign: TextAlign.right,
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 11,
                     fontWeight: FontWeight.w400,
                     color: subtextColor,
@@ -726,7 +715,6 @@ class _AmanahPresenceHistoryScreenState
                     child: const Text(
                       'Lihat Alasan',
                       style: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: AmanahColorTokens.violetDark,
@@ -772,7 +760,6 @@ class _DateTickText extends StatelessWidget {
     return Text(
       text,
       style: const TextStyle(
-        fontFamily: 'PlusJakartaSans',
         fontSize: 11,
         fontWeight: FontWeight.w600,
         color: AmanahColorTokens.neutral400,
@@ -801,7 +788,6 @@ class _LegendIndicator extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            fontFamily: 'PlusJakartaSans',
             fontSize: 11,
             fontWeight: FontWeight.w500,
             color: AmanahColorTokens.neutral500,

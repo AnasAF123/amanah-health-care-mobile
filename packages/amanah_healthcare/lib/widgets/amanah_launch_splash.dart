@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_typography_tokens.dart';
 
 import 'package:amanah_healthcare/widgets/amanah_brand_logo.dart';
 
@@ -21,7 +22,7 @@ class AmanahLaunchSplash extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        fontFamily: 'PlusJakartaSans',
+        fontFamily: AmanahTypographyTokens.fontFamily,
         brightness: brightness,
         scaffoldBackgroundColor: background,
         colorScheme: ColorScheme.fromSeed(

@@ -308,7 +308,6 @@ class _QueueBadgePainter extends CustomPainter {
         text: displayValue,
         style: TextStyle(
           color: dark ? AmanahColorTokens.badgeDepthDark : AmanahColorTokens.badgeDepthLight,
-          fontFamily: 'PlusJakartaSans',
           fontSize: fontSize,
           fontWeight: FontWeight.w900,
           letterSpacing: -0.5,
@@ -327,7 +326,6 @@ class _QueueBadgePainter extends CustomPainter {
         text: displayValue,
         style: TextStyle(
           color: AmanahColorTokens.pureWhite,
-          fontFamily: 'PlusJakartaSans',
           fontSize: fontSize,
           fontWeight: FontWeight.w900,
           letterSpacing: -0.5,

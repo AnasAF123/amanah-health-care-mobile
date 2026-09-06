@@ -50,7 +50,6 @@ class AmanahHomeAppBar extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: AmanahColorTokens.surfaceLight,
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 15.5,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0,
@@ -71,7 +70,6 @@ class AmanahHomeAppBar extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: AmanahColorTokens.textWhite85,
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 11.5,
                           fontWeight: FontWeight.w500,
                           letterSpacing: 0,

@@ -117,7 +117,6 @@ class _AmanahOtpInputState extends State<AmanahOtpInput> {
           Text(
             widget.error!,
             style: const TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: AmanahColorTokens.danger,
@@ -177,7 +176,6 @@ class _DigitBox extends StatelessWidget {
         textAlign: TextAlign.center,
         maxLength: 1,
         style: TextStyle(
-          fontFamily: 'PlusJakartaSans',
           fontSize: 20,
           fontWeight: FontWeight.w800,
           color: textColor,

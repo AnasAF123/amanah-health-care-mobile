@@ -57,7 +57,6 @@ class AuthSheetHeader extends StatelessWidget {
           ),
           style: theme.textTheme.headlineSmall?.copyWith(
             color: theme.colorScheme.onSurface,
-            fontFamily: 'PlusJakartaSans',
             fontSize: 28,
             fontWeight: FontWeight.w900,
             height: 1.04,
@@ -68,7 +67,6 @@ class AuthSheetHeader extends StatelessWidget {
           description,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.58),
-            fontFamily: 'PlusJakartaSans',
             fontSize: 14,
             fontWeight: FontWeight.w400,
             height: 1.38,

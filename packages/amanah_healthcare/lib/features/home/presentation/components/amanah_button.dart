@@ -690,7 +690,6 @@ class AmanahButton extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: fgColor,
-                fontFamily: 'PlusJakartaSans',
                 fontSize: _fontSize,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0,
@@ -716,7 +715,6 @@ class AmanahButton extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: fgColor,
-                fontFamily: 'PlusJakartaSans',
                 fontSize: _fontSize - 2,
                 fontWeight: FontWeight.w800,
                 height: 1.0,

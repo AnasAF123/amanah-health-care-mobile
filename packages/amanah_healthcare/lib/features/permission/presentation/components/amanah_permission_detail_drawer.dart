@@ -37,7 +37,6 @@ class AmanahPermissionDetailDrawer extends StatelessWidget {
         content: Text(
           'Membuka dokumen perizinan (${item.id.toUpperCase()})...',
           style: const TextStyle(
-            fontFamily: 'PlusJakartaSans',
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -82,7 +81,6 @@ class AmanahPermissionDetailDrawer extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 19,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0,
@@ -242,7 +240,6 @@ class _MenuItemLabel extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: tone == AmanahStatusTone.danger
@@ -294,7 +291,6 @@ class _PermissionStatusPill extends StatelessWidget {
             Text(
               status.label,
               style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 11.5,
                 fontWeight: FontWeight.w800,
                 color: foreground,
@@ -343,7 +339,6 @@ class _PermissionInfoRow extends StatelessWidget {
               child: Text(
                 label,
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AmanahThemeTokens.textSecondary(context),
@@ -356,7 +351,6 @@ class _PermissionInfoRow extends StatelessWidget {
                 value,
                 textAlign: TextAlign.right,
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 13.5,
                   fontWeight: FontWeight.w800,
                   color: AmanahThemeTokens.textPrimary(context),
@@ -391,7 +385,6 @@ class _PermissionTextSection extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: AmanahThemeTokens.textPrimary(context),
@@ -401,7 +394,6 @@ class _PermissionTextSection extends StatelessWidget {
           Text(
             body,
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 13.5,
               fontWeight: FontWeight.w500,
               color: AmanahThemeTokens.textSecondary(context),
@@ -413,7 +405,6 @@ class _PermissionTextSection extends StatelessWidget {
             Text(
               footer!,
               style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 11.5,
                 fontWeight: FontWeight.w600,
                 color: AmanahThemeTokens.textTertiary(context),
@@ -456,7 +447,6 @@ class _SubstituteDoctorSection extends StatelessWidget {
                 Text(
                   'Dokter Pengganti',
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: AmanahThemeTokens.textPrimary(context),
@@ -468,7 +458,6 @@ class _SubstituteDoctorSection extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: AmanahThemeTokens.textPrimary(context),
@@ -479,7 +468,6 @@ class _SubstituteDoctorSection extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 11.5,
                     fontWeight: FontWeight.w500,
                     color: AmanahThemeTokens.textSecondary(context),
@@ -524,7 +512,6 @@ class _ApprovedNotice extends StatelessWidget {
               child: Text(
                 'Izin telah disetujui (Terkonfirmasi di SIMRS)',
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
                   color: dark ? tone.light : tone.onSurface,

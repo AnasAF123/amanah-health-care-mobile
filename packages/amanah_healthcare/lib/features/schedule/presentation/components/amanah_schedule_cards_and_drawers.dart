@@ -267,7 +267,6 @@ class AmanahBookedPatientCard extends StatelessWidget {
                               color: dark
                                   ? AmanahColorTokens.surfaceLight
                                   : AmanahColorTokens.neutral900,
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
@@ -365,7 +364,6 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                     color: AmanahThemeTokens.textPrimary(
                                       context,
                                     ),
-                                    fontFamily: 'PlusJakartaSans',
                                     fontSize: 20,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: -0.2,
@@ -378,7 +376,6 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                     color: AmanahThemeTokens.textSecondary(
                                       context,
                                     ),
-                                    fontFamily: 'PlusJakartaSans',
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -409,7 +406,6 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                     color: AmanahThemeTokens.textPrimary(
                                       context,
                                     ),
-                                    fontFamily: 'PlusJakartaSans',
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
                                   ),
@@ -423,7 +419,6 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                     color: AmanahThemeTokens.textTertiary(
                                       context,
                                     ),
-                                    fontFamily: 'PlusJakartaSans',
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -463,7 +458,6 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                         color: AmanahThemeTokens.textPrimary(
                                           context,
                                         ),
-                                        fontFamily: 'PlusJakartaSans',
                                         fontSize: 13,
                                         fontWeight: FontWeight.w800,
                                       ),
@@ -477,7 +471,6 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                     color: AmanahThemeTokens.textTertiary(
                                       context,
                                     ),
-                                    fontFamily: 'PlusJakartaSans',
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -517,7 +510,6 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                         color: AmanahThemeTokens.textPrimary(
                                           context,
                                         ),
-                                        fontFamily: 'PlusJakartaSans',
                                         fontSize: 13,
                                         fontWeight: FontWeight.w800,
                                       ),
@@ -531,7 +523,6 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                     color: AmanahThemeTokens.textTertiary(
                                       context,
                                     ),
-                                    fontFamily: 'PlusJakartaSans',
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -585,7 +576,6 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                 'Detail Pasien',
                                 style: TextStyle(
                                   color: AmanahColorTokens.surfaceLight,
-                                  fontFamily: 'PlusJakartaSans',
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w800,
                                 ),
@@ -752,7 +742,6 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                               color: dark
                                   ? AmanahColorTokens.surfaceLight
                                   : AmanahColorTokens.neutral900,
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
@@ -811,7 +800,6 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                               color: dark
                                   ? AmanahColorTokens.surfaceLight
                                   : AmanahColorTokens.neutral900,
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
@@ -839,7 +827,6 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                         schedule.title,
                         style: TextStyle(
                           color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 24,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -0.3,
@@ -864,7 +851,6 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                                     color: dark
                                         ? AmanahColorTokens.surfaceLight
                                         : AmanahColorTokens.neutral900,
-                                    fontFamily: 'PlusJakartaSans',
                                     fontSize: 14.5,
                                     fontWeight: FontWeight.w800,
                                   ),
@@ -878,7 +864,6 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                                     color: dark
                                         ? AmanahColorTokens.neutral300
                                         : AmanahColorTokens.neutral500,
-                                    fontFamily: 'PlusJakartaSans',
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -910,7 +895,6 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                                           color: dark
                                               ? AmanahColorTokens.surfaceLight
                                               : AmanahColorTokens.neutral900,
-                                          fontFamily: 'PlusJakartaSans',
                                           fontSize: 13.5,
                                           fontWeight: FontWeight.w800,
                                         ),
@@ -924,7 +908,6 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                                       color: dark
                                           ? AmanahColorTokens.neutral300
                                           : AmanahColorTokens.neutral500,
-                                      fontFamily: 'PlusJakartaSans',
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -959,7 +942,6 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                                           color: dark
                                               ? AmanahColorTokens.surfaceLight
                                               : AmanahColorTokens.neutral900,
-                                          fontFamily: 'PlusJakartaSans',
                                           fontSize: 13.5,
                                           fontWeight: FontWeight.w800,
                                         ),
@@ -973,7 +955,6 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                                       color: dark
                                           ? AmanahColorTokens.neutral300
                                           : AmanahColorTokens.neutral500,
-                                      fontFamily: 'PlusJakartaSans',
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -1092,7 +1073,6 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                       schedule.title,
                       style: TextStyle(
                         color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral950,
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 20,
                         fontWeight: FontWeight.w900,
                         letterSpacing: -0.3,
@@ -1105,7 +1085,6 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                         color: dark
                             ? AmanahColorTokens.neutral400
                             : AmanahColorTokens.neutral500,
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1167,7 +1146,6 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                                   : (dark
                                         ? AmanahColorTokens.brandSoft
                                         : AmanahColorTokens.auroraAccentDark)),
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1270,7 +1248,6 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                               color: dark
                                   ? AmanahColorTokens.brandSoft
                                   : AmanahColorTokens.brandAccent,
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
@@ -1328,7 +1305,6 @@ class _SessionSpecTotalPatientsRow extends StatelessWidget {
             'Total Pasien Booking',
             style: TextStyle(
               color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12.5,
               fontWeight: FontWeight.w600,
             ),
@@ -1340,7 +1316,6 @@ class _SessionSpecTotalPatientsRow extends StatelessWidget {
               textAlign: TextAlign.right,
               style: TextStyle(
                 color: dark ? AmanahColorTokens.brandSoft : AmanahColorTokens.brandAccent,
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 12.5,
                 fontWeight: FontWeight.w800,
               ),
@@ -1379,7 +1354,6 @@ class _StackedPatientAvatars extends StatelessWidget {
           '0',
           style: TextStyle(
             color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral700,
-            fontFamily: 'PlusJakartaSans',
             fontSize: 10,
             fontWeight: FontWeight.w700,
           ),
@@ -1599,7 +1573,6 @@ class _PatientProfileHeader extends StatelessWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral950,
-            fontFamily: 'PlusJakartaSans',
             fontSize: 18,
             fontWeight: FontWeight.w900,
             height: 1.1,
@@ -1651,7 +1624,6 @@ class _PatientMetaInline extends StatelessWidget {
                     : (dark
                           ? AmanahColorTokens.brandSoft
                           : AmanahColorTokens.auroraAccentDark),
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
               ),
@@ -1664,7 +1636,6 @@ class _PatientMetaInline extends StatelessWidget {
 
   TextStyle get _style => TextStyle(
     color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
-    fontFamily: 'PlusJakartaSans',
     fontSize: 12,
     fontWeight: FontWeight.w600,
   );
@@ -1778,7 +1749,6 @@ class _PatientSpecRow extends StatelessWidget {
             label,
             style: TextStyle(
               color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -1790,7 +1760,6 @@ class _PatientSpecRow extends StatelessWidget {
               textAlign: TextAlign.right,
               style: TextStyle(
                 color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
@@ -1819,7 +1788,6 @@ class _PatientComplaintBlock extends StatelessWidget {
             'Keluhan & catatan medis pasien',
             style: TextStyle(
               color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -1843,7 +1811,6 @@ class _PatientComplaintBlock extends StatelessWidget {
               complaint,
               style: TextStyle(
                 color: dark ? AmanahColorTokens.neutral200 : AmanahColorTokens.neutral800,
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 height: 1.45,
@@ -2020,7 +1987,6 @@ class _QueueBadgePainter extends CustomPainter {
         text: display,
         style: TextStyle(
           color: AmanahColorTokens.auroraAccentDark,
-          fontFamily: 'PlusJakartaSans',
           fontSize: display.length > 2 ? 11 : 13,
           fontWeight: FontWeight.w900,
         ),

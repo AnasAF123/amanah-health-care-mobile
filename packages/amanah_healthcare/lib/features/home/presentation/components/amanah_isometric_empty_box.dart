@@ -273,7 +273,6 @@ class _ControlButton extends StatelessWidget {
             style: TextStyle(
               fontSize: 11.5,
               fontWeight: FontWeight.w600,
-              fontFamily: 'PlusJakartaSans',
               color: dark
                   ? AmanahColorTokens.neutral400
                   : AmanahColorTokens.neutral600,
@@ -858,7 +857,6 @@ class _IsometricBoxPainter extends CustomPainter {
       text: TextSpan(
         text: text,
         style: TextStyle(
-          fontFamily: 'PlusJakartaSans',
           fontSize: 15.0,
           fontWeight: FontWeight.w500,
           color: colors.caption,

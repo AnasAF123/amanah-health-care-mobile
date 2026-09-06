@@ -341,7 +341,6 @@ class _AmanahClinicAnalyticsSectionState
                           Text(
                             'Pasien Kontrol (Lama)',
                             style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 10.5,
                               fontWeight: FontWeight.w600,
                               color: AmanahThemeTokens.textSecondary(context),
@@ -351,7 +350,6 @@ class _AmanahClinicAnalyticsSectionState
                           Text(
                             '$returning Pasien',
                             style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 16,
                               fontWeight: FontWeight.w900,
                               color: AmanahThemeTokens.textPrimary(context),
@@ -378,7 +376,6 @@ class _AmanahClinicAnalyticsSectionState
                           Text(
                             'Pasien Baru',
                             style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 10.5,
                               fontWeight: FontWeight.w600,
                               color: AmanahThemeTokens.textSecondary(context),
@@ -388,7 +385,6 @@ class _AmanahClinicAnalyticsSectionState
                           Text(
                             '$newPatients Pasien',
                             style: const TextStyle(
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 16,
                               fontWeight: FontWeight.w900,
                               color: AmanahColorTokens.brand,
@@ -414,7 +410,6 @@ class _AmanahClinicAnalyticsSectionState
                 child: Text(
                   'Total kunjungan poli anak RS Amanah Sehat pada bulan ${record.monthName} ${record.year} mencapai $total pasien, didominasi oleh pasien kontrol rutin (${((returning / total) * 100).round()}%) dan pasien baru (${((newPatients / total) * 100).round()}%).',
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 11.5,
                     fontWeight: FontWeight.w500,
                     height: 1.45,
@@ -463,7 +458,6 @@ class _AmanahClinicAnalyticsSectionState
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -0.3,
@@ -549,7 +543,6 @@ class _AmanahClinicAnalyticsSectionState
                   Text(
                     '${currentRecord.monthName} ${currentRecord.year}',
                     style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 13.5,
                       fontWeight: FontWeight.w800,
                       color: AmanahThemeTokens.textPrimary(context),
@@ -589,7 +582,6 @@ class _AmanahClinicAnalyticsSectionState
                         Text(
                           '$totalPatients',
                           style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
                             fontSize: 30,
                             fontWeight: FontWeight.w900,
                             letterSpacing: -1.0,
@@ -603,7 +595,6 @@ class _AmanahClinicAnalyticsSectionState
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 11.5,
                               fontWeight: FontWeight.w700,
                               color: AmanahThemeTokens.textSecondary(context),
@@ -642,7 +633,6 @@ class _AmanahClinicAnalyticsSectionState
                         Text(
                           '+12.5%',
                           style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
                             fontSize: 10.5,
                             fontWeight: FontWeight.w800,
                             color: AmanahColorTokens.brand,
@@ -693,7 +683,6 @@ class _AmanahClinicAnalyticsSectionState
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 9,
                           fontWeight: FontWeight.w700,
                           color: dark
@@ -744,7 +733,6 @@ class _AmanahClinicAnalyticsSectionState
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      fontFamily: 'PlusJakartaSans',
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                       color: AmanahThemeTokens.textSecondary(
@@ -760,7 +748,6 @@ class _AmanahClinicAnalyticsSectionState
                           Text(
                             '$totalReturningPatients',
                             style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 12.5,
                               fontWeight: FontWeight.w900,
                               color: AmanahThemeTokens.textPrimary(context),
@@ -805,7 +792,6 @@ class _AmanahClinicAnalyticsSectionState
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      fontFamily: 'PlusJakartaSans',
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                       color: AmanahThemeTokens.textSecondary(
@@ -821,7 +807,6 @@ class _AmanahClinicAnalyticsSectionState
                           Text(
                             '$totalNewPatients',
                             style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 12.5,
                               fontWeight: FontWeight.w900,
                               color: AmanahThemeTokens.textPrimary(context),

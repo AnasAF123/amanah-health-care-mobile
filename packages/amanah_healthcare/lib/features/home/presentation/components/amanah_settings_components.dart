@@ -32,7 +32,6 @@ class AmanahSettingSection extends StatelessWidget {
             title,
             style: TextStyle(
               color: titleColor,
-              fontFamily: 'PlusJakartaSans',
               fontSize: 11.5,
               fontWeight: FontWeight.w700,
               letterSpacing: 0,
@@ -104,7 +103,6 @@ class AmanahSettingInfoRow extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color: labelColor,
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
@@ -114,7 +112,6 @@ class AmanahSettingInfoRow extends StatelessWidget {
                   value,
                   style: TextStyle(
                     color: valueColor,
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0,
@@ -169,7 +166,6 @@ class AmanahSettingEditableRow extends StatelessWidget {
                       label,
                       style: TextStyle(
                         color: labelColor,
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                       ),
@@ -181,7 +177,6 @@ class AmanahSettingEditableRow extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: valueColor,
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0,
@@ -193,7 +188,6 @@ class AmanahSettingEditableRow extends StatelessWidget {
                         helperText!,
                         style: TextStyle(
                           color: helperColor,
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 10.5,
                           fontWeight: FontWeight.w400,
                         ),
@@ -253,7 +247,6 @@ class AmanahSettingNavRow extends StatelessWidget {
                         category!,
                         style: TextStyle(
                           color: categoryColor,
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 10.5,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0,
@@ -265,7 +258,6 @@ class AmanahSettingNavRow extends StatelessWidget {
                       title,
                       style: TextStyle(
                         color: titleColor,
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 12.5,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0,
@@ -278,7 +270,6 @@ class AmanahSettingNavRow extends StatelessWidget {
                         subtitle!,
                         style: TextStyle(
                           color: subtitleColor,
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 11,
                           fontWeight: FontWeight.w400,
                         ),
@@ -324,7 +315,6 @@ class AmanahSettingHorizontalRow extends StatelessWidget {
             label,
             style: TextStyle(
               color: labelColor,
-              fontFamily: 'PlusJakartaSans',
               fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
@@ -333,7 +323,6 @@ class AmanahSettingHorizontalRow extends StatelessWidget {
             value,
             style: TextStyle(
               color: valueColor,
-              fontFamily: 'PlusJakartaSans',
               fontSize: 13,
               fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
               letterSpacing: 0,
@@ -381,7 +370,6 @@ class AmanahSettingToggleRow extends StatelessWidget {
                   title,
                   style: TextStyle(
                     color: titleColor,
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0,
@@ -392,7 +380,6 @@ class AmanahSettingToggleRow extends StatelessWidget {
                   subtitle,
                   style: TextStyle(
                     color: subtitleColor,
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 11,
                     fontWeight: FontWeight.w400,
                   ),
@@ -528,7 +515,6 @@ class AmanahSettingActionRow extends StatelessWidget {
                   title,
                   style: TextStyle(
                     color: titleColor,
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     letterSpacing: -0.1,
@@ -539,7 +525,6 @@ class AmanahSettingActionRow extends StatelessWidget {
                   subtitle,
                   style: TextStyle(
                     color: subtitleColor,
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 11,
                     fontWeight: FontWeight.w400,
                   ),
@@ -562,7 +547,6 @@ class AmanahSettingActionRow extends StatelessWidget {
                 actionLabel,
                 style: TextStyle(
                   color: btnText,
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -674,7 +658,6 @@ class _AmanahSettingEditDialogState extends State<AmanahSettingEditDialog> {
               widget.title,
               style: TextStyle(
                 color: textColor,
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),
@@ -684,7 +667,6 @@ class _AmanahSettingEditDialogState extends State<AmanahSettingEditDialog> {
               widget.label,
               style: TextStyle(
                 color: subtextColor,
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 fontWeight: FontWeight.w400,
               ),
@@ -697,7 +679,6 @@ class _AmanahSettingEditDialogState extends State<AmanahSettingEditDialog> {
               autofocus: true,
               style: TextStyle(
                 color: textColor,
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
@@ -705,7 +686,6 @@ class _AmanahSettingEditDialogState extends State<AmanahSettingEditDialog> {
                 hintText: widget.placeholder,
                 hintStyle: TextStyle(
                   color: subtextColor.withValues(alpha: 0.60),
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 13,
                 ),
                 filled: true,

@@ -85,7 +85,6 @@ class AmanahPermissionCard extends StatelessWidget {
                     child: Text(
                       item.status.label,
                       style: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 12,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.4,
@@ -131,7 +130,6 @@ class AmanahPermissionCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontFamily: 'PlusJakartaSans',
                                 fontSize: 16.5,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: -0.3,
@@ -146,7 +144,6 @@ class AmanahPermissionCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontFamily: 'PlusJakartaSans',
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w500,
                                 color: textMuted,
@@ -177,7 +174,6 @@ class AmanahPermissionCard extends StatelessWidget {
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
-                                                fontFamily: 'PlusJakartaSans',
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w800,
                                                 letterSpacing: -0.2,
@@ -193,7 +189,6 @@ class AmanahPermissionCard extends StatelessWidget {
                                         child: Text(
                                           'Mulai',
                                           style: TextStyle(
-                                            fontFamily: 'PlusJakartaSans',
                                             fontSize: 11,
                                             fontWeight: FontWeight.w500,
                                             color: textMuted,
@@ -226,7 +221,6 @@ class AmanahPermissionCard extends StatelessWidget {
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
-                                                fontFamily: 'PlusJakartaSans',
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w800,
                                                 letterSpacing: -0.2,
@@ -242,7 +236,6 @@ class AmanahPermissionCard extends StatelessWidget {
                                         child: Text(
                                           'Selesai',
                                           style: TextStyle(
-                                            fontFamily: 'PlusJakartaSans',
                                             fontSize: 11,
                                             fontWeight: FontWeight.w500,
                                             color: textMuted,

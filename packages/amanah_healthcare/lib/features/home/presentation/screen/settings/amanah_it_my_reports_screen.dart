@@ -3,6 +3,7 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_b
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_typography_tokens.dart';
 
 class AmanahReportItem {
   const AmanahReportItem({
@@ -163,7 +164,7 @@ class _ReportCard extends StatelessWidget {
                 report.ticketNumber,
                 style: TextStyle(
                   color: subtextColor,
-                  fontFamily: 'monospace',
+                  fontFamily: AmanahTypographyTokens.monospaceFontFamily,
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                 ),
@@ -179,7 +180,6 @@ class _ReportCard extends StatelessWidget {
                   badgeLabel,
                   style: TextStyle(
                     color: badgeText,
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                   ),
@@ -192,7 +192,6 @@ class _ReportCard extends StatelessWidget {
             report.title,
             style: TextStyle(
               color: textColor,
-              fontFamily: 'PlusJakartaSans',
               fontSize: 13,
               fontWeight: FontWeight.w700,
             ),
@@ -218,7 +217,6 @@ class _ReportCard extends StatelessWidget {
                 color: dark
                     ? AmanahColorTokens.neutral300
                     : AmanahColorTokens.neutral600,
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 11,
                 height: 1.45,
               ),
@@ -229,7 +227,6 @@ class _ReportCard extends StatelessWidget {
             'Diajukan pada: ${report.date}',
             style: TextStyle(
               color: subtextColor,
-              fontFamily: 'PlusJakartaSans',
               fontSize: 10,
             ),
           ),

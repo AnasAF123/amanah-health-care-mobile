@@ -752,7 +752,6 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
-                                        fontFamily: 'PlusJakartaSans',
                                         fontSize: 15.0,
                                         fontWeight: FontWeight.w900,
                                         letterSpacing: -0.2,
@@ -772,7 +771,6 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
                                       maxLines: 3,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
-                                        fontFamily: 'PlusJakartaSans',
                                         fontSize: 11.0,
                                         fontWeight: FontWeight.w500,
                                         height: 1.30,

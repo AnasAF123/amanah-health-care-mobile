@@ -212,7 +212,6 @@ class _AmanahItSupportSettingsScreenState
                                     'Laporan saya',
                                     style: TextStyle(
                                       color: textColor,
-                                      fontFamily: 'PlusJakartaSans',
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -222,7 +221,6 @@ class _AmanahItSupportSettingsScreenState
                                     'Pantau status penanganan tiket kendala teknis',
                                     style: TextStyle(
                                       color: subtextColor,
-                                      fontFamily: 'PlusJakartaSans',
                                       fontSize: 11,
                                     ),
                                   ),
@@ -246,7 +244,6 @@ class _AmanahItSupportSettingsScreenState
                                     : '0 laporan',
                                 style: TextStyle(
                                   color: reportBadgeText,
-                                  fontFamily: 'PlusJakartaSans',
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -306,7 +303,6 @@ class _AmanahItSupportSettingsScreenState
                               color: dark
                                   ? AmanahColorTokens.surfaceLight
                                   : AmanahColorTokens.navy,
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                             ),
@@ -318,7 +314,6 @@ class _AmanahItSupportSettingsScreenState
                               color: dark
                                   ? AmanahColorTokens.neutral400
                                   : AmanahColorTokens.neutral600,
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 11.5,
                               height: 1.4,
                             ),

@@ -136,7 +136,6 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                 child: Text(
                   'Profil dokter berhasil diperbarui',
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
                   ),
@@ -184,7 +183,6 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                 child: Text(
                   'Foto profil dokter berhasil diperbarui',
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
                   ),
@@ -746,7 +744,6 @@ class _TelehealthArtwork extends StatelessWidget {
                               child: Text(
                                 'TeleCare Active',
                                 style: TextStyle(
-                                  fontFamily: 'PlusJakartaSans',
                                   fontSize: 7,
                                   fontWeight: FontWeight.w800,
                                   color: dark
@@ -983,7 +980,6 @@ class _DualStackProfileCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontFamily: 'PlusJakartaSans',
                                 fontSize: 18.5,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: -0.4,
@@ -998,7 +994,6 @@ class _DualStackProfileCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontFamily: 'PlusJakartaSans',
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w500,
                                 color: dark
@@ -1057,7 +1052,6 @@ class _DualStackProfileCard extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
                                     color: dark
@@ -1076,7 +1070,6 @@ class _DualStackProfileCard extends StatelessWidget {
                             Text(
                               'Kartu ID Dokter',
                               style: TextStyle(
-                                fontFamily: 'PlusJakartaSans',
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w700,
                                 color: dark
@@ -1245,7 +1238,6 @@ class _WingedMailBanner extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
                             fontSize: 13,
                             fontWeight: FontWeight.w800,
                             letterSpacing: -0.2,
@@ -1262,7 +1254,6 @@ class _WingedMailBanner extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
                         color: dark
@@ -1294,7 +1285,6 @@ class _WingedMailBanner extends StatelessWidget {
                     child: Text(
                       buttonLabel,
                       style: const TextStyle(
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 12,
                         fontWeight: FontWeight.w800,
                       ),
@@ -1477,7 +1467,6 @@ class _PixelPerfectWingedMailPainter extends CustomPainter {
     const TextSpan span = TextSpan(
       text: '@',
       style: TextStyle(
-        fontFamily: 'PlusJakartaSans',
         fontSize: 12.5,
         fontWeight: FontWeight.w900,
         color: AmanahColorTokens.surfaceLight,
@@ -1518,7 +1507,6 @@ class _PreferencesCard extends StatelessWidget {
           child: Text(
             'Preferensi',
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 13.5,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.2,
@@ -1634,7 +1622,6 @@ class _PreferenceRowItem extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 13.5,
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.2,
@@ -1657,7 +1644,6 @@ class _PreferenceRowItem extends StatelessWidget {
                         child: Text(
                           badgeText!,
                           style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
                             fontSize: 10,
                             fontWeight: FontWeight.w800,
                             color: badgeColor ?? AmanahColorTokens.sky,

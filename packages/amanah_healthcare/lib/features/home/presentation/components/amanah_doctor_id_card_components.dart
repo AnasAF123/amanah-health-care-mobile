@@ -727,7 +727,6 @@ class AmanahDoctorIdInfoDrawer extends StatelessWidget {
             'ID Card Digital Terverifikasi RS Amanah Sehat dilengkapi simulasi fisika tiga dimensi dan token presensi aman:',
             style: TextStyle(
               color: subtextColor,
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w500,
               height: 1.45,
@@ -877,7 +876,6 @@ class AmanahDoctorIdQrDialog extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: textColor,
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0,
@@ -890,7 +888,6 @@ class AmanahDoctorIdQrDialog extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: subtextColor,
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     height: 1.35,
@@ -929,7 +926,6 @@ class AmanahDoctorIdQrDialog extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: subtextColor.withValues(alpha: 0.78),
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                         ),
@@ -1019,7 +1015,6 @@ class _DoctorIdCardFace extends StatelessWidget {
                 'Amanah',
                 style: TextStyle(
                   color: subtextColor,
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: width * 0.075,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0,
@@ -1104,7 +1099,6 @@ class _DoctorIdCardFace extends StatelessWidget {
                             maxLines: 1,
                             style: TextStyle(
                               color: textColor,
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: width * 0.071,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0,
@@ -1119,7 +1113,6 @@ class _DoctorIdCardFace extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: subtextColor,
-                            fontFamily: 'PlusJakartaSans',
                             fontSize: width * 0.039,
                             fontWeight: FontWeight.w700,
                             height: 1.1,
@@ -1140,7 +1133,6 @@ class _DoctorIdCardFace extends StatelessWidget {
                           textAlign: TextAlign.right,
                           style: TextStyle(
                             color: AmanahColorTokens.neutral400,
-                            fontFamily: 'PlusJakartaSans',
                             fontSize: width * 0.028,
                             fontWeight: FontWeight.w900,
                             height: 1,
@@ -1156,7 +1148,6 @@ class _DoctorIdCardFace extends StatelessWidget {
                             textAlign: TextAlign.right,
                             style: TextStyle(
                               color: subtextColor,
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: width * 0.034,
                               fontWeight: FontWeight.w800,
                               height: 1,
@@ -1172,7 +1163,6 @@ class _DoctorIdCardFace extends StatelessWidget {
                             color: dark
                                 ? AmanahColorTokens.auroraCyanLuminousDark
                                 : AmanahColorTokens.brandPrimary,
-                            fontFamily: 'PlusJakartaSans',
                             fontSize: width * 0.033,
                             fontWeight: FontWeight.w900,
                             height: 1.05,
@@ -1267,7 +1257,6 @@ class _DoctorIdCardFace extends StatelessWidget {
                     'Amanah',
                     style: TextStyle(
                       color: subtextColor,
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: width * 0.078,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0,
@@ -1280,7 +1269,6 @@ class _DoctorIdCardFace extends StatelessWidget {
                 'HEALTHCARE IDENTITY SYSTEM',
                 style: TextStyle(
                   color: AmanahColorTokens.neutral400,
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: width * 0.032,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0,
@@ -1386,7 +1374,6 @@ class _InfoDrawerItem extends StatelessWidget {
                     title,
                     style: TextStyle(
                       color: textColor,
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 12,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 0,
@@ -1398,7 +1385,6 @@ class _InfoDrawerItem extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       color: subtextColor,
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                       height: 1.42,
@@ -1757,7 +1743,6 @@ class _LanyardPhysicsPainter extends CustomPainter {
         text: 'RS AMANAH SEHAT',
         style: TextStyle(
           color: AmanahColorTokens.surfaceLight,
-          fontFamily: 'PlusJakartaSans',
           fontSize: 6.5,
           fontWeight: FontWeight.w800,
           letterSpacing: 1.2,

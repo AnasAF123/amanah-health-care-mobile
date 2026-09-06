@@ -326,13 +326,11 @@ class _SuccessContent extends StatelessWidget {
           textAlign: TextAlign.center,
           style:
               theme.textTheme.titleLarge?.copyWith(
-                fontFamily: 'PlusJakartaSans',
                 fontWeight: FontWeight.w800,
                 height: 1.2,
                 color: palette.title,
               ) ??
               TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
                 height: 1.2,
@@ -353,7 +351,6 @@ class _SuccessContent extends StatelessWidget {
           ),
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontFamily: 'PlusJakartaSans',
             fontSize: 14,
             fontWeight: FontWeight.w500,
             height: 1.42,

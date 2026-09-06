@@ -252,7 +252,6 @@ class _AmanahNotificationTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 13,
                         fontWeight: item.isUnread
                             ? FontWeight.w800
@@ -274,7 +273,6 @@ class _AmanahNotificationTile extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                         color: dark
@@ -299,7 +297,6 @@ class _AmanahNotificationTile extends StatelessWidget {
                       Text(
                         item.time,
                         style: const TextStyle(
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color: AmanahColorTokens.neutral400,
@@ -394,7 +391,6 @@ class _AmanahNotificationOptionsMenu extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: AmanahThemeTokens.textPrimary(context),
@@ -422,7 +418,6 @@ class _AmanahNotificationOptionsMenu extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: dark
@@ -462,7 +457,6 @@ class _AmanahNotificationDetailModal extends StatelessWidget {
           Text(
             item.category.label.toUpperCase(),
             style: const TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 11,
               fontWeight: FontWeight.w800,
               color: AmanahColorTokens.brandAccent,
@@ -473,7 +467,6 @@ class _AmanahNotificationDetailModal extends StatelessWidget {
           Text(
             item.title,
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 16,
               fontWeight: FontWeight.w800,
               color: AmanahThemeTokens.textPrimary(context),
@@ -484,7 +477,6 @@ class _AmanahNotificationDetailModal extends StatelessWidget {
           Text(
             item.desc,
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 13,
               fontWeight: FontWeight.w500,
               color: AmanahThemeTokens.textSecondary(context),

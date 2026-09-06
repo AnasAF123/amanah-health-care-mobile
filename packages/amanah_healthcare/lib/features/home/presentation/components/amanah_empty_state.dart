@@ -452,7 +452,6 @@ class AmanahEmptyState extends StatelessWidget {
       title,
       textAlign: TextAlign.center,
       style: TextStyle(
-        fontFamily: 'PlusJakartaSans',
         fontSize: fontSize,
         fontWeight: FontWeight.w800,
         color: textColor,
@@ -471,7 +470,6 @@ class AmanahEmptyState extends StatelessWidget {
         message!,
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontFamily: 'PlusJakartaSans',
           fontSize: fontSize,
           fontWeight: FontWeight.w500,
           color: subtextColor,

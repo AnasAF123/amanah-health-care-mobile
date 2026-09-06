@@ -197,7 +197,6 @@ class _AmanahDocScheduleCalendarDrawerState
                   color: dark
                       ? AmanahColorTokens.surfaceLight
                       : AmanahColorTokens.neutral900,
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
                 ),
@@ -324,7 +323,6 @@ class _AmanahDocScheduleCalendarDrawerState
                         '${date.day}',
                         style: TextStyle(
                           color: textColor,
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 13,
                           fontWeight: (isSelected || isToday)
                               ? FontWeight.w900
@@ -419,7 +417,6 @@ class _CalendarLegendDot extends StatelessWidget {
             color: dark
                 ? AmanahColorTokens.neutral400
                 : AmanahColorTokens.neutral500,
-            fontFamily: 'PlusJakartaSans',
             fontSize: 11,
             fontWeight: FontWeight.w700,
           ),
@@ -442,7 +439,6 @@ class _DayHeader extends StatelessWidget {
         textAlign: TextAlign.center,
         style: const TextStyle(
           color: AmanahColorTokens.neutral400,
-          fontFamily: 'PlusJakartaSans',
           fontSize: 11,
           fontWeight: FontWeight.w700,
         ),
@@ -942,7 +938,6 @@ class _AmanahAddEditScheduleDrawerState
                 color: dark
                     ? AmanahColorTokens.neutral200
                     : AmanahColorTokens.neutral700,
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
@@ -1036,7 +1031,6 @@ class _AmanahAddEditScheduleDrawerState
                                         : (dark
                                               ? AmanahColorTokens.neutral400
                                               : AmanahColorTokens.neutral600),
-                                    fontFamily: 'PlusJakartaSans',
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -1057,7 +1051,6 @@ class _AmanahAddEditScheduleDrawerState
               color: dark
                   ? AmanahColorTokens.neutral200
                   : AmanahColorTokens.neutral700,
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -1090,7 +1083,6 @@ class _AmanahAddEditScheduleDrawerState
               color: dark
                   ? AmanahColorTokens.neutral200
                   : AmanahColorTokens.neutral700,
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -1231,7 +1223,6 @@ class _AmanahAddEditScheduleDrawerState
                     color: dark
                         ? AmanahColorTokens.surfaceLight
                         : AmanahColorTokens.neutral900,
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 12,
                     fontWeight: FontWeight.w900,
                   ),
@@ -1336,7 +1327,6 @@ class _AmanahAddEditScheduleDrawerState
                     '${date.day}',
                     style: TextStyle(
                       color: textColor,
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 12,
                       fontWeight: (isSelected || isToday)
                           ? FontWeight.w900
@@ -1415,7 +1405,6 @@ class _ScheduleSelectorButton extends StatelessWidget {
                   color: dark
                       ? AmanahColorTokens.surfaceLight
                       : AmanahColorTokens.neutral900,
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1558,7 +1547,6 @@ class _ScheduleSessionPanel extends StatelessWidget {
                             : (dark
                                   ? AmanahColorTokens.neutral300
                                   : AmanahColorTokens.neutral700),
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 13.5,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.1,
@@ -1629,7 +1617,6 @@ class _ScheduleSessionPanel extends StatelessWidget {
                                   color: dark
                                       ? AmanahColorTokens.surfaceLight
                                       : AmanahColorTokens.neutral800,
-                                  fontFamily: 'PlusJakartaSans',
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -1805,7 +1792,6 @@ class _SlotFieldColumn extends StatelessWidget {
             color: dark
                 ? AmanahColorTokens.neutral400
                 : AmanahColorTokens.neutral500,
-            fontFamily: 'PlusJakartaSans',
             fontSize: 10.5,
             fontWeight: FontWeight.w600,
           ),
@@ -1833,7 +1819,6 @@ class _SlotLabel extends StatelessWidget {
           color: dark
               ? AmanahColorTokens.neutral400
               : AmanahColorTokens.neutral500,
-          fontFamily: 'PlusJakartaSans',
           fontSize: 11,
           fontWeight: FontWeight.w600,
         ),
@@ -1883,7 +1868,6 @@ class _MiniSlotButton extends StatelessWidget {
                   color: dark
                       ? AmanahColorTokens.surfaceLight
                       : AmanahColorTokens.neutral900,
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
@@ -2035,7 +2019,6 @@ class _AmanahScheduleSelectionSheetState
                         color: dark
                             ? AmanahColorTokens.surfaceLight
                             : AmanahColorTokens.neutral900,
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -2081,7 +2064,6 @@ class _AmanahScheduleSelectionSheetState
                 color: dark
                     ? AmanahColorTokens.neutral400
                     : AmanahColorTokens.neutral500,
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
@@ -2094,7 +2076,6 @@ class _AmanahScheduleSelectionSheetState
                         'Tidak ada pilihan ditemukan',
                         style: TextStyle(
                           color: AmanahColorTokens.neutral400,
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 12,
                         ),
                       ),
@@ -2184,7 +2165,6 @@ class _AmanahScheduleSelectionSheetState
                                           : (dark
                                                 ? AmanahColorTokens.surfaceLight
                                                 : AmanahColorTokens.neutral900),
-                                      fontFamily: 'PlusJakartaSans',
                                       fontSize: 12,
                                       fontWeight: isSelected
                                           ? FontWeight.w800

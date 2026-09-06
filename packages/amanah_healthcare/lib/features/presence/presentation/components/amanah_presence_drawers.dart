@@ -117,7 +117,6 @@ class _AmanahPresenceFilterDrawerState
           Text(
             'Status Presensi',
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: subtextColor,
@@ -159,7 +158,6 @@ class _AmanahPresenceFilterDrawerState
                       child: Text(
                         opt.label,
                         style: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 12,
                           fontWeight: isSelected
                               ? FontWeight.w700
@@ -182,7 +180,6 @@ class _AmanahPresenceFilterDrawerState
           Text(
             'Unit Penugasan',
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: subtextColor,
@@ -224,7 +221,6 @@ class _AmanahPresenceFilterDrawerState
                       child: Text(
                         opt.label,
                         style: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 12,
                           fontWeight: isSelected
                               ? FontWeight.w700
@@ -250,7 +246,6 @@ class _AmanahPresenceFilterDrawerState
               Text(
                 'Pilih Tanggal',
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: subtextColor,
@@ -262,7 +257,6 @@ class _AmanahPresenceFilterDrawerState
                   Text(
                     'Agustus 2026',
                     style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: textColor,
@@ -383,7 +377,6 @@ class _AmanahPresenceFilterDrawerState
                 Text(
                   '$day',
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 11,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                     color: isSelected
@@ -450,7 +443,6 @@ class _CalendarHeaderDay extends StatelessWidget {
         day,
         textAlign: TextAlign.center,
         style: const TextStyle(
-          fontFamily: 'PlusJakartaSans',
           fontSize: 11,
           fontWeight: FontWeight.w600,
           color: AmanahColorTokens.neutral400,
@@ -504,7 +496,6 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
               Text(
                 'Keterangan Alasan',
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: subtextColor,
@@ -536,7 +527,6 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
                     const Text(
                       'Disetujui',
                       style: TextStyle(
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         color: AmanahColorTokens.violetDark,
@@ -552,7 +542,6 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
             record.reason ??
                 'Izin cuti resmi terjadwal yang telah disetujui manajemen RS Amanah.',
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: textColor,
@@ -601,7 +590,6 @@ class AmanahPresenceInfoDrawer extends StatelessWidget {
           Text(
             'Data timeline presensi diakumulasikan secara otomatis setiap bulan berdasarkan shift dan jadwal yang terdaftar di sistem RS Amanah:',
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: subtextColor,
@@ -686,7 +674,6 @@ class _InfoStatusRow extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: dark
@@ -702,7 +689,6 @@ class _InfoStatusRow extends StatelessWidget {
               description,
               textAlign: TextAlign.right,
               style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color: dark

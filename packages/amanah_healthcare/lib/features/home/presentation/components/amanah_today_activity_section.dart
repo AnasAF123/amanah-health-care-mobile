@@ -38,7 +38,6 @@ class AmanahTodayActivitySection extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 16.0,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.3,
@@ -188,7 +187,6 @@ class AmanahActivityCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 11.0,
                               fontWeight: FontWeight.w600,
                               color: AmanahThemeTokens.textSecondary(context),
@@ -202,7 +200,6 @@ class AmanahActivityCard extends StatelessWidget {
                               Text(
                                 item.count,
                                 style: TextStyle(
-                                  fontFamily: 'PlusJakartaSans',
                                   fontSize: 32.0,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: -1.0,
@@ -214,7 +211,6 @@ class AmanahActivityCard extends StatelessWidget {
                               Text(
                                 item.unit,
                                 style: TextStyle(
-                                  fontFamily: 'PlusJakartaSans',
                                   fontSize: 11.0,
                                   fontWeight: FontWeight.w500,
                                   color: AmanahThemeTokens.textTertiary(

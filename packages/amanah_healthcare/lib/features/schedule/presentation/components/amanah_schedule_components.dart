@@ -50,7 +50,6 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                   color: dark
                       ? AmanahColorTokens.surfaceLight
                       : AmanahColorTokens.neutral900,
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 9.5,
                   fontWeight: FontWeight.w800,
                 ),
@@ -76,7 +75,6 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                         color: dark
                             ? AmanahColorTokens.surfaceLight
                             : AmanahColorTokens.neutral900,
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 12,
                         fontWeight: FontWeight.w800,
                       ),
@@ -109,7 +107,6 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                               'Cuti',
                               style: TextStyle(
                                 color: AmanahColorTokens.warning,
-                                fontFamily: 'PlusJakartaSans',
                                 fontSize: 9.5,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -134,7 +131,6 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                         color: dark
                             ? AmanahColorTokens.tabActiveDark
                             : AmanahColorTokens.brand,
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
                       ),
@@ -145,7 +141,6 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                         color: dark
                             ? AmanahColorTokens.neutral400
                             : AmanahColorTokens.neutral500,
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                       ),
@@ -534,7 +529,6 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                                         .withValues(alpha: 0.70)
                                                   : AmanahColorTokens
                                                         .neutral500),
-                                        fontFamily: 'PlusJakartaSans',
                                         fontSize: 10,
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: 0.5,
@@ -550,7 +544,6 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                                         .surfaceLight
                                                   : AmanahColorTokens
                                                         .neutral900),
-                                        fontFamily: 'PlusJakartaSans',
                                         fontSize: 22,
                                         fontWeight: FontWeight.w900,
                                         height: 1.0,
@@ -581,7 +574,6 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                                             )
                                                       : AmanahColorTokens
                                                             .neutral400),
-                                            fontFamily: 'PlusJakartaSans',
                                             fontSize: 9,
                                             fontWeight: FontWeight.w700,
                                             height: 1.1,

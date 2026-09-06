@@ -109,7 +109,6 @@ class _AmanahDoctorIdCardScreenState extends State<AmanahDoctorIdCardScreen> {
         message,
         style: const TextStyle(
           color: AmanahColorTokens.surfaceLight,
-          fontFamily: 'PlusJakartaSans',
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),

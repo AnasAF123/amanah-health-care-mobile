@@ -616,7 +616,6 @@ class _AuthClosedActions extends StatelessWidget {
                     'Sehat Bersama Amanah',
                     style: theme.textTheme.displaySmall?.copyWith(
                       color: AmanahColorTokens.surfaceLight,
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 31,
                       fontWeight: FontWeight.w900,
                       height: 1.12,
@@ -627,7 +626,6 @@ class _AuthClosedActions extends StatelessWidget {
                     'Menemukan layanan kesehatan dan perawatan terbaik yang dirancang khusus untuk kebutuhanmu',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.82),
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
                       height: 1.42,

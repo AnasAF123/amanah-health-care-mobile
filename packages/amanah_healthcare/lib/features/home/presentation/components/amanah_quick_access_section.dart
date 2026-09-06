@@ -111,7 +111,6 @@ class AmanahQuickActionButton extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: labelColor,
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                       height: 1.12,

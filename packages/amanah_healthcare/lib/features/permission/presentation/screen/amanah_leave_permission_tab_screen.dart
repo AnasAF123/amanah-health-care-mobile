@@ -297,7 +297,6 @@ class _AmanahLeavePermissionTabScreenState
                       _toastMessage!,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: AmanahColorTokens.surfaceLight,

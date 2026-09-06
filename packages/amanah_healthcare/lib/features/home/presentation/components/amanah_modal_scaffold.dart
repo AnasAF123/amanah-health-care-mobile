@@ -182,7 +182,6 @@ class _AmanahSheetHeader extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: AmanahThemeTokens.textPrimary(context),
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0,
@@ -197,7 +196,6 @@ class _AmanahSheetHeader extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: AmanahThemeTokens.textSecondary(context),
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
                         height: 1.2,
@@ -278,7 +276,6 @@ Future<bool> showAmanahConfirmationDialog({
         title: Text(
           title,
           style: TextStyle(
-            fontFamily: 'PlusJakartaSans',
             fontSize: 15,
             fontWeight: FontWeight.w800,
             color: AmanahThemeTokens.textPrimary(dialogContext),
@@ -287,7 +284,6 @@ Future<bool> showAmanahConfirmationDialog({
         content: Text(
           message,
           style: TextStyle(
-            fontFamily: 'PlusJakartaSans',
             fontSize: 12.5,
             color: AmanahThemeTokens.textSecondary(dialogContext),
             height: 1.45,

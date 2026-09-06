@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_typography_tokens.dart';
 
 /// GSAP-style Two-Phase Blurry Morphing Text Widget
 /// Phase 1 (Exit 180ms): blur(0 -> 8px), scale(1.0 -> 0.94), opacity(1.0 -> 0.0) [Curves.easeIn]
@@ -126,7 +127,7 @@ class _BlurryMorphTextState extends State<BlurryMorphText>
                       softWrap: false,
                       overflow: TextOverflow.visible,
                       style: widget.style.copyWith(
-                        fontFamily: 'monospace',
+                        fontFamily: AmanahTypographyTokens.monospaceFontFamily,
                         letterSpacing: 1.0,
                       ),
                     ),

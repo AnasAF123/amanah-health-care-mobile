@@ -343,7 +343,6 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                     'Dokter Cuti Praktik: Seluruh jadwal dinonaktifkan.',
                     style: TextStyle(
                       color: AmanahColorTokens.warning,
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                     ),
@@ -377,7 +376,6 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                   color: dark
                       ? AmanahColorTokens.neutral400
                       : AmanahColorTokens.neutral500,
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
                 ),
@@ -390,7 +388,6 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                 color: dark
                     ? AmanahColorTokens.neutral400
                     : AmanahColorTokens.neutral500,
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 11.5,
                 fontWeight: FontWeight.w600,
               ),
@@ -474,7 +471,6 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                   color: dark
                       ? AmanahColorTokens.neutral400
                       : AmanahColorTokens.neutral500,
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
                 ),
@@ -487,7 +483,6 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                 color: dark
                     ? AmanahColorTokens.neutral400
                     : AmanahColorTokens.neutral500,
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 11.5,
                 fontWeight: FontWeight.w600,
               ),
@@ -574,7 +569,6 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                         color: dark
                             ? AmanahColorTokens.surfaceLight
                             : AmanahColorTokens.neutral900,
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
                       ),
@@ -586,7 +580,6 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                         color: dark
                             ? AmanahColorTokens.neutral400
                             : AmanahColorTokens.neutral500,
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -613,7 +606,6 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                     color: dark
                         ? AmanahColorTokens.brandAccent
                         : AmanahColorTokens.brand,
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
                   ),

@@ -682,7 +682,6 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                                           : (isDark
                                               ? AmanahColorTokens.surfaceLight
                                               : AmanahColorTokens.neutral900),
-                                      fontFamily: 'PlusJakartaSans',
                                       fontSize: 22,
                                       fontWeight: FontWeight.w800,
                                       letterSpacing: -0.4,
@@ -1268,7 +1267,6 @@ class _AmanahQueueCardCover extends StatelessWidget {
                       color: isDark
                           ? AmanahColorTokens.brandSoft
                           : AmanahColorTokens.brandPrimary,
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: cardW > 250 ? 44 : 38,
                       fontWeight: FontWeight.w900,
                       letterSpacing: -1.2,
@@ -1359,7 +1357,6 @@ class _AmanahBottomNotchedDock extends StatelessWidget {
                           : (isDark
                               ? AmanahColorTokens.neutral400
                               : AmanahColorTokens.neutral700),
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 12,
                       fontWeight: dragProgress > 0.05
                           ? FontWeight.w800
@@ -1568,7 +1565,6 @@ class _AmanahQueueActivationOverlayState
                               color: isDark
                                   ? AmanahColorTokens.surfaceLight
                                   : AmanahColorTokens.darkNavy,
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
                             ),
@@ -1767,7 +1763,6 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
                   color: isDark
                       ? AmanahColorTokens.brandSoft
                       : AmanahColorTokens.brandPrimary,
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 38,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -1.5,
@@ -1831,7 +1826,6 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
                             color: isDark
                                 ? AmanahColorTokens.surfaceLight
                                 : AmanahColorTokens.neutral900,
-                            fontFamily: 'PlusJakartaSans',
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
                             letterSpacing: -0.3,
@@ -1849,7 +1843,6 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
                       color: isDark
                           ? AmanahColorTokens.neutral400
                           : AmanahColorTokens.neutral500,
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
@@ -1867,7 +1860,6 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
                   color: isDark
                       ? AmanahColorTokens.brandSoft
                       : AmanahColorTokens.brandPrimary,
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                 ),

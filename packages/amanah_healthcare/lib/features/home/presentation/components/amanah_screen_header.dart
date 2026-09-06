@@ -178,7 +178,6 @@ class AmanahScreenHeader extends StatelessWidget
             overflow: TextOverflow.ellipsis,
             textAlign: textAlign,
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 16,
               fontWeight: FontWeight.w800,
               letterSpacing: 0,
@@ -195,7 +194,6 @@ class AmanahScreenHeader extends StatelessWidget
                 overflow: TextOverflow.ellipsis,
                 textAlign: textAlign,
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0,

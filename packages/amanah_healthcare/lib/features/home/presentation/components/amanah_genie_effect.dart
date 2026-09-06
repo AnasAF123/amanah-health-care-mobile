@@ -246,7 +246,6 @@ Future<ui.Image> generateCardCoverSnapshot({
         color: isDark
             ? AmanahColorTokens.brandSoft
             : AmanahColorTokens.brandPrimary,
-        fontFamily: 'PlusJakartaSans',
         fontSize: 40,
         fontWeight: FontWeight.w900,
         letterSpacing: -1.2,

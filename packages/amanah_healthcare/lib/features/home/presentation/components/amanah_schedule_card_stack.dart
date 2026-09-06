@@ -476,7 +476,6 @@ class AmanahScheduleEmptyCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
                               fontSize: 14.5,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0,
@@ -501,7 +500,6 @@ class AmanahScheduleEmptyCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0,
@@ -517,7 +515,6 @@ class AmanahScheduleEmptyCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 0,
@@ -701,7 +698,6 @@ class AmanahScheduleCard extends StatelessWidget {
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
-                                            fontFamily: 'PlusJakartaSans',
                                             fontSize: 14.5,
                                             fontWeight: FontWeight.w900,
                                             letterSpacing: -0.2,
@@ -739,7 +735,6 @@ class AmanahScheduleCard extends StatelessWidget {
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
-                                              fontFamily: 'PlusJakartaSans',
                                               fontSize: 12.5,
                                               fontWeight: FontWeight.w700,
                                               color: dark
@@ -757,7 +752,6 @@ class AmanahScheduleCard extends StatelessWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      fontFamily: 'PlusJakartaSans',
                                       fontSize: 11.5,
                                       fontWeight: FontWeight.w500,
                                       color: dark
@@ -784,7 +778,6 @@ class AmanahScheduleCard extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontFamily: 'PlusJakartaSans',
                                   fontSize: 19.5,
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: -0.4,
@@ -818,7 +811,6 @@ class AmanahScheduleCard extends StatelessWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      fontFamily: 'PlusJakartaSans',
                                       fontSize: 12.5,
                                       fontWeight: FontWeight.w800,
                                       height: 1.15,
@@ -835,7 +827,6 @@ class AmanahScheduleCard extends StatelessWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      fontFamily: 'PlusJakartaSans',
                                       fontSize: 11.0,
                                       fontWeight: FontWeight.w500,
                                       height: 1.15,
@@ -944,7 +935,6 @@ class AmanahBookingPill extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 11.0,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.2,
@@ -960,7 +950,6 @@ class AmanahBookingPill extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 10.5,
                 fontWeight: FontWeight.w500,
                 color: dark

@@ -200,7 +200,6 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                                   color: dark
                                       ? AmanahColorTokens.skySoft
                                       : AmanahColorTokens.brandAccent,
-                                  fontFamily: 'PlusJakartaSans',
                                   fontSize: 9,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -251,7 +250,6 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                                         : (dark
                                               ? AmanahColorTokens.neutral200
                                               : AmanahColorTokens.neutral800),
-                                    fontFamily: 'PlusJakartaSans',
                                     fontSize: 12.5,
                                     height: 1.45,
                                   ),
@@ -266,7 +264,6 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                                         : (dark
                                               ? AmanahColorTokens.neutral400
                                               : AmanahColorTokens.neutral500),
-                                    fontFamily: 'PlusJakartaSans',
                                     fontSize: 9.5,
                                   ),
                                 ),
@@ -320,7 +317,6 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                       controller: _textController,
                       style: TextStyle(
                         color: textColor,
-                        fontFamily: 'PlusJakartaSans',
                         fontSize: 12.5,
                       ),
                       onSubmitted: (_) => _handleSendMessage(),
@@ -328,7 +324,6 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                         hintText: 'Ketik pesan kendala teknis...',
                         hintStyle: TextStyle(
                           color: hintColor,
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 12.5,
                         ),
                         filled: true,
@@ -392,7 +387,6 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                   color: dark
                       ? AmanahColorTokens.skySoft
                       : AmanahColorTokens.brandAccent,
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
                 ),

@@ -122,7 +122,6 @@ class _AmanahFilterChip<T> extends StatelessWidget {
                 Text(
                   item.label,
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: foregroundColor,
@@ -144,7 +143,6 @@ class _AmanahFilterChip<T> extends StatelessWidget {
                       child: Text(
                         '${item.badgeCount}',
                         style: TextStyle(
-                          fontFamily: 'PlusJakartaSans',
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
                           color: badgeForegroundColor,

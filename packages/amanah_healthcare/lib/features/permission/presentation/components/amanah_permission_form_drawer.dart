@@ -294,7 +294,6 @@ class _AmanahPermissionFormDrawerState
           Text(
             'Subjek Perizinan *',
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: textColor,
@@ -304,7 +303,6 @@ class _AmanahPermissionFormDrawerState
           TextField(
             controller: _typeController,
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: textColor,
@@ -312,7 +310,6 @@ class _AmanahPermissionFormDrawerState
             decoration: InputDecoration(
               hintText: 'Contoh: Urusan Keluarga, Seminar / Simposium, Cuti...',
               hintStyle: TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 color: subtextColor,
               ),
@@ -348,7 +345,6 @@ class _AmanahPermissionFormDrawerState
             Text(
               _typeError!,
               style: const TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 11,
                 color: AmanahColorTokens.danger,
                 fontWeight: FontWeight.w500,
@@ -389,7 +385,6 @@ class _AmanahPermissionFormDrawerState
                   child: Text(
                     s,
                     style: TextStyle(
-                      fontFamily: 'PlusJakartaSans',
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                       color: subtextColor,
@@ -409,7 +404,6 @@ class _AmanahPermissionFormDrawerState
                 child: Text(
                   'Rentang Tanggal *',
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: textColor,
@@ -420,7 +414,6 @@ class _AmanahPermissionFormDrawerState
               Text(
                 '$_calculatedDays Hari Kerja',
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
                   color: textColor,
@@ -457,7 +450,6 @@ class _AmanahPermissionFormDrawerState
             Text(
               _endDateError!,
               style: const TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 11,
                 color: AmanahColorTokens.danger,
                 fontWeight: FontWeight.w500,
@@ -470,7 +462,6 @@ class _AmanahPermissionFormDrawerState
           Text(
             'Pesan / Alasan Perizinan *',
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: textColor,
@@ -481,7 +472,6 @@ class _AmanahPermissionFormDrawerState
             controller: _reasonController,
             maxLines: 3,
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 13,
               fontWeight: FontWeight.w500,
               color: textColor,
@@ -489,7 +479,6 @@ class _AmanahPermissionFormDrawerState
             decoration: InputDecoration(
               hintText: 'Tuliskan keterangan keperluan izin...',
               hintStyle: TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 color: subtextColor,
               ),
@@ -522,7 +511,6 @@ class _AmanahPermissionFormDrawerState
             Text(
               _reasonError!,
               style: const TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 11,
                 color: AmanahColorTokens.danger,
                 fontWeight: FontWeight.w500,
@@ -537,7 +525,6 @@ class _AmanahPermissionFormDrawerState
               Text(
                 'Dokter Pengganti',
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: textColor,
@@ -547,7 +534,6 @@ class _AmanahPermissionFormDrawerState
               Text(
                 '(Opsional)',
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 11.5,
                   fontWeight: FontWeight.w500,
                   color: subtextColor,
@@ -559,7 +545,6 @@ class _AmanahPermissionFormDrawerState
           TextField(
             controller: _substituteDoctorController,
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: textColor,
@@ -567,7 +552,6 @@ class _AmanahPermissionFormDrawerState
             decoration: InputDecoration(
               hintText: 'Nama dokter pengganti...',
               hintStyle: TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 color: subtextColor,
               ),
@@ -650,7 +634,6 @@ class _AmanahPermissionFormDrawerState
                         Text(
                           label,
                           style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
                             fontSize: 10.5,
                             fontWeight: FontWeight.w500,
                             color: dark
@@ -663,7 +646,6 @@ class _AmanahPermissionFormDrawerState
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontFamily: 'PlusJakartaSans',
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: textColor,

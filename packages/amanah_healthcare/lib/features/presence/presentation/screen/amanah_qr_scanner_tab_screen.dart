@@ -268,7 +268,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
               child: Text(
                 'Panduan Presensi',
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -279,7 +278,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
         content: const Text(
           'Arahkan kamera smartphone ke QR Code di meja poli atau resepsionis RS Amanah Sehat, atau gunakan Presensi Manual dengan kode 6-digit.',
           style: TextStyle(
-            fontFamily: 'PlusJakartaSans',
             fontSize: 13,
             height: 1.4,
           ),
@@ -290,7 +288,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
             child: const Text(
               'Mengerti',
               style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontWeight: FontWeight.w700,
                 color: AmanahColorTokens.brandPrimary,
               ),
@@ -782,7 +779,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
-                                                fontFamily: 'PlusJakartaSans',
                                                 fontSize: 11.5,
                                                 fontWeight: FontWeight.w700,
                                                 color: AmanahColorTokens.surfaceLight,
@@ -892,7 +888,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                           label: const Text(
                                             'Kembali',
                                             style: TextStyle(
-                                              fontFamily: 'PlusJakartaSans',
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700,
                                               color: AmanahColorTokens.brandPrimary,
@@ -945,7 +940,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                           label: const Text(
                                             'Kembali',
                                             style: TextStyle(
-                                              fontFamily: 'PlusJakartaSans',
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700,
                                               color: AmanahColorTokens.brandPrimary,
@@ -982,8 +976,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                                     content: const Text(
                                                       'QR Code berhasil diunduh ke galeri.',
                                                       style: TextStyle(
-                                                        fontFamily:
-                                                            'PlusJakartaSans',
                                                         fontSize: 12,
                                                       ),
                                                     ),
@@ -1049,7 +1041,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                       child: const Text(
                                         '84920',
                                         style: TextStyle(
-                                          fontFamily: 'PlusJakartaSans',
                                           fontSize: 26,
                                           fontWeight: FontWeight.w900,
                                           letterSpacing: 6,
@@ -1063,7 +1054,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                       const Text(
                                         'Kode 84920 berhasil disalin',
                                         style: TextStyle(
-                                          fontFamily: 'PlusJakartaSans',
                                           fontSize: 10.5,
                                           fontWeight: FontWeight.w600,
                                           color: AmanahColorTokens.brand,
@@ -1091,7 +1081,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                           label: const Text(
                                             'Kembali',
                                             style: TextStyle(
-                                              fontFamily: 'PlusJakartaSans',
                                               fontSize: 12,
                                               fontWeight: FontWeight.w700,
                                               color: AmanahColorTokens.brandPrimary,
@@ -1149,7 +1138,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                             Text(
                                               'Pilih file QR atau seret ke sini',
                                               style: TextStyle(
-                                                fontFamily: 'PlusJakartaSans',
                                                 fontSize: 12.5,
                                                 fontWeight: FontWeight.w700,
                                                 color: textColor,
@@ -1159,7 +1147,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                             Text(
                                               'Format PNG, JPG, JPEG (Maks. 5MB)',
                                               style: TextStyle(
-                                                fontFamily: 'PlusJakartaSans',
                                                 fontSize: 10.5,
                                                 fontWeight: FontWeight.w500,
                                                 color: subtextColor,
@@ -1246,7 +1233,6 @@ class _AttendanceProcessingOverlay extends StatelessWidget {
                   'Memproses presensi Anda',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
                     height: 1.25,
@@ -1258,7 +1244,6 @@ class _AttendanceProcessingOverlay extends StatelessWidget {
                   'QR dikenali. Mengirim data ke sistem klinik.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     height: 1.35,
@@ -1310,7 +1295,6 @@ class _CameraPermissionViewport extends StatelessWidget {
                 'Izin kamera diperlukan untuk presensi QR.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: AmanahColorTokens.surfaceLight,
@@ -1327,7 +1311,6 @@ class _CameraPermissionViewport extends StatelessWidget {
                 child: const Text(
                   'Aktifkan Kamera',
                   style: TextStyle(
-                    fontFamily: 'PlusJakartaSans',
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -1524,7 +1507,6 @@ class _ActionMenuCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 11.5,
                 fontWeight: isActive ? FontWeight.w800 : FontWeight.w700,
                 color: isActive ? AmanahColorTokens.surfaceLight : textColor,

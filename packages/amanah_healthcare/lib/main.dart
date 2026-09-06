@@ -11,6 +11,7 @@ import 'package:provider/single_child_widget.dart';
 import 'package:scanner_shared/scanner_shared.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/screen/auth_bottom_sheet_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_typography_tokens.dart';
 import 'package:amanah_healthcare/helpers/camera_helper.dart';
 import 'package:amanah_healthcare/helpers/entry_points_helper.dart';
 import 'package:amanah_healthcare/helpers/global_vars.dart';
@@ -97,7 +98,7 @@ class _AmanahAppState extends State<AmanahApp> {
         title: 'Amanah Healthcare',
         theme: ThemeData(
           useMaterial3: true,
-          fontFamily: 'PlusJakartaSans',
+          fontFamily: AmanahTypographyTokens.fontFamily,
           brightness: Brightness.light,
           scaffoldBackgroundColor: AmanahColorTokens.canvasLight,
           colorScheme: ColorScheme.fromSeed(
@@ -107,7 +108,7 @@ class _AmanahAppState extends State<AmanahApp> {
         ),
         darkTheme: ThemeData(
           useMaterial3: true,
-          fontFamily: 'PlusJakartaSans',
+          fontFamily: AmanahTypographyTokens.fontFamily,
           brightness: Brightness.dark,
           scaffoldBackgroundColor: AmanahColorTokens.canvasDark,
           colorScheme: ColorScheme.fromSeed(

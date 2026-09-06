@@ -138,7 +138,6 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
           Text(
             'Nama Lengkap & Gelar',
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: subtextColor,
@@ -158,7 +157,6 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
             child: Text(
               widget.doctorName,
               style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: dark ? AmanahColorTokens.neutral300 : AmanahColorTokens.neutral700,
@@ -169,7 +167,6 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
           Text(
             'Terverifikasi oleh manajemen',
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 10.5,
               fontWeight: FontWeight.w600,
               color: subtextColor,
@@ -181,7 +178,6 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
           Text(
             'Nomor WhatsApp / Telepon',
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: subtextColor,
@@ -192,7 +188,6 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
             controller: _phoneController,
             keyboardType: TextInputType.phone,
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: textColor,
@@ -200,7 +195,6 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
             decoration: InputDecoration(
               hintText: '+62 812-xxxx-xxxx',
               hintStyle: TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 color: subtextColor.withValues(alpha: 0.60),
               ),
@@ -234,7 +228,6 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
           Text(
             'Email Resmi',
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: subtextColor,
@@ -245,7 +238,6 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: textColor,
@@ -253,7 +245,6 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
             decoration: InputDecoration(
               hintText: 'dokter@rsamanah.co.id',
               hintStyle: TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 color: subtextColor.withValues(alpha: 0.60),
               ),
@@ -287,7 +278,6 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
           Text(
             'Bio Medis',
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: subtextColor,
@@ -299,7 +289,6 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
             maxLines: 3,
             minLines: 2,
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w500,
               color: textColor,
@@ -308,7 +297,6 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
             decoration: InputDecoration(
               hintText: 'Tuliskan bio atau catatan singkat profil...',
               hintStyle: TextStyle(
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 12,
                 color: subtextColor.withValues(alpha: 0.60),
               ),
@@ -431,7 +419,6 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
               title: Text(
                 'Pilih dari Galeri Perangkat',
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: textColor,
@@ -440,7 +427,6 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
               subtitle: Text(
                 'Unggah gambar JPG / PNG dari galeri',
                 style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
                   fontSize: 11,
                   color: subtextColor,
                 ),
@@ -455,7 +441,6 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
           Text(
             'Atau Pilih Preset Avatar Dokter',
             style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
               fontSize: 12,
               fontWeight: FontWeight.w700,
               color: subtextColor,

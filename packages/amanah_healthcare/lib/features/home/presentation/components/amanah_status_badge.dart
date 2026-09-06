@@ -116,7 +116,6 @@ class AmanahStatusBadge extends StatelessWidget {
               text,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: style.foreground,
-                fontFamily: 'PlusJakartaSans',
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
                 height: 1,

@@ -209,7 +209,6 @@ class _AmanahNavigationItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: color,
-                    fontFamily: 'PlusJakartaSans',
                     fontSize: 10,
                     fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                     height: 1.1,

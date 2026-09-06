@@ -36,7 +36,6 @@ class AmanahBrandLogo extends StatelessWidget {
         Text(
           'Amanah',
           style: TextStyle(
-            fontFamily: 'PlusJakartaSans',
             fontSize: fontSize,
             fontWeight: FontWeight.w700,
             color: foreground,
