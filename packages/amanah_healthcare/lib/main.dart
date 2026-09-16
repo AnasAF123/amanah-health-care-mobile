@@ -9,7 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:scanner_shared/scanner_shared.dart';
-import 'package:amanah_healthcare/features/authentication/presentation/screen/auth_bottom_sheet_screen.dart';
+import 'package:amanah_healthcare/features/home/presentation/screen/amanah_home_shell.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_typography_tokens.dart';
 import 'package:amanah_healthcare/helpers/camera_helper.dart';
@@ -117,7 +117,7 @@ class _AmanahAppState extends State<AmanahApp> {
           ),
         ),
         themeMode: ThemeMode.system,
-        home: const AuthBottomSheetScreen(),
+        home: const AmanahHomeShell(),
       ),
     );
   }
