@@ -55,6 +55,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
   String _manualPin = '';
   String? _pinError;
   bool _copiedFeedback = false;
+  String get _doctorQrValue => widget.user?.id ?? '';
+  String get _doctorPin => '';
 
   late final AnimationController _laserController;
   late final Animation<double> _laserAnimation;
@@ -149,7 +151,9 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
   }
 
   void _handleSimulateScan() {
-    _beginAttendanceProcessing('AMANAH:DOC-2026-0819:POLI-ANAK:20260521:84920');
+    throw UnimplementedError(
+      'TODO: wire to real barcode scanning stream — dummy scan removed',
+    );
   }
 
   void _handleReset() {
@@ -212,7 +216,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     setState(() => _attendanceFlowState = _AttendanceFlowState.success);
     AmanahPresenceSuccessDrawer.show(
       context,
-      timeString: '07:55 WIB',
+      timeString: '',
       bottomPadding: _drawerBottomPadding(context),
       onGoHome: widget.onBack,
       onViewHistory: () {
@@ -230,7 +234,10 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
   }
 
   void _handleCopyQr() {
-    Clipboard.setData(const ClipboardData(text: '84920'));
+    if (_doctorPin.isEmpty) {
+      return;
+    }
+    Clipboard.setData(ClipboardData(text: _doctorPin));
     setState(() => _copiedFeedback = true);
     Future<void>.delayed(const Duration(seconds: 2), () {
       if (mounted) {
@@ -245,11 +252,15 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
         type: FileType.image,
       );
       if (result != null && mounted) {
-        _handleSimulateScan();
+        throw UnimplementedError(
+          'TODO: decode barcode image from file — dummy scan removed',
+        );
       }
     } catch (_) {
       if (mounted) {
-        _handleSimulateScan();
+        throw UnimplementedError(
+          'TODO: decode barcode image from file — dummy scan removed',
+        );
       }
     }
   }
@@ -1018,9 +1029,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                     const SizedBox(height: 8),
 
                                     // Vector SVG QR Code Widget (152x152)
-                                    const AmanahQrCodeWidget(
-                                      value:
-                                          'AMANAH:DOC-2026-0819:POLI-ANAK:20260521:84920',
+                                    AmanahQrCodeWidget(
+                                      value: _doctorQrValue,
                                       size: 152,
                                     ),
                                     const SizedBox(height: 12),
@@ -1038,9 +1048,9 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                           color: AmanahColorTokens.brandAccent.withValues(alpha: 0.25),
                                         ),
                                       ),
-                                      child: const Text(
-                                        '84920',
-                                        style: TextStyle(
+                                      child: Text(
+                                        _doctorPin,
+                                        style: const TextStyle(
                                           fontSize: 26,
                                           fontWeight: FontWeight.w900,
                                           letterSpacing: 6,
@@ -1049,11 +1059,11 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                       ),
                                     ),
 
-                                    if (_copiedFeedback) ...<Widget>[
+                                    if (_copiedFeedback && _doctorPin.isNotEmpty) ...<Widget>[
                                       const SizedBox(height: 6),
-                                      const Text(
-                                        'Kode 84920 berhasil disalin',
-                                        style: TextStyle(
+                                      Text(
+                                        'Kode $_doctorPin berhasil disalin',
+                                        style: const TextStyle(
                                           fontSize: 10.5,
                                           fontWeight: FontWeight.w600,
                                           color: AmanahColorTokens.brand,

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/amanah_presence_success_core.dart';
 import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_presence_history_screen.dart';
@@ -7,7 +7,7 @@ class AmanahPresenceSuccessDrawer extends StatelessWidget {
   const AmanahPresenceSuccessDrawer({
     required this.onClose,
     super.key,
-    this.timeString = '07:55 WIB',
+    this.timeString = '',
     this.bottomPadding = 24,
     this.onGoHome,
     this.onViewHistory,
@@ -21,7 +21,7 @@ class AmanahPresenceSuccessDrawer extends StatelessWidget {
 
   static Future<void> show(
     BuildContext context, {
-    String timeString = '07:55 WIB',
+    String timeString = '',
     double bottomPadding = 24,
     VoidCallback? onGoHome,
     VoidCallback? onViewHistory,
