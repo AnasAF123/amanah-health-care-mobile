@@ -73,21 +73,9 @@ const List<String> kPoliOptions = <String>[
   'Klinik Eksekutif VIP',
 ];
 
-const List<String> kOccupiedTimeOptions = <String>[
-  '2:00 AM',
-  '3:00 AM',
-  '9:00 AM',
-  '10:00 AM',
-  '2:00 PM',
-  '3:00 PM',
-  '8:00 PM',
-];
+const List<String> kOccupiedTimeOptions = <String>[];
 
-const List<String> kOccupiedRoomOptions = <String>[
-  'Ruang 102',
-  'Ruang 203',
-  'Ruang VIP 1',
-];
+const List<String> kOccupiedRoomOptions = <String>[];
 
 /// 7. Monthly Doctor Schedule Big Calendar Drawer Modal ("Lihat Schedule")
 class AmanahDocScheduleCalendarDrawer extends StatefulWidget {
