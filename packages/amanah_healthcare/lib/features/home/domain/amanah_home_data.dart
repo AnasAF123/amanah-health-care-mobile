@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 
 export 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart'
@@ -16,15 +16,15 @@ class AmanahDoctorProfile {
     required this.role,
     required this.greeting,
     required this.unreadNotifications,
-    this.sip = 'SIP. 503/442.1/SIP-D/2026',
-    this.str = 'STR. 31.2.1.100.1.20.123456',
-    this.nik = '3171015508920003',
-    this.kkiNumber = 'KKI-ID-2026-98124',
-    this.email = 'amelia.cantika@rsamanah.co.id',
-    this.phone = '+62 812-3456-7890',
-    this.hospital = 'RS Amanah Sehat',
-    this.department = 'Departemen Ilmu Kesehatan Anak',
-    this.avatarAsset = 'assets/amanah/id_card/images/woman-doctor-4.png',
+    this.sip = '',
+    this.str = '',
+    this.nik = '',
+    this.kkiNumber = '',
+    this.email = '',
+    this.phone = '',
+    this.hospital = '',
+    this.department = '',
+    this.avatarAsset = '',
   });
 
   final String name;
@@ -140,49 +140,12 @@ class AmanahHomeDashboardData {
 
 const AmanahHomeDashboardData amanahHomeDashboardData = AmanahHomeDashboardData(
   profile: AmanahDoctorProfile(
-    name: 'dr. Andika Perkasa',
-    role: 'Dokter Spesialis Anak',
-    greeting: 'Selamat Pagi',
-    unreadNotifications: 3,
+    name: '',
+    role: '',
+    greeting: '',
+    unreadNotifications: 0,
   ),
-  schedules: <AmanahSchedule>[
-    AmanahSchedule(
-      id: 'sch_001',
-      title: 'Jadwal Hari Ini',
-      date: 'Selasa, 21 Mei 2026',
-      time: '07:30 - 11:30',
-      poli: 'Poli Anak',
-      room: 'Room 102',
-      slotCount: '16 / 30',
-      slotText: 'Slot Tersedia',
-      badge: 'Buka',
-      badgeVariant: AmanahBadgeVariant.success,
-    ),
-    AmanahSchedule(
-      id: 'sch_002',
-      title: 'Jadwal Siang',
-      date: 'Rabu, 22 Mei 2026',
-      time: '13:00 - 16:00',
-      poli: 'Poli Umum',
-      room: 'Room 105',
-      slotCount: '5 / 30',
-      slotText: 'Slot Tersedia',
-      badge: 'Aktif',
-      badgeVariant: AmanahBadgeVariant.primary,
-    ),
-    AmanahSchedule(
-      id: 'sch_003',
-      title: 'Jadwal Esok',
-      date: 'Kamis, 23 Mei 2026',
-      time: '09:00 - 12:00',
-      poli: 'Poli Gigi',
-      room: 'Room 201',
-      slotCount: '20 / 30',
-      slotText: 'Slot Tersedia',
-      badge: 'Buka',
-      badgeVariant: AmanahBadgeVariant.success,
-    ),
-  ],
+  schedules: <AmanahSchedule>[],
   quickActions: <AmanahQuickAction>[
     AmanahQuickAction(
       id: 'history',
@@ -205,28 +168,7 @@ const AmanahHomeDashboardData amanahHomeDashboardData = AmanahHomeDashboardData(
       icon: AmanahQuickActionIcon.idCard,
     ),
   ],
-  activities: <AmanahActivityMetric>[
-    AmanahActivityMetric(
-      id: 'antrean-aktif',
-      title: 'Antrean Aktif',
-      count: '23',
-      unit: 'Pasien',
-      badgeText: 'Live',
-      badgeVariant: AmanahBadgeVariant.live,
-      icon: AmanahActivityIcon.users,
-      glow: AmanahActivityGlow.blue,
-    ),
-    AmanahActivityMetric(
-      id: 'total-selesai',
-      title: 'Total Selesai',
-      count: '45',
-      unit: 'Pasien',
-      badgeText: '+12%',
-      badgeVariant: AmanahBadgeVariant.trend,
-      icon: AmanahActivityIcon.stethoscope,
-      glow: AmanahActivityGlow.emerald,
-    ),
-  ],
+  activities: <AmanahActivityMetric>[],
 );
 
 IconData amanahQuickActionIconData(AmanahQuickActionIcon icon) {

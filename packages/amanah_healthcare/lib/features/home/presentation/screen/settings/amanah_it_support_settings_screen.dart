@@ -65,17 +65,7 @@ class _AmanahItSupportSettingsScreenState
     ),
   ];
 
-  final List<AmanahReportItem> _reports = <AmanahReportItem>[
-    const AmanahReportItem(
-      id: 'rep-1',
-      ticketNumber: 'TK-2026-0819',
-      title: 'Scanner QR poliklinik anak lambat membaca kode',
-      date: 'Kemarin, 14:20 WIB',
-      status: 'proses',
-      technicianNote:
-          'Teknisi sedang melakukan pengecekan lensa scanner dan firmware bridge SIMRS.',
-    ),
-  ];
+  final List<AmanahReportItem> _reports = <AmanahReportItem>[];
 
   void _openChat() {
     Navigator.of(context).push<void>(

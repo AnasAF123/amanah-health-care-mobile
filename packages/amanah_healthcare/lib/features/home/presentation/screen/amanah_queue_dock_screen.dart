@@ -420,8 +420,20 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
       _isGenieSettled = false;
     });
 
-    final AmanahQueueCardData chosen =
-        _selectedActiveCard ?? (_cards.isNotEmpty ? _cards.first : defaultAmanahQueueCards.first);
+    final AmanahQueueCardData? chosen = _selectedActiveCard ??
+        (_cards.isNotEmpty
+            ? _cards.first
+            : (defaultAmanahQueueCards.isNotEmpty
+                ? defaultAmanahQueueCards.first
+                : null));
+    if (chosen == null) {
+      setState(() {
+        _isGenieSettled = false;
+        _isGenieRunning = false;
+        _selectedActiveCard = null;
+      });
+      return;
+    }
     final Size screenSize = MediaQuery.sizeOf(context);
     final double cardW = math.min(screenSize.width - 64, 320.0);
     final double cardH = cardW / 0.718;

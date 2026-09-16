@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
@@ -30,248 +31,7 @@ class ClinicDayData {
   final int newPatients;
 }
 
-const List<ClinicMonthRecord> kMonthlyRecords = <ClinicMonthRecord>[
-  ClinicMonthRecord(
-    monthName: 'Mei',
-    year: 2026,
-    data: <ClinicDayData>[
-      ClinicDayData(
-        dayShort: '1 Mei',
-        label: '1 Mei',
-        patients: 82,
-        newPatients: 26,
-      ),
-      ClinicDayData(
-        dayShort: '6 Mei',
-        label: '6 Mei',
-        patients: 95,
-        newPatients: 30,
-      ),
-      ClinicDayData(
-        dayShort: '11 Mei',
-        label: '11 Mei',
-        patients: 104,
-        newPatients: 32,
-      ),
-      ClinicDayData(
-        dayShort: '16 Mei',
-        label: '16 Mei',
-        patients: 98,
-        newPatients: 28,
-      ),
-      ClinicDayData(
-        dayShort: '21 Mei',
-        label: '21 Mei',
-        patients: 112,
-        newPatients: 36,
-      ),
-      ClinicDayData(
-        dayShort: '26 Mei',
-        label: '26 Mei',
-        patients: 120,
-        newPatients: 38,
-      ),
-      ClinicDayData(
-        dayShort: '31 Mei',
-        label: '31 Mei',
-        patients: 128,
-        newPatients: 42,
-      ),
-    ],
-  ),
-  ClinicMonthRecord(
-    monthName: 'Juni',
-    year: 2026,
-    data: <ClinicDayData>[
-      ClinicDayData(
-        dayShort: '1 Jun',
-        label: '1 Juni',
-        patients: 85,
-        newPatients: 25,
-      ),
-      ClinicDayData(
-        dayShort: '6 Jun',
-        label: '6 Juni',
-        patients: 102,
-        newPatients: 32,
-      ),
-      ClinicDayData(
-        dayShort: '11 Jun',
-        label: '11 Juni',
-        patients: 110,
-        newPatients: 34,
-      ),
-      ClinicDayData(
-        dayShort: '16 Jun',
-        label: '16 Juni',
-        patients: 105,
-        newPatients: 30,
-      ),
-      ClinicDayData(
-        dayShort: '21 Jun',
-        label: '21 Juni',
-        patients: 122,
-        newPatients: 38,
-      ),
-      ClinicDayData(
-        dayShort: '26 Jun',
-        label: '26 Juni',
-        patients: 128,
-        newPatients: 37,
-      ),
-      ClinicDayData(
-        dayShort: '30 Jun',
-        label: '30 Juni',
-        patients: 135,
-        newPatients: 40,
-      ),
-    ],
-  ),
-  ClinicMonthRecord(
-    monthName: 'Juli',
-    year: 2026,
-    data: <ClinicDayData>[
-      ClinicDayData(
-        dayShort: '1 Jul',
-        label: '1 Juli',
-        patients: 90,
-        newPatients: 28,
-      ),
-      ClinicDayData(
-        dayShort: '6 Jul',
-        label: '6 Juli',
-        patients: 108,
-        newPatients: 35,
-      ),
-      ClinicDayData(
-        dayShort: '11 Jul',
-        label: '11 Juli',
-        patients: 115,
-        newPatients: 36,
-      ),
-      ClinicDayData(
-        dayShort: '16 Jul',
-        label: '16 Juli',
-        patients: 110,
-        newPatients: 88,
-      ),
-      ClinicDayData(
-        dayShort: '21 Jul',
-        label: '21 Juli',
-        patients: 126,
-        newPatients: 40,
-      ),
-      ClinicDayData(
-        dayShort: '26 Jul',
-        label: '26 Juli',
-        patients: 132,
-        newPatients: 42,
-      ),
-      ClinicDayData(
-        dayShort: '31 Jul',
-        label: '31 Juli',
-        patients: 138,
-        newPatients: 45,
-      ),
-    ],
-  ),
-  ClinicMonthRecord(
-    monthName: 'Agustus',
-    year: 2026,
-    data: <ClinicDayData>[
-      ClinicDayData(
-        dayShort: '1 Agu',
-        label: '1 Agustus',
-        patients: 88,
-        newPatients: 27,
-      ),
-      ClinicDayData(
-        dayShort: '3 Agu',
-        label: '3 Agustus',
-        patients: 112,
-        newPatients: 34,
-      ),
-      ClinicDayData(
-        dayShort: '5 Agu',
-        label: '5 Agustus',
-        patients: 118,
-        newPatients: 36,
-      ),
-      ClinicDayData(
-        dayShort: '7 Agu',
-        label: '7 Agustus',
-        patients: 105,
-        newPatients: 32,
-      ),
-      ClinicDayData(
-        dayShort: '9 Agu',
-        label: '9 Agustus',
-        patients: 114,
-        newPatients: 35,
-      ),
-      ClinicDayData(
-        dayShort: '11 Agu',
-        label: '11 Agustus',
-        patients: 109,
-        newPatients: 33,
-      ),
-      ClinicDayData(
-        dayShort: '12 Agu',
-        label: '12 Agustus',
-        patients: 140,
-        newPatients: 43,
-      ),
-    ],
-  ),
-  ClinicMonthRecord(
-    monthName: 'September',
-    year: 2026,
-    data: <ClinicDayData>[
-      ClinicDayData(
-        dayShort: '1 Sep',
-        label: '1 September',
-        patients: 92,
-        newPatients: 29,
-      ),
-      ClinicDayData(
-        dayShort: '6 Sep',
-        label: '6 September',
-        patients: 115,
-        newPatients: 36,
-      ),
-      ClinicDayData(
-        dayShort: '11 Sep',
-        label: '11 September',
-        patients: 120,
-        newPatients: 38,
-      ),
-      ClinicDayData(
-        dayShort: '16 Sep',
-        label: '16 September',
-        patients: 118,
-        newPatients: 35,
-      ),
-      ClinicDayData(
-        dayShort: '21 Sep',
-        label: '21 September',
-        patients: 130,
-        newPatients: 42,
-      ),
-      ClinicDayData(
-        dayShort: '26 Sep',
-        label: '26 September',
-        patients: 138,
-        newPatients: 44,
-      ),
-      ClinicDayData(
-        dayShort: '30 Sep',
-        label: '30 September',
-        patients: 146,
-        newPatients: 46,
-      ),
-    ],
-  ),
-];
+const List<ClinicMonthRecord> kMonthlyRecords = <ClinicMonthRecord>[];
 
 class AmanahClinicAnalyticsSection extends StatefulWidget {
   const AmanahClinicAnalyticsSection({super.key, this.onViewDetails});
@@ -426,6 +186,46 @@ class _AmanahClinicAnalyticsSectionState
 
   @override
   Widget build(BuildContext context) {
+    if (kMonthlyRecords.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  'Tren kunjungan pasien',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.3,
+                    color: AmanahThemeTokens.textPrimary(context),
+                  ),
+                ),
+                if (widget.onViewDetails != null)
+                  AmanahButton.text(
+                    text: 'Rincian',
+                    trailingIcon: Icons.chevron_right_rounded,
+                    size: AmanahButtonSize.small,
+                    customForegroundColor: AmanahThemeTokens.accent(context),
+                    onPressed: widget.onViewDetails,
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          const AmanahEmptyState.card(
+            icon: Icons.analytics_outlined,
+            title: 'Belum Ada Data Tren Pasien',
+            message:
+                'Grafik kunjungan poliklinik akan muncul setelah terhubung dengan database.',
+          ),
+        ],
+      );
+    }
+
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     final ClinicMonthRecord currentRecord = kMonthlyRecords[_monthIndex];
     final List<ClinicDayData> series = currentRecord.data;

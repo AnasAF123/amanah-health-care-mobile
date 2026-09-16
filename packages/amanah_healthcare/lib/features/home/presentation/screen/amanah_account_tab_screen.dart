@@ -35,10 +35,9 @@ class AmanahAccountTabScreen extends StatefulWidget {
 }
 
 class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
-  String _phone = '+62 812-3456-7890';
-  String _email = 'rayhan.pratama@rsamanah.co.id';
-  String _bio =
-      'Dokter Spesialis Anak di RS Amanah Sehat, melayani konsultasi rawat jalan & rawat inap anak.';
+  String _phone = '';
+  String _email = '';
+  String _bio = '';
   bool _isEmailVerified = false;
   String? _customAvatarPath;
   String? _presetAvatarUrl;
@@ -46,12 +45,9 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   @override
   void initState() {
     super.initState();
-    _phone = '+62 812-3456-7890';
-    _email = widget.user.email.isNotEmpty
-        ? widget.user.email
-        : 'rayhan.pratama@rsamanah.co.id';
-    _bio =
-        'Dokter Spesialis Anak di RS Amanah Sehat, melayani konsultasi rawat jalan & rawat inap anak.';
+    _phone = widget.user.phone;
+    _email = widget.user.email;
+    _bio = '';
     _isEmailVerified = widget.user.isEmailVerified;
   }
 
@@ -86,8 +82,8 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
       SnackBar(
         content: Text(
           _isEmailVerified
-              ? 'Status email diubah ke: Terverifikasi (Mode Dummy)'
-              : 'Status email diubah ke: Belum Terverifikasi (Mode Dummy)',
+              ? 'Status email diubah ke: Terverifikasi'
+              : 'Status email diubah ke: Belum Terverifikasi',
         ),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
@@ -100,15 +96,15 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
 
   AmanahDoctorProfile get _doctorProfile => AmanahDoctorProfile(
     name: widget.user.fullName,
-    role: 'Dokter Spesialis Anak',
-    greeting: 'Selamat Bertugas',
-    unreadNotifications: 3,
-    sip: 'SIP. 503/442.1/SIP-D/2026',
-    str: 'STR. 31.2.1.100.1.20.123456',
+    role: widget.user.roleLabel,
+    greeting: '',
+    unreadNotifications: 0,
+    sip: '',
+    str: '',
     phone: _phone,
     email: _email,
-    hospital: 'RS Amanah Sehat',
-    department: 'Departemen Ilmu Kesehatan Anak',
+    hospital: '',
+    department: '',
   );
 
   Future<void> _openEditProfileDrawer() async {

@@ -37,11 +37,11 @@ class AmanahHomeShell extends StatefulWidget {
   final VoidCallback? onLogout;
 
   static const AmanahAuthUser defaultUser = AmanahAuthUser(
-    id: 'doc-001',
+    id: '',
     role: AmanahUserRole.doctor,
-    fullName: 'dr. Rayhan Pratama, Sp.A',
-    email: 'dokter@amanah.health',
-    phone: '081234567890',
+    fullName: '',
+    email: '',
+    phone: '',
     password: '',
     isEmailVerified: false,
   );

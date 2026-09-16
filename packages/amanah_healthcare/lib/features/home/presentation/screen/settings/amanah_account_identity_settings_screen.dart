@@ -22,17 +22,15 @@ class AmanahAccountIdentitySettingsScreen extends StatefulWidget {
 class _AmanahAccountIdentitySettingsScreenState
     extends State<AmanahAccountIdentitySettingsScreen> {
   String _name = '';
-  String _phone = '+62 812-3456-7890';
-  String _email = 'rayhan.pratama@rsamanah.co.id';
+  String _phone = '';
+  String _email = '';
 
   @override
   void initState() {
     super.initState();
     _name = widget.user.fullName;
-    _phone = '+62 812-3456-7890';
-    _email = widget.user.email.isNotEmpty
-        ? widget.user.email
-        : 'rayhan.pratama@rsamanah.co.id';
+    _phone = widget.user.phone;
+    _email = widget.user.email;
   }
 
   void _editName() {
@@ -117,9 +115,9 @@ class _AmanahAccountIdentitySettingsScreenState
                           value: _name,
                           onEdit: _editName,
                         ),
-                        const AmanahSettingInfoRow(
+                        AmanahSettingInfoRow(
                           label: 'Spesialisasi medis',
-                          value: 'Dokter Spesialis Anak',
+                          value: widget.user.roleLabel,
                         ),
                         AmanahSettingEditableRow(
                           label: 'Nomor telepon / WhatsApp',
@@ -141,11 +139,11 @@ class _AmanahAccountIdentitySettingsScreenState
                       children: <Widget>[
                         AmanahSettingInfoRow(
                           label: 'NPWP',
-                          value: '09.254.382.1-013.000',
+                          value: '-',
                         ),
                         AmanahSettingInfoRow(
                           label: 'Nomor NIB',
-                          value: '9120001234567',
+                          value: '-',
                         ),
                       ],
                     ),

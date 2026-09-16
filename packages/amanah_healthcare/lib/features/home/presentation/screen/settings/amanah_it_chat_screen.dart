@@ -42,15 +42,7 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
   final ScrollController _scrollController = ScrollController();
   bool _isTechnicianTyping = false;
 
-  final List<AmanahChatMessage> _messages = <AmanahChatMessage>[
-    const AmanahChatMessage(
-      id: 'msg-1',
-      sender: 'it',
-      text:
-          'Halo dr. Amelia, ada kendala pada sistem SIMRS, scanner presensi, atau perangkat poli yang bisa tim IT bantu?',
-      time: '08:00',
-    ),
-  ];
+  final List<AmanahChatMessage> _messages = <AmanahChatMessage>[];
 
   @override
   void dispose() {
