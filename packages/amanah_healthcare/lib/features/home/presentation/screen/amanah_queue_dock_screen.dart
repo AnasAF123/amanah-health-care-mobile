@@ -17,17 +17,20 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_r
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_watermark_path.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_cards_and_drawers.dart';
 
 /// Master 3D Queue Dock Screen (Pilih Antrean Pasien)
 /// Faithful 1:1 native Flutter replication of QueueDockScreen.tsx from web.
 class AmanahQueueDockScreen extends StatefulWidget {
-  const AmanahQueueDockScreen({super.key});
+  const AmanahQueueDockScreen({this.cards, super.key});
 
-  static Route<void> route() {
+  final List<AmanahQueueCardData>? cards;
+
+  static Route<void> route({List<AmanahQueueCardData>? cards}) {
     return PageRouteBuilder<void>(
-      pageBuilder: (_, _, _) => const AmanahQueueDockScreen(),
+      pageBuilder: (_, _, _) => AmanahQueueDockScreen(cards: cards),
       transitionsBuilder:
           (
             BuildContext context,
@@ -46,10 +49,10 @@ class AmanahQueueDockScreen extends StatefulWidget {
 
 class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     with TickerProviderStateMixin {
-  final List<AmanahQueueCardData> _cards = defaultAmanahQueueCards;
+  late List<AmanahQueueCardData> _cards;
   final List<AmanahQueueCardData> _collectedCards = <AmanahQueueCardData>[];
 
-  int _currentIndex = 1;
+  int _currentIndex = 0;
   double _horizontalDrag = 0.0;
   double _verticalDrag = 0.0;
   bool _isLongPressing = false;
@@ -81,11 +84,44 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
   @override
   void initState() {
     super.initState();
+    _cards = widget.cards != null
+        ? List<AmanahQueueCardData>.from(widget.cards!)
+        : _loadCardsFromSchedules();
+    _currentIndex = _cards.isNotEmpty ? 0 : 0;
     _initDotsTimer();
     _entranceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..forward();
+  }
+
+  List<AmanahQueueCardData> _loadCardsFromSchedules() {
+    final List<DoctorSchedule> todaySchedules = AmanahScheduleStore.instance
+        .getSchedulesForDate(AmanahScheduleStore.baseToday);
+    final List<AmanahQueueCardData> result = <AmanahQueueCardData>[];
+    for (final DoctorSchedule s in todaySchedules) {
+      for (final BookedPatient p in s.bookedPatients) {
+        result.add(
+          AmanahQueueCardData(
+            id: p.id.isNotEmpty ? p.id : 'queue-${result.length + 1}',
+            queueNumber: p.queueNumber,
+            patientName: p.patientName,
+            complaint: p.patientComplaint,
+            poly: s.poli,
+            doctorName: p.sessionTitle ?? s.title,
+            doctorImage: 'assets/amanah/id_card/images/woman-doctor-4.png',
+            priority: p.badge,
+            timeSlot: p.timeSlot,
+            age: int.tryParse(p.patientAge) ?? 0,
+            gender: p.gender ?? 'L',
+            room: p.room ?? s.room,
+            status: p.status ?? 'Menunggu',
+            guardian: p.patientGuardian,
+          ),
+        );
+      }
+    }
+    return result;
   }
 
   void _clearEjectionTimers() {
@@ -164,7 +200,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
   }
 
   void _startRouletteSpin() {
-    if (_activationStage != 'idle') {
+    if (_cards.isEmpty || _activationStage != 'idle') {
       return;
     }
     _disposeDecelController();
@@ -255,7 +291,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
   }
 
   Future<void> _handleActivate() async {
-    if (_activationStage != 'idle' || _isGenieRunning) {
+    if (_cards.isEmpty || _activationStage != 'idle' || _isGenieRunning) {
       return;
     }
     _disposeRouletteController();
@@ -516,7 +552,9 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
             _verticalDrag = 0;
             _horizontalDrag = 0;
             _spinOffset = 0;
-            _currentIndex = (_currentIndex + 1) % _cards.length;
+            _currentIndex = _cards.isNotEmpty
+                ? (_currentIndex + 1) % _cards.length
+                : 0;
           });
           _disposeGenieController();
           _clearEjectionTimers();
@@ -696,110 +734,125 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                       ),
                     ),
 
-                    // 3. 3D Cylindrical Carousel & Deck (Sequential Entrance 3)
-                    Expanded(
-                      child: Transform.translate(
-                        offset: Offset(0, 40.0 * (1.0 - railProgress)),
-                        child: Transform.scale(
-                          scale: 0.88 + (0.12 * railProgress),
-                          child: Opacity(
-                            opacity: railProgress,
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onLongPressStart: (_) => _startRouletteSpin(),
-                              onLongPressEnd: (_) => _stopRouletteSpin(),
-                              onPanDown: (_) {
-                                if (_decelController != null &&
-                                    _decelController!.isAnimating) {
-                                  _disposeDecelController();
-                                  setState(() {
-                                    _spinOffset = 0;
-                                  });
-                                }
-                              },
-                              onPanCancel: () {
-                                if (!_isLongPressing &&
-                                    _activationStage == 'idle') {
-                                  setState(() {
-                                    _horizontalDrag = 0;
-                                    _verticalDrag = 0;
-                                  });
-                                }
-                              },
-                              onPanUpdate: (DragUpdateDetails details) {
-                                if (_isLongPressing ||
-                                    _activationStage != 'idle') {
-                                  return;
-                                }
-                                final double dx = details.delta.dx;
-                                final double dy = details.delta.dy;
-                                if (dy > 0 || _verticalDrag > 0) {
-                                  setState(() {
-                                    _verticalDrag = (_verticalDrag + dy).clamp(
-                                      0.0,
-                                      110.0,
-                                    );
-                                  });
-                                } else {
-                                  setState(() {
-                                    _horizontalDrag += dx;
-                                  });
-                                }
-                              },
-                              onPanEnd: (DragEndDetails details) {
-                                if (_isLongPressing ||
-                                    _activationStage != 'idle') {
-                                  return;
-                                }
-                                if (_verticalDrag >= 55) {
-                                  _handleActivate();
-                                } else {
-                                  setState(() => _verticalDrag = 0);
-                                  final double vx =
-                                      details.velocity.pixelsPerSecond.dx;
-                                  if (_horizontalDrag < -45 || vx < -400) {
-                                    _onIndexChange(_currentIndex + 1);
-                                  } else if (_horizontalDrag > 45 || vx > 400) {
-                                    _onIndexChange(_currentIndex - 1);
-                                  } else {
-                                    setState(() => _horizontalDrag = 0);
+                    if (_cards.isEmpty)
+                      Expanded(
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: AmanahEmptyState.box(
+                              title: 'Belum Ada Antrean Pasien',
+                              message:
+                                  'Saat ini belum ada pasien yang dijadwalkan pada antrean poli hari ini.',
+                            ),
+                          ),
+                        ),
+                      )
+                    else ...<Widget>[
+                      // 3. 3D Cylindrical Carousel & Deck (Sequential Entrance 3)
+                      Expanded(
+                        child: Transform.translate(
+                          offset: Offset(0, 40.0 * (1.0 - railProgress)),
+                          child: Transform.scale(
+                            scale: 0.88 + (0.12 * railProgress),
+                            child: Opacity(
+                              opacity: railProgress,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onLongPressStart: (_) => _startRouletteSpin(),
+                                onLongPressEnd: (_) => _stopRouletteSpin(),
+                                onPanDown: (_) {
+                                  if (_decelController != null &&
+                                      _decelController!.isAnimating) {
+                                    _disposeDecelController();
+                                    setState(() {
+                                      _spinOffset = 0;
+                                    });
                                   }
-                                }
-                              },
-                              child: RepaintBoundary(
-                                child: _AmanahQueue3DCarousel(
-                                  cards: _cards,
-                                  currentIndex: _currentIndex,
-                                  horizontalDrag: _horizontalDrag,
-                                  verticalDrag: _verticalDrag,
-                                  spinOffset: _spinOffset,
-                                  isActivating: _activationStage != 'idle',
-                                  ejectionStage: _ejectionStage,
-                                  showSuccess: _showSuccess,
-                                  onCardSelect: _onIndexChange,
+                                },
+                                onPanCancel: () {
+                                  if (!_isLongPressing &&
+                                      _activationStage == 'idle') {
+                                    setState(() {
+                                      _horizontalDrag = 0;
+                                      _verticalDrag = 0;
+                                    });
+                                  }
+                                },
+                                onPanUpdate: (DragUpdateDetails details) {
+                                  if (_isLongPressing ||
+                                      _activationStage != 'idle') {
+                                    return;
+                                  }
+                                  final double dx = details.delta.dx;
+                                  final double dy = details.delta.dy;
+                                  if (dy > 0 || _verticalDrag > 0) {
+                                    setState(() {
+                                      _verticalDrag = (_verticalDrag + dy).clamp(
+                                        0.0,
+                                        110.0,
+                                      );
+                                    });
+                                  } else {
+                                    setState(() {
+                                      _horizontalDrag += dx;
+                                    });
+                                  }
+                                },
+                                onPanEnd: (DragEndDetails details) {
+                                  if (_isLongPressing ||
+                                      _activationStage != 'idle') {
+                                    return;
+                                  }
+                                  if (_verticalDrag >= 55) {
+                                    _handleActivate();
+                                  } else {
+                                    setState(() => _verticalDrag = 0);
+                                    final double vx =
+                                        details.velocity.pixelsPerSecond.dx;
+                                    if (_horizontalDrag < -45 || vx < -400) {
+                                      _onIndexChange(_currentIndex + 1);
+                                    } else if (_horizontalDrag > 45 || vx > 400) {
+                                      _onIndexChange(_currentIndex - 1);
+                                    } else {
+                                      setState(() => _horizontalDrag = 0);
+                                    }
+                                  }
+                                },
+                                child: RepaintBoundary(
+                                  child: _AmanahQueue3DCarousel(
+                                    cards: _cards,
+                                    currentIndex: _currentIndex,
+                                    horizontalDrag: _horizontalDrag,
+                                    verticalDrag: _verticalDrag,
+                                    spinOffset: _spinOffset,
+                                    isActivating: _activationStage != 'idle',
+                                    ejectionStage: _ejectionStage,
+                                    showSuccess: _showSuccess,
+                                    onCardSelect: _onIndexChange,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
 
-                    // 4. SVG Notched Bottom Dock Floor with Glowing Cavity (Sequential Entrance 4)
-                    Transform.translate(
-                      offset: Offset(0, 70.0 * (1.0 - dockProgress)),
-                      child: Opacity(
-                        opacity: dockProgress,
-                        child: RepaintBoundary(
-                          child: _AmanahBottomNotchedDock(
-                            isActivating: isMorphingActive || _showSuccess,
-                            dragProgress: dragProgress,
-                            isLongPressing: _isLongPressing,
-                            label: 'Tarik antrean ke bawah untuk proses',
+                      // 4. SVG Notched Bottom Dock Floor with Glowing Cavity (Sequential Entrance 4)
+                      Transform.translate(
+                        offset: Offset(0, 70.0 * (1.0 - dockProgress)),
+                        child: Opacity(
+                          opacity: dockProgress,
+                          child: RepaintBoundary(
+                            child: _AmanahBottomNotchedDock(
+                              isActivating: isMorphingActive || _showSuccess,
+                              dragProgress: dragProgress,
+                              isLongPressing: _isLongPressing,
+                              label: 'Tarik antrean ke bawah untuk proses',
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),

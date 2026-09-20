@@ -7,11 +7,14 @@ import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model
 import 'package:amanah_healthcare/features/presence/presentation/components/amanah_presence_drawers.dart';
 
 class AmanahPresenceHistoryScreen extends StatefulWidget {
-  const AmanahPresenceHistoryScreen({super.key});
+  const AmanahPresenceHistoryScreen({this.records, super.key});
 
-  static Route<void> route() {
+  final List<AttendanceRecord>? records;
+
+  static Route<void> route({List<AttendanceRecord>? records}) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) => const AmanahPresenceHistoryScreen(),
+      builder: (BuildContext context) =>
+          AmanahPresenceHistoryScreen(records: records),
     );
   }
 
@@ -32,8 +35,11 @@ class _AmanahPresenceHistoryScreenState
       _unitFilter != 'all' ||
       _selectedDayFilter != null;
 
+  List<AttendanceRecord> get _sourceRecords =>
+      widget.records ?? kAttendanceRecords;
+
   List<AttendanceRecord> get _filteredRecords {
-    return kAttendanceRecords
+    return _sourceRecords
         .where((AttendanceRecord rec) {
           if (_statusFilter != null && rec.status != _statusFilter) {
             return false;

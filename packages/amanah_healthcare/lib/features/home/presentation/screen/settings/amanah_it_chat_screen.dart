@@ -41,16 +41,28 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isTechnicianTyping = false;
+  late final List<AmanahChatMessage> _messages;
 
-  final List<AmanahChatMessage> _messages = <AmanahChatMessage>[
-    const AmanahChatMessage(
-      id: 'msg-1',
-      sender: 'it',
-      text:
-          'Halo dr. Amelia, ada kendala pada sistem SIMRS, scanner presensi, atau perangkat poli yang bisa tim IT bantu?',
-      time: '08:00',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    final String greetingName =
+        widget.user?.staff?.fullName?.trim().isNotEmpty == true
+            ? widget.user!.staff!.fullName!
+            : (widget.user?.fullName.trim().isNotEmpty == true
+                ? widget.user!.fullName
+                : 'Tenaga Medis');
+
+    _messages = <AmanahChatMessage>[
+      AmanahChatMessage(
+        id: 'msg-1',
+        sender: 'it',
+        text:
+            'Halo $greetingName, ada kendala pada sistem SIMRS, scanner presensi, atau perangkat poli yang bisa tim IT bantu?',
+        time: '08:00',
+      ),
+    ];
+  }
 
   @override
   void dispose() {

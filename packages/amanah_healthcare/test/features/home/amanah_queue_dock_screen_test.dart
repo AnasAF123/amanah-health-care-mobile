@@ -1,11 +1,63 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:amanah_healthcare/features/home/domain/amanah_queue_data.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_dock_hollow_glow.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_queue_dock_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
+const List<AmanahQueueCardData> kTestQueueCards = <AmanahQueueCardData>[
+  AmanahQueueCardData(
+    id: 'queue-01',
+    queueNumber: '#01',
+    patientName: 'Budi Mulyono',
+    complaint: 'sakit kepala dan panas dalam',
+    poly: 'Poli gigi',
+    doctorName: 'dr. Sarah Wijaya, Sp.A',
+    doctorImage: 'assets/amanah/id_card/images/woman-docter-3.png',
+    priority: 'Reguler',
+    timeSlot: '08:30 WIB',
+    age: 34,
+    gender: 'L',
+    room: 'R. Periksa 101',
+    status: 'Menunggu',
+  ),
+  AmanahQueueCardData(
+    id: 'queue-02',
+    queueNumber: '#02',
+    patientName: 'Siti Rahmawati',
+    complaint: 'Pemeriksaan rutin anak & flu batuk',
+    poly: 'Poli Anak',
+    doctorName: 'dr. Sarah Wijaya, Sp.A',
+    doctorImage: 'assets/amanah/id_card/images/woman-docter-3.png',
+    priority: 'Prioritas',
+    timeSlot: '08:45 WIB',
+    age: 6,
+    gender: 'P',
+    room: 'R. Anak 104',
+    status: 'Menunggu',
+  ),
+  AmanahQueueCardData(
+    id: 'queue-03',
+    queueNumber: '#03',
+    patientName: 'Ahmad Fauzi',
+    complaint: 'Kontrol hipertensi berkala & vertigo',
+    poly: 'Poli Umum',
+    doctorName: 'dr. Sarah Wijaya, Sp.A',
+    doctorImage: 'assets/amanah/id_card/images/woman-docter-3.png',
+    priority: 'BPJS',
+    timeSlot: '09:00 WIB',
+    age: 52,
+    gender: 'L',
+    room: 'R. Umum 102',
+    status: 'Menunggu',
+  ),
+];
+
 void main() {
-  Widget createQueueDockScreen({Brightness brightness = Brightness.light}) {
+  Widget createQueueDockScreen({
+    Brightness brightness = Brightness.light,
+    List<AmanahQueueCardData>? cards,
+  }) {
     return MaterialApp(
       theme: ThemeData(
         brightness: brightness,
@@ -15,7 +67,7 @@ void main() {
           brightness: brightness,
         ),
       ),
-      home: const AmanahQueueDockScreen(),
+      home: AmanahQueueDockScreen(cards: cards ?? kTestQueueCards),
     );
   }
 

@@ -1,11 +1,87 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_notification_model.dart';
+import 'package:amanah_healthcare/features/home/domain/amanah_visual_role.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_notification_tab_screen.dart';
+
+const List<AmanahNotificationItem> kTestNotifications = <AmanahNotificationItem>[
+  AmanahNotificationItem(
+    id: 'notif_1',
+    title: 'Pasien Siap di Ruang Periksa',
+    desc:
+        'An. Kevin Sanjaya (No. Antrean A-04) telah selesai asesmen tanda vital oleh perawat.',
+    time: 'Baru saja',
+    timestamp: '07:45',
+    category: AmanahNotificationCategory.queue,
+    isUnread: true,
+    isUrgent: false,
+    visual: AmanahNotificationVisual.queueVitals,
+  ),
+  AmanahNotificationItem(
+    id: 'notif_2',
+    title: 'Hasil Kritis Laboratorium Darah',
+    desc:
+        'Hb 7.2 g/dL & Trombosit 45.000 pada pasien Ny. Ratna Dewi (Kamar 204B) perlu verifikasi DPJP.',
+    time: '12 mnt lalu',
+    timestamp: '07:33',
+    category: AmanahNotificationCategory.clinical,
+    isUnread: true,
+    isUrgent: true,
+    visual: AmanahNotificationVisual.clinicalCritical,
+  ),
+  AmanahNotificationItem(
+    id: 'notif_3',
+    title: 'Konsultasi Antar Spesialis',
+    desc:
+        'dr. Budi Santoso, Sp.A meminta lembar rujukan kasus bronkiolitis anak ruang PICU.',
+    time: '45 mnt lalu',
+    timestamp: '07:00',
+    category: AmanahNotificationCategory.clinical,
+    isUnread: true,
+    isUrgent: false,
+    visual: AmanahNotificationVisual.clinicalConsult,
+  ),
+  AmanahNotificationItem(
+    id: 'notif_4',
+    title: 'Konfirmasi Jadwal Shift Sore',
+    desc:
+        'Poli Spesialis Anak Sesi 2 dimulai pukul 14:00 - 18:00 WIB (Kuota 15 pasien terisi).',
+    time: '2 jam lalu',
+    timestamp: '05:45',
+    category: AmanahNotificationCategory.shift,
+    isUnread: false,
+    isUrgent: false,
+    visual: AmanahNotificationVisual.shiftSchedule,
+  ),
+  AmanahNotificationItem(
+    id: 'notif_5',
+    title: 'Laporan Hasil Radiologi Toraks',
+    desc:
+        'Hasil foto Rontgen Thorax AP/Lat pasien By. Alif Pratama sudah dapat diakses via SIMRS.',
+    time: '3 jam lalu',
+    timestamp: '04:30',
+    category: AmanahNotificationCategory.clinical,
+    isUnread: false,
+    isUrgent: false,
+    visual: AmanahNotificationVisual.clinicalReport,
+  ),
+  AmanahNotificationItem(
+    id: 'notif_6',
+    title: 'Pengingat Batas Verifikasi Resep',
+    desc:
+        'Terdapat 3 resep elektronik pasien rawat jalan yang menunggu paraf digital Anda.',
+    time: 'Kemarin',
+    timestamp: '25 Ags',
+    category: AmanahNotificationCategory.shift,
+    isUnread: false,
+    isUrgent: false,
+    visual: AmanahNotificationVisual.shiftReminder,
+  ),
+];
 
 void main() {
   setUp(() {
-    AmanahNotificationStore.instance.reset();
+    AmanahNotificationStore.instance.seedForTesting(kTestNotifications);
   });
 
   Widget createNotificationScreen({

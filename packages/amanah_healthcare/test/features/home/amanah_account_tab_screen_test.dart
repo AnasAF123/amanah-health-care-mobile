@@ -17,9 +17,17 @@ void main() {
     role: AmanahUserRole.doctor,
     fullName: 'dr. Andika Perkasa',
     email: 'dokter@amanah.health',
-    phone: '081234567890',
+    phone: '+62 812-3456-7890',
     password: 'password123',
     isEmailVerified: true,
+    staff: AmanahStaffProfile(
+      id: 'staff-001',
+      userId: 'doc-001',
+      practitionerId: 'SIP. 503/442.1/SIP-D/2026',
+      fullName: 'dr. Andika Perkasa',
+      profession: 'Dokter Spesialis Anak',
+      phoneNumber: '+62 812-3456-7890',
+    ),
   );
 
   Widget createAccountScreen({

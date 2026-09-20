@@ -1,8 +1,22 @@
-﻿import 'dart:ui' as ui;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_queue_data.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_genie_effect.dart';
+
+const AmanahQueueCardData testCard = AmanahQueueCardData(
+  id: 'queue-test-01',
+  queueNumber: '#01',
+  patientName: 'Pasien Test',
+  complaint: 'Pemeriksaan rutin klinis',
+  poly: 'Poli Umum',
+  doctorName: 'dr. Tenaga Medis',
+  doctorImage: 'assets/amanah/id_card/images/woman-docter-3.png',
+  priority: 'Reguler',
+  timeSlot: '08:30 WIB',
+  age: 30,
+  gender: 'L',
+);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -12,7 +26,7 @@ void main() {
       'generateCardCoverSnapshot creates a sharp ui.Image with correct pixelRatio in light and dark mode',
       () async {
         const Size cardSize = Size(320, 445);
-        final AmanahQueueCardData card = defaultAmanahQueueCards[0];
+        const AmanahQueueCardData card = testCard;
 
         final ui.Image lightSnapshot = await generateCardCoverSnapshot(
           card: card,
@@ -40,7 +54,7 @@ void main() {
 
     test('AmanahGenieCanvasPainter repaints when progress changes', () async {
       const Size cardSize = Size(320, 445);
-      final AmanahQueueCardData card = defaultAmanahQueueCards[0];
+      const AmanahQueueCardData card = testCard;
       final ui.Image snapshot = await generateCardCoverSnapshot(
         card: card,
         size: cardSize,

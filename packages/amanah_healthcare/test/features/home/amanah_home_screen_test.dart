@@ -188,9 +188,8 @@ void main() {
       expect(find.byType(AmanahTodayActivitySection), findsOneWidget);
       expect(find.text('Aktivitas hari ini'), findsOneWidget);
       expect(find.text('Antrean Aktif'), findsOneWidget);
-      expect(find.text('4'), findsOneWidget);
       expect(find.text('Total Selesai'), findsOneWidget);
-      expect(find.text('45'), findsOneWidget);
+      expect(find.text('0'), findsWidgets);
 
       // Check Bottom Navigation Bar
       expect(find.byType(AmanahBottomNavigationBar), findsOneWidget);
@@ -210,7 +209,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Riwayat Presensi'), findsOneWidget);
-        expect(find.text('Timeline'), findsOneWidget);
+        expect(find.text('Tidak Ada Data Presensi'), findsOneWidget);
       },
     );
 

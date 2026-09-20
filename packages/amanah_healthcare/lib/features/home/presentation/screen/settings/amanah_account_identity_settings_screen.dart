@@ -22,17 +22,19 @@ class AmanahAccountIdentitySettingsScreen extends StatefulWidget {
 class _AmanahAccountIdentitySettingsScreenState
     extends State<AmanahAccountIdentitySettingsScreen> {
   String _name = '';
-  String _phone = '+62 812-3456-7890';
-  String _email = 'rayhan.pratama@rsamanah.co.id';
+  String _phone = '';
+  String _email = '';
 
   @override
   void initState() {
     super.initState();
-    _name = widget.user.fullName;
-    _phone = '+62 812-3456-7890';
-    _email = widget.user.email.isNotEmpty
-        ? widget.user.email
-        : 'rayhan.pratama@rsamanah.co.id';
+    _name = widget.user.staff?.fullName?.trim().isNotEmpty == true
+        ? widget.user.staff!.fullName!
+        : widget.user.fullName;
+    _phone = widget.user.staff?.phoneNumber?.trim().isNotEmpty == true
+        ? widget.user.staff!.phoneNumber!
+        : widget.user.phone;
+    _email = widget.user.email;
   }
 
   void _editName() {
@@ -117,9 +119,11 @@ class _AmanahAccountIdentitySettingsScreenState
                           value: _name,
                           onEdit: _editName,
                         ),
-                        const AmanahSettingInfoRow(
+                        AmanahSettingInfoRow(
                           label: 'Spesialisasi medis',
-                          value: 'Dokter Spesialis Anak',
+                          value: widget.user.staff?.profession?.trim().isNotEmpty == true
+                              ? widget.user.staff!.profession!
+                              : widget.user.displayRole,
                         ),
                         AmanahSettingEditableRow(
                           label: 'Nomor telepon / WhatsApp',
@@ -136,16 +140,22 @@ class _AmanahAccountIdentitySettingsScreenState
                     const SizedBox(height: 20),
 
                     // 2. Kredensial medis dan legalitas
-                    const AmanahSettingSection(
+                    AmanahSettingSection(
                       title: 'Kredensial medis dan legalitas',
                       children: <Widget>[
                         AmanahSettingInfoRow(
                           label: 'NPWP',
-                          value: '09.254.382.1-013.000',
+                          value: widget.user.staff?.practitionerId?.trim().isNotEmpty == true
+                              ? widget.user.staff!.practitionerId!
+                              : (widget.user.staff?.idCardNumber?.trim().isNotEmpty == true
+                                  ? widget.user.staff!.idCardNumber!
+                                  : '-'),
                         ),
                         AmanahSettingInfoRow(
                           label: 'Nomor NIB',
-                          value: '9120001234567',
+                          value: widget.user.staff?.idCardNumber?.trim().isNotEmpty == true
+                              ? widget.user.staff!.idCardNumber!
+                              : '-',
                         ),
                       ],
                     ),

@@ -35,10 +35,9 @@ class AmanahAccountTabScreen extends StatefulWidget {
 }
 
 class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
-  String _phone = '+62 812-3456-7890';
-  String _email = 'rayhan.pratama@rsamanah.co.id';
-  String _bio =
-      'Dokter Spesialis Anak di RS Amanah Sehat, melayani konsultasi rawat jalan & rawat inap anak.';
+  String _phone = '';
+  String _email = '';
+  String _bio = '';
   bool _isEmailVerified = false;
   String? _customAvatarPath;
   String? _presetAvatarUrl;
@@ -46,12 +45,13 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   @override
   void initState() {
     super.initState();
-    _phone = '+62 812-3456-7890';
-    _email = widget.user.email.isNotEmpty
-        ? widget.user.email
-        : 'rayhan.pratama@rsamanah.co.id';
-    _bio =
-        'Dokter Spesialis Anak di RS Amanah Sehat, melayani konsultasi rawat jalan & rawat inap anak.';
+    _phone = widget.user.staff?.phoneNumber?.trim().isNotEmpty == true
+        ? widget.user.staff!.phoneNumber!
+        : widget.user.phone;
+    _email = widget.user.email;
+    _bio = widget.user.staff?.profession?.trim().isNotEmpty == true
+        ? 'Tenaga medis (${widget.user.staff!.profession}) di RS Amanah Sehat.'
+        : 'Tenaga medis di RS Amanah Sehat.';
     _isEmailVerified = widget.user.isEmailVerified;
   }
 
@@ -76,18 +76,27 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
     );
   }
 
-  AmanahDoctorProfile get _doctorProfile => AmanahDoctorProfile(
-    name: widget.user.fullName,
-    role: 'Dokter Spesialis Anak',
-    greeting: 'Selamat Bertugas',
-    unreadNotifications: 3,
-    sip: 'SIP. 503/442.1/SIP-D/2026',
-    str: 'STR. 31.2.1.100.1.20.123456',
-    phone: _phone,
-    email: _email,
-    hospital: 'RS Amanah Sehat',
-    department: 'Departemen Ilmu Kesehatan Anak',
-  );
+  AmanahDoctorProfile get _doctorProfile {
+    final AmanahDoctorProfile base =
+        AmanahDoctorProfile.fromAuthUser(widget.user);
+    return AmanahDoctorProfile(
+      name: widget.user.fullName.isNotEmpty ? widget.user.fullName : base.name,
+      role: widget.user.staff?.profession?.trim().isNotEmpty == true
+          ? widget.user.staff!.profession!
+          : widget.user.displayRole,
+      greeting: base.greeting,
+      unreadNotifications: base.unreadNotifications,
+      sip: base.sip,
+      str: base.str,
+      nik: base.nik,
+      kkiNumber: base.kkiNumber,
+      email: _email.isNotEmpty ? _email : base.email,
+      phone: _phone.isNotEmpty ? _phone : base.phone,
+      hospital: base.hospital,
+      department: base.department,
+      avatarAsset: base.avatarAsset,
+    );
+  }
 
   Future<void> _openEditProfileDrawer() async {
     final AmanahEditProfileResult? result = await AmanahEditProfileDrawer.show(
@@ -281,7 +290,9 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: _DualStackProfileCard(
                           userName: widget.user.fullName,
-                          roleText: 'Dokter Spesialis Anak',
+                          roleText: widget.user.staff?.profession?.trim().isNotEmpty == true
+                              ? widget.user.staff!.profession!
+                              : widget.user.displayRole,
                           phoneText: _phone,
                           customAvatarPath: _customAvatarPath,
                           presetAvatarUrl: _presetAvatarUrl,

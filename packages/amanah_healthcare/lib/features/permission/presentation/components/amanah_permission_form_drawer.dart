@@ -102,9 +102,7 @@ class _AmanahPermissionFormDrawerState
       _startDate = DateTime.now().add(const Duration(days: 3));
       _endDate = DateTime.now().add(const Duration(days: 5));
       _reasonController = TextEditingController();
-      _substituteDoctorController = TextEditingController(
-        text: 'dr. Budi Santoso, Sp.A',
-      );
+      _substituteDoctorController = TextEditingController();
     }
   }
 
