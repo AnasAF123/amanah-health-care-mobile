@@ -1,0 +1,251 @@
+{
+  "timestamp": "2026-09-07T00:36:20.497370",
+  "targetPath": "packages/amanah_healthcare/lib",
+  "totalFilesScanned": 105,
+  "totalViolations": 44,
+  "scanDurationMs": 65,
+  "findings": {
+    "packages/amanah_healthcare/lib/features/home/presentation/components/amanah_button.dart": [
+      {
+        "lineNumber": 696,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues(alpha: 0.12)"
+      },
+      {
+        "lineNumber": 834,
+        "matchedValue": "Colors.white",
+        "lineContent": "Colors.white.withValues(alpha: 0.28),"
+      },
+      {
+        "lineNumber": 835,
+        "matchedValue": "Colors.white",
+        "lineContent": "Colors.white.withValues(alpha: 0.0),"
+      }
+    ],
+    "packages/amanah_healthcare/lib/features/home/presentation/components/amanah_clinic_analytics_section.dart": [
+      {
+        "lineNumber": 534,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues(alpha: 0.06)"
+      },
+      {
+        "lineNumber": 560,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues(alpha: 0.06)"
+      },
+      {
+        "lineNumber": 947,
+        "matchedValue": "Colors.white",
+        "lineContent": "..color = isDark ? AmanahColorTokens.canvasDark : Colors.white"
+      }
+    ],
+    "packages/amanah_healthcare/lib/features/home/presentation/components/amanah_edit_profile_drawer.dart": [
+      {
+        "lineNumber": 152,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues(alpha: 0.05)"
+      }
+    ],
+    "packages/amanah_healthcare/lib/features/home/presentation/components/amanah_empty_state.dart": [
+      {
+        "lineNumber": 398,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues(alpha: 0.05)"
+      },
+      {
+        "lineNumber": 401,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues(alpha: 0.10)"
+      }
+    ],
+    "packages/amanah_healthcare/lib/features/home/presentation/components/amanah_filter_bar.dart": [
+      {
+        "lineNumber": 82,
+        "matchedValue": "Colors.white",
+        "lineContent": "badgeBackgroundColor = (dark ? AmanahColorTokens.canvasDark : Colors.white).withValues(alpha: 0.24);"
+      },
+      {
+        "lineNumber": 86,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues(alpha: 0.05)"
+      },
+      {
+        "lineNumber": 92,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues(alpha: 0.10)"
+      }
+    ],
+    "packages/amanah_healthcare/lib/features/home/presentation/components/amanah_genie_effect.dart": [
+      {
+        "lineNumber": 171,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues(alpha: 0.14)"
+      },
+      {
+        "lineNumber": 266,
+        "matchedValue": "Colors.white",
+        "lineContent": "Colors.white.withValues(alpha: isDark ? 0.05 : 0.10),"
+      }
+    ],
+    "packages/amanah_healthcare/lib/features/home/presentation/components/amanah_isometric_empty_box.dart": [
+      {
+        "lineNumber": 267,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues(alpha: 0.12)"
+      }
+    ],
+    "packages/amanah_healthcare/lib/features/home/presentation/components/amanah_modal_scaffold.dart": [
+      {
+        "lineNumber": 134,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues(alpha: 0.25)"
+      }
+    ],
+    "packages/amanah_healthcare/lib/features/home/presentation/components/amanah_schedule_card_stack.dart": [
+      {
+        "lineNumber": 722,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues("
+      }
+    ],
+    "packages/amanah_healthcare/lib/features/home/presentation/components/amanah_settings_components.dart": [
+      {
+        "lineNumber": 429,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues(alpha: 0.20)"
+      },
+      {
+        "lineNumber": 498,
+        "matchedValue": "Colors.white",
+        "lineContent": "btnBg = Colors.white.withValues(alpha: 0.05);"
+      },
+      {
+        "lineNumber": 499,
+        "matchedValue": "Colors.white",
+        "lineContent": "btnBorder = Colors.white.withValues(alpha: 0.10);"
+      },
+      {
+        "lineNumber": 644,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues(alpha: 0.05)"
+      },
+      {
+        "lineNumber": 647,
+        "matchedValue": "Colors.white",
+        "lineContent": "? Colors.white.withValues(alpha: 0.10)"
+      }
+    ],
+    "packages/amanah_healthcare/lib/generic_lib/design_constants.dart": [
+      {
+        "lineNumber": 45,
+        "matchedValue": "Colors.deepOrange",
+        "lineContent": "const MaterialColor WARNING_COLOR = Colors.deepOrange;"
+      },
+      {
+        "lineNumber": 46,
+        "matchedValue": "Color(0xFF2D9CDB)",
+        "lineContent": "const Color PRIMARY_BLUE_COLOR = Color(0xFF2D9CDB);"
+      },
+      {
+        "lineNumber": 47,
+        "matchedValue": "Color(0xFF4F4F4F)",
+        "lineContent": "const Color PRIMARY_GREY_COLOR = Color(0xFF4F4F4F);"
+      },
+      {
+        "lineNumber": 48,
+        "matchedValue": "Color(0xFF888888)",
+        "lineContent": "const Color FAIR_GREY_COLOR = Color(0xFF888888);"
+      },
+      {
+        "lineNumber": 49,
+        "matchedValue": "Color(0xFFF2F2F2)",
+        "lineContent": "const Color GREY_COLOR = Color(0xFFF2F2F2);"
+      },
+      {
+        "lineNumber": 50,
+        "matchedValue": "Color(0xFFFFFFFF)",
+        "lineContent": "const Color WHITE_COLOR = Color(0xFFFFFFFF);"
+      },
+      {
+        "lineNumber": 51,
+        "matchedValue": "Color(0xFF219653)",
+        "lineContent": "const Color DARK_GREEN_COLOR = Color(0xFF219653);"
+      },
+      {
+        "lineNumber": 52,
+        "matchedValue": "Color(0xFF60AC0E)",
+        "lineContent": "const Color LIGHT_GREEN_COLOR = Color(0xFF60AC0E);"
+      },
+      {
+        "lineNumber": 53,
+        "matchedValue": "Color(0xFFF2C94C)",
+        "lineContent": "const Color LIGHT_YELLOW_COLOR = Color(0xFFF2C94C);"
+      },
+      {
+        "lineNumber": 54,
+        "matchedValue": "Color(0xFFBFBFBF)",
+        "lineContent": "const Color LIGHT_GREY_COLOR = Color(0xFFBFBFBF);"
+      },
+      {
+        "lineNumber": 55,
+        "matchedValue": "Color(0xFFC88F01)",
+        "lineContent": "const Color DARK_YELLOW_COLOR = Color(0xFFC88F01);"
+      },
+      {
+        "lineNumber": 56,
+        "matchedValue": "Color(0xFFF2994A)",
+        "lineContent": "const Color LIGHT_ORANGE_COLOR = Color(0xFFF2994A);"
+      },
+      {
+        "lineNumber": 57,
+        "matchedValue": "Color(0xFFE07312)",
+        "lineContent": "const Color DARK_ORANGE_COLOR = Color(0xFFE07312);"
+      },
+      {
+        "lineNumber": 58,
+        "matchedValue": "Color(0xFFEB5757)",
+        "lineContent": "const Color RED_COLOR = Color(0xFFEB5757);"
+      },
+      {
+        "lineNumber": 59,
+        "matchedValue": "Color(0xFFFFCBCB)",
+        "lineContent": "const Color LIGHT_RED_COLOR = Color(0xFFFFCBCB);"
+      },
+      {
+        "lineNumber": 60,
+        "matchedValue": "Color(0xFFFF0000)",
+        "lineContent": "const Color DARK_RED_COLOR = Color(0xFFFF0000);"
+      },
+      {
+        "lineNumber": 61,
+        "matchedValue": "Color(0xFF341100)",
+        "lineContent": "const Color DARK_BROWN_COLOR = Color(0xFF341100);"
+      },
+      {
+        "lineNumber": 64,
+        "matchedValue": "Color.fromRGBO(255, 204, 204, 1)",
+        "lineContent": "const Color RED_BACKGROUND_COLOR = Color.fromRGBO(255, 204, 204, 1);"
+      },
+      {
+        "lineNumber": 65,
+        "matchedValue": "Color.fromRGBO(255, 230, 204, 1)",
+        "lineContent": "const Color ORANGE_BACKGROUND_COLOR = Color.fromRGBO(255, 230, 204, 1);"
+      },
+      {
+        "lineNumber": 66,
+        "matchedValue": "Color.fromRGBO(255, 255, 204, 1)",
+        "lineContent": "const Color YELLOW_BACKGROUND_COLOR = Color.fromRGBO(255, 255, 204, 1);"
+      },
+      {
+        "lineNumber": 67,
+        "matchedValue": "Color.fromRGBO(230, 255, 204, 1)",
+        "lineContent": "const Color LIGHT_GREEN_BACKGROUND_COLOR = Color.fromRGBO(230, 255, 204, 1);"
+      },
+      {
+        "lineNumber": 68,
+        "matchedValue": "Color.fromRGBO(204, 255, 204, 1)",
+        "lineContent": "const Color DARK_GREEN_BACKGROUND_COLOR = Color.fromRGBO(204, 255, 204, 1);"
+      }
+    ]
+  }
+}

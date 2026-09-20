@@ -1,0 +1,439 @@
+import 'dart:convert';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:amanah_healthcare/features/authentication/data/amanah_auth_token_storage.dart';
+import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_repository.dart';
+import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
+import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
+
+class _MockTokenStorage extends AmanahAuthTokenStorage {
+  const _MockTokenStorage([this._token = 'test-bearer-token-123']);
+  final String? _token;
+
+  @override
+  Future<String?> getToken() async => _token;
+}
+
+void main() {
+  group('AmanahScheduleRepository - Authentication & Headers', () {
+    test('Injects Authorization Bearer token into headers when token exists', () async {
+      late http.Request capturedRequest;
+      final MockClient client = MockClient((http.Request request) async {
+        capturedRequest = request;
+        return http.Response('[]', 200, headers: <String, String>{'content-type': 'application/json'});
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage('jwt-token-xyz'),
+      );
+
+      await repo.fetchMySchedules(date: '2026-08-26');
+
+      expect(capturedRequest.headers['Authorization'], 'Bearer jwt-token-xyz');
+      expect(capturedRequest.headers['Content-Type'], 'application/json');
+      expect(capturedRequest.headers['Accept'], 'application/json');
+    });
+
+    test('Omits Authorization header when token is null or empty', () async {
+      late http.Request capturedRequest;
+      final MockClient client = MockClient((http.Request request) async {
+        capturedRequest = request;
+        return http.Response('[]', 200, headers: <String, String>{'content-type': 'application/json'});
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage(null),
+      );
+
+      await repo.fetchMySchedules(date: '2026-08-26');
+
+      expect(capturedRequest.headers.containsKey('Authorization'), isFalse);
+    });
+  });
+
+  group('AmanahScheduleRepository - Error Handling & 409 Conflict Exceptions', () {
+    test('Throws AmanahScheduleConflictException with SCHEDULE_HAS_ACTIVE_BOOKINGS on HTTP 409', () async {
+      final MockClient client = MockClient((http.Request request) async {
+        return http.Response(
+          jsonEncode(<String, dynamic>{
+            'statusCode': 409,
+            'code': 'SCHEDULE_HAS_ACTIVE_BOOKINGS',
+            'message': 'Jadwal memiliki 3 pasien terdaftar yang masih aktif.',
+          }),
+          409,
+          headers: <String, String>{'content-type': 'application/json'},
+        );
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage(),
+      );
+
+      try {
+        await repo.deleteSchedule('sched-active-123');
+        fail('Expected AmanahScheduleConflictException to be thrown');
+      } on AmanahScheduleConflictException catch (e) {
+        expect(e.code, 'SCHEDULE_HAS_ACTIVE_BOOKINGS');
+        expect(e.hasActiveBookings, isTrue);
+        expect(e.message, contains('3 pasien'));
+      }
+    });
+
+    test('Throws AmanahScheduleConflictException with ROOM_ALREADY_OCCUPIED on HTTP 409', () async {
+      final MockClient client = MockClient((http.Request request) async {
+        return http.Response(
+          jsonEncode(<String, dynamic>{
+            'statusCode': 409,
+            'code': 'ROOM_ALREADY_OCCUPIED',
+            'message': 'Ruangan telah dipakai oleh dokter lain pada jam tersebut.',
+          }),
+          409,
+          headers: <String, String>{'content-type': 'application/json'},
+        );
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage(),
+      );
+
+      try {
+        await repo.createSchedule(
+          date: '2026-08-26',
+          session: 'Pagi',
+          startTime: '08:00',
+          endTime: '11:00',
+          roomId: 'room-101',
+        );
+        fail('Expected AmanahScheduleConflictException to be thrown');
+      } on AmanahScheduleConflictException catch (e) {
+        expect(e.code, 'ROOM_ALREADY_OCCUPIED');
+        expect(e.isRoomOccupied, isTrue);
+      }
+    });
+
+    test('Throws AmanahScheduleException with UNAUTHORIZED on HTTP 401', () async {
+      final MockClient client = MockClient((http.Request request) async {
+        return http.Response('{"message": "Unauthorized"}', 401);
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage(),
+      );
+
+      expect(
+        () => repo.fetchMySchedules(),
+        throwsA(isA<AmanahScheduleException>().having((AmanahScheduleException e) => e.code, 'code', 'UNAUTHORIZED')),
+      );
+    });
+
+    test('Throws AmanahScheduleException with FORBIDDEN on HTTP 403', () async {
+      final MockClient client = MockClient((http.Request request) async {
+        return http.Response(
+          jsonEncode(<String, dynamic>{
+            'code': 'FORBIDDEN_DOCTOR_ACCESS',
+            'message': 'Anda tidak berhak mengakses jadwal dokter lain.',
+          }),
+          403,
+          headers: <String, String>{'content-type': 'application/json'},
+        );
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage(),
+      );
+
+      expect(
+        () => repo.fetchBookedPatients(scheduleId: 'other-doc-schedule'),
+        throwsA(isA<AmanahScheduleException>().having((AmanahScheduleException e) => e.code, 'code', 'FORBIDDEN_DOCTOR_ACCESS')),
+      );
+    });
+  });
+
+  group('AmanahScheduleRepository - CRUD Endpoints & Serialization', () {
+    test('fetchMySchedules successfully decodes backend JSON response', () async {
+      final MockClient client = MockClient((http.Request request) async {
+        expect(request.url.queryParameters['date'], '2026-08-26');
+        return http.Response(
+          jsonEncode(<dynamic>[
+            <String, dynamic>{
+              'id': 'sched-uuid-001',
+              'scheduleDate': '2026-08-26',
+              'sessionShift': 'morning',
+              'sessionLabel': 'Pagi',
+              'startTime': '08:00',
+              'endTime': '12:00',
+              'timeRange': '08:00 - 12:00 WIB',
+              'poliklinikId': 'poli-01',
+              'poliklinikName': 'Poli Gigi & Mulut',
+              'roomId': 'room-201',
+              'roomName': 'Ruang 201',
+              'capacity': 10,
+              'bookedPatientCount': 2,
+              'isAvailable': true,
+              'status': 'Buka',
+              'bookedPatients': <dynamic>[
+                <String, dynamic>{
+                  'id': 'pt-1',
+                  'appointmentId': 'apt-1',
+                  'fullName': 'Ahmad Dahlan',
+                  'medicalRecordNumber': 'RM-2026-001',
+                  'age': '30 Thn',
+                  'complaint': 'Pemeriksaan rutin gigi',
+                  'queueNumber': '#01',
+                  'timeSlot': '08:30 - 09:00 WIB',
+                  'status': 'checked_in',
+                  'statusBadge': 'Check In',
+                },
+              ],
+            },
+          ]),
+          200,
+          headers: <String, String>{'content-type': 'application/json'},
+        );
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage(),
+      );
+
+      final List<DoctorSchedule> schedules = await repo.fetchMySchedules(date: '2026-08-26');
+      expect(schedules.length, 1);
+      expect(schedules.first.id, 'sched-uuid-001');
+      expect(schedules.first.title, 'Sesi Pagi');
+      expect(schedules.first.poli, 'Poli Gigi & Mulut');
+      expect(schedules.first.room, 'Ruang 201');
+      expect(schedules.first.bookedPatients.length, 1);
+      expect(schedules.first.bookedPatients.first.patientName, 'Ahmad Dahlan');
+      expect(schedules.first.bookedPatients.first.patientRm, 'RM-2026-001');
+    });
+
+    test('fetchCalendarSummary successfully decodes month summary', () async {
+      final MockClient client = MockClient((http.Request request) async {
+        expect(request.url.queryParameters['month'], '2026-08');
+        return http.Response(
+          jsonEncode(<String, dynamic>{
+            'month': '2026-08',
+            'days': <dynamic>[
+              <String, dynamic>{
+                'date': '2026-08-26',
+                'hasSchedule': true,
+                'isCuti': false,
+                'sessionCount': 2,
+                'targetQuota': 8,
+                'bookedPatientCount': 4,
+                'capacityPercentage': 50,
+              },
+              <String, dynamic>{
+                'date': '2026-08-30',
+                'hasSchedule': false,
+                'isCuti': true,
+                'cutiReason': 'Hari Libur',
+                'sessionCount': 0,
+                'targetQuota': 0,
+                'bookedPatientCount': 0,
+                'capacityPercentage': 0,
+              },
+            ],
+          }),
+          200,
+          headers: <String, String>{'content-type': 'application/json'},
+        );
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage(),
+      );
+
+      final CalendarSummaryResponse summary = await repo.fetchCalendarSummary('2026-08');
+      expect(summary.month, '2026-08');
+      expect(summary.days.length, 2);
+      expect(summary.days.first.date, '2026-08-26');
+      expect(summary.days.first.capacityPercentage, 50);
+      expect(summary.days.last.isCuti, isTrue);
+      expect(summary.days.last.cutiReason, 'Hari Libur');
+    });
+
+    test('createSchedule sends correct POST payload and decodes response', () async {
+      late Map<String, dynamic> sentPayload;
+      final MockClient client = MockClient((http.Request request) async {
+        expect(request.method, 'POST');
+        sentPayload = jsonDecode(request.body) as Map<String, dynamic>;
+        return http.Response(
+          jsonEncode(<String, dynamic>{
+            'id': 'sched-created-789',
+            'scheduleDate': '2026-08-27',
+            'sessionShift': 'afternoon',
+            'sessionLabel': 'Siang',
+            'startTime': '13:00',
+            'endTime': '17:00',
+            'timeRange': '13:00 - 17:00 WIB',
+            'poliklinikId': 'poli-konservasi',
+            'poliklinikName': 'Klinik Spesialis Konservasi',
+            'roomId': 'room-204',
+            'roomName': 'Ruang 204',
+            'capacity': 8,
+            'bookedPatientCount': 0,
+            'isAvailable': true,
+            'status': 'Buka',
+          }),
+          201,
+          headers: <String, String>{'content-type': 'application/json'},
+        );
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage(),
+      );
+
+      final DoctorSchedule created = await repo.createSchedule(
+        date: '2026-08-27',
+        session: 'Siang',
+        startTime: '13:00',
+        endTime: '17:00',
+        roomId: 'room-204',
+        poliklinikId: 'poli-konservasi',
+        capacity: 8,
+      );
+
+      expect(sentPayload['date'], '2026-08-27');
+      expect(sentPayload['session'], 'SIANG');
+      expect(sentPayload['startTime'], '13:00');
+      expect(sentPayload['endTime'], '17:00');
+      expect(sentPayload['roomId'], 'room-204');
+      expect(created.id, 'sched-created-789');
+      expect(created.title, 'Sesi Siang');
+      expect(created.poli, 'Klinik Spesialis Konservasi');
+    });
+
+    test('fetchReferenceRooms and fetchReferencePolikliniks successfully decode', () async {
+      final MockClient client = MockClient((http.Request request) async {
+        if (request.url.path.contains('reference/rooms')) {
+          return http.Response(
+            jsonEncode(<dynamic>[
+              <String, dynamic>{
+                'id': 'room-1',
+                'code': 'R101',
+                'name': 'Ruang 101',
+                'isOccupied': true,
+                'occupiedBy': 'dr. Pratama',
+              },
+              <String, dynamic>{
+                'id': 'room-2',
+                'code': 'R201',
+                'name': 'Ruang 201',
+                'isOccupied': false,
+              },
+            ]),
+            200,
+            headers: <String, String>{'content-type': 'application/json'},
+          );
+        } else {
+          return http.Response(
+            jsonEncode(<dynamic>[
+              <String, dynamic>{
+                'id': 'poli-1',
+                'code': 'P-GIGI',
+                'name': 'Poli Gigi & Mulut',
+              },
+            ]),
+            200,
+            headers: <String, String>{'content-type': 'application/json'},
+          );
+        }
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage(),
+      );
+
+      final List<ClinicRoomReference> rooms = await repo.fetchReferenceRooms(date: '2026-08-26');
+      expect(rooms.length, 2);
+      expect(rooms.first.isOccupied, isTrue);
+      expect(rooms.first.occupiedBy, 'dr. Pratama');
+      expect(rooms.last.isOccupied, isFalse);
+
+      final List<ClinicPoliklinikReference> polis = await repo.fetchReferencePolikliniks();
+      expect(polis.length, 1);
+      expect(polis.first.name, 'Poli Gigi & Mulut');
+    });
+  });
+
+  group('AmanahScheduleStore - Integrated Operations', () {
+    test('AmanahScheduleStore.loadSchedulesForDate populates schedules and enriches patients', () async {
+      final MockClient client = MockClient((http.Request request) async {
+        if (request.url.path.contains('my-schedules')) {
+          return http.Response(
+            jsonEncode(<dynamic>[
+              <String, dynamic>{
+                'id': 'sched-store-1',
+                'scheduleDate': '2026-09-01',
+                'sessionShift': 'morning',
+                'sessionLabel': 'Pagi',
+                'startTime': '08:00',
+                'endTime': '12:00',
+                'poliklinikName': 'Poli Anak',
+                'roomName': 'Ruang 105',
+                'capacity': 8,
+                'bookedPatientCount': 1,
+                'isAvailable': true,
+                'bookedPatients': <dynamic>[
+                  <String, dynamic>{
+                    'id': 'pt-store-1',
+                    'fullName': 'Dewi Sartika',
+                    'medicalRecordNumber': 'RM-9901',
+                    'age': '5 Thn',
+                    'complaint': 'Demam tinggi',
+                    'queueNumber': '#01',
+                    'timeSlot': '08:30 - 09:00 WIB',
+                  },
+                ],
+              },
+            ]),
+            200,
+            headers: <String, String>{'content-type': 'application/json'},
+          );
+        } else {
+          return http.Response('[]', 200, headers: <String, String>{'content-type': 'application/json'});
+        }
+      });
+
+      final AmanahScheduleStore store = AmanahScheduleStore.instance;
+      store.setRepository(
+        AmanahScheduleRepository(
+          baseUrl: 'http://test.api',
+          httpClient: client,
+          tokenStorage: const _MockTokenStorage(),
+        ),
+      );
+
+      final DateTime targetDate = DateTime(2026, 9, 1);
+      final List<DoctorSchedule> result = await store.loadSchedulesForDate(targetDate, forceRefresh: true);
+
+      expect(result.length, 1);
+      expect(result.first.id, 'sched-store-1');
+      expect(result.first.bookedPatients.first.patientName, 'Dewi Sartika');
+      expect(store.getSchedulesForDate(targetDate).length, 1);
+    });
+  });
+}

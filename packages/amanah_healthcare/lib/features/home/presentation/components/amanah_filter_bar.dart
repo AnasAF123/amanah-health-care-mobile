@@ -79,17 +79,17 @@ class _AmanahFilterChip<T> extends StatelessWidget {
           ? AmanahColorTokens.tabActiveDark
           : AmanahColorTokens.brand;
       foregroundColor = dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.pureWhite;
-      badgeBackgroundColor = (dark ? AmanahColorTokens.canvasDark : Colors.white).withValues(alpha: 0.24);
+      badgeBackgroundColor = (dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.pureWhite).withValues(alpha: 0.24);
       badgeForegroundColor = foregroundColor;
     } else {
       backgroundColor = dark
-          ? Colors.white.withValues(alpha: 0.05)
+          ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
           : AmanahColorTokens.neutral100;
       foregroundColor = dark
           ? AmanahColorTokens.neutral300
           : AmanahColorTokens.neutral600;
       badgeBackgroundColor = dark
-          ? Colors.white.withValues(alpha: 0.10)
+          ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
           : AmanahColorTokens.neutral200;
       badgeForegroundColor = dark
           ? AmanahColorTokens.neutral300

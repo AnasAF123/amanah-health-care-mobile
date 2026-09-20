@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-09-07T00:43:38.460456",
+  "targetPath": "packages/amanah_healthcare/lib",
+  "totalFilesScanned": 105,
+  "totalViolations": 0,
+  "scanDurationMs": 45,
+  "findings": {}
+}

@@ -281,14 +281,14 @@ class _AmanahItSupportSettingsScreenState
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: dark
-                            ? AmanahColorTokens.surfaceLight.withValues(
+                            ? AmanahColorTokens.pureWhite.withValues(
                                 alpha: 0.05,
                               )
                             : AmanahColorTokens.brandSurface,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: dark
-                              ? AmanahColorTokens.surfaceLight.withValues(
+                              ? AmanahColorTokens.pureWhite.withValues(
                                   alpha: 0.10,
                                 )
                               : AmanahColorTokens.brandMuted,
@@ -301,7 +301,7 @@ class _AmanahItSupportSettingsScreenState
                             'Butuh bantuan teknisi langsung?',
                             style: TextStyle(
                               color: dark
-                                  ? AmanahColorTokens.surfaceLight
+                                  ? AmanahColorTokens.pureWhite
                                   : AmanahColorTokens.navy,
                               fontSize: 13,
                               fontWeight: FontWeight.w700,

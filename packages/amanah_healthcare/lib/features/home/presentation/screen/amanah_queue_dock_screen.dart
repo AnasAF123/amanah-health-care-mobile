@@ -680,7 +680,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                                               ? AmanahColorTokens.tabActiveDark
                                               : AmanahColorTokens.brandPrimary)
                                           : (isDark
-                                              ? AmanahColorTokens.surfaceLight
+                                              ? AmanahColorTokens.pureWhite
                                               : AmanahColorTokens.neutral900),
                                       fontSize: 22,
                                       fontWeight: FontWeight.w800,
@@ -879,12 +879,12 @@ class _QueueHeaderBar extends StatelessWidget {
         trailing: PopupMenuButton<String>(
           icon: Icon(
             Icons.more_vert_rounded,
-            color: isDark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral800,
+            color: isDark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral800,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
             side: isDark
-                ? BorderSide(color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.12))
+                ? BorderSide(color: AmanahColorTokens.pureWhite.withValues(alpha: 0.12))
                 : BorderSide.none,
           ),
           color: isDark ? AmanahColorTokens.surfaceElevatedDark : AmanahColorTokens.surfaceLight,
@@ -913,7 +913,7 @@ class _QueueHeaderBar extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: isDark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
+                      color: isDark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral900,
                     ),
                   ),
                 ],
@@ -936,7 +936,7 @@ class _QueueHeaderBar extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: isDark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
+                      color: isDark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral900,
                     ),
                   ),
                   if (historyCount > 0) ...<Widget>[
@@ -948,7 +948,7 @@ class _QueueHeaderBar extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? AmanahColorTokens.auroraSapphireDark
+                            ? AmanahColorTokens.cyanAccent.withValues(alpha: 0.16)
                             : AmanahColorTokens.brandMuted,
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -956,7 +956,7 @@ class _QueueHeaderBar extends StatelessWidget {
                         '$historyCount',
                         style: TextStyle(
                           color: isDark
-                              ? AmanahColorTokens.brandSubtle
+                              ? AmanahColorTokens.cyanAccent
                               : AmanahColorTokens.brandPrimary,
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
@@ -1199,7 +1199,7 @@ class _AmanahQueueCardCover extends StatelessWidget {
           ],
           border: Border.all(
             color: isDark
-                ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.14)
+                ? AmanahColorTokens.pureWhite.withValues(alpha: 0.14)
                 : AmanahColorTokens.surfaceLight,
             width: 1.5,
           ),
@@ -1217,7 +1217,7 @@ class _AmanahQueueCardCover extends StatelessWidget {
                       end: Alignment.topCenter,
                       colors: isDark
                           ? <Color>[
-                              AmanahColorTokens.auroraSapphireDark.withValues(alpha: 0.35),
+                              AmanahColorTokens.auroraCyanDark.withValues(alpha: 0.35),
                               AmanahColorTokens.neutral800.withValues(alpha: 0.15),
                               Colors.transparent,
                             ]
@@ -1247,9 +1247,9 @@ class _AmanahQueueCardCover extends StatelessWidget {
                       end: Alignment.bottomRight,
                       colors: isDark
                           ? const <Color>[
-                              AmanahColorTokens.brandLight,
-                              AmanahColorTokens.brandSoft,
-                              AmanahColorTokens.brandSubtle,
+                              AmanahColorTokens.cyanBright,
+                              AmanahColorTokens.cyanAccent,
+                              AmanahColorTokens.cyanLight,
                             ]
                           : const <Color>[
                               AmanahColorTokens.brandPrimary,
@@ -1265,7 +1265,7 @@ class _AmanahQueueCardCover extends StatelessWidget {
                     card.queueNumber,
                     style: TextStyle(
                       color: isDark
-                          ? AmanahColorTokens.brandSoft
+                          ? AmanahColorTokens.cyanAccent
                           : AmanahColorTokens.brandPrimary,
                       fontSize: cardW > 250 ? 44 : 38,
                       fontWeight: FontWeight.w900,
@@ -1379,7 +1379,7 @@ class _AmanahBottomNotchedDock extends StatelessWidget {
                   height: 4,
                   decoration: BoxDecoration(
                     color: isDark
-                        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.25)
+                        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.25)
                         : AmanahColorTokens.pureBlack.withValues(alpha: 0.35),
                     borderRadius: BorderRadius.circular(999),
                   ),
@@ -1556,14 +1556,14 @@ class _AmanahQueueActivationOverlayState
                             onPressed: widget.onClose,
                             icon: const Icon(Icons.arrow_back_rounded),
                             color: isDark
-                                ? AmanahColorTokens.surfaceLight
+                                ? AmanahColorTokens.pureWhite
                                 : AmanahColorTokens.neutral800,
                           ),
                           Text(
                             'Antrean terpilih',
                             style: TextStyle(
                               color: isDark
-                                  ? AmanahColorTokens.surfaceLight
+                                  ? AmanahColorTokens.pureWhite
                                   : AmanahColorTokens.darkNavy,
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -1727,7 +1727,7 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
         ],
         border: Border.all(
           color: isDark
-              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.14)
+              ? AmanahColorTokens.pureWhite.withValues(alpha: 0.14)
               : AmanahColorTokens.surfaceLight,
           width: 1.5,
         ),
@@ -1742,7 +1742,7 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
               child: AmanahWatermarkLogo(
                 size: 200,
                 color: isDark
-                    ? AmanahColorTokens.brandSoft
+                    ? AmanahColorTokens.cyanAccent
                     : AmanahColorTokens.brandPrimary,
                 opacity: isDark ? 0.18 : 0.25,
               ),
@@ -1761,7 +1761,7 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
                 card.queueNumber,
                 style: TextStyle(
                   color: isDark
-                      ? AmanahColorTokens.brandSoft
+                      ? AmanahColorTokens.cyanAccent
                       : AmanahColorTokens.brandPrimary,
                   fontSize: 38,
                   fontWeight: FontWeight.w900,
@@ -1812,7 +1812,7 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
                       Icon(
                         Icons.arrow_outward_rounded,
                         color: isDark
-                            ? AmanahColorTokens.brandSoft
+                            ? AmanahColorTokens.cyanAccent
                             : AmanahColorTokens.brandPrimary,
                         size: 20,
                       ),
@@ -1824,7 +1824,7 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: isDark
-                                ? AmanahColorTokens.surfaceLight
+                                ? AmanahColorTokens.pureWhite
                                 : AmanahColorTokens.neutral900,
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
@@ -1858,7 +1858,7 @@ class _AmanahRevealedHeroCard extends StatelessWidget {
                 card.poly,
                 style: TextStyle(
                   color: isDark
-                      ? AmanahColorTokens.brandSoft
+                      ? AmanahColorTokens.cyanAccent
                       : AmanahColorTokens.brandPrimary,
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
@@ -1917,7 +1917,7 @@ class AmanahQueueHistoryScreen extends StatelessWidget {
                         '#',
                         style: TextStyle(
                           color: dark
-                              ? AmanahColorTokens.brandAccent
+                              ? AmanahColorTokens.cyanAccent
                               : AmanahColorTokens.brandPrimary,
                           fontSize: 32,
                           fontWeight: FontWeight.w900,
@@ -2017,10 +2017,8 @@ class AmanahQueueHistoryScreen extends StatelessWidget {
                                               card.queueNumber,
                                               style: TextStyle(
                                                 color: dark
-                                                    ? AmanahColorTokens
-                                                          .brandAccent
-                                                    : AmanahColorTokens
-                                                          .brandPrimary,
+                                                    ? AmanahColorTokens.cyanAccent
+                                                    : AmanahColorTokens.brandPrimary,
                                                 fontSize: 20,
                                                 fontWeight: FontWeight.w900,
                                               ),
@@ -2035,7 +2033,7 @@ class AmanahQueueHistoryScreen extends StatelessWidget {
                                                     ),
                                                 decoration: BoxDecoration(
                                                   color: dark
-                                                      ? AmanahColorTokens.brand
+                                                      ? AmanahColorTokens.cyanAccent
                                                             .withValues(
                                                               alpha: 0.15,
                                                             )
@@ -2045,13 +2043,8 @@ class AmanahQueueHistoryScreen extends StatelessWidget {
                                                       BorderRadius.circular(10),
                                                   border: Border.all(
                                                     color: dark
-                                                        ? AmanahColorTokens
-                                                              .brand
-                                                              .withValues(
-                                                                alpha: 0.30,
-                                                              )
-                                                        : AmanahColorTokens
-                                                              .brandMuted,
+                                                        ? AmanahColorTokens.cyanAccent.withValues(alpha: 0.30)
+                                                        : AmanahColorTokens.brandMuted,
                                                   ),
                                                 ),
                                                 child: Text(
@@ -2061,10 +2054,8 @@ class AmanahQueueHistoryScreen extends StatelessWidget {
                                                       TextOverflow.ellipsis,
                                                   style: TextStyle(
                                                     color: dark
-                                                        ? AmanahColorTokens
-                                                              .brandAccent
-                                                        : AmanahColorTokens
-                                                              .brandPrimary,
+                                                        ? AmanahColorTokens.cyanAccent
+                                                        : AmanahColorTokens.brandPrimary,
                                                     fontSize: 10,
                                                     fontWeight: FontWeight.w800,
                                                   ),
@@ -2239,13 +2230,13 @@ class _AmanahQueueGuideDrawer extends StatelessWidget {
           _buildStep(
             '1. Geser Rel 3D',
             'Geser kartu ke kiri/kanan untuk memilih nomor antrean pasien',
-            AmanahColorTokens.brandPrimary,
+            dark ? AmanahColorTokens.cyanAccent : AmanahColorTokens.brandPrimary,
             dark: dark,
           ),
           _buildStep(
             '2. Tarik ke Bawah',
             'Tarik kartu ke slot bawah hingga kotak paramedis terbuka untuk memproses',
-            dark ? AmanahColorTokens.brandSoft : AmanahColorTokens.brandLight,
+            dark ? AmanahColorTokens.cyanLight : AmanahColorTokens.brandLight,
             dark: dark,
           ),
           _buildStep(
@@ -2285,7 +2276,7 @@ class _AmanahQueueGuideDrawer extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
+                    color: dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral900,
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
                   ),

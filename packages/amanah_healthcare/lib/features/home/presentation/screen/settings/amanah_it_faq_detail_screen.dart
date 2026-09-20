@@ -148,7 +148,7 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                                   margin: const EdgeInsets.only(top: 1),
                                   decoration: BoxDecoration(
                                     color: dark
-                                        ? AmanahColorTokens.surfaceLight
+                                        ? AmanahColorTokens.pureWhite
                                             .withValues(alpha: 0.10)
                                         : AmanahColorTokens.neutral100,
                                     shape: BoxShape.circle,
@@ -195,14 +195,14 @@ class AmanahItFaqDetailScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: dark
-                            ? AmanahColorTokens.surfaceLight.withValues(
+                            ? AmanahColorTokens.pureWhite.withValues(
                                 alpha: 0.04,
                               )
                             : AmanahColorTokens.neutral50,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
                           color: dark
-                              ? AmanahColorTokens.surfaceLight.withValues(
+                              ? AmanahColorTokens.pureWhite.withValues(
                                   alpha: 0.06,
                                 )
                               : AmanahColorTokens.neutral200,

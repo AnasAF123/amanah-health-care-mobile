@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:app_store_shared/app_store_shared.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_better_auth/flutter_better_auth.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -50,6 +52,20 @@ Future<void> launchAmanahApp({
 
   _enableEdgeToEdgeMode();
 
+  String authUrl = 'http://localhost:3001/api/auth';
+  if (!kIsWeb && Platform.isAndroid) {
+    authUrl = 'http://10.0.2.2:3001/api/auth';
+  }
+
+  try {
+    await FlutterBetterAuth.initialize(
+      url: authUrl,
+      scheme: 'amanahhealth',
+    );
+  } catch (e) {
+    debugPrint('FlutterBetterAuth initialize error: $e');
+  }
+
   try {
     await CameraHelper.init();
   } catch (e) {
@@ -93,31 +109,33 @@ class _AmanahAppState extends State<AmanahApp> {
           lazy: true,
         ),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: true,
-        title: 'Amanah Healthcare',
-        theme: ThemeData(
-          useMaterial3: true,
-          fontFamily: AmanahTypographyTokens.fontFamily,
-          brightness: Brightness.light,
-          scaffoldBackgroundColor: AmanahColorTokens.canvasLight,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AmanahColorTokens.brand,
+      child: BetterAuthProvider(
+        child: MaterialApp(
+          debugShowCheckedModeBanner: true,
+          title: 'Amanah Healthcare',
+          theme: ThemeData(
+            useMaterial3: true,
+            fontFamily: AmanahTypographyTokens.fontFamily,
             brightness: Brightness.light,
+            scaffoldBackgroundColor: AmanahColorTokens.canvasLight,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: AmanahColorTokens.brand,
+              brightness: Brightness.light,
+            ),
           ),
-        ),
-        darkTheme: ThemeData(
-          useMaterial3: true,
-          fontFamily: AmanahTypographyTokens.fontFamily,
-          brightness: Brightness.dark,
-          scaffoldBackgroundColor: AmanahColorTokens.canvasDark,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AmanahColorTokens.brand,
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            fontFamily: AmanahTypographyTokens.fontFamily,
             brightness: Brightness.dark,
+            scaffoldBackgroundColor: AmanahColorTokens.canvasDark,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: AmanahColorTokens.brand,
+              brightness: Brightness.dark,
+            ),
           ),
+          themeMode: ThemeMode.system,
+          home: const AuthBottomSheetScreen(),
         ),
-        themeMode: ThemeMode.system,
-        home: const AuthBottomSheetScreen(),
       ),
     );
   }

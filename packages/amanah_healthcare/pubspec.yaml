@@ -40,6 +40,10 @@ dependencies:
     path: ../scanner/ml_kit
   scanner_zxing:
     path: ../scanner/zxing
+  http: ^1.6.0
+  flutter_secure_storage: ^10.3.4
+  google_sign_in: ^6.2.2
+  flutter_better_auth: ^0.6.5
 
 dev_dependencies:
   flutter_test:

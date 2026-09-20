@@ -149,7 +149,7 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
             decoration: BoxDecoration(
               color: dark
-                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
                   : AmanahColorTokens.neutral50,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: fieldBorder),
@@ -380,7 +380,7 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
     final bool dark = theme.brightness == Brightness.dark;
 
     final Color textColor = dark
-        ? AmanahColorTokens.surfaceLight
+        ? AmanahColorTokens.pureWhite
         : AmanahColorTokens.neutral900;
     final Color subtextColor = dark
         ? AmanahColorTokens.neutral400

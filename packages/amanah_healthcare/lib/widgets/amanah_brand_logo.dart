@@ -20,7 +20,7 @@ class AmanahBrandLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = isDark ?? (Theme.of(context).brightness == Brightness.dark);
-    final Color foreground = dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.navy;
+    final Color foreground = dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.navy;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

@@ -693,7 +693,7 @@ class AmanahButton extends StatelessWidget {
             border ??
             Border.all(
               color: dark
-                  ? Colors.white.withValues(alpha: 0.12)
+                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.12)
                   : AmanahColorTokens.brandMuted,
               width: 1.0,
             );
@@ -831,8 +831,8 @@ class AmanahButton extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: <Color>[
-                      Colors.white.withValues(alpha: 0.28),
-                      Colors.white.withValues(alpha: 0.0),
+                      AmanahColorTokens.pureWhite.withValues(alpha: 0.28),
+                      AmanahColorTokens.pureWhite.withValues(alpha: 0.0),
                     ],
                   ),
                 ),

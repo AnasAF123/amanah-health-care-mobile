@@ -73,22 +73,6 @@ const List<String> kPoliOptions = <String>[
   'Klinik Eksekutif VIP',
 ];
 
-const List<String> kOccupiedTimeOptions = <String>[
-  '2:00 AM',
-  '3:00 AM',
-  '9:00 AM',
-  '10:00 AM',
-  '2:00 PM',
-  '3:00 PM',
-  '8:00 PM',
-];
-
-const List<String> kOccupiedRoomOptions = <String>[
-  'Ruang 102',
-  'Ruang 203',
-  'Ruang VIP 1',
-];
-
 /// 7. Monthly Doctor Schedule Big Calendar Drawer Modal ("Lihat Schedule")
 class AmanahDocScheduleCalendarDrawer extends StatefulWidget {
   const AmanahDocScheduleCalendarDrawer({
@@ -125,7 +109,7 @@ class AmanahDocScheduleCalendarDrawer extends StatefulWidget {
 
 class _AmanahDocScheduleCalendarDrawerState
     extends State<AmanahDocScheduleCalendarDrawer> {
-  DateTime _currentMonth = DateTime(2026, 8);
+  late DateTime _currentMonth;
 
   @override
   void initState() {
@@ -134,6 +118,13 @@ class _AmanahDocScheduleCalendarDrawerState
       widget.selectedDate.year,
       widget.selectedDate.month,
     );
+    _loadCalendarSummary();
+  }
+
+  void _loadCalendarSummary() {
+    final String monthStr =
+        '${_currentMonth.year}-${_currentMonth.month.toString().padLeft(2, '0')}';
+    AmanahScheduleStore.instance.loadCalendarSummary(monthStr);
   }
 
   bool _isSameDay(DateTime a, DateTime b) {
@@ -189,13 +180,14 @@ class _AmanahDocScheduleCalendarDrawerState
                       _currentMonth.month - 1,
                     );
                   });
+                  _loadCalendarSummary();
                 },
               ),
               Text(
                 '${_getMonthName(_currentMonth.month)} ${_currentMonth.year}',
                 style: TextStyle(
                   color: dark
-                      ? AmanahColorTokens.surfaceLight
+                      ? AmanahColorTokens.pureWhite
                       : AmanahColorTokens.neutral900,
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -210,6 +202,7 @@ class _AmanahDocScheduleCalendarDrawerState
                       _currentMonth.month + 1,
                     );
                   });
+                  _loadCalendarSummary();
                 },
               ),
             ],
@@ -264,7 +257,7 @@ class _AmanahDocScheduleCalendarDrawerState
 
               Color bgColor = Colors.transparent;
               Color textColor = dark
-                  ? AmanahColorTokens.surfaceLight
+                  ? AmanahColorTokens.pureWhite
                   : AmanahColorTokens.neutral900;
               Color? dotColor;
 
@@ -543,11 +536,14 @@ class AmanahAddEditScheduleDrawer extends StatefulWidget {
 
 class _AmanahAddEditScheduleDrawerState
     extends State<AmanahAddEditScheduleDrawer> {
-  DateTime _selectedDate = DateTime(2026, 8, 26);
-  DateTime _calendarMonth = DateTime(2026, 8);
+  late DateTime _selectedDate;
+  late DateTime _calendarMonth;
   bool _isCalendarOpen = false;
   String _status = 'Buka'; // 'Menunggu', 'Buka', 'Cuti'
   List<_ScheduleFormSession> _sessions = const <_ScheduleFormSession>[];
+  List<String> _dynamicPoliOptions = kPoliOptions;
+  List<String> _dynamicRoomOptions = kRoomOptions;
+  List<String> _occupiedRoomOptions = const <String>[];
 
   @override
   void initState() {
@@ -561,6 +557,29 @@ class _AmanahAddEditScheduleDrawerState
     } else {
       _status = 'Menunggu';
       _sessions = _buildInitialSessions();
+    }
+    _loadReferenceData();
+  }
+
+  Future<void> _loadReferenceData() async {
+    final List<ClinicPoliklinikReference> polis =
+        await AmanahScheduleStore.instance.loadPolikliniks();
+    if (polis.isNotEmpty && mounted) {
+      setState(() {
+        _dynamicPoliOptions = polis.map((ClinicPoliklinikReference p) => p.name).toList();
+      });
+    }
+
+    final List<ClinicRoomReference> rooms =
+        await AmanahScheduleStore.instance.loadRooms(date: _selectedDate);
+    if (rooms.isNotEmpty && mounted) {
+      setState(() {
+        _dynamicRoomOptions = rooms.map((ClinicRoomReference r) => r.name).toList();
+        _occupiedRoomOptions = rooms
+            .where((ClinicRoomReference r) => r.isOccupied)
+            .map((ClinicRoomReference r) => r.name)
+            .toList();
+      });
     }
   }
 
@@ -650,7 +669,65 @@ class _AmanahAddEditScheduleDrawerState
     ];
   }
 
-  void _saveSchedule() {
+  void _showConflictDialog(BuildContext context, String message) {
+    showAmanahBottomSheet<void>(
+      context: context,
+      builder: (BuildContext ctx) {
+        final bool dark = Theme.of(ctx).brightness == Brightness.dark;
+        return AmanahBottomSheetScaffold(
+          title: 'Konflik Penjadwalan',
+          subtitle: 'Validasi Sistem Praktik Dokter',
+          maxHeightFactor: 0.45,
+          footer: AmanahButton.primary(
+            text: 'Mengerti',
+            isFullWidth: true,
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AmanahColorTokens.warning.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AmanahColorTokens.warning.withValues(alpha: 0.40),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Icon(
+                      Icons.warning_amber_rounded,
+                      color: AmanahColorTokens.warning,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        message,
+                        style: TextStyle(
+                          color: dark
+                              ? AmanahColorTokens.pureWhite
+                              : AmanahColorTokens.neutral900,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _saveSchedule() async {
     final AmanahScheduleStore store = AmanahScheduleStore.instance;
     final String dateStr =
         '${_getDayName(_selectedDate.weekday)}, ${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}';
@@ -677,70 +754,98 @@ class _AmanahAddEditScheduleDrawerState
           );
     final String timeStr = '${firstSlot.from} - ${firstSlot.to} WIB';
 
-    if (widget.scheduleToEdit != null) {
-      final DoctorSchedule updated = widget.scheduleToEdit!.copyWith(
-        title: firstActive.name,
-        date: dateStr,
-        time: timeStr,
-        startTime: firstSlot.from,
-        endTime: firstSlot.to,
-        sessionType: firstActive.sessionType,
-        poli: firstSlot.poli,
-        room: firstSlot.room,
-        badge: _status,
-        badgeVariant: _status == 'Cuti'
-            ? AmanahBadgeVariant.warning
-            : (_status == 'Menunggu'
-                  ? AmanahBadgeVariant.primary
-                  : AmanahBadgeVariant.success),
-      );
-      store.updateSchedule(_selectedDate, updated);
-      if (_status == 'Cuti') {
-        store.setDayCuti(_selectedDate, true);
-      }
-    } else {
-      for (int index = 0; index < targetSessions.length; index++) {
-        final _ScheduleFormSession session = targetSessions[index];
-        final _ScheduleFormSlot slot = session.slots.isNotEmpty
-            ? session.slots.first
-            : const _ScheduleFormSlot(
-                id: 'fallback',
-                from: '7:00 AM',
-                to: '11:00 AM',
-                room: 'Ruang 201',
-                poli: 'Poli Gigi & Mulut',
-              );
-        final DoctorSchedule newSch = DoctorSchedule(
-          id: 'ses-${DateTime.now().millisecondsSinceEpoch}-${session.id}-$index',
-          title: session.name,
+    try {
+      if (widget.scheduleToEdit != null) {
+        final DoctorSchedule updated = widget.scheduleToEdit!.copyWith(
+          title: firstActive.name,
           date: dateStr,
-          time: '${slot.from} - ${slot.to} WIB',
-          startTime: slot.from,
-          endTime: slot.to,
-          sessionType: session.sessionType,
-          poli: slot.poli,
-          room: slot.room,
-          slotCount: '0',
-          slotText: '0 Pasien Booking',
-          badge: 'Menunggu',
-          badgeVariant: AmanahBadgeVariant.primary,
-          bookedPatients: const <BookedPatient>[],
+          time: timeStr,
+          startTime: firstSlot.from,
+          endTime: firstSlot.to,
+          sessionType: firstActive.sessionType,
+          poli: firstSlot.poli,
+          room: firstSlot.room,
+          badge: _status,
+          badgeVariant: _status == 'Cuti'
+              ? AmanahBadgeVariant.warning
+              : (_status == 'Menunggu'
+                    ? AmanahBadgeVariant.primary
+                    : AmanahBadgeVariant.success),
         );
-        store.addSchedule(_selectedDate, newSch);
+        await store.saveSchedule(_selectedDate, updated);
+        if (_status == 'Cuti') {
+          await store.updateDayCuti(_selectedDate, true);
+        }
+      } else {
+        for (int index = 0; index < targetSessions.length; index++) {
+          final _ScheduleFormSession session = targetSessions[index];
+          final _ScheduleFormSlot slot = session.slots.isNotEmpty
+              ? session.slots.first
+              : const _ScheduleFormSlot(
+                  id: 'fallback',
+                  from: '7:00 AM',
+                  to: '11:00 AM',
+                  room: 'Ruang 201',
+                  poli: 'Poli Gigi & Mulut',
+                );
+          final DoctorSchedule newSch = DoctorSchedule(
+            id: 'ses-${DateTime.now().millisecondsSinceEpoch}-${session.id}-$index',
+            title: session.name,
+            date: dateStr,
+            time: '${slot.from} - ${slot.to} WIB',
+            startTime: slot.from,
+            endTime: slot.to,
+            sessionType: session.sessionType,
+            poli: slot.poli,
+            room: slot.room,
+            slotCount: '0',
+            slotText: '0 Pasien Booking',
+            badge: 'Menunggu',
+            badgeVariant: AmanahBadgeVariant.primary,
+            bookedPatients: const <BookedPatient>[],
+          );
+          await store.saveSchedule(_selectedDate, newSch);
+        }
+      }
+      widget.onSavedDate?.call(_selectedDate);
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    } on AmanahScheduleConflictException catch (e) {
+      if (mounted) {
+        _showConflictDialog(context, e.message);
+      }
+    } catch (_) {
+      widget.onSavedDate?.call(_selectedDate);
+      if (mounted) {
+        Navigator.of(context).pop();
       }
     }
-    widget.onSavedDate?.call(_selectedDate);
-    Navigator.of(context).pop();
   }
 
-  void _deleteSchedule() {
+  Future<void> _deleteSchedule() async {
+    final AmanahScheduleStore store = AmanahScheduleStore.instance;
     if (widget.scheduleToEdit != null) {
-      AmanahScheduleStore.instance.deleteSchedule(
-        _selectedDate,
-        widget.scheduleToEdit!.id,
-      );
+      try {
+        await store.removeSchedule(
+          _selectedDate,
+          widget.scheduleToEdit!.id,
+        );
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      } on AmanahScheduleConflictException catch (e) {
+        if (mounted) {
+          _showConflictDialog(context, e.message);
+        }
+      } catch (_) {
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      }
+    } else {
+      Navigator.of(context).pop();
     }
-    Navigator.of(context).pop();
   }
 
   void _toggleSession(String sessionId, [bool? forcedState]) {
@@ -877,14 +982,28 @@ class _AmanahAddEditScheduleDrawerState
     required ValueChanged<String> onChanged,
     List<String> disabledOptions = const <String>[],
   }) async {
+    List<String> effectiveOptions = options;
+    List<String> effectiveDisabled = disabledOptions;
+
+    if (options == kRoomOptions) {
+      if (_dynamicRoomOptions.isNotEmpty) {
+        effectiveOptions = _dynamicRoomOptions;
+      }
+      effectiveDisabled = _occupiedRoomOptions;
+    } else if (options == kPoliOptions) {
+      if (_dynamicPoliOptions.isNotEmpty) {
+        effectiveOptions = _dynamicPoliOptions;
+      }
+    }
+
     final String? selected = await showAmanahBottomSheet<String>(
       context: context,
       builder: (BuildContext context) => _AmanahScheduleSelectionSheet(
         title: title,
         subtitle: subtitle,
         currentValue: currentValue,
-        options: options,
-        disabledOptions: disabledOptions,
+        options: effectiveOptions,
+        disabledOptions: effectiveDisabled,
       ),
     );
     if (selected != null && mounted) {
@@ -947,12 +1066,12 @@ class _AmanahAddEditScheduleDrawerState
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: dark
-                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
                     : AmanahColorTokens.surfaceSecondaryLight,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: dark
-                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                      ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                       : AmanahColorTokens.neutral200,
                 ),
               ),
@@ -1197,7 +1316,7 @@ class _AmanahAddEditScheduleDrawerState
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: dark
-            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+            ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
             : AmanahColorTokens.surfaceSecondaryLight,
         borderRadius: BorderRadius.circular(22),
       ),
@@ -1221,7 +1340,7 @@ class _AmanahAddEditScheduleDrawerState
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: dark
-                        ? AmanahColorTokens.surfaceLight
+                        ? AmanahColorTokens.pureWhite
                         : AmanahColorTokens.neutral900,
                     fontSize: 12,
                     fontWeight: FontWeight.w900,
@@ -1274,7 +1393,7 @@ class _AmanahAddEditScheduleDrawerState
               Color bgColor = Colors.transparent;
               Color textColor = inCurrentMonth
                   ? (dark
-                        ? AmanahColorTokens.surfaceLight
+                        ? AmanahColorTokens.pureWhite
                         : AmanahColorTokens.neutral900)
                   : (dark
                         ? AmanahColorTokens.neutral600
@@ -1362,8 +1481,8 @@ class _ScheduleSelectorButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color background = dark
         ? (expanded
-              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
-              : AmanahColorTokens.surfaceLight.withValues(alpha: 0.05))
+              ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
+              : AmanahColorTokens.pureWhite.withValues(alpha: 0.05))
         : (expanded
               ? AmanahColorTokens.neutral200
               : AmanahColorTokens.surfaceSecondaryLight);
@@ -1403,7 +1522,7 @@ class _ScheduleSelectorButton extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: dark
-                      ? AmanahColorTokens.surfaceLight
+                      ? AmanahColorTokens.pureWhite
                       : AmanahColorTokens.neutral900,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -1507,13 +1626,13 @@ class _ScheduleSessionPanel extends StatelessWidget {
           : const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: dark
-            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+            ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
             : AmanahColorTokens.surfaceSecondaryLight,
         borderRadius: BorderRadius.circular(expanded ? 22 : 20),
         border: Border.all(
           color: expanded
               ? (dark
-                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
+                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.15)
                     : AmanahColorTokens.neutral200)
               : Colors.transparent,
         ),
@@ -1542,7 +1661,7 @@ class _ScheduleSessionPanel extends StatelessWidget {
                       style: TextStyle(
                         color: expanded
                             ? (dark
-                                  ? AmanahColorTokens.surfaceLight
+                                  ? AmanahColorTokens.pureWhite
                                   : AmanahColorTokens.neutral900)
                             : (dark
                                   ? AmanahColorTokens.neutral300
@@ -1587,14 +1706,14 @@ class _ScheduleSessionPanel extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
                             color: dark
-                                ? AmanahColorTokens.surfaceLight.withValues(
+                                ? AmanahColorTokens.pureWhite.withValues(
                                     alpha: 0.05,
                                   )
                                 : AmanahColorTokens.surfaceLight,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: dark
-                                  ? AmanahColorTokens.surfaceLight.withValues(
+                                  ? AmanahColorTokens.pureWhite.withValues(
                                       alpha: 0.10,
                                     )
                                   : AmanahColorTokens.neutral200,
@@ -1607,7 +1726,7 @@ class _ScheduleSessionPanel extends StatelessWidget {
                                 Icons.add_rounded,
                                 size: 16,
                                 color: dark
-                                    ? AmanahColorTokens.surfaceLight
+                                    ? AmanahColorTokens.pureWhite
                                     : AmanahColorTokens.neutral800,
                               ),
                               const SizedBox(width: 6),
@@ -1615,7 +1734,7 @@ class _ScheduleSessionPanel extends StatelessWidget {
                                 'Add More',
                                 style: TextStyle(
                                   color: dark
-                                      ? AmanahColorTokens.surfaceLight
+                                      ? AmanahColorTokens.pureWhite
                                       : AmanahColorTokens.neutral800,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
@@ -1666,7 +1785,7 @@ class _ScheduleSlotRow extends StatelessWidget {
               border: Border(
                 top: BorderSide(
                   color: dark
-                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
+                      ? AmanahColorTokens.pureWhite.withValues(alpha: 0.15)
                       : AmanahColorTokens.neutral300,
                   style: BorderStyle.solid,
                 ),
@@ -1685,7 +1804,7 @@ class _ScheduleSlotRow extends StatelessWidget {
                   subtitle: 'Pilih jam dari daftar atau ketik manual',
                   currentValue: slot.from,
                   options: kTimeOptions,
-                  disabledOptions: kOccupiedTimeOptions,
+                  disabledOptions: const <String>[],
                   onChanged: (String value) =>
                       onChanged(slotIndex: slotIndex, from: value),
                 ),
@@ -1702,7 +1821,7 @@ class _ScheduleSlotRow extends StatelessWidget {
                   subtitle: 'Pilih jam dari daftar atau ketik manual',
                   currentValue: slot.to,
                   options: kTimeOptions,
-                  disabledOptions: kOccupiedTimeOptions,
+                  disabledOptions: const <String>[],
                   onChanged: (String value) =>
                       onChanged(slotIndex: slotIndex, to: value),
                 ),
@@ -1737,7 +1856,7 @@ class _ScheduleSlotRow extends StatelessWidget {
                   subtitle: 'Pilih ruangan praktik dokter',
                   currentValue: slot.room,
                   options: kRoomOptions,
-                  disabledOptions: kOccupiedRoomOptions,
+                  disabledOptions: const <String>[],
                   onChanged: (String value) =>
                       onChanged(slotIndex: slotIndex, room: value),
                 ),
@@ -1848,12 +1967,12 @@ class _MiniSlotButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           color: dark
-              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+              ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
               : AmanahColorTokens.surfaceLight,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: dark
-                ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
+                ? AmanahColorTokens.pureWhite.withValues(alpha: 0.15)
                 : AmanahColorTokens.neutral200,
           ),
         ),
@@ -1866,7 +1985,7 @@ class _MiniSlotButton extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: dark
-                      ? AmanahColorTokens.surfaceLight
+                      ? AmanahColorTokens.pureWhite
                       : AmanahColorTokens.neutral900,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -1903,7 +2022,7 @@ class _ScheduleToggleSwitch extends StatelessWidget {
         color: active
             ? (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
             : (dark
-                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.20)
+                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.20)
                   : AmanahColorTokens.neutral200),
         borderRadius: BorderRadius.circular(999),
       ),
@@ -1999,14 +2118,14 @@ class _AmanahScheduleSelectionSheetState
                     height: 38,
                     decoration: BoxDecoration(
                       color: dark
-                          ? AmanahColorTokens.surfaceLight.withValues(
+                          ? AmanahColorTokens.pureWhite.withValues(
                               alpha: 0.05,
                             )
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: dark
-                            ? AmanahColorTokens.surfaceLight.withValues(
+                            ? AmanahColorTokens.pureWhite.withValues(
                                 alpha: 0.15,
                               )
                             : AmanahColorTokens.neutral200,
@@ -2017,7 +2136,7 @@ class _AmanahScheduleSelectionSheetState
                       onChanged: (_) => setState(() {}),
                       style: TextStyle(
                         color: dark
-                            ? AmanahColorTokens.surfaceLight
+                            ? AmanahColorTokens.pureWhite
                             : AmanahColorTokens.neutral900,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -2119,11 +2238,11 @@ class _AmanahScheduleSelectionSheetState
                                   ? selectedAccent
                                   : isDisabled
                                   ? (dark
-                                        ? AmanahColorTokens.surfaceLight
+                                        ? AmanahColorTokens.pureWhite
                                               .withValues(alpha: 0.02)
                                         : AmanahColorTokens.neutral100)
                                   : (dark
-                                        ? AmanahColorTokens.surfaceLight
+                                        ? AmanahColorTokens.pureWhite
                                               .withValues(alpha: 0.05)
                                         : AmanahColorTokens.surfaceLight),
                               borderRadius: BorderRadius.circular(12),
@@ -2131,7 +2250,7 @@ class _AmanahScheduleSelectionSheetState
                                 color: isSelected
                                     ? selectedAccent
                                     : (dark
-                                          ? AmanahColorTokens.surfaceLight
+                                          ? AmanahColorTokens.pureWhite
                                                 .withValues(alpha: 0.10)
                                           : AmanahColorTokens.neutral200),
                               ),
@@ -2163,7 +2282,7 @@ class _AmanahScheduleSelectionSheetState
                                                 ? AmanahColorTokens.neutral600
                                                 : AmanahColorTokens.neutral400)
                                           : (dark
-                                                ? AmanahColorTokens.surfaceLight
+                                                ? AmanahColorTokens.pureWhite
                                                 : AmanahColorTokens.neutral900),
                                       fontSize: 12,
                                       fontWeight: isSelected

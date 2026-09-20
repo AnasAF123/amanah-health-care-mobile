@@ -247,7 +247,7 @@ class _AmanahPermissionFormDrawerState
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
     final Color borderColor = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
         : AmanahColorTokens.neutral200;
     final Color textColor = dark
         ? AmanahPermissionTokens.textTitleDark
@@ -256,7 +256,7 @@ class _AmanahPermissionFormDrawerState
         ? AmanahPermissionTokens.textMutedDark
         : AmanahPermissionTokens.textMutedLight;
     final Color inputBg = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
         : AmanahColorTokens.surfaceLight;
 
     final bool isEditing = widget.editingRecord != null;
@@ -373,12 +373,12 @@ class _AmanahPermissionFormDrawerState
                   ),
                   decoration: BoxDecoration(
                     color: dark
-                        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
                         : AmanahColorTokens.canvasLight,
                     borderRadius: BorderRadius.circular(100),
                     border: Border.all(
                       color: dark
-                          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                          ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                           : AmanahColorTokens.neutral200,
                     ),
                   ),
@@ -599,7 +599,7 @@ class _AmanahPermissionFormDrawerState
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: dark
-              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+              ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
               : AmanahColorTokens.canvasLight,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: borderColor),
@@ -614,7 +614,7 @@ class _AmanahPermissionFormDrawerState
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: dark
-                          ? AmanahColorTokens.brand.withValues(alpha: 0.15)
+                          ? AmanahColorTokens.cyanAccent.withValues(alpha: 0.15)
                           : AmanahColorTokens.brandSurface,
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -622,7 +622,7 @@ class _AmanahPermissionFormDrawerState
                       Icons.calendar_today_rounded,
                       size: 16,
                       color: dark
-                          ? AmanahColorTokens.brandSoft
+                          ? AmanahColorTokens.cyanAccent
                           : AmanahColorTokens.brand,
                     ),
                   ),

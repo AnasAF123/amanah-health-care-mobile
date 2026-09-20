@@ -74,9 +74,9 @@ class _ProfileReadabilityMaskLayer extends StatelessWidget {
                     stops: const <double>[0.0, 0.44, 1.0],
                     colors: dark
                         ? <Color>[
-                            AmanahColorTokens.brandNavyDark.withValues(alpha: 0.0),
-                            AmanahColorTokens.brandNavyDark.withValues(alpha: 0.72),
-                            AmanahColorTokens.brandNavyDark.withValues(alpha: 0.97),
+                            AmanahColorTokens.darkNavy.withValues(alpha: 0.0),
+                            AmanahColorTokens.darkNavy.withValues(alpha: 0.72),
+                            AmanahColorTokens.darkNavy.withValues(alpha: 0.97),
                           ]
                         : <Color>[
                             AmanahColorTokens.pureWhite.withValues(alpha: 0.0),
@@ -113,10 +113,10 @@ class _AmbientCardGradientLayer extends StatelessWidget {
               stops: const <double>[0.0, 0.35, 0.65, 1.0],
               colors: dark
                   ? <Color>[
-                      AmanahColorTokens.brandNavyDark.withValues(alpha: 0.0),
-                      AmanahColorTokens.brandNavyDark.withValues(alpha: 0.0),
-                      AmanahColorTokens.brandNavyDark.withValues(alpha: 0.60),
-                      AmanahColorTokens.brandNavyDark.withValues(alpha: 0.96),
+                      AmanahColorTokens.darkNavy.withValues(alpha: 0.0),
+                      AmanahColorTokens.darkNavy.withValues(alpha: 0.0),
+                      AmanahColorTokens.darkNavy.withValues(alpha: 0.60),
+                      AmanahColorTokens.darkNavy.withValues(alpha: 0.96),
                     ]
                   : <Color>[
                       AmanahColorTokens.pureWhite.withValues(alpha: 0.0),
@@ -201,7 +201,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                             colors: dark
                                 ? const <Color>[
                                     AmanahColorTokens.darkNavy,
-                                    AmanahColorTokens.brandNavyDark,
+                                    AmanahColorTokens.canvasDark,
                                   ]
                                 : const <Color>[
                                     AmanahColorTokens.skyLight,
@@ -239,7 +239,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(999),
                         border: Border.all(
                           color: dark
-                              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                              ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                               : AmanahColorTokens.neutral200,
                         ),
                         boxShadow: <BoxShadow>[
@@ -265,7 +265,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                             patient.badge,
                             style: TextStyle(
                               color: dark
-                                  ? AmanahColorTokens.surfaceLight
+                                  ? AmanahColorTokens.pureWhite
                                   : AmanahColorTokens.neutral900,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -309,7 +309,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                               shape: BoxShape.circle,
                               color: AmanahColorTokens.neutral800,
                               border: Border.all(
-                                color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.surfaceLight,
+                                color: dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.pureWhite,
                                 width: 2,
                               ),
                               boxShadow: <BoxShadow>[
@@ -539,7 +539,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                         width: double.infinity,
                         height: 1,
                         color: dark
-                            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
+                            ? AmanahColorTokens.pureWhite.withValues(alpha: 0.15)
                             : AmanahColorTokens.neutral200,
                       ),
                       const SizedBox(height: 12),
@@ -637,10 +637,10 @@ class AmanahDoctorSessionCard extends StatelessWidget {
           width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(32),
-            color: dark ? AmanahColorTokens.brandNavyDark : AmanahColorTokens.surfaceLight,
+            color: dark ? AmanahColorTokens.surfaceDark : AmanahColorTokens.pureWhite,
             border: Border.all(
               color: dark
-                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                   : AmanahColorTokens.neutral200,
               width: 1,
             ),
@@ -676,7 +676,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                             colors: dark
                                 ? const <Color>[
                                     AmanahColorTokens.darkNavy,
-                                    AmanahColorTokens.brandNavyDark,
+                                    AmanahColorTokens.canvasDark,
                                   ]
                                 : const <Color>[
                                     AmanahColorTokens.skyLight,
@@ -714,7 +714,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(999),
                         border: Border.all(
                           color: dark
-                              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                              ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                               : AmanahColorTokens.neutral200,
                         ),
                         boxShadow: <BoxShadow>[
@@ -740,7 +740,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                             schedule.badge,
                             style: TextStyle(
                               color: dark
-                                  ? AmanahColorTokens.surfaceLight
+                                  ? AmanahColorTokens.pureWhite
                                   : AmanahColorTokens.neutral900,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -772,7 +772,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(999),
                         border: Border.all(
                           color: dark
-                              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                              ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                               : AmanahColorTokens.neutral200,
                         ),
                         boxShadow: <BoxShadow>[
@@ -790,7 +790,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                             Icons.people_alt_rounded,
                             size: 14,
                             color: dark
-                                ? AmanahColorTokens.surfaceLight
+                                ? AmanahColorTokens.pureWhite
                                 : AmanahColorTokens.neutral900,
                           ),
                           const SizedBox(width: 5),
@@ -798,7 +798,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                             '$bookedCount Pasien Booking',
                             style: TextStyle(
                               color: dark
-                                  ? AmanahColorTokens.surfaceLight
+                                  ? AmanahColorTokens.pureWhite
                                   : AmanahColorTokens.neutral900,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -826,7 +826,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                       Text(
                         schedule.title,
                         style: TextStyle(
-                          color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
+                          color: dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral900,
                           fontSize: 24,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -0.3,
@@ -849,7 +849,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     color: dark
-                                        ? AmanahColorTokens.surfaceLight
+                                        ? AmanahColorTokens.pureWhite
                                         : AmanahColorTokens.neutral900,
                                     fontSize: 14.5,
                                     fontWeight: FontWeight.w800,
@@ -885,7 +885,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                                         Icons.access_time_rounded,
                                         size: 13,
                                         color: dark
-                                            ? AmanahColorTokens.surfaceLight
+                                            ? AmanahColorTokens.pureWhite
                                             : AmanahColorTokens.neutral900,
                                       ),
                                       const SizedBox(width: 4),
@@ -893,7 +893,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                                         startTime,
                                         style: TextStyle(
                                           color: dark
-                                              ? AmanahColorTokens.surfaceLight
+                                              ? AmanahColorTokens.pureWhite
                                               : AmanahColorTokens.neutral900,
                                           fontSize: 13.5,
                                           fontWeight: FontWeight.w800,
@@ -921,7 +921,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                                 width: 1,
                                 height: 26,
                                 color: dark
-                                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.20)
+                                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.20)
                                     : AmanahColorTokens.neutral200,
                               ),
                               Column(
@@ -932,7 +932,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                                         Icons.access_time_rounded,
                                         size: 13,
                                         color: dark
-                                            ? AmanahColorTokens.surfaceLight
+                                            ? AmanahColorTokens.pureWhite
                                             : AmanahColorTokens.neutral900,
                                       ),
                                       const SizedBox(width: 4),
@@ -940,7 +940,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                                         endTime,
                                         style: TextStyle(
                                           color: dark
-                                              ? AmanahColorTokens.surfaceLight
+                                              ? AmanahColorTokens.pureWhite
                                               : AmanahColorTokens.neutral900,
                                           fontSize: 13.5,
                                           fontWeight: FontWeight.w800,
@@ -972,7 +972,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                         width: double.infinity,
                         height: 1,
                         color: dark
-                            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
+                            ? AmanahColorTokens.pureWhite.withValues(alpha: 0.15)
                             : AmanahColorTokens.neutral200,
                       ),
                       const SizedBox(height: 14),
@@ -1072,7 +1072,7 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                     Text(
                       schedule.title,
                       style: TextStyle(
-                        color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral950,
+                        color: dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral950,
                         fontSize: 20,
                         fontWeight: FontWeight.w900,
                         letterSpacing: -0.3,
@@ -1111,7 +1111,7 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                                   ? AmanahColorTokens.warning.withValues(alpha: 0.20)
                                   : AmanahColorTokens.amberSurfaceSoft)
                             : (dark
-                                  ? AmanahColorTokens.brandLight.withValues(alpha: 0.20)
+                                  ? AmanahColorTokens.cyanAccent.withValues(alpha: 0.20)
                                   : AmanahColorTokens.brandSurface)),
                   borderRadius: BorderRadius.circular(999),
                 ),
@@ -1144,7 +1144,7 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                                         ? AmanahColorTokens.amberLight
                                         : AmanahColorTokens.warningDark)
                                   : (dark
-                                        ? AmanahColorTokens.brandSoft
+                                        ? AmanahColorTokens.cyanAccent
                                         : AmanahColorTokens.auroraAccentDark)),
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -1163,12 +1163,12 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
               border: Border(
                 top: BorderSide(
                   color: dark
-                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                      ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                       : AmanahColorTokens.neutral100,
                 ),
                 bottom: BorderSide(
                   color: dark
-                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                      ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                       : AmanahColorTokens.neutral100,
                 ),
               ),
@@ -1213,12 +1213,12 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
               border: Border(
                 top: BorderSide(
                   color: dark
-                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                      ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                       : AmanahColorTokens.pureBlack.withValues(alpha: 0.06),
                 ),
                 bottom: BorderSide(
                   color: dark
-                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                      ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                       : AmanahColorTokens.pureBlack.withValues(alpha: 0.06),
                 ),
               ),
@@ -1246,7 +1246,7 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: dark
-                                  ? AmanahColorTokens.brandSoft
+                                  ? AmanahColorTokens.tabActiveDark
                                   : AmanahColorTokens.brandAccent,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -1261,7 +1261,7 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                     Icons.chevron_right_rounded,
                     size: 16,
                     color: dark
-                        ? AmanahColorTokens.brandSoft
+                        ? AmanahColorTokens.tabActiveDark
                         : AmanahColorTokens.brandAccent,
                   ),
                 ],
@@ -1292,7 +1292,7 @@ class _SessionSpecTotalPatientsRow extends StatelessWidget {
         border: Border(
           bottom: BorderSide(
             color: dark
-                ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                 : AmanahColorTokens.neutral100,
           ),
         ),
@@ -1315,7 +1315,7 @@ class _SessionSpecTotalPatientsRow extends StatelessWidget {
               '$bookedCount Pasien',
               textAlign: TextAlign.right,
               style: TextStyle(
-                color: dark ? AmanahColorTokens.brandSoft : AmanahColorTokens.brandAccent,
+                color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brandAccent,
                 fontSize: 12.5,
                 fontWeight: FontWeight.w800,
               ),
@@ -1342,10 +1342,10 @@ class _StackedPatientAvatars extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: dark
-              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+              ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
               : AmanahColorTokens.neutral200,
           border: Border.all(
-            color: dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.surfaceLight,
+            color: dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.pureWhite,
             width: 2,
           ),
         ),
@@ -1353,7 +1353,7 @@ class _StackedPatientAvatars extends StatelessWidget {
         child: Text(
           '0',
           style: TextStyle(
-            color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral700,
+            color: dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral700,
             fontSize: 10,
             fontWeight: FontWeight.w700,
           ),
@@ -1379,7 +1379,7 @@ class _StackedPatientAvatars extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: dark ? AmanahColorTokens.neutral800 : AmanahColorTokens.neutral200,
                 border: Border.all(
-                  color: dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.surfaceLight,
+                  color: dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.pureWhite,
                   width: 2,
                 ),
               ),
@@ -1403,7 +1403,7 @@ class _StackedPatientAvatars extends StatelessWidget {
                                   fontSize: 9,
                                   fontWeight: FontWeight.w700,
                                   color: dark
-                                      ? AmanahColorTokens.surfaceLight
+                                      ? AmanahColorTokens.pureWhite
                                       : AmanahColorTokens.neutral800,
                                 ),
                               ),
@@ -1547,7 +1547,7 @@ class _PatientProfileHeader extends StatelessWidget {
                                 fontSize: 32,
                                 fontWeight: FontWeight.w800,
                                 color: dark
-                                    ? AmanahColorTokens.surfaceLight
+                                    ? AmanahColorTokens.pureWhite
                                     : AmanahColorTokens.neutral800,
                               ),
                             ),
@@ -1572,7 +1572,7 @@ class _PatientProfileHeader extends StatelessWidget {
           patient.patientName,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral950,
+            color: dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral950,
             fontSize: 18,
             fontWeight: FontWeight.w900,
             height: 1.1,
@@ -1612,7 +1612,7 @@ class _PatientMetaInline extends StatelessWidget {
                         ? AmanahColorTokens.success.withValues(alpha: 0.20)
                         : AmanahColorTokens.successSurface)
                   : (dark
-                        ? AmanahColorTokens.brandLight.withValues(alpha: 0.20)
+                        ? AmanahColorTokens.cyanAccent.withValues(alpha: 0.20)
                         : AmanahColorTokens.brandSurface),
               borderRadius: BorderRadius.circular(999),
             ),
@@ -1622,7 +1622,7 @@ class _PatientMetaInline extends StatelessWidget {
                 color: patient.badgeVariant == AmanahBadgeVariant.success
                     ? (dark ? AmanahColorTokens.emerald : AmanahColorTokens.successDark)
                     : (dark
-                          ? AmanahColorTokens.brandSoft
+                          ? AmanahColorTokens.cyanAccent
                           : AmanahColorTokens.auroraAccentDark),
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
@@ -1653,7 +1653,7 @@ class _PatientMetaDivider extends StatelessWidget {
       height: 12,
       margin: const EdgeInsets.symmetric(horizontal: 8),
       color: dark
-          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.20)
+          ? AmanahColorTokens.pureWhite.withValues(alpha: 0.20)
           : AmanahColorTokens.neutral300,
     );
   }
@@ -1714,7 +1714,7 @@ class _PatientSpecificationTable extends StatelessWidget {
   }
 
   Color get _dividerColor =>
-      dark ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10) : AmanahColorTokens.neutral100;
+      dark ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10) : AmanahColorTokens.neutral100;
 }
 
 class _PatientSpecRow extends StatelessWidget {
@@ -1736,7 +1736,7 @@ class _PatientSpecRow extends StatelessWidget {
         border: Border(
           bottom: BorderSide(
             color: dark
-                ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                 : AmanahColorTokens.neutral100,
           ),
         ),
@@ -1759,7 +1759,7 @@ class _PatientSpecRow extends StatelessWidget {
               value,
               textAlign: TextAlign.right,
               style: TextStyle(
-                color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
+                color: dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral900,
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
@@ -1798,12 +1798,12 @@ class _PatientComplaintBlock extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: dark
-                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
                   : AmanahColorTokens.neutral50,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: dark
-                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                     : AmanahColorTokens.neutral200,
               ),
             ),
@@ -1834,11 +1834,11 @@ class _PatientDetailAuroraPainter extends CustomPainter {
     canvas.saveLayer(bounds, Paint());
 
     final Paint baseGlow = Paint()
-      ..color = (dark ? AmanahColorTokens.auroraSapphireDark : AmanahColorTokens.brandPrimary)
+      ..color = (dark ? AmanahColorTokens.auroraCyanDark : AmanahColorTokens.brandPrimary)
           .withValues(alpha: dark ? 0.60 : 0.50)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 62);
     final Paint secondaryGlow = Paint()
-      ..color = (dark ? AmanahColorTokens.auroraAccentDark : AmanahColorTokens.brandLight)
+      ..color = (dark ? AmanahColorTokens.auroraCyanLuminousDark : AmanahColorTokens.brandLight)
           .withValues(alpha: 0.45)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 56);
 

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
@@ -8,6 +8,7 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_q
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_schedule_card_stack.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_today_activity_section.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_home_shell.dart';
+import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 
 void main() {
@@ -19,6 +20,123 @@ void main() {
     phone: '081234567890',
     password: 'password123',
   );
+
+  void seedHomeTestScheduleData() {
+    final AmanahScheduleStore store = AmanahScheduleStore.instance;
+    store.schedulesMap['2026-08-26'] = <DoctorSchedule>[
+      const DoctorSchedule(
+        id: 'ses-1',
+        title: 'Sesi Pagi',
+        date: 'Rabu, 26 Agustus 2026',
+        time: '07:00 - 11:00 WIB',
+        startTime: '07:00',
+        endTime: '11:00',
+        sessionType: 'Pagi',
+        poli: 'Poli Gigi & Mulut',
+        room: 'Ruang 201',
+        slotCount: '2 Pasien',
+        slotText: '2 Pasien',
+        badge: 'Terdaftar',
+        badgeVariant: AmanahBadgeVariant.success,
+        bookedPatients: <BookedPatient>[
+          BookedPatient(
+            id: 'p-1',
+            patientName: 'Steven Pratama',
+            patientAge: '28 Thn',
+            patientRm: 'RM-2026-0412',
+            patientComplaint: 'Pembersihan karang gigi (scaling)',
+            queueNumber: '#01',
+            timeSlot: '08:00 - 09:30 WIB',
+            badge: 'Aktif',
+            badgeVariant: AmanahBadgeVariant.success,
+          ),
+          BookedPatient(
+            id: 'p-2',
+            patientName: 'An. Kevin Sanjaya',
+            patientAge: '7 Thn',
+            patientRm: 'RM-2026-0523',
+            patientGuardian: 'Bpk. Budi Sanjaya (Ayah)',
+            patientComplaint: 'Cabut gigi susu goyang',
+            queueNumber: '#02',
+            timeSlot: '10:00 - 11:00 WIB',
+            badge: 'Mendatang',
+            badgeVariant: AmanahBadgeVariant.primary,
+          ),
+        ],
+      ),
+      const DoctorSchedule(
+        id: 'ses-2',
+        title: 'Sesi Siang',
+        date: 'Rabu, 26 Agustus 2026',
+        time: '13:00 - 17:00 WIB',
+        startTime: '13:00',
+        endTime: '17:00',
+        sessionType: 'Siang',
+        poli: 'Klinik Spesialis Konservasi',
+        room: 'Ruang 204',
+        slotCount: '1 Pasien',
+        slotText: '1 Pasien',
+        badge: 'Terdaftar',
+        badgeVariant: AmanahBadgeVariant.success,
+        bookedPatients: <BookedPatient>[
+          BookedPatient(
+            id: 'p-3',
+            patientName: 'Ibu Ratna Dewi',
+            patientAge: '42 Thn',
+            patientRm: 'RM-2026-0789',
+            patientComplaint: 'Perawatan saluran akar',
+            queueNumber: '#01',
+            timeSlot: '13:30 - 15:00 WIB',
+            badge: 'Mendatang',
+            badgeVariant: AmanahBadgeVariant.primary,
+          ),
+        ],
+      ),
+      const DoctorSchedule(
+        id: 'ses-3',
+        title: 'Sesi Malam',
+        date: 'Rabu, 26 Agustus 2026',
+        time: '19:00 - 22:00 WIB',
+        startTime: '19:00',
+        endTime: '22:00',
+        sessionType: 'Malam',
+        poli: 'Klinik Eksekutif VIP',
+        room: 'Suite VIP 01',
+        slotCount: '1 Pasien',
+        slotText: '1 Pasien',
+        badge: 'Terdaftar',
+        badgeVariant: AmanahBadgeVariant.success,
+        bookedPatients: <BookedPatient>[
+          BookedPatient(
+            id: 'p-4',
+            patientName: 'Andi Budiman',
+            patientAge: '34 Thn',
+            patientRm: 'RM-2026-0811',
+            patientComplaint: 'Pemeriksaan estetika',
+            queueNumber: '#01',
+            timeSlot: '19:30 - 21:00 WIB',
+            badge: 'Mendatang',
+            badgeVariant: AmanahBadgeVariant.primary,
+          ),
+        ],
+      ),
+    ];
+    store.daySettingsMap['2026-08-26'] = const DayScheduleSetting(
+      targetQuota: 8,
+      isCuti: false,
+      scheduleDate: '2026-08-26',
+    );
+  }
+
+  setUp(() {
+    AmanahScheduleStore.instance.reset();
+    AmanahScheduleStore.setCustomBaseToday(DateTime(2026, 8, 26));
+    seedHomeTestScheduleData();
+  });
+
+  tearDown(() {
+    AmanahScheduleStore.instance.reset();
+  });
 
   Widget createHomeScreen({Brightness brightness = Brightness.light}) {
     return MaterialApp(

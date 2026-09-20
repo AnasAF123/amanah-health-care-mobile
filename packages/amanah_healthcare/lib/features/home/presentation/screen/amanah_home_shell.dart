@@ -30,27 +30,17 @@ import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_form_and_calendar_dialog.dart';
 
 class AmanahHomeShell extends StatefulWidget {
-  const AmanahHomeShell({this.user, this.onLogout, super.key});
+  const AmanahHomeShell({required this.user, this.onLogout, super.key});
 
-  final AmanahAuthUser? user;
+  final AmanahAuthUser user;
   final VoidCallback? onLogout;
-
-  static const AmanahAuthUser defaultUser = AmanahAuthUser(
-    id: 'doc-001',
-    role: AmanahUserRole.doctor,
-    fullName: 'dr. Rayhan Pratama, Sp.A',
-    email: 'dokter@amanah.health',
-    phone: '081234567890',
-    password: '',
-    isEmailVerified: false,
-  );
 
   @override
   State<AmanahHomeShell> createState() => _AmanahHomeShellState();
 }
 
 class _AmanahHomeShellState extends State<AmanahHomeShell> {
-  AmanahAuthUser get _currentUser => widget.user ?? AmanahHomeShell.defaultUser;
+  AmanahAuthUser get _currentUser => widget.user;
   final AmanahScheduleStore _scheduleStore = AmanahScheduleStore.instance;
   final AmanahNotificationStore _notificationStore =
       AmanahNotificationStore.instance;
@@ -104,7 +94,10 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
       return;
     }
 
-    _showToast('Berhasil keluar dari akun dokter');
+    _showToast('Berhasil keluar dari akun');
+    AmanahScheduleStore.instance.reset();
+    AmanahNotificationStore.instance.reset();
+    AmanahPermissionStore.instance.reset();
     if (widget.onLogout != null) {
       widget.onLogout?.call();
     } else if (Navigator.of(context).canPop()) {

@@ -109,7 +109,7 @@ class _AmanahPresenceHistoryScreenState
     final Color bgColor =
         dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.canvasLight;
     final Color textColor =
-        dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
+        dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral900;
     final Color subtextColor =
         dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
 
@@ -179,7 +179,7 @@ class _AmanahPresenceHistoryScreenState
                       height: 20,
                       decoration: BoxDecoration(
                         color: dark
-                            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                            ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                             : AmanahColorTokens.canvasLight,
                         shape: BoxShape.circle,
                       ),
@@ -209,7 +209,7 @@ class _AmanahPresenceHistoryScreenState
                                     )
                                   : AmanahColorTokens.brandSurface)
                             : (dark
-                                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
                                   : AmanahColorTokens.surfaceLight),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
@@ -219,7 +219,7 @@ class _AmanahPresenceHistoryScreenState
                                           .withValues(alpha: 0.50)
                                     : AmanahColorTokens.brandAccent)
                               : (dark
-                                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                                     : AmanahColorTokens.neutral200),
                         ),
                       ),
@@ -265,12 +265,12 @@ class _AmanahPresenceHistoryScreenState
                       height: 32,
                       decoration: BoxDecoration(
                         color: dark
-                            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                            ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
                             : AmanahColorTokens.surfaceLight,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: dark
-                              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                              ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                               : AmanahColorTokens.neutral200,
                         ),
                       ),
@@ -306,12 +306,12 @@ class _AmanahPresenceHistoryScreenState
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: dark
-                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
                     : AmanahColorTokens.canvasLight,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: dark
-                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                      ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
                       : AmanahColorTokens.neutral200,
                 ),
               ),
@@ -382,7 +382,7 @@ class _AmanahPresenceHistoryScreenState
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
               color: dark
-                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                   : AmanahColorTokens.canvasLight,
               borderRadius: BorderRadius.circular(100),
             ),
@@ -563,16 +563,16 @@ class _AmanahPresenceHistoryScreenState
     Color subtextColor,
   ) {
     Color iconBorderColor = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.15)
         : AmanahColorTokens.neutral300;
     Color iconBgColor = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
         : AmanahColorTokens.canvasLight;
     Color iconColor = subtextColor;
     Color titleColor = textColor;
     IconData iconData = Icons.login_rounded;
     Color lineColor = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.15)
         : AmanahColorTokens.neutral300;
 
     if (item.isLatest) {

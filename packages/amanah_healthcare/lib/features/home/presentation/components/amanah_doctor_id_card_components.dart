@@ -697,7 +697,7 @@ class AmanahDoctorIdInfoDrawer extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
     final Color borderColor = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
         : AmanahColorTokens.neutral100;
     final Color subtextColor = dark
         ? AmanahColorTokens.neutral400
@@ -736,7 +736,7 @@ class AmanahDoctorIdInfoDrawer extends StatelessWidget {
           DecoratedBox(
             decoration: BoxDecoration(
               color: dark
-                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.02)
+                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.02)
                   : AmanahColorTokens.neutral50.withValues(alpha: 0.50),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: borderColor),
@@ -821,7 +821,7 @@ class AmanahDoctorIdQrDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     final Color textColor = dark
-        ? AmanahColorTokens.surfaceLight
+        ? AmanahColorTokens.pureWhite
         : AmanahColorTokens.neutral900;
     final Color subtextColor = dark
         ? AmanahColorTokens.neutral400
@@ -843,7 +843,7 @@ class AmanahDoctorIdQrDialog extends StatelessWidget {
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
                 color: dark
-                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                     : AmanahColorTokens.neutral100,
               ),
               boxShadow: <BoxShadow>[
@@ -861,12 +861,17 @@ class AmanahDoctorIdQrDialog extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: AmanahColorTokens.brandAccent.withValues(alpha: 0.10),
+                    color: (dark
+                            ? AmanahColorTokens.cyanAccent
+                            : AmanahColorTokens.brandAccent)
+                        .withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.qr_code_2_rounded,
-                    color: AmanahColorTokens.brandAccent,
+                    color: dark
+                        ? AmanahColorTokens.cyanAccent
+                        : AmanahColorTokens.brandAccent,
                     size: 24,
                   ),
                 ),
@@ -993,7 +998,7 @@ class _DoctorIdCardFace extends StatelessWidget {
   Widget _buildFront() {
     final double panelHeight = height * 0.245;
     final Color textColor = dark
-        ? AmanahColorTokens.surfaceLight
+        ? AmanahColorTokens.pureWhite
         : AmanahColorTokens.neutral900;
     final Color subtextColor = dark
         ? AmanahColorTokens.neutral400
@@ -1037,7 +1042,7 @@ class _DoctorIdCardFace extends StatelessWidget {
               borderRadius: BorderRadius.circular(width * 0.035),
               border: Border.all(
                 color: dark
-                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.35)
+                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.35)
                     : AmanahColorTokens.surfaceLight.withValues(alpha: 0.90),
                 width: 1.5,
               ),
@@ -1071,7 +1076,7 @@ class _DoctorIdCardFace extends StatelessWidget {
               border: Border(
                 top: BorderSide(
                   color: dark
-                      ? AmanahColorTokens.brandLight.withValues(alpha: 0.25)
+                      ? AmanahColorTokens.cyanAccent.withValues(alpha: 0.25)
                       : AmanahColorTokens.brandPrimary.withValues(alpha: 0.15),
                 ),
               ),
@@ -1206,7 +1211,7 @@ class _DoctorIdCardFace extends StatelessWidget {
               borderRadius: BorderRadius.circular(width * 0.035),
               border: Border.all(
                 color: dark
-                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.35)
+                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.35)
                     : AmanahColorTokens.surfaceLight.withValues(alpha: 0.90),
                 width: 1.5,
               ),
@@ -1331,9 +1336,9 @@ class _InfoDrawerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color borderColor = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
         : AmanahColorTokens.neutral100;
-    final Color textColor = dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
+    final Color textColor = dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral900;
     final Color subtextColor = dark
         ? AmanahColorTokens.neutral400
         : AmanahColorTokens.neutral500;
@@ -1355,14 +1360,14 @@ class _InfoDrawerItem extends StatelessWidget {
               margin: const EdgeInsets.only(top: 2),
               decoration: BoxDecoration(
                 color: dark
-                    ? AmanahColorTokens.brandAccent.withValues(alpha: 0.10)
+                    ? AmanahColorTokens.cyanAccent.withValues(alpha: 0.10)
                     : AmanahColorTokens.brandSurface,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
                 size: 16,
-                color: dark ? AmanahColorTokens.brandSoft : AmanahColorTokens.brandPrimary,
+                color: dark ? AmanahColorTokens.cyanAccent : AmanahColorTokens.brandPrimary,
               ),
             ),
             const SizedBox(width: 12),
@@ -1412,7 +1417,7 @@ class _AmanahMark extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: dark ? AmanahColorTokens.brandLight : AmanahColorTokens.brandAccent,
+        color: dark ? AmanahColorTokens.cyanAccent : AmanahColorTokens.brandAccent,
         borderRadius: BorderRadius.circular(size * 0.27),
       ),
       child: CustomPaint(painter: _AmanahCrossPainter(dark: dark)),
@@ -1428,7 +1433,7 @@ class _AmanahCrossPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-      ..color = dark ? AmanahColorTokens.brandSubtle : AmanahColorTokens.brandPrimary
+      ..color = dark ? AmanahColorTokens.darkNavy : AmanahColorTokens.brandPrimary
       ..style = PaintingStyle.fill;
     canvas.drawRRect(
       RRect.fromRectAndRadius(
@@ -1471,7 +1476,7 @@ class _BauhausGridPainter extends CustomPainter {
     final List<_BauhausColorPair> palette = dark
         ? const <_BauhausColorPair>[
             _BauhausColorPair(
-              AmanahColorTokens.brandLight,
+              AmanahColorTokens.cyanAccent,
               AmanahColorTokens.darkNavy,
             ),
             _BauhausColorPair(
@@ -1483,7 +1488,7 @@ class _BauhausGridPainter extends CustomPainter {
               AmanahColorTokens.successDark,
             ),
             _BauhausColorPair(
-              AmanahColorTokens.brandSoft,
+              AmanahColorTokens.auroraCyanDark,
               AmanahColorTokens.surfaceElevatedDark,
             ),
             _BauhausColorPair(
@@ -1491,7 +1496,7 @@ class _BauhausGridPainter extends CustomPainter {
               AmanahColorTokens.surfaceDark,
             ),
             _BauhausColorPair(
-              AmanahColorTokens.brandSubtle,
+              AmanahColorTokens.cyanLight,
               AmanahColorTokens.neutral900,
             ),
           ]
@@ -1966,7 +1971,7 @@ class _UnderglowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-      ..color = (dark ? AmanahColorTokens.brandLight : AmanahColorTokens.brandSoft)
+      ..color = (dark ? AmanahColorTokens.cyanAccent : AmanahColorTokens.brandSoft)
           .withValues(alpha: dark ? 0.20 : 0.25)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 80);
     canvas.drawCircle(size.center(Offset.zero), size.width / 2.2, paint);

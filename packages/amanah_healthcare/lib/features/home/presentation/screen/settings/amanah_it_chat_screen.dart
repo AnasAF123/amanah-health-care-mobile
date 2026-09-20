@@ -127,13 +127,13 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
     final Color bgColor = AmanahThemeTokens.canvas(context);
     final Color bottomBarBg = AmanahThemeTokens.canvas(context);
     final Color bottomBarBorder = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
         : AmanahColorTokens.neutral100;
     final Color inputBg = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
         : AmanahColorTokens.neutral50;
     final Color inputBorder = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
         : AmanahColorTokens.neutral200;
     final Color textColor = AmanahThemeTokens.textPrimary(context);
     final Color hintColor = AmanahThemeTokens.textTertiary(context);
@@ -232,7 +232,7 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                               ),
                               border: !isUser && dark
                                   ? Border.all(
-                                      color: AmanahColorTokens.surfaceLight
+                                      color: AmanahColorTokens.pureWhite
                                           .withValues(alpha: 0.08),
                                     )
                                   : null,
@@ -246,7 +246,7 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                                   msg.text,
                                   style: TextStyle(
                                     color: isUser
-                                        ? AmanahColorTokens.surfaceLight
+                                        ? AmanahColorTokens.pureWhite
                                         : (dark
                                               ? AmanahColorTokens.neutral200
                                               : AmanahColorTokens.neutral800),
@@ -259,7 +259,7 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                                   msg.time,
                                   style: TextStyle(
                                     color: isUser
-                                        ? AmanahColorTokens.surfaceLight
+                                        ? AmanahColorTokens.pureWhite
                                             .withValues(alpha: 0.70)
                                         : (dark
                                               ? AmanahColorTokens.neutral400
@@ -342,8 +342,10 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
-                          borderSide: const BorderSide(
-                            color: AmanahColorTokens.brand,
+                          borderSide: BorderSide(
+                            color: dark
+                                ? AmanahColorTokens.cyanAccent
+                                : AmanahColorTokens.brand,
                             width: 1.5,
                           ),
                         ),

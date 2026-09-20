@@ -264,7 +264,7 @@ class _ControlButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(6),
             border: Border.all(
               color: dark
-                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.12)
+                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.12)
                   : AmanahColorTokens.neutral200,
             ),
           ),

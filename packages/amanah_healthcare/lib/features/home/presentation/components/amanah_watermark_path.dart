@@ -4813,11 +4813,11 @@ class AmanahOrganicPixelPainter extends CustomPainter {
 
     final List<Color> pixelPalette = isDark
         ? const <Color>[
-            AmanahColorTokens.brandAccent,
-            AmanahColorTokens.brandLight,
-            AmanahColorTokens.brandPrimary,
-            AmanahColorTokens.brandSoft,
-            AmanahColorTokens.brandSubtle,
+            AmanahColorTokens.cyanAccent,
+            AmanahColorTokens.auroraCyanDark,
+            AmanahColorTokens.auroraCyanLuminousDark,
+            AmanahColorTokens.cyanBright,
+            AmanahColorTokens.cyanLight,
           ]
         : const <Color>[
             AmanahColorTokens.brandPrimary,

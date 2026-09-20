@@ -48,7 +48,7 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                 isCuti ? '0%' : '$capacityPercentage%',
                 style: TextStyle(
                   color: dark
-                      ? AmanahColorTokens.surfaceLight
+                      ? AmanahColorTokens.pureWhite
                       : AmanahColorTokens.neutral900,
                   fontSize: 9.5,
                   fontWeight: FontWeight.w800,
@@ -73,7 +73,7 @@ class AmanahRadialCapacityGauge extends StatelessWidget {
                       'Kapasitas Hari Ini',
                       style: TextStyle(
                         color: dark
-                            ? AmanahColorTokens.surfaceLight
+                            ? AmanahColorTokens.pureWhite
                             : AmanahColorTokens.neutral900,
                         fontSize: 12,
                         fontWeight: FontWeight.w800,
@@ -175,34 +175,35 @@ class _RadialArcPainter extends CustomPainter {
 
     final Paint trackPaint = Paint()
       ..color = dark
-          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.08)
+          ? AmanahColorTokens.pureWhite.withValues(alpha: 0.08)
           : AmanahColorTokens.neutral200
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4.0;
     canvas.drawCircle(center, radius, trackPaint);
 
     if (progress > 0) {
+      final List<Color> gradientColors;
+      if (isCuti) {
+        gradientColors = const <Color>[
+          AmanahColorTokens.warning,
+          AmanahColorTokens.warningDark,
+        ];
+      } else if (dark) {
+        gradientColors = const <Color>[
+          AmanahColorTokens.cyanAccent,
+          AmanahColorTokens.auroraCyanDark,
+        ];
+      } else {
+        gradientColors = const <Color>[
+          AmanahColorTokens.brandSoft,
+          AmanahColorTokens.brand,
+        ];
+      }
+
       final Paint arcPaint = Paint()
-        ..shader = isCuti
-            ? const LinearGradient(
-                colors: <Color>[
-                  AmanahColorTokens.warning,
-                  AmanahColorTokens.warningDark,
-                ],
-              ).createShader(bounds)
-            : (dark
-                  ? const LinearGradient(
-                      colors: <Color>[
-                        AmanahColorTokens.cyanAccent,
-                        AmanahColorTokens.auroraCyanDark,
-                      ],
-                    ).createShader(bounds)
-                  : const LinearGradient(
-                      colors: <Color>[
-                        AmanahColorTokens.brandSoft,
-                        AmanahColorTokens.brand,
-                      ],
-                    ).createShader(bounds))
+        ..shader = LinearGradient(
+          colors: gradientColors,
+        ).createShader(bounds)
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
         ..strokeWidth = 4.0;
@@ -459,7 +460,7 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                             color: isCloseToCenter
                                 ? null
                                 : (dark
-                                      ? AmanahColorTokens.surfaceLight
+                                      ? AmanahColorTokens.pureWhite
                                             .withValues(alpha: 0.05)
                                       : AmanahColorTokens.surfaceLight),
                             borderRadius: BorderRadius.circular(18),
@@ -473,7 +474,7 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                               : AmanahColorTokens
                                                     .btnCrispBlueBorder))
                                   : (dark
-                                        ? AmanahColorTokens.surfaceLight
+                                        ? AmanahColorTokens.pureWhite
                                               .withValues(alpha: 0.10)
                                         : AmanahColorTokens.neutral200),
                               width: 1,
@@ -481,25 +482,25 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                             boxShadow: isCloseToCenter
                                 ? <BoxShadow>[
                                     if (isCuti)
-                                      BoxShadow(
-                                        color: AmanahColorTokens.warning
-                                            .withValues(alpha: 0.35),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 4),
-                                      )
-                                    else if (dark)
-                                      AmanahColorTokens.btnCrispBlueDarkShadow
-                                    else
-                                      AmanahColorTokens.btnCrispBlueShadow,
-                                  ]
-                                : <BoxShadow>[
-                                    BoxShadow(
-                                      color: AmanahColorTokens.pureBlack
-                                          .withValues(alpha: 0.03),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
+                                       BoxShadow(
+                                         color: AmanahColorTokens.warning
+                                             .withValues(alpha: 0.35),
+                                         blurRadius: 10,
+                                         offset: const Offset(0, 4),
+                                       )
+                                     else if (dark)
+                                       AmanahColorTokens.btnCrispBlueDarkShadow
+                                     else
+                                       AmanahColorTokens.btnCrispBlueShadow,
+                                   ]
+                                 : <BoxShadow>[
+                                     BoxShadow(
+                                       color: AmanahColorTokens.pureBlack
+                                           .withValues(alpha: 0.03),
+                                       blurRadius: 4,
+                                       offset: const Offset(0, 2),
+                                     ),
+                                   ],
                           ),
                           child: Material(
                             color: Colors.transparent,
@@ -525,7 +526,7 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                             ? AmanahColorTokens.surfaceLight
                                             : (dark
                                                   ? AmanahColorTokens
-                                                        .surfaceLight
+                                                        .pureWhite
                                                         .withValues(alpha: 0.70)
                                                   : AmanahColorTokens
                                                         .neutral500),
@@ -541,7 +542,7 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                             ? AmanahColorTokens.surfaceLight
                                             : (dark
                                                   ? AmanahColorTokens
-                                                        .surfaceLight
+                                                        .pureWhite
                                                   : AmanahColorTokens
                                                         .neutral900),
                                         fontSize: 22,
@@ -568,7 +569,7 @@ class _AmanahDateCarouselStripState extends State<AmanahDateCarouselStrip> {
                                                       .withValues(alpha: 0.95)
                                                 : (dark
                                                       ? AmanahColorTokens
-                                                            .surfaceLight
+                                                            .pureWhite
                                                             .withValues(
                                                               alpha: 0.55,
                                                             )

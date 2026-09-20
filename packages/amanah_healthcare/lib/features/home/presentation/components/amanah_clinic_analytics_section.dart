@@ -469,12 +469,16 @@ class _AmanahClinicAnalyticsSectionState
                     Container(
                       width: 7,
                       height: 7,
-                      decoration: const BoxDecoration(
-                        color: AmanahColorTokens.brand,
+                      decoration: BoxDecoration(
+                        color: dark
+                            ? AmanahColorTokens.cyanAccent
+                            : AmanahColorTokens.brand,
                         shape: BoxShape.circle,
                         boxShadow: <BoxShadow>[
                           BoxShadow(
-                            color: AmanahColorTokens.brandLight,
+                            color: dark
+                                ? AmanahColorTokens.cyanAccent.withValues(alpha: 0.4)
+                                : AmanahColorTokens.brandLight,
                             blurRadius: 6,
                             spreadRadius: 2,
                           ),
@@ -527,7 +531,7 @@ class _AmanahClinicAnalyticsSectionState
                     visualDensity: VisualDensity.compact,
                     style: IconButton.styleFrom(
                       backgroundColor: dark
-                          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.06)
+                          ? AmanahColorTokens.pureWhite.withValues(alpha: 0.06)
                           : AmanahColorTokens.neutral100,
                     ),
                     icon: const Icon(Icons.chevron_left_rounded),
@@ -553,7 +557,7 @@ class _AmanahClinicAnalyticsSectionState
                     visualDensity: VisualDensity.compact,
                     style: IconButton.styleFrom(
                       backgroundColor: dark
-                          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.06)
+                          ? AmanahColorTokens.pureWhite.withValues(alpha: 0.06)
                           : AmanahColorTokens.neutral100,
                     ),
                     icon: const Icon(Icons.chevron_right_rounded),
@@ -612,30 +616,34 @@ class _AmanahClinicAnalyticsSectionState
                     ),
                     decoration: BoxDecoration(
                       color: dark
-                          ? AmanahColorTokens.brand.withValues(alpha: 0.18)
+                          ? AmanahColorTokens.cyanAccent.withValues(alpha: 0.18)
                           : AmanahColorTokens.brandSurface,
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
                         color: dark
-                            ? AmanahColorTokens.brandLight.withValues(alpha: 0.3)
+                            ? AmanahColorTokens.auroraCyanDark.withValues(alpha: 0.35)
                             : AmanahColorTokens.brandMuted,
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         Icon(
                           Icons.arrow_upward_rounded,
                           size: 11,
-                          color: AmanahColorTokens.brand,
+                          color: dark
+                              ? AmanahColorTokens.cyanAccent
+                              : AmanahColorTokens.brand,
                         ),
-                        SizedBox(width: 3),
+                        const SizedBox(width: 3),
                         Text(
                           '+12.5%',
                           style: TextStyle(
                             fontSize: 10.5,
                             fontWeight: FontWeight.w800,
-                            color: AmanahColorTokens.brand,
+                            color: dark
+                                ? AmanahColorTokens.cyanAccent
+                                : AmanahColorTokens.brand,
                           ),
                         ),
                       ],
@@ -721,8 +729,10 @@ class _AmanahClinicAnalyticsSectionState
                                 Container(
                                   width: 6,
                                   height: 6,
-                                  decoration: const BoxDecoration(
-                                    color: AmanahColorTokens.brand,
+                                  decoration: BoxDecoration(
+                                    color: dark
+                                        ? AmanahColorTokens.cyanAccent
+                                        : AmanahColorTokens.brand,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -780,8 +790,10 @@ class _AmanahClinicAnalyticsSectionState
                                 Container(
                                   width: 6,
                                   height: 6,
-                                  decoration: const BoxDecoration(
-                                    color: AmanahColorTokens.brand,
+                                  decoration: BoxDecoration(
+                                    color: dark
+                                        ? AmanahColorTokens.cyanAccent
+                                        : AmanahColorTokens.brand,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -886,15 +898,20 @@ class _ClinicAreaChartPainter extends CustomPainter {
       ..lineTo(points.first.dx, size.height)
       ..close();
 
+    final Color chartAccent =
+        isDark ? AmanahColorTokens.cyanAccent : AmanahColorTokens.brand;
+    final Color chartLightAccent =
+        isDark ? AmanahColorTokens.auroraCyanDark : AmanahColorTokens.brandLight;
+
     final Paint fillPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: isDark
             ? <Color>[
-                AmanahColorTokens.brand.withValues(alpha: 0.45),
-                AmanahColorTokens.brandLight.withValues(alpha: 0.15),
-                AmanahColorTokens.brand.withValues(alpha: 0.0),
+                AmanahColorTokens.cyanAccent.withValues(alpha: 0.35),
+                AmanahColorTokens.auroraCyanDark.withValues(alpha: 0.12),
+                AmanahColorTokens.cyanAccent.withValues(alpha: 0.0),
               ]
             : <Color>[
                 AmanahColorTokens.brand.withValues(alpha: 0.32),
@@ -908,7 +925,7 @@ class _ClinicAreaChartPainter extends CustomPainter {
 
     // Stroke line
     final Paint linePaint = Paint()
-      ..color = AmanahColorTokens.brand
+      ..color = chartAccent
       ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -918,16 +935,16 @@ class _ClinicAreaChartPainter extends CustomPainter {
     // Tip Beam Dot on the Last Point
     final Offset tip = points.last;
     final Paint outerGlow = Paint()
-      ..color = AmanahColorTokens.brandLight.withValues(alpha: 0.45);
+      ..color = chartLightAccent.withValues(alpha: 0.45);
     canvas.drawCircle(tip, 9, outerGlow);
 
     final Paint midGlow = Paint()
-      ..color = AmanahColorTokens.brand.withValues(alpha: 0.40);
+      ..color = chartAccent.withValues(alpha: 0.40);
     canvas.drawCircle(tip, 6, midGlow);
 
-    final Paint coreDot = Paint()..color = AmanahColorTokens.brand;
+    final Paint coreDot = Paint()..color = chartAccent;
     final Paint coreDotStroke = Paint()
-      ..color = AmanahColorTokens.surfaceLight
+      ..color = isDark ? AmanahColorTokens.canvasDark : AmanahColorTokens.pureWhite
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
     canvas.drawCircle(tip, 4, coreDot);
@@ -941,7 +958,7 @@ class _ClinicAreaChartPainter extends CustomPainter {
 
       // Draw vertical cursor dash line
       final Paint cursorPaint = Paint()
-        ..color = AmanahColorTokens.brand.withValues(alpha: 0.4)
+        ..color = chartAccent.withValues(alpha: 0.4)
         ..strokeWidth = 1.5;
       canvas.drawLine(
         Offset(selPoint.dx, 0),
@@ -950,7 +967,7 @@ class _ClinicAreaChartPainter extends CustomPainter {
       );
 
       // Draw Selected Dot
-      canvas.drawCircle(selPoint, 5, Paint()..color = AmanahColorTokens.brand);
+      canvas.drawCircle(selPoint, 5, Paint()..color = chartAccent);
       canvas.drawCircle(selPoint, 5, coreDotStroke);
     }
   }

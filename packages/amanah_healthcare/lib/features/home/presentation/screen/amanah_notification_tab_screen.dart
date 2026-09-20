@@ -156,7 +156,7 @@ class _AmanahNotificationTabScreenState
                               height: 1,
                               thickness: 1,
                               color: dark
-                                  ? AmanahColorTokens.surfaceLight.withValues(
+                                  ? AmanahColorTokens.pureWhite.withValues(
                                       alpha: 0.05,
                                     )
                                   : AmanahColorTokens.neutral100,
@@ -258,7 +258,7 @@ class _AmanahNotificationTile extends StatelessWidget {
                             : FontWeight.w600,
                         color: item.isUnread
                             ? (dark
-                                  ? AmanahColorTokens.surfaceLight
+                                  ? AmanahColorTokens.pureWhite
                                   : AmanahColorTokens.neutral900)
                             : (dark
                                   ? AmanahColorTokens.neutral300
@@ -308,13 +308,16 @@ class _AmanahNotificationTile extends StatelessWidget {
                           width: 6,
                           height: 6,
                           decoration: BoxDecoration(
-                            color: AmanahColorTokens.brandAccent,
+                            color: dark
+                                ? AmanahColorTokens.cyanAccent
+                                : AmanahColorTokens.brandAccent,
                             shape: BoxShape.circle,
                             boxShadow: <BoxShadow>[
                               BoxShadow(
-                                color: AmanahColorTokens.brandLight.withValues(
-                                  alpha: 0.60,
-                                ),
+                                color: (dark
+                                        ? AmanahColorTokens.cyanAccent
+                                        : AmanahColorTokens.brandLight)
+                                    .withValues(alpha: 0.60),
                                 blurRadius: 4,
                               ),
                             ],

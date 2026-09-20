@@ -1,21 +1,50 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_repository.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 
 class AmanahScheduleStore extends ChangeNotifier {
-  AmanahScheduleStore._() {
-    _schedulesMap = Map<String, List<DoctorSchedule>>.from(_initialSchedulesMap);
-    _daySettingsMap = Map<String, DayScheduleSetting>.from(_initialDaySettings);
+  AmanahScheduleStore._({AmanahScheduleRepository? repository})
+      : _repository = repository ?? const AmanahScheduleRepository() {
+    _schedulesMap = <String, List<DoctorSchedule>>{};
+    _daySettingsMap = <String, DayScheduleSetting>{};
   }
 
   static final AmanahScheduleStore instance = AmanahScheduleStore._();
 
-  static final DateTime baseToday = DateTime(2026, 8, 26);
+  static DateTime? _customBaseToday;
+  static DateTime get baseToday {
+    if (_customBaseToday != null) {
+      return _customBaseToday!;
+    }
+    final DateTime now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  @visibleForTesting
+  static void setCustomBaseToday(DateTime? date) {
+    _customBaseToday = date;
+  }
+
+  AmanahScheduleRepository _repository;
+  void setRepository(AmanahScheduleRepository repository) {
+    _repository = repository;
+  }
 
   late Map<String, List<DoctorSchedule>> _schedulesMap;
   late Map<String, DayScheduleSetting> _daySettingsMap;
+  final Map<String, CalendarDaySummary> _calendarSummariesMap = <String, CalendarDaySummary>{};
+
+  bool _isLoading = false;
+  String? _errorMessage;
+  AmanahScheduleConflictException? _lastConflict;
 
   Map<String, List<DoctorSchedule>> get schedulesMap => _schedulesMap;
   Map<String, DayScheduleSetting> get daySettingsMap => _daySettingsMap;
+  Map<String, CalendarDaySummary> get calendarSummariesMap => _calendarSummariesMap;
+
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+  AmanahScheduleConflictException? get lastConflict => _lastConflict;
 
   static String formatDateKey(DateTime date) {
     final String y = date.year.toString().padLeft(4, '0');
@@ -35,6 +64,7 @@ class AmanahScheduleStore extends ChangeNotifier {
         DayScheduleSetting(
           targetQuota: 8,
           isCuti: date.weekday == DateTime.sunday,
+          scheduleDate: key,
         );
   }
 
@@ -52,6 +82,12 @@ class AmanahScheduleStore extends ChangeNotifier {
   }
 
   int getCapacityPercentage(DateTime date) {
+    final String key = formatDateKey(date);
+    final CalendarDaySummary? summary = _calendarSummariesMap[key];
+    if (summary != null) {
+      return summary.capacityPercentage;
+    }
+
     final DayScheduleSetting setting = getDaySettingForDate(date);
     if (setting.isCuti || setting.targetQuota <= 0) {
       return 0;
@@ -59,6 +95,8 @@ class AmanahScheduleStore extends ChangeNotifier {
     final int bookedCount = getAllBookedPatientsForDate(date).length;
     return ((bookedCount / setting.targetQuota) * 100).round().clamp(0, 100);
   }
+
+  // --- Synchronous methods for UI instant updates and backwards compatibility ---
 
   void addSchedule(DateTime date, DoctorSchedule schedule) {
     final String key = formatDateKey(date);
@@ -100,297 +138,289 @@ class AmanahScheduleStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  void reset() {
-    _schedulesMap = Map<String, List<DoctorSchedule>>.from(_initialSchedulesMap);
-    _daySettingsMap = Map<String, DayScheduleSetting>.from(_initialDaySettings);
+  // --- Asynchronous backend-connected methods ---
+
+  Future<List<DoctorSchedule>> loadSchedulesForDate(
+    DateTime date, {
+    bool forceRefresh = false,
+  }) async {
+    final String dateStr = formatDateKey(date);
+    _isLoading = true;
+    _errorMessage = null;
+    await Future<void>.value();
     notifyListeners();
+
+    try {
+      final List<DoctorSchedule> backendSchedules =
+          await _repository.fetchMySchedules(date: dateStr);
+
+      // Also enrich with booked patients for that date
+      final List<BookedPatient> allPatients =
+          await _repository.fetchBookedPatients(date: dateStr);
+
+      final List<DoctorSchedule> enriched = backendSchedules.map((DoctorSchedule s) {
+        final List<BookedPatient> sessionPatients = allPatients.where((BookedPatient p) {
+          if (p.appointmentId != null && s.bookedPatients.any((BookedPatient bp) => bp.id == p.id)) {
+            return true;
+          }
+          if (p.sessionTitle != null && p.sessionTitle!.toLowerCase().contains(s.sessionType.toLowerCase())) {
+            return true;
+          }
+          return false;
+        }).toList();
+
+        final List<BookedPatient> finalPatients =
+            sessionPatients.isNotEmpty ? sessionPatients : s.bookedPatients;
+
+        return s.copyWith(
+          bookedPatients: finalPatients,
+          slotCount: finalPatients.length.toString(),
+          slotText: '${finalPatients.length} Pasien Booking',
+        );
+      }).toList();
+
+      _schedulesMap[dateStr] = enriched;
+      _isLoading = false;
+      notifyListeners();
+      return _schedulesMap[dateStr] ?? const <DoctorSchedule>[];
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+      return getSchedulesForDate(date);
+    }
   }
 
-  // 1:1 Initial Data from Web store
-  static final Map<String, List<DoctorSchedule>> _initialSchedulesMap =
-      <String, List<DoctorSchedule>>{
-    '2026-08-26': <DoctorSchedule>[
-      const DoctorSchedule(
-        id: 'ses-1',
-        title: 'Sesi Pagi',
-        date: 'Rabu, 26 Agustus 2026',
-        time: '07:00 - 11:00 WIB',
-        startTime: '07:00',
-        endTime: '11:00',
-        sessionType: 'Pagi',
-        poli: 'Poli Gigi & Mulut',
-        room: 'Ruang 201',
-        slotCount: '2',
-        slotText: '2 Pasien Booking',
-        badge: 'Buka',
-        badgeVariant: AmanahBadgeVariant.success,
-        bookedPatients: <BookedPatient>[
-          BookedPatient(
-            id: 'p-1',
-            patientName: 'Steven Pratama',
-            avatarUrl:
-                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop',
-            patientAge: '28 Thn',
-            patientRm: 'RM-2026-0412',
-            patientComplaint:
-                'Pembersihan karang gigi (scaling) & tambal gigi geraham belakang',
-            queueNumber: '#01',
-            timeSlot: '08:00 - 09:30 WIB',
-            badge: 'Aktif',
-            badgeVariant: AmanahBadgeVariant.success,
-          ),
-          BookedPatient(
-            id: 'p-2',
-            patientName: 'An. Kevin Sanjaya',
-            avatarUrl:
-                'https://images.unsplash.com/photo-1543610892-0b1f7e6d8ac1?q=80&w=300&auto=format&fit=crop',
-            patientAge: '7 Thn',
-            patientRm: 'RM-2026-0523',
-            patientGuardian: 'Bpk. Budi Sanjaya (Ayah)',
-            patientComplaint: 'Cabut gigi susu goyang & aplikasi fluoride',
-            queueNumber: '#02',
-            timeSlot: '10:00 - 11:00 WIB',
-            badge: 'Mendatang',
-            badgeVariant: AmanahBadgeVariant.primary,
-          ),
-        ],
-      ),
-      const DoctorSchedule(
-        id: 'ses-2',
-        title: 'Sesi Siang',
-        date: 'Rabu, 26 Agustus 2026',
-        time: '13:00 - 17:00 WIB',
-        startTime: '13:00',
-        endTime: '17:00',
-        sessionType: 'Siang',
-        poli: 'Klinik Spesialis Konservasi',
-        room: 'Ruang 204',
-        slotCount: '1',
-        slotText: '1 Pasien Booking',
-        badge: 'Buka',
-        badgeVariant: AmanahBadgeVariant.success,
-        bookedPatients: <BookedPatient>[
-          BookedPatient(
-            id: 'p-3',
-            patientName: 'Ibu Ratna Dewi',
-            avatarUrl:
-                'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=300&auto=format&fit=crop',
-            patientAge: '42 Thn',
-            patientRm: 'RM-2026-0789',
-            patientComplaint:
-                'Perawatan saluran akar lanjutan tahap 2 & persiapan crown',
-            queueNumber: '#01',
-            timeSlot: '13:30 - 15:00 WIB',
-            badge: 'Mendatang',
-            badgeVariant: AmanahBadgeVariant.primary,
-          ),
-        ],
-      ),
-      const DoctorSchedule(
-        id: 'ses-3',
-        title: 'Sesi Malam',
-        date: 'Rabu, 26 Agustus 2026',
-        time: '19:00 - 22:00 WIB',
-        startTime: '19:00',
-        endTime: '22:00',
-        sessionType: 'Malam',
-        poli: 'Klinik Eksekutif VIP',
-        room: 'Suite VIP 01',
-        slotCount: '1',
-        slotText: '1 Pasien Booking',
-        badge: 'Buka',
-        badgeVariant: AmanahBadgeVariant.success,
-        bookedPatients: <BookedPatient>[
-          BookedPatient(
-            id: 'p-4',
-            patientName: 'Andi Budiman',
-            avatarUrl:
-                'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=300&auto=format&fit=crop',
-            patientAge: '34 Thn',
-            patientRm: 'RM-2026-0811',
-            patientComplaint:
-                'Pemeriksaan estetika veneer & konsultasi clear aligner',
-            queueNumber: '#01',
-            timeSlot: '19:30 - 21:00 WIB',
-            badge: 'Mendatang',
-            badgeVariant: AmanahBadgeVariant.primary,
-          ),
-        ],
-      ),
-    ],
-    '2026-08-27': <DoctorSchedule>[
-      const DoctorSchedule(
-        id: 'ses-4',
-        title: 'Sesi Pagi',
-        date: 'Kamis, 27 Agustus 2026',
-        time: '08:00 - 12:00 WIB',
-        startTime: '08:00',
-        endTime: '12:00',
-        sessionType: 'Pagi',
-        poli: 'Poli Gigi Umum',
-        room: 'Ruang 201',
-        slotCount: '1',
-        slotText: '1 Pasien Booking',
-        badge: 'Buka',
-        badgeVariant: AmanahBadgeVariant.success,
-        bookedPatients: <BookedPatient>[
-          BookedPatient(
-            id: 'p-5',
-            patientName: 'Rafi Ahmad',
-            avatarUrl:
-                'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=300&auto=format&fit=crop',
-            patientAge: '35 Thn',
-            patientRm: 'RM-2026-0911',
-            patientComplaint: 'Pemeriksaan rutin & scaling berkala',
-            queueNumber: '#01',
-            timeSlot: '09:00 - 10:30 WIB',
-            badge: 'Mendatang',
-            badgeVariant: AmanahBadgeVariant.primary,
-          ),
-        ],
-      ),
-      const DoctorSchedule(
-        id: 'ses-5',
-        title: 'Sesi Siang',
-        date: 'Kamis, 27 Agustus 2026',
-        time: '13:00 - 17:00 WIB',
-        startTime: '13:00',
-        endTime: '17:00',
-        sessionType: 'Siang',
-        poli: 'Spesialis Bedah Mulut',
-        room: 'Ruang Tindakan 2',
-        slotCount: '1',
-        slotText: '1 Pasien Booking',
-        badge: 'Buka',
-        badgeVariant: AmanahBadgeVariant.success,
-        bookedPatients: <BookedPatient>[
-          BookedPatient(
-            id: 'p-6',
-            patientName: 'Bpk. Hendra Gunawan',
-            avatarUrl:
-                'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=300&auto=format&fit=crop',
-            patientAge: '49 Thn',
-            patientRm: 'RM-2026-1044',
-            patientComplaint: 'Tindakan odontektomi gigi bungsu impaksi',
-            queueNumber: '#01',
-            timeSlot: '14:00 - 15:30 WIB',
-            badge: 'Mendatang',
-            badgeVariant: AmanahBadgeVariant.primary,
-          ),
-        ],
-      ),
-    ],
-    '2026-08-28': <DoctorSchedule>[
-      const DoctorSchedule(
-        id: 'ses-6',
-        title: 'Sesi Pagi',
-        date: 'Jumat, 28 Agustus 2026',
-        time: '08:00 - 11:30 WIB',
-        startTime: '08:00',
-        endTime: '11:30',
-        sessionType: 'Pagi',
-        poli: 'Telemedisin Gigi',
-        room: 'Studio D-02',
-        slotCount: '1',
-        slotText: '1 Pasien Booking',
-        badge: 'Buka',
-        badgeVariant: AmanahBadgeVariant.success,
-        bookedPatients: <BookedPatient>[
-          BookedPatient(
-            id: 'p-7',
-            patientName: 'Nadia Saphira',
-            avatarUrl:
-                'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop',
-            patientAge: '24 Thn',
-            patientRm: 'RM-2026-1120',
-            patientComplaint:
-                'Konsultasi rencana kawat gigi / clear aligner estetika',
-            queueNumber: '#01',
-            timeSlot: '08:30 - 10:00 WIB',
-            badge: 'Mendatang',
-            badgeVariant: AmanahBadgeVariant.primary,
-          ),
-        ],
-      ),
-    ],
-    '2026-08-29': <DoctorSchedule>[
-      const DoctorSchedule(
-        id: 'ses-7',
-        title: 'Sesi Pagi',
-        date: 'Sabtu, 29 Agustus 2026',
-        time: '09:00 - 12:00 WIB',
-        startTime: '09:00',
-        endTime: '12:00',
-        sessionType: 'Pagi',
-        poli: 'Poli Eksekutif VIP',
-        room: 'Suite VIP 02',
-        slotCount: '1',
-        slotText: '1 Pasien Booking',
-        badge: 'Buka',
-        badgeVariant: AmanahBadgeVariant.success,
-        bookedPatients: <BookedPatient>[
-          BookedPatient(
-            id: 'p-8',
-            patientName: 'drg. Maya Kusuma (VIP)',
-            avatarUrl:
-                'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=300&auto=format&fit=crop',
-            patientAge: '31 Thn',
-            patientRm: 'RM-2026-1205',
-            patientComplaint:
-                'Pemasangan bleaching / pemutihan gigi & fluoride polish',
-            queueNumber: '#01',
-            timeSlot: '09:00 - 11:00 WIB',
-            badge: 'Mendatang',
-            badgeVariant: AmanahBadgeVariant.primary,
-          ),
-        ],
-      ),
-    ],
-    '2026-08-31': <DoctorSchedule>[
-      const DoctorSchedule(
-        id: 'ses-8',
-        title: 'Sesi Pagi',
-        date: 'Senin, 31 Agustus 2026',
-        time: '08:30 - 12:00 WIB',
-        startTime: '08:30',
-        endTime: '12:00',
-        sessionType: 'Pagi',
-        poli: 'Poli Gigi & Mulut',
-        room: 'Ruang 201',
-        slotCount: '1',
-        slotText: '1 Pasien Booking',
-        badge: 'Buka',
-        badgeVariant: AmanahBadgeVariant.success,
-        bookedPatients: <BookedPatient>[
-          BookedPatient(
-            id: 'p-9',
-            patientName: 'Farhan Maulana',
-            avatarUrl:
-                'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=300&auto=format&fit=crop',
-            patientAge: '29 Thn',
-            patientRm: 'RM-2026-1310',
-            patientComplaint: 'Penambalan gigi berlubang & konsultasi',
-            queueNumber: '#01',
-            timeSlot: '08:30 - 10:00 WIB',
-            badge: 'Mendatang',
-            badgeVariant: AmanahBadgeVariant.primary,
-          ),
-        ],
-      ),
-    ],
-  };
+  Future<CalendarSummaryResponse?> loadCalendarSummary(String month) async {
+    try {
+      final CalendarSummaryResponse res = await _repository.fetchCalendarSummary(month);
+      for (final CalendarDaySummary day in res.days) {
+        _calendarSummariesMap[day.date] = day;
+        final DayScheduleSetting existing = _daySettingsMap[day.date] ??
+            DayScheduleSetting(
+              targetQuota: day.targetQuota,
+              isCuti: day.isCuti,
+              cutiReason: day.cutiReason,
+              scheduleDate: day.date,
+              totalBookedPatients: day.bookedPatientCount,
+              capacityPercentage: day.capacityPercentage,
+            );
+        _daySettingsMap[day.date] = existing.copyWith(
+          targetQuota: day.targetQuota,
+          isCuti: day.isCuti,
+          cutiReason: day.cutiReason,
+          totalBookedPatients: day.bookedPatientCount,
+          capacityPercentage: day.capacityPercentage,
+        );
+      }
+      notifyListeners();
+      return res;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
 
-  static final Map<String, DayScheduleSetting> _initialDaySettings =
-      <String, DayScheduleSetting>{
-    '2026-08-26': const DayScheduleSetting(targetQuota: 8, isCuti: false),
-    '2026-08-27': const DayScheduleSetting(targetQuota: 6, isCuti: false),
-    '2026-08-28': const DayScheduleSetting(targetQuota: 6, isCuti: false),
-    '2026-08-29': const DayScheduleSetting(targetQuota: 10, isCuti: false),
-    '2026-08-30': const DayScheduleSetting(
-      targetQuota: 0,
-      isCuti: true,
-      cutiReason: 'Cuti Akhir Pekan / Hari Libur Nasional',
-    ),
-    '2026-08-31': const DayScheduleSetting(targetQuota: 8, isCuti: false),
-  };
+  Future<DayScheduleSetting> loadDaySettings(DateTime date) async {
+    final String dateStr = formatDateKey(date);
+    try {
+      final DayScheduleSetting setting = await _repository.fetchDaySettings(dateStr);
+      _daySettingsMap[dateStr] = setting;
+      notifyListeners();
+      return setting;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return getDaySettingForDate(date);
+    }
+  }
+
+  Future<DoctorSchedule> saveSchedule(
+    DateTime date,
+    DoctorSchedule schedule, {
+    String? roomId,
+    String? poliklinikId,
+    String? serviceId,
+    int? capacity,
+    String? notes,
+  }) async {
+    final String dateStr = formatDateKey(date);
+    _isLoading = true;
+    _errorMessage = null;
+    _lastConflict = null;
+    await Future<void>.value();
+    notifyListeners();
+
+    try {
+      DoctorSchedule result;
+      // If schedule ID starts with 'ses-' and is not a uuid, it's either an initial local ID or newly created.
+      final bool isExistingPersisted = schedule.id.isNotEmpty &&
+          !schedule.id.startsWith('ses-');
+
+      if (isExistingPersisted) {
+        result = await _repository.updateSchedule(
+          schedule.id,
+          session: schedule.sessionType,
+          startTime: schedule.startTime,
+          endTime: schedule.endTime,
+          capacity: capacity ?? schedule.capacity,
+          roomId: roomId ?? schedule.roomId,
+          poliklinikId: poliklinikId ?? schedule.poliklinikId,
+          serviceId: serviceId ?? schedule.serviceId,
+          status: schedule.badge,
+          isAvailable: schedule.isAvailable,
+          notes: notes ?? schedule.notes,
+        );
+        updateSchedule(date, result);
+      } else {
+        result = await _repository.createSchedule(
+          date: dateStr,
+          session: schedule.sessionType,
+          startTime: schedule.startTime ?? '08:00',
+          endTime: schedule.endTime ?? '12:00',
+          roomId: roomId ?? schedule.roomId,
+          poliklinikId: poliklinikId ?? schedule.poliklinikId,
+          serviceId: serviceId ?? schedule.serviceId,
+          capacity: capacity ?? schedule.capacity,
+          isAvailable: schedule.isAvailable,
+          notes: notes ?? schedule.notes,
+        );
+        addSchedule(date, result);
+      }
+
+      _isLoading = false;
+      notifyListeners();
+      return result;
+    } on AmanahScheduleConflictException catch (e) {
+      _isLoading = false;
+      _lastConflict = e;
+      _errorMessage = e.message;
+      notifyListeners();
+      rethrow;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+      // Keep optimistic local update
+      if (schedule.id.isNotEmpty) {
+        updateSchedule(date, schedule);
+      } else {
+        addSchedule(date, schedule);
+      }
+      return schedule;
+    }
+  }
+
+  Future<void> removeSchedule(DateTime date, String scheduleId) async {
+    _isLoading = true;
+    _errorMessage = null;
+    _lastConflict = null;
+    await Future<void>.value();
+    notifyListeners();
+
+    try {
+      if (!scheduleId.startsWith('ses-')) {
+        await _repository.deleteSchedule(scheduleId);
+      }
+      deleteSchedule(date, scheduleId);
+      _isLoading = false;
+      notifyListeners();
+    } on AmanahScheduleConflictException catch (e) {
+      _isLoading = false;
+      _lastConflict = e;
+      _errorMessage = e.message;
+      notifyListeners();
+      rethrow;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      deleteSchedule(date, scheduleId);
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateDayCuti(
+    DateTime date,
+    bool isCuti, {
+    String? cutiReason,
+    int? targetQuota,
+  }) async {
+    final String dateStr = formatDateKey(date);
+    setDayCuti(date, isCuti, cutiReason: cutiReason);
+
+    try {
+      await _repository.updateDaySettings(
+        date: dateStr,
+        isCuti: isCuti,
+        cutiReason: cutiReason,
+        targetQuota: targetQuota,
+      );
+    } catch (e) {
+      _errorMessage = e.toString();
+    }
+  }
+
+  Future<void> toggleScheduleAvailability(
+    DateTime date,
+    String scheduleId,
+    bool isAvailable,
+  ) async {
+    final String key = formatDateKey(date);
+    final List<DoctorSchedule> current =
+        List<DoctorSchedule>.from(_schedulesMap[key] ?? <DoctorSchedule>[]);
+    final int index = current.indexWhere((DoctorSchedule s) => s.id == scheduleId);
+    if (index >= 0) {
+      current[index] = current[index].copyWith(
+        isAvailable: isAvailable,
+        badge: isAvailable ? 'Buka' : 'Tutup',
+        badgeVariant: isAvailable ? AmanahBadgeVariant.success : AmanahBadgeVariant.warning,
+      );
+      _schedulesMap[key] = current;
+      notifyListeners();
+    }
+
+    try {
+      if (!scheduleId.startsWith('ses-')) {
+        await _repository.toggleAvailability(scheduleId, isAvailable);
+      }
+    } catch (e) {
+      _errorMessage = e.toString();
+    }
+  }
+
+  Future<List<ClinicRoomReference>> loadRooms({
+    DateTime? date,
+    String? startTime,
+    String? endTime,
+  }) async {
+    try {
+      return await _repository.fetchReferenceRooms(
+        date: date != null ? formatDateKey(date) : null,
+        startTime: startTime,
+        endTime: endTime,
+      );
+    } catch (_) {
+      return const <ClinicRoomReference>[];
+    }
+  }
+
+  Future<List<ClinicPoliklinikReference>> loadPolikliniks() async {
+    try {
+      return await _repository.fetchReferencePolikliniks();
+    } catch (_) {
+      return const <ClinicPoliklinikReference>[];
+    }
+  }
+
+  void reset() {
+    _schedulesMap = <String, List<DoctorSchedule>>{};
+    _daySettingsMap = <String, DayScheduleSetting>{};
+    _calendarSummariesMap.clear();
+    _customBaseToday = null;
+    _isLoading = false;
+    _errorMessage = null;
+    _lastConflict = null;
+    notifyListeners();
+  }
 }

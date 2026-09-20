@@ -394,19 +394,23 @@ class AmanahEmptyState extends StatelessWidget {
     switch (tone) {
       case AmanahEmptyStateTone.neutral:
         return (
-          dark ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05) : AmanahColorTokens.neutral100,
-          dark ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10) : AmanahColorTokens.neutral200,
+          dark
+              ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
+              : AmanahColorTokens.neutral100,
+          dark
+              ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
+              : AmanahColorTokens.neutral200,
           dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
         );
       case AmanahEmptyStateTone.brand:
         return (
           dark
-              ? AmanahColorTokens.brand.withValues(alpha: 0.15)
+              ? AmanahColorTokens.cyanAccent.withValues(alpha: 0.15)
               : AmanahColorTokens.brandSurface,
           dark
-              ? AmanahColorTokens.brand.withValues(alpha: 0.30)
+              ? AmanahColorTokens.auroraCyanDark.withValues(alpha: 0.35)
               : AmanahColorTokens.brandMuted,
-          dark ? AmanahColorTokens.brandAccent : AmanahColorTokens.brandPrimary,
+          dark ? AmanahColorTokens.cyanAccent : AmanahColorTokens.brandPrimary,
         );
       case AmanahEmptyStateTone.warning:
         return (

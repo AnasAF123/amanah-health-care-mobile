@@ -15,7 +15,7 @@ class AmanahLaunchSplash extends StatelessWidget {
     final Color background =
         isDark ? AmanahColorTokens.canvasDark : AmanahColorTokens.canvasLight;
     final Color foreground =
-        isDark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.navy;
+        isDark ? AmanahColorTokens.pureWhite : AmanahColorTokens.navy;
     final Color secondary =
         isDark ? AmanahColorTokens.neutral300 : AmanahColorTokens.neutral600;
 

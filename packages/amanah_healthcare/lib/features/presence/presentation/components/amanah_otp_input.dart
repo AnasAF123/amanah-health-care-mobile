@@ -145,24 +145,30 @@ class _DigitBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color bgColor = dark
-        ? (controller.text.isNotEmpty
-            ? AmanahColorTokens.neutral800
-            : AmanahColorTokens.surfaceDark)
-        : (controller.text.isNotEmpty
-            ? AmanahColorTokens.neutral50
-            : AmanahColorTokens.surfaceLight);
+    final Color bgColor;
+    if (dark) {
+      bgColor = controller.text.isNotEmpty
+          ? AmanahColorTokens.neutral800
+          : AmanahColorTokens.surfaceDark;
+    } else {
+      bgColor = controller.text.isNotEmpty
+          ? AmanahColorTokens.neutral50
+          : AmanahColorTokens.surfaceLight;
+    }
 
-    final Color borderColor = hasError
-        ? AmanahColorTokens.danger
-        : (controller.text.isNotEmpty
-            ? (dark ? AmanahColorTokens.brandLight : AmanahColorTokens.neutral900)
-            : (dark
-                ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
-                : AmanahColorTokens.neutral300));
+    final Color borderColor;
+    if (hasError) {
+      borderColor = AmanahColorTokens.danger;
+    } else if (controller.text.isNotEmpty) {
+      borderColor = dark ? AmanahColorTokens.cyanAccent : AmanahColorTokens.neutral900;
+    } else {
+      borderColor = dark
+          ? AmanahColorTokens.pureWhite.withValues(alpha: 0.15)
+          : AmanahColorTokens.neutral300;
+    }
 
     final Color textColor = dark
-        ? AmanahColorTokens.surfaceLight
+        ? AmanahColorTokens.pureWhite
         : AmanahColorTokens.neutral900;
 
     return SizedBox(
@@ -199,7 +205,7 @@ class _DigitBox extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide(
               color: dark
-                  ? AmanahColorTokens.brandLight
+                  ? AmanahColorTokens.cyanAccent
                   : AmanahColorTokens.brandPrimary,
               width: 2.0,
             ),

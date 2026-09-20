@@ -18,6 +18,7 @@ void main(List<String> args) {
     'lib/features/home/presentation/theme/amanah_typography_tokens.dart',
     'lib/features/home/presentation/theme/amanah_theme_data.dart',
     'lib/features/home/domain/amanah_visual_role.dart',
+    'lib/features/home/presentation/components/amanah_aurora_background.dart',
     'lib/generic_lib/',
   ];
 

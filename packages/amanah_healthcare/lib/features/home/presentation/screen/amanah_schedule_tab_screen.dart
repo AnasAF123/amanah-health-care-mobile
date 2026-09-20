@@ -6,6 +6,7 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_s
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_cards_and_drawers.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_components.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_form_and_calendar_dialog.dart';
@@ -72,6 +73,79 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
       }
     }
     _store.addListener(_onStoreUpdated);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadData();
+      }
+    });
+  }
+
+  Future<void> _loadData({bool forceRefresh = false}) async {
+    await Future.wait(<Future<dynamic>>[
+      _store.loadSchedulesForDate(_selectedDate, forceRefresh: forceRefresh),
+      _store.loadDaySettings(_selectedDate),
+      _store.loadCalendarSummary(
+        '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}',
+      ),
+    ]);
+  }
+
+  void _showConflictDialog(BuildContext context, String message) {
+    showAmanahBottomSheet<void>(
+      context: context,
+      builder: (BuildContext ctx) {
+        final bool dark = Theme.of(ctx).brightness == Brightness.dark;
+        return AmanahBottomSheetScaffold(
+          title: 'Konflik Penjadwalan',
+          subtitle: 'Validasi Sistem Praktik Dokter',
+          maxHeightFactor: 0.45,
+          footer: AmanahButton.primary(
+            text: 'Mengerti',
+            isFullWidth: true,
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AmanahColorTokens.warning.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AmanahColorTokens.warning.withValues(alpha: 0.40),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Icon(
+                      Icons.warning_amber_rounded,
+                      color: AmanahColorTokens.warning,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        message,
+                        style: TextStyle(
+                          color: dark
+                              ? AmanahColorTokens.pureWhite
+                              : AmanahColorTokens.neutral900,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -95,6 +169,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
       _selectedSession = null;
       _viewMode = AmanahScheduleViewMode.sessions;
     });
+    _loadData();
   }
 
   String _formatDateSubtitle(DateTime date) {
@@ -193,7 +268,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
             Expanded(
               child: AmanahPullToRefresh(
                 onRefresh: () async {
-                  await Future<void>.delayed(const Duration(milliseconds: 900));
+                  await _loadData(forceRefresh: true);
                 },
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(
@@ -297,10 +372,13 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                   context,
                   selectedDate: _selectedDate,
                   baseToday: AmanahScheduleStore.baseToday,
-                  onSelectDate: (DateTime d) => setState(() {
-                    _selectedDate = d;
-                    _viewMode = AmanahScheduleViewMode.sessions;
-                  }),
+                  onSelectDate: (DateTime d) {
+                    setState(() {
+                      _selectedDate = d;
+                      _viewMode = AmanahScheduleViewMode.sessions;
+                    });
+                    _loadData();
+                  },
                 );
               },
             ),
@@ -312,7 +390,10 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
         AmanahDateCarouselStrip(
           selectedDate: _selectedDate,
           baseToday: AmanahScheduleStore.baseToday,
-          onSelectDate: (DateTime d) => setState(() => _selectedDate = d),
+          onSelectDate: (DateTime d) {
+            setState(() => _selectedDate = d);
+            _loadData();
+          },
           hasSchedulesForDate: (DateTime d) =>
               _store.getSchedulesForDate(d).isNotEmpty,
           isCutiForDate: (DateTime d) => _store.getDaySettingForDate(d).isCuti,
@@ -514,8 +595,14 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                     onSavedDate: _handleSavedDate,
                   );
                 },
-                onTapDelete: () {
-                  _store.deleteSchedule(_selectedDate, sch.id);
+                onTapDelete: () async {
+                  try {
+                    await _store.removeSchedule(_selectedDate, sch.id);
+                  } on AmanahScheduleConflictException catch (e) {
+                    if (context.mounted) {
+                      _showConflictDialog(context, e.message);
+                    }
+                  }
                 },
               );
             },
@@ -567,7 +654,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                       '${sch?.title} • ${sch?.poli}',
                       style: TextStyle(
                         color: dark
-                            ? AmanahColorTokens.surfaceLight
+                            ? AmanahColorTokens.pureWhite
                             : AmanahColorTokens.neutral900,
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
@@ -595,7 +682,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                 decoration: BoxDecoration(
                   color:
                       (dark
-                              ? AmanahColorTokens.brandAccent
+                              ? AmanahColorTokens.cyanAccent
                               : AmanahColorTokens.brand)
                           .withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
@@ -604,7 +691,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                   '${patients.length} Pasien',
                   style: TextStyle(
                     color: dark
-                        ? AmanahColorTokens.brandAccent
+                        ? AmanahColorTokens.cyanAccent
                         : AmanahColorTokens.brand,
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
@@ -672,8 +759,14 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
           onSavedDate: _handleSavedDate,
         );
       },
-      onTapDelete: () {
-        _store.deleteSchedule(_selectedDate, schedule.id);
+      onTapDelete: () async {
+        try {
+          await _store.removeSchedule(_selectedDate, schedule.id);
+        } on AmanahScheduleConflictException catch (e) {
+          if (context.mounted) {
+            _showConflictDialog(context, e.message);
+          }
+        }
       },
     );
   }

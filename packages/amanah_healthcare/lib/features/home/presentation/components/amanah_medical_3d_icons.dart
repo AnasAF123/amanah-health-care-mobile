@@ -68,7 +68,7 @@ class _Medical3DIconPainter extends CustomPainter {
         colors: isDark
             ? const <Color>[
                 AmanahColorTokens.sky,
-                AmanahColorTokens.brandNavy,
+                AmanahColorTokens.skyDarkest,
               ]
             : const <Color>[
                 AmanahColorTokens.brand,

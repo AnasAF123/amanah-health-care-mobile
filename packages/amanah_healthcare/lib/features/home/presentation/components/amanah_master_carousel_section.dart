@@ -871,7 +871,8 @@ class AmanahCarouselNotchedIndicator extends StatelessWidget {
                     ? <BoxShadow>[
                         BoxShadow(
                           color: (isDark
-                                  ? AmanahColorTokens.brandSoft.withValues(alpha: 0.40)
+                                  ? AmanahColorTokens.cyanAccent
+                                        .withValues(alpha: 0.40)
                                   : AmanahCarouselTokens
                                         .indicatorActiveColor
                                         .withValues(alpha: 0.35)),

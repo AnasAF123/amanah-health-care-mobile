@@ -666,7 +666,7 @@ class _SuccessPalette {
     final Color surface =
         dark ? theme.colorScheme.surface : AmanahColorTokens.surfaceLight;
     final Color primary = dark
-        ? AmanahColorTokens.brandSoft
+        ? AmanahColorTokens.cyanAccent
         : AmanahColorTokens.brand;
     final Color primarySoft = dark
         ? primary.withValues(alpha: 0.16)
@@ -692,7 +692,7 @@ class _SuccessPalette {
           : theme.colorScheme.outlineVariant,
       primary: primary,
       primaryText: dark
-          ? AmanahColorTokens.brandSubtle
+          ? AmanahColorTokens.cyanAccent
           : AmanahColorTokens.brand,
       primarySoft: primarySoft,
       onPrimary: AmanahColorTokens.surfaceLight,

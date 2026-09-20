@@ -64,36 +64,14 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   }
 
   void _handleVerifyEmail() {
-    setState(() {
-      _isEmailVerified = true;
-    });
+    setState(() => _isEmailVerified = true);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Tautan verifikasi telah dikirim ke $_email. Email berhasil diverifikasi.',
+          'Tautan verifikasi telah dikirim ke $_email.',
         ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: AmanahColorTokens.sky,
-      ),
-    );
-  }
-
-  void _handleToggleVerification() {
-    setState(() {
-      _isEmailVerified = !_isEmailVerified;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          _isEmailVerified
-              ? 'Status email diubah ke: Terverifikasi (Mode Dummy)'
-              : 'Status email diubah ke: Belum Terverifikasi (Mode Dummy)',
-        ),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: _isEmailVerified
-            ? AmanahColorTokens.sky
-            : AmanahColorTokens.warningDark,
       ),
     );
   }
@@ -227,6 +205,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
         Navigator.of(context).push<void>(
           MaterialPageRoute<void>(
             builder: (BuildContext ctx) => AmanahPrivacySecuritySettingsScreen(
+              user: widget.user,
               onBack: () => Navigator.of(ctx).pop(),
             ),
           ),
@@ -325,7 +304,6 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                           dark: dark,
                           onActionTap: _openEditProfileDrawer,
                           onVerifyTap: _handleVerifyEmail,
-                          onToggleVerification: _handleToggleVerification,
                         ),
                       ),
                     ),
@@ -442,9 +420,9 @@ class _MedicalHeroIllustrationPainter extends CustomPainter {
         end: Alignment.bottomCenter,
         colors: dark
             ? const <Color>[
-                AmanahColorTokens.brandNavyDark,
-                AmanahColorTokens.brandNavy,
-                AmanahColorTokens.navySurface,
+                AmanahColorTokens.canvasDark,
+                AmanahColorTokens.canvasAltDark,
+                AmanahColorTokens.surfaceDark,
               ]
             : const <Color>[
                 AmanahColorTokens.skySurface,
@@ -523,7 +501,7 @@ class _MedicalHeroIllustrationPainter extends CustomPainter {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: dark
-            ? const <Color>[AmanahColorTokens.brandNavy, AmanahColorTokens.brandNavyDark]
+            ? const <Color>[AmanahColorTokens.surfaceSecondaryDark, AmanahColorTokens.canvasDark]
             : <Color>[
                 AmanahColorTokens.sky.withValues(alpha: 0.30),
                 AmanahColorTokens.skyDark.withValues(alpha: 0.38),
@@ -651,7 +629,7 @@ class _TelehealthArtwork extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: dark
-                          ? const <Color>[AmanahColorTokens.skyDark, AmanahColorTokens.brandNavy]
+                          ? const <Color>[AmanahColorTokens.skyDark, AmanahColorTokens.surfaceDark]
                           : const <Color>[AmanahColorTokens.skySoft, AmanahColorTokens.sky],
                     ),
                     borderRadius: BorderRadius.circular(16),
@@ -955,7 +933,7 @@ class _DualStackProfileCard extends StatelessWidget {
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: dark
-                                  ? AmanahColorTokens.brand
+                                  ? AmanahColorTokens.cyanAccent
                                   : AmanahColorTokens.skySubtle,
                               width: 2.2,
                             ),
@@ -984,7 +962,7 @@ class _DualStackProfileCard extends StatelessWidget {
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: -0.4,
                                 color: dark
-                                    ? AmanahColorTokens.surfaceLight
+                                    ? AmanahColorTokens.pureWhite
                                     : AmanahColorTokens.brandNavy,
                               ),
                             ),
@@ -1010,7 +988,7 @@ class _DualStackProfileCard extends StatelessWidget {
                         tooltip: 'Edit Profil',
                         style: IconButton.styleFrom(
                           backgroundColor: dark
-                              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.06)
+                              ? AmanahColorTokens.pureWhite.withValues(alpha: 0.06)
                               : AmanahColorTokens.skyLight.withValues(alpha: 0.60),
                           foregroundColor: dark
                               ? AmanahColorTokens.cyanLight
@@ -1055,7 +1033,7 @@ class _DualStackProfileCard extends StatelessWidget {
                                     fontSize: 13,
                                     fontWeight: FontWeight.w800,
                                     color: dark
-                                        ? AmanahColorTokens.surfaceLight
+                                        ? AmanahColorTokens.pureWhite
                                         : AmanahColorTokens.brandNavy,
                                   ),
                                 ),
@@ -1091,8 +1069,8 @@ class _DualStackProfileCard extends StatelessWidget {
                                 Icons.arrow_forward_rounded,
                                 size: 14,
                                 color: dark
-                                    ? AmanahColorTokens.brandNavy
-                                    : AmanahColorTokens.cyanLight,
+                                    ? AmanahColorTokens.darkNavy
+                                    : AmanahColorTokens.pureWhite,
                               ),
                             ),
                           ],
@@ -1154,7 +1132,6 @@ class _WingedMailBanner extends StatelessWidget {
     required this.dark,
     required this.onActionTap,
     this.onVerifyTap,
-    this.onToggleVerification,
   });
 
   final String email;
@@ -1162,7 +1139,6 @@ class _WingedMailBanner extends StatelessWidget {
   final bool dark;
   final VoidCallback onActionTap;
   final VoidCallback? onVerifyTap;
-  final VoidCallback? onToggleVerification;
 
   @override
   Widget build(BuildContext context) {
@@ -1180,35 +1156,33 @@ class _WingedMailBanner extends StatelessWidget {
 
     final String buttonLabel = isVerified ? 'Perbarui' : 'Verifikasi email';
 
-    return GestureDetector(
-      onLongPress: onToggleVerification,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+    final List<Color> bannerGradientColors;
+    final Color bannerBorderColor;
+    if (dark) {
+      bannerGradientColors = isVerified
+          ? const <Color>[AmanahColorTokens.surfaceSecondaryDark, AmanahColorTokens.surfaceDark]
+          : const <Color>[AmanahColorTokens.amberBgDark, AmanahColorTokens.amberBgDarker];
+      bannerBorderColor = isVerified
+          ? AmanahThemeTokens.outline(context)
+          : AmanahColorTokens.amberBorderDark;
+    } else {
+      bannerGradientColors = isVerified
+          ? const <Color>[AmanahColorTokens.skySurface, AmanahColorTokens.skyLight]
+          : const <Color>[AmanahColorTokens.amberSurfaceLight, AmanahColorTokens.amberSurfaceSoft];
+      bannerBorderColor = isVerified
+          ? AmanahColorTokens.skySubtle
+          : AmanahColorTokens.amberBorderLight;
+    }
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
-          gradient: dark
-              ? (isVerified
-                    ? const LinearGradient(
-                        colors: <Color>[AmanahColorTokens.navySurface, AmanahColorTokens.surfaceDark],
-                      )
-                    : const LinearGradient(
-                        colors: <Color>[AmanahColorTokens.amberBgDark, AmanahColorTokens.amberBgDarker],
-                      ))
-              : (isVerified
-                    ? const LinearGradient(
-                        colors: <Color>[AmanahColorTokens.skySurface, AmanahColorTokens.skyLight],
-                      )
-                    : const LinearGradient(
-                        colors: <Color>[AmanahColorTokens.amberSurfaceLight, AmanahColorTokens.amberSurfaceSoft],
-                      )),
+          gradient: LinearGradient(
+            colors: bannerGradientColors,
+          ),
           border: Border.all(
-            color: dark
-                ? (isVerified
-                      ? AmanahThemeTokens.outline(context)
-                      : AmanahColorTokens.amberBorderDark)
-                : (isVerified
-                      ? AmanahColorTokens.skySubtle
-                      : AmanahColorTokens.amberBorderLight),
+            color: bannerBorderColor,
             width: 1,
           ),
           boxShadow: <BoxShadow>[
@@ -1300,8 +1274,7 @@ class _WingedMailBanner extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -1625,7 +1598,7 @@ class _PreferenceRowItem extends StatelessWidget {
                           fontSize: 13.5,
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.2,
-                          color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
+                          color: dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral900,
                         ),
                       ),
                     ),

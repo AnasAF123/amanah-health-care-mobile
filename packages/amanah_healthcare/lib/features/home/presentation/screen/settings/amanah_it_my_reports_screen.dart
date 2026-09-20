@@ -202,12 +202,12 @@ class _ReportCard extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: dark
-                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
                   : AmanahColorTokens.neutral50,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: dark
-                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
                     : AmanahColorTokens.neutral100,
               ),
             ),

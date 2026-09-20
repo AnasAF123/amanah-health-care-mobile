@@ -517,11 +517,11 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
         ? AmanahThemeTokens.canvas(context)
         : AmanahColorTokens.surfaceLight;
     final Color textColor =
-        dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
+        dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral900;
     final Color subtextColor =
         dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
     final Color drawerBorder = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
         : AmanahColorTokens.canvasLight;
 
     return Scaffold(
@@ -728,7 +728,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                         height: 4.5,
                                         decoration: BoxDecoration(
                                           color: dark
-                                              ? AmanahColorTokens.surfaceLight
+                                              ? AmanahColorTokens.pureWhite
                                                     .withValues(alpha: 0.25)
                                               : AmanahColorTokens.neutral300,
                                           borderRadius: BorderRadius.circular(
@@ -959,7 +959,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                                   VisualDensity.compact,
                                               style: IconButton.styleFrom(
                                                 backgroundColor: dark
-                                                    ? AmanahColorTokens.surfaceLight.withValues(
+                                                    ? AmanahColorTokens.pureWhite.withValues(
                                                         alpha: 0.10,
                                                       )
                                                     : AmanahColorTokens.canvasLight,
@@ -1004,7 +1004,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                                   VisualDensity.compact,
                                               style: IconButton.styleFrom(
                                                 backgroundColor: dark
-                                                    ? AmanahColorTokens.surfaceLight.withValues(
+                                                    ? AmanahColorTokens.pureWhite.withValues(
                                                         alpha: 0.10,
                                                       )
                                                     : AmanahColorTokens.canvasLight,
@@ -1103,7 +1103,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                         ),
                                         decoration: BoxDecoration(
                                           color: dark
-                                              ? AmanahColorTokens.surfaceLight.withValues(
+                                              ? AmanahColorTokens.pureWhite.withValues(
                                                   alpha: 0.04,
                                                 )
                                               : AmanahColorTokens.canvasLight,
@@ -1112,7 +1112,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                                           ),
                                           border: Border.all(
                                             color: dark
-                                                ? AmanahColorTokens.surfaceLight.withValues(
+                                                ? AmanahColorTokens.pureWhite.withValues(
                                                     alpha: 0.20,
                                                   )
                                                 : AmanahColorTokens.neutral300,
@@ -1355,15 +1355,15 @@ class _FloatingCircularButton extends StatelessWidget {
               : AmanahColorTokens.surfaceLight.withValues(alpha: 0.85));
 
     final Color iconColor = isActive
-        ? AmanahColorTokens.surfaceLight
-        : (dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral800);
+        ? AmanahColorTokens.pureWhite
+        : (dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral800);
 
     final Color borderColor = isActive
         ? (dark
               ? AmanahColorTokens.btnCrispBlueDarkBorder
               : AmanahColorTokens.btnCrispBlueBorder)
         : (dark
-              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.20)
+              ? AmanahColorTokens.pureWhite.withValues(alpha: 0.20)
               : AmanahColorTokens.surfaceLight.withValues(alpha: 0.80));
 
     final List<BoxShadow> shadows = <BoxShadow>[
@@ -1426,10 +1426,10 @@ class _ActionMenuCard extends StatelessWidget {
     final Color cardBg = dark ? AmanahColorTokens.surfaceSecondaryDark : AmanahColorTokens.surfaceLight;
 
     final Color borderColor = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.12)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.12)
         : AmanahColorTokens.neutral200;
 
-    final Color textColor = dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
+    final Color textColor = dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral900;
 
     final Gradient? bgGradient = isActive
         ? (dark
@@ -1450,7 +1450,7 @@ class _ActionMenuCard extends StatelessWidget {
             else
               AmanahColorTokens.btnCrispBlueShadow,
             BoxShadow(
-              color: (dark ? AmanahColorTokens.brandAccent : AmanahColorTokens.brand)
+              color: (dark ? AmanahColorTokens.cyanAccent : AmanahColorTokens.brand)
                   .withValues(alpha: 0.30),
               blurRadius: 14,
               offset: const Offset(0, 4),
@@ -1484,9 +1484,9 @@ class _ActionMenuCard extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: isActive
-                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.22)
+                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.22)
                     : (dark
-                          ? AmanahColorTokens.brandAccent.withValues(alpha: 0.20)
+                          ? AmanahColorTokens.cyanAccent.withValues(alpha: 0.20)
                           : AmanahColorTokens.brandAccent.withValues(alpha: 0.14)),
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -1494,9 +1494,9 @@ class _ActionMenuCard extends StatelessWidget {
                 icon,
                 size: 22,
                 color: isActive
-                    ? AmanahColorTokens.surfaceLight
+                    ? AmanahColorTokens.pureWhite
                     : (dark
-                          ? AmanahColorTokens.brandSoft
+                          ? AmanahColorTokens.cyanAccent
                           : AmanahColorTokens.brandAccent),
               ),
             ),
@@ -1509,7 +1509,7 @@ class _ActionMenuCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11.5,
                 fontWeight: isActive ? FontWeight.w800 : FontWeight.w700,
-                color: isActive ? AmanahColorTokens.surfaceLight : textColor,
+                color: isActive ? AmanahColorTokens.pureWhite : textColor,
               ),
             ),
           ],

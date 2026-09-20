@@ -75,7 +75,7 @@ class _AmanahPresenceFilterDrawerState
     final bool dark = theme.brightness == Brightness.dark;
 
     final Color textColor =
-        dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
+        dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral900;
     final Color subtextColor =
         dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
     final Color selectedAccent = dark
@@ -142,7 +142,7 @@ class _AmanahPresenceFilterDrawerState
                         color: isSelected
                             ? selectedAccent
                             : (dark
-                                  ? AmanahColorTokens.surfaceLight
+                                  ? AmanahColorTokens.pureWhite
                                         .withValues(alpha: 0.05)
                                   : AmanahColorTokens.canvasLight),
                         borderRadius: BorderRadius.circular(12),
@@ -150,7 +150,7 @@ class _AmanahPresenceFilterDrawerState
                           color: isSelected
                               ? selectedAccent
                               : (dark
-                                    ? AmanahColorTokens.surfaceLight
+                                    ? AmanahColorTokens.pureWhite
                                           .withValues(alpha: 0.10)
                                     : AmanahColorTokens.neutral200),
                         ),
@@ -205,7 +205,7 @@ class _AmanahPresenceFilterDrawerState
                         color: isSelected
                             ? selectedAccent
                             : (dark
-                                  ? AmanahColorTokens.surfaceLight
+                                  ? AmanahColorTokens.pureWhite
                                         .withValues(alpha: 0.05)
                                   : AmanahColorTokens.canvasLight),
                         borderRadius: BorderRadius.circular(12),
@@ -213,7 +213,7 @@ class _AmanahPresenceFilterDrawerState
                           color: isSelected
                               ? selectedAccent
                               : (dark
-                                    ? AmanahColorTokens.surfaceLight
+                                    ? AmanahColorTokens.pureWhite
                                           .withValues(alpha: 0.10)
                                     : AmanahColorTokens.neutral200),
                         ),
@@ -284,12 +284,12 @@ class _AmanahPresenceFilterDrawerState
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: dark
-                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
                   : AmanahColorTokens.canvasLight,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: dark
-                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
                     : AmanahColorTokens.neutral200,
               ),
             ),
@@ -472,7 +472,7 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
     final bool dark = theme.brightness == Brightness.dark;
 
     final Color textColor =
-        dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
+        dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral900;
     final Color subtextColor =
         dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
 
@@ -651,7 +651,7 @@ class _InfoStatusRow extends StatelessWidget {
             : Border(
                 bottom: BorderSide(
                   color: dark
-                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                      ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
                       : AmanahColorTokens.neutral100,
                 ),
               ),
@@ -677,7 +677,7 @@ class _InfoStatusRow extends StatelessWidget {
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: dark
-                      ? AmanahColorTokens.surfaceLight
+                      ? AmanahColorTokens.pureWhite
                       : AmanahColorTokens.neutral900,
                 ),
               ),

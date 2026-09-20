@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_edit_profile_drawer.dart';
@@ -178,8 +178,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AmanahPrivacySecuritySettingsScreen), findsOneWidget);
-      expect(find.text('Kredensial dan sandi'), findsOneWidget);
-      expect(find.text('Keamanan perangkat'), findsOneWidget);
+      expect(find.text('Kredensial dan Sandi'), findsOneWidget);
+      expect(find.text('Keamanan Perangkat'), findsOneWidget);
       expect(find.text('PIN presensi dokter'), findsNothing);
       expect(find.text('Kunci otomatis aplikasi'), findsNothing);
       expect(find.text('Samarkan nama pasien di notifikasi'), findsNothing);

@@ -422,9 +422,11 @@ class AmanahToggleSwitch extends StatelessWidget {
         padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
           color: active
-              ? AmanahColorTokens.brand
+              ? (isDark
+                    ? AmanahColorTokens.cyanAccent
+                    : AmanahColorTokens.brand)
               : (isDark
-                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.20)
+                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.20)
                     : AmanahColorTokens.neutral200),
           borderRadius: BorderRadius.circular(999),
         ),
@@ -493,8 +495,8 @@ class AmanahSettingActionRow extends StatelessWidget {
       btnBorder = tone.border;
       btnText = tone.onSurface;
     } else if (dark) {
-      btnBg = AmanahColorTokens.surfaceLight.withValues(alpha: 0.05);
-      btnBorder = AmanahColorTokens.surfaceLight.withValues(alpha: 0.10);
+      btnBg = AmanahColorTokens.pureWhite.withValues(alpha: 0.05);
+      btnBorder = AmanahColorTokens.pureWhite.withValues(alpha: 0.10);
       btnText = AmanahColorTokens.neutral200;
     } else {
       btnBg = AmanahColorTokens.neutral50;
@@ -633,16 +635,16 @@ class _AmanahSettingEditDialogState extends State<AmanahSettingEditDialog> {
         ? AmanahColorTokens.surfaceElevatedDark
         : AmanahColorTokens.surfaceLight;
     final Color textColor = dark
-        ? AmanahColorTokens.surfaceLight
+        ? AmanahColorTokens.pureWhite
         : AmanahColorTokens.neutral900;
     final Color subtextColor = dark
         ? AmanahColorTokens.neutral400
         : AmanahColorTokens.neutral500;
     final Color inputBg = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
         : AmanahColorTokens.neutral50;
     final Color inputBorder = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
         : AmanahColorTokens.neutral200;
 
     return Dialog(
@@ -704,8 +706,10 @@ class _AmanahSettingEditDialogState extends State<AmanahSettingEditDialog> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: AmanahColorTokens.brand,
+                  borderSide: BorderSide(
+                    color: dark
+                        ? AmanahColorTokens.cyanAccent
+                        : AmanahColorTokens.brand,
                     width: 1.5,
                   ),
                 ),

@@ -45,3 +45,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 !/coverage/
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+client_secret*.json

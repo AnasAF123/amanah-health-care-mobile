@@ -57,63 +57,119 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
     final Size screenSize = MediaQuery.sizeOf(context);
     final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final double bottomInset = MediaQuery.viewPaddingOf(context).bottom;
-    final double maxHeight = screenSize.height * maxHeightFactor;
-    final double? fixedHeight = fixedHeightFactor == null
-        ? null
-        : screenSize.height * fixedHeightFactor!.clamp(0.0, 1.0);
     final Color sheetBackgroundColor = dark
         ? AmanahThemeTokens.canvas(context)
         : AmanahThemeTokens.elevatedSurface(context);
 
-    final Widget sheet = Container(
-      height: fixedHeight ?? maxHeight,
-      constraints: BoxConstraints(
-        maxHeight: maxHeight,
-        minHeight: minHeight ?? 0,
-      ),
-      decoration: BoxDecoration(
-        color: sheetBackgroundColor,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AmanahRadius.sheet),
-        ),
-        border: Border(
-          top: BorderSide(color: AmanahThemeTokens.outline(context)),
-        ),
-        boxShadow: <BoxShadow>[AmanahElevation.sheet(dark: dark)],
-      ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AmanahRadius.sheet),
-        ),
-        child: Column(
-          children: <Widget>[
-            const _AmanahSheetHandle(),
-            _AmanahSheetHeader(
-              title: title,
-              subtitle: subtitle,
-              trailing: trailing,
-              padding: headerPadding,
-              showDivider: showHeaderDivider,
-            ),
-            Expanded(
-              child: extendBodyBehindHeader
-                  ? body
-                  : SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: bodyPadding,
-                      child: body,
-                    ),
-            ),
-            if (footer != null)
-              _AmanahSheetFooter(bottomInset: bottomInset, child: footer!),
-          ],
-        ),
-      ),
-    );
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final bool isKeyboardOpen = keyboardInset > 0;
+        // Determine whether an ancestor (e.g. Flutter's route or outer padding)
+        // has already accounted for keyboardInset.
+        final bool alreadyPadded = isKeyboardOpen &&
+            (constraints.maxHeight < screenSize.height - (keyboardInset * 0.75));
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: keyboardInset),
-      child: Align(alignment: Alignment.bottomCenter, child: sheet),
+        final double effectiveKeyboardInset =
+            alreadyPadded ? 0.0 : keyboardInset;
+        final double usableHeight = (constraints.maxHeight - effectiveKeyboardInset)
+            .clamp(0.0, constraints.maxHeight);
+
+        final double calculatedMaxHeight = usableHeight * maxHeightFactor;
+        final double? calculatedFixedHeight = fixedHeightFactor == null
+            ? null
+            : usableHeight * fixedHeightFactor!.clamp(0.0, 1.0);
+
+        final double effectiveMinHeight =
+            (minHeight ?? 0.0).clamp(0.0, usableHeight);
+        final double targetHeight = (calculatedFixedHeight ?? calculatedMaxHeight)
+            .clamp(effectiveMinHeight, usableHeight);
+
+        // When vertical space is severely restricted (e.g. landscape with keyboard),
+        // embed footer inside the scrollable view so Column never overflows.
+        final bool isTight = usableHeight < 260;
+
+        final Widget sheetContent = ClipRRect(
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AmanahRadius.sheet),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              const _AmanahSheetHandle(),
+              _AmanahSheetHeader(
+                title: title,
+                subtitle: subtitle,
+                trailing: trailing,
+                padding: headerPadding,
+                showDivider: showHeaderDivider,
+              ),
+              if (isTight)
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: bodyPadding,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        body,
+                        if (footer != null) ...<Widget>[
+                          const SizedBox(height: AmanahSpacing.md),
+                          footer!,
+                        ],
+                      ],
+                    ),
+                  ),
+                )
+              else ...<Widget>[
+                Expanded(
+                  child: extendBodyBehindHeader
+                      ? body
+                      : SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          padding: bodyPadding,
+                          child: body,
+                        ),
+                ),
+                if (footer != null)
+                  _AmanahSheetFooter(
+                    bottomInset: isKeyboardOpen ? 0 : bottomInset,
+                    isKeyboardOpen: isKeyboardOpen,
+                    child: footer!,
+                  ),
+              ],
+            ],
+          ),
+        );
+
+        final Widget sheet = Container(
+          height: targetHeight,
+          constraints: BoxConstraints(
+            maxHeight: usableHeight,
+            minHeight: effectiveMinHeight,
+          ),
+          decoration: BoxDecoration(
+            color: sheetBackgroundColor,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AmanahRadius.sheet),
+            ),
+            border: Border(
+              top: BorderSide(color: AmanahThemeTokens.outline(context)),
+            ),
+            boxShadow: <BoxShadow>[AmanahElevation.sheet(dark: dark)],
+          ),
+          child: sheetContent,
+        );
+
+        if (effectiveKeyboardInset > 0) {
+          return Padding(
+            padding: EdgeInsets.only(bottom: effectiveKeyboardInset),
+            child: Align(alignment: Alignment.bottomCenter, child: sheet),
+          );
+        }
+
+        return Align(alignment: Alignment.bottomCenter, child: sheet);
+      },
     );
   }
 }
@@ -131,7 +187,7 @@ class _AmanahSheetHandle extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: dark
-                ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.25)
+                ? AmanahColorTokens.pureWhite.withValues(alpha: 0.25)
                 : AmanahColorTokens.neutral300,
             borderRadius: BorderRadius.circular(AmanahRadius.pill),
           ),
@@ -220,10 +276,15 @@ class _AmanahSheetHeader extends StatelessWidget {
 }
 
 class _AmanahSheetFooter extends StatelessWidget {
-  const _AmanahSheetFooter({required this.child, required this.bottomInset});
+  const _AmanahSheetFooter({
+    required this.child,
+    required this.bottomInset,
+    this.isKeyboardOpen = false,
+  });
 
   final Widget child;
   final double bottomInset;
+  final bool isKeyboardOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -231,6 +292,10 @@ class _AmanahSheetFooter extends StatelessWidget {
     final Color footerBackgroundColor = dark
         ? AmanahThemeTokens.canvas(context)
         : AmanahThemeTokens.elevatedSurface(context).withValues(alpha: 0.96);
+
+    final double bottomPadding = isKeyboardOpen
+        ? 10.0
+        : (bottomInset > 0 ? bottomInset + 12 : 24.0);
 
     return ClipRect(
       child: BackdropFilter(
@@ -243,12 +308,7 @@ class _AmanahSheetFooter extends StatelessWidget {
             ),
           ),
           child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              24,
-              12,
-              24,
-              bottomInset > 0 ? bottomInset + 12 : 24,
-            ),
+            padding: EdgeInsets.fromLTRB(24, 10, 24, bottomPadding),
             child: child,
           ),
         ),

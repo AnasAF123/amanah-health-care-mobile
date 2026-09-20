@@ -168,7 +168,7 @@ Future<ui.Image> generateCardCoverSnapshot({
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1.5
     ..color = isDark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.14)
+        ? AmanahColorTokens.pureWhite.withValues(alpha: 0.14)
         : AmanahColorTokens.surfaceLight;
   canvas.drawRRect(rrect, borderPaint);
 
@@ -244,7 +244,7 @@ Future<ui.Image> generateCardCoverSnapshot({
       text: card.queueNumber,
       style: TextStyle(
         color: isDark
-            ? AmanahColorTokens.brandSoft
+            ? AmanahColorTokens.cyanAccent
             : AmanahColorTokens.brandPrimary,
         fontSize: 40,
         fontWeight: FontWeight.w900,
@@ -263,7 +263,7 @@ Future<ui.Image> generateCardCoverSnapshot({
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
       colors: <Color>[
-        AmanahColorTokens.surfaceLight.withValues(alpha: isDark ? 0.05 : 0.10),
+        AmanahColorTokens.pureWhite.withValues(alpha: isDark ? 0.05 : 0.10),
         Colors.transparent,
       ],
       stops: const <double>[0.0, 0.45],

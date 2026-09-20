@@ -1,4 +1,6 @@
+// ignore_for_file: constant_identifier_names, non_constant_identifier_names
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 const String APP_NAME = 'Amanah Healthcare';
 
@@ -42,27 +44,27 @@ const BorderRadius CIRCULAR_BORDER_RADIUS = BorderRadius.all(CIRCULAR_RADIUS);
 const BorderRadius MAX_BORDER_RADIUS = BorderRadius.all(Radius.circular(100.0));
 
 /// Widget Colors
-const MaterialColor WARNING_COLOR = Colors.deepOrange;
-const Color PRIMARY_BLUE_COLOR = Color(0xFF2D9CDB);
-const Color PRIMARY_GREY_COLOR = Color(0xFF4F4F4F);
-const Color FAIR_GREY_COLOR = Color(0xFF888888);
-const Color GREY_COLOR = Color(0xFFF2F2F2);
-const Color WHITE_COLOR = Color(0xFFFFFFFF);
-const Color DARK_GREEN_COLOR = Color(0xFF219653);
-const Color LIGHT_GREEN_COLOR = Color(0xFF60AC0E);
-const Color LIGHT_YELLOW_COLOR = Color(0xFFF2C94C);
-const Color LIGHT_GREY_COLOR = Color(0xFFBFBFBF);
-const Color DARK_YELLOW_COLOR = Color(0xFFC88F01);
-const Color LIGHT_ORANGE_COLOR = Color(0xFFF2994A);
-const Color DARK_ORANGE_COLOR = Color(0xFFE07312);
-const Color RED_COLOR = Color(0xFFEB5757);
-const Color LIGHT_RED_COLOR = Color(0xFFFFCBCB);
-const Color DARK_RED_COLOR = Color(0xFFFF0000);
-const Color DARK_BROWN_COLOR = Color(0xFF341100);
+const Color WARNING_COLOR = AmanahColorTokens.warning;
+const Color PRIMARY_BLUE_COLOR = AmanahColorTokens.brand;
+const Color PRIMARY_GREY_COLOR = AmanahColorTokens.neutral700;
+const Color FAIR_GREY_COLOR = AmanahColorTokens.neutral500;
+const Color GREY_COLOR = AmanahColorTokens.neutral100;
+const Color WHITE_COLOR = AmanahColorTokens.pureWhite;
+const Color DARK_GREEN_COLOR = AmanahColorTokens.successDark;
+const Color LIGHT_GREEN_COLOR = AmanahColorTokens.success;
+const Color LIGHT_YELLOW_COLOR = AmanahColorTokens.amberLight;
+const Color LIGHT_GREY_COLOR = AmanahColorTokens.neutral300;
+const Color DARK_YELLOW_COLOR = AmanahColorTokens.amberDark;
+const Color LIGHT_ORANGE_COLOR = AmanahColorTokens.warning;
+const Color DARK_ORANGE_COLOR = AmanahColorTokens.warningDark;
+const Color RED_COLOR = AmanahColorTokens.danger;
+const Color LIGHT_RED_COLOR = AmanahColorTokens.dangerBorder;
+const Color DARK_RED_COLOR = AmanahColorTokens.dangerDark;
+const Color DARK_BROWN_COLOR = AmanahColorTokens.neutral950;
 
 /// Widget Background Colors
-const Color RED_BACKGROUND_COLOR = Color.fromRGBO(255, 204, 204, 1);
-const Color ORANGE_BACKGROUND_COLOR = Color.fromRGBO(255, 230, 204, 1);
-const Color YELLOW_BACKGROUND_COLOR = Color.fromRGBO(255, 255, 204, 1);
-const Color LIGHT_GREEN_BACKGROUND_COLOR = Color.fromRGBO(230, 255, 204, 1);
-const Color DARK_GREEN_BACKGROUND_COLOR = Color.fromRGBO(204, 255, 204, 1);
+const Color RED_BACKGROUND_COLOR = AmanahColorTokens.dangerSurface;
+const Color ORANGE_BACKGROUND_COLOR = AmanahColorTokens.amberSurfaceLight;
+const Color YELLOW_BACKGROUND_COLOR = AmanahColorTokens.warningSurface;
+const Color LIGHT_GREEN_BACKGROUND_COLOR = AmanahColorTokens.successSurface;
+const Color DARK_GREEN_BACKGROUND_COLOR = AmanahColorTokens.successBorder;

@@ -719,7 +719,7 @@ class AmanahScheduleCard extends StatelessWidget {
                                           ),
                                           decoration: BoxDecoration(
                                             color: dark
-                                                ? Colors.white.withValues(
+                                                ? AmanahColorTokens.pureWhite.withValues(
                                                     alpha: 0.25,
                                                   )
                                                 : AmanahColorTokens.neutral300,
