@@ -377,7 +377,55 @@ void main() {
       expect(polis.length, 1);
       expect(polis.first.name, 'Poli Gigi & Mulut');
     });
+
+    test('fetchReferenceOptions successfully decodes shifts, statuses, and intervals', () async {
+      final MockClient client = MockClient((http.Request request) async {
+        expect(request.url.path, '/api/v1/schedules/reference/options');
+        return http.Response(
+          jsonEncode(<String, dynamic>{
+            'shifts': <dynamic>[
+              <String, dynamic>{
+                'id': 'PAGI',
+                'label': 'Pagi',
+                'shift': 'morning',
+                'startTime': '07:00',
+                'endTime': '12:00',
+              },
+              <String, dynamic>{
+                'id': 'SIANG',
+                'label': 'Siang',
+                'shift': 'afternoon',
+                'startTime': '12:00',
+                'endTime': '17:00',
+              },
+            ],
+            'statuses': <dynamic>[
+              <String, dynamic>{'id': 'open', 'label': 'Buka'},
+              <String, dynamic>{'id': 'closed', 'label': 'Tutup'},
+            ],
+            'timeSlotIntervals': <int>[15, 30, 45, 60],
+          }),
+          200,
+          headers: <String, String>{'content-type': 'application/json'},
+        );
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage(),
+      );
+
+      final ClinicScheduleOptionsReference options = await repo.fetchReferenceOptions();
+      expect(options.shifts.length, 2);
+      expect(options.shifts.first.label, 'Pagi');
+      expect(options.shifts.first.startTime, '07:00');
+      expect(options.statuses.length, 2);
+      expect(options.statuses.first.label, 'Buka');
+      expect(options.timeIntervals, <int>[15, 30, 45, 60]);
+    });
   });
+
 
   group('AmanahScheduleStore - Integrated Operations', () {
     test('AmanahScheduleStore.loadSchedulesForDate populates schedules and enriches patients', () async {

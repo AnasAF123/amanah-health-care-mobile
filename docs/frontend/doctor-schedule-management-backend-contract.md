@@ -56,6 +56,7 @@ Sebelumnya, modul **Jadwal Dokter** dirancang pada saat Flutter Mobile masih ber
 | `GET` | `/schedules/:id/booked-patients` | Daftar pasien spesifik per sesi praktek | `STAF`, `ADMIN` |
 | `GET` | `/schedules/reference/rooms` | Pilihan Ruang Praktek & Pengecekan Okupansi Real-time | `ADMIN`, `STAF`, `PATIENT` |
 | `GET` | `/schedules/reference/polikliniks` | Pilihan Unit Poliklinik aktif untuk dropdown form | `ADMIN`, `STAF`, `PATIENT` |
+| `GET` | `/schedules/reference/options` | Master shifts, status sesi, dan durasi interval waktu | `ADMIN`, `STAF`, `PATIENT` |
 
 ---
 
@@ -306,6 +307,44 @@ Untuk mengisi opsi dropdown pada form tambah/edit jadwal secara dinamis:
   ]
   ```
 
+#### C. Referensi Opsi Konfigurasi Sesi (Shifts, Statuses, & Time Intervals):
+`GET /schedules/reference/options`
+- **Response `200 OK`:**
+  ```json
+  {
+    "shifts": [
+      {
+        "id": "PAGI",
+        "label": "Pagi",
+        "shift": "morning",
+        "startTime": "07:00",
+        "endTime": "12:00"
+      },
+      {
+        "id": "SIANG",
+        "label": "Siang",
+        "shift": "afternoon",
+        "startTime": "12:00",
+        "endTime": "17:00"
+      },
+      {
+        "id": "MALAM",
+        "label": "Malam",
+        "shift": "night",
+        "startTime": "17:00",
+        "endTime": "21:00"
+      }
+    ],
+    "statuses": [
+      { "id": "open", "label": "Buka" },
+      { "id": "closed", "label": "Tutup" },
+      { "id": "pending", "label": "Menunggu" }
+    ],
+    "timeSlotIntervals": [15, 30, 45, 60]
+  }
+  ```
+  *Memungkinkan Flutter dan Web mengeliminasi seluruh list hardcoded dan menyelaraskan validasi shift serta durasi sesi secara terpusat.*
+
 ---
 
 ## 5. Panduan Transisi untuk Flutter Mobile Developer (`AmanahScheduleStore`)
@@ -313,9 +352,10 @@ Untuk mengisi opsi dropdown pada form tambah/edit jadwal secara dinamis:
 Di repository Flutter (`packages/amanah_healthcare/lib/features/schedule/data/amanah_schedule_store.dart`), data jadwal saat ini masih tersimpan dalam `Map<String, List<DoctorSchedule>> _schedulesMap` statis di memori.
 
 ### Langkah Rekomendasi Sinkronisasi:
-1. Buat class `AmanahScheduleRepository` yang menginjeksi `http.Client` dan `AmanahAuthTokenStorage`.
-2. Pada `AmanahScheduleStore`:
-   - Ganti inisialisasi mock data dengan pemanggilan API:
+1. **Pemanfaatan Repository yang Sudah Tersedia:**
+   Class `AmanahScheduleRepository` telah siap di `packages/amanah_healthcare/lib/features/schedule/data/amanah_schedule_repository.dart`.
+2. **Pada `AmanahScheduleStore`:**
+   - Sambungkan method-method store ke API:
      - `fetchSchedulesForDate(DateTime date)` ➔ `GET /api/v1/schedules/my-schedules?date=YYYY-MM-DD`
      - `fetchDaySettings(DateTime date)` ➔ `GET /api/v1/schedules/day-settings?date=YYYY-MM-DD`
      - `fetchCalendarSummary(String month)` ➔ `GET /api/v1/schedules/calendar-summary?month=YYYY-MM`
@@ -323,5 +363,82 @@ Di repository Flutter (`packages/amanah_healthcare/lib/features/schedule/data/am
      - `updateSchedule(DoctorSchedule schedule)` ➔ `PATCH /api/v1/schedules/:id`
      - `deleteSchedule(String scheduleId)` ➔ `DELETE /api/v1/schedules/:id`
      - `setDayCuti(DateTime date, bool isCuti)` ➔ `PUT /api/v1/schedules/day-settings`
-3. Tangani Error `409 Conflict`:
-   - Tangkap kode error `SCHEDULE_HAS_ACTIVE_BOOKINGS`, `ROOM_ALREADY_OCCUPIED`, atau `PRACTITIONER_ALREADY_SCHEDULED` untuk menampilkan dialog peringatan informatif bagi dokter.
+3. **Penanganan Multi-Slot Saat Pembuatan Jadwal:**
+   - Pada form `AmanahAddEditScheduleDrawer`, jika dokter menambahkan beberapa slot waktu sekaligus, UI dapat mengirimkan request `POST /api/v1/schedules` untuk setiap entri slot waktu secara terpisah (atau batching), karena di database setiap sesi praktek adalah satu record sesi yang independen.
+4. **Tangani Error `409 Conflict`:**
+   - Tangkap kode error:
+     - `SCHEDULE_HAS_ACTIVE_BOOKINGS`: Tampilkan dialog "Tidak dapat menghapus jadwal karena telah ada pasien terdaftar. Silakan batalkan atau alihkan janji temu pasien terlebih dahulu."
+     - `ROOM_ALREADY_OCCUPIED`: Tampilkan pesan "Ruangan telah digunakan oleh dokter lain pada jam tersebut."
+     - `PRACTITIONER_ALREADY_SCHEDULED`: Tampilkan pesan "Anda sudah memiliki jadwal praktek lain pada rentang waktu ini."
+
+---
+
+## 6. Jawaban Resmi atas 5 Pertanyaan Terbuka Arsitektural (Open Questions Resolution)
+
+Berdasarkan arsitektur backend terkini dan integritas data klinis, berikut adalah ketetapan resmi untuk menjawab 5 pertanyaan pada *Feature Backend Requirement Delegation Report*:
+
+### 6.1. Multi-Slot Session Persistence
+* **Pertanyaan:** Apakah backend menyimpan multiple time slots dalam satu sesi sebagai record terpisah di database, atau sebagai satu record durasi gabungan?
+* **Ketetapan Backend:**
+  Backend Drizzle (`practitioner_schedule_sessions`) mencatat **setiap blok waktu praktek sebagai satu entitas sesi terpisah** (`startTime` s/d `endTime`). 
+  - Alasan: Setiap slot/sesi membutuhkan alokasi ruangan mandiri (`roomId`), kapasitas antrean terisolasi (`capacity`), dan relasi janji temu pasien terpisah (`appointments.scheduleSessionId`).
+  - Implikasi Mobile: Ketika dokter menambahkan beberapa slot waktu pada form "Tambah Jadwal" di drawer mobile, client melakukan dispatch `POST /schedules` untuk masing-masing slot tersebut.
+
+### 6.2. Kebijakan Penghapusan dengan Booking Aktif (Active Booking Deletion Shield)
+* **Pertanyaan:** Apakah backend menyediakan *administrative override* untuk menghapus jadwal yang memiliki pasien terdaftar, ataukah penghapusan diblokir mutlak?
+* **Ketetapan Backend:**
+  Backend **memblokir mutlak** penghapusan langsung terhadap sesi yang memiliki janji temu berstatus aktif (`booked`, `checked_in`, `waiting`, `in_service`) dengan respons `409 Conflict` bersandi `SCHEDULE_HAS_ACTIVE_BOOKINGS`.
+  - Alasan Keamanan Pasien: Pasien tidak boleh kehilangan nomor antrean atau janji temu tanpa jejak audit.
+  - Prosedur Resmi Jika Dokter Berhalangan / Sakit / Cuti Mendadak:
+    1. Dokter / Admin menandai hari tersebut sebagai **Cuti** melalui `PUT /schedules/day-settings` (`isCuti: true, cutiReason: '...'`).
+    2. Admin klinik melalui Web Dashboard melakukan pembatalan resmi (*cancellation*) atau penjadwalan ulang (*reschedule*) janji temu pasien yang terdampak.
+    3. Setelah seluruh status janji temu menjadi `cancelled` atau dipindahkan, sesi baru dapat dihapus jika memang diperlukan.
+
+### 6.3. Sinkronisasi Pasien Terdaftar: Push vs Pull
+* **Pertanyaan:** Apakah pendaftaran pasien baru via Web App / Loket Pendaftaran otomatis mendorong notifikasi push / WebSocket ke perangkat mobile dokter, ataukah mobile mengandalkan pull-to-refresh?
+* **Ketetapan Backend:**
+  - **Fase Saat Ini (Canonical Persistence):** Seluruh data janji temu tersimpan secara sentral di tabel `appointments` PostgreSQL. Mobile mengandalkan **Pull-to-Refresh** (`RefreshIndicator`) dan auto-refetch saat dokter membuka Overview Tab (`initState` / tab switch).
+  - **Fase Berikutnya (Real-time Notification):** Backend telah menyiapkan event emitter arsitektural untuk mengalirkan WebSocket / SSE / FCM Push Notification ketika ada booking pasien baru. Kontrak payload pasien (`BookedPatientEntity`) tetap identik sehingga mobile tidak memerlukan refactor struktur data.
+
+### 6.4. Standar Zona Waktu & Format Waktu
+* **Pertanyaan:** Bagaimana format waktu standar yang disepakati antara frontend dan backend?
+* **Ketetapan Backend:**
+  - Format Waktu: String `HH:mm` (24-jam, contoh: `"07:00"`, `"13:30"`).
+  - Format Tanggal: String `YYYY-MM-DD` (ISO-8601 Date, contoh: `"2026-08-26"`).
+  - Zona Waktu Klinis: **WIB (Waktu Indonesia Barat, UTC+7)** sebagai basis waktu operasional klinik.
+  - Nilai `timeRange` disediakan langsung oleh backend (contoh: `"07:00 - 11:00 WIB"`) untuk mempermudah rendering instan pada badge dan kartu jadwal di mobile & web tanpa formatting berulang.
+
+### 6.5. Asal Target Kuota Harian (Daily Target Quota Origin)
+* **Pertanyaan:** Apakah target kuota harian dihitung otomatis dari penjumlahan kapasitas seluruh sesi, atau ditentukan manual oleh dokter?
+* **Ketetapan Backend:**
+  Target kuota harian (`targetQuota`) dikelola secara independen di tabel `practitioner_schedule_day_settings`:
+  - Nilai *default* saat dokter belum mengatur kuota harian adalah **8 pasien**.
+  - Dokter dapat mengubah target kuota harian melalui `PUT /schedules/day-settings`.
+  - Backend secara otomatis menghitung `sessionCount`, `bookedPatientCount`, dan `capacityPercentage` berdasarkan kalkulasi real-time terhadap seluruh sesi aktif dokter pada tanggal tersebut.
+
+---
+
+## 7. Panduan Sinkronisasi Lintas Platform (Mobile App & Web Dashboard)
+
+Untuk memastikan pengembang Flutter Mobile dan pengembang Web Dashboard (Portal Admin/Pendaftaran) berjalan selaras:
+
+1. **Konsistensi Skema Entitas:**
+   Web dan Mobile mengonsumsi model data yang sama persis:
+   - `ScheduleEntity`: Objek sesi praktek dokter.
+   - `DayScheduleSettingEntity`: Pengaturan cuti dan target kuota harian.
+   - `CalendarSummaryResponse`: Ringkasan bulanan untuk kalender.
+   - `BookedPatientEntity`: Pasien janji temu.
+2. **Web Portal Khusus Admin/Resepsionis:**
+   - Web Dashboard menggunakan endpoint `GET /api/v1/schedules` (dengan query `poliklinikId`, `staffId`, `date`) untuk melihat jadwal seluruh dokter di klinik, sementara Flutter Mobile dokter menggunakan `GET /api/v1/schedules/my-schedules` yang secara otomatis terisolasi ke dokter yang login.
+3. **Respon Error Standar:**
+   Keduanya (Web & Mobile) harus menangani respons error `409 Conflict` dengan kode error yang sama:
+   - `SCHEDULE_HAS_ACTIVE_BOOKINGS`
+   - `ROOM_ALREADY_OCCUPIED`
+   - `PRACTITIONER_ALREADY_SCHEDULED`
+   - `INVALID_TIME_RANGE`
+4. **Master Pilihan Dinamis:**
+   Gunakan endpoint referensi berikut untuk mengisi seluruh form input di Web & Mobile:
+   - `GET /api/v1/schedules/reference/polikliniks`
+   - `GET /api/v1/schedules/reference/rooms`
+   - `GET /api/v1/schedules/reference/options`
+

@@ -573,3 +573,88 @@ class ClinicPoliklinikReference {
   final String name;
   final String? location;
 }
+
+class ClinicShiftReference {
+  const ClinicShiftReference({
+    required this.id,
+    required this.label,
+    required this.shift,
+    required this.startTime,
+    required this.endTime,
+  });
+
+  factory ClinicShiftReference.fromJson(Map<String, dynamic> json) {
+    return ClinicShiftReference(
+      id: json['id'] as String? ?? '',
+      label: json['label'] as String? ?? '',
+      shift: json['shift'] as String? ?? 'morning',
+      startTime: json['startTime'] as String? ?? '08:00',
+      endTime: json['endTime'] as String? ?? '12:00',
+    );
+  }
+
+  final String id;
+  final String label;
+  final String shift;
+  final String startTime;
+  final String endTime;
+}
+
+class ClinicStatusReference {
+  const ClinicStatusReference({
+    required this.id,
+    required this.label,
+  });
+
+  factory ClinicStatusReference.fromJson(Map<String, dynamic> json) {
+    return ClinicStatusReference(
+      id: json['id'] as String? ?? '',
+      label: json['label'] as String? ?? '',
+    );
+  }
+
+  final String id;
+  final String label;
+}
+
+class ClinicScheduleOptionsReference {
+  const ClinicScheduleOptionsReference({
+    required this.shifts,
+    required this.statuses,
+    required this.timeIntervals,
+  });
+
+  factory ClinicScheduleOptionsReference.fromJson(Map<String, dynamic> json) {
+    final List<dynamic>? rawShifts = json['shifts'] as List<dynamic>?;
+    final List<ClinicShiftReference> shifts = rawShifts != null
+        ? rawShifts
+            .whereType<Map<String, dynamic>>()
+            .map(ClinicShiftReference.fromJson)
+            .toList()
+        : const <ClinicShiftReference>[];
+
+    final List<dynamic>? rawStatuses = json['statuses'] as List<dynamic>?;
+    final List<ClinicStatusReference> statuses = rawStatuses != null
+        ? rawStatuses
+            .whereType<Map<String, dynamic>>()
+            .map(ClinicStatusReference.fromJson)
+            .toList()
+        : const <ClinicStatusReference>[];
+
+    final List<dynamic>? rawIntervals = json['timeSlotIntervals'] as List<dynamic>?;
+    final List<int> intervals = rawIntervals != null
+        ? rawIntervals.whereType<num>().map((num n) => n.toInt()).toList()
+        : const <int>[15, 30, 45, 60];
+
+    return ClinicScheduleOptionsReference(
+      shifts: shifts,
+      statuses: statuses,
+      timeIntervals: intervals,
+    );
+  }
+
+  final List<ClinicShiftReference> shifts;
+  final List<ClinicStatusReference> statuses;
+  final List<int> timeIntervals;
+}
+

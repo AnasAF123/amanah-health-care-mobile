@@ -413,6 +413,15 @@ class AmanahScheduleStore extends ChangeNotifier {
     }
   }
 
+  Future<ClinicScheduleOptionsReference?> loadScheduleOptions() async {
+    try {
+      return await _repository.fetchReferenceOptions();
+    } catch (_) {
+      return null;
+    }
+  }
+
+
   void reset() {
     _schedulesMap = <String, List<DoctorSchedule>>{};
     _daySettingsMap = <String, DayScheduleSetting>{};

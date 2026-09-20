@@ -510,4 +510,25 @@ class AmanahScheduleRepository {
     _handleHttpError(response);
     return <ClinicPoliklinikReference>[];
   }
+
+  /// GET /api/v1/schedules/reference/options
+  Future<ClinicScheduleOptionsReference> fetchReferenceOptions() async {
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/reference/options');
+    final http.Response response = await _get(uri);
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final dynamic decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        return ClinicScheduleOptionsReference.fromJson(decoded);
+      }
+    }
+
+    _handleHttpError(response);
+    return const ClinicScheduleOptionsReference(
+      shifts: <ClinicShiftReference>[],
+      statuses: <ClinicStatusReference>[],
+      timeIntervals: <int>[15, 30, 45, 60],
+    );
+  }
 }
+

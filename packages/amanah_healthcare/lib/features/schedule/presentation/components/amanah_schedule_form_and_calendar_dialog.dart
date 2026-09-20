@@ -544,6 +544,7 @@ class _AmanahAddEditScheduleDrawerState
   List<String> _dynamicPoliOptions = kPoliOptions;
   List<String> _dynamicRoomOptions = kRoomOptions;
   List<String> _occupiedRoomOptions = const <String>[];
+  List<String> _dynamicStatusOptions = const <String>['Menunggu', 'Buka', 'Cuti'];
 
   @override
   void initState() {
@@ -581,7 +582,18 @@ class _AmanahAddEditScheduleDrawerState
             .toList();
       });
     }
+
+    final ClinicScheduleOptionsReference? options =
+        await AmanahScheduleStore.instance.loadScheduleOptions();
+    if (options != null && mounted && options.statuses.isNotEmpty) {
+      setState(() {
+        _dynamicStatusOptions = options.statuses
+            .map((ClinicStatusReference s) => s.label)
+            .toList();
+      });
+    }
   }
+
 
   List<_ScheduleFormSession> _buildInitialSessions({
     DoctorSchedule? editingSchedule,
@@ -1076,38 +1088,23 @@ class _AmanahAddEditScheduleDrawerState
                 ),
               ),
               child: Row(
-                children:
-                    <Map<String, dynamic>>[
-                      <String, dynamic>{
-                        'label': 'Menunggu',
-                        'activeBg': AmanahColorTokens.warning,
-                        'activeText': AmanahColorTokens.surfaceLight,
-                        'dotColor': AmanahColorTokens.warningLight,
-                      },
-                      <String, dynamic>{
-                        'label': 'Buka',
-                        'activeBg': AmanahColorTokens.success,
-                        'activeText': AmanahColorTokens.surfaceLight,
-                        'dotColor': AmanahColorTokens.emeraldLight,
-                      },
-                      <String, dynamic>{
-                        'label': 'Cuti',
-                        'activeBg': AmanahColorTokens.danger,
-                        'activeText': AmanahColorTokens.surfaceLight,
-                        'dotColor': AmanahColorTokens.roseLight,
-                      },
-                    ].map((Map<String, dynamic> item) {
-                      final String label = item['label'] as String;
-                      final bool active = _status == label;
-                      final Color activeBg = item['activeBg'] as Color;
-                      final Color activeText = item['activeText'] as Color;
-                      final Color dotColor = item['dotColor'] as Color;
-                      final Color selectedBg = dark
-                          ? AmanahColorTokens.tabActiveDark
-                          : activeBg;
-                      final Color selectedText = dark
-                          ? AmanahColorTokens.canvasDark
-                          : activeText;
+                children: _dynamicStatusOptions.map((String label) {
+                  final bool active = _status == label;
+                  Color activeBg = AmanahColorTokens.warning;
+                  Color dotColor = AmanahColorTokens.warningLight;
+                  if (label == 'Buka' || label == 'open') {
+                    activeBg = AmanahColorTokens.success;
+                    dotColor = AmanahColorTokens.emeraldLight;
+                  } else if (label == 'Cuti' || label == 'closed' || label == 'Tutup') {
+                    activeBg = AmanahColorTokens.danger;
+                    dotColor = AmanahColorTokens.roseLight;
+                  }
+                  final Color selectedBg = dark
+                      ? AmanahColorTokens.tabActiveDark
+                      : activeBg;
+                  final Color selectedText = dark
+                      ? AmanahColorTokens.canvasDark
+                      : AmanahColorTokens.surfaceLight;
 
                       return Expanded(
                         child: InkWell(

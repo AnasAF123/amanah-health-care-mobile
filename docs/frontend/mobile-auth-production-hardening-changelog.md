@@ -280,10 +280,21 @@ Modul Jadwal Dokter (`AmanahScheduleStore`) sebelumnya dibangun saat aplikasi be
    - Percobaan memodifikasi jadwal dokter lain ditolak dengan `403 Forbidden`.
 3. **Pemberantasan Fallback Acak:** Fallback lama di backend yang mengembalikan dokter sembarang di database jika profil dokter tidak ditemukan telah dihapus demi menjaga kerahasiaan medis.
 4. **Proteksi Hapus Jadwal Berpenghuni:** Jadwal dengan pasien terdaftar tidak dapat dihapus (`409 Conflict SCHEDULE_HAS_ACTIVE_BOOKINGS`).
-5. **Endpoint Referensi Poliklinik Baru:** Ditambahkan `GET /api/v1/schedules/reference/polikliniks` mendampingi `GET /api/v1/schedules/reference/rooms` untuk mengisi dropdown form jadwal secara dinamis.
+5. **Endpoint Referensi Baru:** 
+   - Ditambahkan `GET /api/v1/schedules/reference/polikliniks` mendampingi `GET /api/v1/schedules/reference/rooms` untuk mengisi dropdown poliklinik dan ruangan (dengan deteksi okupansi real-time).
+   - Ditambahkan `GET /api/v1/schedules/reference/options` untuk master shift klinik (`PAGI`, `SIANG`, `MALAM`), master status sesi (`Buka`, `Tutup`, `Menunggu`), dan durasi interval waktu.
 
-### 6.2. Dokumen Kontrak Lengkap
-Panduan lengkap mengenai URL, parameter, payload JSON, dan langkah transisi `AmanahScheduleStore` dari mock ke REST API tersedia di:  
+### 6.2. Sinkronisasi Antara Tim Flutter Mobile & Tim Web Dashboard
+1. **Model Data Bersama:** Baik Mobile (Aplikasi Dokter) maupun Web (Portal Resepsionis/Admin) mengonsumsi endpoint yang konsisten:
+   - Mobile Dokter: Mengakses `GET /schedules/my-schedules` (otomatis terisolasi pada dokter yang login).
+   - Web Portal Klinik: Mengakses `GET /schedules` (dapat memfilter per poliklinik atau dokter untuk operasional loket).
+2. **Penanganan Multi-Slot:** Setiap slot waktu praktek di database disimpan sebagai satu sesi independen. Saat dokter menambahkan multiple slot di drawer, mobile/web mendispatch `POST /schedules` per slot waktu.
+3. **Penanganan Cuti & Emergency:** Jika dokter berhalangan, dokter menandai status **Cuti** via `PUT /schedules/day-settings`. Admin klinik di web menangani pembatalan/penjadwalan ulang janji temu pasien sebelum sesi dihapus.
+4. **Penanganan Error Bersama (HTTP 409):** Web dan Mobile menangkap kode error standar: `SCHEDULE_HAS_ACTIVE_BOOKINGS`, `ROOM_ALREADY_OCCUPIED`, `PRACTITIONER_ALREADY_SCHEDULED`, dan `INVALID_TIME_RANGE`.
+
+### 6.3. Dokumen Kontrak Lengkap
+Panduan detail spesifikasi JSON, query parameter, dan arsitektur transisi `AmanahScheduleStore` tersedia di:  
 👉 [`docs/frontend/doctor-schedule-management-backend-contract.md`](file:///D:/amanah-healthcare-mobile/docs/frontend/doctor-schedule-management-backend-contract.md)
+
 
 
