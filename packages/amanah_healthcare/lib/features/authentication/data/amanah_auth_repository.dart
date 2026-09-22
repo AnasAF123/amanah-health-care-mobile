@@ -23,6 +23,30 @@ class AmanahAuthPatientRestrictedException extends AmanahAuthException {
         );
 }
 
+class StaffOnboardingPoliOption {
+  const StaffOnboardingPoliOption({
+    required this.id,
+    required this.code,
+    required this.name,
+    this.description,
+  });
+
+  factory StaffOnboardingPoliOption.fromJson(Map<String, dynamic> json) {
+    return StaffOnboardingPoliOption(
+      id: json['id'] as String? ?? '',
+      code: json['code'] as String? ?? json['kodePoli'] as String? ?? '',
+      name: json['name'] as String? ?? json['namaPoli'] as String? ?? '',
+      description:
+          json['description'] as String? ?? json['deskripsi'] as String?,
+    );
+  }
+
+  final String id;
+  final String code;
+  final String name;
+  final String? description;
+}
+
 class AmanahAuthRepository {
   const AmanahAuthRepository({
     String? baseUrl,
@@ -132,6 +156,100 @@ class AmanahAuthRepository {
       stopwatch.stop();
       AmanahAuthLogger.logError(
         'GET',
+        uri,
+        e,
+        stackTrace: stack,
+        elapsed: stopwatch.elapsed,
+      );
+      rethrow;
+    }
+  }
+
+  /// Internal PATCH helper with complete observability logging
+  Future<http.Response> _patch(
+    Uri uri, {
+    Map<String, String>? headers,
+    Map<String, dynamic>? body,
+  }) async {
+    final Map<String, String> resolvedHeaders = <String, String>{
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      ...?headers,
+    };
+
+    AmanahAuthLogger.logRequest(
+      'PATCH',
+      uri,
+      headers: resolvedHeaders,
+      body: body,
+    );
+
+    final Stopwatch stopwatch = Stopwatch()..start();
+    try {
+      final http.Response response = await _httpClient.patch(
+        uri,
+        headers: resolvedHeaders,
+        body: body != null ? jsonEncode(body) : null,
+      );
+      stopwatch.stop();
+
+      AmanahAuthLogger.logResponse(
+        'PATCH',
+        uri,
+        response.statusCode,
+        stopwatch.elapsed,
+        body: response.body,
+      );
+      return response;
+    } catch (e, stack) {
+      stopwatch.stop();
+      AmanahAuthLogger.logError(
+        'PATCH',
+        uri,
+        e,
+        stackTrace: stack,
+        elapsed: stopwatch.elapsed,
+      );
+      rethrow;
+    }
+  }
+
+  /// Internal DELETE helper with complete observability logging
+  Future<http.Response> _delete(
+    Uri uri, {
+    Map<String, String>? headers,
+  }) async {
+    final Map<String, String> resolvedHeaders = <String, String>{
+      'Accept': 'application/json',
+      ...?headers,
+    };
+
+    AmanahAuthLogger.logRequest(
+      'DELETE',
+      uri,
+      headers: resolvedHeaders,
+    );
+
+    final Stopwatch stopwatch = Stopwatch()..start();
+    try {
+      final http.Response response = await _httpClient.delete(
+        uri,
+        headers: resolvedHeaders,
+      );
+      stopwatch.stop();
+
+      AmanahAuthLogger.logResponse(
+        'DELETE',
+        uri,
+        response.statusCode,
+        stopwatch.elapsed,
+        body: response.body,
+      );
+      return response;
+    } catch (e, stack) {
+      stopwatch.stop();
+      AmanahAuthLogger.logError(
+        'DELETE',
         uri,
         e,
         stackTrace: stack,
@@ -507,6 +625,37 @@ class AmanahAuthRepository {
     }
   }
 
+  /// Fetch active poliklinik options for staff onboarding from backend data.
+  /// Endpoint: GET /api/v1/clinics
+  Future<List<StaffOnboardingPoliOption>>
+      fetchStaffOnboardingPolikliniks() async {
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/clinics');
+    final http.Response response = await _get(uri);
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final dynamic decoded = jsonDecode(response.body);
+      final List<dynamic> records = decoded is List<dynamic>
+          ? decoded
+          : decoded is Map<String, dynamic> && decoded['data'] is List<dynamic>
+              ? decoded['data'] as List<dynamic>
+              : const <dynamic>[];
+
+      return records
+          .whereType<Map<String, dynamic>>()
+          .where((Map<String, dynamic> item) => item['isActive'] != false)
+          .map(StaffOnboardingPoliOption.fromJson)
+          .where(
+            (StaffOnboardingPoliOption item) =>
+                item.id.isNotEmpty && item.name.isNotEmpty,
+          )
+          .toList();
+    }
+
+    throw const AmanahAuthException(
+      'Gagal mengambil daftar poliklinik. Silakan coba lagi.',
+    );
+  }
+
   /// Complete Staff Onboarding & Role Selection
   /// Endpoint: POST /api/v1/auth/onboarding/staff
   Future<AmanahAuthUser?> completeStaffOnboarding({
@@ -562,6 +711,385 @@ class AmanahAuthRepository {
         throw const AmanahAuthException(
           'Terjadi kesalahan saat memproses onboarding staf.',
         );
+      }
+    }
+  }
+
+  /// Upload or update user profile image / avatar
+  /// Endpoint: PATCH /api/v1/users/me/avatar (or POST /api/v1/auth/me/avatar)
+  Future<UserAvatar> uploadAvatar({
+    List<int>? fileBytes,
+    String? filePath,
+    String fileName = 'avatar.jpg',
+    bool useAuthAlias = false,
+  }) async {
+    final String? token = await _tokenStorage.getToken();
+    if (token == null || token.isEmpty) {
+      throw const AmanahAuthException('Sesi Anda telah kedaluwarsa. Silakan masuk kembali.');
+    }
+
+    final String path = useAuthAlias ? '/api/v1/auth/me/avatar' : '/api/v1/users/me/avatar';
+    final Uri uri = Uri.parse('$_baseUrl$path');
+
+    final http.MultipartRequest request = http.MultipartRequest(useAuthAlias ? 'POST' : 'PATCH', uri);
+    request.headers['Authorization'] = 'Bearer $token';
+    request.headers['Accept'] = 'application/json';
+
+    if (fileBytes != null) {
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          fileBytes,
+          filename: fileName,
+        ),
+      );
+    } else if (filePath != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'file',
+          filePath,
+          filename: fileName,
+        ),
+      );
+    } else {
+      throw const AmanahAuthException('Berkas foto tidak boleh kosong.');
+    }
+
+    AmanahAuthLogger.logRequest(
+      request.method,
+      uri,
+      headers: request.headers,
+      body: <String, dynamic>{'filename': fileName, 'useAlias': useAuthAlias},
+    );
+
+    final Stopwatch stopwatch = Stopwatch()..start();
+    try {
+      final http.StreamedResponse streamedResponse = await _httpClient.send(request);
+      final http.Response response = await http.Response.fromStream(streamedResponse);
+      stopwatch.stop();
+
+      AmanahAuthLogger.logResponse(
+        request.method,
+        uri,
+        response.statusCode,
+        stopwatch.elapsed,
+        body: response.body,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final Map<String, dynamic> data = jsonDecode(response.body) as Map<String, dynamic>;
+        if (data['avatar'] != null && data['avatar'] is Map<String, dynamic>) {
+          return UserAvatar.fromJson(data['avatar'] as Map<String, dynamic>);
+        } else if (data['avatarUrl'] != null) {
+          final String avatarUrl = data['avatarUrl'] as String;
+          return UserAvatar(
+            url: avatarUrl,
+            initials: 'AH',
+            type: 'custom',
+            hasCustomAvatar: true,
+            directUrl: avatarUrl,
+          );
+        }
+        throw const AmanahAuthException('Format respons avatar dari server tidak valid.');
+      } else if (response.statusCode == 422) {
+        throw const AmanahAuthException(
+          'Berkas yang dipilih bukan format gambar yang didukung (Gunakan JPEG, PNG, atau WebP max 5MB).',
+        );
+      } else if (response.statusCode == 401) {
+        throw const AmanahAuthException('Sesi Anda telah kedaluwarsa. Silakan masuk kembali.');
+      } else {
+        try {
+          final Map<String, dynamic> errorData = jsonDecode(response.body) as Map<String, dynamic>;
+          final String? message = errorData['message'] as String? ?? errorData['error']?['message'];
+          throw AmanahAuthException(message ?? 'Gagal mengunggah foto profil.');
+        } catch (e) {
+          if (e is AmanahAuthException) rethrow;
+          throw const AmanahAuthException('Terjadi kesalahan saat mengunggah foto profil.');
+        }
+      }
+    } catch (e, stack) {
+      stopwatch.stop();
+      AmanahAuthLogger.logError(
+        request.method,
+        uri,
+        e,
+        stackTrace: stack,
+        elapsed: stopwatch.elapsed,
+      );
+      if (e is AmanahAuthException) rethrow;
+      throw AmanahAuthException('Gagal mengunggah foto profil: $e');
+    }
+  }
+
+  /// Delete custom avatar and revert to clinical initials SVG fallback
+  /// Endpoint: DELETE /api/v1/users/me/avatar
+  Future<bool> deleteAvatar() async {
+    final String? token = await _tokenStorage.getToken();
+    if (token == null || token.isEmpty) {
+      throw const AmanahAuthException('Sesi Anda telah kedaluwarsa. Silakan masuk kembali.');
+    }
+
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/users/me/avatar');
+    final Map<String, String> headers = <String, String>{
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/json',
+    };
+
+    AmanahAuthLogger.logRequest('DELETE', uri, headers: headers);
+    final Stopwatch stopwatch = Stopwatch()..start();
+    try {
+      final http.Response response = await _httpClient.delete(uri, headers: headers);
+      stopwatch.stop();
+
+      AmanahAuthLogger.logResponse(
+        'DELETE',
+        uri,
+        response.statusCode,
+        stopwatch.elapsed,
+        body: response.body,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return true;
+      } else if (response.statusCode == 401) {
+        throw const AmanahAuthException('Sesi Anda telah kedaluwarsa. Silakan masuk kembali.');
+      } else {
+        try {
+          final Map<String, dynamic> errorData = jsonDecode(response.body) as Map<String, dynamic>;
+          final String? message = errorData['message'] as String? ?? errorData['error']?['message'];
+          throw AmanahAuthException(message ?? 'Gagal menghapus avatar kustom.');
+        } catch (e) {
+          if (e is AmanahAuthException) rethrow;
+          throw const AmanahAuthException('Terjadi kesalahan saat menghapus avatar.');
+        }
+      }
+    } catch (e, stack) {
+      stopwatch.stop();
+      AmanahAuthLogger.logError('DELETE', uri, e, stackTrace: stack, elapsed: stopwatch.elapsed);
+      if (e is AmanahAuthException) rethrow;
+      throw AmanahAuthException('Gagal menghapus avatar: $e');
+    }
+  }
+
+  /// 1. Ambil daftar SIP / STR dokter login
+  /// Endpoint: GET /api/v1/staffs/me/credentials
+  Future<List<StaffCredentialModel>> getMyCredentials() async {
+    final String? token = await _tokenStorage.getToken();
+    if (token == null || token.isEmpty) {
+      return <StaffCredentialModel>[];
+    }
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/staffs/me/credentials');
+    final http.Response response = await _get(
+      uri,
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final dynamic decoded = jsonDecode(response.body);
+      if (decoded is List) {
+        return decoded
+            .map((dynamic e) => StaffCredentialModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      return <StaffCredentialModel>[];
+    } else {
+      try {
+        final Map<String, dynamic> errorData =
+            jsonDecode(response.body) as Map<String, dynamic>;
+        final String? message =
+            errorData['message'] as String? ?? errorData['error']?['message'];
+        throw AmanahAuthException(
+          message ?? 'Gagal memuat kredensial medis.',
+        );
+      } catch (e) {
+        if (e is AmanahAuthException) rethrow;
+        throw const AmanahAuthException('Terjadi kesalahan saat memuat kredensial.');
+      }
+    }
+  }
+
+  /// 2. Tambah SIP / STR baru
+  /// Endpoint: POST /api/v1/staffs/me/credentials
+  Future<StaffCredentialModel> addCredential({
+    required CredentialType type,
+    required String number,
+    String? issuer,
+    String? issuedAt,
+    String? expiresAt,
+  }) async {
+    final String? token = await _tokenStorage.getToken();
+    if (token == null || token.isEmpty) {
+      throw const AmanahAuthException('Sesi Anda telah kedaluwarsa. Silakan masuk kembali.');
+    }
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/staffs/me/credentials');
+    final Map<String, dynamic> body = <String, dynamic>{
+      'credentialType': type.toApiValue(),
+      'credentialNumber': number.trim(),
+      if (issuer != null && issuer.trim().isNotEmpty) 'issuer': issuer.trim(),
+      if (issuedAt != null && issuedAt.trim().isNotEmpty) 'issuedAt': issuedAt.trim(),
+      if (expiresAt != null && expiresAt.trim().isNotEmpty) 'expiresAt': expiresAt.trim(),
+    };
+
+    final http.Response response = await _post(
+      uri,
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+      },
+      body: body,
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return StaffCredentialModel.fromJson(data);
+    } else {
+      try {
+        final Map<String, dynamic> errorData =
+            jsonDecode(response.body) as Map<String, dynamic>;
+        final String? message =
+            errorData['message'] as String? ?? errorData['error']?['message'];
+        throw AmanahAuthException(
+          message ?? 'Gagal menambahkan kredensial medis.',
+        );
+      } catch (e) {
+        if (e is AmanahAuthException) rethrow;
+        throw const AmanahAuthException('Terjadi kesalahan saat menyimpan kredensial.');
+      }
+    }
+  }
+
+  /// 3. Update SIP / STR yang sudah ada
+  /// Endpoint: PATCH /api/v1/staffs/me/credentials/:credentialId
+  Future<StaffCredentialModel> updateCredential({
+    required String credentialId,
+    String? number,
+    String? issuer,
+    String? expiresAt,
+    String? status,
+  }) async {
+    final String? token = await _tokenStorage.getToken();
+    if (token == null || token.isEmpty) {
+      throw const AmanahAuthException('Sesi Anda telah kedaluwarsa. Silakan masuk kembali.');
+    }
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/staffs/me/credentials/$credentialId');
+    final Map<String, dynamic> body = <String, dynamic>{
+      if (number != null && number.trim().isNotEmpty)
+        'credentialNumber': number.trim(),
+      if (issuer != null && issuer.trim().isNotEmpty)
+        'issuer': issuer.trim(),
+      if (expiresAt != null && expiresAt.trim().isNotEmpty)
+        'expiresAt': expiresAt.trim(),
+      if (status != null && status.trim().isNotEmpty)
+        'status': status.trim().toLowerCase(),
+    };
+
+    final http.Response response = await _patch(
+      uri,
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+      },
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return StaffCredentialModel.fromJson(data);
+    } else {
+      try {
+        final Map<String, dynamic> errorData =
+            jsonDecode(response.body) as Map<String, dynamic>;
+        final String? message =
+            errorData['message'] as String? ?? errorData['error']?['message'];
+        throw AmanahAuthException(
+          message ?? 'Gagal memperbarui kredensial medis.',
+        );
+      } catch (e) {
+        if (e is AmanahAuthException) rethrow;
+        throw const AmanahAuthException('Terjadi kesalahan saat memperbarui kredensial.');
+      }
+    }
+  }
+
+  /// 4. Hapus kredensial
+  /// Endpoint: DELETE /api/v1/staffs/me/credentials/:credentialId
+  Future<bool> deleteCredential(String credentialId) async {
+    final String? token = await _tokenStorage.getToken();
+    if (token == null || token.isEmpty) {
+      throw const AmanahAuthException('Sesi Anda telah kedaluwarsa. Silakan masuk kembali.');
+    }
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/staffs/me/credentials/$credentialId');
+
+    final http.Response response = await _delete(
+      uri,
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return true;
+    } else {
+      try {
+        final Map<String, dynamic> errorData =
+            jsonDecode(response.body) as Map<String, dynamic>;
+        final String? message =
+            errorData['message'] as String? ?? errorData['error']?['message'];
+        throw AmanahAuthException(
+          message ?? 'Gagal menghapus kredensial medis.',
+        );
+      } catch (e) {
+        if (e is AmanahAuthException) rethrow;
+        throw const AmanahAuthException('Terjadi kesalahan saat menghapus kredensial.');
+      }
+    }
+  }
+
+  /// 5. Self-update nama atau nomor telepon staf dokter
+  /// Endpoint: PATCH /api/v1/staffs/me
+  /// IMPORTANT: Email is immutable and never included in this request.
+  Future<AmanahStaffProfile> updateMyProfile({
+    String? fullName,
+    String? phoneNumber,
+  }) async {
+    final String? token = await _tokenStorage.getToken();
+    if (token == null || token.isEmpty) {
+      throw const AmanahAuthException('Sesi Anda telah kedaluwarsa. Silakan masuk kembali.');
+    }
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/staffs/me');
+    final Map<String, dynamic> body = <String, dynamic>{
+      if (fullName != null && fullName.trim().isNotEmpty)
+        'fullName': fullName.trim(),
+      if (phoneNumber != null && phoneNumber.trim().isNotEmpty)
+        'phoneNumber': phoneNumber.trim(),
+    };
+
+    final http.Response response = await _patch(
+      uri,
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+      },
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      return AmanahStaffProfile.fromJson(data);
+    } else {
+      try {
+        final Map<String, dynamic> errorData =
+            jsonDecode(response.body) as Map<String, dynamic>;
+        final String? message =
+            errorData['message'] as String? ?? errorData['error']?['message'];
+        throw AmanahAuthException(
+          message ?? 'Gagal memperbarui profil dokter.',
+        );
+      } catch (e) {
+        if (e is AmanahAuthException) rethrow;
+        throw const AmanahAuthException('Terjadi kesalahan saat memperbarui profil dokter.');
       }
     }
   }

@@ -4,6 +4,7 @@ import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_use
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_edit_profile_drawer.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_account_tab_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_home_shell.dart';
+import 'package:amanah_healthcare/widgets/amanah_avatar.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/settings/amanah_account_identity_settings_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/settings/amanah_data_storage_settings_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/settings/amanah_it_chat_screen.dart';
@@ -111,31 +112,34 @@ void main() {
       },
     );
 
-    testWidgets('Tapping Camera / Avatar opens Avatar photo sheet', (
-      WidgetTester tester,
-    ) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.75;
-      addTearDown(() => tester.view.reset());
+    testWidgets(
+      'Tapping Camera / Avatar opens AmanahAvatarPhotoSheet and closes on outside tap',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.75;
+        addTearDown(() => tester.view.reset());
 
-      await tester.pumpWidget(createAccountScreen());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(createAccountScreen());
+        await tester.pumpAndSettle();
 
-      // Tap Avatar
-      await tester.tap(find.byType(ClipOval));
-      await tester.pumpAndSettle();
+        // Tap Avatar
+        await tester.tap(find.byType(AmanahAvatar));
+        await tester.pumpAndSettle();
 
-      expect(find.byType(AmanahAvatarPhotoSheet), findsOneWidget);
-      expect(find.text('Ganti Foto Profil Dokter'), findsOneWidget);
-      expect(find.text('Pilih dari Galeri Perangkat'), findsOneWidget);
-      expect(find.text('Gunakan Foto Default'), findsOneWidget);
+        expect(find.byType(AmanahAvatarPhotoSheet), findsOneWidget);
+        expect(find.text('Foto Profil Dokter'), findsOneWidget);
+        expect(find.text('Ambil Foto dari Kamera'), findsOneWidget);
+        expect(find.text('Pilih dari Galeri Perangkat'), findsOneWidget);
+        expect(find.text('Pilih dari File Explorer / Disk HP'), findsOneWidget);
+        expect(find.text('Atau Pilih Preset Avatar Klinis'), findsOneWidget);
 
-      // Tap Gunakan Foto Default
-      await tester.tap(find.text('Gunakan Foto Default'));
-      await tester.pumpAndSettle();
+        // Tap outside sheet (top area of screen) to test outside-tap dismiss
+        await tester.tapAt(const Offset(200, 50));
+        await tester.pumpAndSettle();
 
-      expect(find.byType(AmanahAvatarPhotoSheet), findsNothing);
-    });
+        expect(find.byType(AmanahAvatarPhotoSheet), findsNothing);
+      },
+    );
 
     testWidgets('Tapping Akun & identitas dokter navigates to sub-screen', (
       WidgetTester tester,

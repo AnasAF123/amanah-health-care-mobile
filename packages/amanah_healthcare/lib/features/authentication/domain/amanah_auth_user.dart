@@ -1,3 +1,7 @@
+import 'package:amanah_healthcare/features/authentication/domain/user_avatar.dart';
+export 'package:amanah_healthcare/features/authentication/domain/user_avatar.dart';
+export 'package:amanah_healthcare/features/authentication/domain/staff_credential_model.dart';
+
 enum AmanahUserRole { doctor, midwife, staff }
 
 class AmanahStaffProfile {
@@ -48,6 +52,8 @@ class AmanahAuthUser {
     required this.fullName,
     required this.email,
     required this.phone,
+    this.avatar = UserAvatar.empty,
+    this.imageUrl,
     this.password = '',
     this.isEmailVerified = false,
     this.needsOnboarding = false,
@@ -60,14 +66,36 @@ class AmanahAuthUser {
         ? (json['role']['code'] as String? ?? '')
         : (json['role'] as String? ?? '');
 
+    final String id = json['id'] as String? ?? '';
+    final String fullName =
+        json['fullName'] as String? ?? json['name'] as String? ?? '';
+    final String? imageUrl =
+        json['imageUrl'] as String? ?? json['image'] as String?;
+
+    final UserAvatar resolvedAvatar = json['avatar'] != null
+        ? UserAvatar.fromJson(json['avatar'] as Map<String, dynamic>)
+        : (imageUrl != null && imageUrl.isNotEmpty
+            ? UserAvatar(
+                url: imageUrl,
+                initials: UserAvatar.extractInitials(fullName),
+                type: imageUrl.startsWith('http') ? 'oauth' : 'custom',
+                hasCustomAvatar: true,
+                directUrl: imageUrl,
+              )
+            : UserAvatar.fromFallback(userId: id, name: fullName));
+
     return AmanahAuthUser(
-      id: json['id'] as String? ?? '',
+      id: id,
       role: parseRole(roleStr),
-      fullName: json['fullName'] as String? ?? json['name'] as String? ?? '',
+      fullName: fullName,
       email: json['email'] as String? ?? '',
       phone: json['phone'] as String? ?? json['phoneNumber'] as String? ?? '',
+      imageUrl: imageUrl,
+      avatar: resolvedAvatar,
       password: json['password'] as String? ?? '',
-      isEmailVerified: json['isEmailVerified'] as bool? ?? json['emailVerified'] as bool? ?? false,
+      isEmailVerified: json['isEmailVerified'] as bool? ??
+          json['emailVerified'] as bool? ??
+          false,
       needsOnboarding:
           json['needsOnboarding'] as bool? ?? isPatientRole(roleStr),
       systemRole: json['systemRole'] as String? ?? 'PATIENT',
@@ -89,12 +117,32 @@ class AmanahAuthUser {
     final Map<String, dynamic>? staffJson =
         json['staff'] as Map<String, dynamic>?;
 
+    final String id = json['id'] as String? ?? '';
+    final String fullName =
+        json['name'] as String? ?? json['fullName'] as String? ?? '';
+    final String? imageUrl =
+        json['imageUrl'] as String? ?? json['image'] as String?;
+
+    final UserAvatar resolvedAvatar = json['avatar'] != null
+        ? UserAvatar.fromJson(json['avatar'] as Map<String, dynamic>)
+        : (imageUrl != null && imageUrl.isNotEmpty
+            ? UserAvatar(
+                url: imageUrl,
+                initials: UserAvatar.extractInitials(fullName),
+                type: imageUrl.startsWith('http') ? 'oauth' : 'custom',
+                hasCustomAvatar: true,
+                directUrl: imageUrl,
+              )
+            : UserAvatar.fromFallback(userId: id, name: fullName));
+
     return AmanahAuthUser(
-      id: json['id'] as String? ?? '',
+      id: id,
       role: mappedRole,
-      fullName: json['name'] as String? ?? json['fullName'] as String? ?? '',
+      fullName: fullName,
       email: json['email'] as String? ?? '',
       phone: json['phone'] as String? ?? json['phoneNumber'] as String? ?? '',
+      imageUrl: imageUrl,
+      avatar: resolvedAvatar,
       password: '',
       isEmailVerified: json['emailVerified'] as bool? ??
           json['isEmailVerified'] as bool? ??
@@ -110,6 +158,8 @@ class AmanahAuthUser {
   final String fullName;
   final String email;
   final String phone;
+  final String? imageUrl;
+  final UserAvatar avatar;
   final String password;
   final bool isEmailVerified;
   final bool needsOnboarding;
@@ -155,6 +205,8 @@ class AmanahAuthUser {
     String? fullName,
     String? email,
     String? phone,
+    String? imageUrl,
+    UserAvatar? avatar,
     String? password,
     bool? isEmailVerified,
     bool? needsOnboarding,
@@ -167,6 +219,8 @@ class AmanahAuthUser {
       fullName: fullName ?? this.fullName,
       email: email ?? this.email,
       phone: phone ?? this.phone,
+      imageUrl: imageUrl ?? this.imageUrl,
+      avatar: avatar ?? this.avatar,
       password: password ?? this.password,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
       needsOnboarding: needsOnboarding ?? this.needsOnboarding,

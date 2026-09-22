@@ -553,6 +553,7 @@ class _SuccessBadgeEmblem extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         boxShadow: <BoxShadow>[
+          palette.primaryShadow,
           BoxShadow(
             color: palette.primary.withValues(alpha: 0.24),
             blurRadius: 22,
@@ -605,7 +606,7 @@ class _SuccessBadgeEmblemPainter extends CustomPainter {
         2 * math.pi * outlineProgress,
         false,
         Paint()
-          ..color = palette.primary
+          ..color = palette.primaryBorder
           ..style = PaintingStyle.stroke
           ..strokeWidth = 7
           ..strokeCap = StrokeCap.round,
@@ -617,7 +618,9 @@ class _SuccessBadgeEmblemPainter extends CustomPainter {
         center,
         radius * fillScale,
         Paint()
-          ..color = palette.primary
+          ..shader = palette.primaryGradient.createShader(
+            Rect.fromCircle(center: center, radius: radius * fillScale),
+          )
           ..style = PaintingStyle.fill,
       );
     }
@@ -762,6 +765,9 @@ class _SuccessPalette {
     required this.border,
     required this.handle,
     required this.primary,
+    required this.primaryGradient,
+    required this.primaryBorder,
+    required this.primaryShadow,
     required this.primaryText,
     required this.primarySoft,
     required this.onPrimary,
@@ -775,6 +781,9 @@ class _SuccessPalette {
   final Color border;
   final Color handle;
   final Color primary;
+  final LinearGradient primaryGradient;
+  final Color primaryBorder;
+  final BoxShadow primaryShadow;
   final Color primaryText;
   final Color primarySoft;
   final Color onPrimary;
@@ -783,11 +792,20 @@ class _SuccessPalette {
     final bool dark = theme.brightness == Brightness.dark;
     final Color surface =
         dark ? theme.colorScheme.surface : AmanahColorTokens.surfaceLight;
+    final LinearGradient primaryGradient = dark
+        ? AmanahColorTokens.btnCrispBlueDarkGradient
+        : AmanahColorTokens.btnCrispBlueGradient;
     final Color primary = dark
-        ? AmanahColorTokens.cyanAccent
+        ? AmanahColorTokens.skyMedium
         : AmanahColorTokens.brand;
+    final Color primaryBorder = dark
+        ? AmanahColorTokens.btnCrispBlueDarkBorder
+        : AmanahColorTokens.btnCrispBlueBorder;
+    final BoxShadow primaryShadow = dark
+        ? AmanahColorTokens.btnCrispBlueDarkShadow
+        : AmanahColorTokens.btnCrispBlueShadow;
     final Color primarySoft = dark
-        ? primary.withValues(alpha: 0.16)
+        ? AmanahColorTokens.brand.withValues(alpha: 0.16)
         : AmanahColorTokens.brandSurface;
 
     return _SuccessPalette(
@@ -809,8 +827,11 @@ class _SuccessPalette {
           ? theme.colorScheme.onSurface.withValues(alpha: 0.20)
           : theme.colorScheme.outlineVariant,
       primary: primary,
+      primaryGradient: primaryGradient,
+      primaryBorder: primaryBorder,
+      primaryShadow: primaryShadow,
       primaryText: dark
-          ? AmanahColorTokens.cyanAccent
+          ? AmanahColorTokens.btnCrispSoftDarkText
           : AmanahColorTokens.brand,
       primarySoft: primarySoft,
       onPrimary: AmanahColorTokens.pureWhite,

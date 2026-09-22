@@ -161,14 +161,42 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
           child: sheetContent,
         );
 
-        if (effectiveKeyboardInset > 0) {
-          return Padding(
-            padding: EdgeInsets.only(bottom: effectiveKeyboardInset),
-            child: Align(alignment: Alignment.bottomCenter, child: sheet),
-          );
-        }
+        final Widget positionedSheet = Align(
+          alignment: Alignment.bottomCenter,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {},
+            child: sheet,
+          ),
+        );
 
-        return Align(alignment: Alignment.bottomCenter, child: sheet);
+        return Stack(
+          clipBehavior: Clip.none,
+          children: <Widget>[
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  final ModalRoute<dynamic>? route = ModalRoute.of(context);
+                  if (route != null && route.isCurrent) {
+                    if (route.barrierDismissible) {
+                      Navigator.of(context).maybePop();
+                    }
+                  } else {
+                    Navigator.of(context).maybePop();
+                  }
+                },
+              ),
+            ),
+            if (effectiveKeyboardInset > 0)
+              Padding(
+                padding: EdgeInsets.only(bottom: effectiveKeyboardInset),
+                child: positionedSheet,
+              )
+            else
+              positionedSheet,
+          ],
+        );
       },
     );
   }

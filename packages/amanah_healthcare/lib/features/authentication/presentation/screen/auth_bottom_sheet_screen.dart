@@ -70,6 +70,10 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
   bool _statusIsError = false;
   bool _sheetOpen = false;
   AmanahAuthUser? _authenticatedUser;
+  bool _showOnboardingScreen = true;
+  int _savedOnboardingStep = 0;
+  StaffOnboardingRoleOption? _savedOnboardingRole;
+  String _savedOnboardingLicense = '';
   bool _isSignUpVerification = false;
   String _pendingVerificationPassword = '';
   String _pendingPhone = '';
@@ -96,6 +100,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
         );
         setState(() {
           _authenticatedUser = user;
+          _showOnboardingScreen = true;
         });
         widget.onAuthenticated?.call(user);
       } else {
@@ -105,6 +110,28 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
       }
     } catch (e) {
       AmanahAuthLogger.logLifecycle('Session restoration check error: $e');
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    await widget.repository.signOut();
+    try {
+      await GoogleSignIn().signOut().timeout(
+        const Duration(milliseconds: 100),
+        onTimeout: () => null,
+      );
+    } catch (_) {}
+    AmanahScheduleStore.instance.reset();
+    AmanahNotificationStore.instance.reset();
+    AmanahPermissionStore.instance.reset();
+    if (mounted) {
+      setState(() {
+        _authenticatedUser = null;
+        _showOnboardingScreen = true;
+        _savedOnboardingStep = 0;
+        _savedOnboardingRole = null;
+        _savedOnboardingLicense = '';
+      });
     }
   }
 
@@ -130,45 +157,44 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
   Widget build(BuildContext context) {
     final AmanahAuthUser? user = _authenticatedUser;
     if (user != null) {
-      if (user.needsOnboarding) {
+      if (user.needsOnboarding && _showOnboardingScreen) {
         return StaffOnboardingScreen(
           user: user,
           repository: widget.repository,
+          initialStep: _savedOnboardingStep,
+          initialRole: _savedOnboardingRole,
+          initialLicenseNumber: _savedOnboardingLicense,
+          onProgressChanged: (
+            int step,
+            StaffOnboardingRoleOption? role,
+            String license,
+          ) {
+            _savedOnboardingStep = step;
+            _savedOnboardingRole = role;
+            _savedOnboardingLicense = license;
+          },
+          onBack: () => setState(() => _showOnboardingScreen = false),
           onOnboardingComplete: (AmanahAuthUser updatedUser) {
-            setState(() => _authenticatedUser = updatedUser);
+            setState(() {
+              _authenticatedUser = updatedUser;
+              _showOnboardingScreen = false;
+            });
             widget.onAuthenticated?.call(updatedUser);
           },
-          onLogout: () async {
-            await widget.repository.signOut();
-            try {
-              await GoogleSignIn().signOut();
-            } catch (_) {}
-            AmanahScheduleStore.instance.reset();
-            AmanahNotificationStore.instance.reset();
-            AmanahPermissionStore.instance.reset();
-            if (mounted) {
-              setState(() => _authenticatedUser = null);
-            }
-          },
+          onLogout: _handleLogout,
         );
       }
 
-      return AmanahHomeShell(
-        user: user,
-        onLogout: () async {
-          await widget.repository.signOut();
-          try {
-            await GoogleSignIn().signOut();
-          } catch (_) {}
-          AmanahScheduleStore.instance.reset();
-          AmanahNotificationStore.instance.reset();
-          AmanahPermissionStore.instance.reset();
-          if (mounted) {
-            setState(() => _authenticatedUser = null);
-          }
-        },
-      );
+      if (!user.needsOnboarding) {
+        return AmanahHomeShell(
+          user: user,
+          onLogout: _handleLogout,
+        );
+      }
     }
+
+    final bool hasPendingOnboarding =
+        user != null && user.needsOnboarding;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -178,6 +204,9 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
           _AuthBackground(assetPath: widget.backgroundAsset),
           const _AuthBackgroundScrim(),
           _AuthClosedActions(
+            hasPendingOnboarding: hasPendingOnboarding,
+            onResumeOnboarding: () =>
+                setState(() => _showOnboardingScreen = true),
             onSignIn: () => _showAuthSheet(AuthSheetMode.signIn),
             onSignUp: () => _showAuthSheet(AuthSheetMode.signUp),
           ),
@@ -431,7 +460,10 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
 
       if (user != null) {
         widget.onAuthenticated?.call(user);
-        setState(() => _authenticatedUser = user);
+        setState(() {
+          _authenticatedUser = user;
+          _showOnboardingScreen = true;
+        });
         if (sheetContext.mounted) {
           Navigator.of(sheetContext).pop();
         }
@@ -522,7 +554,10 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
             },
           );
           widget.onAuthenticated?.call(user);
-          setState(() => _authenticatedUser = user);
+          setState(() {
+            _authenticatedUser = user;
+            _showOnboardingScreen = true;
+          });
           if (sheetContext.mounted) {
             Navigator.of(sheetContext).pop();
           }
@@ -785,7 +820,10 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
           _refreshSheet(sheetSetState);
 
           widget.onAuthenticated?.call(user);
-          setState(() => _authenticatedUser = user);
+          setState(() {
+            _authenticatedUser = user;
+            _showOnboardingScreen = true;
+          });
           if (sheetContext.mounted) {
             Navigator.of(sheetContext).pop();
           }
@@ -1056,10 +1094,17 @@ class _AuthBackgroundScrim extends StatelessWidget {
 }
 
 class _AuthClosedActions extends StatelessWidget {
-  const _AuthClosedActions({required this.onSignIn, required this.onSignUp});
+  const _AuthClosedActions({
+    required this.onSignIn,
+    required this.onSignUp,
+    this.hasPendingOnboarding = false,
+    this.onResumeOnboarding,
+  });
 
   final VoidCallback onSignIn;
   final VoidCallback onSignUp;
+  final bool hasPendingOnboarding;
+  final VoidCallback? onResumeOnboarding;
 
   @override
   Widget build(BuildContext context) {
@@ -1100,8 +1145,8 @@ class _AuthClosedActions extends StatelessWidget {
             ),
             const SizedBox(height: 28),
             AmanahButton.hero(
-              text: 'Mulai',
-              onPressed: onSignUp,
+              text: hasPendingOnboarding ? 'Lanjutkan Pengisian Data' : 'Mulai',
+              onPressed: hasPendingOnboarding ? onResumeOnboarding : onSignUp,
               size: AmanahButtonSize.large,
               isFullWidth: true,
             ),

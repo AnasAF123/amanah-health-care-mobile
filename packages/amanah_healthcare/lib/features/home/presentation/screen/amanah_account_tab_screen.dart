@@ -1,7 +1,7 @@
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/authentication/data/amanah_auth_repository.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
@@ -15,6 +15,7 @@ import 'package:amanah_healthcare/features/home/presentation/screen/settings/ama
 import 'package:amanah_healthcare/features/home/presentation/screen/settings/amanah_it_support_settings_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/settings/amanah_privacy_security_settings_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/widgets/amanah_avatar.dart';
 
 class AmanahAccountTabScreen extends StatefulWidget {
   const AmanahAccountTabScreen({
@@ -22,6 +23,7 @@ class AmanahAccountTabScreen extends StatefulWidget {
     required this.onMenuItemTap,
     required this.onLogout,
     this.onBack,
+    this.repository = const AmanahAuthRepository(),
     super.key,
   });
 
@@ -29,6 +31,7 @@ class AmanahAccountTabScreen extends StatefulWidget {
   final ValueChanged<String> onMenuItemTap;
   final VoidCallback onLogout;
   final VoidCallback? onBack;
+  final AmanahAuthRepository repository;
 
   @override
   State<AmanahAccountTabScreen> createState() => _AmanahAccountTabScreenState();
@@ -39,8 +42,8 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   String _email = '';
   String _bio = '';
   bool _isEmailVerified = false;
-  String? _customAvatarPath;
-  String? _presetAvatarUrl;
+  late UserAvatar _avatar;
+  bool _isAvatarUploading = false;
 
   @override
   void initState() {
@@ -53,6 +56,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
         ? 'Tenaga medis (${widget.user.staff!.profession}) di RS Amanah Sehat.'
         : 'Tenaga medis di RS Amanah Sehat.';
     _isEmailVerified = widget.user.isEmailVerified;
+    _avatar = widget.user.avatar;
   }
 
   @override
@@ -60,6 +64,9 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.user.isEmailVerified != widget.user.isEmailVerified) {
       _isEmailVerified = widget.user.isEmailVerified;
+    }
+    if (oldWidget.user.avatar != widget.user.avatar) {
+      _avatar = widget.user.avatar;
     }
   }
 
@@ -108,11 +115,16 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
     );
 
     if (result != null && mounted) {
+      try {
+        await widget.repository.updateMyProfile(
+          phoneNumber: result.phone,
+        );
+      } catch (_) {}
       setState(() {
         _phone = result.phone;
-        _email = result.email;
         _bio = result.bio;
       });
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Row(
@@ -144,47 +156,136 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   Future<void> _openAvatarPhotoSheet() async {
     final AmanahAvatarPhotoResult? result = await AmanahAvatarPhotoSheet.show(
       context,
+      hasCustomAvatar: _avatar.hasCustomAvatar,
     );
 
-    if (result != null && mounted) {
-      setState(() {
-        if (result.isReset) {
-          _customAvatarPath = null;
-          _presetAvatarUrl = null;
-        } else if (result.customImagePath != null) {
-          _customAvatarPath = result.customImagePath;
-          _presetAvatarUrl = null;
-        } else if (result.presetAvatarUrl != null) {
-          _presetAvatarUrl = result.presetAvatarUrl;
-          _customAvatarPath = null;
-        }
-      });
+    if (result == null || !mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: <Widget>[
-              Icon(Icons.camera_alt_rounded, color: AmanahColorTokens.surfaceLight, size: 18),
-              SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Foto profil dokter berhasil diperbarui',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
+    if (result.isDelete || result.isReset) {
+      setState(() => _isAvatarUploading = true);
+      try {
+        await widget.repository.deleteAvatar();
+        if (!mounted) return;
+        setState(() {
+          _isAvatarUploading = false;
+          _avatar = UserAvatar.fromFallback(
+            userId: widget.user.id,
+            name: widget.user.fullName,
+          );
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: <Widget>[
+                Icon(Icons.check_circle_rounded, color: AmanahColorTokens.surfaceLight, size: 18),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Avatar berhasil dihapus dan dikembalikan ke inisial nama',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            backgroundColor: AmanahColorTokens.neutral900,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            duration: const Duration(seconds: 2),
           ),
-          backgroundColor: AmanahColorTokens.neutral900,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        setState(() => _isAvatarUploading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: AmanahColorTokens.danger,
+            behavior: SnackBarBehavior.floating,
           ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+        );
+      }
+      return;
+    }
+
+    if (result.pickedFile != null ||
+        result.pickedBytes != null ||
+        result.customImagePath != null ||
+        result.presetAvatarUrl != null) {
+      setState(() => _isAvatarUploading = true);
+      try {
+        final UserAvatar updated;
+        if (result.pickedBytes != null) {
+          updated = await widget.repository.uploadAvatar(
+            fileBytes: result.pickedBytes!,
+            fileName: result.fileName ?? 'avatar.jpg',
+          );
+        } else if (result.pickedFile != null) {
+          updated = await widget.repository.uploadAvatar(
+            filePath: result.pickedFile!.path,
+            fileName: result.pickedFile!.name,
+          );
+        } else if (result.customImagePath != null) {
+          updated = await widget.repository.uploadAvatar(
+            filePath: result.customImagePath!,
+            fileName: 'avatar.jpg',
+          );
+        } else if (result.presetAvatarUrl != null) {
+          updated = UserAvatar.custom(
+            url: result.presetAvatarUrl!,
+            initials: UserAvatar.extractInitials(widget.user.fullName),
+          );
+        } else {
+          return;
+        }
+
+        if (!mounted) return;
+        setState(() {
+          _isAvatarUploading = false;
+          _avatar = updated;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: <Widget>[
+                Icon(Icons.camera_alt_rounded, color: AmanahColorTokens.surfaceLight, size: 18),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Foto profil dokter berhasil diperbarui',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: AmanahColorTokens.neutral900,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        setState(() => _isAvatarUploading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: AmanahColorTokens.danger,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -205,6 +306,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
           MaterialPageRoute<void>(
             builder: (BuildContext ctx) => AmanahAccountIdentitySettingsScreen(
               user: widget.user,
+              repository: widget.repository,
               onBack: () => Navigator.of(ctx).pop(),
             ),
           ),
@@ -294,8 +396,8 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                               ? widget.user.staff!.profession!
                               : widget.user.displayRole,
                           phoneText: _phone,
-                          customAvatarPath: _customAvatarPath,
-                          presetAvatarUrl: _presetAvatarUrl,
+                          avatar: _avatar,
+                          isUploading: _isAvatarUploading,
                           dark: dark,
                           onEditTap: _openEditProfileDrawer,
                           onAvatarTap: _openAvatarPhotoSheet,
@@ -858,19 +960,19 @@ class _DualStackProfileCard extends StatelessWidget {
     required this.userName,
     required this.roleText,
     required this.phoneText,
+    required this.avatar,
+    required this.isUploading,
     required this.dark,
     required this.onEditTap,
     required this.onAvatarTap,
     required this.onLoyaltyTap,
-    this.customAvatarPath,
-    this.presetAvatarUrl,
   });
 
   final String userName;
   final String roleText;
   final String phoneText;
-  final String? customAvatarPath;
-  final String? presetAvatarUrl;
+  final UserAvatar avatar;
+  final bool isUploading;
   final bool dark;
   final VoidCallback onEditTap;
   final VoidCallback onAvatarTap;
@@ -935,29 +1037,24 @@ class _DualStackProfileCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: <Widget>[
-                      GestureDetector(
+                      AmanahAvatar(
+                        avatar: avatar,
+                        radius: 28,
+                        isLoading: isUploading,
                         onTap: onAvatarTap,
-                        child: Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: dark
-                                  ? AmanahColorTokens.cyanAccent
-                                  : AmanahColorTokens.skySubtle,
-                              width: 2.2,
-                            ),
-                            boxShadow: <BoxShadow>[
-                              BoxShadow(
-                                color: AmanahColorTokens.pureBlack.withValues(alpha: 0.10),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: ClipOval(child: _buildAvatar()),
+                        border: Border.all(
+                          color: dark
+                              ? AmanahColorTokens.cyanAccent
+                              : AmanahColorTokens.skySubtle,
+                          width: 2.2,
                         ),
+                        boxShadow: <BoxShadow>[
+                          BoxShadow(
+                            color: AmanahColorTokens.pureBlack.withValues(alpha: 0.10),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -1094,40 +1191,6 @@ class _DualStackProfileCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildAvatar() {
-    if (customAvatarPath != null) {
-      return Image.file(
-        File(customAvatarPath!),
-        fit: BoxFit.cover,
-        alignment: Alignment.topCenter,
-        errorBuilder: (BuildContext ctx, Object err, StackTrace? st) =>
-            _fallbackAvatar(),
-      );
-    }
-    if (presetAvatarUrl != null) {
-      return Image.network(
-        presetAvatarUrl!,
-        fit: BoxFit.cover,
-        alignment: Alignment.topCenter,
-        errorBuilder: (BuildContext ctx, Object err, StackTrace? st) =>
-            _fallbackAvatar(),
-      );
-    }
-    return _fallbackAvatar();
-  }
-
-  Widget _fallbackAvatar() {
-    return Image.asset(
-      'assets/amanah/auth/auth_background.png',
-      fit: BoxFit.cover,
-      alignment: Alignment.topCenter,
-      errorBuilder: (BuildContext ctx, Object err, StackTrace? st) => Container(
-        color: AmanahColorTokens.sky,
-        child: const Icon(Icons.person_rounded, color: AmanahColorTokens.surfaceLight, size: 30),
       ),
     );
   }

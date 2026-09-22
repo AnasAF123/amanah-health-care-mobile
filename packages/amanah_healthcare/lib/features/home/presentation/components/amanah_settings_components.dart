@@ -76,12 +76,16 @@ class AmanahSettingInfoRow extends StatelessWidget {
   const AmanahSettingInfoRow({
     required this.label,
     required this.value,
+    this.helperText,
+    this.trailing,
     this.isHighlighted = false,
     super.key,
   });
 
   final String label;
   final String value;
+  final String? helperText;
+  final Widget? trailing;
   final bool isHighlighted;
 
   @override
@@ -90,6 +94,7 @@ class AmanahSettingInfoRow extends StatelessWidget {
     final Color valueColor = isHighlighted
         ? AmanahThemeTokens.status(AmanahStatusTone.success).onSurface
         : AmanahThemeTokens.textPrimary(context);
+    final Color helperColor = AmanahThemeTokens.textTertiary(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -117,9 +122,24 @@ class AmanahSettingInfoRow extends StatelessWidget {
                     letterSpacing: 0,
                   ),
                 ),
+                if (helperText != null) ...<Widget>[
+                  const SizedBox(height: 2),
+                  Text(
+                    helperText!,
+                    style: TextStyle(
+                      color: helperColor,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
+          if (trailing != null) ...<Widget>[
+            const SizedBox(width: 8),
+            trailing!,
+          ],
         ],
       ),
     );

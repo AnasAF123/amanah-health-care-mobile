@@ -21,24 +21,20 @@ const double DEFAULT_ICON_SIZE = 24.0;
 
 /// Card background border radius
 const Radius ROUNDED_RADIUS = Radius.circular(20.0);
-//ignore: non_constant_identifier_names
 const BorderRadius ROUNDED_BORDER_RADIUS = BorderRadius.all(ROUNDED_RADIUS);
 
 /// Topbar…
 const Radius HEADER_ROUNDED_RADIUS = Radius.circular(30.0);
-//ignore: non_constant_identifier_names
 const BorderRadius HEADER_BORDER_RADIUS = BorderRadius.all(
   HEADER_ROUNDED_RADIUS,
 );
 
 /// Full screen button, e.g. KnowledgePanel
 const Radius ANGULAR_RADIUS = Radius.circular(8.0);
-//ignore: non_constant_identifier_names
 const BorderRadius ANGULAR_BORDER_RADIUS = BorderRadius.all(ANGULAR_RADIUS);
 
 /// Buttons & TextFields
 const Radius CIRCULAR_RADIUS = Radius.circular(40.0);
-//ignore: non_constant_identifier_names
 const BorderRadius CIRCULAR_BORDER_RADIUS = BorderRadius.all(CIRCULAR_RADIUS);
 
 const BorderRadius MAX_BORDER_RADIUS = BorderRadius.all(Radius.circular(100.0));
