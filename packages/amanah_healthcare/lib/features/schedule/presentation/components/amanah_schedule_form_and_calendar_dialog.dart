@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_notice_banner.dart';
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_duration_info_drawer.dart';
@@ -897,6 +896,15 @@ class _AmanahAddEditScheduleDrawerState
 
     for (final _ScheduleFormSession s in activeSessions) {
       for (final _ScheduleFormSlot slot in s.slots) {
+        if (slot.from.isEmpty || slot.from == 'Pilih Jam') {
+          setState(() => _isSubmitting = false);
+          _showConflictDialog(
+            context,
+            'Silakan tentukan Jam Mulai praktik untuk ${s.name}.',
+            title: 'Validasi Jadwal Praktik',
+          );
+          return;
+        }
         if (slot.room.isEmpty || slot.room == 'Pilih Ruang Praktik') {
           setState(() => _isSubmitting = false);
           _showConflictDialog(
@@ -1100,6 +1108,15 @@ class _AmanahAddEditScheduleDrawerState
     }
 
     final _ScheduleFormSlot lastSlot = session.slots.last;
+    if (lastSlot.from.isEmpty || lastSlot.from == 'Pilih Jam' || lastSlot.to == '-') {
+      _showConflictDialog(
+        context,
+        'Silakan tentukan jam mulai pada antrean sebelumnya terlebih dahulu.',
+        title: 'Tentukan Jam Praktik',
+      );
+      return;
+    }
+
     final int? lastEndMinutes =
         _parseTimeToMinutes(lastSlot.to, sessionId: sessionId);
     final int effectiveLastEnd = lastEndMinutes ?? bounds.endMinutes;
@@ -1181,12 +1198,14 @@ class _AmanahAddEditScheduleDrawerState
                 final _ScheduleFormSlot currentSlot = session.slots[i];
                 final String effectiveFrom = from ?? currentSlot.from;
                 final String effectiveTo = from != null
-                    ? _autoCalculateEndTime(
-                        effectiveFrom,
-                        sessionId,
-                        durationMinutes: duration,
-                        context: ctx,
-                      )
+                    ? (effectiveFrom != 'Pilih Jam'
+                        ? _autoCalculateEndTime(
+                            effectiveFrom,
+                            sessionId,
+                            durationMinutes: duration,
+                            context: ctx,
+                          )
+                        : '-')
                     : (to ?? currentSlot.to);
                 return currentSlot.copyWith(
                   from: effectiveFrom,
@@ -1208,26 +1227,8 @@ class _AmanahAddEditScheduleDrawerState
   }
 
   _ScheduleFormSlot _defaultSlotForSession(String sessionId, {String? id}) {
-    final int duration = _getEffectiveDurationForSession(sessionId);
-    final ScheduleContext? ctx = _getContextForSession(sessionId);
-    final _SessionShiftBoundary bounds = _getSessionShiftBoundary(sessionId, ctx);
-    final String targetShift = _sessionShiftFromId(sessionId);
-    final ScheduleShiftOccupancy? shiftOcc = AmanahScheduleStore
-        .instance.occupancyOverview?.shifts
-        .where((ScheduleShiftOccupancy s) => s.shift == targetShift)
-        .firstOrNull;
-
-    final String initialFrom = shiftOcc?.slots
-            .where((ScheduleShiftSlot s) => s.isAvailable)
-            .firstOrNull
-            ?.startTime ??
-        bounds.defaultStart;
-    final String initialTo = _autoCalculateEndTime(
-      initialFrom,
-      sessionId,
-      durationMinutes: duration,
-      context: ctx,
-    );
+    const String initialFrom = 'Pilih Jam';
+    const String initialTo = '-';
     const String initialRoom = 'Pilih Ruang Praktik';
     const String initialPoli = 'Pilih Poliklinik';
 
@@ -2347,6 +2348,7 @@ class _MiniSlotButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isPlaceholder = value.startsWith('Pilih ') || value == '-';
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: onTap,
@@ -2372,11 +2374,15 @@ class _MiniSlotButton extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: dark
-                      ? AmanahColorTokens.pureWhite
-                      : AmanahColorTokens.neutral900,
+                  color: isPlaceholder
+                      ? (dark
+                          ? AmanahColorTokens.neutral500
+                          : AmanahColorTokens.neutral400)
+                      : (dark
+                          ? AmanahColorTokens.pureWhite
+                          : AmanahColorTokens.neutral900),
                   fontSize: 12,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: isPlaceholder ? FontWeight.w500 : FontWeight.w700,
                 ),
               ),
             ),
@@ -2468,7 +2474,6 @@ class _AmanahScheduleSelectionSheet extends StatefulWidget {
 class _AmanahScheduleSelectionSheetState
     extends State<_AmanahScheduleSelectionSheet> {
   late final TextEditingController _controller;
-  String? _validationError;
 
   @override
   void initState() {
@@ -2480,111 +2485,6 @@ class _AmanahScheduleSelectionSheetState
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  void _validateInput(String text) {
-    if (!widget.isTimePicker || text.trim().isEmpty) {
-      if (_validationError != null) {
-        setState(() => _validationError = null);
-      }
-      return;
-    }
-
-    final ScheduleContext? ctx = widget.sessionId != null
-        ? AmanahScheduleStore.instance.scheduleContexts
-            .where((ScheduleContext c) =>
-                c.sessionShift == widget.sessionId ||
-                c.contextId == widget.sessionId)
-            .firstOrNull
-        : null;
-    final int duration = ctx?.effectiveConsultationDurationMinutes ?? 30;
-    final _SessionShiftBoundary bounds =
-        _getSessionShiftBoundary(widget.sessionId ?? 'pagi', ctx);
-    final int? minutes =
-        _parseTimeToMinutes(text.trim(), sessionId: widget.sessionId);
-
-    if (minutes == null) {
-      setState(() {
-        _validationError = 'Format waktu tidak valid (contoh: 08:30)';
-      });
-    } else if (minutes < bounds.startMinutes ||
-        minutes > bounds.endMinutes - duration) {
-      setState(() {
-        _validationError =
-            'Waktu harus dalam shift (${_formatMinutesToTime(bounds.startMinutes)} - ${_formatMinutesToTime(bounds.endMinutes)} WIB)';
-      });
-    } else {
-      final String formatted = _formatMinutesToTime(minutes);
-      final bool isOptionDisabled = widget.disabledOptions.any(
-        (String d) => d.trim().toLowerCase() == formatted.toLowerCase(),
-      );
-      if (isOptionDisabled) {
-        final String? reason = widget.optionSubtitles[formatted];
-        setState(() {
-          _validationError = reason != null && reason.isNotEmpty
-              ? 'Waktu $formatted tidak tersedia: $reason'
-              : 'Waktu $formatted sudah terisi atau tidak tersedia.';
-        });
-      } else if (_validationError != null) {
-        setState(() => _validationError = null);
-      }
-    }
-  }
-
-  Future<void> _pickViaClock() async {
-    final ScheduleContext? ctx = widget.sessionId != null
-        ? AmanahScheduleStore.instance.scheduleContexts
-            .where((ScheduleContext c) =>
-                c.sessionShift == widget.sessionId ||
-                c.contextId == widget.sessionId)
-            .firstOrNull
-        : null;
-    final int duration = ctx?.effectiveConsultationDurationMinutes ?? 30;
-    final _SessionShiftBoundary bounds =
-        _getSessionShiftBoundary(widget.sessionId ?? 'pagi', ctx);
-    final TimeOfDay initial = TimeOfDay(
-      hour: (bounds.startMinutes ~/ 60).clamp(0, 23),
-      minute: bounds.startMinutes % 60,
-    );
-
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: initial,
-      builder: (BuildContext context, Widget? child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-          child: child ?? const SizedBox.shrink(),
-        );
-      },
-    );
-
-    if (picked != null && mounted) {
-      final int pickedMinutes = picked.hour * 60 + picked.minute;
-      if (pickedMinutes < bounds.startMinutes ||
-          pickedMinutes > bounds.endMinutes - duration) {
-        setState(() {
-          _validationError =
-              'Jam yang dipilih (${_formatMinutesToTime(pickedMinutes)}) di luar rentang shift (${_formatMinutesToTime(bounds.startMinutes)} - ${_formatMinutesToTime(bounds.endMinutes)} WIB)';
-        });
-        return;
-      }
-
-      final String formatted = _formatMinutesToTime(pickedMinutes);
-      final bool isOptionDisabled = widget.disabledOptions.any(
-        (String d) => d.trim().toLowerCase() == formatted.toLowerCase(),
-      );
-      if (isOptionDisabled) {
-        final String? reason = widget.optionSubtitles[formatted];
-        setState(() {
-          _validationError = reason != null && reason.isNotEmpty
-              ? 'Waktu $formatted tidak tersedia: $reason'
-              : 'Waktu $formatted sudah terisi atau tidak tersedia.';
-        });
-        return;
-      }
-
-      Navigator.of(context).pop(formatted);
-    }
   }
 
   @override
@@ -2618,165 +2518,84 @@ class _AmanahScheduleSelectionSheetState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            if (widget.isTimePicker) ...<Widget>[
-              const Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: AmanahNoticeBanner(
-                  message:
-                      'Waktu selesai ("To") dihitung otomatis berdasarkan durasi konsultasi dokter hingga akhir shift.',
-                  variant: AmanahNoticeVariant.info,
-                ),
-              ),
-            ],
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: Container(
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: dark
-                          ? AmanahColorTokens.pureWhite.withValues(
-                              alpha: 0.05,
-                            )
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: _validationError != null
-                            ? AmanahColorTokens.danger
-                            : (dark
-                                  ? AmanahColorTokens.pureWhite.withValues(
-                                      alpha: 0.15,
-                                    )
-                                  : AmanahColorTokens.neutral200),
-                      ),
-                    ),
-                    child: TextField(
-                      controller: _controller,
-                      onChanged: (String val) {
-                        _validateInput(val);
-                        setState(() {});
-                      },
-                      style: TextStyle(
-                        color: dark
-                            ? AmanahColorTokens.pureWhite
-                            : AmanahColorTokens.neutral900,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: widget.isTimePicker
-                            ? 'Ketik jam mulai (cth. 08:45)...'
-                            : 'Cari atau ketik manual...',
-                        hintStyle: TextStyle(
-                          color: dark
-                              ? AmanahColorTokens.neutral500
-                              : AmanahColorTokens.neutral400,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        prefixIcon: Icon(
-                          widget.isTimePicker
-                              ? Icons.schedule_rounded
-                              : Icons.search_rounded,
-                          size: 16,
-                          color: AmanahColorTokens.neutral400,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 8,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                if (_controller.text.trim().isNotEmpty &&
-                    _validationError == null) ...<Widget>[
-                  const SizedBox(width: 8),
-                  AmanahButton.primary(
-                    text: 'Gunakan',
-                    size: AmanahButtonSize.small,
-                    onPressed: () {
-                      final String raw = _controller.text.trim();
-                      if (widget.isTimePicker) {
-                        final int? parsed = _parseTimeToMinutes(
-                          raw,
-                          sessionId: widget.sessionId,
-                        );
-                        if (parsed != null) {
-                          Navigator.of(context).pop(
-                            _formatMinutesToTime(parsed),
-                          );
-                          return;
-                        }
-                      }
-                      Navigator.of(context).pop(raw);
-                    },
-                  ),
-                ],
-                if (widget.isTimePicker) ...<Widget>[
-                  const SizedBox(width: 6),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(10),
-                    onTap: _pickViaClock,
+            if (!widget.isTimePicker) ...<Widget>[
+              Row(
+                children: <Widget>[
+                  Expanded(
                     child: Container(
-                      height: 38,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      height: 40,
+                      alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: dark
-                            ? AmanahColorTokens.pureWhite
-                                .withValues(alpha: 0.08)
-                            : AmanahColorTokens.surfaceSecondaryLight,
-                        borderRadius: BorderRadius.circular(10),
+                            ? AmanahColorTokens.pureWhite.withValues(
+                                alpha: 0.05,
+                              )
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: dark
-                              ? AmanahColorTokens.pureWhite
-                                  .withValues(alpha: 0.15)
+                              ? AmanahColorTokens.pureWhite.withValues(
+                                  alpha: 0.15,
+                                )
                               : AmanahColorTokens.neutral200,
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Icon(
-                            Icons.access_time_rounded,
-                            size: 15,
+                      child: TextField(
+                        controller: _controller,
+                        textAlignVertical: TextAlignVertical.center,
+                        onChanged: (String val) => setState(() {}),
+                        style: TextStyle(
+                          color: dark
+                              ? AmanahColorTokens.pureWhite
+                              : AmanahColorTokens.neutral900,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          isCollapsed: true,
+                          hintText: 'Cari atau ketik manual...',
+                          hintStyle: TextStyle(
                             color: dark
-                                ? AmanahColorTokens.tabActiveDark
-                                : AmanahColorTokens.brand,
+                                ? AmanahColorTokens.neutral500
+                                : AmanahColorTokens.neutral400,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w500,
                           ),
-                          const SizedBox(width: 5),
-                          Text(
-                            'Jam',
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: dark
-                                  ? AmanahColorTokens.tabActiveDark
-                                  : AmanahColorTokens.brand,
-                            ),
+                          prefixIcon: const Icon(
+                            Icons.search_rounded,
+                            size: 18,
+                            color: AmanahColorTokens.neutral400,
                           ),
-                        ],
+                          prefixIconConstraints: const BoxConstraints(
+                            minWidth: 38,
+                            minHeight: 40,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 11,
+                          ),
+                        ),
                       ),
                     ),
                   ),
+                  if (_controller.text.trim().isNotEmpty) ...<Widget>[
+                    const SizedBox(width: 8),
+                    AmanahButton.primary(
+                      text: 'Gunakan',
+                      size: AmanahButtonSize.small,
+                      onPressed: () {
+                        Navigator.of(context).pop(_controller.text.trim());
+                      },
+                    ),
+                  ],
                 ],
-              ],
-            ),
-            if (_validationError != null) ...<Widget>[
-              const SizedBox(height: 5),
-              Text(
-                _validationError!,
-                style: const TextStyle(
-                  color: AmanahColorTokens.danger,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                ),
               ),
+              const SizedBox(height: 12),
             ],
-            const SizedBox(height: 12),
             Text(
-              widget.isTimePicker ? 'Pilihan Cepat Sesi' : 'Pilihan Tersedia',
+              widget.isTimePicker ? 'Pilihan Waktu Shift' : 'Pilihan Tersedia',
               style: TextStyle(
                 color: dark
                     ? AmanahColorTokens.neutral400
@@ -2810,9 +2629,15 @@ class _AmanahScheduleSelectionSheetState
                           ),
                       itemBuilder: (BuildContext context, int index) {
                         final String option = filtered[index];
-                        final bool isSelected =
+                        final bool isPlaceholder =
+                            widget.currentValue.trim().isEmpty ||
+                            widget.currentValue == 'Pilih Jam' ||
+                            widget.currentValue == 'Pilih Ruang Praktik' ||
+                            widget.currentValue == 'Pilih Poliklinik' ||
+                            widget.currentValue == '-';
+                        final bool isSelected = !isPlaceholder &&
                             widget.currentValue.trim().toLowerCase() ==
-                            option.trim().toLowerCase();
+                                option.trim().toLowerCase();
                         final bool isDisabled =
                             !isSelected &&
                             widget.disabledOptions.any(
