@@ -85,6 +85,25 @@ _SessionShiftBoundary _getSessionShiftBoundary(
   }
 }
 
+String _sessionShiftFromId(String sessionId) {
+  switch (sessionId) {
+    case 'dini_hari':
+    case 'early_morning':
+      return 'early_morning';
+    case 'pagi':
+    case 'morning':
+      return 'morning';
+    case 'siang':
+    case 'afternoon':
+      return 'afternoon';
+    case 'malam':
+    case 'night':
+      return 'night';
+    default:
+      return 'morning';
+  }
+}
+
 int? _parseTimeToMinutes(String timeStr, {String? sessionId}) {
   try {
     final String trimmed = timeStr.trim().toUpperCase();
@@ -675,25 +694,6 @@ class _AmanahAddEditScheduleDrawerState
     });
   }
 
-  String _sessionShiftFromId(String sessionId) {
-    switch (sessionId) {
-      case 'dini_hari':
-      case 'early_morning':
-        return 'early_morning';
-      case 'pagi':
-      case 'morning':
-        return 'morning';
-      case 'siang':
-      case 'afternoon':
-        return 'afternoon';
-      case 'malam':
-      case 'night':
-        return 'night';
-      default:
-        return 'morning';
-    }
-  }
-
   ScheduleContext? _getContextForSession(String sessionId) {
     final AmanahScheduleStore store = AmanahScheduleStore.instance;
     final String targetShift = _sessionShiftFromId(sessionId);
@@ -711,6 +711,35 @@ class _AmanahAddEditScheduleDrawerState
       return ctx.effectiveConsultationDurationMinutes;
     }
     return 30; // Database default: practitioners.consultation_duration_minutes
+  }
+
+  Future<void> _loadOccupancyData([String? preferredRoomName]) async {
+    final AmanahScheduleStore store = AmanahScheduleStore.instance;
+    String? roomId;
+    if (preferredRoomName != null && preferredRoomName != 'Pilih Ruang Praktik') {
+      roomId = _rooms
+          .where((ClinicRoomReference r) => r.name == preferredRoomName)
+          .firstOrNull
+          ?.id;
+    } else {
+      for (final _ScheduleFormSession s in _sessions) {
+        for (final _ScheduleFormSlot sl in s.slots) {
+          if (sl.room.isNotEmpty && sl.room != 'Pilih Ruang Praktik') {
+            roomId = _rooms
+                .where((ClinicRoomReference r) => r.name == sl.room)
+                .firstOrNull
+                ?.id;
+            if (roomId != null) break;
+          }
+        }
+        if (roomId != null) break;
+      }
+    }
+
+    await store.loadOccupancyOverview(date: _selectedDate, roomId: roomId);
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _loadReferenceData() async {
@@ -738,6 +767,8 @@ class _AmanahAddEditScheduleDrawerState
             .toList();
       }
     });
+
+    await _loadOccupancyData();
   }
 
   List<_ScheduleFormSession> _buildInitialSessions({
@@ -1170,6 +1201,10 @@ class _AmanahAddEditScheduleDrawerState
         return session.copyWith(slots: slots);
       }).toList();
     });
+
+    if (room != null && room != 'Pilih Ruang Praktik') {
+      _loadOccupancyData(room);
+    }
   }
 
   _ScheduleFormSlot _defaultSlotForSession(String sessionId, {String? id}) {
@@ -1202,6 +1237,7 @@ class _AmanahAddEditScheduleDrawerState
     required List<String> options,
     required ValueChanged<String> onChanged,
     List<String> disabledOptions = const <String>[],
+    Map<String, String> optionSubtitles = const <String, String>{},
     String? sessionId,
     bool isTimePicker = false,
   }) async {
@@ -1229,6 +1265,7 @@ class _AmanahAddEditScheduleDrawerState
         currentValue: currentValue,
         options: effectiveOptions,
         disabledOptions: effectiveDisabled,
+        optionSubtitles: optionSubtitles,
         sessionId: sessionId,
         isTimePicker: isTimePicker,
       ),
@@ -1452,31 +1489,40 @@ class _AmanahAddEditScheduleDrawerState
           Column(
             children: <Widget>[
               for (final _ScheduleFormSession session in _sessions) ...<Widget>[
-                _ScheduleSessionPanel(
-                  session: session,
-                  dark: dark,
-                  onToggle: (bool value) => _toggleSession(session.id, value),
-                  onSlotChanged: ({
-                    required int slotIndex,
-                    String? from,
-                    String? to,
-                    String? room,
-                    String? poli,
-                  }) {
-                    _updateSlot(
-                      session.id,
-                      slotIndex,
-                      from: from,
-                      to: to,
-                      room: room,
-                      poli: poli,
-                    );
-                  },
-                  onAddSlot: () => _addTimeSlot(session.id),
-                  onRemoveSlot: (int slotIndex) =>
-                      _removeTimeSlot(session.id, slotIndex),
-                  onOpenSelection: _openSelectionSheet,
-                ),
+                () {
+                  final String targetShift = _sessionShiftFromId(session.id);
+                  final ScheduleShiftOccupancy? shiftOcc = AmanahScheduleStore
+                      .instance.occupancyOverview?.shifts
+                      .where((ScheduleShiftOccupancy s) => s.shift == targetShift)
+                      .firstOrNull;
+
+                  return _ScheduleSessionPanel(
+                    session: session,
+                    occupancy: shiftOcc,
+                    dark: dark,
+                    onToggle: (bool value) => _toggleSession(session.id, value),
+                    onSlotChanged: ({
+                      required int slotIndex,
+                      String? from,
+                      String? to,
+                      String? room,
+                      String? poli,
+                    }) {
+                      _updateSlot(
+                        session.id,
+                        slotIndex,
+                        from: from,
+                        to: to,
+                        room: room,
+                        poli: poli,
+                      );
+                    },
+                    onAddSlot: () => _addTimeSlot(session.id),
+                    onRemoveSlot: (int slotIndex) =>
+                        _removeTimeSlot(session.id, slotIndex),
+                    onOpenSelection: _openSelectionSheet,
+                  );
+                }(),
                 const SizedBox(height: 10),
               ],
             ],
@@ -1828,6 +1874,7 @@ typedef _OpenScheduleSelectionSheet =
       required List<String> options,
       required ValueChanged<String> onChanged,
       List<String> disabledOptions,
+      Map<String, String> optionSubtitles,
       String? sessionId,
       bool isTimePicker,
     });
@@ -1844,6 +1891,7 @@ typedef _ScheduleSlotChanged =
 class _ScheduleSessionPanel extends StatelessWidget {
   const _ScheduleSessionPanel({
     required this.session,
+    this.occupancy,
     required this.dark,
     required this.onToggle,
     required this.onSlotChanged,
@@ -1853,6 +1901,7 @@ class _ScheduleSessionPanel extends StatelessWidget {
   });
 
   final _ScheduleFormSession session;
+  final ScheduleShiftOccupancy? occupancy;
   final bool dark;
   final ValueChanged<bool> onToggle;
   final _ScheduleSlotChanged onSlotChanged;
@@ -1903,7 +1952,9 @@ class _ScheduleSessionPanel extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      session.name,
+                      occupancy != null
+                          ? '${session.name} (${occupancy!.availableSlotsCount}/${occupancy!.totalSlots} Tersedia)'
+                          : session.name,
                       style: TextStyle(
                         color: expanded
                             ? (dark
@@ -1937,6 +1988,7 @@ class _ScheduleSessionPanel extends StatelessWidget {
                             session: session,
                             slot: session.slots[index],
                             slotIndex: index,
+                            occupancy: occupancy,
                             dark: dark,
                             showDivider: index > 0,
                             onOpenSelection: onOpenSelection,
@@ -2006,6 +2058,7 @@ class _ScheduleSlotRow extends StatelessWidget {
     required this.session,
     required this.slot,
     required this.slotIndex,
+    this.occupancy,
     required this.dark,
     required this.showDivider,
     required this.onOpenSelection,
@@ -2016,6 +2069,7 @@ class _ScheduleSlotRow extends StatelessWidget {
   final _ScheduleFormSession session;
   final _ScheduleFormSlot slot;
   final int slotIndex;
+  final ScheduleShiftOccupancy? occupancy;
   final bool dark;
   final bool showDivider;
   final _OpenScheduleSelectionSheet onOpenSelection;
@@ -2057,13 +2111,45 @@ class _ScheduleSlotRow extends StatelessWidget {
                       .firstOrNull;
                   final _SessionShiftBoundary bounds =
                       _getSessionShiftBoundary(session.id, ctx);
+
+                  final List<String> timeOptions;
+                  final List<String> disabledTimes = <String>[];
+                  final Map<String, String> subtitles = <String, String>{};
+
+                  if (occupancy != null && occupancy!.slots.isNotEmpty) {
+                    timeOptions = occupancy!.slots
+                        .map((ScheduleShiftSlot s) => s.startTime)
+                        .toList();
+                    for (final ScheduleShiftSlot s in occupancy!.slots) {
+                      if (!s.isAvailable) {
+                        disabledTimes.add(s.startTime);
+                        if (s.displayLabel.isNotEmpty) {
+                          subtitles[s.startTime] = s.displayLabel;
+                        }
+                      }
+                    }
+                  } else {
+                    timeOptions =
+                        _getTimeOptionsForSession(session.id, context: ctx);
+                  }
+
+                  for (final _ScheduleFormSlot otherSlot in session.slots) {
+                    if (otherSlot.id != slot.id && otherSlot.from.isNotEmpty) {
+                      if (!disabledTimes.contains(otherSlot.from)) {
+                        disabledTimes.add(otherSlot.from);
+                        subtitles[otherSlot.from] = 'Antrean lain';
+                      }
+                    }
+                  }
+
                   onOpenSelection(
                     title: 'Pilih Waktu Mulai (${session.name})',
                     subtitle:
                         'Batas shift: ${_formatMinutesToTime(bounds.startMinutes)} - ${_formatMinutesToTime(bounds.endMinutes)} WIB',
                     currentValue: slot.from,
-                    options: _getTimeOptionsForSession(session.id, context: ctx),
-                    disabledOptions: const <String>[],
+                    options: timeOptions,
+                    disabledOptions: disabledTimes,
+                    optionSubtitles: subtitles,
                     sessionId: session.id,
                     isTimePicker: true,
                     onChanged: (String value) =>
@@ -2318,6 +2404,7 @@ class _AmanahScheduleSelectionSheet extends StatefulWidget {
     required this.currentValue,
     required this.options,
     this.disabledOptions = const <String>[],
+    this.optionSubtitles = const <String, String>{},
     this.sessionId,
     this.isTimePicker = false,
   });
@@ -2327,6 +2414,7 @@ class _AmanahScheduleSelectionSheet extends StatefulWidget {
   final String currentValue;
   final List<String> options;
   final List<String> disabledOptions;
+  final Map<String, String> optionSubtitles;
   final String? sessionId;
   final bool isTimePicker;
 
@@ -2384,7 +2472,18 @@ class _AmanahScheduleSelectionSheetState
             'Waktu harus dalam shift (${_formatMinutesToTime(bounds.startMinutes)} - ${_formatMinutesToTime(bounds.endMinutes)} WIB)';
       });
     } else {
-      if (_validationError != null) {
+      final String formatted = _formatMinutesToTime(minutes);
+      final bool isOptionDisabled = widget.disabledOptions.any(
+        (String d) => d.trim().toLowerCase() == formatted.toLowerCase(),
+      );
+      if (isOptionDisabled) {
+        final String? reason = widget.optionSubtitles[formatted];
+        setState(() {
+          _validationError = reason != null && reason.isNotEmpty
+              ? 'Waktu $formatted tidak tersedia: $reason'
+              : 'Waktu $formatted sudah terisi atau tidak tersedia.';
+        });
+      } else if (_validationError != null) {
         setState(() => _validationError = null);
       }
     }
@@ -2429,6 +2528,19 @@ class _AmanahScheduleSelectionSheetState
       }
 
       final String formatted = _formatMinutesToTime(pickedMinutes);
+      final bool isOptionDisabled = widget.disabledOptions.any(
+        (String d) => d.trim().toLowerCase() == formatted.toLowerCase(),
+      );
+      if (isOptionDisabled) {
+        final String? reason = widget.optionSubtitles[formatted];
+        setState(() {
+          _validationError = reason != null && reason.isNotEmpty
+              ? 'Waktu $formatted tidak tersedia: $reason'
+              : 'Waktu $formatted sudah terisi atau tidak tersedia.';
+        });
+        return;
+      }
+
       Navigator.of(context).pop(formatted);
     }
   }
@@ -2647,9 +2759,10 @@ class _AmanahScheduleSelectionSheetState
                       physics: const BouncingScrollPhysics(),
                       itemCount: filtered.length,
                       gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
+                          SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
-                            mainAxisExtent: 44,
+                            mainAxisExtent:
+                                widget.optionSubtitles.isNotEmpty ? 52 : 44,
                             crossAxisSpacing: 8,
                             mainAxisSpacing: 8,
                           ),
@@ -2665,6 +2778,7 @@ class _AmanahScheduleSelectionSheetState
                                   d.trim().toLowerCase() ==
                                   option.trim().toLowerCase(),
                             );
+                        final String? subtitle = widget.optionSubtitles[option];
 
                         return InkWell(
                           borderRadius: BorderRadius.circular(12),
@@ -2675,7 +2789,7 @@ class _AmanahScheduleSelectionSheetState
                             duration: const Duration(milliseconds: 140),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
-                              vertical: 8,
+                              vertical: 6,
                             ),
                             decoration: BoxDecoration(
                               color: isSelected
@@ -2714,25 +2828,57 @@ class _AmanahScheduleSelectionSheetState
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Expanded(
-                                  child: Text(
-                                    option,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: isSelected
-                                          ? selectedForeground
-                                          : isDisabled
-                                          ? (dark
-                                                ? AmanahColorTokens.neutral600
-                                                : AmanahColorTokens.neutral400)
-                                          : (dark
-                                                ? AmanahColorTokens.pureWhite
-                                                : AmanahColorTokens.neutral900),
-                                      fontSize: 12,
-                                      fontWeight: isSelected
-                                          ? FontWeight.w800
-                                          : FontWeight.w600,
-                                    ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text(
+                                        option,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: isSelected
+                                              ? selectedForeground
+                                              : isDisabled
+                                              ? (dark
+                                                    ? AmanahColorTokens
+                                                          .neutral600
+                                                    : AmanahColorTokens
+                                                          .neutral400)
+                                              : (dark
+                                                    ? AmanahColorTokens
+                                                          .pureWhite
+                                                    : AmanahColorTokens
+                                                          .neutral900),
+                                          fontSize: 12,
+                                          fontWeight: isSelected
+                                              ? FontWeight.w800
+                                              : FontWeight.w600,
+                                        ),
+                                      ),
+                                      if (subtitle != null &&
+                                          subtitle.isNotEmpty) ...<Widget>[
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          subtitle,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: isSelected
+                                                ? selectedForeground
+                                                      .withValues(alpha: 0.8)
+                                                : (dark
+                                                      ? AmanahColorTokens
+                                                            .neutral500
+                                                      : AmanahColorTokens
+                                                            .neutral400),
+                                            fontSize: 9.5,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ),
                                 if (isSelected)

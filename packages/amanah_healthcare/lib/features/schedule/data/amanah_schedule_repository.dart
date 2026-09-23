@@ -645,5 +645,34 @@ class AmanahScheduleRepository {
     _handleHttpError(response);
     throw const AmanahScheduleException('Gagal membuat ketersediaan jadwal');
   }
+
+  /// GET /api/v1/schedules/occupancy-overview?date=YYYY-MM-DD&roomId=...
+  Future<ScheduleOccupancyOverviewData> fetchOccupancyOverview({
+    required String date,
+    String? roomId,
+  }) async {
+    final Map<String, String> queryParameters = <String, String>{'date': date};
+    if (roomId != null && roomId.isNotEmpty) {
+      queryParameters['roomId'] = roomId;
+    }
+
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/occupancy-overview').replace(
+      queryParameters: queryParameters,
+    );
+
+    final http.Response response = await _get(uri);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final dynamic decoded = jsonDecode(response.body);
+      final dynamic data = decoded is Map<String, dynamic> && decoded['data'] != null
+          ? decoded['data']
+          : decoded;
+      if (data is Map<String, dynamic>) {
+        return ScheduleOccupancyOverviewData.fromJson(data);
+      }
+    }
+
+    _handleHttpError(response);
+    throw const AmanahScheduleException('Gagal mengambil data occupancy jadwal');
+  }
 }
 

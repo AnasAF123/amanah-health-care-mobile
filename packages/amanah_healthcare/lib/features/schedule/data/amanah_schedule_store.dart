@@ -35,6 +35,7 @@ class AmanahScheduleStore extends ChangeNotifier {
   final Map<String, CalendarDaySummary> _calendarSummariesMap = <String, CalendarDaySummary>{};
   List<ScheduleContext> _scheduleContexts = const <ScheduleContext>[];
   ScheduleProjection? _currentProjection;
+  ScheduleOccupancyOverviewData? _occupancyOverview;
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -45,6 +46,7 @@ class AmanahScheduleStore extends ChangeNotifier {
   Map<String, CalendarDaySummary> get calendarSummariesMap => _calendarSummariesMap;
   List<ScheduleContext> get scheduleContexts => _scheduleContexts;
   ScheduleProjection? get currentProjection => _currentProjection;
+  ScheduleOccupancyOverviewData? get occupancyOverview => _occupancyOverview;
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -451,6 +453,31 @@ class AmanahScheduleStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearOccupancyOverview() {
+    _occupancyOverview = null;
+    notifyListeners();
+  }
+
+  Future<ScheduleOccupancyOverviewData?> loadOccupancyOverview({
+    required DateTime date,
+    String? roomId,
+  }) async {
+    try {
+      final ScheduleOccupancyOverviewData data =
+          await _repository.fetchOccupancyOverview(
+        date: formatDateKey(date),
+        roomId: roomId,
+      );
+      _occupancyOverview = data;
+      notifyListeners();
+      return data;
+    } catch (e) {
+      _occupancyOverview = null;
+      notifyListeners();
+      return null;
+    }
+  }
+
   Future<ScheduleProjection?> loadProjection({
     required DateTime date,
     required String scheduleContextId,
@@ -526,6 +553,7 @@ class AmanahScheduleStore extends ChangeNotifier {
     _calendarSummariesMap.clear();
     _scheduleContexts = const <ScheduleContext>[];
     _currentProjection = null;
+    _occupancyOverview = null;
     _customBaseToday = null;
     _isLoading = false;
     _errorMessage = null;
