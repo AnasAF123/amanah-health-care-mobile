@@ -1211,7 +1211,17 @@ class _AmanahAddEditScheduleDrawerState
     final int duration = _getEffectiveDurationForSession(sessionId);
     final ScheduleContext? ctx = _getContextForSession(sessionId);
     final _SessionShiftBoundary bounds = _getSessionShiftBoundary(sessionId, ctx);
-    final String initialFrom = bounds.defaultStart;
+    final String targetShift = _sessionShiftFromId(sessionId);
+    final ScheduleShiftOccupancy? shiftOcc = AmanahScheduleStore
+        .instance.occupancyOverview?.shifts
+        .where((ScheduleShiftOccupancy s) => s.shift == targetShift)
+        .firstOrNull;
+
+    final String initialFrom = shiftOcc?.slots
+            .where((ScheduleShiftSlot s) => s.isAvailable)
+            .firstOrNull
+            ?.startTime ??
+        bounds.defaultStart;
     final String initialTo = _autoCalculateEndTime(
       initialFrom,
       sessionId,
@@ -1951,22 +1961,54 @@ class _ScheduleSessionPanel extends StatelessWidget {
               child: Row(
                 children: <Widget>[
                   Expanded(
-                    child: Text(
-                      occupancy != null
-                          ? '${session.name} (${occupancy!.availableSlotsCount}/${occupancy!.totalSlots} Tersedia)'
-                          : session.name,
-                      style: TextStyle(
-                        color: expanded
-                            ? (dark
-                                  ? AmanahColorTokens.pureWhite
-                                  : AmanahColorTokens.neutral900)
-                            : (dark
-                                  ? AmanahColorTokens.neutral300
-                                  : AmanahColorTokens.neutral700),
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.1,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          session.name,
+                          style: TextStyle(
+                            color: expanded
+                                ? (dark
+                                      ? AmanahColorTokens.pureWhite
+                                      : AmanahColorTokens.neutral900)
+                                : (dark
+                                      ? AmanahColorTokens.pureWhite
+                                      : AmanahColorTokens.neutral900),
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.1,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        () {
+                          final _SessionShiftBoundary bounds =
+                              _getSessionShiftBoundary(session.id);
+                          final String rangeStr = occupancy?.timeRange ??
+                              '${bounds.defaultStart} - ${bounds.defaultEnd} WIB';
+                          final String availabilityStr = occupancy != null
+                              ? '${occupancy!.availableSlotsCount}/${occupancy!.totalSlots} Tersedia'
+                              : '';
+                          final String fullSubtitle =
+                              availabilityStr.isNotEmpty
+                                  ? '$rangeStr • $availabilityStr'
+                                  : rangeStr;
+
+                          return Text(
+                            fullSubtitle,
+                            style: TextStyle(
+                              color: dark
+                                  ? (expanded
+                                        ? AmanahColorTokens.tabActiveDark
+                                        : AmanahColorTokens.neutral400)
+                                  : (expanded
+                                        ? AmanahColorTokens.brand
+                                        : AmanahColorTokens.neutral500),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          );
+                        }(),
+                      ],
                     ),
                   ),
                   _ScheduleToggleSwitch(active: expanded, dark: dark),

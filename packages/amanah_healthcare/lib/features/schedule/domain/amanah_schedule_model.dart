@@ -985,6 +985,7 @@ class ScheduleShiftSlot {
 class ScheduleShiftOccupancy {
   final String shift;
   final String shiftLabel;
+  final String timeRange;
   final String boundaryStartTime;
   final String boundaryEndTime;
   final int slotDurationMinutes;
@@ -996,6 +997,7 @@ class ScheduleShiftOccupancy {
   const ScheduleShiftOccupancy({
     required this.shift,
     required this.shiftLabel,
+    required this.timeRange,
     required this.boundaryStartTime,
     required this.boundaryEndTime,
     required this.slotDurationMinutes,
@@ -1014,11 +1016,25 @@ class ScheduleShiftOccupancy {
             .toList()
         : <ScheduleShiftSlot>[];
 
+    final String shiftCode = json['sessionShift'] as String? ??
+        json['contextId'] as String? ??
+        json['shift'] as String? ??
+        '';
+    final String label = json['contextLabel'] as String? ??
+        json['shiftLabel'] as String? ??
+        json['label'] as String? ??
+        '';
+    final String boundaryStart = json['boundaryStartTime'] as String? ?? '00:00';
+    final String boundaryEnd = json['boundaryEndTime'] as String? ?? '23:59';
+    final String timeRange = json['timeRange'] as String? ??
+        '$boundaryStart - $boundaryEnd WIB';
+
     return ScheduleShiftOccupancy(
-      shift: json['shift'] as String? ?? '',
-      shiftLabel: json['shiftLabel'] as String? ?? '',
-      boundaryStartTime: json['boundaryStartTime'] as String? ?? '00:00',
-      boundaryEndTime: json['boundaryEndTime'] as String? ?? '23:59',
+      shift: shiftCode,
+      shiftLabel: label,
+      timeRange: timeRange,
+      boundaryStartTime: boundaryStart,
+      boundaryEndTime: boundaryEnd,
       slotDurationMinutes: json['slotDurationMinutes'] as int? ?? 30,
       totalSlots: json['totalSlots'] as int? ?? parsedSlots.length,
       availableSlotsCount: json['availableSlotsCount'] as int? ??
