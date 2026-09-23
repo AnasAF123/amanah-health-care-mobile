@@ -7,11 +7,13 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 
 class AmanahEditProfileResult {
   const AmanahEditProfileResult({
+    required this.name,
     required this.phone,
     required this.email,
     required this.bio,
   });
 
+  final String name;
   final String phone;
   final String email;
   final String bio;
@@ -55,6 +57,7 @@ class AmanahEditProfileDrawer extends StatefulWidget {
 }
 
 class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
+  late final TextEditingController _nameController;
   late final TextEditingController _phoneController;
   late final TextEditingController _emailController;
   late final TextEditingController _bioController;
@@ -63,6 +66,7 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
   @override
   void initState() {
     super.initState();
+    _nameController = TextEditingController(text: widget.doctorName);
     _phoneController = TextEditingController(text: widget.initialPhone);
     _emailController = TextEditingController(text: widget.initialEmail);
     _bioController = TextEditingController(text: widget.initialBio);
@@ -70,6 +74,7 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     _bioController.dispose();
@@ -82,6 +87,7 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
       if (mounted) {
         Navigator.of(context).pop(
           AmanahEditProfileResult(
+            name: _nameController.text.trim(),
             phone: _phoneController.text.trim(),
             email: _emailController.text.trim(),
             bio: _bioController.text.trim(),
@@ -135,7 +141,7 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // 1. Nama Lengkap & Gelar (Read-only verified)
+          // 1. Nama Lengkap & Gelar
           Text(
             'Nama Lengkap & Gelar',
             style: TextStyle(
@@ -145,22 +151,40 @@ class _AmanahEditProfileDrawerState extends State<AmanahEditProfileDrawer> {
             ),
           ),
           const SizedBox(height: 6),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-            decoration: BoxDecoration(
-              color: dark
-                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
-                  : AmanahColorTokens.neutral50,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: fieldBorder),
+          TextField(
+            controller: _nameController,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: textColor,
             ),
-            child: Text(
-              widget.doctorName,
-              style: TextStyle(
+            decoration: InputDecoration(
+              hintText: 'dr. Nama dokter, Sp.A',
+              hintStyle: TextStyle(
                 fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: dark ? AmanahColorTokens.neutral300 : AmanahColorTokens.neutral700,
+                color: subtextColor.withValues(alpha: 0.60),
+              ),
+              prefixIcon: Icon(
+                Icons.badge_outlined,
+                size: 16,
+                color: subtextColor,
+              ),
+              filled: true,
+              fillColor: fieldBg,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 12,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: fieldBorder),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(
+                  color: AmanahColorTokens.brandPrimary,
+                  width: 1.5,
+                ),
               ),
             ),
           ),

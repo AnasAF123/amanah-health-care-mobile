@@ -33,6 +33,8 @@ class AmanahScheduleStore extends ChangeNotifier {
   late Map<String, List<DoctorSchedule>> _schedulesMap;
   late Map<String, DayScheduleSetting> _daySettingsMap;
   final Map<String, CalendarDaySummary> _calendarSummariesMap = <String, CalendarDaySummary>{};
+  List<ScheduleContext> _scheduleContexts = const <ScheduleContext>[];
+  ScheduleProjection? _currentProjection;
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -41,6 +43,8 @@ class AmanahScheduleStore extends ChangeNotifier {
   Map<String, List<DoctorSchedule>> get schedulesMap => _schedulesMap;
   Map<String, DayScheduleSetting> get daySettingsMap => _daySettingsMap;
   Map<String, CalendarDaySummary> get calendarSummariesMap => _calendarSummariesMap;
+  List<ScheduleContext> get scheduleContexts => _scheduleContexts;
+  ScheduleProjection? get currentProjection => _currentProjection;
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
@@ -421,11 +425,107 @@ class AmanahScheduleStore extends ChangeNotifier {
     }
   }
 
+  Future<List<ScheduleContext>> loadScheduleContexts(DateTime date) async {
+    _isLoading = true;
+    _errorMessage = null;
+    await Future<void>.value();
+    notifyListeners();
+
+    try {
+      final List<ScheduleContext> contexts =
+          await _repository.fetchScheduleContexts(date: formatDateKey(date));
+      _scheduleContexts = contexts;
+      _isLoading = false;
+      notifyListeners();
+      return contexts;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+      return _scheduleContexts;
+    }
+  }
+
+  void clearProjection() {
+    _currentProjection = null;
+    notifyListeners();
+  }
+
+  Future<ScheduleProjection?> loadProjection({
+    required DateTime date,
+    required String scheduleContextId,
+    required String startTime,
+    String? roomId,
+    String? serviceId,
+  }) async {
+    try {
+      final ScheduleProjection projection = await _repository.fetchProjection(
+        date: formatDateKey(date),
+        scheduleContextId: scheduleContextId,
+        startTime: startTime,
+        roomId: roomId,
+        serviceId: serviceId,
+      );
+      _currentProjection = projection;
+      notifyListeners();
+      return projection;
+    } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
+
+  Future<DoctorSchedule> createAvailability({
+    required DateTime date,
+    required String scheduleContextId,
+    required String startTime,
+    String? roomId,
+    String? poliklinikId,
+    String? serviceId,
+    String? notes,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    _lastConflict = null;
+    await Future<void>.value();
+    notifyListeners();
+
+    try {
+      final DoctorSchedule schedule = await _repository.createAvailability(
+        date: formatDateKey(date),
+        scheduleContextId: scheduleContextId,
+        startTime: startTime,
+        roomId: roomId,
+        poliklinikId: poliklinikId,
+        serviceId: serviceId,
+        notes: notes,
+      );
+
+      await loadSchedulesForDate(date, forceRefresh: true);
+      _isLoading = false;
+      notifyListeners();
+      return schedule;
+    } on AmanahScheduleConflictException catch (e) {
+      _isLoading = false;
+      _lastConflict = e;
+      _errorMessage = e.message;
+      notifyListeners();
+      rethrow;
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
 
   void reset() {
     _schedulesMap = <String, List<DoctorSchedule>>{};
     _daySettingsMap = <String, DayScheduleSetting>{};
     _calendarSummariesMap.clear();
+    _scheduleContexts = const <ScheduleContext>[];
+    _currentProjection = null;
     _customBaseToday = null;
     _isLoading = false;
     _errorMessage = null;

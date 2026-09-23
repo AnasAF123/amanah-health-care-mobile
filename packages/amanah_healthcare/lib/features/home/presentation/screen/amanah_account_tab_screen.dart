@@ -117,6 +117,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
     if (result != null && mounted) {
       try {
         await widget.repository.updateMyProfile(
+          fullName: result.name,
           phoneNumber: result.phone,
         );
       } catch (_) {}

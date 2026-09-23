@@ -10,7 +10,7 @@ class AmanahScheduleException implements Exception {
   String toString() => message;
 }
 
-/// Conflict exception thrown on HTTP 409 Conflict responses.
+/// Conflict exception thrown on HTTP 409/422 Conflict and Unprocessable responses.
 class AmanahScheduleConflictException extends AmanahScheduleException {
   const AmanahScheduleConflictException({
     required String message,
@@ -30,11 +30,45 @@ class AmanahScheduleConflictException extends AmanahScheduleException {
   static const String roomAlreadyOccupied = 'ROOM_ALREADY_OCCUPIED';
   static const String practitionerAlreadyScheduled = 'PRACTITIONER_ALREADY_SCHEDULED';
   static const String invalidTimeRange = 'INVALID_TIME_RANGE';
+  static const String startOutsideBoundary = 'START_OUTSIDE_BOUNDARY';
+  static const String invalidStartPrecision = 'INVALID_START_PRECISION';
+  static const String durationLeavesNoCapacity = 'DURATION_LEAVES_NO_CAPACITY';
+  static const String dateClosed = 'DATE_CLOSED';
+  static const String scheduleModifiedConcurrently = 'SCHEDULE_MODIFIED_CONCURRENTLY';
 
   bool get hasActiveBookings => code == scheduleHasActiveBookings;
   bool get isRoomOccupied => code == roomAlreadyOccupied;
   bool get isPractitionerConflict => code == practitionerAlreadyScheduled;
   bool get isInvalidTimeRange => code == invalidTimeRange;
+  bool get isStartOutsideBoundary => code == startOutsideBoundary;
+  bool get isInvalidStartPrecision => code == invalidStartPrecision;
+  bool get isDurationLeavesNoCapacity => code == durationLeavesNoCapacity;
+  bool get isDateClosed => code == dateClosed;
+  bool get isConcurrentModification => code == scheduleModifiedConcurrently;
+
+  /// Returns user-facing Indonesian message based on canonical domain error codes.
+  static String userMessageForCode(String code, {String? defaultMessage}) {
+    switch (code) {
+      case startOutsideBoundary:
+        return 'Jam mulai berada di luar batas waktu shift yang dipilih.';
+      case invalidStartPrecision:
+        return 'Jam mulai tidak sesuai presisi menit yang diizinkan.';
+      case durationLeavesNoCapacity:
+        return 'Waktu mulai terlalu dekat dengan akhir shift sehingga tidak ada kuota konsultasi.';
+      case dateClosed:
+        return 'Tidak dapat membuat jadwal karena Anda tercatat sedang cuti pada tanggal ini.';
+      case practitionerAlreadyScheduled:
+        return 'Anda sudah memiliki jadwal lain yang bertabrakan pada rentang waktu ini.';
+      case roomAlreadyOccupied:
+        return 'Ruangan tersebut sudah digunakan oleh dokter lain pada jam ini.';
+      case scheduleHasActiveBookings:
+        return 'Jadwal tidak dapat dihapus atau diubah karena sudah ada pasien terdaftar. Silakan batalkan atau pindahkan pasien terlebih dahulu.';
+      case scheduleModifiedConcurrently:
+        return 'Jadwal telah diubah oleh pengguna lain. Silakan muat ulang halaman.';
+      default:
+        return defaultMessage ?? 'Terjadi kendala penjadwalan pada sistem.';
+    }
+  }
 }
 
 class BookedPatient {
@@ -213,6 +247,7 @@ class DoctorSchedule {
     this.isAvailable = true,
     this.notes,
     this.sessionShift = 'morning',
+    this.version,
   });
 
   factory DoctorSchedule.fromJson(Map<String, dynamic> json) {
@@ -236,15 +271,30 @@ class DoctorSchedule {
         json['specificDate'] as String? ??
         '';
 
+    final String? version = json['version'] as String?;
+    final String rawStatus = (json['rawStatus'] as String? ?? json['status'] as String? ?? '').toLowerCase();
     final bool isAvailable = json['isAvailable'] as bool? ??
-        (json['rawStatus'] == 'open' || json['status'] == 'Buka');
-    final String badge = isAvailable ? 'Buka' : 'Tutup';
-    final AmanahBadgeVariant badgeVariant = isAvailable
-        ? AmanahBadgeVariant.success
-        : AmanahBadgeVariant.warning;
+        (rawStatus != 'closed' && rawStatus != 'tutup');
+    
+    final int bookedPatientCount = json['bookedPatientCount'] as int? ??
+        (json['bookedPatients'] as List<dynamic>?)?.length ??
+        0;
+
+    // Canonical status: OPEN ('Buka'), OCCUPIED ('Terisi'), CLOSED ('Tutup')
+    final String badge;
+    final AmanahBadgeVariant badgeVariant;
+    if (!isAvailable || rawStatus == 'closed' || rawStatus == 'tutup') {
+      badge = 'Tutup';
+      badgeVariant = AmanahBadgeVariant.warning;
+    } else if (bookedPatientCount > 0 || rawStatus == 'occupied' || rawStatus == 'terisi') {
+      badge = 'Terisi';
+      badgeVariant = AmanahBadgeVariant.primary;
+    } else {
+      badge = 'Buka';
+      badgeVariant = AmanahBadgeVariant.success;
+    }
 
     final int capacity = json['capacity'] as int? ?? 8;
-    final int bookedPatientCount = json['bookedPatientCount'] as int? ?? 0;
     final int availableSlots = json['availableSlots'] as int? ?? (capacity - bookedPatientCount);
 
     final List<dynamic>? bookedPatientsRaw = json['bookedPatients'] as List<dynamic>?;
@@ -280,6 +330,7 @@ class DoctorSchedule {
       isAvailable: isAvailable,
       notes: json['notes'] as String?,
       sessionShift: sessionShift,
+      version: version,
     );
   }
 
@@ -307,6 +358,7 @@ class DoctorSchedule {
   final bool isAvailable;
   final String? notes;
   final String sessionShift;
+  final String? version;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -329,6 +381,7 @@ class DoctorSchedule {
       'isAvailable': isAvailable,
       'status': badge,
       'notes': notes,
+      'version': version,
       'bookedPatients': bookedPatients.map((BookedPatient p) => p.toJson()).toList(),
     };
   }
@@ -358,6 +411,7 @@ class DoctorSchedule {
     bool? isAvailable,
     String? notes,
     String? sessionShift,
+    String? version,
   }) {
     return DoctorSchedule(
       id: id ?? this.id,
@@ -384,6 +438,7 @@ class DoctorSchedule {
       isAvailable: isAvailable ?? this.isAvailable,
       notes: notes ?? this.notes,
       sessionShift: sessionShift ?? this.sessionShift,
+      version: version ?? this.version,
     );
   }
 }
@@ -656,5 +711,184 @@ class ClinicScheduleOptionsReference {
   final List<ClinicShiftReference> shifts;
   final List<ClinicStatusReference> statuses;
   final List<int> timeIntervals;
+}
+
+class ScheduleContext {
+  final String contextId;
+  final String contextLabel;
+  final String sessionShift;
+  final String date;
+  final String boundaryStartTime;
+  final String boundaryEndTime;
+  final int effectiveConsultationDurationMinutes;
+  final int allowedStartPrecisionMinutes;
+  final bool durationEditableByCurrentUser;
+
+  const ScheduleContext({
+    required this.contextId,
+    required this.contextLabel,
+    required this.sessionShift,
+    required this.date,
+    required this.boundaryStartTime,
+    required this.boundaryEndTime,
+    required this.effectiveConsultationDurationMinutes,
+    required this.allowedStartPrecisionMinutes,
+    required this.durationEditableByCurrentUser,
+  });
+
+  factory ScheduleContext.fromJson(Map<String, dynamic> json) {
+    return ScheduleContext(
+      contextId: json['contextId'] as String? ?? json['id'] as String? ?? '',
+      contextLabel: json['contextLabel'] as String? ?? json['label'] as String? ?? '',
+      sessionShift: json['sessionShift'] as String? ?? json['shift'] as String? ?? 'morning',
+      date: json['date'] as String? ?? '',
+      boundaryStartTime: json['boundaryStartTime'] as String? ?? json['startTime'] as String? ?? '06:00',
+      boundaryEndTime: json['boundaryEndTime'] as String? ?? json['endTime'] as String? ?? '12:00',
+      effectiveConsultationDurationMinutes:
+          json['effectiveConsultationDurationMinutes'] as int? ?? 30,
+      allowedStartPrecisionMinutes:
+          json['allowedStartPrecisionMinutes'] as int? ?? 1,
+      durationEditableByCurrentUser:
+          json['durationEditableByCurrentUser'] as bool? ?? false,
+    );
+  }
+}
+
+enum ScheduleIntervalStatus {
+  open('OPEN', 'Buka'),
+  occupied('OCCUPIED', 'Terisi'),
+  closed('CLOSED', 'Tutup');
+
+  final String code;
+  final String label;
+  const ScheduleIntervalStatus(this.code, this.label);
+
+  static ScheduleIntervalStatus fromCode(String code) {
+    switch (code.toUpperCase()) {
+      case 'OCCUPIED':
+      case 'TERISI':
+        return ScheduleIntervalStatus.occupied;
+      case 'CLOSED':
+      case 'TUTUP':
+        return ScheduleIntervalStatus.closed;
+      case 'OPEN':
+      case 'BUKA':
+      default:
+        return ScheduleIntervalStatus.open;
+    }
+  }
+}
+
+class AppointmentRef {
+  final String appointmentId;
+  final String? queueNumber;
+  final String status;
+
+  const AppointmentRef({
+    required this.appointmentId,
+    this.queueNumber,
+    required this.status,
+  });
+
+  factory AppointmentRef.fromJson(Map<String, dynamic> json) {
+    return AppointmentRef(
+      appointmentId: json['appointmentId'] as String? ?? '',
+      queueNumber: json['queueNumber'] as String?,
+      status: json['status'] as String? ?? 'booked',
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'appointmentId': appointmentId,
+    if (queueNumber != null) 'queueNumber': queueNumber,
+    'status': status,
+  };
+}
+
+class ScheduleInterval {
+  final int intervalIndex;
+  final String startTime;
+  final String endTime;
+  final ScheduleIntervalStatus status;
+  final String displayLabel;
+  final bool isOccupied;
+  final AppointmentRef? appointmentRef;
+  final String? closedReason;
+
+  const ScheduleInterval({
+    required this.intervalIndex,
+    required this.startTime,
+    required this.endTime,
+    required this.status,
+    required this.displayLabel,
+    required this.isOccupied,
+    this.appointmentRef,
+    this.closedReason,
+  });
+
+  factory ScheduleInterval.fromJson(Map<String, dynamic> json) {
+    return ScheduleInterval(
+      intervalIndex: json['intervalIndex'] as int? ?? 0,
+      startTime: json['startTime'] as String? ?? '',
+      endTime: json['endTime'] as String? ?? '',
+      status: ScheduleIntervalStatus.fromCode(json['status'] as String? ?? 'OPEN'),
+      displayLabel: json['displayLabel'] as String? ?? 'Buka',
+      isOccupied: json['isOccupied'] as bool? ?? false,
+      appointmentRef: json['appointmentRef'] != null
+          ? AppointmentRef.fromJson(json['appointmentRef'] as Map<String, dynamic>)
+          : null,
+      closedReason: json['closedReason'] as String?,
+    );
+  }
+}
+
+class ScheduleProjection {
+  final String? scheduleId;
+  final String date;
+  final String scheduleContextId;
+  final String contextLabel;
+  final String selectedStartTime;
+  final String projectedEndTime;
+  final int effectiveConsultationDurationMinutes;
+  final int capacity;
+  final List<ScheduleInterval> intervals;
+  final String? version;
+
+  const ScheduleProjection({
+    this.scheduleId,
+    required this.date,
+    required this.scheduleContextId,
+    required this.contextLabel,
+    required this.selectedStartTime,
+    required this.projectedEndTime,
+    required this.effectiveConsultationDurationMinutes,
+    required this.capacity,
+    required this.intervals,
+    this.version,
+  });
+
+  factory ScheduleProjection.fromJson(Map<String, dynamic> json) {
+    final List<dynamic>? rawIntervals = json['intervals'] as List<dynamic>?;
+    final List<ScheduleInterval> parsedIntervals = rawIntervals != null
+        ? rawIntervals
+            .whereType<Map<String, dynamic>>()
+            .map(ScheduleInterval.fromJson)
+            .toList()
+        : <ScheduleInterval>[];
+
+    return ScheduleProjection(
+      scheduleId: json['scheduleId'] as String?,
+      date: json['date'] as String? ?? '',
+      scheduleContextId: json['scheduleContextId'] as String? ?? '',
+      contextLabel: json['contextLabel'] as String? ?? '',
+      selectedStartTime: json['selectedStartTime'] as String? ?? '',
+      projectedEndTime: json['projectedEndTime'] as String? ?? '',
+      effectiveConsultationDurationMinutes:
+          json['effectiveConsultationDurationMinutes'] as int? ?? 30,
+      capacity: json['capacity'] as int? ?? parsedIntervals.length,
+      intervals: parsedIntervals,
+      version: json['version'] as String?,
+    );
+  }
 }
 

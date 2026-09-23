@@ -5,73 +5,177 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 
-const List<String> kTimeOptions = <String>[
-  '12:00 AM',
-  '1:00 AM',
-  '2:00 AM',
-  '3:00 AM',
-  '4:00 AM',
-  '5:00 AM',
-  '6:00 AM',
-  '7:00 AM',
-  '8:00 AM',
-  '9:00 AM',
-  '10:00 AM',
-  '11:00 AM',
-  '12:00 PM',
-  '1:00 PM',
-  '2:00 PM',
-  '3:00 PM',
-  '4:00 PM',
-  '5:00 PM',
-  '6:00 PM',
-  '7:00 PM',
-  '8:00 PM',
-  '9:00 PM',
-  '10:00 PM',
-  '11:00 PM',
-];
+const List<String> kTimeOptions = <String>[];
+const List<String> kRoomOptions = <String>[];
+const List<String> kPoliOptions = <String>[];
 
-const List<String> kRoomOptions = <String>[
-  'Ruang 101',
-  'Ruang 102',
-  'Ruang 201',
-  'Ruang 202',
-  'Ruang 203',
-  'Ruang 204',
-  'Ruang 301',
-  'Ruang 302',
-  'Ruang VIP 1',
-  'Ruang VIP 2',
-  'Ruang Bedah A',
-  'Ruang Konsultasi 1',
-  'Ruang Radiologi',
-  'Ruang Tindakan 2',
-  'Suite VIP 01',
-  'Suite VIP 02',
-  'Studio D-02',
-];
+class _SessionShiftBoundary {
+  const _SessionShiftBoundary({
+    required this.startMinutes,
+    required this.endMinutes,
+    required this.defaultStart,
+    required this.defaultEnd,
+  });
 
-const List<String> kPoliOptions = <String>[
-  'Poli Gigi & Mulut',
-  'Poli Gigi Umum',
-  'Poli Umum',
-  'Poli Spesialis Anak',
-  'Poli Penyakit Dalam',
-  'Poli Jantung & Pembuluh',
-  'Poli Mata',
-  'Poli THT',
-  'Poli Kulit & Kelamin',
-  'Poli Syaraf',
-  'Poli Kandungan (Obgyn)',
-  'Poli Bedah Umum',
-  'Poli Fisioterapi',
-  'Klinik Spesialis Konservasi',
-  'Spesialis Bedah Mulut',
-  'Telemedisin Gigi',
-  'Poli Eksekutif VIP',
-  'Klinik Eksekutif VIP',
-];
+  final int startMinutes;
+  final int endMinutes;
+  final String defaultStart;
+  final String defaultEnd;
+}
+
+_SessionShiftBoundary _getSessionShiftBoundary(
+  String sessionId, [
+  ScheduleContext? context,
+]) {
+  if (context != null) {
+    final int? startM = _parseTimeToMinutes(context.boundaryStartTime);
+    final int? endM = _parseTimeToMinutes(context.boundaryEndTime);
+    if (startM != null && endM != null && endM > startM) {
+      return _SessionShiftBoundary(
+        startMinutes: startM,
+        endMinutes: endM,
+        defaultStart: context.boundaryStartTime,
+        defaultEnd: context.boundaryEndTime,
+      );
+    }
+  }
+
+  switch (sessionId) {
+    case 'dini_hari':
+    case 'early_morning':
+      return const _SessionShiftBoundary(
+        startMinutes: 0, // 00:00 WIB
+        endMinutes: 6 * 60, // 06:00 WIB
+        defaultStart: '00:00',
+        defaultEnd: '06:00',
+      );
+    case 'pagi':
+    case 'morning':
+      return const _SessionShiftBoundary(
+        startMinutes: 6 * 60, // 06:00 WIB
+        endMinutes: 12 * 60, // 12:00 WIB
+        defaultStart: '08:00',
+        defaultEnd: '12:00',
+      );
+    case 'siang':
+    case 'afternoon':
+      return const _SessionShiftBoundary(
+        startMinutes: 12 * 60, // 12:00 WIB
+        endMinutes: 17 * 60, // 17:00 WIB
+        defaultStart: '13:00',
+        defaultEnd: '17:00',
+      );
+    case 'malam':
+    case 'night':
+      return const _SessionShiftBoundary(
+        startMinutes: 17 * 60, // 17:00 WIB
+        endMinutes: 21 * 60, // 21:00 WIB
+        defaultStart: '19:00',
+        defaultEnd: '21:00',
+      );
+    default:
+      return const _SessionShiftBoundary(
+        startMinutes: 8 * 60,
+        endMinutes: 12 * 60,
+        defaultStart: '08:00',
+        defaultEnd: '12:00',
+      );
+  }
+}
+
+int? _parseTimeToMinutes(String timeStr, {String? sessionId}) {
+  try {
+    final String trimmed = timeStr.trim().toUpperCase();
+    final bool isPM = trimmed.contains('PM');
+    final bool isAM = trimmed.contains('AM');
+    final String cleanTime = trimmed
+        .replaceAll('AM', '')
+        .replaceAll('PM', '')
+        .replaceAll('WIB', '')
+        .trim();
+    final List<String> parts = cleanTime.split(':');
+    if (parts.isEmpty) return null;
+    int hour = int.parse(parts[0]);
+    final int minute = parts.length > 1 ? int.parse(parts[1]) : 0;
+
+    if (isPM && hour < 12) {
+      hour += 12;
+    } else if (isAM && hour == 12) {
+      hour = 0;
+    } else if (!isPM && !isAM && sessionId != null) {
+      if ((sessionId == 'siang' || sessionId == 'malam') && hour < 6) {
+        hour += 12;
+      }
+    }
+    return hour * 60 + minute;
+  } catch (_) {
+    return null;
+  }
+}
+
+String _formatMinutesToTime(int totalMinutes, {bool is12Hour = false}) {
+  final int clamped = totalMinutes.clamp(0, 24 * 60);
+  final int h = (clamped ~/ 60) % 24;
+  final int m = clamped % 60;
+  final String mm = m.toString().padLeft(2, '0');
+  if (is12Hour) {
+    final String period = h >= 12 ? 'PM' : 'AM';
+    int displayH = h % 12;
+    if (displayH == 0) displayH = 12;
+    return '$displayH:$mm $period';
+  } else {
+    final String hh = h.toString().padLeft(2, '0');
+    return '$hh:$mm';
+  }
+}
+
+List<String> _getTimeOptionsForSession(
+  String sessionId, {
+  int? intervalMinutes,
+  ScheduleContext? context,
+}) {
+  final _SessionShiftBoundary bounds = _getSessionShiftBoundary(sessionId, context);
+  final List<String> options = <String>[];
+  final int step = (intervalMinutes != null && intervalMinutes > 0)
+      ? intervalMinutes
+      : (context?.effectiveConsultationDurationMinutes ?? 30);
+  for (int m = bounds.startMinutes; m <= bounds.endMinutes - step; m += step) {
+    options.add(_formatMinutesToTime(m));
+  }
+  return options;
+}
+
+String _autoCalculateEndTime(
+  String fromTime,
+  String sessionId, {
+  int? durationMinutes,
+  ScheduleContext? context,
+}) {
+  final _SessionShiftBoundary bounds = _getSessionShiftBoundary(sessionId, context);
+  final int? fromMinutes = _parseTimeToMinutes(fromTime, sessionId: sessionId);
+
+  // Authoritative duration policy from database: practitioners.consultation_duration_minutes
+  final int patientInterval = (durationMinutes != null && durationMinutes > 0)
+      ? durationMinutes
+      : (context?.effectiveConsultationDurationMinutes ?? 30);
+
+  if (fromMinutes == null) {
+    return _formatMinutesToTime(
+      (bounds.startMinutes + patientInterval).clamp(bounds.startMinutes, bounds.endMinutes),
+    );
+  }
+
+  final int shiftBoundaryEnd = bounds.endMinutes;
+  final int effectiveStart =
+      fromMinutes.clamp(bounds.startMinutes, bounds.endMinutes);
+
+  // Setiap antrean/slot berdurasi persis sesuai kebijakan durasi dokter (default 30 menit)
+  final int endMinutes =
+      (effectiveStart + patientInterval).clamp(bounds.startMinutes, shiftBoundaryEnd);
+
+  return _formatMinutesToTime(endMinutes);
+}
+
 
 /// 7. Monthly Doctor Schedule Big Calendar Drawer Modal ("Lihat Schedule")
 class AmanahDocScheduleCalendarDrawer extends StatefulWidget {
@@ -539,12 +643,15 @@ class _AmanahAddEditScheduleDrawerState
   late DateTime _selectedDate;
   late DateTime _calendarMonth;
   bool _isCalendarOpen = false;
-  String _status = 'Buka'; // 'Menunggu', 'Buka', 'Cuti'
+  String _status = 'Buka'; // 'Buka', 'Terisi', 'Tutup'
   List<_ScheduleFormSession> _sessions = const <_ScheduleFormSession>[];
+  List<ClinicPoliklinikReference> _polis = const <ClinicPoliklinikReference>[];
+  List<ClinicRoomReference> _rooms = const <ClinicRoomReference>[];
   List<String> _dynamicPoliOptions = kPoliOptions;
   List<String> _dynamicRoomOptions = kRoomOptions;
   List<String> _occupiedRoomOptions = const <String>[];
-  List<String> _dynamicStatusOptions = const <String>['Menunggu', 'Buka', 'Cuti'];
+  final List<String> _dynamicStatusOptions = const <String>['Buka', 'Terisi', 'Tutup'];
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -556,44 +663,100 @@ class _AmanahAddEditScheduleDrawerState
       _status = sch.badge;
       _sessions = _buildInitialSessions(editingSchedule: sch);
     } else {
-      _status = 'Menunggu';
+      _status = 'Buka';
       _sessions = _buildInitialSessions();
     }
-    _loadReferenceData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadReferenceData();
+      }
+    });
+  }
+
+  String _sessionShiftFromId(String sessionId) {
+    switch (sessionId) {
+      case 'dini_hari':
+      case 'early_morning':
+        return 'early_morning';
+      case 'pagi':
+      case 'morning':
+        return 'morning';
+      case 'siang':
+      case 'afternoon':
+        return 'afternoon';
+      case 'malam':
+      case 'night':
+        return 'night';
+      default:
+        return 'morning';
+    }
+  }
+
+  ScheduleContext? _getContextForSession(String sessionId) {
+    final AmanahScheduleStore store = AmanahScheduleStore.instance;
+    final String targetShift = _sessionShiftFromId(sessionId);
+    return store.scheduleContexts
+        .where((ScheduleContext c) =>
+            c.sessionShift == targetShift ||
+            c.contextId == sessionId ||
+            c.contextId == targetShift)
+        .firstOrNull;
+  }
+
+  int _getEffectiveDurationForSession(String sessionId) {
+    final ScheduleContext? ctx = _getContextForSession(sessionId);
+    if (ctx != null && ctx.effectiveConsultationDurationMinutes > 0) {
+      return ctx.effectiveConsultationDurationMinutes;
+    }
+    return 30; // Database default: practitioners.consultation_duration_minutes
   }
 
   Future<void> _loadReferenceData() async {
+    final AmanahScheduleStore store = AmanahScheduleStore.instance;
     final List<ClinicPoliklinikReference> polis =
-        await AmanahScheduleStore.instance.loadPolikliniks();
-    if (polis.isNotEmpty && mounted) {
-      setState(() {
-        _dynamicPoliOptions = polis.map((ClinicPoliklinikReference p) => p.name).toList();
-      });
-    }
-
+        await store.loadPolikliniks();
     final List<ClinicRoomReference> rooms =
-        await AmanahScheduleStore.instance.loadRooms(date: _selectedDate);
-    if (rooms.isNotEmpty && mounted) {
-      setState(() {
-        _dynamicRoomOptions = rooms.map((ClinicRoomReference r) => r.name).toList();
+        await store.loadRooms(date: _selectedDate);
+    final List<ScheduleContext> contexts =
+        await store.loadScheduleContexts(_selectedDate);
+
+    if (!mounted) return;
+    setState(() {
+      if (polis.isNotEmpty) {
+        _polis = polis;
+        _dynamicPoliOptions =
+            polis.map((ClinicPoliklinikReference p) => p.name).toList();
+      }
+      if (rooms.isNotEmpty) {
+        _rooms = rooms;
+        _dynamicRoomOptions =
+            rooms.map((ClinicRoomReference r) => r.name).toList();
         _occupiedRoomOptions = rooms
             .where((ClinicRoomReference r) => r.isOccupied)
             .map((ClinicRoomReference r) => r.name)
             .toList();
-      });
-    }
-
-    final ClinicScheduleOptionsReference? options =
-        await AmanahScheduleStore.instance.loadScheduleOptions();
-    if (options != null && mounted && options.statuses.isNotEmpty) {
-      setState(() {
-        _dynamicStatusOptions = options.statuses
-            .map((ClinicStatusReference s) => s.label)
-            .toList();
-      });
-    }
+      }
+      // Recompute slots with authoritative context duration policy
+      if (contexts.isNotEmpty && widget.scheduleToEdit == null) {
+        _sessions = _sessions.map((_ScheduleFormSession session) {
+          if (!session.active || session.slots.isEmpty) return session;
+          final int duration = _getEffectiveDurationForSession(session.id);
+          final ScheduleContext? ctx = _getContextForSession(session.id);
+          final List<_ScheduleFormSlot> updatedSlots =
+              session.slots.map((_ScheduleFormSlot slot) {
+            final String autoTo = _autoCalculateEndTime(
+              slot.from,
+              session.id,
+              durationMinutes: duration,
+              context: ctx,
+            );
+            return slot.copyWith(to: autoTo);
+          }).toList();
+          return session.copyWith(slots: updatedSlots);
+        }).toList();
+      }
+    });
   }
-
 
   List<_ScheduleFormSession> _buildInitialSessions({
     DoctorSchedule? editingSchedule,
@@ -601,84 +764,54 @@ class _AmanahAddEditScheduleDrawerState
     final String matchedId = editingSchedule == null
         ? ''
         : _sessionIdFromType(editingSchedule.sessionType);
-    return <_ScheduleFormSession>[
-      _ScheduleFormSession(
-        id: 'dini_hari',
-        name: 'Sesi Dini Hari',
-        sessionType: 'Dini Hari',
-        active: matchedId == 'dini_hari',
-        slots: <_ScheduleFormSlot>[
-          _ScheduleFormSlot(
-            id: 'dh1',
-            from: matchedId == 'dini_hari'
-                ? (editingSchedule?.startTime ?? '1:00 AM')
-                : '1:00 AM',
-            to: matchedId == 'dini_hari'
-                ? (editingSchedule?.endTime ?? '4:00 AM')
-                : '4:00 AM',
-            room: editingSchedule?.room ?? 'Ruang 201',
-            poli: editingSchedule?.poli ?? 'Poli Gigi & Mulut',
-          ),
-        ],
-      ),
-      _ScheduleFormSession(
-        id: 'pagi',
-        name: 'Sesi Pagi',
-        sessionType: 'Pagi',
-        active: matchedId == 'pagi',
-        slots: <_ScheduleFormSlot>[
-          _ScheduleFormSlot(
-            id: 'p1',
-            from: matchedId == 'pagi'
-                ? (editingSchedule?.startTime ?? '7:00 AM')
-                : '7:00 AM',
-            to: matchedId == 'pagi'
-                ? (editingSchedule?.endTime ?? '11:00 AM')
-                : '11:00 AM',
-            room: editingSchedule?.room ?? 'Ruang 201',
-            poli: editingSchedule?.poli ?? 'Poli Gigi & Mulut',
-          ),
-        ],
-      ),
-      _ScheduleFormSession(
-        id: 'siang',
-        name: 'Sesi Siang',
-        sessionType: 'Siang',
-        active: matchedId == 'siang',
-        slots: <_ScheduleFormSlot>[
-          _ScheduleFormSlot(
-            id: 's1',
-            from: matchedId == 'siang'
-                ? (editingSchedule?.startTime ?? '1:00 PM')
-                : '1:00 PM',
-            to: matchedId == 'siang'
-                ? (editingSchedule?.endTime ?? '5:00 PM')
-                : '5:00 PM',
-            room: editingSchedule?.room ?? 'Ruang 201',
-            poli: editingSchedule?.poli ?? 'Poli Gigi & Mulut',
-          ),
-        ],
-      ),
-      _ScheduleFormSession(
-        id: 'malam',
-        name: 'Sesi Malam',
-        sessionType: 'Malam',
-        active: matchedId == 'malam',
-        slots: <_ScheduleFormSlot>[
-          _ScheduleFormSlot(
-            id: 'm1',
-            from: matchedId == 'malam'
-                ? (editingSchedule?.startTime ?? '7:00 PM')
-                : '7:00 PM',
-            to: matchedId == 'malam'
-                ? (editingSchedule?.endTime ?? '10:00 PM')
-                : '10:00 PM',
-            room: editingSchedule?.room ?? 'Ruang 201',
-            poli: editingSchedule?.poli ?? 'Poli Gigi & Mulut',
-          ),
-        ],
-      ),
+
+    final List<({String id, String name, String sessionType})> defs =
+        const <({String id, String name, String sessionType})>[
+      (id: 'dini_hari', name: 'Sesi Dini Hari', sessionType: 'Dini Hari'),
+      (id: 'pagi', name: 'Sesi Pagi', sessionType: 'Pagi'),
+      (id: 'siang', name: 'Sesi Siang', sessionType: 'Siang'),
+      (id: 'malam', name: 'Sesi Malam', sessionType: 'Malam'),
     ];
+
+    return defs.map((def) {
+      final bool isActive = editingSchedule != null && matchedId == def.id;
+      final List<_ScheduleFormSlot> slots;
+      if (isActive) {
+        final int duration = _getEffectiveDurationForSession(def.id);
+        final ScheduleContext? ctx = _getContextForSession(def.id);
+        final String effectiveFrom = editingSchedule.startTime ??
+            _getSessionShiftBoundary(def.id, ctx).defaultStart;
+        final String effectiveTo = editingSchedule.endTime ??
+            _autoCalculateEndTime(
+              effectiveFrom,
+              def.id,
+              durationMinutes: duration,
+              context: ctx,
+            );
+        slots = <_ScheduleFormSlot>[
+          _ScheduleFormSlot(
+            id: editingSchedule.id,
+            from: effectiveFrom,
+            to: effectiveTo,
+            room: editingSchedule.room.isNotEmpty
+                ? editingSchedule.room
+                : 'Pilih Ruang Praktik',
+            poli: editingSchedule.poli.isNotEmpty
+                ? editingSchedule.poli
+                : 'Pilih Poliklinik',
+          ),
+        ];
+      } else {
+        slots = const <_ScheduleFormSlot>[];
+      }
+      return _ScheduleFormSession(
+        id: def.id,
+        name: def.name,
+        sessionType: def.sessionType,
+        active: isActive,
+        slots: slots,
+      );
+    }).toList();
   }
 
   void _showConflictDialog(BuildContext context, String message) {
@@ -740,33 +873,42 @@ class _AmanahAddEditScheduleDrawerState
   }
 
   Future<void> _saveSchedule() async {
+    setState(() => _isSubmitting = true);
     final AmanahScheduleStore store = AmanahScheduleStore.instance;
     final String dateStr =
         '${_getDayName(_selectedDate.weekday)}, ${_selectedDate.day} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year}';
     final List<_ScheduleFormSession> activeSessions = _sessions
-        .where((_ScheduleFormSession session) => session.active)
+        .where((_ScheduleFormSession session) =>
+            session.active && session.slots.isNotEmpty)
         .toList();
-    final List<_ScheduleFormSession> targetSessions = activeSessions.isNotEmpty
-        ? activeSessions
-        : <_ScheduleFormSession>[
-            _sessions.firstWhere(
-              (_ScheduleFormSession session) => session.id == 'pagi',
-              orElse: () => _buildInitialSessions()[1],
-            ),
-          ];
+    if (activeSessions.isEmpty) {
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Aktifkan minimal satu sesi praktik untuk menyimpan jadwal.',
+          ),
+          backgroundColor: AmanahColorTokens.neutral800,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    final List<_ScheduleFormSession> targetSessions = activeSessions;
     final _ScheduleFormSession firstActive = targetSessions.first;
-    final _ScheduleFormSlot firstSlot = firstActive.slots.isNotEmpty
-        ? firstActive.slots.first
-        : const _ScheduleFormSlot(
-            id: 'fallback',
-            from: '7:00 AM',
-            to: '11:00 AM',
-            room: 'Ruang 201',
-            poli: 'Poli Gigi & Mulut',
-          );
+    final _ScheduleFormSlot firstSlot = firstActive.slots.first;
     final String timeStr = '${firstSlot.from} - ${firstSlot.to} WIB';
 
     try {
+      final String? roomId = _rooms
+          .where((ClinicRoomReference r) => r.name == firstSlot.room)
+          .firstOrNull
+          ?.id;
+      final String? poliId = _polis
+          .where((ClinicPoliklinikReference p) => p.name == firstSlot.poli)
+          .firstOrNull
+          ?.id;
+
       if (widget.scheduleToEdit != null) {
         final DoctorSchedule updated = widget.scheduleToEdit!.copyWith(
           title: firstActive.name,
@@ -777,46 +919,71 @@ class _AmanahAddEditScheduleDrawerState
           sessionType: firstActive.sessionType,
           poli: firstSlot.poli,
           room: firstSlot.room,
+          roomId: roomId ?? widget.scheduleToEdit!.roomId,
+          poliklinikId: poliId ?? widget.scheduleToEdit!.poliklinikId,
           badge: _status,
-          badgeVariant: _status == 'Cuti'
+          badgeVariant: _status == 'Tutup' || _status == 'Cuti'
               ? AmanahBadgeVariant.warning
-              : (_status == 'Menunggu'
+              : (_status == 'Terisi'
                     ? AmanahBadgeVariant.primary
                     : AmanahBadgeVariant.success),
         );
         await store.saveSchedule(_selectedDate, updated);
-        if (_status == 'Cuti') {
-          await store.updateDayCuti(_selectedDate, true);
-        }
       } else {
         for (int index = 0; index < targetSessions.length; index++) {
           final _ScheduleFormSession session = targetSessions[index];
-          final _ScheduleFormSlot slot = session.slots.isNotEmpty
-              ? session.slots.first
-              : const _ScheduleFormSlot(
-                  id: 'fallback',
-                  from: '7:00 AM',
-                  to: '11:00 AM',
-                  room: 'Ruang 201',
-                  poli: 'Poli Gigi & Mulut',
-                );
-          final DoctorSchedule newSch = DoctorSchedule(
-            id: 'ses-${DateTime.now().millisecondsSinceEpoch}-${session.id}-$index',
-            title: session.name,
-            date: dateStr,
-            time: '${slot.from} - ${slot.to} WIB',
-            startTime: slot.from,
-            endTime: slot.to,
-            sessionType: session.sessionType,
-            poli: slot.poli,
-            room: slot.room,
-            slotCount: '0',
-            slotText: '0 Pasien Booking',
-            badge: 'Menunggu',
-            badgeVariant: AmanahBadgeVariant.primary,
-            bookedPatients: const <BookedPatient>[],
-          );
-          await store.saveSchedule(_selectedDate, newSch);
+          for (final _ScheduleFormSlot slot in session.slots) {
+            final String? slotRoomId = _rooms
+                .where((ClinicRoomReference r) => r.name == slot.room)
+                .firstOrNull
+                ?.id;
+            final String? slotPoliId = _polis
+                .where((ClinicPoliklinikReference p) => p.name == slot.poli)
+                .firstOrNull
+                ?.id;
+
+            final DoctorSchedule newSch = DoctorSchedule(
+              id: 'ses-${DateTime.now().millisecondsSinceEpoch}-${session.id}-$index',
+              title: session.name,
+              date: dateStr,
+              time: '${slot.from} - ${slot.to} WIB',
+              startTime: slot.from,
+              endTime: slot.to,
+              sessionType: session.sessionType,
+              sessionShift: _sessionIdFromType(session.sessionType),
+              poli: slot.poli,
+              room: slot.room,
+              roomId: slotRoomId,
+              poliklinikId: slotPoliId,
+              slotCount: '0',
+              slotText: '0 Pasien Booking',
+              badge: _status,
+              badgeVariant: _status == 'Tutup' || _status == 'Cuti'
+                  ? AmanahBadgeVariant.warning
+                  : (_status == 'Terisi'
+                        ? AmanahBadgeVariant.primary
+                        : AmanahBadgeVariant.success),
+              bookedPatients: const <BookedPatient>[],
+            );
+
+            // Forward to authoritative Schedule V2 backend availability endpoint
+            try {
+              final ScheduleContext? ctx = _getContextForSession(session.id);
+              final String contextId = ctx?.contextId ?? _sessionShiftFromId(session.id);
+              await store.createAvailability(
+                date: _selectedDate,
+                scheduleContextId: contextId,
+                startTime: slot.from,
+                roomId: slotRoomId,
+                poliklinikId: slotPoliId,
+              );
+            } on AmanahScheduleConflictException {
+              rethrow;
+            } catch (_) {
+              // Backward-compatible fallback
+              await store.saveSchedule(_selectedDate, newSch);
+            }
+          }
         }
       }
       widget.onSavedDate?.call(_selectedDate);
@@ -827,10 +994,13 @@ class _AmanahAddEditScheduleDrawerState
       if (mounted) {
         _showConflictDialog(context, e.message);
       }
-    } catch (_) {
-      widget.onSavedDate?.call(_selectedDate);
+    } catch (e) {
       if (mounted) {
-        Navigator.of(context).pop();
+        _showConflictDialog(context, e.toString());
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
       }
     }
   }
@@ -843,6 +1013,7 @@ class _AmanahAddEditScheduleDrawerState
           _selectedDate,
           widget.scheduleToEdit!.id,
         );
+        widget.onSavedDate?.call(_selectedDate);
         if (mounted) {
           Navigator.of(context).pop();
         }
@@ -876,28 +1047,95 @@ class _AmanahAddEditScheduleDrawerState
     });
   }
 
+  String? _sessionAnnouncement;
+
   void _addTimeSlot(String sessionId) {
+    final _ScheduleFormSession session = _sessions.firstWhere(
+      (_ScheduleFormSession s) => s.id == sessionId,
+      orElse: () => _sessions.first,
+    );
+
+    final int duration = _getEffectiveDurationForSession(sessionId);
+    final ScheduleContext? ctx = _getContextForSession(sessionId);
+    final _SessionShiftBoundary bounds = _getSessionShiftBoundary(sessionId, ctx);
+
+    if (session.slots.isEmpty) {
+      setState(() {
+        _sessions = _sessions.map((_ScheduleFormSession s) {
+          if (s.id == sessionId) {
+            return s.copyWith(
+              slots: <_ScheduleFormSlot>[_defaultSlotForSession(sessionId)],
+            );
+          }
+          return s;
+        }).toList();
+      });
+      return;
+    }
+
+    final _ScheduleFormSlot lastSlot = session.slots.last;
+    final int? lastEndMinutes =
+        _parseTimeToMinutes(lastSlot.to, sessionId: sessionId);
+    final int effectiveLastEnd = lastEndMinutes ?? bounds.endMinutes;
+    final int remainingMinutes = bounds.endMinutes - effectiveLastEnd;
+
+    if (remainingMinutes < duration) {
+      final String bannerText =
+          'Sesi ${session.name} sudah terisi hingga batas shift (${bounds.defaultEnd} WIB). Setiap antrean membutuhkan minimal $duration menit.';
+      setState(() {
+        _sessionAnnouncement = bannerText;
+      });
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: <Widget>[
+              const Icon(
+                Icons.info_outline_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  bannerText,
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: AmanahColorTokens.neutral800,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+      return;
+    }
+
+    final String nextFrom = lastSlot.to;
+    final String nextTo = _autoCalculateEndTime(
+      nextFrom,
+      sessionId,
+      durationMinutes: duration,
+      context: ctx,
+    );
+
     setState(() {
-      _sessions = _sessions.map((_ScheduleFormSession session) {
-        if (session.id != sessionId) {
-          return session;
-        }
-        final _ScheduleFormSlot previousSlot = session.slots.isNotEmpty
-            ? session.slots.last
-            : _defaultSlotForSession(session.id);
-        final _ScheduleFormSlot defaultSlot = _defaultSlotForSession(
-          session.id,
-          id: '${session.id}-${DateTime.now().microsecondsSinceEpoch}',
-        );
-        return session.copyWith(
+      _sessionAnnouncement = null;
+      _sessions = _sessions.map((_ScheduleFormSession s) {
+        if (s.id != sessionId) return s;
+        return s.copyWith(
           slots: <_ScheduleFormSlot>[
-            ...session.slots,
+            ...s.slots,
             _ScheduleFormSlot(
-              id: defaultSlot.id,
-              from: defaultSlot.from,
-              to: defaultSlot.to,
-              room: previousSlot.room,
-              poli: previousSlot.poli,
+              id: '$sessionId-${DateTime.now().microsecondsSinceEpoch}',
+              from: nextFrom,
+              to: nextTo,
+              room: lastSlot.room,
+              poli: lastSlot.poli,
             ),
           ],
         );
@@ -907,6 +1145,7 @@ class _AmanahAddEditScheduleDrawerState
 
   void _removeTimeSlot(String sessionId, int slotIndex) {
     setState(() {
+      _sessionAnnouncement = null;
       _sessions = _sessions.map((_ScheduleFormSession session) {
         if (session.id != sessionId) {
           return session;
@@ -928,6 +1167,9 @@ class _AmanahAddEditScheduleDrawerState
     String? room,
     String? poli,
   }) {
+    final int duration = _getEffectiveDurationForSession(sessionId);
+    final ScheduleContext? ctx = _getContextForSession(sessionId);
+
     setState(() {
       _sessions = _sessions.map((_ScheduleFormSession session) {
         if (session.id != sessionId) {
@@ -935,14 +1177,27 @@ class _AmanahAddEditScheduleDrawerState
         }
         final List<_ScheduleFormSlot> slots = <_ScheduleFormSlot>[
           for (int i = 0; i < session.slots.length; i++)
-            i == slotIndex
-                ? session.slots[i].copyWith(
-                    from: from,
-                    to: to,
-                    room: room,
-                    poli: poli,
-                  )
-                : session.slots[i],
+            if (i == slotIndex) ...[
+              () {
+                final _ScheduleFormSlot currentSlot = session.slots[i];
+                final String effectiveFrom = from ?? currentSlot.from;
+                final String effectiveTo = from != null
+                    ? _autoCalculateEndTime(
+                        effectiveFrom,
+                        sessionId,
+                        durationMinutes: duration,
+                        context: ctx,
+                      )
+                    : (to ?? currentSlot.to);
+                return currentSlot.copyWith(
+                  from: effectiveFrom,
+                  to: effectiveTo,
+                  room: room,
+                  poli: poli,
+                );
+              }()
+            ] else
+              session.slots[i],
         ];
         return session.copyWith(slots: slots);
       }).toList();
@@ -950,39 +1205,33 @@ class _AmanahAddEditScheduleDrawerState
   }
 
   _ScheduleFormSlot _defaultSlotForSession(String sessionId, {String? id}) {
-    if (sessionId == 'dini_hari') {
-      return _ScheduleFormSlot(
-        id: id ?? 'dh-${DateTime.now().microsecondsSinceEpoch}',
-        from: '2:00 AM',
-        to: '4:00 AM',
-        room: 'Ruang 201',
-        poli: 'Poli Gigi & Mulut',
-      );
-    }
-    if (sessionId == 'siang') {
-      return _ScheduleFormSlot(
-        id: id ?? 's-${DateTime.now().microsecondsSinceEpoch}',
-        from: '2:00 PM',
-        to: '4:00 PM',
-        room: 'Ruang 201',
-        poli: 'Poli Gigi & Mulut',
-      );
-    }
-    if (sessionId == 'malam') {
-      return _ScheduleFormSlot(
-        id: id ?? 'm-${DateTime.now().microsecondsSinceEpoch}',
-        from: '8:00 PM',
-        to: '10:00 PM',
-        room: 'Ruang 201',
-        poli: 'Poli Gigi & Mulut',
-      );
-    }
+    final int duration = _getEffectiveDurationForSession(sessionId);
+    final ScheduleContext? ctx = _getContextForSession(sessionId);
+    final _SessionShiftBoundary bounds = _getSessionShiftBoundary(sessionId, ctx);
+    final String initialFrom = bounds.defaultStart;
+    final String initialTo = _autoCalculateEndTime(
+      initialFrom,
+      sessionId,
+      durationMinutes: duration,
+      context: ctx,
+    );
+    final String initialRoom = _rooms.isNotEmpty
+        ? _rooms.first.name
+        : (_dynamicRoomOptions.isNotEmpty
+              ? _dynamicRoomOptions.first
+              : 'Pilih Ruang Praktik');
+    final String initialPoli = _polis.isNotEmpty
+        ? _polis.first.name
+        : (_dynamicPoliOptions.isNotEmpty
+              ? _dynamicPoliOptions.first
+              : 'Pilih Poliklinik');
+
     return _ScheduleFormSlot(
-      id: id ?? 'p-${DateTime.now().microsecondsSinceEpoch}',
-      from: '8:00 AM',
-      to: '10:00 AM',
-      room: 'Ruang 201',
-      poli: 'Poli Gigi & Mulut',
+      id: id ?? '$sessionId-${DateTime.now().microsecondsSinceEpoch}',
+      from: initialFrom,
+      to: initialTo,
+      room: initialRoom,
+      poli: initialPoli,
     );
   }
 
@@ -993,18 +1242,22 @@ class _AmanahAddEditScheduleDrawerState
     required List<String> options,
     required ValueChanged<String> onChanged,
     List<String> disabledOptions = const <String>[],
+    String? sessionId,
+    bool isTimePicker = false,
   }) async {
     List<String> effectiveOptions = options;
     List<String> effectiveDisabled = disabledOptions;
 
-    if (options == kRoomOptions) {
-      if (_dynamicRoomOptions.isNotEmpty) {
-        effectiveOptions = _dynamicRoomOptions;
-      }
-      effectiveDisabled = _occupiedRoomOptions;
-    } else if (options == kPoliOptions) {
-      if (_dynamicPoliOptions.isNotEmpty) {
-        effectiveOptions = _dynamicPoliOptions;
+    if (!isTimePicker) {
+      if (options == kRoomOptions) {
+        if (_dynamicRoomOptions.isNotEmpty) {
+          effectiveOptions = _dynamicRoomOptions;
+        }
+        effectiveDisabled = _occupiedRoomOptions;
+      } else if (options == kPoliOptions) {
+        if (_dynamicPoliOptions.isNotEmpty) {
+          effectiveOptions = _dynamicPoliOptions;
+        }
       }
     }
 
@@ -1016,6 +1269,8 @@ class _AmanahAddEditScheduleDrawerState
         currentValue: currentValue,
         options: effectiveOptions,
         disabledOptions: effectiveDisabled,
+        sessionId: sessionId,
+        isTimePicker: isTimePicker,
       ),
     );
     if (selected != null && mounted) {
@@ -1047,6 +1302,7 @@ class _AmanahAddEditScheduleDrawerState
           text: isEditing ? 'Simpan Perubahan' : 'Tambah Jadwal',
           size: AmanahButtonSize.medium,
           isFullWidth: true,
+          isLoading: _isSubmitting,
           onPressed: _saveSchedule,
         ),
         secondary: isEditing
@@ -1090,73 +1346,70 @@ class _AmanahAddEditScheduleDrawerState
               child: Row(
                 children: _dynamicStatusOptions.map((String label) {
                   final bool active = _status == label;
-                  Color activeBg = AmanahColorTokens.warning;
-                  Color dotColor = AmanahColorTokens.warningLight;
-                  if (label == 'Buka' || label == 'open') {
-                    activeBg = AmanahColorTokens.success;
-                    dotColor = AmanahColorTokens.emeraldLight;
-                  } else if (label == 'Cuti' || label == 'closed' || label == 'Tutup') {
+                  Color activeBg = AmanahColorTokens.success;
+                  Color dotColor = AmanahColorTokens.emeraldLight;
+                  if (label == 'Terisi') {
+                    activeBg = AmanahColorTokens.brand;
+                    dotColor = AmanahColorTokens.brandLight;
+                  } else if (label == 'Tutup' || label == 'Cuti') {
                     activeBg = AmanahColorTokens.danger;
                     dotColor = AmanahColorTokens.roseLight;
                   }
-                  final Color selectedBg = dark
-                      ? AmanahColorTokens.tabActiveDark
-                      : activeBg;
+                  final Color selectedBg =
+                      dark ? AmanahColorTokens.tabActiveDark : activeBg;
                   final Color selectedText = dark
                       ? AmanahColorTokens.canvasDark
                       : AmanahColorTokens.surfaceLight;
 
-                      return Expanded(
-                        child: InkWell(
+                  return Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () => setState(() => _status = label),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 160),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: active ? selectedBg : Colors.transparent,
                           borderRadius: BorderRadius.circular(12),
-                          onTap: () => setState(() => _status = label),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 160),
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            decoration: BoxDecoration(
-                              color: active ? selectedBg : Colors.transparent,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: active
-                                  ? <BoxShadow>[
-                                      BoxShadow(
-                                        color: selectedBg.withValues(
-                                          alpha: 0.25,
-                                        ),
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ]
-                                  : null,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    color: active ? selectedText : dotColor,
-                                    shape: BoxShape.circle,
+                          boxShadow: active
+                              ? <BoxShadow>[
+                                  BoxShadow(
+                                    color: selectedBg.withValues(alpha: 0.25),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
                                   ),
-                                  child: const SizedBox(width: 6, height: 6),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  label,
-                                  style: TextStyle(
-                                    color: active
-                                        ? selectedText
-                                        : (dark
-                                              ? AmanahColorTokens.neutral400
-                                              : AmanahColorTokens.neutral600),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                                ]
+                              : null,
                         ),
-                      );
-                    }).toList(),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: active ? selectedText : dotColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const SizedBox(width: 6, height: 6),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              label,
+                              style: TextStyle(
+                                color: active
+                                    ? selectedText
+                                    : (dark
+                                        ? AmanahColorTokens.neutral400
+                                        : AmanahColorTokens.neutral600),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
             const SizedBox(height: 14),
@@ -1204,6 +1457,88 @@ class _AmanahAddEditScheduleDrawerState
             ),
           ),
           const SizedBox(height: 8),
+          Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            decoration: BoxDecoration(
+              color: dark
+                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
+                  : AmanahColorTokens.brandLight,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: dark
+                    ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.25)
+                    : AmanahColorTokens.brand.withValues(alpha: 0.20),
+              ),
+            ),
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 16,
+                  color: dark
+                      ? AmanahColorTokens.tabActiveDark
+                      : AmanahColorTokens.brand,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Waktu selesai ("To") dihitung otomatis berdasarkan durasi konsultasi dokter hingga batas shift.',
+                    style: TextStyle(
+                      color: dark
+                          ? AmanahColorTokens.tabActiveDark
+                          : AmanahColorTokens.brandAccent,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_sessionAnnouncement != null) ...<Widget>[
+            Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+              decoration: BoxDecoration(
+                color: AmanahColorTokens.warning.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: AmanahColorTokens.warning.withValues(alpha: 0.35),
+                ),
+              ),
+              child: Row(
+                children: <Widget>[
+                  const Icon(
+                    Icons.warning_amber_rounded,
+                    size: 16,
+                    color: AmanahColorTokens.warning,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _sessionAnnouncement!,
+                      style: const TextStyle(
+                        color: AmanahColorTokens.warning,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () => setState(() => _sessionAnnouncement = null),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 14,
+                      color: AmanahColorTokens.warning,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           Column(
             children: <Widget>[
               for (final _ScheduleFormSession session in _sessions) ...<Widget>[
@@ -1211,23 +1546,22 @@ class _AmanahAddEditScheduleDrawerState
                   session: session,
                   dark: dark,
                   onToggle: (bool value) => _toggleSession(session.id, value),
-                  onSlotChanged:
-                      ({
-                        required int slotIndex,
-                        String? from,
-                        String? to,
-                        String? room,
-                        String? poli,
-                      }) {
-                        _updateSlot(
-                          session.id,
-                          slotIndex,
-                          from: from,
-                          to: to,
-                          room: room,
-                          poli: poli,
-                        );
-                      },
+                  onSlotChanged: ({
+                    required int slotIndex,
+                    String? from,
+                    String? to,
+                    String? room,
+                    String? poli,
+                  }) {
+                    _updateSlot(
+                      session.id,
+                      slotIndex,
+                      from: from,
+                      to: to,
+                      room: room,
+                      poli: poli,
+                    );
+                  },
                   onAddSlot: () => _addTimeSlot(session.id),
                   onRemoveSlot: (int slotIndex) =>
                       _removeTimeSlot(session.id, slotIndex),
@@ -1413,11 +1747,14 @@ class _AmanahAddEditScheduleDrawerState
 
               return InkWell(
                 borderRadius: BorderRadius.circular(12),
-                onTap: () => setState(() {
-                  _selectedDate = date;
-                  _calendarMonth = DateTime(date.year, date.month);
-                  _isCalendarOpen = false;
-                }),
+                onTap: () {
+                  setState(() {
+                    _selectedDate = date;
+                    _calendarMonth = DateTime(date.year, date.month);
+                    _isCalendarOpen = false;
+                  });
+                  _loadReferenceData();
+                },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 160),
                   curve: Curves.easeOutCubic,
@@ -1581,6 +1918,8 @@ typedef _OpenScheduleSelectionSheet =
       required List<String> options,
       required ValueChanged<String> onChanged,
       List<String> disabledOptions,
+      String? sessionId,
+      bool isTimePicker,
     });
 
 typedef _ScheduleSlotChanged =
@@ -1685,6 +2024,7 @@ class _ScheduleSessionPanel extends StatelessWidget {
                         _AnimatedSlotEntry(
                           key: ValueKey<String>(session.slots[index].id),
                           child: _ScheduleSlotRow(
+                            session: session,
                             slot: session.slots[index],
                             slotIndex: index,
                             dark: dark,
@@ -1753,6 +2093,7 @@ class _ScheduleSessionPanel extends StatelessWidget {
 
 class _ScheduleSlotRow extends StatelessWidget {
   const _ScheduleSlotRow({
+    required this.session,
     required this.slot,
     required this.slotIndex,
     required this.dark,
@@ -1762,6 +2103,7 @@ class _ScheduleSlotRow extends StatelessWidget {
     required this.onRemove,
   });
 
+  final _ScheduleFormSession session;
   final _ScheduleFormSlot slot;
   final int slotIndex;
   final bool dark;
@@ -1796,32 +2138,42 @@ class _ScheduleSlotRow extends StatelessWidget {
               child: _MiniSlotButton(
                 value: slot.from,
                 dark: dark,
-                onTap: () => onOpenSelection(
-                  title: 'Pilih Waktu Mulai (From)',
-                  subtitle: 'Pilih jam dari daftar atau ketik manual',
-                  currentValue: slot.from,
-                  options: kTimeOptions,
-                  disabledOptions: const <String>[],
-                  onChanged: (String value) =>
-                      onChanged(slotIndex: slotIndex, from: value),
-                ),
+                onTap: () {
+                  final ScheduleContext? ctx = AmanahScheduleStore
+                      .instance.scheduleContexts
+                      .where((ScheduleContext c) =>
+                          c.sessionShift == session.id ||
+                          c.contextId == session.id)
+                      .firstOrNull;
+                  final _SessionShiftBoundary bounds =
+                      _getSessionShiftBoundary(session.id, ctx);
+                  onOpenSelection(
+                    title: 'Pilih Waktu Mulai (${session.name})',
+                    subtitle:
+                        'Batas shift: ${_formatMinutesToTime(bounds.startMinutes)} - ${_formatMinutesToTime(bounds.endMinutes)} WIB',
+                    currentValue: slot.from,
+                    options: _getTimeOptionsForSession(session.id, context: ctx),
+                    disabledOptions: const <String>[],
+                    sessionId: session.id,
+                    isTimePicker: true,
+                    onChanged: (String value) =>
+                        onChanged(slotIndex: slotIndex, from: value),
+                  );
+                },
               ),
             ),
             const SizedBox(width: 8),
-            _SlotLabel(text: 'To', dark: dark),
+            _SlotLabel(
+              text: 'To',
+              dark: dark,
+              tooltip:
+                  'Waktu selesai ("To") dihitung otomatis berdasarkan durasi konsultasi dokter hingga batas shift',
+            ),
             Expanded(
               child: _MiniSlotButton(
                 value: slot.to,
                 dark: dark,
-                onTap: () => onOpenSelection(
-                  title: 'Pilih Waktu Selesai (To)',
-                  subtitle: 'Pilih jam dari daftar atau ketik manual',
-                  currentValue: slot.to,
-                  options: kTimeOptions,
-                  disabledOptions: const <String>[],
-                  onChanged: (String value) =>
-                      onChanged(slotIndex: slotIndex, to: value),
-                ),
+                onTap: null,
               ),
             ),
             const SizedBox(width: 8),
@@ -1846,12 +2198,12 @@ class _ScheduleSlotRow extends StatelessWidget {
             Expanded(
               child: _SlotFieldColumn(
                 label: 'Ruang Praktik',
-                value: slot.room,
+                value: slot.room.isNotEmpty ? slot.room : 'Pilih Ruang Praktik',
                 dark: dark,
                 onTap: () => onOpenSelection(
                   title: 'Pilih Ruang Praktik',
                   subtitle: 'Pilih ruangan praktik dokter',
-                  currentValue: slot.room,
+                  currentValue: slot.room.isNotEmpty ? slot.room : 'Pilih Ruang Praktik',
                   options: kRoomOptions,
                   disabledOptions: const <String>[],
                   onChanged: (String value) =>
@@ -1863,12 +2215,12 @@ class _ScheduleSlotRow extends StatelessWidget {
             Expanded(
               child: _SlotFieldColumn(
                 label: 'Poli / Spesialisasi',
-                value: slot.poli,
+                value: slot.poli.isNotEmpty ? slot.poli : 'Pilih Poliklinik',
                 dark: dark,
                 onTap: () => onOpenSelection(
                   title: 'Pilih Poli / Spesialisasi',
                   subtitle: 'Pilih poliklinik atau bidang spesialisasi',
-                  currentValue: slot.poli,
+                  currentValue: slot.poli.isNotEmpty ? slot.poli : 'Pilih Poliklinik',
                   options: kPoliOptions,
                   onChanged: (String value) =>
                       onChanged(slotIndex: slotIndex, poli: value),
@@ -1920,24 +2272,56 @@ class _SlotFieldColumn extends StatelessWidget {
 }
 
 class _SlotLabel extends StatelessWidget {
-  const _SlotLabel({required this.text, required this.dark});
+  const _SlotLabel({
+    required this.text,
+    required this.dark,
+    this.tooltip,
+  });
 
   final String text;
   final bool dark;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
+    final Widget labelWidget = Text(
+      text,
+      style: TextStyle(
+        color: dark
+            ? AmanahColorTokens.neutral400
+            : AmanahColorTokens.neutral500,
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+
+    if (tooltip == null) {
+      return SizedBox(
+        width: text == 'From' ? 34 : 20,
+        child: labelWidget,
+      );
+    }
+
     return SizedBox(
-      width: text == 'From' ? 34 : 20,
-      child: Text(
-        text,
-        style: TextStyle(
-          color: dark
-              ? AmanahColorTokens.neutral400
-              : AmanahColorTokens.neutral500,
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-        ),
+      width: 36,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          labelWidget,
+          const SizedBox(width: 2),
+          Tooltip(
+            message: tooltip!,
+            triggerMode: TooltipTriggerMode.tap,
+            showDuration: const Duration(seconds: 4),
+            child: Icon(
+              Icons.info_outline_rounded,
+              size: 11,
+              color: dark
+                  ? AmanahColorTokens.tabActiveDark
+                  : AmanahColorTokens.brand,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1947,12 +2331,12 @@ class _MiniSlotButton extends StatelessWidget {
   const _MiniSlotButton({
     required this.value,
     required this.dark,
-    required this.onTap,
+    this.onTap,
   });
 
   final String value;
   final bool dark;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1989,11 +2373,12 @@ class _MiniSlotButton extends StatelessWidget {
                 ),
               ),
             ),
-            const Icon(
-              Icons.keyboard_arrow_down_rounded,
-              size: 15,
-              color: AmanahColorTokens.neutral400,
-            ),
+            if (onTap != null)
+              const Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 15,
+                color: AmanahColorTokens.neutral400,
+              ),
           ],
         ),
       ),
@@ -2054,6 +2439,8 @@ class _AmanahScheduleSelectionSheet extends StatefulWidget {
     required this.currentValue,
     required this.options,
     this.disabledOptions = const <String>[],
+    this.sessionId,
+    this.isTimePicker = false,
   });
 
   final String title;
@@ -2061,6 +2448,8 @@ class _AmanahScheduleSelectionSheet extends StatefulWidget {
   final String currentValue;
   final List<String> options;
   final List<String> disabledOptions;
+  final String? sessionId;
+  final bool isTimePicker;
 
   @override
   State<_AmanahScheduleSelectionSheet> createState() =>
@@ -2069,12 +2458,100 @@ class _AmanahScheduleSelectionSheet extends StatefulWidget {
 
 class _AmanahScheduleSelectionSheetState
     extends State<_AmanahScheduleSelectionSheet> {
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller;
+  String? _validationError;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _validateInput(String text) {
+    if (!widget.isTimePicker || text.trim().isEmpty) {
+      if (_validationError != null) {
+        setState(() => _validationError = null);
+      }
+      return;
+    }
+
+    final ScheduleContext? ctx = widget.sessionId != null
+        ? AmanahScheduleStore.instance.scheduleContexts
+            .where((ScheduleContext c) =>
+                c.sessionShift == widget.sessionId ||
+                c.contextId == widget.sessionId)
+            .firstOrNull
+        : null;
+    final int duration = ctx?.effectiveConsultationDurationMinutes ?? 30;
+    final _SessionShiftBoundary bounds =
+        _getSessionShiftBoundary(widget.sessionId ?? 'pagi', ctx);
+    final int? minutes =
+        _parseTimeToMinutes(text.trim(), sessionId: widget.sessionId);
+
+    if (minutes == null) {
+      setState(() {
+        _validationError = 'Format waktu tidak valid (contoh: 08:30)';
+      });
+    } else if (minutes < bounds.startMinutes ||
+        minutes > bounds.endMinutes - duration) {
+      setState(() {
+        _validationError =
+            'Waktu harus dalam shift (${_formatMinutesToTime(bounds.startMinutes)} - ${_formatMinutesToTime(bounds.endMinutes)} WIB)';
+      });
+    } else {
+      if (_validationError != null) {
+        setState(() => _validationError = null);
+      }
+    }
+  }
+
+  Future<void> _pickViaClock() async {
+    final ScheduleContext? ctx = widget.sessionId != null
+        ? AmanahScheduleStore.instance.scheduleContexts
+            .where((ScheduleContext c) =>
+                c.sessionShift == widget.sessionId ||
+                c.contextId == widget.sessionId)
+            .firstOrNull
+        : null;
+    final int duration = ctx?.effectiveConsultationDurationMinutes ?? 30;
+    final _SessionShiftBoundary bounds =
+        _getSessionShiftBoundary(widget.sessionId ?? 'pagi', ctx);
+    final TimeOfDay initial = TimeOfDay(
+      hour: (bounds.startMinutes ~/ 60).clamp(0, 23),
+      minute: bounds.startMinutes % 60,
+    );
+
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
+    );
+
+    if (picked != null && mounted) {
+      final int pickedMinutes = picked.hour * 60 + picked.minute;
+      if (pickedMinutes < bounds.startMinutes ||
+          pickedMinutes > bounds.endMinutes - duration) {
+        setState(() {
+          _validationError =
+              'Jam yang dipilih (${_formatMinutesToTime(pickedMinutes)}) di luar rentang shift (${_formatMinutesToTime(bounds.startMinutes)} - ${_formatMinutesToTime(bounds.endMinutes)} WIB)';
+        });
+        return;
+      }
+
+      final String formatted = _formatMinutesToTime(pickedMinutes);
+      Navigator.of(context).pop(formatted);
+    }
   }
 
   @override
@@ -2095,7 +2572,7 @@ class _AmanahScheduleSelectionSheetState
     return AmanahBottomSheetScaffold(
       title: widget.title,
       subtitle: widget.subtitle.isEmpty ? null : widget.subtitle,
-      fixedHeightFactor: 0.82,
+      fixedHeightFactor: 0.85,
       bodyPadding: EdgeInsets.zero,
       extendBodyBehindHeader: true,
       body: Padding(
@@ -2108,6 +2585,43 @@ class _AmanahScheduleSelectionSheetState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            if (widget.isTimePicker) ...<Widget>[
+              Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                decoration: BoxDecoration(
+                  color: dark
+                      ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.10)
+                      : AmanahColorTokens.brandLight,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 14,
+                      color: dark
+                          ? AmanahColorTokens.tabActiveDark
+                          : AmanahColorTokens.brand,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Waktu selesai ("To") dihitung otomatis berdasarkan durasi konsultasi dokter hingga akhir shift.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: dark
+                              ? AmanahColorTokens.tabActiveDark
+                              : AmanahColorTokens.brandAccent,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             Row(
               children: <Widget>[
                 Expanded(
@@ -2121,16 +2635,21 @@ class _AmanahScheduleSelectionSheetState
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: dark
-                            ? AmanahColorTokens.pureWhite.withValues(
-                                alpha: 0.15,
-                              )
-                            : AmanahColorTokens.neutral200,
+                        color: _validationError != null
+                            ? AmanahColorTokens.danger
+                            : (dark
+                                  ? AmanahColorTokens.pureWhite.withValues(
+                                      alpha: 0.15,
+                                    )
+                                  : AmanahColorTokens.neutral200),
                       ),
                     ),
                     child: TextField(
                       controller: _controller,
-                      onChanged: (_) => setState(() {}),
+                      onChanged: (String val) {
+                        _validateInput(val);
+                        setState(() {});
+                      },
                       style: TextStyle(
                         color: dark
                             ? AmanahColorTokens.pureWhite
@@ -2139,7 +2658,9 @@ class _AmanahScheduleSelectionSheetState
                         fontWeight: FontWeight.w600,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Cari atau ketik manual...',
+                        hintText: widget.isTimePicker
+                            ? 'Ketik jam mulai (cth. 08:45)...'
+                            : 'Cari atau ketik manual...',
                         hintStyle: TextStyle(
                           color: dark
                               ? AmanahColorTokens.neutral500
@@ -2147,8 +2668,10 @@ class _AmanahScheduleSelectionSheetState
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
-                        prefixIcon: const Icon(
-                          Icons.search_rounded,
+                        prefixIcon: Icon(
+                          widget.isTimePicker
+                              ? Icons.schedule_rounded
+                              : Icons.search_rounded,
                           size: 16,
                           color: AmanahColorTokens.neutral400,
                         ),
@@ -2161,21 +2684,93 @@ class _AmanahScheduleSelectionSheetState
                     ),
                   ),
                 ),
-                if (_controller.text.trim().isNotEmpty) ...<Widget>[
+                if (_controller.text.trim().isNotEmpty &&
+                    _validationError == null) ...<Widget>[
                   const SizedBox(width: 8),
                   AmanahButton.primary(
                     text: 'Gunakan',
                     size: AmanahButtonSize.small,
                     onPressed: () {
-                      Navigator.of(context).pop(_controller.text.trim());
+                      final String raw = _controller.text.trim();
+                      if (widget.isTimePicker) {
+                        final int? parsed = _parseTimeToMinutes(
+                          raw,
+                          sessionId: widget.sessionId,
+                        );
+                        if (parsed != null) {
+                          Navigator.of(context).pop(
+                            _formatMinutesToTime(parsed),
+                          );
+                          return;
+                        }
+                      }
+                      Navigator.of(context).pop(raw);
                     },
+                  ),
+                ],
+                if (widget.isTimePicker) ...<Widget>[
+                  const SizedBox(width: 6),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(10),
+                    onTap: _pickViaClock,
+                    child: Container(
+                      height: 38,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: dark
+                            ? AmanahColorTokens.pureWhite
+                                .withValues(alpha: 0.08)
+                            : AmanahColorTokens.surfaceSecondaryLight,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: dark
+                              ? AmanahColorTokens.pureWhite
+                                  .withValues(alpha: 0.15)
+                              : AmanahColorTokens.neutral200,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Icon(
+                            Icons.access_time_rounded,
+                            size: 15,
+                            color: dark
+                                ? AmanahColorTokens.tabActiveDark
+                                : AmanahColorTokens.brand,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'Jam',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: dark
+                                  ? AmanahColorTokens.tabActiveDark
+                                  : AmanahColorTokens.brand,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ],
             ),
-            const SizedBox(height: 14),
+            if (_validationError != null) ...<Widget>[
+              const SizedBox(height: 5),
+              Text(
+                _validationError!,
+                style: const TextStyle(
+                  color: AmanahColorTokens.danger,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
             Text(
-              'Pilihan Tersedia',
+              widget.isTimePicker ? 'Pilihan Cepat Sesi' : 'Pilihan Tersedia',
               style: TextStyle(
                 color: dark
                     ? AmanahColorTokens.neutral400

@@ -483,5 +483,195 @@ void main() {
       expect(result.first.bookedPatients.first.patientName, 'Dewi Sartika');
       expect(store.getSchedulesForDate(targetDate).length, 1);
     });
+
+    test('fetchScheduleContexts and fetchProjection with arbitrary start time 08:45', () async {
+      final MockClient client = MockClient((http.Request request) async {
+        if (request.url.path.contains('contexts')) {
+          expect(request.url.queryParameters['date'], '2026-09-24');
+          return http.Response(
+            jsonEncode(<dynamic>[
+              <String, dynamic>{
+                'contextId': 'ctx-morning',
+                'contextLabel': 'Pagi',
+                'sessionShift': 'morning',
+                'date': '2026-09-24',
+                'boundaryStartTime': '06:00',
+                'boundaryEndTime': '12:00',
+                'effectiveConsultationDurationMinutes': 30,
+                'allowedStartPrecisionMinutes': 1,
+                'durationEditableByCurrentUser': false,
+              },
+            ]),
+            200,
+            headers: <String, String>{'content-type': 'application/json'},
+          );
+        } else if (request.url.path.contains('projection')) {
+          expect(request.url.queryParameters['startTime'], '08:45');
+          expect(request.url.queryParameters['scheduleContextId'], 'ctx-morning');
+          return http.Response(
+            jsonEncode(<String, dynamic>{
+              'date': '2026-09-24',
+              'scheduleContextId': 'ctx-morning',
+              'contextLabel': 'Pagi',
+              'selectedStartTime': '08:45',
+              'projectedEndTime': '11:45',
+              'effectiveConsultationDurationMinutes': 30,
+              'capacity': 6,
+              'intervals': <dynamic>[
+                <String, dynamic>{
+                  'intervalIndex': 1,
+                  'startTime': '08:45',
+                  'endTime': '09:15',
+                  'status': 'OPEN',
+                  'displayLabel': 'Buka',
+                  'isOccupied': false,
+                },
+                <String, dynamic>{
+                  'intervalIndex': 2,
+                  'startTime': '09:15',
+                  'endTime': '09:45',
+                  'status': 'OCCUPIED',
+                  'displayLabel': 'Terisi',
+                  'isOccupied': true,
+                  'appointmentRef': <String, dynamic>{
+                    'appointmentId': 'apt-101',
+                    'queueNumber': '#01',
+                    'status': 'confirmed',
+                  },
+                },
+              ],
+            }),
+            200,
+            headers: <String, String>{'content-type': 'application/json'},
+          );
+        }
+        return http.Response('{}', 200, headers: <String, String>{'content-type': 'application/json'});
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage(),
+      );
+
+      final List<ScheduleContext> contexts = await repo.fetchScheduleContexts(date: '2026-09-24');
+      expect(contexts.length, 1);
+      expect(contexts.first.contextId, 'ctx-morning');
+      expect(contexts.first.effectiveConsultationDurationMinutes, 30);
+      expect(contexts.first.durationEditableByCurrentUser, isFalse);
+
+      final ScheduleProjection projection = await repo.fetchProjection(
+        date: '2026-09-24',
+        scheduleContextId: 'ctx-morning',
+        startTime: '08:45',
+      );
+      expect(projection.selectedStartTime, '08:45');
+      expect(projection.capacity, 6);
+      expect(projection.intervals.length, 2);
+      expect(projection.intervals.first.startTime, '08:45');
+      expect(projection.intervals.first.endTime, '09:15');
+      expect(projection.intervals.first.status, ScheduleIntervalStatus.open);
+      expect(projection.intervals[1].isOccupied, isTrue);
+      expect(projection.intervals[1].appointmentRef?.queueNumber, '#01');
+    });
+
+    test('createAvailability creates schedule and updates store without fake optimistic local fallbacks on error', () async {
+      bool failWithConflict = false;
+      final MockClient client = MockClient((http.Request request) async {
+        if (request.url.path.contains('availability') && request.method == 'POST') {
+          if (failWithConflict) {
+            return http.Response(
+              jsonEncode(<String, dynamic>{
+                'statusCode': 409,
+                'code': 'START_OUTSIDE_BOUNDARY',
+                'message': 'Jam mulai berada di luar batas waktu shift yang dipilih.',
+              }),
+              409,
+              headers: <String, String>{'content-type': 'application/json'},
+            );
+          }
+          return http.Response(
+            jsonEncode(<String, dynamic>{
+              'id': 'sched-v2-1',
+              'scheduleDate': '2026-09-24',
+              'sessionShift': 'morning',
+              'sessionLabel': 'Pagi',
+              'startTime': '08:45',
+              'endTime': '11:45',
+              'timeRange': '08:45 - 11:45 WIB',
+              'poliklinikId': 'poli-1',
+              'poliklinikName': 'Poli Umum',
+              'roomId': 'room-1',
+              'roomName': 'Ruang 101',
+              'capacity': 6,
+              'bookedPatientCount': 0,
+              'isAvailable': true,
+              'status': 'Buka',
+            }),
+            201,
+            headers: <String, String>{'content-type': 'application/json'},
+          );
+        } else if (request.url.path.contains('my-schedules')) {
+          return http.Response(
+            jsonEncode(<dynamic>[
+              <String, dynamic>{
+                'id': 'sched-v2-1',
+                'scheduleDate': '2026-09-24',
+                'sessionShift': 'morning',
+                'sessionLabel': 'Pagi',
+                'startTime': '08:45',
+                'endTime': '11:45',
+                'poliklinikName': 'Poli Umum',
+                'roomName': 'Ruang 101',
+                'capacity': 6,
+                'bookedPatientCount': 0,
+                'isAvailable': true,
+                'status': 'Buka',
+              },
+            ]),
+            200,
+            headers: <String, String>{'content-type': 'application/json'},
+          );
+        }
+        return http.Response('[]', 200, headers: <String, String>{'content-type': 'application/json'});
+      });
+
+      final AmanahScheduleStore store = AmanahScheduleStore.instance;
+      store.reset();
+      store.setRepository(
+        AmanahScheduleRepository(
+          baseUrl: 'http://test.api',
+          httpClient: client,
+          tokenStorage: const _MockTokenStorage(),
+        ),
+      );
+
+      final DateTime targetDate = DateTime(2026, 9, 24);
+      final DoctorSchedule created = await store.createAvailability(
+        date: targetDate,
+        scheduleContextId: 'ctx-morning',
+        startTime: '08:45',
+        roomId: 'room-1',
+        poliklinikId: 'poli-1',
+      );
+
+      expect(created.id, 'sched-v2-1');
+      expect(created.startTime, '08:45');
+      expect(store.getSchedulesForDate(targetDate).length, 1);
+
+      // Now test conflict handling
+      failWithConflict = true;
+      try {
+        await store.createAvailability(
+          date: targetDate,
+          scheduleContextId: 'ctx-morning',
+          startTime: '05:00',
+        );
+        fail('Should throw conflict exception');
+      } on AmanahScheduleConflictException catch (e) {
+        expect(e.code, 'START_OUTSIDE_BOUNDARY');
+        expect(store.lastConflict?.code, 'START_OUTSIDE_BOUNDARY');
+      }
+    });
   });
 }

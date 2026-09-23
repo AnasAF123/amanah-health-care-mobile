@@ -60,10 +60,14 @@ class AmanahScheduleRepository {
       }
     } catch (_) {}
 
-    if (response.statusCode == 409) {
+    if (response.statusCode == 409 || response.statusCode == 422) {
+      final String codeStr = code ?? (response.statusCode == 409 ? 'CONFLICT' : 'UNPROCESSABLE');
+      final String effectiveMsg = (message != 'Terjadi kesalahan sistem (${response.statusCode})' && message.isNotEmpty)
+          ? message
+          : AmanahScheduleConflictException.userMessageForCode(codeStr);
       throw AmanahScheduleConflictException(
-        message: message,
-        code: code ?? 'CONFLICT',
+        message: effectiveMsg,
+        code: codeStr,
       );
     }
 
@@ -529,6 +533,117 @@ class AmanahScheduleRepository {
       statuses: <ClinicStatusReference>[],
       timeIntervals: <int>[15, 30, 45, 60],
     );
+  }
+
+  /// GET /api/v1/schedules/contexts?date=YYYY-MM-DD
+  Future<List<ScheduleContext>> fetchScheduleContexts({
+    required String date,
+    String? staffId,
+  }) async {
+    final Map<String, String> queryParameters = <String, String>{'date': date};
+    if (staffId != null && staffId.isNotEmpty) {
+      queryParameters['staffId'] = staffId;
+    }
+
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/contexts').replace(
+      queryParameters: queryParameters,
+    );
+
+    final http.Response response = await _get(uri);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final dynamic decoded = jsonDecode(response.body);
+      final dynamic list = decoded is Map<String, dynamic> && decoded['data'] != null
+          ? decoded['data']
+          : decoded;
+      if (list is List) {
+        return list
+            .whereType<Map<String, dynamic>>()
+            .map(ScheduleContext.fromJson)
+            .toList();
+      }
+      return <ScheduleContext>[];
+    }
+
+    _handleHttpError(response);
+    return <ScheduleContext>[];
+  }
+
+  /// GET /api/v1/schedules/projection?date=...&scheduleContextId=...&startTime=...
+  Future<ScheduleProjection> fetchProjection({
+    required String date,
+    required String scheduleContextId,
+    required String startTime,
+    String? roomId,
+    String? serviceId,
+    String? staffId,
+  }) async {
+    final Map<String, String> queryParameters = <String, String>{
+      'date': date,
+      'scheduleContextId': scheduleContextId,
+      'startTime': startTime,
+    };
+    if (roomId != null && roomId.isNotEmpty) queryParameters['roomId'] = roomId;
+    if (serviceId != null && serviceId.isNotEmpty) queryParameters['serviceId'] = serviceId;
+    if (staffId != null && staffId.isNotEmpty) queryParameters['staffId'] = staffId;
+
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/projection').replace(
+      queryParameters: queryParameters,
+    );
+
+    final http.Response response = await _get(uri);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final dynamic decoded = jsonDecode(response.body);
+      final dynamic data = decoded is Map<String, dynamic> && decoded['data'] != null
+          ? decoded['data']
+          : decoded;
+      if (data is Map<String, dynamic>) {
+        return ScheduleProjection.fromJson(data);
+      }
+    }
+
+    _handleHttpError(response);
+    throw const AmanahScheduleException('Gagal menghitung proyeksi jadwal');
+  }
+
+  /// POST /api/v1/schedules/availability
+  Future<DoctorSchedule> createAvailability({
+    required String date,
+    required String scheduleContextId,
+    required String startTime,
+    String? roomId,
+    String? poliklinikId,
+    String? serviceId,
+    String? notes,
+    String? staffId,
+  }) async {
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/availability');
+    final Map<String, dynamic> body = <String, dynamic>{
+      'date': date,
+      'scheduleContextId': scheduleContextId,
+      'startTime': startTime,
+      if (roomId != null && roomId.isNotEmpty) 'roomId': roomId,
+      if (poliklinikId != null && poliklinikId.isNotEmpty) 'poliklinikId': poliklinikId,
+      if (serviceId != null && serviceId.isNotEmpty) 'serviceId': serviceId,
+      if (notes != null && notes.isNotEmpty) 'notes': notes,
+      if (staffId != null && staffId.isNotEmpty) 'staffId': staffId,
+    };
+
+    final http.Response response = await _post(uri, body: body);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final dynamic decoded = jsonDecode(response.body);
+      final dynamic payload = decoded is Map<String, dynamic> && decoded['data'] != null
+          ? decoded['data']
+          : decoded;
+      if (payload is Map<String, dynamic>) {
+        final dynamic scheduleObj = payload['schedule'] ?? payload;
+        if (scheduleObj is Map<String, dynamic>) {
+          return DoctorSchedule.fromJson(scheduleObj);
+        }
+      }
+    }
+
+    _handleHttpError(response);
+    throw const AmanahScheduleException('Gagal membuat ketersediaan jadwal');
   }
 }
 
