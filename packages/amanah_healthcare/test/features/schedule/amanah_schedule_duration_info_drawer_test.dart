@@ -157,9 +157,9 @@ void main() {
     });
   });
 
-  group('AmanahAddEditScheduleDrawer Feedback & Notice Banner Tests', () {
+  group('AmanahAddEditScheduleDrawer Validation & Modal Drawer Tests', () {
     testWidgets(
-      'displays in-drawer AmanahNoticeBanner and zero SnackBars when validation fails',
+      'displays modal drawer announcement and zero SnackBars when validation fails',
       (WidgetTester tester) async {
         tester.view.physicalSize = const Size(1080, 2400);
         tester.view.devicePixelRatio = 2.0;
@@ -176,28 +176,25 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // Initially pagi session is active. Toggle pagi off to test empty session validation.
-        await tester.tap(find.text('Sesi Pagi'));
-        await tester.pumpAndSettle();
-
-        // Tap "Tambah Jadwal" button
+        // On add schedule, all sessions are unselected / blank by default.
+        // Tap "Tambah Jadwal" button directly
         final Finder submitBtn = find.widgetWithText(AmanahButton, 'Tambah Jadwal');
         expect(submitBtn, findsOneWidget);
         await tester.tap(submitBtn);
         await tester.pumpAndSettle();
 
-        // In-drawer notice banner MUST be rendered inside the drawer
+        // Validation announcement modal drawer MUST open
+        expect(find.text('Validasi Jadwal Praktik'), findsOneWidget);
         expect(
           find.text('Aktifkan minimal satu sesi praktik untuk menyimpan jadwal.'),
           findsOneWidget,
         );
-        expect(find.byType(AmanahNoticeBanner), findsOneWidget);
 
         // Verify NO SnackBar was used (which would render behind modal bottom sheet)
         expect(find.byType(SnackBar), findsNothing);
 
-        // Dismiss notice banner
-        await tester.tap(find.byIcon(Icons.close_rounded));
+        // Tap "Mengerti" button to dismiss the validation modal
+        await tester.tap(find.text('Mengerti'));
         await tester.pumpAndSettle();
         expect(
           find.text('Aktifkan minimal satu sesi praktik untuk menyimpan jadwal.'),

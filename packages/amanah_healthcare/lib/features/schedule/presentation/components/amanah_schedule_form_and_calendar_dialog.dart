@@ -737,47 +737,14 @@ class _AmanahAddEditScheduleDrawerState
             .map((ClinicRoomReference r) => r.name)
             .toList();
       }
-      // Recompute slots with authoritative context duration policy and backend reference data
-      if (widget.scheduleToEdit == null) {
-        _sessions = _sessions.map((_ScheduleFormSession session) {
-          if (!session.active || session.slots.isEmpty) return session;
-          final int duration = _getEffectiveDurationForSession(session.id);
-          final ScheduleContext? ctx = _getContextForSession(session.id);
-          final List<_ScheduleFormSlot> updatedSlots =
-              session.slots.map((_ScheduleFormSlot slot) {
-            final String autoTo = _autoCalculateEndTime(
-              slot.from,
-              session.id,
-              durationMinutes: duration,
-              context: ctx,
-            );
-            final String effectiveRoom =
-                (slot.room.isEmpty || slot.room == 'Pilih Ruang Praktik') &&
-                        _rooms.isNotEmpty
-                    ? _rooms.first.name
-                    : slot.room;
-            final String effectivePoli =
-                (slot.poli.isEmpty || slot.poli == 'Pilih Poliklinik') &&
-                        _polis.isNotEmpty
-                    ? _polis.first.name
-                    : slot.poli;
-            return slot.copyWith(
-              to: autoTo,
-              room: effectiveRoom,
-              poli: effectivePoli,
-            );
-          }).toList();
-          return session.copyWith(slots: updatedSlots);
-        }).toList();
-      }
     });
   }
 
   List<_ScheduleFormSession> _buildInitialSessions({
     DoctorSchedule? editingSchedule,
   }) {
-    final String matchedId = editingSchedule == null
-        ? 'pagi'
+    final String? matchedId = editingSchedule == null
+        ? null
         : _sessionIdFromType(editingSchedule.sessionType);
 
     final List<({String id, String name, String sessionType})> defs =
@@ -789,42 +756,17 @@ class _AmanahAddEditScheduleDrawerState
     ];
 
     return defs.map((def) {
-      final bool isActive = matchedId == def.id;
+      final bool isActive = matchedId != null && matchedId == def.id;
       final List<_ScheduleFormSlot> slots;
-      if (isActive) {
-        final int duration = _getEffectiveDurationForSession(def.id);
-        final ScheduleContext? ctx = _getContextForSession(def.id);
-        final String effectiveFrom = editingSchedule?.startTime ??
-            _getSessionShiftBoundary(def.id, ctx).defaultStart;
-        final String effectiveTo = editingSchedule?.endTime ??
-            _autoCalculateEndTime(
-              effectiveFrom,
-              def.id,
-              durationMinutes: duration,
-              context: ctx,
-            );
-        final String effectiveRoom = editingSchedule?.room.isNotEmpty == true
-            ? editingSchedule!.room
-            : (_rooms.isNotEmpty
-                ? _rooms.first.name
-                : (_dynamicRoomOptions.isNotEmpty
-                    ? _dynamicRoomOptions.first
-                    : 'Pilih Ruang Praktik'));
-        final String effectivePoli = editingSchedule?.poli.isNotEmpty == true
-            ? editingSchedule!.poli
-            : (_polis.isNotEmpty
-                ? _polis.first.name
-                : (_dynamicPoliOptions.isNotEmpty
-                    ? _dynamicPoliOptions.first
-                    : 'Pilih Poliklinik'));
-
+      if (isActive && editingSchedule != null) {
+        final _SessionShiftBoundary bounds = _getSessionShiftBoundary(def.id);
         slots = <_ScheduleFormSlot>[
           _ScheduleFormSlot(
-            id: editingSchedule?.id ?? 'slot-${def.id}-1',
-            from: effectiveFrom,
-            to: effectiveTo,
-            room: effectiveRoom,
-            poli: effectivePoli,
+            id: editingSchedule.id,
+            from: editingSchedule.startTime ?? bounds.defaultStart,
+            to: editingSchedule.endTime ?? bounds.defaultEnd,
+            room: editingSchedule.room,
+            poli: editingSchedule.poli,
           ),
         ];
       } else {
@@ -840,14 +782,19 @@ class _AmanahAddEditScheduleDrawerState
     }).toList();
   }
 
-  void _showConflictDialog(BuildContext context, String message) {
+  void _showConflictDialog(
+    BuildContext context,
+    String message, {
+    String title = 'Validasi Jadwal Praktik',
+    String subtitle = 'Validasi Sistem Praktik Dokter',
+  }) {
     showAmanahBottomSheet<void>(
       context: context,
       builder: (BuildContext ctx) {
         final bool dark = Theme.of(ctx).brightness == Brightness.dark;
         return AmanahBottomSheetScaffold(
-          title: 'Konflik Penjadwalan',
-          subtitle: 'Validasi Sistem Praktik Dokter',
+          title: title,
+          subtitle: subtitle,
           maxHeightFactor: 0.45,
           footer: AmanahButton.primary(
             text: 'Mengerti',
@@ -909,9 +856,10 @@ class _AmanahAddEditScheduleDrawerState
         .toList();
     if (activeSessions.isEmpty) {
       setState(() => _isSubmitting = false);
-      _showNotice(
+      _showConflictDialog(
+        context,
         'Aktifkan minimal satu sesi praktik untuk menyimpan jadwal.',
-        variant: AmanahNoticeVariant.warning,
+        title: 'Validasi Jadwal Praktik',
       );
       return;
     }
@@ -920,17 +868,19 @@ class _AmanahAddEditScheduleDrawerState
       for (final _ScheduleFormSlot slot in s.slots) {
         if (slot.room.isEmpty || slot.room == 'Pilih Ruang Praktik') {
           setState(() => _isSubmitting = false);
-          _showNotice(
+          _showConflictDialog(
+            context,
             'Silakan pilih Ruang Praktik untuk ${s.name}.',
-            variant: AmanahNoticeVariant.warning,
+            title: 'Validasi Jadwal Praktik',
           );
           return;
         }
         if (slot.poli.isEmpty || slot.poli == 'Pilih Poliklinik') {
           setState(() => _isSubmitting = false);
-          _showNotice(
+          _showConflictDialog(
+            context,
             'Silakan pilih Poli / Spesialisasi untuk ${s.name}.',
-            variant: AmanahNoticeVariant.warning,
+            title: 'Validasi Jadwal Praktik',
           );
           return;
         }
@@ -1039,12 +989,10 @@ class _AmanahAddEditScheduleDrawerState
       }
     } on AmanahScheduleConflictException catch (e) {
       if (mounted) {
-        _showNotice(e.message, variant: AmanahNoticeVariant.danger);
         _showConflictDialog(context, e.message);
       }
     } catch (e) {
       if (mounted) {
-        _showNotice(e.toString(), variant: AmanahNoticeVariant.danger);
         _showConflictDialog(context, e.toString());
       }
     } finally {
@@ -1096,19 +1044,6 @@ class _AmanahAddEditScheduleDrawerState
     });
   }
 
-  String? _sessionAnnouncement;
-  AmanahNoticeVariant _sessionAnnouncementVariant = AmanahNoticeVariant.warning;
-
-  void _showNotice(
-    String message, {
-    AmanahNoticeVariant variant = AmanahNoticeVariant.warning,
-  }) {
-    setState(() {
-      _sessionAnnouncement = message;
-      _sessionAnnouncementVariant = variant;
-    });
-  }
-
   void _addTimeSlot(String sessionId) {
     final _ScheduleFormSession session = _sessions.firstWhere(
       (_ScheduleFormSession s) => s.id == sessionId,
@@ -1142,7 +1077,11 @@ class _AmanahAddEditScheduleDrawerState
     if (remainingMinutes < duration) {
       final String bannerText =
           'Sesi ${session.name} sudah terisi hingga batas shift (${bounds.defaultEnd} WIB). Setiap antrean membutuhkan minimal $duration menit.';
-      _showNotice(bannerText, variant: AmanahNoticeVariant.warning);
+      _showConflictDialog(
+        context,
+        bannerText,
+        title: 'Batas Shift Tercapai',
+      );
       return;
     }
 
@@ -1155,7 +1094,6 @@ class _AmanahAddEditScheduleDrawerState
     );
 
     setState(() {
-      _sessionAnnouncement = null;
       _sessions = _sessions.map((_ScheduleFormSession s) {
         if (s.id != sessionId) return s;
         return s.copyWith(
@@ -1165,8 +1103,8 @@ class _AmanahAddEditScheduleDrawerState
               id: '$sessionId-${DateTime.now().microsecondsSinceEpoch}',
               from: nextFrom,
               to: nextTo,
-              room: lastSlot.room,
-              poli: lastSlot.poli,
+              room: 'Pilih Ruang Praktik',
+              poli: 'Pilih Poliklinik',
             ),
           ],
         );
@@ -1176,7 +1114,6 @@ class _AmanahAddEditScheduleDrawerState
 
   void _removeTimeSlot(String sessionId, int slotIndex) {
     setState(() {
-      _sessionAnnouncement = null;
       _sessions = _sessions.map((_ScheduleFormSession session) {
         if (session.id != sessionId) {
           return session;
@@ -1246,16 +1183,8 @@ class _AmanahAddEditScheduleDrawerState
       durationMinutes: duration,
       context: ctx,
     );
-    final String initialRoom = _rooms.isNotEmpty
-        ? _rooms.first.name
-        : (_dynamicRoomOptions.isNotEmpty
-            ? _dynamicRoomOptions.first
-            : 'Pilih Ruang Praktik');
-    final String initialPoli = _polis.isNotEmpty
-        ? _polis.first.name
-        : (_dynamicPoliOptions.isNotEmpty
-            ? _dynamicPoliOptions.first
-            : 'Pilih Poliklinik');
+    const String initialRoom = 'Pilih Ruang Praktik';
+    const String initialPoli = 'Pilih Poliklinik';
 
     return _ScheduleFormSlot(
       id: id ?? '$sessionId-${DateTime.now().microsecondsSinceEpoch}',
@@ -1382,16 +1311,6 @@ class _AmanahAddEditScheduleDrawerState
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          if (_sessionAnnouncement != null) ...<Widget>[
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: AmanahNoticeBanner(
-                message: _sessionAnnouncement!,
-                variant: _sessionAnnouncementVariant,
-                onClose: () => setState(() => _sessionAnnouncement = null),
-              ),
-            ),
-          ],
           if (isEditing) ...<Widget>[
             Text(
               'Status Praktik',
@@ -2157,8 +2076,6 @@ class _ScheduleSlotRow extends StatelessWidget {
             _SlotLabel(
               text: 'To',
               dark: dark,
-              tooltip:
-                  'Waktu selesai ("To") dihitung otomatis berdasarkan durasi konsultasi dokter hingga batas shift',
             ),
             Expanded(
               child: _MiniSlotButton(
@@ -2266,53 +2183,24 @@ class _SlotLabel extends StatelessWidget {
   const _SlotLabel({
     required this.text,
     required this.dark,
-    this.tooltip,
   });
 
   final String text;
   final bool dark;
-  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
-    final Widget labelWidget = Text(
-      text,
-      style: TextStyle(
-        color: dark
-            ? AmanahColorTokens.neutral400
-            : AmanahColorTokens.neutral500,
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-
-    if (tooltip == null) {
-      return SizedBox(
-        width: text == 'From' ? 34 : 20,
-        child: labelWidget,
-      );
-    }
-
     return SizedBox(
-      width: 36,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          labelWidget,
-          const SizedBox(width: 2),
-          Tooltip(
-            message: tooltip!,
-            triggerMode: TooltipTriggerMode.tap,
-            showDuration: const Duration(seconds: 4),
-            child: Icon(
-              Icons.info_outline_rounded,
-              size: 11,
-              color: dark
-                  ? AmanahColorTokens.tabActiveDark
-                  : AmanahColorTokens.brand,
-            ),
-          ),
-        ],
+      width: text == 'From' ? 34 : 20,
+      child: Text(
+        text,
+        style: TextStyle(
+          color: dark
+              ? AmanahColorTokens.neutral400
+              : AmanahColorTokens.neutral500,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
