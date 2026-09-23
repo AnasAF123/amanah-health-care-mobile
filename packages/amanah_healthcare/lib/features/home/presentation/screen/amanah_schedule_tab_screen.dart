@@ -7,6 +7,7 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_notice_banner.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_cards_and_drawers.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_components.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_form_and_calendar_dialog.dart';
@@ -402,44 +403,11 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
 
         // Cuti Alert Banner if Day is on Cuti
         if (isCuti) ...<Widget>[
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AmanahColorTokens.warning.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AmanahColorTokens.warning.withValues(alpha: 0.35),
-              ),
-            ),
-            child: Row(
-              children: <Widget>[
-                const Icon(
-                  Icons.info_outline_rounded,
-                  size: 20,
-                  color: AmanahColorTokens.warning,
-                ),
-                const SizedBox(width: 10),
-                const Expanded(
-                  child: Text(
-                    'Dokter Cuti Praktik: Seluruh jadwal dinonaktifkan.',
-                    style: TextStyle(
-                      color: AmanahColorTokens.warning,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                AmanahButton.secondary(
-                  text: 'Buka Jadwal',
-                  size: AmanahButtonSize.small,
-                  customForegroundColor: AmanahColorTokens.warning,
-                  customBackgroundColor: AmanahColorTokens.warning.withValues(
-                    alpha: 0.12,
-                  ),
-                  onPressed: () => _store.setDayCuti(_selectedDate, false),
-                ),
-              ],
-            ),
+          AmanahNoticeBanner(
+            message: 'Dokter Cuti Praktik: Seluruh jadwal dinonaktifkan.',
+            variant: AmanahNoticeVariant.warning,
+            actionLabel: 'Buka Jadwal',
+            onAction: () => _store.setDayCuti(_selectedDate, false),
           ),
           const SizedBox(height: 12),
         ],

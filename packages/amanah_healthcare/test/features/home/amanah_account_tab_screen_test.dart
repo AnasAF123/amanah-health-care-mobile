@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_edit_profile_drawer.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_avatar_photo_sheet.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_account_tab_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_home_shell.dart';
 import 'package:amanah_healthcare/widgets/amanah_avatar.dart';
@@ -72,7 +72,7 @@ void main() {
           find.text('Dokter Spesialis Anak • +62 812-3456-7890'),
           findsOneWidget,
         );
-        expect(find.byIcon(Icons.edit_rounded), findsOneWidget);
+        expect(find.byIcon(Icons.edit_rounded), findsNothing);
 
         // Settings Menu Items (4 master items)
         expect(find.text('Keamanan akun & PIN'), findsOneWidget);
@@ -86,7 +86,7 @@ void main() {
     );
 
     testWidgets(
-      'Tapping Edit Profil opens Edit Profile drawer and updates profile',
+      'Redundant edit pencil button and drawer are completely removed in favor of identity section',
       (WidgetTester tester) async {
         tester.view.physicalSize = const Size(1080, 2400);
         tester.view.devicePixelRatio = 2.75;
@@ -95,20 +95,9 @@ void main() {
         await tester.pumpWidget(createAccountScreen());
         await tester.pumpAndSettle();
 
-        // Tap Edit Profil button
-        await tester.tap(find.byIcon(Icons.edit_rounded));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(AmanahEditProfileDrawer), findsOneWidget);
-        expect(find.text('Edit Profil Dokter'), findsOneWidget);
-        expect(find.text('Terverifikasi oleh manajemen'), findsOneWidget);
-        expect(find.text('Simpan Perubahan'), findsOneWidget);
-
-        // Tap Simpan Perubahan
-        await tester.tap(find.text('Simpan Perubahan'));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(AmanahEditProfileDrawer), findsNothing);
+        // Verify edit pencil button does NOT exist on profile screen
+        expect(find.byIcon(Icons.edit_rounded), findsNothing);
+        expect(find.text('Edit Profil'), findsNothing);
       },
     );
 

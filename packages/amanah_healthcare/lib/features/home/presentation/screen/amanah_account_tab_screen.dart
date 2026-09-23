@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_repository.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_avatar_photo_sheet.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_edit_profile_drawer.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_pull_to_refresh.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_watermark_path.dart';
@@ -40,7 +40,6 @@ class AmanahAccountTabScreen extends StatefulWidget {
 class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   String _phone = '';
   String _email = '';
-  String _bio = '';
   bool _isEmailVerified = false;
   late UserAvatar _avatar;
   bool _isAvatarUploading = false;
@@ -52,9 +51,6 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
         ? widget.user.staff!.phoneNumber!
         : widget.user.phone;
     _email = widget.user.email;
-    _bio = widget.user.staff?.profession?.trim().isNotEmpty == true
-        ? 'Tenaga medis (${widget.user.staff!.profession}) di RS Amanah Sehat.'
-        : 'Tenaga medis di RS Amanah Sehat.';
     _isEmailVerified = widget.user.isEmailVerified;
     _avatar = widget.user.avatar;
   }
@@ -103,55 +99,6 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
       department: base.department,
       avatarAsset: base.avatarAsset,
     );
-  }
-
-  Future<void> _openEditProfileDrawer() async {
-    final AmanahEditProfileResult? result = await AmanahEditProfileDrawer.show(
-      context: context,
-      doctorName: widget.user.fullName,
-      initialPhone: _phone,
-      initialEmail: _email,
-      initialBio: _bio,
-    );
-
-    if (result != null && mounted) {
-      try {
-        await widget.repository.updateMyProfile(
-          fullName: result.name,
-          phoneNumber: result.phone,
-        );
-      } catch (_) {}
-      setState(() {
-        _phone = result.phone;
-        _bio = result.bio;
-      });
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: <Widget>[
-              Icon(Icons.check_circle_rounded, color: AmanahColorTokens.surfaceLight, size: 18),
-              SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Profil dokter berhasil diperbarui',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: AmanahColorTokens.neutral900,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
   }
 
   Future<void> _openAvatarPhotoSheet() async {
@@ -400,7 +347,6 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                           avatar: _avatar,
                           isUploading: _isAvatarUploading,
                           dark: dark,
-                          onEditTap: _openEditProfileDrawer,
                           onAvatarTap: _openAvatarPhotoSheet,
                           onLoyaltyTap: _handleOpenDoctorIdCard,
                         ),
@@ -416,7 +362,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                           email: _email,
                           isVerified: _isEmailVerified,
                           dark: dark,
-                          onActionTap: _openEditProfileDrawer,
+                          onActionTap: () => _handleMenuItemTap('account'),
                           onVerifyTap: _handleVerifyEmail,
                         ),
                       ),
@@ -964,7 +910,6 @@ class _DualStackProfileCard extends StatelessWidget {
     required this.avatar,
     required this.isUploading,
     required this.dark,
-    required this.onEditTap,
     required this.onAvatarTap,
     required this.onLoyaltyTap,
   });
@@ -975,7 +920,6 @@ class _DualStackProfileCard extends StatelessWidget {
   final UserAvatar avatar;
   final bool isUploading;
   final bool dark;
-  final VoidCallback onEditTap;
   final VoidCallback onAvatarTap;
   final VoidCallback onLoyaltyTap;
 
@@ -1090,20 +1034,6 @@ class _DualStackProfileCard extends StatelessWidget {
                             ),
                           ],
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.edit_rounded),
-                        iconSize: 20,
-                        tooltip: 'Edit Profil',
-                        style: IconButton.styleFrom(
-                          backgroundColor: dark
-                              ? AmanahColorTokens.pureWhite.withValues(alpha: 0.06)
-                              : AmanahColorTokens.skyLight.withValues(alpha: 0.60),
-                          foregroundColor: dark
-                              ? AmanahColorTokens.cyanLight
-                              : AmanahColorTokens.brandNavy,
-                        ),
-                        onPressed: onEditTap,
                       ),
                     ],
                   ),
