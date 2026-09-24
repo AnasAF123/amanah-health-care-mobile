@@ -401,16 +401,30 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
         ),
         const SizedBox(height: 12),
 
-        // Cuti Alert Banner if Day is on Cuti
-        if (isCuti) ...<Widget>[
-          AmanahNoticeBanner(
-            message: 'Dokter Cuti Praktik: Seluruh jadwal dinonaktifkan.',
-            variant: AmanahNoticeVariant.warning,
-            actionLabel: 'Buka Jadwal',
-            onAction: () => _store.setDayCuti(_selectedDate, false),
-          ),
-          const SizedBox(height: 12),
-        ],
+        // Cuti or Day Closed Alert Banner
+        () {
+          final bool isDayClosed =
+              isCuti || daySetting.isClosed || daySetting.status == 'Tutup';
+          if (!isDayClosed) return const SizedBox.shrink();
+          return Column(
+            children: <Widget>[
+              AmanahNoticeBanner(
+                message: isCuti
+                    ? 'Dokter Cuti Praktik: Seluruh jadwal dinonaktifkan.'
+                    : 'Jadwal Praktik Ditutup: Dokter tidak menerima konsultasi pada hari ini.',
+                variant: AmanahNoticeVariant.warning,
+                actionLabel: 'Buka Jadwal',
+                onAction: () async {
+                  await _store.updateDayStatus(
+                    date: _selectedDate,
+                    status: 'Buka',
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
+          );
+        }(),
 
         // Section Title: Date & Patient Count
         Row(
@@ -503,11 +517,31 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
     required bool isCuti,
     required List<DoctorSchedule> schedules,
   }) {
+    final bool isDayClosed =
+        isCuti || daySetting.isClosed || daySetting.status == 'Tutup';
+
     return Column(
       key: const ValueKey<String>('view-sessions'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        // Header Count
+        if (isDayClosed) ...<Widget>[
+          AmanahNoticeBanner(
+            message: isCuti
+                ? 'Dokter Cuti Praktik: Seluruh jadwal dinonaktifkan.'
+                : 'Jadwal Praktik Ditutup: Seluruh sesi dinonaktifkan pada hari ini.',
+            variant: AmanahNoticeVariant.warning,
+            actionLabel: 'Buka Hari Ini',
+            onAction: () async {
+              await _store.updateDayStatus(
+                date: _selectedDate,
+                status: 'Buka',
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+        ],
+
+        // Header Count & Day Toggle
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -526,15 +560,18 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              '${schedules.length} Sesi Aktif',
-              style: TextStyle(
-                color: dark
-                    ? AmanahColorTokens.neutral400
-                    : AmanahColorTokens.neutral500,
-                fontSize: 11.5,
-                fontWeight: FontWeight.w600,
-              ),
+            AmanahButton.text(
+              text: isDayClosed ? 'Buka Praktik' : 'Tutup Praktik',
+              size: AmanahButtonSize.small,
+              customForegroundColor: isDayClosed
+                  ? AmanahColorTokens.success
+                  : AmanahColorTokens.danger,
+              onPressed: () async {
+                await _store.updateDayStatus(
+                  date: _selectedDate,
+                  status: isDayClosed ? 'Buka' : 'Tutup',
+                );
+              },
             ),
           ],
         ),

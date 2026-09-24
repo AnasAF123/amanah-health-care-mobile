@@ -66,11 +66,17 @@ class AmanahScheduleStore extends ChangeNotifier {
 
   DayScheduleSetting getDaySettingForDate(DateTime date) {
     final String key = formatDateKey(date);
+    final CalendarDaySummary? summary = _calendarSummariesMap[key];
     return _daySettingsMap[key] ??
         DayScheduleSetting(
-          targetQuota: 8,
-          isCuti: date.weekday == DateTime.sunday,
+          targetQuota: summary?.targetQuota ?? 8,
+          isCuti: summary?.isCuti ?? (date.weekday == DateTime.sunday),
+          cutiReason: summary?.cutiReason,
           scheduleDate: key,
+          status: summary?.status ??
+              (date.weekday == DateTime.sunday ? 'Tutup' : 'Buka'),
+          isClosed: summary?.isClosed ?? (date.weekday == DateTime.sunday),
+          notes: summary?.notes,
         );
   }
 
@@ -140,6 +146,8 @@ class AmanahScheduleStore extends ChangeNotifier {
     _daySettingsMap[key] = current.copyWith(
       isCuti: isCuti,
       cutiReason: cutiReason ?? (isCuti ? 'Dokter Cuti Praktik' : null),
+      status: isCuti ? 'Tutup' : 'Buka',
+      isClosed: isCuti,
     );
     notifyListeners();
   }
@@ -210,6 +218,9 @@ class AmanahScheduleStore extends ChangeNotifier {
               scheduleDate: day.date,
               totalBookedPatients: day.bookedPatientCount,
               capacityPercentage: day.capacityPercentage,
+              status: day.status,
+              isClosed: day.isClosed,
+              notes: day.notes,
             );
         _daySettingsMap[day.date] = existing.copyWith(
           targetQuota: day.targetQuota,
@@ -217,6 +228,9 @@ class AmanahScheduleStore extends ChangeNotifier {
           cutiReason: day.cutiReason,
           totalBookedPatients: day.bookedPatientCount,
           capacityPercentage: day.capacityPercentage,
+          status: day.status,
+          isClosed: day.isClosed,
+          notes: day.notes,
         );
       }
       notifyListeners();
@@ -364,6 +378,42 @@ class AmanahScheduleStore extends ChangeNotifier {
       );
     } catch (e) {
       _errorMessage = e.toString();
+    }
+  }
+
+  /// Menutup atau membuka seluruh jadwal pada hari/tanggal tertentu via PATCH /schedules/days/:date
+  Future<void> updateDayStatus({
+    required DateTime date,
+    required String status, // 'Buka', 'Tutup', 'Cuti'
+    String? notes,
+  }) async {
+    final String dateStr = formatDateKey(date);
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.updateDayStatus(
+        date: dateStr,
+        status: status,
+        notes: notes,
+      );
+
+      // Re-fetch schedules and calendar summary to guarantee 100% sync
+      await Future.wait(<Future<dynamic>>[
+        loadSchedulesForDate(date, forceRefresh: true),
+        loadCalendarSummary(
+          '${date.year}-${date.month.toString().padLeft(2, '0')}',
+        ),
+      ]);
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      notifyListeners();
+      rethrow;
     }
   }
 

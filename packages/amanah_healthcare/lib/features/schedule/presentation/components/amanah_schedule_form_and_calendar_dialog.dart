@@ -234,6 +234,8 @@ class AmanahDocScheduleCalendarDrawer extends StatefulWidget {
 class _AmanahDocScheduleCalendarDrawerState
     extends State<AmanahDocScheduleCalendarDrawer> {
   late DateTime _currentMonth;
+  late DateTime _focusedDate;
+  bool _isDayToggling = false;
 
   @override
   void initState() {
@@ -242,6 +244,7 @@ class _AmanahDocScheduleCalendarDrawerState
       widget.selectedDate.year,
       widget.selectedDate.month,
     );
+    _focusedDate = widget.selectedDate;
     _loadCalendarSummary();
   }
 
@@ -249,6 +252,95 @@ class _AmanahDocScheduleCalendarDrawerState
     final String monthStr =
         '${_currentMonth.year}-${_currentMonth.month.toString().padLeft(2, '0')}';
     AmanahScheduleStore.instance.loadCalendarSummary(monthStr);
+  }
+
+  Future<void> _toggleDayStatus(DateTime date, bool isCurrentClosed) async {
+    final String targetStatus = isCurrentClosed ? 'Buka' : 'Tutup';
+    final String dateDisplay =
+        '${date.day} ${_getMonthName(date.month)} ${date.year}';
+
+    if (!isCurrentClosed) {
+      final bool? confirmed = await showAmanahBottomSheet<bool>(
+        context: context,
+        builder: (BuildContext ctx) {
+          final bool dark = Theme.of(ctx).brightness == Brightness.dark;
+          return AmanahBottomSheetScaffold(
+            title: 'Tutup Jadwal Praktik',
+            subtitle: 'Konfirmasi Penutupan Hari',
+            maxHeightFactor: 0.45,
+            footer: AmanahActionRow(
+              axis: AmanahActionRowAxis.horizontal,
+              primary: AmanahButton.destructive(
+                text: 'Ya, Tutup Hari Ini',
+                onPressed: () => Navigator.of(ctx).pop(true),
+              ),
+              secondary: AmanahButton.secondary(
+                text: 'Batal',
+                onPressed: () => Navigator.of(ctx).pop(false),
+              ),
+            ),
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AmanahColorTokens.warning.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AmanahColorTokens.warning.withValues(alpha: 0.40),
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Icon(
+                        Icons.warning_amber_rounded,
+                        color: AmanahColorTokens.warning,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Apakah Anda yakin ingin menutup seluruh jadwal pada $dateDisplay? Seluruh sesi akan dinonaktifkan.',
+                          style: TextStyle(
+                            color: dark
+                                ? AmanahColorTokens.pureWhite
+                                : AmanahColorTokens.neutral900,
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      if (confirmed != true) return;
+    }
+
+    setState(() => _isDayToggling = true);
+    try {
+      await AmanahScheduleStore.instance.updateDayStatus(
+        date: date,
+        status: targetStatus,
+        notes: isCurrentClosed ? 'Buka kembali' : 'Jadwal ditutup oleh dokter',
+      );
+      _loadCalendarSummary();
+      if (mounted) {
+        setState(() => _isDayToggling = false);
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isDayToggling = false);
+      }
+    }
   }
 
   bool _isSameDay(DateTime a, DateTime b) {
@@ -280,8 +372,17 @@ class _AmanahDocScheduleCalendarDrawerState
 
     return AmanahBottomSheetScaffold(
       title: 'Kalender Jadwal Praktik',
-      maxHeightFactor: 0.76,
-      minHeight: 430,
+      maxHeightFactor: 0.88,
+      minHeight: 520,
+      footer: AmanahButton.primary(
+        text: 'Pilih & Lihat Sesi Praktik',
+        size: AmanahButtonSize.medium,
+        isFullWidth: true,
+        onPressed: () {
+          widget.onSelectDate(_focusedDate);
+          Navigator.of(context).pop();
+        },
+      ),
       bodyPadding: const EdgeInsets.fromLTRB(
         AmanahSpacing.xxl,
         AmanahSpacing.lg,
@@ -361,7 +462,7 @@ class _AmanahDocScheduleCalendarDrawerState
               if (!inCurrentMonth) {
                 return const SizedBox.shrink();
               }
-              final bool isSelected = _isSameDay(date, widget.selectedDate);
+              final bool isSelected = _isSameDay(date, _focusedDate);
               final bool isToday = _isSameDay(date, widget.baseToday);
               final bool isPast = date.isBefore(
                 DateTime(
@@ -425,8 +526,7 @@ class _AmanahDocScheduleCalendarDrawerState
                 onTap: isPast
                     ? null
                     : () {
-                        widget.onSelectDate(date);
-                        Navigator.of(context).pop();
+                        setState(() => _focusedDate = date);
                       },
                 child: Container(
                   decoration: BoxDecoration(
@@ -486,6 +586,93 @@ class _AmanahDocScheduleCalendarDrawerState
                 label: 'Tutup',
               ),
             ],
+          ),
+          const SizedBox(height: 14),
+          // Day closure / opening panel for _focusedDate
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: dark
+                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.05)
+                  : AmanahColorTokens.surfaceSecondaryLight,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: dark
+                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
+                    : AmanahColorTokens.neutral200,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        '${_focusedDate.day} ${_getMonthName(_focusedDate.month)} ${_focusedDate.year}',
+                        style: TextStyle(
+                          color: dark
+                              ? AmanahColorTokens.pureWhite
+                              : AmanahColorTokens.neutral900,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      () {
+                        final String focusedKey =
+                            AmanahScheduleStore.formatDateKey(_focusedDate);
+                        final CalendarDaySummary? summary =
+                            store.calendarSummariesMap[focusedKey];
+                        final DayScheduleSetting setting =
+                            store.getDaySettingForDate(_focusedDate);
+                        final bool isClosed = (summary?.isClosed ?? false) ||
+                            summary?.status == 'Tutup' ||
+                            setting.isCuti;
+                        final String statusText = isClosed
+                            ? (setting.isCuti ? 'Cuti Praktik' : 'Tutup Praktik')
+                            : 'Buka Praktik (${summary?.sessionCount ?? 0} Sesi)';
+
+                        return Text(
+                          'Status: $statusText',
+                          style: TextStyle(
+                            color: isClosed
+                                ? AmanahColorTokens.danger
+                                : AmanahColorTokens.success,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        );
+                      }(),
+                    ],
+                  ),
+                ),
+                () {
+                  final String focusedKey =
+                      AmanahScheduleStore.formatDateKey(_focusedDate);
+                  final CalendarDaySummary? summary =
+                      store.calendarSummariesMap[focusedKey];
+                  final DayScheduleSetting setting =
+                      store.getDaySettingForDate(_focusedDate);
+                  final bool isClosed = (summary?.isClosed ?? false) ||
+                      summary?.status == 'Tutup' ||
+                      setting.isCuti;
+
+                  return AmanahButton(
+                    text: isClosed ? 'Buka Praktik' : 'Tutup Praktik',
+                    size: AmanahButtonSize.small,
+                    variant: isClosed
+                        ? AmanahButtonVariant.primary
+                        : AmanahButtonVariant.ghost,
+                    customForegroundColor:
+                        isClosed ? null : AmanahColorTokens.danger,
+                    isLoading: _isDayToggling,
+                    onPressed: () => _toggleDayStatus(_focusedDate, isClosed),
+                  );
+                }(),
+              ],
+            ),
           ),
         ],
       ),
@@ -663,14 +850,14 @@ class _AmanahAddEditScheduleDrawerState
   late DateTime _selectedDate;
   late DateTime _calendarMonth;
   bool _isCalendarOpen = false;
-  String _status = 'Buka'; // 'Buka', 'Terisi', 'Tutup'
+  String _status = 'Buka'; // 'Buka', 'Tutup'
   List<_ScheduleFormSession> _sessions = const <_ScheduleFormSession>[];
   List<ClinicPoliklinikReference> _polis = const <ClinicPoliklinikReference>[];
   List<ClinicRoomReference> _rooms = const <ClinicRoomReference>[];
   List<String> _dynamicPoliOptions = kPoliOptions;
   List<String> _dynamicRoomOptions = kRoomOptions;
   List<String> _occupiedRoomOptions = const <String>[];
-  final List<String> _dynamicStatusOptions = const <String>['Buka', 'Terisi', 'Tutup'];
+  final List<String> _dynamicStatusOptions = const <String>['Buka', 'Tutup'];
   bool _isSubmitting = false;
 
   @override
@@ -680,7 +867,7 @@ class _AmanahAddEditScheduleDrawerState
     _calendarMonth = DateTime(_selectedDate.year, _selectedDate.month);
     final DoctorSchedule? sch = widget.scheduleToEdit;
     if (sch != null) {
-      _status = sch.badge;
+      _status = (sch.badge == 'Tutup' || sch.badge == 'Cuti') ? 'Tutup' : 'Buka';
       _sessions = _buildInitialSessions(editingSchedule: sch);
     } else {
       _status = 'Buka';
@@ -958,9 +1145,7 @@ class _AmanahAddEditScheduleDrawerState
           badge: _status,
           badgeVariant: _status == 'Tutup' || _status == 'Cuti'
               ? AmanahBadgeVariant.warning
-              : (_status == 'Terisi'
-                    ? AmanahBadgeVariant.primary
-                    : AmanahBadgeVariant.success),
+              : AmanahBadgeVariant.success,
         );
         await store.saveSchedule(_selectedDate, updated);
       } else {
@@ -996,9 +1181,7 @@ class _AmanahAddEditScheduleDrawerState
               badge: _status,
               badgeVariant: _status == 'Tutup' || _status == 'Cuti'
                   ? AmanahBadgeVariant.warning
-                  : (_status == 'Terisi'
-                        ? AmanahBadgeVariant.primary
-                        : AmanahBadgeVariant.success),
+                  : AmanahBadgeVariant.success,
               bookedPatients: const <BookedPatient>[],
             );
 
@@ -1389,10 +1572,7 @@ class _AmanahAddEditScheduleDrawerState
                   final bool active = _status == label;
                   Color activeBg = AmanahColorTokens.success;
                   Color dotColor = AmanahColorTokens.emeraldLight;
-                  if (label == 'Terisi') {
-                    activeBg = AmanahColorTokens.brand;
-                    dotColor = AmanahColorTokens.brandLight;
-                  } else if (label == 'Tutup' || label == 'Cuti') {
+                  if (label == 'Tutup' || label == 'Cuti') {
                     activeBg = AmanahColorTokens.danger;
                     dotColor = AmanahColorTokens.roseLight;
                   }

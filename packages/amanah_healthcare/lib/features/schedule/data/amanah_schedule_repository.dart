@@ -674,5 +674,30 @@ class AmanahScheduleRepository {
     _handleHttpError(response);
     throw const AmanahScheduleException('Gagal mengambil data occupancy jadwal');
   }
+
+  /// PATCH /api/v1/schedules/days/:date
+  Future<Map<String, dynamic>> updateDayStatus({
+    required String date,
+    required String status,
+    String? notes,
+  }) async {
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/days/$date');
+    final Map<String, dynamic> body = <String, dynamic>{
+      'status': status,
+      if (notes != null && notes.isNotEmpty) 'notes': notes,
+    };
+
+    final http.Response response = await _patch(uri, body: body);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final dynamic decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+      return <String, dynamic>{'success': true};
+    }
+
+    _handleHttpError(response);
+    throw const AmanahScheduleException('Gagal memperbarui status hari');
+  }
 }
 

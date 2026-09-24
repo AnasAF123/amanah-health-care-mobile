@@ -451,9 +451,14 @@ class DayScheduleSetting {
     this.scheduleDate,
     this.totalBookedPatients = 0,
     this.capacityPercentage = 0,
+    this.status = 'Buka',
+    this.isClosed = false,
+    this.notes,
   });
 
   factory DayScheduleSetting.fromJson(Map<String, dynamic> json) {
+    final String status = json['status'] as String? ?? 'Buka';
+    final bool isClosed = json['isClosed'] as bool? ?? (status == 'Tutup');
     return DayScheduleSetting(
       targetQuota: json['targetQuota'] as int? ?? 8,
       isCuti: json['isCuti'] as bool? ?? false,
@@ -461,6 +466,9 @@ class DayScheduleSetting {
       scheduleDate: json['scheduleDate'] as String?,
       totalBookedPatients: json['totalBookedPatients'] as int? ?? 0,
       capacityPercentage: json['capacityPercentage'] as int? ?? 0,
+      status: status,
+      isClosed: isClosed,
+      notes: json['notes'] as String?,
     );
   }
 
@@ -470,6 +478,9 @@ class DayScheduleSetting {
   final String? scheduleDate;
   final int totalBookedPatients;
   final int capacityPercentage;
+  final String status;
+  final bool isClosed;
+  final String? notes;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -479,6 +490,9 @@ class DayScheduleSetting {
       'scheduleDate': scheduleDate,
       'totalBookedPatients': totalBookedPatients,
       'capacityPercentage': capacityPercentage,
+      'status': status,
+      'isClosed': isClosed,
+      if (notes != null) 'notes': notes,
     };
   }
 
@@ -489,6 +503,9 @@ class DayScheduleSetting {
     String? scheduleDate,
     int? totalBookedPatients,
     int? capacityPercentage,
+    String? status,
+    bool? isClosed,
+    String? notes,
   }) {
     return DayScheduleSetting(
       targetQuota: targetQuota ?? this.targetQuota,
@@ -497,6 +514,9 @@ class DayScheduleSetting {
       scheduleDate: scheduleDate ?? this.scheduleDate,
       totalBookedPatients: totalBookedPatients ?? this.totalBookedPatients,
       capacityPercentage: capacityPercentage ?? this.capacityPercentage,
+      status: status ?? this.status,
+      isClosed: isClosed ?? this.isClosed,
+      notes: notes ?? this.notes,
     );
   }
 }
@@ -511,9 +531,14 @@ class CalendarDaySummary {
     required this.targetQuota,
     required this.bookedPatientCount,
     required this.capacityPercentage,
+    this.status = 'Buka',
+    this.isClosed = false,
+    this.notes,
   });
 
   factory CalendarDaySummary.fromJson(Map<String, dynamic> json) {
+    final String status = json['status'] as String? ?? 'Buka';
+    final bool isClosed = json['isClosed'] as bool? ?? (status == 'Tutup');
     return CalendarDaySummary(
       date: json['date'] as String? ?? '',
       hasSchedule: json['hasSchedule'] as bool? ?? false,
@@ -523,6 +548,9 @@ class CalendarDaySummary {
       targetQuota: json['targetQuota'] as int? ?? 0,
       bookedPatientCount: json['bookedPatientCount'] as int? ?? 0,
       capacityPercentage: json['capacityPercentage'] as int? ?? 0,
+      status: status,
+      isClosed: isClosed,
+      notes: json['notes'] as String?,
     );
   }
 
@@ -534,6 +562,9 @@ class CalendarDaySummary {
   final int targetQuota;
   final int bookedPatientCount;
   final int capacityPercentage;
+  final String status;
+  final bool isClosed;
+  final String? notes;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -545,6 +576,9 @@ class CalendarDaySummary {
       'targetQuota': targetQuota,
       'bookedPatientCount': bookedPatientCount,
       'capacityPercentage': capacityPercentage,
+      'status': status,
+      'isClosed': isClosed,
+      if (notes != null) 'notes': notes,
     };
   }
 }
