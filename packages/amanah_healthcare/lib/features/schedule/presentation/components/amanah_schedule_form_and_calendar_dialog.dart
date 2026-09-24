@@ -278,19 +278,71 @@ class _AmanahDocScheduleCalendarDrawerState
     );
     final int gridDayCount = gridEnd.difference(gridStart).inDays + 1;
 
-    return AmanahBottomSheetScaffold(
-      title: 'Kalender Jadwal Praktik',
-      maxHeightFactor: 0.88,
-      minHeight: 520,
-      bodyPadding: const EdgeInsets.fromLTRB(
-        AmanahSpacing.xxl,
-        AmanahSpacing.lg,
-        AmanahSpacing.xxl,
-        AmanahSpacing.xxl,
+    return Container(
+      decoration: BoxDecoration(
+        color: dark
+            ? AmanahColorTokens.canvasDark
+            : AmanahColorTokens.surfaceLight,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border(
+          top: BorderSide(
+            color: dark
+                ? AmanahColorTokens.pureWhite.withValues(alpha: 0.10)
+                : AmanahColorTokens.neutral200,
+          ),
+        ),
       ),
-      body: Column(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        24 + MediaQuery.viewPaddingOf(context).bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          // Drag Handle
+          Center(
+            child: Container(
+              width: 44,
+              height: 5,
+              decoration: BoxDecoration(
+                color: dark
+                    ? AmanahColorTokens.pureWhite.withValues(alpha: 0.20)
+                    : AmanahColorTokens.neutral300,
+                borderRadius: BorderRadius.circular(3),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  'Kalender Jadwal Praktik',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: dark
+                        ? AmanahColorTokens.pureWhite
+                        : AmanahColorTokens.neutral900,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.close_rounded, size: 20),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           // Month Switcher
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
