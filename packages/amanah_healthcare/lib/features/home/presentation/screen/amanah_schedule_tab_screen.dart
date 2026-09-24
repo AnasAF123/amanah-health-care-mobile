@@ -7,7 +7,6 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_notice_banner.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_cards_and_drawers.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_components.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_form_and_calendar_dialog.dart';
@@ -202,6 +201,121 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
     return '$dayName, ${date.day} $monthName ${date.year}';
   }
 
+  Widget? _buildHeaderMoreMenu(
+    BuildContext context,
+    bool dark,
+    DayScheduleSetting daySetting,
+  ) {
+    if (_viewMode == AmanahScheduleViewMode.sessionPatients) {
+      return null;
+    }
+
+    final bool isDayClosed =
+        daySetting.isClosed || daySetting.status == 'Tutup';
+
+    return Theme(
+      data: Theme.of(context).copyWith(
+        popupMenuTheme: PopupMenuThemeData(
+          color: dark
+              ? AmanahColorTokens.surfaceDark
+              : AmanahColorTokens.surfaceLight,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: dark
+                  ? AmanahColorTokens.pureWhite.withValues(alpha: 0.12)
+                  : AmanahColorTokens.neutral200,
+            ),
+          ),
+          elevation: 6,
+        ),
+      ),
+      child: PopupMenuButton<String>(
+        tooltip: 'Menu Opsi Jadwal',
+        icon: Icon(
+          Icons.more_vert_rounded,
+          color: dark
+              ? AmanahColorTokens.pureWhite
+              : AmanahColorTokens.neutral800,
+          size: 22,
+        ),
+        padding: EdgeInsets.zero,
+        splashRadius: 20,
+        onSelected: (String value) async {
+          if (value == 'add') {
+            AmanahAddEditScheduleDrawer.show(
+              context,
+              initialDate: _selectedDate,
+              onSavedDate: _handleSavedDate,
+            );
+          } else if (value == 'toggle_day') {
+            final String nextStatus = isDayClosed ? 'Buka' : 'Tutup';
+            await _store.updateDayStatus(
+              date: _selectedDate,
+              status: nextStatus,
+              notes: isDayClosed ? 'Buka kembali' : 'Jadwal ditutup oleh dokter',
+            );
+          }
+        },
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+          PopupMenuItem<String>(
+            value: 'add',
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.add_circle_outline_rounded,
+                  size: 18,
+                  color: dark
+                      ? AmanahColorTokens.pureWhite
+                      : AmanahColorTokens.neutral800,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'Tambah Jadwal',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: dark
+                        ? AmanahColorTokens.pureWhite
+                        : AmanahColorTokens.neutral800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const PopupMenuDivider(height: 1),
+          PopupMenuItem<String>(
+            value: 'toggle_day',
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  isDayClosed
+                      ? Icons.check_circle_outline_rounded
+                      : Icons.do_not_disturb_on_outlined,
+                  size: 18,
+                  color: isDayClosed
+                      ? AmanahColorTokens.success
+                      : AmanahColorTokens.danger,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  isDayClosed ? 'Buka Jadwal Hari Ini' : 'Tutup Jadwal Hari Ini',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDayClosed
+                        ? AmanahColorTokens.success
+                        : AmanahColorTokens.danger,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
@@ -247,22 +361,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
               title: screenTitle,
               subtitle: screenSubtitle,
               onBack: backAction,
-              trailing: _viewMode != AmanahScheduleViewMode.sessionPatients
-                  ? AmanahScreenHeaderIconAction(
-                      icon: Icons.add_rounded,
-                      semanticsLabel: 'Tambah jadwal praktik',
-                      foregroundColor: dark
-                          ? AmanahColorTokens.tabActiveDark
-                          : AmanahColorTokens.brand,
-                      onPressed: () {
-                        AmanahAddEditScheduleDrawer.show(
-                          context,
-                          initialDate: _selectedDate,
-                          onSavedDate: _handleSavedDate,
-                        );
-                      },
-                    )
-                  : null,
+              trailing: _buildHeaderMoreMenu(context, dark, daySetting),
             ),
 
             // Main Scrollable Viewport
@@ -401,30 +500,6 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
         ),
         const SizedBox(height: 12),
 
-        // Cuti or Day Closed Alert Banner
-        () {
-          final bool isDayClosed =
-              isCuti || daySetting.isClosed || daySetting.status == 'Tutup';
-          if (!isDayClosed) return const SizedBox.shrink();
-          return Column(
-            children: <Widget>[
-              AmanahNoticeBanner(
-                message: isCuti
-                    ? 'Dokter Cuti Praktik: Seluruh jadwal dinonaktifkan.'
-                    : 'Jadwal Praktik Ditutup: Dokter tidak menerima konsultasi pada hari ini.',
-                variant: AmanahNoticeVariant.warning,
-                actionLabel: 'Buka Jadwal',
-                onAction: () async {
-                  await _store.updateDayStatus(
-                    date: _selectedDate,
-                    status: 'Buka',
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-            ],
-          );
-        }(),
 
         // Section Title: Date & Patient Count
         Row(
@@ -518,30 +593,13 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
     required List<DoctorSchedule> schedules,
   }) {
     final bool isDayClosed =
-        isCuti || daySetting.isClosed || daySetting.status == 'Tutup';
+        daySetting.isClosed || daySetting.status == 'Tutup';
 
     return Column(
       key: const ValueKey<String>('view-sessions'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        if (isDayClosed) ...<Widget>[
-          AmanahNoticeBanner(
-            message: isCuti
-                ? 'Dokter Cuti Praktik: Seluruh jadwal dinonaktifkan.'
-                : 'Jadwal Praktik Ditutup: Seluruh sesi dinonaktifkan pada hari ini.',
-            variant: AmanahNoticeVariant.warning,
-            actionLabel: 'Buka Hari Ini',
-            onAction: () async {
-              await _store.updateDayStatus(
-                date: _selectedDate,
-                status: 'Buka',
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-        ],
-
-        // Header Count & Day Toggle
+        // Header Count & Status Indicator
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -560,63 +618,72 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            AmanahButton.text(
-              text: isDayClosed ? 'Buka Praktik' : 'Tutup Praktik',
-              size: AmanahButtonSize.small,
-              customForegroundColor: isDayClosed
-                  ? AmanahColorTokens.success
-                  : AmanahColorTokens.danger,
-              onPressed: () async {
-                await _store.updateDayStatus(
-                  date: _selectedDate,
-                  status: isDayClosed ? 'Buka' : 'Tutup',
-                );
-              },
+            Text(
+              isDayClosed
+                  ? 'Jadwal Ditutup'
+                  : '${schedules.length} Sesi Aktif',
+              style: TextStyle(
+                color: isDayClosed
+                    ? AmanahColorTokens.danger
+                    : (dark
+                        ? AmanahColorTokens.neutral400
+                        : AmanahColorTokens.neutral500),
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
         const SizedBox(height: 12),
 
         if (schedules.isNotEmpty)
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: schedules.length,
-            separatorBuilder: (BuildContext context, int index) =>
-                const SizedBox(height: 14),
-            itemBuilder: (BuildContext context, int index) {
-              final DoctorSchedule sch = schedules[index];
-              return AmanahDoctorSessionCard(
-                schedule: sch,
-                imageIndex: index,
-                onTapDetail: () {
-                  _showSessionDetailSheet(context, sch, isCuti);
-                },
-                onTapEdit: () {
-                  AmanahAddEditScheduleDrawer.show(
-                    context,
-                    initialDate: _selectedDate,
-                    scheduleToEdit: sch,
-                    onSavedDate: _handleSavedDate,
+          Opacity(
+            opacity: isDayClosed ? 0.45 : 1.0,
+            child: IgnorePointer(
+              ignoring: isDayClosed,
+              child: ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: schedules.length,
+                separatorBuilder: (BuildContext context, int index) =>
+                    const SizedBox(height: 14),
+                itemBuilder: (BuildContext context, int index) {
+                  final DoctorSchedule sch = schedules[index];
+                  return AmanahDoctorSessionCard(
+                    schedule: sch,
+                    imageIndex: index,
+                    onTapDetail: () {
+                      _showSessionDetailSheet(context, sch, isCuti);
+                    },
+                    onTapEdit: () {
+                      AmanahAddEditScheduleDrawer.show(
+                        context,
+                        initialDate: _selectedDate,
+                        scheduleToEdit: sch,
+                        onSavedDate: _handleSavedDate,
+                      );
+                    },
+                    onTapDelete: () async {
+                      try {
+                        await _store.removeSchedule(_selectedDate, sch.id);
+                      } on AmanahScheduleConflictException catch (e) {
+                        if (context.mounted) {
+                          _showConflictDialog(context, e.message);
+                        }
+                      }
+                    },
                   );
                 },
-                onTapDelete: () async {
-                  try {
-                    await _store.removeSchedule(_selectedDate, sch.id);
-                  } on AmanahScheduleConflictException catch (e) {
-                    if (context.mounted) {
-                      _showConflictDialog(context, e.message);
-                    }
-                  }
-                },
-              );
-            },
+              ),
+            ),
           )
         else
           AmanahEmptyState.box(
-            title: 'Belum Ada Sesi Praktik',
-            message: isCuti
-                ? 'Dokter sedang cuti pada tanggal ini.'
+            title: isDayClosed
+                ? 'Jadwal Hari Ini Ditutup'
+                : 'Belum Ada Sesi Praktik',
+            message: isDayClosed
+                ? 'Dokter tidak membuka praktik pada tanggal ini.'
                 : 'Belum ada sesi praktik dokter yang ditambahkan pada tanggal ini.',
             actionText: 'Tambah Jadwal Dokter',
             actionLeadingIcon: Icons.add_rounded,
