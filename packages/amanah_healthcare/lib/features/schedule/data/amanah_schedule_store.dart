@@ -446,7 +446,6 @@ class AmanahScheduleStore extends ChangeNotifier
         ),
         loadCalendarSummary(monthKey),
         loadDaySettings(date),
-        loadOccupancyOverview(date: date),
       ]);
     } catch (e) {
       _errorMessage = e.toString();
