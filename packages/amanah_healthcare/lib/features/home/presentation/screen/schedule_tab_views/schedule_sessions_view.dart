@@ -44,6 +44,7 @@ class AmanahScheduleSessionsView extends StatelessWidget {
       schedules: schedules,
       daySetting: daySetting,
       isDayClosed: isDayClosed,
+      occupancyOverview: occupancyOverview,
     );
 
     return Column(
@@ -169,14 +170,135 @@ class AmanahScheduleSessionsView extends StatelessWidget {
     required List<DoctorSchedule> schedules,
     required DayScheduleSetting daySetting,
     required bool isDayClosed,
+    ScheduleOccupancyOverviewData? occupancyOverview,
   }) {
+    final String dateStr = daySetting.scheduleDate ??
+        (schedules.isNotEmpty
+            ? (schedules.first.scheduleDate ?? schedules.first.date)
+            : (occupancyOverview?.date ?? ''));
+
+    final List<DoctorSchedule> result = <DoctorSchedule>[];
+
+    // Priority 1: If occupancyOverview contains doctor-scheduled slots, render per-slot schedules.
+    if (occupancyOverview != null && occupancyOverview.shifts.isNotEmpty) {
+      for (final ScheduleShiftOccupancy shift in occupancyOverview.shifts) {
+        for (final ScheduleShiftSlot slot in shift.slots) {
+          final bool isSelf = slot.status == 'OCCUPIED_BY_SELF' ||
+              slot.conflictInfo?.type == 'SELF';
+          if (!isSelf) {
+            continue;
+          }
+
+          DoctorSchedule? matchingParent;
+          if (slot.conflictInfo?.sessionId != null) {
+            matchingParent = schedules.cast<DoctorSchedule?>().firstWhere(
+              (DoctorSchedule? s) => s?.id == slot.conflictInfo!.sessionId,
+              orElse: () => null,
+            );
+          }
+          matchingParent ??= schedules.cast<DoctorSchedule?>().firstWhere(
+            (DoctorSchedule? s) =>
+                s?.sessionShift.toLowerCase() == shift.shift.toLowerCase(),
+            orElse: () => schedules.isNotEmpty ? schedules.first : null,
+          );
+
+          final bool isSlotPast = isTemporalSlotPast(
+            scheduleDate: DateTime.tryParse(dateStr),
+            scheduleDateStr: dateStr,
+            timeSlotOrEndTime: slot.endTime,
+          );
+
+          final bool isClosed = isDayClosed ||
+              (matchingParent != null &&
+                  (!matchingParent.isAvailable ||
+                      matchingParent.badge == ScheduleFormConstants.statusTutup ||
+                      matchingParent.badge == ScheduleFormConstants.statusCuti));
+
+          final String badge;
+          final AmanahBadgeVariant badgeVariant;
+
+          if (isSlotPast) {
+            badge = ScheduleFormConstants.badgeSelesai;
+            badgeVariant = AmanahBadgeVariant.warning;
+          } else if (isClosed) {
+            badge = ScheduleFormConstants.statusTutup;
+            badgeVariant = AmanahBadgeVariant.warning;
+          } else if ((matchingParent?.bookedPatientCount ?? 0) > 0) {
+            badge = ScheduleFormConstants.badgeTerisi;
+            badgeVariant = AmanahBadgeVariant.primary;
+          } else {
+            badge = ScheduleFormConstants.statusBuka;
+            badgeVariant = AmanahBadgeVariant.success;
+          }
+
+          final String formattedTime = slot.timeRange.isNotEmpty
+              ? (slot.timeRange.endsWith('WIB')
+                  ? slot.timeRange
+                  : '${slot.timeRange} WIB')
+              : '${slot.startTime} - ${slot.endTime} WIB';
+
+          final String roomName = slot.conflictInfo?.roomName ??
+              matchingParent?.room ??
+              occupancyOverview.roomName ??
+              'Ruang Poli Umum 1';
+
+          final String poliName = matchingParent?.poli ?? 'Poli Umum';
+          final String sessionTitle = matchingParent?.title ??
+              'Sesi Praktik ($poliName - $roomName)';
+
+          result.add(
+            DoctorSchedule(
+              id: slot.conflictInfo?.sessionId ??
+                  matchingParent?.id ??
+                  '${dateStr}_${slot.startTime}',
+              title: sessionTitle,
+              date: dateStr,
+              time: formattedTime,
+              poli: poliName,
+              room: roomName,
+              slotCount: (matchingParent?.bookedPatientCount ?? 0).toString(),
+              slotText: matchingParent?.slotText ??
+                  '${matchingParent?.bookedPatientCount ?? 0} Pasien Booking',
+              badge: badge,
+              badgeVariant: badgeVariant,
+              startTime: slot.startTime,
+              endTime: slot.endTime,
+              sessionShift: shift.shift,
+              sessionType: shift.shiftLabel,
+              scheduleDate: dateStr,
+              roomId: slot.conflictInfo?.roomId ??
+                  matchingParent?.roomId ??
+                  occupancyOverview.roomId,
+              poliklinikId: matchingParent?.poliklinikId,
+              serviceId: matchingParent?.serviceId,
+              capacity: 1,
+              availableSlots: isSlotPast || isClosed ? 0 : 1,
+              bookedPatientCount: matchingParent?.bookedPatientCount ?? 0,
+              bookedPatients:
+                  matchingParent?.bookedPatients ?? const <BookedPatient>[],
+              isAvailable: !isClosed && !isSlotPast,
+              notes: matchingParent?.notes,
+              version: matchingParent?.version,
+              staffId: matchingParent?.staffId,
+              practitionerId: slot.conflictInfo?.practitionerId ??
+                  matchingParent?.practitionerId ??
+                  occupancyOverview.practitionerId,
+              doctorName: slot.conflictInfo?.practitionerName ??
+                  matchingParent?.doctorName ??
+                  occupancyOverview.practitionerName,
+            ),
+          );
+        }
+      }
+    }
+
+    if (result.isNotEmpty) {
+      return result;
+    }
+
     if (schedules.isEmpty) {
       return const <DoctorSchedule>[];
     }
-    final String dateStr = daySetting.scheduleDate ??
-        (schedules.first.scheduleDate ?? schedules.first.date);
-
-    final List<DoctorSchedule> result = <DoctorSchedule>[];
 
     for (final DoctorSchedule sch in schedules) {
       final bool isSlotPast = isTemporalSlotPast(

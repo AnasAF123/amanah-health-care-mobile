@@ -108,9 +108,15 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
     );
     if (!mounted) return;
     final List<DoctorSchedule> schs = _store.getSchedulesForDate(_selectedDate);
+    final String y = _selectedDate.year.toString().padLeft(4, '0');
+    final String m = _selectedDate.month.toString().padLeft(2, '0');
+    final String d = _selectedDate.day.toString().padLeft(2, '0');
+    final String dateKey = '$y-$m-$d';
     if (schs.isNotEmpty && schs.first.roomId != null) {
       if (_store.occupancyOverview == null ||
-          _store.occupancyOverview?.roomId != schs.first.roomId) {
+          _store.occupancyOverview?.date != dateKey ||
+          _store.occupancyOverview?.roomId != schs.first.roomId ||
+          forceRefresh) {
         await _store.loadOccupancyOverview(
           date: _selectedDate,
           roomId: schs.first.roomId,
