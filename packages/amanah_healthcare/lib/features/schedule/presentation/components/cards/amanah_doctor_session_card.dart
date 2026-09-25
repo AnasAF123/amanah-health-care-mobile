@@ -39,7 +39,6 @@ class AmanahDoctorSessionCard extends StatelessWidget {
     final int bookedCount = schedule.bookedPatientCount;
 
     final bool isSessionExpired = schedule.badge == ScheduleFormConstants.badgeSelesai ||
-        !schedule.isAvailable ||
         isTemporalSlotPast(
           scheduleDate: schedule.scheduleDate != null && schedule.scheduleDate!.isNotEmpty
               ? (DateTime.tryParse(schedule.scheduleDate!) ?? tryParseDate(schedule.scheduleDate!))
