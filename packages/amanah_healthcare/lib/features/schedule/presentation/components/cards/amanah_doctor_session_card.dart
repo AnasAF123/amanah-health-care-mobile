@@ -38,13 +38,15 @@ class AmanahDoctorSessionCard extends StatelessWidget {
     final String endTime = schedule.endTime ?? '';
     final int bookedCount = schedule.bookedPatientCount;
 
-    final bool isSessionExpired = isTemporalSlotPast(
-      scheduleDate: schedule.scheduleDate != null && schedule.scheduleDate!.isNotEmpty
-          ? DateTime.tryParse(schedule.scheduleDate!)
-          : null,
-      scheduleDateStr: schedule.scheduleDate ?? schedule.date,
-      timeSlotOrEndTime: endTime,
-    );
+    final bool isSessionExpired = schedule.badge == ScheduleFormConstants.badgeSelesai ||
+        !schedule.isAvailable ||
+        isTemporalSlotPast(
+          scheduleDate: schedule.scheduleDate != null && schedule.scheduleDate!.isNotEmpty
+              ? (DateTime.tryParse(schedule.scheduleDate!) ?? tryParseDate(schedule.scheduleDate!))
+              : (schedule.date.isNotEmpty ? tryParseDate(schedule.date) : null),
+          scheduleDateStr: schedule.scheduleDate ?? schedule.date,
+          timeSlotOrEndTime: endTime,
+        );
 
     final bool isClosed = isDayClosed ||
         schedule.badge == ScheduleFormConstants.statusTutup ||

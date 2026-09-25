@@ -352,6 +352,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
 
       case AmanahScheduleViewMode.sessions:
         return AmanahScheduleSessionsView(
+          selectedDate: _selectedDate,
           daySetting: daySetting,
           isCuti: isCuti,
           schedules: schedules,

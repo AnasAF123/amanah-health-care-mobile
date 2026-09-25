@@ -15,6 +15,7 @@ class AmanahScheduleSessionsView extends StatelessWidget {
     required this.onTapEdit,
     required this.onTapDelete,
     required this.onOpenAddSchedule,
+    this.selectedDate,
     this.occupancyOverview,
     this.onToggleDayStatus,
     super.key,
@@ -23,6 +24,7 @@ class AmanahScheduleSessionsView extends StatelessWidget {
   final DayScheduleSetting daySetting;
   final bool isCuti;
   final List<DoctorSchedule> schedules;
+  final DateTime? selectedDate;
   final ScheduleOccupancyOverviewData? occupancyOverview;
   final bool dark;
   final void Function(DoctorSchedule) onTapDetail;
@@ -44,6 +46,7 @@ class AmanahScheduleSessionsView extends StatelessWidget {
       schedules: schedules,
       daySetting: daySetting,
       isDayClosed: isDayClosed,
+      selectedDate: selectedDate,
       occupancyOverview: occupancyOverview,
     );
 
@@ -170,12 +173,32 @@ class AmanahScheduleSessionsView extends StatelessWidget {
     required List<DoctorSchedule> schedules,
     required DayScheduleSetting daySetting,
     required bool isDayClosed,
+    DateTime? selectedDate,
     ScheduleOccupancyOverviewData? occupancyOverview,
   }) {
-    final String dateStr = daySetting.scheduleDate ??
-        (schedules.isNotEmpty
-            ? (schedules.first.scheduleDate ?? schedules.first.date)
-            : (occupancyOverview?.date ?? ''));
+    DateTime? effectiveDate = selectedDate;
+    if (effectiveDate == null && daySetting.scheduleDate != null) {
+      effectiveDate = DateTime.tryParse(daySetting.scheduleDate!) ??
+          tryParseDate(daySetting.scheduleDate!);
+    }
+    final String? overviewDate = occupancyOverview?.date;
+    if (effectiveDate == null && overviewDate != null) {
+      effectiveDate = DateTime.tryParse(overviewDate) ?? tryParseDate(overviewDate);
+    }
+    if (effectiveDate == null && schedules.isNotEmpty) {
+      final String sDate = schedules.first.scheduleDate ?? schedules.first.date;
+      effectiveDate = DateTime.tryParse(sDate) ?? tryParseDate(sDate);
+    }
+
+    final String dateStr;
+    if (effectiveDate != null) {
+      final String y = effectiveDate.year.toString().padLeft(4, '0');
+      final String m = effectiveDate.month.toString().padLeft(2, '0');
+      final String d = effectiveDate.day.toString().padLeft(2, '0');
+      dateStr = '$y-$m-$d';
+    } else {
+      dateStr = daySetting.scheduleDate ?? (occupancyOverview?.date ?? '');
+    }
 
     final List<DoctorSchedule> result = <DoctorSchedule>[];
 
@@ -203,7 +226,7 @@ class AmanahScheduleSessionsView extends StatelessWidget {
           );
 
           final bool isSlotPast = isTemporalSlotPast(
-            scheduleDate: DateTime.tryParse(dateStr),
+            scheduleDate: effectiveDate,
             scheduleDateStr: dateStr,
             timeSlotOrEndTime: slot.endTime,
           );
@@ -302,7 +325,7 @@ class AmanahScheduleSessionsView extends StatelessWidget {
 
     for (final DoctorSchedule sch in schedules) {
       final bool isSlotPast = isTemporalSlotPast(
-        scheduleDate: DateTime.tryParse(dateStr),
+        scheduleDate: effectiveDate,
         scheduleDateStr: dateStr,
         timeSlotOrEndTime: sch.endTime,
       );

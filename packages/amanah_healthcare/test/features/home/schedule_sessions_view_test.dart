@@ -148,4 +148,64 @@ void main() {
     // The available morning slot is NOT rendered
     expect(find.text('06:00'), findsNothing);
   });
+
+  testWidgets('AmanahScheduleSessionsView disables past date slots and shows Selesai even if status is Buka', (WidgetTester tester) async {
+    final DateTime pastDate = DateTime(2026, 9, 24);
+    final DayScheduleSetting daySetting = DayScheduleSetting(
+      scheduleDate: '2026-09-24',
+      targetQuota: 8,
+      isCuti: false,
+      status: 'OPEN',
+      isClosed: false,
+    );
+
+    // Backend returned schedule with status OPEN and isAvailable true on a past date
+    final List<DoctorSchedule> pastSchedules = <DoctorSchedule>[
+      const DoctorSchedule(
+        id: 'past-session-1',
+        title: 'Sesi Siang',
+        date: '2026-09-24',
+        scheduleDate: '2026-09-24',
+        time: '13:00 - 13:30 WIB',
+        poli: 'Poli Umum',
+        room: 'Ruang Poli Umum 1',
+        slotCount: '0',
+        slotText: '0 Pasien Booking',
+        badge: 'Buka',
+        badgeVariant: AmanahBadgeVariant.success,
+        startTime: '13:00',
+        endTime: '13:30',
+        sessionShift: 'afternoon',
+        sessionType: 'Siang',
+        isAvailable: true,
+      ),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: AmanahScheduleSessionsView(
+              selectedDate: pastDate,
+              daySetting: daySetting,
+              isCuti: false,
+              schedules: pastSchedules,
+              dark: false,
+              onTapDetail: (_) {},
+              onTapEdit: (_) {},
+              onTapDelete: (_) {},
+              onOpenAddSchedule: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Verify card is rendered
+    expect(find.byType(AmanahDoctorSessionCard), findsOneWidget);
+
+    // Crucial: The badge is 'Selesai' and the time column label is also 'Selesai' (2 widgets), and 'Buka' is gone
+    expect(find.text('Selesai'), findsNWidgets(2));
+    expect(find.text('Buka'), findsNothing);
+  });
 }
