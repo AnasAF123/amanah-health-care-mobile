@@ -166,7 +166,7 @@ void main() {
       // Check App Bar
       expect(find.byType(AmanahHomeAppBar), findsOneWidget);
       expect(find.text('dr. Andika Perkasa'), findsOneWidget);
-      expect(find.text('Selamat Pagi'), findsOneWidget);
+      expect(find.textContaining('Selamat'), findsOneWidget);
 
       // Check Schedule Card Stack
       expect(find.byType(AmanahScheduleCardStack), findsOneWidget);

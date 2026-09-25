@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_repository.dart';
+import 'package:amanah_healthcare/features/schedule/data/schedule_store_day_mixin.dart';
+import 'package:amanah_healthcare/features/schedule/data/schedule_store_projection_mixin.dart';
+import 'package:amanah_healthcare/features/schedule/data/schedule_store_session_mixin.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
+import 'package:amanah_healthcare/features/schedule/presentation/components/form/schedule_shift_boundary_helper.dart';
 
-class AmanahScheduleStore extends ChangeNotifier {
+class AmanahScheduleStore extends ChangeNotifier
+    with
+        ScheduleStoreProjectionMixin,
+        ScheduleStoreSessionMixin,
+        ScheduleStoreDayMixin {
   AmanahScheduleStore._({AmanahScheduleRepository? repository})
       : _repository = repository ?? const AmanahScheduleRepository() {
     _schedulesMap = <String, List<DoctorSchedule>>{};
-    _daySettingsMap = <String, DayScheduleSetting>{};
   }
 
   static final AmanahScheduleStore instance = AmanahScheduleStore._();
@@ -20,37 +27,61 @@ class AmanahScheduleStore extends ChangeNotifier {
     return DateTime(now.year, now.month, now.day);
   }
 
+  static bool get hasCustomBaseToday => _customBaseToday != null;
+  static DateTime? get customBaseToday => _customBaseToday;
+
   @visibleForTesting
   static void setCustomBaseToday(DateTime? date) {
     _customBaseToday = date;
   }
 
   AmanahScheduleRepository _repository;
+  @override
+  AmanahScheduleRepository get repository => _repository;
+
   void setRepository(AmanahScheduleRepository repository) {
     _repository = repository;
   }
 
   late Map<String, List<DoctorSchedule>> _schedulesMap;
-  late Map<String, DayScheduleSetting> _daySettingsMap;
-  final Map<String, CalendarDaySummary> _calendarSummariesMap = <String, CalendarDaySummary>{};
-  List<ScheduleContext> _scheduleContexts = const <ScheduleContext>[];
-  ScheduleProjection? _currentProjection;
-  ScheduleOccupancyOverviewData? _occupancyOverview;
+  String? _activeDoctorId;
+
+  String? get activeDoctorId => _activeDoctorId;
+
+  void setActiveDoctorId(String? id, {bool notify = false}) {
+    if (_activeDoctorId != id) {
+      _activeDoctorId = id;
+      if (notify) {
+        notifyListeners();
+      }
+    }
+  }
 
   bool _isLoading = false;
   String? _errorMessage;
   AmanahScheduleConflictException? _lastConflict;
 
+  @override
   Map<String, List<DoctorSchedule>> get schedulesMap => _schedulesMap;
-  Map<String, DayScheduleSetting> get daySettingsMap => _daySettingsMap;
-  Map<String, CalendarDaySummary> get calendarSummariesMap => _calendarSummariesMap;
-  List<ScheduleContext> get scheduleContexts => _scheduleContexts;
-  ScheduleProjection? get currentProjection => _currentProjection;
-  ScheduleOccupancyOverviewData? get occupancyOverview => _occupancyOverview;
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   AmanahScheduleConflictException? get lastConflict => _lastConflict;
+
+  @override
+  void setLoading(bool loading) {
+    _isLoading = loading;
+  }
+
+  @override
+  void setErrorMessage(String? error) {
+    _errorMessage = error;
+  }
+
+  @override
+  void setLastConflict(AmanahScheduleConflictException? conflict) {
+    _lastConflict = conflict;
+  }
 
   static String formatDateKey(DateTime date) {
     final String y = date.year.toString().padLeft(4, '0');
@@ -64,22 +95,7 @@ class AmanahScheduleStore extends ChangeNotifier {
     return _schedulesMap[key] ?? const <DoctorSchedule>[];
   }
 
-  DayScheduleSetting getDaySettingForDate(DateTime date) {
-    final String key = formatDateKey(date);
-    final CalendarDaySummary? summary = _calendarSummariesMap[key];
-    return _daySettingsMap[key] ??
-        DayScheduleSetting(
-          targetQuota: summary?.targetQuota ?? 8,
-          isCuti: summary?.isCuti ?? (date.weekday == DateTime.sunday),
-          cutiReason: summary?.cutiReason,
-          scheduleDate: key,
-          status: summary?.status ??
-              (date.weekday == DateTime.sunday ? 'Tutup' : 'Buka'),
-          isClosed: summary?.isClosed ?? (date.weekday == DateTime.sunday),
-          notes: summary?.notes,
-        );
-  }
-
+  @override
   List<({BookedPatient patient, DoctorSchedule schedule})>
       getAllBookedPatientsForDate(DateTime date) {
     final List<DoctorSchedule> schedules = getSchedulesForDate(date);
@@ -93,19 +109,53 @@ class AmanahScheduleStore extends ChangeNotifier {
     return list;
   }
 
-  int getCapacityPercentage(DateTime date) {
-    final String key = formatDateKey(date);
-    final CalendarDaySummary? summary = _calendarSummariesMap[key];
-    if (summary != null) {
-      return summary.capacityPercentage;
-    }
+  List<({BookedPatient patient, DoctorSchedule schedule})>
+      getActiveBookedPatientsForDate(DateTime date) {
+    return getAllBookedPatientsForDate(date).where((item) {
+      if (item.patient.isCompleted || item.patient.isCancelled) {
+        return false;
+      }
+      final bool isExpired = isTemporalSlotPast(
+        scheduleDateStr: item.schedule.scheduleDate ?? item.schedule.date,
+        timeSlotOrEndTime: item.patient.timeSlot,
+      );
+      return !isExpired;
+    }).toList();
+  }
 
-    final DayScheduleSetting setting = getDaySettingForDate(date);
-    if (setting.isCuti || setting.targetQuota <= 0) {
-      return 0;
+  List<({BookedPatient patient, DoctorSchedule schedule})>
+      getCompletedPatientsForDate(DateTime date) {
+    return getAllBookedPatientsForDate(date).where((item) {
+      if (item.patient.isCompleted || item.patient.isCancelled) {
+        return true;
+      }
+      return isTemporalSlotPast(
+        scheduleDateStr: item.schedule.scheduleDate ?? item.schedule.date,
+        timeSlotOrEndTime: item.patient.timeSlot,
+      );
+    }).toList();
+  }
+
+  List<({BookedPatient patient, DoctorSchedule schedule})>
+      getAllHistoricalPatients() {
+    final List<({BookedPatient patient, DoctorSchedule schedule})> list =
+        <({BookedPatient patient, DoctorSchedule schedule})>[];
+    for (final List<DoctorSchedule> schedules in _schedulesMap.values) {
+      for (final DoctorSchedule sch in schedules) {
+        for (final BookedPatient p in sch.bookedPatients) {
+          final bool isPast = p.isCompleted ||
+              p.isCancelled ||
+              isTemporalSlotPast(
+                scheduleDateStr: sch.scheduleDate ?? sch.date,
+                timeSlotOrEndTime: p.timeSlot,
+              );
+          if (isPast) {
+            list.add((patient: p, schedule: sch));
+          }
+        }
+      }
     }
-    final int bookedCount = getAllBookedPatientsForDate(date).length;
-    return ((bookedCount / setting.targetQuota) * 100).round().clamp(0, 100);
+    return list;
   }
 
   // --- Synchronous methods for UI instant updates and backwards compatibility ---
@@ -123,7 +173,8 @@ class AmanahScheduleStore extends ChangeNotifier {
     final String key = formatDateKey(date);
     final List<DoctorSchedule> current =
         List<DoctorSchedule>.from(_schedulesMap[key] ?? <DoctorSchedule>[]);
-    final int index = current.indexWhere((DoctorSchedule s) => s.id == schedule.id);
+    final int index =
+        current.indexWhere((DoctorSchedule s) => s.id == schedule.id);
     if (index >= 0) {
       current[index] = schedule;
       _schedulesMap[key] = current;
@@ -140,22 +191,12 @@ class AmanahScheduleStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setDayCuti(DateTime date, bool isCuti, {String? cutiReason}) {
-    final String key = formatDateKey(date);
-    final DayScheduleSetting current = getDaySettingForDate(date);
-    _daySettingsMap[key] = current.copyWith(
-      isCuti: isCuti,
-      cutiReason: cutiReason ?? (isCuti ? 'Dokter Cuti Praktik' : null),
-      status: isCuti ? 'Tutup' : 'Buka',
-      isClosed: isCuti,
-    );
-    notifyListeners();
-  }
-
   // --- Asynchronous backend-connected methods ---
 
+  @override
   Future<List<DoctorSchedule>> loadSchedulesForDate(
     DateTime date, {
+    String? doctorId,
     bool forceRefresh = false,
   }) async {
     final String dateStr = formatDateKey(date);
@@ -165,19 +206,52 @@ class AmanahScheduleStore extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final List<DoctorSchedule> backendSchedules =
-          await _repository.fetchMySchedules(date: dateStr);
+      final String resolvedDoctorId = (doctorId != null && doctorId.isNotEmpty)
+          ? doctorId
+          : (_activeDoctorId != null && _activeDoctorId!.isNotEmpty)
+              ? _activeDoctorId!
+              : _schedulesMap[dateStr]
+                      ?.where((DoctorSchedule s) => s.doctorId.isNotEmpty)
+                      .firstOrNull
+                      ?.doctorId ??
+                  _schedulesMap.values
+                      .expand((List<DoctorSchedule> list) => list)
+                      .where((DoctorSchedule s) => s.doctorId.isNotEmpty)
+                      .firstOrNull
+                      ?.doctorId ??
+                  '';
 
-      // Also enrich with booked patients for that date
-      final List<BookedPatient> allPatients =
-          await _repository.fetchBookedPatients(date: dateStr);
+      List<DoctorSchedule> backendSchedules = const <DoctorSchedule>[];
+      if (resolvedDoctorId.isNotEmpty) {
+        try {
+          backendSchedules = await _repository.fetchDoctorDailySchedules(
+            doctorId: resolvedDoctorId,
+            date: dateStr,
+          );
+        } catch (_) {
+          backendSchedules = await _repository.fetchMySchedules(date: dateStr);
+        }
+      } else {
+        backendSchedules = await _repository.fetchMySchedules(date: dateStr);
+      }
 
-      final List<DoctorSchedule> enriched = backendSchedules.map((DoctorSchedule s) {
-        final List<BookedPatient> sessionPatients = allPatients.where((BookedPatient p) {
-          if (p.appointmentId != null && s.bookedPatients.any((BookedPatient bp) => bp.id == p.id)) {
+      List<BookedPatient> allPatients = const <BookedPatient>[];
+      try {
+        allPatients = await _repository.fetchBookedPatients(date: dateStr);
+      } catch (_) {}
+
+      final List<DoctorSchedule> enriched =
+          backendSchedules.map((DoctorSchedule s) {
+        final List<BookedPatient> sessionPatients =
+            allPatients.where((BookedPatient p) {
+          if (p.appointmentId != null &&
+              s.bookedPatients.any((BookedPatient bp) => bp.id == p.id)) {
             return true;
           }
-          if (p.sessionTitle != null && p.sessionTitle!.toLowerCase().contains(s.sessionType.toLowerCase())) {
+          if (p.sessionTitle != null &&
+              p.sessionTitle!
+                  .toLowerCase()
+                  .contains(s.sessionType.toLowerCase())) {
             return true;
           }
           return false;
@@ -185,11 +259,15 @@ class AmanahScheduleStore extends ChangeNotifier {
 
         final List<BookedPatient> finalPatients =
             sessionPatients.isNotEmpty ? sessionPatients : s.bookedPatients;
+        final int finalCount = finalPatients.isNotEmpty
+            ? finalPatients.length
+            : s.bookedPatientCount;
 
         return s.copyWith(
           bookedPatients: finalPatients,
-          slotCount: finalPatients.length.toString(),
-          slotText: '${finalPatients.length} Pasien Booking',
+          bookedPatientCount: finalCount,
+          slotCount: finalCount.toString(),
+          slotText: '$finalCount Pasien Booking',
         );
       }).toList();
 
@@ -202,57 +280,6 @@ class AmanahScheduleStore extends ChangeNotifier {
       _errorMessage = e.toString();
       notifyListeners();
       return getSchedulesForDate(date);
-    }
-  }
-
-  Future<CalendarSummaryResponse?> loadCalendarSummary(String month) async {
-    try {
-      final CalendarSummaryResponse res = await _repository.fetchCalendarSummary(month);
-      for (final CalendarDaySummary day in res.days) {
-        _calendarSummariesMap[day.date] = day;
-        final DayScheduleSetting existing = _daySettingsMap[day.date] ??
-            DayScheduleSetting(
-              targetQuota: day.targetQuota,
-              isCuti: day.isCuti,
-              cutiReason: day.cutiReason,
-              scheduleDate: day.date,
-              totalBookedPatients: day.bookedPatientCount,
-              capacityPercentage: day.capacityPercentage,
-              status: day.status,
-              isClosed: day.isClosed,
-              notes: day.notes,
-            );
-        _daySettingsMap[day.date] = existing.copyWith(
-          targetQuota: day.targetQuota,
-          isCuti: day.isCuti,
-          cutiReason: day.cutiReason,
-          totalBookedPatients: day.bookedPatientCount,
-          capacityPercentage: day.capacityPercentage,
-          status: day.status,
-          isClosed: day.isClosed,
-          notes: day.notes,
-        );
-      }
-      notifyListeners();
-      return res;
-    } catch (e) {
-      _errorMessage = e.toString();
-      notifyListeners();
-      return null;
-    }
-  }
-
-  Future<DayScheduleSetting> loadDaySettings(DateTime date) async {
-    final String dateStr = formatDateKey(date);
-    try {
-      final DayScheduleSetting setting = await _repository.fetchDaySettings(dateStr);
-      _daySettingsMap[dateStr] = setting;
-      notifyListeners();
-      return setting;
-    } catch (e) {
-      _errorMessage = e.toString();
-      notifyListeners();
-      return getDaySettingForDate(date);
     }
   }
 
@@ -274,9 +301,8 @@ class AmanahScheduleStore extends ChangeNotifier {
 
     try {
       DoctorSchedule result;
-      // If schedule ID starts with 'ses-' and is not a uuid, it's either an initial local ID or newly created.
-      final bool isExistingPersisted = schedule.id.isNotEmpty &&
-          !schedule.id.startsWith('ses-');
+      final bool isExistingPersisted =
+          schedule.id.isNotEmpty && !schedule.id.startsWith('ses-');
 
       if (isExistingPersisted) {
         result = await _repository.updateSchedule(
@@ -288,17 +314,20 @@ class AmanahScheduleStore extends ChangeNotifier {
           roomId: roomId ?? schedule.roomId,
           poliklinikId: poliklinikId ?? schedule.poliklinikId,
           serviceId: serviceId ?? schedule.serviceId,
-          status: schedule.badge,
+          status: schedule.mutationStatus,
           isAvailable: schedule.isAvailable,
           notes: notes ?? schedule.notes,
         );
         updateSchedule(date, result);
       } else {
+        final CanonicalShift shift =
+            CanonicalShift.tryResolve(schedule.sessionType) ??
+                CanonicalShift.morning;
         result = await _repository.createSchedule(
           date: dateStr,
           session: schedule.sessionType,
-          startTime: schedule.startTime ?? '08:00',
-          endTime: schedule.endTime ?? '12:00',
+          startTime: schedule.startTime ?? shift.defaultStartTime,
+          endTime: schedule.endTime ?? shift.defaultEndTime,
           roomId: roomId ?? schedule.roomId,
           poliklinikId: poliklinikId ?? schedule.poliklinikId,
           serviceId: serviceId ?? schedule.serviceId,
@@ -322,7 +351,6 @@ class AmanahScheduleStore extends ChangeNotifier {
       _isLoading = false;
       _errorMessage = e.toString();
       notifyListeners();
-      // Keep optimistic local update
       if (schedule.id.isNotEmpty) {
         updateSchedule(date, schedule);
       } else {
@@ -360,63 +388,6 @@ class AmanahScheduleStore extends ChangeNotifier {
     }
   }
 
-  Future<void> updateDayCuti(
-    DateTime date,
-    bool isCuti, {
-    String? cutiReason,
-    int? targetQuota,
-  }) async {
-    final String dateStr = formatDateKey(date);
-    setDayCuti(date, isCuti, cutiReason: cutiReason);
-
-    try {
-      await _repository.updateDaySettings(
-        date: dateStr,
-        isCuti: isCuti,
-        cutiReason: cutiReason,
-        targetQuota: targetQuota,
-      );
-    } catch (e) {
-      _errorMessage = e.toString();
-    }
-  }
-
-  /// Menutup atau membuka seluruh jadwal pada hari/tanggal tertentu via PATCH /schedules/days/:date
-  Future<void> updateDayStatus({
-    required DateTime date,
-    required String status, // 'Buka', 'Tutup', 'Cuti'
-    String? notes,
-  }) async {
-    final String dateStr = formatDateKey(date);
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      await _repository.updateDayStatus(
-        date: dateStr,
-        status: status,
-        notes: notes,
-      );
-
-      // Re-fetch schedules and calendar summary to guarantee 100% sync
-      await Future.wait(<Future<dynamic>>[
-        loadSchedulesForDate(date, forceRefresh: true),
-        loadCalendarSummary(
-          '${date.year}-${date.month.toString().padLeft(2, '0')}',
-        ),
-      ]);
-
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      _isLoading = false;
-      _errorMessage = e.toString();
-      notifyListeners();
-      rethrow;
-    }
-  }
-
   Future<void> toggleScheduleAvailability(
     DateTime date,
     String scheduleId,
@@ -425,12 +396,17 @@ class AmanahScheduleStore extends ChangeNotifier {
     final String key = formatDateKey(date);
     final List<DoctorSchedule> current =
         List<DoctorSchedule>.from(_schedulesMap[key] ?? <DoctorSchedule>[]);
-    final int index = current.indexWhere((DoctorSchedule s) => s.id == scheduleId);
+    final int index =
+        current.indexWhere((DoctorSchedule s) => s.id == scheduleId);
     if (index >= 0) {
       current[index] = current[index].copyWith(
         isAvailable: isAvailable,
-        badge: isAvailable ? 'Buka' : 'Tutup',
-        badgeVariant: isAvailable ? AmanahBadgeVariant.success : AmanahBadgeVariant.warning,
+        badge: isAvailable
+            ? ScheduleFormConstants.statusBuka
+            : ScheduleFormConstants.statusTutup,
+        badgeVariant: isAvailable
+            ? AmanahBadgeVariant.success
+            : AmanahBadgeVariant.warning,
       );
       _schedulesMap[key] = current;
       notifyListeners();
@@ -445,165 +421,47 @@ class AmanahScheduleStore extends ChangeNotifier {
     }
   }
 
-  Future<List<ClinicRoomReference>> loadRooms({
-    DateTime? date,
-    String? startTime,
-    String? endTime,
+  /// Authoritative full synchronization across all schedule subsystems:
+  /// - Doctor sessions (`/api/v1/schedules/my-schedules?date=...`)
+  /// - Monthly calendar summaries & status dots (`/api/v1/schedules/calendar-summary?month=...`)
+  /// - Daily operational quota & setting (`/api/v1/schedules/day-settings?date=...`)
+  /// - Clinic room & interval occupancy (`/api/v1/schedules/occupancy-overview?date=...`)
+  Future<void> syncAll(
+    DateTime date, {
+    String? doctorId,
+    bool forceRefresh = true,
   }) async {
-    try {
-      return await _repository.fetchReferenceRooms(
-        date: date != null ? formatDateKey(date) : null,
-        startTime: startTime,
-        endTime: endTime,
-      );
-    } catch (_) {
-      return const <ClinicRoomReference>[];
-    }
-  }
-
-  Future<List<ClinicPoliklinikReference>> loadPolikliniks() async {
-    try {
-      return await _repository.fetchReferencePolikliniks();
-    } catch (_) {
-      return const <ClinicPoliklinikReference>[];
-    }
-  }
-
-  Future<ClinicScheduleOptionsReference?> loadScheduleOptions() async {
-    try {
-      return await _repository.fetchReferenceOptions();
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Future<List<ScheduleContext>> loadScheduleContexts(DateTime date) async {
+    final String monthKey =
+        '${date.year}-${date.month.toString().padLeft(2, '0')}';
     _isLoading = true;
     _errorMessage = null;
-    await Future<void>.value();
     notifyListeners();
 
     try {
-      final List<ScheduleContext> contexts =
-          await _repository.fetchScheduleContexts(date: formatDateKey(date));
-      _scheduleContexts = contexts;
-      _isLoading = false;
-      notifyListeners();
-      return contexts;
-    } catch (e) {
-      _isLoading = false;
-      _errorMessage = e.toString();
-      notifyListeners();
-      return _scheduleContexts;
-    }
-  }
-
-  void clearProjection() {
-    _currentProjection = null;
-    notifyListeners();
-  }
-
-  void clearOccupancyOverview() {
-    _occupancyOverview = null;
-    notifyListeners();
-  }
-
-  Future<ScheduleOccupancyOverviewData?> loadOccupancyOverview({
-    required DateTime date,
-    String? roomId,
-  }) async {
-    try {
-      final ScheduleOccupancyOverviewData data =
-          await _repository.fetchOccupancyOverview(
-        date: formatDateKey(date),
-        roomId: roomId,
-      );
-      _occupancyOverview = data;
-      notifyListeners();
-      return data;
-    } catch (e) {
-      _occupancyOverview = null;
-      notifyListeners();
-      return null;
-    }
-  }
-
-  Future<ScheduleProjection?> loadProjection({
-    required DateTime date,
-    required String scheduleContextId,
-    required String startTime,
-    String? roomId,
-    String? serviceId,
-  }) async {
-    try {
-      final ScheduleProjection projection = await _repository.fetchProjection(
-        date: formatDateKey(date),
-        scheduleContextId: scheduleContextId,
-        startTime: startTime,
-        roomId: roomId,
-        serviceId: serviceId,
-      );
-      _currentProjection = projection;
-      notifyListeners();
-      return projection;
+      await Future.wait(<Future<dynamic>>[
+        loadSchedulesForDate(
+          date,
+          doctorId: doctorId,
+          forceRefresh: forceRefresh,
+        ),
+        loadCalendarSummary(monthKey),
+        loadDaySettings(date),
+        loadOccupancyOverview(date: date),
+      ]);
     } catch (e) {
       _errorMessage = e.toString();
-      notifyListeners();
-      return null;
-    }
-  }
-
-  Future<DoctorSchedule> createAvailability({
-    required DateTime date,
-    required String scheduleContextId,
-    required String startTime,
-    String? roomId,
-    String? poliklinikId,
-    String? serviceId,
-    String? notes,
-  }) async {
-    _isLoading = true;
-    _errorMessage = null;
-    _lastConflict = null;
-    await Future<void>.value();
-    notifyListeners();
-
-    try {
-      final DoctorSchedule schedule = await _repository.createAvailability(
-        date: formatDateKey(date),
-        scheduleContextId: scheduleContextId,
-        startTime: startTime,
-        roomId: roomId,
-        poliklinikId: poliklinikId,
-        serviceId: serviceId,
-        notes: notes,
-      );
-
-      await loadSchedulesForDate(date, forceRefresh: true);
+    } finally {
       _isLoading = false;
       notifyListeners();
-      return schedule;
-    } on AmanahScheduleConflictException catch (e) {
-      _isLoading = false;
-      _lastConflict = e;
-      _errorMessage = e.message;
-      notifyListeners();
-      rethrow;
-    } catch (e) {
-      _isLoading = false;
-      _errorMessage = e.toString();
-      notifyListeners();
-      rethrow;
     }
   }
 
   void reset() {
     _schedulesMap = <String, List<DoctorSchedule>>{};
-    _daySettingsMap = <String, DayScheduleSetting>{};
-    _calendarSummariesMap.clear();
-    _scheduleContexts = const <ScheduleContext>[];
-    _currentProjection = null;
-    _occupancyOverview = null;
+    _activeDoctorId = null;
+    resetDayState();
+    resetProjectionState();
+    resetSessionState();
     _customBaseToday = null;
     _isLoading = false;
     _errorMessage = null;

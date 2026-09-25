@@ -1,18 +1,30 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:amanah_healthcare/features/authentication/data/amanah_auth_token_storage.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_isometric_empty_box.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_home_shell.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_schedule_tab_screen.dart';
+import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_repository.dart';
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_queue_badge.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_cards_and_drawers.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_form_and_calendar_dialog.dart';
+
+class _TestTokenStorage extends AmanahAuthTokenStorage {
+  const _TestTokenStorage();
+
+  @override
+  Future<String?> getToken() async => 'test-bearer-token-123';
+}
 
 void main() {
   setUpAll(() {
@@ -46,6 +58,8 @@ void main() {
         slotText: '2 Pasien Booking',
         badge: 'Buka',
         badgeVariant: AmanahBadgeVariant.success,
+        practitionerId: 'doc-001',
+        doctorName: 'dr. Andika Perkasa',
         bookedPatients: <BookedPatient>[
           BookedPatient(
             id: 'p-1',
@@ -83,11 +97,35 @@ void main() {
 
   setUp(() {
     AmanahScheduleStore.instance.reset();
+    final AmanahScheduleRepository repo = AmanahScheduleRepository(
+      baseUrl: 'http://test.api',
+      httpClient: MockClient((http.Request request) async {
+        if (request.method == 'PATCH' && request.url.path.contains('/days/')) {
+          final Map<String, dynamic> body =
+              jsonDecode(request.body) as Map<String, dynamic>;
+          final String status = body['status'] as String? ?? 'CLOSED';
+          return http.Response(
+            jsonEncode(<String, dynamic>{
+              'status': 'success',
+              'data': <String, dynamic>{
+                'status': status,
+                'affectedSessionsCount': 1,
+              },
+            }),
+            200,
+            headers: <String, String>{'content-type': 'application/json'},
+          );
+        }
+        return http.Response('Not mocked in test', 500);
+      }),
+      tokenStorage: const _TestTokenStorage(),
+    );
+    AmanahScheduleStore.instance.setRepository(repo);
   });
 
   Widget createScheduleScreen({
     Brightness brightness = Brightness.light,
-    AmanahScheduleViewMode? initialViewMode,
+    AmanahScheduleViewMode? initialViewMode = AmanahScheduleViewMode.overview,
   }) {
     return MaterialApp(
       theme: ThemeData(
@@ -168,28 +206,80 @@ void main() {
       expect(find.text('Keluhan & catatan medis pasien'), findsOneWidget);
     });
 
-    testWidgets('Tapping + icon button opens Add Schedule drawer', (
-      WidgetTester tester,
-    ) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.75;
-      addTearDown(() => tester.view.reset());
+    testWidgets(
+      'Tapping more_vert menu in header shows Tambah Jadwal and Tutup Jadwal Hari Ini',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.75;
+        addTearDown(() => tester.view.reset());
 
-      seedTestScheduleData();
-      await tester.pumpWidget(createScheduleScreen());
-      await tester.pumpAndSettle();
+        seedTestScheduleData();
+        await tester.pumpWidget(createScheduleScreen());
+        await tester.pumpAndSettle();
 
-      final Finder addButtons = find.byIcon(Icons.add_rounded);
-      expect(addButtons, findsOneWidget);
+        // Ensure redundant + button is not in header
+        expect(
+          find.descendant(
+            of: find.byType(AmanahScheduleTabScreen),
+            matching: find.byIcon(Icons.add_rounded),
+          ),
+          findsNothing,
+        );
 
-      await tester.tap(addButtons);
-      await tester.pumpAndSettle();
+        // Tap more_vert icon button in header
+        final Finder moreVertFinder = find.byIcon(Icons.more_vert_rounded);
+        expect(moreVertFinder, findsOneWidget);
 
-      expect(find.byType(AmanahAddEditScheduleDrawer), findsOneWidget);
-      expect(find.text('Tambah Jadwal'), findsWidgets);
-      expect(find.text('Tanggal Praktik'), findsOneWidget);
-      expect(find.text('Sesi Praktik & Jam'), findsOneWidget);
-    });
+        await tester.tap(moreVertFinder);
+        await tester.pumpAndSettle();
+
+        // Popup menu is visible
+        expect(find.text('Tambah Jadwal'), findsOneWidget);
+        expect(find.text('Tutup Jadwal Hari Ini'), findsOneWidget);
+
+        // Tap Tambah Jadwal to open drawer
+        await tester.tap(find.text('Tambah Jadwal'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AmanahAddEditScheduleDrawer), findsOneWidget);
+        expect(find.text('Tanggal Praktik'), findsOneWidget);
+        expect(find.text('Sesi Praktik & Jam'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Tapping Tutup Jadwal Hari Ini in more_vert menu closes schedule for the day',
+      (WidgetTester tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 2.75;
+        addTearDown(() => tester.view.reset());
+
+        seedTestScheduleData();
+        await tester.pumpWidget(createScheduleScreen());
+        await tester.pumpAndSettle();
+
+        // Tap more_vert icon button in header
+        await tester.tap(find.byIcon(Icons.more_vert_rounded));
+        await tester.pumpAndSettle();
+
+        // Tap Tutup Jadwal Hari Ini
+        expect(find.text('Tutup Jadwal Hari Ini'), findsOneWidget);
+        await tester.tap(find.text('Tutup Jadwal Hari Ini'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pumpAndSettle();
+
+        // Day setting is updated to CLOSED
+        final DayScheduleSetting setting =
+            AmanahScheduleStore.instance.getDaySettingForDate(DateTime(2026, 8, 26));
+        expect(setting.isClosed, isTrue);
+
+        // Tap more_vert again to confirm it now says Buka Jadwal Hari Ini
+        await tester.tap(find.byIcon(Icons.more_vert_rounded));
+        await tester.pumpAndSettle();
+        expect(find.text('Buka Jadwal Hari Ini'), findsOneWidget);
+      },
+    );
 
     testWidgets(
       'Session Card and Session Detail Drawer have no more_vert, and Edit Jadwal button is brand below booking row',
@@ -208,7 +298,13 @@ void main() {
 
         // Verify session cards exist and NO more_vert icon exists on cards
         expect(find.byType(AmanahDoctorSessionCard), findsWidgets);
-        expect(find.byIcon(Icons.more_vert_rounded), findsNothing);
+        expect(
+          find.descendant(
+            of: find.byType(AmanahDoctorSessionCard),
+            matching: find.byIcon(Icons.more_vert_rounded),
+          ),
+          findsNothing,
+        );
 
         // Tap Detail Sesi
         final Finder detailSesiButtons = find.text('Detail Sesi');
@@ -220,7 +316,13 @@ void main() {
         expect(find.byType(AmanahScheduleDetailDrawer), findsOneWidget);
         expect(find.text('Detail Sesi Praktik'), findsOneWidget);
         // Verify NO more_vert icon inside drawer header
-        expect(find.byIcon(Icons.more_vert_rounded), findsNothing);
+        expect(
+          find.descendant(
+            of: find.byType(AmanahScheduleDetailDrawer),
+            matching: find.byIcon(Icons.more_vert_rounded),
+          ),
+          findsNothing,
+        );
 
         // Verify Edit Jadwal brand button is rendered below Lihat Pasien Booking
         expect(find.textContaining('Lihat Pasien Booking'), findsOneWidget);

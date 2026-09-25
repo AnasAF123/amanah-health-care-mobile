@@ -2,10 +2,21 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:amanah_healthcare/features/authentication/data/amanah_auth_logger.dart';
+import 'package:amanah_healthcare/core/network/client/amanah_http_client.dart';
+import 'package:amanah_healthcare/core/network/client/observable_http_client.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_token_storage.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 
+part 'amanah_schedule_repository_reference.dart';
+part 'amanah_schedule_repository_patient.dart';
+
+/// Single source of truth repository for Schedule management and interactive workflows.
+///
+/// Implements canonical mobile & admin parity routes per backend specification:
+/// - Schedular CRUD & 4-Shift Calendar (`/api/v1/schedules/...`)
+/// - Dynamic Slot Math & Anti-Collision Occupancy Grid
+/// - Interactive Session Patient Demographics & Actions (`/api/v1/schedules/sessions/:id/patients`, `/api/v1/appointments/...`)
+/// - Canonical Reschedule System (`/api/v1/schedules/sessions/:id/reschedule...`)
 class AmanahScheduleRepository {
   const AmanahScheduleRepository({
     String? baseUrl,
@@ -20,14 +31,24 @@ class AmanahScheduleRepository {
   final AmanahAuthTokenStorage _tokenStorage;
 
   String get _baseUrl {
-    if (_customBaseUrl != null) return _customBaseUrl;
+    final String? custom = _customBaseUrl;
+    if (custom != null) return custom;
     if (!kIsWeb && Platform.isAndroid) {
       return 'http://10.0.2.2:3001';
     }
     return 'http://localhost:3001';
   }
 
-  http.Client get _httpClient => _customClient ?? http.Client();
+  http.Client get _httpClient {
+    final http.Client? custom = _customClient;
+    if (custom != null) {
+      return custom is ObservableHttpClient
+          ? custom
+          : ObservableHttpClient(innerClient: custom);
+    }
+    return AmanahHttpClient.instance;
+  }
+
   AmanahAuthTokenStorage get tokenStorage => _tokenStorage;
 
   Future<Map<String, String>> _buildHeaders({Map<String, String>? extra}) async {
@@ -54,6 +75,7 @@ class AmanahScheduleRepository {
         message = decoded['message'] as String? ??
             decoded['error']?['message'] as String? ??
             decoded['title'] as String? ??
+            decoded['detail'] as String? ??
             message;
         code = decoded['code'] as String? ??
             decoded['error']?['code'] as String?;
@@ -61,8 +83,11 @@ class AmanahScheduleRepository {
     } catch (_) {}
 
     if (response.statusCode == 409 || response.statusCode == 422) {
-      final String codeStr = code ?? (response.statusCode == 409 ? 'CONFLICT' : 'UNPROCESSABLE');
-      final String effectiveMsg = (message != 'Terjadi kesalahan sistem (${response.statusCode})' && message.isNotEmpty)
+      final String codeStr =
+          code ?? (response.statusCode == 409 ? 'CONFLICT' : 'UNPROCESSABLE');
+      final String effectiveMsg = (message !=
+                  'Terjadi kesalahan sistem (${response.statusCode})' &&
+              message.isNotEmpty)
           ? message
           : AmanahScheduleConflictException.userMessageForCode(codeStr);
       throw AmanahScheduleConflictException(
@@ -72,24 +97,18 @@ class AmanahScheduleRepository {
     }
 
     if (response.statusCode == 401) {
-      throw AmanahScheduleException(
+      throw const AmanahScheduleException(
         'Sesi autentikasi telah berakhir. Silakan masuk kembali.',
         code: 'UNAUTHORIZED',
       );
     }
 
     if (response.statusCode == 403) {
-      throw AmanahScheduleException(
-        message,
-        code: code ?? 'FORBIDDEN',
-      );
+      throw AmanahScheduleException(message, code: code ?? 'FORBIDDEN');
     }
 
     if (response.statusCode == 404) {
-      throw AmanahScheduleException(
-        message,
-        code: code ?? 'NOT_FOUND',
-      );
+      throw AmanahScheduleException(message, code: code ?? 'NOT_FOUND');
     }
 
     throw AmanahScheduleException(message, code: code);
@@ -97,130 +116,44 @@ class AmanahScheduleRepository {
 
   Future<http.Response> _get(Uri uri) async {
     final Map<String, String> headers = await _buildHeaders();
-    AmanahAuthLogger.logRequest('GET', uri, headers: headers);
-    final Stopwatch stopwatch = Stopwatch()..start();
-
-    try {
-      final http.Response response = await _httpClient.get(uri, headers: headers);
-      stopwatch.stop();
-      AmanahAuthLogger.logResponse(
-        'GET',
-        uri,
-        response.statusCode,
-        stopwatch.elapsed,
-        body: response.body,
-      );
-      return response;
-    } catch (e, stack) {
-      stopwatch.stop();
-      AmanahAuthLogger.logError('GET', uri, e, stackTrace: stack, elapsed: stopwatch.elapsed);
-      rethrow;
-    }
+    return _httpClient.get(uri, headers: headers);
   }
 
   Future<http.Response> _post(Uri uri, {Map<String, dynamic>? body}) async {
     final Map<String, String> headers = await _buildHeaders();
-    AmanahAuthLogger.logRequest('POST', uri, headers: headers, body: body);
-    final Stopwatch stopwatch = Stopwatch()..start();
-
-    try {
-      final http.Response response = await _httpClient.post(
-        uri,
-        headers: headers,
-        body: body != null ? jsonEncode(body) : null,
-      );
-      stopwatch.stop();
-      AmanahAuthLogger.logResponse(
-        'POST',
-        uri,
-        response.statusCode,
-        stopwatch.elapsed,
-        body: response.body,
-      );
-      return response;
-    } catch (e, stack) {
-      stopwatch.stop();
-      AmanahAuthLogger.logError('POST', uri, e, stackTrace: stack, elapsed: stopwatch.elapsed);
-      rethrow;
-    }
+    return _httpClient.post(
+      uri,
+      headers: headers,
+      body: body != null ? jsonEncode(body) : null,
+    );
   }
 
   Future<http.Response> _put(Uri uri, {Map<String, dynamic>? body}) async {
     final Map<String, String> headers = await _buildHeaders();
-    AmanahAuthLogger.logRequest('PUT', uri, headers: headers, body: body);
-    final Stopwatch stopwatch = Stopwatch()..start();
-
-    try {
-      final http.Response response = await _httpClient.put(
-        uri,
-        headers: headers,
-        body: body != null ? jsonEncode(body) : null,
-      );
-      stopwatch.stop();
-      AmanahAuthLogger.logResponse(
-        'PUT',
-        uri,
-        response.statusCode,
-        stopwatch.elapsed,
-        body: response.body,
-      );
-      return response;
-    } catch (e, stack) {
-      stopwatch.stop();
-      AmanahAuthLogger.logError('PUT', uri, e, stackTrace: stack, elapsed: stopwatch.elapsed);
-      rethrow;
-    }
+    return _httpClient.put(
+      uri,
+      headers: headers,
+      body: body != null ? jsonEncode(body) : null,
+    );
   }
 
   Future<http.Response> _patch(Uri uri, {Map<String, dynamic>? body}) async {
     final Map<String, String> headers = await _buildHeaders();
-    AmanahAuthLogger.logRequest('PATCH', uri, headers: headers, body: body);
-    final Stopwatch stopwatch = Stopwatch()..start();
-
-    try {
-      final http.Response response = await _httpClient.patch(
-        uri,
-        headers: headers,
-        body: body != null ? jsonEncode(body) : null,
-      );
-      stopwatch.stop();
-      AmanahAuthLogger.logResponse(
-        'PATCH',
-        uri,
-        response.statusCode,
-        stopwatch.elapsed,
-        body: response.body,
-      );
-      return response;
-    } catch (e, stack) {
-      stopwatch.stop();
-      AmanahAuthLogger.logError('PATCH', uri, e, stackTrace: stack, elapsed: stopwatch.elapsed);
-      rethrow;
-    }
+    return _httpClient.patch(
+      uri,
+      headers: headers,
+      body: body != null ? jsonEncode(body) : null,
+    );
   }
 
   Future<http.Response> _delete(Uri uri) async {
     final Map<String, String> headers = await _buildHeaders();
-    AmanahAuthLogger.logRequest('DELETE', uri, headers: headers);
-    final Stopwatch stopwatch = Stopwatch()..start();
-
-    try {
-      final http.Response response = await _httpClient.delete(uri, headers: headers);
-      stopwatch.stop();
-      AmanahAuthLogger.logResponse(
-        'DELETE',
-        uri,
-        response.statusCode,
-        stopwatch.elapsed,
-        body: response.body,
-      );
-      return response;
-    } catch (e, stack) {
-      stopwatch.stop();
-      AmanahAuthLogger.logError('DELETE', uri, e, stackTrace: stack, elapsed: stopwatch.elapsed);
-      rethrow;
-    }
+    return _httpClient.delete(uri, headers: headers);
   }
+
+  // ==========================================
+  // 3. DOCTOR SCHEDULES & CALENDAR
+  // ==========================================
 
   /// GET /api/v1/schedules/my-schedules
   Future<List<DoctorSchedule>> fetchMySchedules({
@@ -228,15 +161,13 @@ class AmanahScheduleRepository {
     String? startDate,
     String? endDate,
   }) async {
-    final Map<String, String> queryParameters = <String, String>{};
-    if (date != null && date.isNotEmpty) queryParameters['date'] = date;
-    if (startDate != null && startDate.isNotEmpty) queryParameters['startDate'] = startDate;
-    if (endDate != null && endDate.isNotEmpty) queryParameters['endDate'] = endDate;
+    final Map<String, String> qp = <String, String>{};
+    if (date != null && date.isNotEmpty) qp['date'] = date;
+    if (startDate != null && startDate.isNotEmpty) qp['startDate'] = startDate;
+    if (endDate != null && endDate.isNotEmpty) qp['endDate'] = endDate;
 
-    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/my-schedules').replace(
-      queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
-    );
-
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/my-schedules')
+        .replace(queryParameters: qp.isNotEmpty ? qp : null);
     final http.Response response = await _get(uri);
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final dynamic decoded = jsonDecode(response.body);
@@ -248,47 +179,100 @@ class AmanahScheduleRepository {
       }
       return <DoctorSchedule>[];
     }
+    _handleHttpError(response);
+    return <DoctorSchedule>[];
+  }
 
+  /// GET /api/v1/admin/doctor-schedules/:doctorId?month=YYYY-MM&date=YYYY-MM-DD
+  Future<List<DoctorSchedule>> fetchDoctorDailySchedules({
+    required String doctorId,
+    required String date,
+    String? month,
+  }) async {
+    final Map<String, String> qp = <String, String>{
+      'date': date,
+    };
+    final String effectiveMonth =
+        month ?? (date.length >= 7 ? date.substring(0, 7) : '');
+    if (effectiveMonth.isNotEmpty) {
+      qp['month'] = effectiveMonth;
+    }
+
+    final Uri uri =
+        Uri.parse('$_baseUrl/api/v1/admin/doctor-schedules/$doctorId')
+            .replace(queryParameters: qp);
+    final http.Response response = await _get(uri);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final dynamic decoded = jsonDecode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        final dynamic data = decoded['data'] ?? decoded;
+        if (data is Map<String, dynamic>) {
+          final dynamic sesiList = data['sesi_harian'] ?? data['sessions'];
+          if (sesiList is List) {
+            final String? practitionerId =
+                data['practitioner_id'] as String? ?? data['id'] as String?;
+            final String? doctorName = data['nama_dokter'] as String?;
+            final String? spesialisasi = data['spesialisasi'] as String?;
+            final String? ruangPraktik = data['ruang_praktik'] as String?;
+
+            return sesiList
+                .whereType<Map<String, dynamic>>()
+                .map((Map<String, dynamic> item) {
+              final Map<String, dynamic> enriched =
+                  Map<String, dynamic>.from(item);
+              enriched['scheduleDate'] ??= date;
+              enriched['date'] ??= date;
+              enriched['practitioner_id'] ??= practitionerId;
+              enriched['doctor_name'] ??= doctorName;
+              enriched['spesialisasi'] ??= spesialisasi;
+              enriched['ruang'] ??= ruangPraktik;
+              return DoctorSchedule.fromJson(enriched);
+            }).toList();
+          }
+        }
+      }
+      return <DoctorSchedule>[];
+    }
     _handleHttpError(response);
     return <DoctorSchedule>[];
   }
 
   /// GET /api/v1/schedules/calendar-summary?month=YYYY-MM
   Future<CalendarSummaryResponse> fetchCalendarSummary(String month) async {
-    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/calendar-summary').replace(
-      queryParameters: <String, String>{'month': month},
-    );
-
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/calendar-summary')
+        .replace(queryParameters: <String, String>{'month': month});
     final http.Response response = await _get(uri);
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final dynamic decoded = jsonDecode(response.body);
       if (decoded is Map<String, dynamic>) {
         return CalendarSummaryResponse.fromJson(decoded);
       }
-      return CalendarSummaryResponse(month: month, days: const <CalendarDaySummary>[]);
+      return CalendarSummaryResponse(
+        month: month,
+        days: const <CalendarDaySummary>[],
+      );
     }
-
     _handleHttpError(response);
-    return CalendarSummaryResponse(month: month, days: const <CalendarDaySummary>[]);
+    return CalendarSummaryResponse(
+      month: month,
+      days: const <CalendarDaySummary>[],
+    );
   }
 
   /// GET /api/v1/schedules/day-settings?date=YYYY-MM-DD
   Future<DayScheduleSetting> fetchDaySettings(String date) async {
-    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/day-settings').replace(
-      queryParameters: <String, String>{'date': date},
-    );
-
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/day-settings')
+        .replace(queryParameters: <String, String>{'date': date});
     final http.Response response = await _get(uri);
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final dynamic decoded = jsonDecode(response.body);
       if (decoded is Map<String, dynamic>) {
         return DayScheduleSetting.fromJson(decoded);
       }
-      return const DayScheduleSetting(targetQuota: 8, isCuti: false);
+      return const DayScheduleSetting(targetQuota: 0, isCuti: false);
     }
-
     _handleHttpError(response);
-    return const DayScheduleSetting(targetQuota: 8, isCuti: false);
+    return const DayScheduleSetting(targetQuota: 0, isCuti: false);
   }
 
   /// PUT /api/v1/schedules/day-settings
@@ -305,21 +289,114 @@ class AmanahScheduleRepository {
       'isCuti': ?isCuti,
       'cutiReason': ?cutiReason,
     };
-
     final http.Response response = await _put(uri, body: body);
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final dynamic decoded = jsonDecode(response.body);
       if (decoded is Map<String, dynamic>) {
         return DayScheduleSetting.fromJson(decoded);
       }
-      return const DayScheduleSetting(targetQuota: 8, isCuti: false);
+      return const DayScheduleSetting(targetQuota: 0, isCuti: false);
     }
-
     _handleHttpError(response);
-    return const DayScheduleSetting(targetQuota: 8, isCuti: false);
+    return const DayScheduleSetting(targetQuota: 0, isCuti: false);
   }
 
-  /// POST /api/v1/schedules
+  /// PATCH /api/v1/schedules/days/:date (Canonical Mobile Cascading Day Status)
+  Future<Map<String, dynamic>> updateDayStatus({
+    required String date,
+    required String status,
+    String? notes,
+    String? doctorId,
+  }) async {
+    final String canonical =
+        (status.toUpperCase() == ScheduleFormConstants.statusBuka.toUpperCase() ||
+                status.toUpperCase() == ScheduleCanonicalStatus.open)
+            ? ScheduleCanonicalStatus.open
+            : ScheduleCanonicalStatus.closed;
+    final String path = (doctorId != null && doctorId.isNotEmpty)
+        ? '$_baseUrl/api/v1/admin/doctor-schedules/$doctorId/days/$date'
+        : '$_baseUrl/api/v1/schedules/days/$date';
+    final Uri uri = Uri.parse(path);
+    final Map<String, dynamic> body = <String, dynamic>{
+      'status': canonical,
+      if (notes != null && notes.isNotEmpty) 'notes': notes,
+    };
+
+    final http.Response response = await _patch(uri, body: body);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (response.body.isNotEmpty) {
+        try {
+          final dynamic decoded = jsonDecode(response.body);
+          if (decoded is Map<String, dynamic>) return decoded;
+        } catch (_) {}
+      }
+      return <String, dynamic>{'success': true};
+    }
+    _handleHttpError(response);
+    throw const AmanahScheduleException('Gagal memperbarui status hari');
+  }
+
+  /// POST /api/v1/schedules/availability (Auto calculate end time)
+  Future<DoctorSchedule> createAvailability({
+    required String date,
+    required String scheduleContextId,
+    required String startTime,
+    String? roomId,
+    String? poliklinikId,
+    String? serviceId,
+    String? notes,
+    String? staffId,
+  }) async {
+    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/availability');
+    final Map<String, dynamic> body = <String, dynamic>{
+      'date': date,
+      'scheduleContextId': scheduleContextId,
+      'startTime': startTime,
+      if (roomId != null && roomId.isNotEmpty) 'roomId': roomId,
+      if (poliklinikId != null && poliklinikId.isNotEmpty)
+        'poliklinikId': poliklinikId,
+      if (serviceId != null && serviceId.isNotEmpty) 'serviceId': serviceId,
+      if (notes != null && notes.isNotEmpty) 'notes': notes,
+      if (staffId != null && staffId.isNotEmpty) 'staffId': staffId,
+    };
+
+    final http.Response response = await _post(uri, body: body);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final dynamic decoded = jsonDecode(response.body);
+      final dynamic payload = decoded is Map<String, dynamic> &&
+              decoded['data'] != null
+          ? decoded['data']
+          : decoded;
+      if (payload is Map<String, dynamic>) {
+        final dynamic scheduleObj = payload['schedule'] ?? payload;
+        if (scheduleObj is Map<String, dynamic>) {
+          return DoctorSchedule.fromJson(scheduleObj);
+        }
+      }
+    }
+    _handleHttpError(response);
+    throw const AmanahScheduleException('Gagal membuat ketersediaan jadwal');
+  }
+
+  static String? _cleanTime(String? t) {
+    if (t == null || t.isEmpty || t == 'Pilih Jam' || t == '-') return null;
+    final String trimmed = t.replaceAll('WIB', '').trim();
+    final RegExp match = RegExp(r'^\d{1,2}:\d{2}');
+    final RegExpMatch? m = match.firstMatch(trimmed);
+    if (m != null) {
+      final List<String> parts = m.group(0)!.split(':');
+      final String h = parts[0].padLeft(2, '0');
+      final String min = parts[1].padLeft(2, '0');
+      return '$h:$min';
+    }
+    return null;
+  }
+
+  static String? _resolveCanonicalShift(String? session) {
+    return CanonicalShift.tryResolve(session)?.dtoSession;
+  }
+
+  /// POST /api/v1/schedules (Standard Create)
   Future<DoctorSchedule> createSchedule({
     required String date,
     required String session,
@@ -333,19 +410,31 @@ class AmanahScheduleRepository {
     String? notes,
   }) async {
     final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules');
+    final String? validSession = _resolveCanonicalShift(session);
+
+    final bool hasValidRoomId = roomId != null &&
+        roomId.isNotEmpty &&
+        !roomId.startsWith('Pilih');
+    final bool hasValidPoliId = poliklinikId != null &&
+        poliklinikId.isNotEmpty &&
+        !poliklinikId.startsWith('Pilih');
+    final bool hasValidServiceId = serviceId != null &&
+        serviceId.isNotEmpty &&
+        !serviceId.startsWith('Pilih');
+
     final Map<String, dynamic> body = <String, dynamic>{
       'date': date,
       'specificDate': date,
-      'session': session.toUpperCase(),
+      'session': ?validSession,
       'sessionType': session,
-      'startTime': startTime,
-      'endTime': endTime,
-      'roomId': ?roomId,
-      'poliklinikId': ?poliklinikId,
-      'serviceId': ?serviceId,
-      'capacity': ?capacity,
+      'startTime': _cleanTime(startTime) ?? startTime,
+      'endTime': _cleanTime(endTime) ?? endTime,
+      if (hasValidRoomId) 'roomId': roomId,
+      if (hasValidPoliId) 'poliklinikId': poliklinikId,
+      if (hasValidServiceId) 'serviceId': serviceId,
+      if (capacity != null && capacity > 0) 'capacity': capacity,
       'isAvailable': ?isAvailable,
-      'notes': ?notes,
+      if (notes != null && notes.isNotEmpty) 'notes': notes,
     };
 
     final http.Response response = await _post(uri, body: body);
@@ -355,7 +444,6 @@ class AmanahScheduleRepository {
         return DoctorSchedule.fromJson(decoded);
       }
     }
-
     _handleHttpError(response);
     throw const AmanahScheduleException('Gagal membuat jadwal praktik');
   }
@@ -375,18 +463,42 @@ class AmanahScheduleRepository {
     String? notes,
   }) async {
     final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/$scheduleId');
+    final String? validSession = _resolveCanonicalShift(session);
+
+    String? canonicalStatus;
+    if (status != null && status.isNotEmpty) {
+      final String upper = status.toUpperCase();
+      canonicalStatus = (upper == ScheduleFormConstants.statusBuka.toUpperCase() ||
+              upper == ScheduleCanonicalStatus.open)
+          ? ScheduleCanonicalStatus.open
+          : ScheduleCanonicalStatus.closed;
+    }
+
+    final bool hasValidRoomId = roomId != null &&
+        roomId.isNotEmpty &&
+        !roomId.startsWith('Pilih');
+    final bool hasValidPoliId = poliklinikId != null &&
+        poliklinikId.isNotEmpty &&
+        !poliklinikId.startsWith('Pilih');
+    final bool hasValidServiceId = serviceId != null &&
+        serviceId.isNotEmpty &&
+        !serviceId.startsWith('Pilih');
+
+    final String? cleanStart = _cleanTime(startTime);
+    final String? cleanEnd = _cleanTime(endTime);
+
     final Map<String, dynamic> body = <String, dynamic>{
-      'session': ?session?.toUpperCase(),
-      'sessionType': ?session,
-      'startTime': ?startTime,
-      'endTime': ?endTime,
-      'capacity': ?capacity,
-      'roomId': ?roomId,
-      'poliklinikId': ?poliklinikId,
-      'serviceId': ?serviceId,
-      'status': ?status,
+      'session': ?validSession,
+      if (session != null && session.isNotEmpty) 'sessionType': session,
+      'startTime': ?cleanStart,
+      'endTime': ?cleanEnd,
+      if (capacity != null && capacity > 0) 'capacity': capacity,
+      if (hasValidRoomId) 'roomId': roomId,
+      if (hasValidPoliId) 'poliklinikId': poliklinikId,
+      if (hasValidServiceId) 'serviceId': serviceId,
+      'status': ?canonicalStatus,
       'isAvailable': ?isAvailable,
-      'notes': ?notes,
+      if (notes != null && notes.isNotEmpty) 'notes': notes,
     };
 
     final http.Response response = await _patch(uri, body: body);
@@ -396,16 +508,19 @@ class AmanahScheduleRepository {
         return DoctorSchedule.fromJson(decoded);
       }
     }
-
     _handleHttpError(response);
     throw const AmanahScheduleException('Gagal memperbarui jadwal praktik');
   }
 
   /// PATCH /api/v1/schedules/:id/availability
-  Future<DoctorSchedule> toggleAvailability(String scheduleId, bool isAvailable) async {
-    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/$scheduleId/availability');
+  Future<DoctorSchedule> toggleAvailability(
+    String scheduleId,
+    bool isAvailable,
+  ) async {
+    final Uri uri =
+        Uri.parse('$_baseUrl/api/v1/schedules/$scheduleId/availability');
     final Map<String, dynamic> body = <String, dynamic>{
-      'isAvailable': isAvailable,
+      'isAvailable': isAvailable
     };
 
     final http.Response response = await _patch(uri, body: body);
@@ -415,7 +530,6 @@ class AmanahScheduleRepository {
         return DoctorSchedule.fromJson(decoded);
       }
     }
-
     _handleHttpError(response);
     throw const AmanahScheduleException('Gagal mengubah ketersediaan jadwal');
   }
@@ -424,280 +538,7 @@ class AmanahScheduleRepository {
   Future<void> deleteSchedule(String scheduleId) async {
     final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/$scheduleId');
     final http.Response response = await _delete(uri);
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return;
-    }
-
+    if (response.statusCode >= 200 && response.statusCode < 300) return;
     _handleHttpError(response);
-  }
-
-  /// GET /api/v1/schedules/booked-patients OR GET /api/v1/schedules/:id/booked-patients
-  Future<List<BookedPatient>> fetchBookedPatients({
-    String? date,
-    String? scheduleId,
-  }) async {
-    Uri uri;
-    if (scheduleId != null && scheduleId.isNotEmpty) {
-      uri = Uri.parse('$_baseUrl/api/v1/schedules/$scheduleId/booked-patients');
-    } else {
-      final Map<String, String> queryParameters = <String, String>{};
-      if (date != null && date.isNotEmpty) queryParameters['date'] = date;
-      uri = Uri.parse('$_baseUrl/api/v1/schedules/booked-patients').replace(
-        queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
-      );
-    }
-
-    final http.Response response = await _get(uri);
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final dynamic decoded = jsonDecode(response.body);
-      if (decoded is List) {
-        return decoded
-            .whereType<Map<String, dynamic>>()
-            .map(BookedPatient.fromJson)
-            .toList();
-      }
-      return <BookedPatient>[];
-    }
-
-    _handleHttpError(response);
-    return <BookedPatient>[];
-  }
-
-  /// GET /api/v1/schedules/reference/rooms
-  Future<List<ClinicRoomReference>> fetchReferenceRooms({
-    String? date,
-    String? startTime,
-    String? endTime,
-  }) async {
-    final Map<String, String> queryParameters = <String, String>{};
-    if (date != null) queryParameters['date'] = date;
-    if (startTime != null) queryParameters['startTime'] = startTime;
-    if (endTime != null) queryParameters['endTime'] = endTime;
-
-    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/reference/rooms').replace(
-      queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
-    );
-
-    final http.Response response = await _get(uri);
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final dynamic decoded = jsonDecode(response.body);
-      if (decoded is List) {
-        return decoded
-            .whereType<Map<String, dynamic>>()
-            .map(ClinicRoomReference.fromJson)
-            .toList();
-      }
-      return <ClinicRoomReference>[];
-    }
-
-    _handleHttpError(response);
-    return <ClinicRoomReference>[];
-  }
-
-  /// GET /api/v1/schedules/reference/polikliniks
-  Future<List<ClinicPoliklinikReference>> fetchReferencePolikliniks() async {
-    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/reference/polikliniks');
-    final http.Response response = await _get(uri);
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final dynamic decoded = jsonDecode(response.body);
-      if (decoded is List) {
-        return decoded
-            .whereType<Map<String, dynamic>>()
-            .map(ClinicPoliklinikReference.fromJson)
-            .toList();
-      }
-      return <ClinicPoliklinikReference>[];
-    }
-
-    _handleHttpError(response);
-    return <ClinicPoliklinikReference>[];
-  }
-
-  /// GET /api/v1/schedules/reference/options
-  Future<ClinicScheduleOptionsReference> fetchReferenceOptions() async {
-    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/reference/options');
-    final http.Response response = await _get(uri);
-
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final dynamic decoded = jsonDecode(response.body);
-      if (decoded is Map<String, dynamic>) {
-        return ClinicScheduleOptionsReference.fromJson(decoded);
-      }
-    }
-
-    _handleHttpError(response);
-    return const ClinicScheduleOptionsReference(
-      shifts: <ClinicShiftReference>[],
-      statuses: <ClinicStatusReference>[],
-      timeIntervals: <int>[15, 30, 45, 60],
-    );
-  }
-
-  /// GET /api/v1/schedules/contexts?date=YYYY-MM-DD
-  Future<List<ScheduleContext>> fetchScheduleContexts({
-    required String date,
-    String? staffId,
-  }) async {
-    final Map<String, String> queryParameters = <String, String>{'date': date};
-    if (staffId != null && staffId.isNotEmpty) {
-      queryParameters['staffId'] = staffId;
-    }
-
-    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/contexts').replace(
-      queryParameters: queryParameters,
-    );
-
-    final http.Response response = await _get(uri);
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final dynamic decoded = jsonDecode(response.body);
-      final dynamic list = decoded is Map<String, dynamic> && decoded['data'] != null
-          ? decoded['data']
-          : decoded;
-      if (list is List) {
-        return list
-            .whereType<Map<String, dynamic>>()
-            .map(ScheduleContext.fromJson)
-            .toList();
-      }
-      return <ScheduleContext>[];
-    }
-
-    _handleHttpError(response);
-    return <ScheduleContext>[];
-  }
-
-  /// GET /api/v1/schedules/projection?date=...&scheduleContextId=...&startTime=...
-  Future<ScheduleProjection> fetchProjection({
-    required String date,
-    required String scheduleContextId,
-    required String startTime,
-    String? roomId,
-    String? serviceId,
-    String? staffId,
-  }) async {
-    final Map<String, String> queryParameters = <String, String>{
-      'date': date,
-      'scheduleContextId': scheduleContextId,
-      'startTime': startTime,
-    };
-    if (roomId != null && roomId.isNotEmpty) queryParameters['roomId'] = roomId;
-    if (serviceId != null && serviceId.isNotEmpty) queryParameters['serviceId'] = serviceId;
-    if (staffId != null && staffId.isNotEmpty) queryParameters['staffId'] = staffId;
-
-    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/projection').replace(
-      queryParameters: queryParameters,
-    );
-
-    final http.Response response = await _get(uri);
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final dynamic decoded = jsonDecode(response.body);
-      final dynamic data = decoded is Map<String, dynamic> && decoded['data'] != null
-          ? decoded['data']
-          : decoded;
-      if (data is Map<String, dynamic>) {
-        return ScheduleProjection.fromJson(data);
-      }
-    }
-
-    _handleHttpError(response);
-    throw const AmanahScheduleException('Gagal menghitung proyeksi jadwal');
-  }
-
-  /// POST /api/v1/schedules/availability
-  Future<DoctorSchedule> createAvailability({
-    required String date,
-    required String scheduleContextId,
-    required String startTime,
-    String? roomId,
-    String? poliklinikId,
-    String? serviceId,
-    String? notes,
-    String? staffId,
-  }) async {
-    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/availability');
-    final Map<String, dynamic> body = <String, dynamic>{
-      'date': date,
-      'scheduleContextId': scheduleContextId,
-      'startTime': startTime,
-      if (roomId != null && roomId.isNotEmpty) 'roomId': roomId,
-      if (poliklinikId != null && poliklinikId.isNotEmpty) 'poliklinikId': poliklinikId,
-      if (serviceId != null && serviceId.isNotEmpty) 'serviceId': serviceId,
-      if (notes != null && notes.isNotEmpty) 'notes': notes,
-      if (staffId != null && staffId.isNotEmpty) 'staffId': staffId,
-    };
-
-    final http.Response response = await _post(uri, body: body);
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final dynamic decoded = jsonDecode(response.body);
-      final dynamic payload = decoded is Map<String, dynamic> && decoded['data'] != null
-          ? decoded['data']
-          : decoded;
-      if (payload is Map<String, dynamic>) {
-        final dynamic scheduleObj = payload['schedule'] ?? payload;
-        if (scheduleObj is Map<String, dynamic>) {
-          return DoctorSchedule.fromJson(scheduleObj);
-        }
-      }
-    }
-
-    _handleHttpError(response);
-    throw const AmanahScheduleException('Gagal membuat ketersediaan jadwal');
-  }
-
-  /// GET /api/v1/schedules/occupancy-overview?date=YYYY-MM-DD&roomId=...
-  Future<ScheduleOccupancyOverviewData> fetchOccupancyOverview({
-    required String date,
-    String? roomId,
-  }) async {
-    final Map<String, String> queryParameters = <String, String>{'date': date};
-    if (roomId != null && roomId.isNotEmpty) {
-      queryParameters['roomId'] = roomId;
-    }
-
-    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/occupancy-overview').replace(
-      queryParameters: queryParameters,
-    );
-
-    final http.Response response = await _get(uri);
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final dynamic decoded = jsonDecode(response.body);
-      final dynamic data = decoded is Map<String, dynamic> && decoded['data'] != null
-          ? decoded['data']
-          : decoded;
-      if (data is Map<String, dynamic>) {
-        return ScheduleOccupancyOverviewData.fromJson(data);
-      }
-    }
-
-    _handleHttpError(response);
-    throw const AmanahScheduleException('Gagal mengambil data occupancy jadwal');
-  }
-
-  /// PATCH /api/v1/schedules/days/:date
-  Future<Map<String, dynamic>> updateDayStatus({
-    required String date,
-    required String status,
-    String? notes,
-  }) async {
-    final Uri uri = Uri.parse('$_baseUrl/api/v1/schedules/days/$date');
-    final Map<String, dynamic> body = <String, dynamic>{
-      'status': status,
-      if (notes != null && notes.isNotEmpty) 'notes': notes,
-    };
-
-    final http.Response response = await _patch(uri, body: body);
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      final dynamic decoded = jsonDecode(response.body);
-      if (decoded is Map<String, dynamic>) {
-        return decoded;
-      }
-      return <String, dynamic>{'success': true};
-    }
-
-    _handleHttpError(response);
-    throw const AmanahScheduleException('Gagal memperbarui status hari');
   }
 }
-

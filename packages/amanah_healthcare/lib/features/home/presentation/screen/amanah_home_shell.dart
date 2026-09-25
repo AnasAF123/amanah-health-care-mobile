@@ -232,6 +232,10 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                 ),
                 AmanahHomeTab.schedule => AmanahScheduleTabScreen(
                   key: const ValueKey<String>('schedule_content'),
+                  user: _currentUser,
+                  doctorId: _currentUser.staff?.practitionerId ??
+                      _currentUser.staff?.id ??
+                      _currentUser.id,
                   initialSessionId: _scheduleInitialSessionId,
                   initialViewMode: _scheduleInitialViewMode,
                   openDetailOnLaunch: _scheduleOpenDetailOnLaunch,
@@ -310,7 +314,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                 setState(() {
                   if (tab == AmanahHomeTab.schedule) {
                     _scheduleInitialSessionId = null;
-                    _scheduleInitialViewMode = null;
+                    _scheduleInitialViewMode = AmanahScheduleViewMode.overview;
                     _scheduleOpenDetailOnLaunch = false;
                   }
                   _selectedTab = tab;

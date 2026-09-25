@@ -674,4 +674,202 @@ void main() {
       }
     });
   });
+
+  group('AmanahScheduleRepository - Reschedule API V2 Endpoints & DTOs', () {
+    test('checkRescheduleEligibility successfully decodes eligibility and projectedEndTime', () async {
+      final MockClient client = MockClient((http.Request request) async {
+        expect(
+          request.url.path,
+          '/api/v1/admin/doctor-schedules/doc-uuid-1/sessions/sess-uuid-1/reschedule-eligibility',
+        );
+        expect(request.url.queryParameters['targetDate'], '2026-09-25');
+        expect(request.url.queryParameters['targetStartTime'], '09:00');
+        expect(request.url.queryParameters['targetRoomId'], 'room-101');
+
+        return http.Response(
+          jsonEncode(<String, dynamic>{
+            'status': 'success',
+            'data': <String, dynamic>{
+              'sessionId': 'sess-uuid-1',
+              'practitionerId': 'doc-uuid-1',
+              'isEligible': true,
+              'ineligibilityReason': null,
+              'actionableGuidance': null,
+              'targetValidation': <String, dynamic>{
+                'evaluated': true,
+                'targetDate': '2026-09-25',
+                'targetStartTime': '09:00',
+                'projectedEndTime': '12:00',
+                'targetRoomId': 'room-101',
+                'targetRoomName': 'Ruang 101',
+                'isTargetEligible': true,
+                'conflictMessage': null,
+              },
+            },
+          }),
+          200,
+          headers: <String, String>{'content-type': 'application/json'},
+        );
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage(),
+      );
+
+      final RescheduleEligibilityData eligibility =
+          await repo.checkRescheduleEligibility(
+        doctorId: 'doc-uuid-1',
+        sessionId: 'sess-uuid-1',
+        targetDate: '2026-09-25',
+        targetStartTime: '09:00',
+        targetRoomId: 'room-101',
+      );
+
+      expect(eligibility.sessionId, 'sess-uuid-1');
+      expect(eligibility.practitionerId, 'doc-uuid-1');
+      expect(eligibility.isEligible, isTrue);
+      expect(eligibility.targetValidation, isNotNull);
+      expect(eligibility.targetValidation!.evaluated, isTrue);
+      expect(eligibility.targetValidation!.projectedEndTime, '12:00');
+      expect(eligibility.targetValidation!.targetRoomName, 'Ruang 101');
+      expect(eligibility.targetValidation!.isTargetEligible, isTrue);
+    });
+
+    test('rescheduleSession sends correct payload and parses response', () async {
+      late Map<String, dynamic> sentBody;
+      final MockClient client = MockClient((http.Request request) async {
+        expect(request.method, 'POST');
+        expect(
+          request.url.path,
+          '/api/v1/admin/doctor-schedules/doc-uuid-1/sessions/sess-uuid-1/reschedule',
+        );
+        sentBody = jsonDecode(request.body) as Map<String, dynamic>;
+
+        return http.Response(
+          jsonEncode(<String, dynamic>{
+            'status': 'success',
+            'message': 'Sesi berhasil di-reschedule',
+            'data': <String, dynamic>{
+              'newSessionId': 'sess-uuid-2',
+              'targetDate': '2026-09-25',
+              'startTime': '09:00',
+              'endTime': '12:00',
+              'transferredAppointmentsCount': 2,
+            },
+          }),
+          200,
+          headers: <String, String>{'content-type': 'application/json'},
+        );
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage(),
+      );
+
+      final Map<String, dynamic> result = await repo.rescheduleSession(
+        doctorId: 'doc-uuid-1',
+        sessionId: 'sess-uuid-1',
+        targetDate: '2026-09-25',
+        targetStartTime: '09:00',
+        targetRoomId: 'room-101',
+        notes: 'Pindah karena rapat',
+        rescheduleActiveAppointments: true,
+      );
+
+      expect(sentBody['targetDate'], '2026-09-25');
+      expect(sentBody['targetStartTime'], '09:00');
+      expect(sentBody['targetRoomId'], 'room-101');
+      expect(sentBody['notes'], 'Pindah karena rapat');
+      expect(sentBody['rescheduleActiveAppointments'], isTrue);
+      expect(result['status'], 'success');
+      expect(result['data']['newSessionId'], 'sess-uuid-2');
+    });
+
+    test('Reschedule DTOs correctly handle round-trip toJson and fromJson', () {
+      const RescheduleTargetValidation targetVal = RescheduleTargetValidation(
+        evaluated: true,
+        targetDate: '2026-09-25',
+        targetStartTime: '10:00',
+        projectedEndTime: '13:00',
+        targetRoomId: 'room-abc',
+        targetRoomName: 'Ruang Cempaka',
+        isTargetEligible: false,
+        conflictMessage: 'Ruangan sudah terisi oleh dokter lain',
+      );
+
+      final Map<String, dynamic> targetJson = targetVal.toJson();
+      final RescheduleTargetValidation fromTargetJson =
+          RescheduleTargetValidation.fromJson(targetJson);
+
+      expect(fromTargetJson.evaluated, isTrue);
+      expect(fromTargetJson.targetDate, '2026-09-25');
+      expect(fromTargetJson.projectedEndTime, '13:00');
+      expect(fromTargetJson.isTargetEligible, isFalse);
+      expect(fromTargetJson.conflictMessage, contains('terisi'));
+
+      final RescheduleEligibilityData eligibility = RescheduleEligibilityData(
+        sessionId: 'sess-123',
+        practitionerId: 'doc-456',
+        isEligible: false,
+        ineligibilityReason: 'Sesi memiliki antrean aktif',
+        actionableGuidance: 'Pilih opsi alihkan antrean pasien',
+        targetValidation: targetVal,
+      );
+
+      final Map<String, dynamic> eligJson = eligibility.toJson();
+      final RescheduleEligibilityData fromEligJson =
+          RescheduleEligibilityData.fromJson(eligJson);
+
+      expect(fromEligJson.sessionId, 'sess-123');
+      expect(fromEligJson.practitionerId, 'doc-456');
+      expect(fromEligJson.isEligible, isFalse);
+      expect(fromEligJson.ineligibilityReason, contains('antrean'));
+      expect(fromEligJson.targetValidation?.targetRoomName, 'Ruang Cempaka');
+    });
+
+    test('updateDayStatus sends canonical PATCH /api/v1/admin/doctor-schedules/:doctorId/days/:date', () async {
+      late Map<String, dynamic> sentBody;
+      final MockClient client = MockClient((http.Request request) async {
+        expect(request.method, 'PATCH');
+        expect(
+          request.url.path,
+          '/api/v1/admin/doctor-schedules/doc-uuid-1/days/2026-09-24',
+        );
+        sentBody = jsonDecode(request.body) as Map<String, dynamic>;
+
+        return http.Response(
+          jsonEncode(<String, dynamic>{
+            'success': true,
+            'data': <String, dynamic>{
+              'status': 'CLOSED',
+              'notes': 'Jadwal ditutup oleh dokter',
+            },
+          }),
+          200,
+          headers: <String, String>{'content-type': 'application/json'},
+        );
+      });
+
+      final AmanahScheduleRepository repo = AmanahScheduleRepository(
+        baseUrl: 'http://test.api',
+        httpClient: client,
+        tokenStorage: const _MockTokenStorage(),
+      );
+
+      final Map<String, dynamic> result = await repo.updateDayStatus(
+        doctorId: 'doc-uuid-1',
+        date: '2026-09-24',
+        status: 'Tutup',
+        notes: 'Jadwal ditutup oleh dokter',
+      );
+
+      expect(sentBody['status'], 'CLOSED');
+      expect(sentBody['notes'], 'Jadwal ditutup oleh dokter');
+      expect(result['success'], isTrue);
+    });
+  });
 }

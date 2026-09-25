@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:amanah_healthcare/features/authentication/data/amanah_auth_logger.dart';
+import 'package:amanah_healthcare/core/network/client/amanah_http_client.dart';
+import 'package:amanah_healthcare/core/network/client/observable_http_client.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_token_storage.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 
@@ -68,195 +69,81 @@ class AmanahAuthRepository {
     return 'http://localhost:3001';
   }
 
-  http.Client get _httpClient => _customClient ?? http.Client();
+  http.Client get _httpClient {
+    final http.Client? custom = _customClient;
+    if (custom != null) {
+      return custom is ObservableHttpClient
+          ? custom
+          : ObservableHttpClient(innerClient: custom);
+    }
+    return AmanahHttpClient.instance;
+  }
   AmanahAuthTokenStorage get tokenStorage => _tokenStorage;
 
-  /// Internal POST helper with complete observability logging
+  /// Internal POST helper
   Future<http.Response> _post(
     Uri uri, {
     Map<String, String>? headers,
     Map<String, dynamic>? body,
-  }) async {
+  }) {
     final Map<String, String> resolvedHeaders = <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       ...?headers,
     };
-
-    AmanahAuthLogger.logRequest(
-      'POST',
+    return _httpClient.post(
       uri,
       headers: resolvedHeaders,
-      body: body,
+      body: body != null ? jsonEncode(body) : null,
     );
-
-    final Stopwatch stopwatch = Stopwatch()..start();
-    try {
-      final http.Response response = await _httpClient.post(
-        uri,
-        headers: resolvedHeaders,
-        body: body != null ? jsonEncode(body) : null,
-      );
-      stopwatch.stop();
-
-      AmanahAuthLogger.logResponse(
-        'POST',
-        uri,
-        response.statusCode,
-        stopwatch.elapsed,
-        body: response.body,
-      );
-      return response;
-    } catch (e, stack) {
-      stopwatch.stop();
-      AmanahAuthLogger.logError(
-        'POST',
-        uri,
-        e,
-        stackTrace: stack,
-        elapsed: stopwatch.elapsed,
-      );
-      rethrow;
-    }
   }
 
-  /// Internal GET helper with complete observability logging
+  /// Internal GET helper
   Future<http.Response> _get(
     Uri uri, {
     Map<String, String>? headers,
-  }) async {
+  }) {
     final Map<String, String> resolvedHeaders = <String, String>{
       'Accept': 'application/json',
       ...?headers,
     };
-
-    AmanahAuthLogger.logRequest(
-      'GET',
+    return _httpClient.get(
       uri,
       headers: resolvedHeaders,
     );
-
-    final Stopwatch stopwatch = Stopwatch()..start();
-    try {
-      final http.Response response = await _httpClient.get(
-        uri,
-        headers: resolvedHeaders,
-      );
-      stopwatch.stop();
-
-      AmanahAuthLogger.logResponse(
-        'GET',
-        uri,
-        response.statusCode,
-        stopwatch.elapsed,
-        body: response.body,
-      );
-      return response;
-    } catch (e, stack) {
-      stopwatch.stop();
-      AmanahAuthLogger.logError(
-        'GET',
-        uri,
-        e,
-        stackTrace: stack,
-        elapsed: stopwatch.elapsed,
-      );
-      rethrow;
-    }
   }
 
-  /// Internal PATCH helper with complete observability logging
+  /// Internal PATCH helper
   Future<http.Response> _patch(
     Uri uri, {
     Map<String, String>? headers,
     Map<String, dynamic>? body,
-  }) async {
+  }) {
     final Map<String, String> resolvedHeaders = <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       ...?headers,
     };
-
-    AmanahAuthLogger.logRequest(
-      'PATCH',
+    return _httpClient.patch(
       uri,
       headers: resolvedHeaders,
-      body: body,
+      body: body != null ? jsonEncode(body) : null,
     );
-
-    final Stopwatch stopwatch = Stopwatch()..start();
-    try {
-      final http.Response response = await _httpClient.patch(
-        uri,
-        headers: resolvedHeaders,
-        body: body != null ? jsonEncode(body) : null,
-      );
-      stopwatch.stop();
-
-      AmanahAuthLogger.logResponse(
-        'PATCH',
-        uri,
-        response.statusCode,
-        stopwatch.elapsed,
-        body: response.body,
-      );
-      return response;
-    } catch (e, stack) {
-      stopwatch.stop();
-      AmanahAuthLogger.logError(
-        'PATCH',
-        uri,
-        e,
-        stackTrace: stack,
-        elapsed: stopwatch.elapsed,
-      );
-      rethrow;
-    }
   }
 
-  /// Internal DELETE helper with complete observability logging
+  /// Internal DELETE helper
   Future<http.Response> _delete(
     Uri uri, {
     Map<String, String>? headers,
-  }) async {
+  }) {
     final Map<String, String> resolvedHeaders = <String, String>{
       'Accept': 'application/json',
       ...?headers,
     };
-
-    AmanahAuthLogger.logRequest(
-      'DELETE',
+    return _httpClient.delete(
       uri,
       headers: resolvedHeaders,
     );
-
-    final Stopwatch stopwatch = Stopwatch()..start();
-    try {
-      final http.Response response = await _httpClient.delete(
-        uri,
-        headers: resolvedHeaders,
-      );
-      stopwatch.stop();
-
-      AmanahAuthLogger.logResponse(
-        'DELETE',
-        uri,
-        response.statusCode,
-        stopwatch.elapsed,
-        body: response.body,
-      );
-      return response;
-    } catch (e, stack) {
-      stopwatch.stop();
-      AmanahAuthLogger.logError(
-        'DELETE',
-        uri,
-        e,
-        stackTrace: stack,
-        elapsed: stopwatch.elapsed,
-      );
-      rethrow;
-    }
   }
 
   /// Sign In with Email & Password via Better Auth
@@ -755,26 +642,9 @@ class AmanahAuthRepository {
       throw const AmanahAuthException('Berkas foto tidak boleh kosong.');
     }
 
-    AmanahAuthLogger.logRequest(
-      request.method,
-      uri,
-      headers: request.headers,
-      body: <String, dynamic>{'filename': fileName, 'useAlias': useAuthAlias},
-    );
-
-    final Stopwatch stopwatch = Stopwatch()..start();
     try {
       final http.StreamedResponse streamedResponse = await _httpClient.send(request);
       final http.Response response = await http.Response.fromStream(streamedResponse);
-      stopwatch.stop();
-
-      AmanahAuthLogger.logResponse(
-        request.method,
-        uri,
-        response.statusCode,
-        stopwatch.elapsed,
-        body: response.body,
-      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final Map<String, dynamic> data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -807,15 +677,7 @@ class AmanahAuthRepository {
           throw const AmanahAuthException('Terjadi kesalahan saat mengunggah foto profil.');
         }
       }
-    } catch (e, stack) {
-      stopwatch.stop();
-      AmanahAuthLogger.logError(
-        request.method,
-        uri,
-        e,
-        stackTrace: stack,
-        elapsed: stopwatch.elapsed,
-      );
+    } catch (e) {
       if (e is AmanahAuthException) rethrow;
       throw AmanahAuthException('Gagal mengunggah foto profil: $e');
     }
@@ -835,19 +697,8 @@ class AmanahAuthRepository {
       'Accept': 'application/json',
     };
 
-    AmanahAuthLogger.logRequest('DELETE', uri, headers: headers);
-    final Stopwatch stopwatch = Stopwatch()..start();
     try {
       final http.Response response = await _httpClient.delete(uri, headers: headers);
-      stopwatch.stop();
-
-      AmanahAuthLogger.logResponse(
-        'DELETE',
-        uri,
-        response.statusCode,
-        stopwatch.elapsed,
-        body: response.body,
-      );
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         return true;
@@ -863,9 +714,7 @@ class AmanahAuthRepository {
           throw const AmanahAuthException('Terjadi kesalahan saat menghapus avatar.');
         }
       }
-    } catch (e, stack) {
-      stopwatch.stop();
-      AmanahAuthLogger.logError('DELETE', uri, e, stackTrace: stack, elapsed: stopwatch.elapsed);
+    } catch (e) {
       if (e is AmanahAuthException) rethrow;
       throw AmanahAuthException('Gagal menghapus avatar: $e');
     }

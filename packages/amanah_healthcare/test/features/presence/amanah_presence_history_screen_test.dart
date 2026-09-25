@@ -248,5 +248,51 @@ void main() {
       expect(find.text('Timeline'), findsOneWidget);
       expect(find.text('Tidak Ada Data Presensi'), findsNothing);
     });
+
+    testWidgets('Renders segmented tabs Presensi and Pasien, switches to Pasien tab', (
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.75;
+      addTearDown(() => tester.view.reset());
+
+      await tester.pumpWidget(createPresenceHistoryScreen());
+      await tester.pumpAndSettle();
+
+      // Verify both tabs exist
+      expect(find.text('Presensi'), findsOneWidget);
+      expect(find.text('Pasien'), findsOneWidget);
+
+      // Tap on Pasien tab
+      await tester.tap(find.text('Pasien'));
+      await tester.pumpAndSettle();
+
+      // Verify Pasien tab content is displayed
+      expect(find.text('Riwayat Pasien'), findsOneWidget);
+      expect(find.textContaining('Pasien Telah Selesai Konsultasi'), findsOneWidget);
+      expect(find.text('Detail Pasien'), findsWidgets);
+    });
+
+    testWidgets('Opens directly to Pasien tab when initialTab is 1', (
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.75;
+      addTearDown(() => tester.view.reset());
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AmanahPresenceHistoryScreen(
+            records: kTestAttendanceRecords,
+            initialTab: 1,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Immediately shows Pasien tab
+      expect(find.text('Riwayat Pasien'), findsOneWidget);
+      expect(find.text('Timeline'), findsNothing);
+    });
   });
 }
