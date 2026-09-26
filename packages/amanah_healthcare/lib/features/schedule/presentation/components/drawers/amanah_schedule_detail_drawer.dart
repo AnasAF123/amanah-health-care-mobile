@@ -90,10 +90,13 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
             text: 'Edit Jadwal',
             isFullWidth: true,
             size: AmanahButtonSize.medium,
-            onPressed: () {
-              Navigator.of(context).pop();
-              onTapEdit();
-            },
+            isDisabled: isSessionExpired,
+            onPressed: isSessionExpired
+                ? null
+                : () {
+                    Navigator.of(context).pop();
+                    onTapEdit();
+                  },
           ),
         ],
       ),

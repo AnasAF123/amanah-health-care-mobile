@@ -48,7 +48,9 @@ class AmanahScheduleSessionsView extends StatelessWidget {
             !s.isAvailable ||
             s.badge == ScheduleFormConstants.statusTutup ||
             s.badge == ScheduleFormConstants.statusCuti);
-    final bool isDayClosed = daySetting.isDayClosed || allSchedulesClosed;
+    final bool isDayClosed = (schedules.isNotEmpty && daySetting.isDayClosed) ||
+        allSchedulesClosed ||
+        daySetting.isCuti;
 
     final List<DoctorSchedule> displaySchedules = _resolveDisplaySchedules(
       schedules: schedules,
@@ -61,7 +63,7 @@ class AmanahScheduleSessionsView extends StatelessWidget {
       key: const ValueKey<String>('view-sessions'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        if (isDayClosed) ...<Widget>[
+        if (isDayClosed && schedules.isNotEmpty) ...<Widget>[
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Row(

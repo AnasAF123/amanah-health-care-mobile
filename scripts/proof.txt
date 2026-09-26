@@ -1,0 +1,179 @@
+● Bash(pwsh -Command '$login = Invoke-RestMethod -Uri
+"http://localhost:3001/api/v1/auth/email/login" -Method
+Post -Body
+(@{email="zikriahmadamikom@gmail.com";password="secret123"}
+|ConvertTo-Json) -ContentType "application/json"; $token =
+$login.token; $H = @{Authorization="Bearer $token"}; Write-
+Host "=== MY-SCHEDULES 2026-09-29 ==="; $schedules =
+Invoke-RestMethod -Uri
+"http://localhost:3001/api/v1/schedules/my-
+schedules?date=2026-09-29" -Headers $H; $schedules |
+ConvertTo-Json -Depth 5; Write-Host "=== DAY-SETTINGS 2026-
+09-29 ==="; $daySettings = Invoke-RestMethod -Uri
+"http://localhost:3001/api/v1/schedules/day-
+settings?date=2026-09-29" -Headers $H; $daySettings |
+ConvertTo-Json -Depth 5; Write-Host "=== CALENDAR-SUMMARY
+2026-09 (day 29) ==="; $cal = Invoke-RestMethod -Uri
+"http://localhost:3001/api/v1/schedules/calendar-
+summary?month=2026-09" -Headers $H; ($cal.days | Where-
+Object { $_.date -eq "2026-09-29" }) | ConvertTo-Json -
+Depth 5')
+  ⎿  <output +16 lines>
+              "isCuti": false,
+              "cutiReason": null,
+              "sessionCount": 0,
+              "targetQuota": 8,
+              "bookedPatientCount": 0,
+              "capacityPercentage": 0,
+              "status": "CLOSED",
+              "isClosed": true,
+              "notes": null
+            } (ctrl+o to collapse)
+
+▾ Thought for 7s, 439 tokens
+  The initial check for personal schedules on the specified
+  date yielded no results. Subsequently, day settings were
+  examined, revealing that the date isn't a holiday, with a
+  target quota of eight. Further investigation is required to
+  determine if there is day-level closure or a status
+  indicator within the day settings.
+
+● Bash(pwsh -Command '$login = Invoke-RestMethod -Uri
+"http://localhost:3001/api/v1/auth/email/login" -Method
+Post -Body
+(@{email="zikriahmadamikom@gmail.com";password="secret123"}
+|ConvertTo-Json) -ContentType "application/json"; $token =
+$login.token; $H = @{Authorization="Bearer $token"}; $cal =
+Invoke-RestMethod -Uri
+"http://localhost:3001/api/v1/schedules/calendar-
+summary?month=2026-09" -Headers $H; $cal.days | Select-
+Object date, hasSchedule, sessionCount, status, isClosed |
+Format-Table -AutoSize')
+  ⎿  <output +22 lines>
+            2026-09-21       False            0 CLOSED     True
+            2026-09-22       False            0 CLOSED     True
+            2026-09-23       False            0 CLOSED     True
+            2026-09-24       False            0 CLOSED     True
+            2026-09-25        True            1 OPEN      False
+            2026-09-26        True            4 OPEN      False
+            2026-09-27        True            1 OPEN      False
+            2026-09-28       False            0 CLOSED     True
+            2026-09-29       False            0 CLOSED     True
+            2026-09-30       False            0 CLOSED     True
+● Bash(rg -n "isClosed|isDayClosed"
+packages/amanah_healthcare/lib/features/)
+  ⎿  <output +14 lines>
+
+     packages/amanah_healthcare/lib/features/schedule\domain\day
+     _schedule_setting.dart:118:
+            final bool? isClosedRaw =
+
+     packages/amanah_healthcare/lib/features/schedule\domain\day
+     creen\schedule_tab_views\schedule_sessions_view.dart:196:
+            required bool isDayClosed,
+
+     packages/amanah_healthcare/lib/features/home\presentation\s
+     creen\schedule_tab_views\schedule_sessions_view.dart:233:
+            final bool isClosed = isDayClosed ||
+
+     packages/amanah_healthcare/lib/features/home\presentation\s
+     creen\schedule_tab_views\schedule_sessions_view.dart:244:
+            } else if (isClosed) {
+
+     packages/amanah_healthcare/lib/features/home\presentation\s
+     creen\schedule_tab_views\schedule_sessions_view.dart:259:
+            isAvailable: !isClosed && !isSlotPast,
+
+     packages/amanah_healthcare/lib/features/home\presentation\s
+     creen\schedule_tab_views\schedule_tab_header_menu.dart:21:
+            final bool isDayClosed = daySetting.isDayClosed
+
+     packages/amanah_healthcare/lib/features/home\presentation\s
+     creen\schedule_tab_views\schedule_tab_header_menu.dart:94:
+            isDayClosed
+
+     packages/amanah_healthcare/lib/features/home\presentation\s
+     creen\schedule_tab_views\schedule_tab_header_menu.dart:98:
+            color: isDayClosed
+
+     packages/amanah_healthcare/lib/features/home\presentation\s
+     creen\schedule_tab_views\schedule_tab_header_menu.dart:105:
+            isDayClosed ? 'Buka Jadwal Hari Ini' : 'Tutup Jadwal
+            Hari Ini',
+
+     packages/amanah_healthcare/lib/features/home\presentation\s
+     creen\schedule_tab_views\schedule_tab_header_menu.dart:109:
+            color: isDayClosed
+● Read(D:/amanah-hea...ay_mixin.dart)
+  ⎿  Read 41 lines (ctrl+o to collapse)
+
+▾ Thought for 8s, 990 tokens
+  Examining the backend, days with no sessions
+  (`sessionCount == 0`) are marked as closed. Lines 53 and 63
+  of the specified file reveal the `isClosed` status is
+  derived from multiple factors including the summary, whic
+  is populated by `_calendarSummaryMap`. The logical flow
+  suggests that an empty calendar summary directly translates
+  to a closed status.
+
+
+  If there are no schedules, and `isDayClosed` is true, a
+  specific "Jadwal Hari Ini Ditutup" message is displayed,
+  indicating the day's closure. The code checks for
+  `allSchedulesClosed`, which is also a determining factor
+  for `isDayClosed`.
+
+● Bash(rg -n -C 10 "updateDayStatus"
+packages/amanah_healthcare/lib/features/schedule/)
+  ⎿  <output +33 lines>
+
+     packages/amanah_healthcare/lib/features/schedule/data\sched
+     on\components\drawers\schedule_form_saver.dart-124-
+            date: selectedDate,
+
+     packages/amanah_healthcare/lib/features/schedule/presentati
+     on\components\drawers\schedule_form_saver.dart-125-
+            status: isClosing
+
+     packages/amanah_healthcare/lib/features/schedule/presentati
+     on\components\drawers\schedule_form_saver.dart-126-
+            ? ScheduleCanonicalStatus.closed
+
+     packages/amanah_healthcare/lib/features/schedule/presentati
+     on\components\drawers\schedule_form_saver.dart-127-
+            : ScheduleCanonicalStatus.open,
+
+     packages/amanah_healthcare/lib/features/schedule/presentati
+     on\components\drawers\schedule_form_saver.dart-128-
+            notes: isClosing ? 'Jadwal ditutup oleh dokter' :
+            'Buka kembali',
+
+     packages/amanah_healthcare/lib/features/schedule/presentati
+     on\components\drawers\schedule_form_saver.dart-129-
+            );
+
+     packages/amanah_healthcare/lib/features/schedule/presentati
+     on\components\drawers\schedule_form_saver.dart-130-
+            } catch (_) {}
+
+     packages/amanah_healthcare/lib/features/schedule/presen
+     on\components\drawers\schedule_form_saver.dart-131-
+
+     packages/amanah_healthcare/lib/features/schedule/presen
+     on\components\drawers\schedule_form_saver.dart-132-
+            await store.saveSchedule(selectedDate, updated);
+
+     packages/amanah_healthcare/lib/features/schedule/presen
+     on\components\drawers\schedule_form_saver.dart-133-
+            await store.syncAll(selectedDate, forceRefresh:
+            true);
+● Bash(pwsh -Command '$login = Invoke-RestMethod -Uri
+"http://localhost:3001/api/v1/auth/email/login" -Method
+Post -Body
+(@{email="zikriahmadamikom@gmail.com";password="secret123"}
+|ConvertTo-Json) -ContentType "application/json"; $token =
+$login.token; $H = @{Authorization="Bearer $token"}; try {
+$res = Invoke-RestMethod -Uri
+"http://localhost:3001/api/v1/schedules/days/2026-09-29" -
+Method Patch -Body (@{status="OPEN";notes="Buka
+kembali"}|ConvertTo-Json) -Con

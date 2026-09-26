@@ -235,10 +235,10 @@ class _AmanahDocScheduleCalendarDrawerState
               final CalendarDaySummary? backendDay = store.calendarSummariesMap[dateKey];
 
               final DayScheduleSetting setting = store.getDaySettingForDate(date);
-              final bool isCuti = (backendDay?.isCuti ?? false) || setting.isCuti;
-              final bool isClosed = (backendDay?.isClosed ?? false) || setting.isDayClosed;
               final List<DoctorSchedule> schedules = store.getSchedulesForDate(date);
               final bool hasSchedules = (backendDay?.hasSchedule ?? false) || schedules.isNotEmpty;
+              final bool isCuti = (backendDay?.isCuti ?? false) || setting.isCuti;
+              final bool isClosed = hasSchedules && ((backendDay?.isClosed ?? false) || setting.isDayClosed);
 
               Color bgColor = Colors.transparent;
               Color textColor = dark

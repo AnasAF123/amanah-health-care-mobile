@@ -5,6 +5,7 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_b
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_schedule_card_tokens.dart';
+import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 
 /// Organism: Stack of 3D Doctor Schedule Cards on the Home Screen.
@@ -109,7 +110,10 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
   /// first on the home card.
   int _resolveRelevantIndex(List<DoctorSchedule> schedules) {
     if (schedules.isEmpty) return 0;
-    final DateTime now = DateTime.now();
+    final DateTime now = AmanahScheduleStore.hasCustomBaseToday &&
+            AmanahScheduleStore.customBaseToday != null
+        ? AmanahScheduleStore.customBaseToday!
+        : DateTime.now();
     final int nowMinutes = now.hour * 60 + now.minute;
     final bool isToday = _isScheduleListForToday(schedules, now);
     if (!isToday) return 0;

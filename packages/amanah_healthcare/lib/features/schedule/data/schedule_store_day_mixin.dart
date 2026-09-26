@@ -40,8 +40,11 @@ mixin ScheduleStoreDayMixin on ChangeNotifier {
     final String key = _formatDateKey(date);
     final CalendarDaySummary? summary = _calendarSummariesMap[key];
     final DayScheduleSetting? existing = _daySettingsMap[key];
-
     final List<DoctorSchedule>? daySchedules = schedulesMap[key];
+
+    final bool hasSchedules = (daySchedules != null && daySchedules.isNotEmpty) ||
+        (summary?.hasSchedule ?? false);
+
     final bool allSchedulesClosed = daySchedules != null &&
         daySchedules.isNotEmpty &&
         daySchedules.every((DoctorSchedule s) =>
@@ -49,18 +52,21 @@ mixin ScheduleStoreDayMixin on ChangeNotifier {
             s.badge == ScheduleFormConstants.statusTutup ||
             s.badge == ScheduleFormConstants.statusCuti);
 
-    final bool isClosed = (existing?.isClosed ?? false) ||
-        (summary?.isClosed ?? false) ||
+    final bool isCuti = (existing?.isCuti ?? false) || (summary?.isCuti ?? false);
+    final bool isClosed = isCuti ||
+        (hasSchedules && (existing?.isClosed ?? false)) ||
+        (hasSchedules && (summary?.isClosed ?? false)) ||
         allSchedulesClosed ||
-        (date.weekday == DateTime.sunday);
+        (hasSchedules && date.weekday == DateTime.sunday);
 
     final String status = isClosed
         ? ScheduleCanonicalStatus.closed
-        : (existing?.status ?? summary?.status ?? ScheduleCanonicalStatus.open);
+        : (existing?.status ?? (hasSchedules ? summary?.status : null) ?? ScheduleCanonicalStatus.open);
 
     if (existing != null) {
-      final bool effectiveClosed = existing.isClosed ||
-          (summary?.isClosed ?? false) ||
+      final bool effectiveClosed = isCuti ||
+          (hasSchedules && existing.isClosed) ||
+          (hasSchedules && (summary?.isClosed ?? false)) ||
           allSchedulesClosed;
       return existing.copyWith(
         isClosed: effectiveClosed,
