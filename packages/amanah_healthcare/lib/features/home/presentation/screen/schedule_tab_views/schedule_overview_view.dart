@@ -46,8 +46,10 @@ class AmanahScheduleOverviewView extends StatelessWidget {
     final int effectiveTotalSlots = totalScheduleCapacity > 0
         ? totalScheduleCapacity
         : (daySetting.targetQuota > 0 ? daySetting.targetQuota : 0);
+    final int effectiveBookedCount =
+        bookedPatients.where((item) => !item.patient.isCancelled).length;
     final int effectiveCapacityPercentage = effectiveTotalSlots > 0
-        ? ((bookedPatients.length / effectiveTotalSlots) * 100).round().clamp(0, 100)
+        ? ((effectiveBookedCount / effectiveTotalSlots) * 100).round().clamp(0, 100)
         : (isCuti ? 0 : capacityPercentage);
 
     final List<({BookedPatient patient, DoctorSchedule schedule})> activePatients =
@@ -64,7 +66,10 @@ class AmanahScheduleOverviewView extends StatelessWidget {
 
     final List<({BookedPatient patient, DoctorSchedule schedule})> completedPatients =
         bookedPatients.where((item) {
-      if (item.patient.isCompleted || item.patient.isCancelled) {
+      if (item.patient.isCancelled) {
+        return false;
+      }
+      if (item.patient.isCompleted) {
         return true;
       }
       return isTemporalSlotPast(
@@ -84,13 +89,13 @@ class AmanahScheduleOverviewView extends StatelessWidget {
             Flexible(
               child: AmanahRadialCapacityGauge(
                 capacityPercentage: effectiveCapacityPercentage,
-                bookedCount: bookedPatients.length,
+                bookedCount: effectiveBookedCount,
                 totalSlots: effectiveTotalSlots,
                 isCuti: isCuti,
                 onTapInfo: () {
                   AmanahScheduleCapacityInfoDrawer.show(
                     context,
-                    bookedCount: bookedPatients.length,
+                    bookedCount: effectiveBookedCount,
                     totalSlots: effectiveTotalSlots,
                     schedules: schedules,
                   );
@@ -159,7 +164,9 @@ class AmanahScheduleOverviewView extends StatelessWidget {
             Text(
               activePatients.isNotEmpty
                   ? '${activePatients.length} Pasien Aktif'
-                  : '${bookedPatients.length} Pasien Booking',
+                  : (effectiveBookedCount > 0
+                      ? '$effectiveBookedCount Pasien Booking'
+                      : '0 Pasien Aktif'),
               style: TextStyle(
                 color: dark
                     ? AmanahColorTokens.neutral400

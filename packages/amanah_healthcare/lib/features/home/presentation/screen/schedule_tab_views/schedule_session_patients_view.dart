@@ -60,29 +60,39 @@ class AmanahScheduleSessionPatientsView extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color:
-                      (dark
-                              ? AmanahColorTokens.cyanAccent
-                              : AmanahColorTokens.brand)
-                          .withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${patients.length} Pasien',
-                  style: TextStyle(
-                    color: dark
-                        ? AmanahColorTokens.cyanAccent
-                        : AmanahColorTokens.brand,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
+              Builder(
+                builder: (BuildContext context) {
+                  final int activeCount =
+                      patients.where((BookedPatient p) => !p.isCancelled).length;
+                  final int cancelledCount = patients.length - activeCount;
+                  final String countLabel = cancelledCount > 0
+                      ? '$activeCount Aktif • $cancelledCount Batal'
+                      : '${patients.length} Pasien';
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          (dark
+                                  ? AmanahColorTokens.cyanAccent
+                                  : AmanahColorTokens.brand)
+                              .withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      countLabel,
+                      style: TextStyle(
+                        color: dark
+                            ? AmanahColorTokens.cyanAccent
+                            : AmanahColorTokens.brand,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),

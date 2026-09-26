@@ -109,7 +109,9 @@ mixin ScheduleStoreDayMixin on ChangeNotifier {
       return summary?.capacityPercentage ?? 0;
     }
 
-    final int bookedCount = getAllBookedPatientsForDate(date).length;
+    final int bookedCount = getAllBookedPatientsForDate(date)
+        .where((item) => !item.patient.isCancelled)
+        .length;
     return ((bookedCount / effectiveCapacity) * 100).round().clamp(0, 100);
   }
 

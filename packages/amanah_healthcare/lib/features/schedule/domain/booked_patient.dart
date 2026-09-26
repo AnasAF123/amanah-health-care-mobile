@@ -120,6 +120,8 @@ class BookedPatient {
       status?.toLowerCase() == 'cancelled' ||
       status?.toLowerCase() == 'batal';
 
+  bool get isActive => !isCancelled;
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'id': id,

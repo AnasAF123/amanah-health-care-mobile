@@ -635,8 +635,10 @@ class AmanahScheduleCard extends StatelessWidget {
   final VoidCallback? onCardTap;
 
   String _formatSlotText() {
+    final int activeCount =
+        schedule.bookedPatients.where((BookedPatient p) => !p.isCancelled).length;
     if (schedule.bookedPatients.isNotEmpty) {
-      return '${schedule.bookedPatients.length} Pasien';
+      return '$activeCount Pasien';
     }
     final String raw = schedule.slotCount
         .replaceAll(RegExp(r'\s*/\s*\d+'), '')

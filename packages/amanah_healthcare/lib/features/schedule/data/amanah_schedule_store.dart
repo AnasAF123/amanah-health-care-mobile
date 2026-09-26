@@ -259,13 +259,38 @@ class AmanahScheduleStore extends ChangeNotifier
 
         final List<BookedPatient> finalPatients =
             sessionPatients.isNotEmpty ? sessionPatients : s.bookedPatients;
-        final int finalCount = finalPatients.isNotEmpty
-            ? finalPatients.length
+        final int activePatientCount =
+            finalPatients.where((BookedPatient p) => !p.isCancelled).length;
+        final int finalCount = sessionPatients.isNotEmpty
+            ? activePatientCount
             : s.bookedPatientCount;
+        final int availableSlots =
+            (s.capacity - finalCount).clamp(0, s.capacity);
+
+        final String badge;
+        final AmanahBadgeVariant badgeVariant;
+        if (!s.isAvailable ||
+            s.badge == ScheduleFormConstants.statusTutup ||
+            s.badge == ScheduleFormConstants.statusCuti) {
+          badge = s.badge;
+          badgeVariant = s.badgeVariant;
+        } else if (availableSlots == 0) {
+          badge = ScheduleFormConstants.badgePenuh;
+          badgeVariant = AmanahBadgeVariant.primary;
+        } else if (finalCount > 0) {
+          badge = ScheduleFormConstants.badgeTerisi;
+          badgeVariant = AmanahBadgeVariant.primary;
+        } else {
+          badge = ScheduleFormConstants.statusBuka;
+          badgeVariant = AmanahBadgeVariant.success;
+        }
 
         return s.copyWith(
           bookedPatients: finalPatients,
           bookedPatientCount: finalCount,
+          availableSlots: availableSlots,
+          badge: badge,
+          badgeVariant: badgeVariant,
           slotCount: finalCount.toString(),
           slotText: '$finalCount Pasien Booking',
         );

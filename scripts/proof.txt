@@ -177,3 +177,741 @@ $res = Invoke-RestMethod -Uri
 "http://localhost:3001/api/v1/schedules/days/2026-09-29" -
 Method Patch -Body (@{status="OPEN";notes="Buka
 kembali"}|ConvertTo-Json) -Con
+● Bash(pwsh -Command '$login = Invoke-RestMethod -Uri
+"http://localhost:3001/api/v1/auth/email/login" -Method
+Post -Body
+(@{email="zikriahmadamikom@gmail.com";password="secret123"}
+|ConvertTo-Json) -ContentType "application/json"; $token =
+$login.token; $H = @{Authorization="Bearer $token"}; Write-
+Host "=== 1. MY-SCHEDULES 2026-09-26 ==="; $schedules =
+Invoke-RestMethod -Uri
+"http://localhost:3001/api/v1/schedules/my-
+schedules?date=2026-09-26" -Headers $H; $schedules |
+ConvertTo-Json -Depth 5')
+  ⎿  <output +141 lines>
+                "updatedAt": "2026-09-26T02:59:24.896Z",
+                "doctorId":
+            "c518facb-372e-4f07-9766-f3eacf54221f",
+                "practitionerId":
+            "c518facb-372e-4f07-9766-f3eacf54221f",
+                "isRescheduleEligible": true,
+                "is_reschedule_eligible": true,
+                "rescheduleIneligibilityReason": null,
+                "reschedule_ineligibility_reason": null,
+                "version": "1790391564896"
+              }
+            ] (ctrl+o to collapse)
+
+▾ Thought for 4s, 557 tokens
+  Investigating the "Dibatalkan" status for Dewi Lestari
+  and Eka Kuswandari; it requires determining if the
+  cancellation originates in the backend or is a frontend
+  display discrepancy. The session duration variation on
+  September 26 also needs further scrutiny to understand it
+  cause.
+
+● Bash(rg -n -i "lihat pasien booking|pasien
+booking|booked_patient|BookedPatient" lib/ packages/)
+  ⎿  <output +47 lines>
+
+     packages/amanah_healthcare\test\features\home\amanah_home_s
+     creen_test.dart:42:
+            BookedPatient(
+     packages/amanah_healthcare\lib\features\home\presentation\s
+     creen\amanah_queue_dock_screen.dart:103:
+            for (final BookedPatient p in s.bookedPatients) {
+
+     packages/amanah_healthcare\lib\features\home\presentation\s
+     creen\amanah_queue_dock_screen.dart:1529:
+            BookedPatient(
+
+     packages/amanah_healthcare\lib\features\home\presentation\s
+     creen\amanah_queue_dock_screen.dart:1999:
+            BookedPatient(
+
+     packages/amanah_healthcare\lib\features\home\presentation\s
+     creen\amanah_home_shell.dart:369:
+            final int totalBookedPatients =
+            todaySchedules.fold<int>(
+
+     packages/amanah_healthcare\lib\features\home\presentation\s
+     creen\amanah_home_shell.dart:371:
+            (int acc, DoctorSchedule s) => acc +
+            s.bookedPatients.length,
+
+     packages/amanah_healthcare\lib\features\home\presentation\s
+     creen\amanah_home_shell.dart:379:
+            count: totalBookedPatients > 0
+
+     packages/amanah_healthcare\lib\features\home\presentation\s
+     creen\amanah_home_shell.dart:380:
+            ? totalBookedPatients.toString()
+
+     packages/amanah_healthcare\lib\features\home\presentation\c
+     omponents\amanah_schedule_card_stack.dart:638:
+            if (schedule.bookedPatients.isNotEmpty) {
+
+     packages/amanah_healthcare\lib\features\home\presentation\c
+     omponents\amanah_schedule_card_stack.dart:639:
+            return '${schedule.bookedPatients.length} Pasien';
+● Bash(rg -n "class AmanahBookedPatientCard|class
+BookedPatient" lib/ packages/)
+  ⎿  rg: lib/: The system cannot find the file specified.
+            (os error 2)
+
+     packages/amanah_healthcare\lib\features\schedule\domain\boo
+     ked_patient.dart:3:class
+            BookedPatient {
+
+     packages/amanah_healthcare\lib\features\schedule\presentati
+     on\components\cards\amanah_booked_patient_card.dart:11:clas
+     s
+            AmanahBookedPatientCard extends StatelessWidget {
+● Bash(rg -n -i "Dewi Lestari|Eka Kuswandari" packages/)
+● Bash(rg -n -i "Dewi Lestari|Eka Kuswandari" D:\amanah-
+healthcare-backend)
+  ⎿  <output +17 lines>
+            D:\amanah-healthcare-
+     backend\docs\SCHEDULE_MANAGEMENT_API_SPEC.md:8149:
+            "patientName": "Eka Kuswandari",
+            D:\amanah-healthcare-backend\docs\changelogs\2026-
+     09-25-schedule-automation-and-parity.md:67:
+            "fullName": "Dewi Lestari",
+            D:\amanah-healthcare-backend\src\common\utils\name-
+     initials.helper.spec.ts:10:
+            expect(NameInitialsHelper.extract('Dewi
+            Lestari')).toBe('DL');
+            D:\amanah-healthcare-
+     backend\changelog\web\CHANGELOG-BACKEND-CANONICAL-DATA
+     PRODUCER-AND-SEED-FIX.md:157:
+            "fullName": "Dewi Lestari",
+            D:\amanah-healthcare-backend\scripts\e2e\test-
+     better-auth-credentials.ps1:90:
+            Assert-Test -Name "Patient user name is 'Dewi
+            Lestari'" -Condition ($patientUser.name -eq "Dewi
+            Lestari")
+            D:\amanah-healthcare-
+     backend\src\database\seeds\drizzle\seed.ts:1721:
+            body: 'Hasil uji laboratorium darah lengkap pasien
+            Dewi Lestari (RM-2026-0001) telah siap ditinjau.',
+            D:\amanah-healthcare-
+     backend\src\database\seeds\drizzle\dev-seed.data.ts:141:
+            name: 'Dewi Lestari',
+            D:\amanah-healthcare-
+     backend\src\database\seeds\drizzle\dev-seed.data.ts:147:
+            fullName: 'Dewi Lestari',
+            D:\amanah-healthcare-backend\scripts\e2e\test-
+     endpoints.ps1:108:
+            if ($patient.fullName -ne "Dewi Lestari") { throw
+            "Expected Dewi Lestari, got $($patient.fullName)" }
+            D:\amanah-healthcare-
+     backend\src\modules\patients\presentation\dto\create-
+     patient.dto.ts:20:
+            @ApiProperty({ example: 'Dewi Lestari', description:
+            'Nama Lengkap Pasien' }) (ctrl+o to collapse)
+
+▾ Thought for 5s, 280 tokens
+  The API specification indicates appointments for "Dewi
+  Lestari" and "Eka Kuswandari" are marked as "Selesai"
+  (Completed), contrary to an expectation of "Dibatalkan"
+  (Cancelled). This discrepancy requires investigation to
+  determine the status of related backend records. A script
+  will query the backend API for schedule information for
+  these individuals.
+
+● Bash($login = Invoke-RestMethod -Uri
+"http://localhost:3001/api/v1/auth/email/login" -Method
+Post -Body (@{email="zikriahmadamikom@gmail.com";
+password="secret123"} | ConvertTo-Json) -ContentType
+"application/json"
+$token = $login.token
+$headers = @{ Authorization = "Bearer $token" }
+
+Write-Host "=== 1. /api/v1/schedules/my-
+schedules?date=2026-09-26 ==="
+$sch = Invoke-RestMethod -Uri
+"http://localhost:3001/api/v1/schedules/my-
+schedules?date=2026-09-26" -Headers $headers
+$sch | ConvertTo-Json -Depth 6
+
+Write-Host "`n=== 2. Try endpoints for booked patients ==="
+try {
+  $bp = Invoke-RestMethod -Uri
+"http://localhost:3001/api/v1/schedules/booked-
+patients?date=2026-09-26" -Headers $headers
+  $bp | ConvertTo-Json -Depth 6
+} catch {
+  Write-Host "booked-patients error: $_"
+}
+)
+  ⎿  <output +179 lines>
+                "timeSlot": "08:30 - 09:00 WIB",
+                "sessionTitle": "Sesi Pagi",
+                "room": "Ruang Poli Umum 1",
+                "guardian": null,
+                "complaint": "Konsultasi alergi kulit dan
+            gatal-gatal kambuhan",
+                "status": "cancelled",
+                "statusBadge": "Dibatalkan",
+                "avatarUrl": null
+              }
+            ]
+● Bash(rg -n -C 5 "class BookedPatient"
+packages/amanah_healthcare/lib/)
+  ⎿
+     packages/amanah_healthcare/lib/features\schedule\domain\boo
+     ked_patient.dart-1-enum
+            AmanahBadgeVariant { success, primary, warning,
+            live, trend }
+
+     packages/amanah_healthcare/lib/features\schedule\domain\boo
+     ked_patient.dart-2-
+
+     packages/amanah_healthcare/lib/features\schedule\domain\boo
+     ked_patient.dart:3:class
+            BookedPatient {
+
+     packages/amanah_healthcare/lib/features\schedule\domain\boo
+     ked_patient.dart-4-
+            const BookedPatient({
+
+     packages/amanah_healthcare/lib/features\schedule\domain\boo
+     ked_patient.dart-5-
+            required this.id,
+
+     packages/amanah_healthcare/lib/features\schedule\domain\boo
+     ked_patient.dart-6-
+            required this.patientName,
+
+     packages/amanah_healthcare/lib/features\schedule\domain\boo
+     ked_patient.dart-7-
+            required this.patientRm,
+
+     packages/amanah_healthcare/lib/features\schedule\domain\boo
+     ked_patient.dart-8-
+            required this.patientAge, (ctrl+o to collapse)
+
+▾ Thought for 4s, 747 tokens
+  Analyzing the provided data from the scheduled patients
+  endpoint, I need to understand the structure and content of
+  this response. The response includes patient details like
+  name, medical record, age, and gender. The presence of th
+  "queueNumber" field suggests this is related to patient
+  scheduling.
+○ Bash(rg -n "2b22bd5e-53f6-4623-9d86-7fecb89afad0|booked-
+patients" D:\amanah-healthcare-backend)
+  ⎿  <output +14 lines>
+            D:\amanah-healthcare-backend\changelog\agent-
+     changelog.md:34:
+            - `GET /api/v1/schedules/:id/booked-patients`:
+            Mengambil daftar pasien terdaftar pada sesi tertentu
+            lengkap dengan nomor antrean, usia, jenis kelamin,
+            keluhan medis, dan wali.
+            D:\amanah-healthcare-backend\scripts\generate-
+     schedules-docs.ts:526:
+            const bookedPatientsByDateRes = await
+            jsonRequest('GET',
+            `/schedules/booked-patients?date=${scheduleDate}`,
+            doctorToken);
+     manifest.md:203:4.
+            **Read Booked Patients (`GET
+            /api/v1/schedules/:id/booked-patients` or `GET
+            /api/v1/schedules/booked-patients`):**
+            D:\amanah-healthcare-
+     backend\changelog\requirements\doctor-schedule-management-
+     manifest.md:277:*
+            `GET /api/v1/schedules/booked-patients` & `GET
+            /api/v1/schedules/:id/booked-patients`
+            D:\amanah-healthcare-
+     backend\changelog\requirements\doctor-schedule-management-
+     manifest.md:344:|
+            **Booked Patients by Session/Date** |
+            [amanah_schedule_repository.dart:431-
+     461](file:///D:/amanah-healthcare-
+     mobile/packages/amanah_healthcare/lib/features/schedule/dat
+     a/amanah_schedule_repository.dart#L431-L461)
+            | Session Patients & Overview | `GET
+            /api/v1/schedules/:id/booked-patients` | Implemented
+            in backend |
+            D:\amanah-healthcare-backend\changelog\qa\SCHEDULE-
+     V2-CRUD-SECURITY-TEST-REPORT.md:71:|
+            18 | BOLA / IDOR | `GET
+            /schedules/:id_A/booked-patients` | Dokter B | 403 |
+            403 Forbidden | **LULUS** |
+            D:\amanah-healthcare-
+     backend\changelog\mobile\CHANGELOG-FLUTTER-SCHEDULE-
+     V2.md:147:**Answer:**
+            Projected intervals return a minimal, non-sensitive
+            `appointmentRef` containing only `{ appointmentId,
+            queueNumber, status }`. Full patient PII (medical
+            record number, full patient history, complaint,
+            guardian) is NOT included in the projection and is
+            only retrieved via the authenticated `GET
+            /api/v1/schedules/:id/booked-patients` endpoint when
+            the doctor specifically opens patient details.
+            D:\amanah-healthcare-
+     backend\changelog\mobile\CHANGELOG-FLUTTER-SCHEDULE-
+     V2.md:572:|
+            `GET` | `/api/v1/schedules/:id/booked-patients` |
+            Daftar pasien yang terdaftar pada sesi jadwal
+            tersebut | `200 OK` |
+            D:\amanah-healthcare-backend\changelog\qa\doctor-
+     schedules-backend-verification.md:27:|
+            **A.1** | Functional Completeness — Endpoints |
+            Inspected `SchedulesController` & executed
+            `scripts/e2e/test-doctor-schedules.ps1` | **PASS** |
+            All 10 routes implemented: `my-schedules`,
+            `calendar-summary`, `day-settings` (GET/PUT),
+            `reference/rooms`, `booked-patients`, `POST
+            /schedules`, `PATCH /schedules/:id`, `DELETE
+            /schedules/:id`. |
+            D:\amanah-healthcare-backend\changelog\qa\doctor-
+     schedules-backend-verification.md:78:
+            [PASS] GET /api/v1/schedules/:id/booked-patient
+            returns array
+● Bash(rg -n -C 15 "booked-patients" D:\amanah-healthcare-
+backend\src\modules\schedules\presentation\schedules.contro
+ller.ts)
+  ⎿  <output +85 lines>
+            751-  })
+            752-  @ApiParam({
+            753-    name: 'id',
+            754-    description: 'ID unik sesi jadwal praktek',
+            755-    example:
+            '67212c38-ca4a-45f8-b9bc-ebe2fd82b0a1',
+            756-  })
+            757-  @ApiOkResponse({
+            758-    description: 'Daftar pasien terdaftar pada
+            sesi ini berhasil diambil',
+            759-  })
+            760-  async getBookedPatientsForSession(
+● Bash(rg -n -C 20 "getBookedPatientsByDate" D:\amanah-
+healthcare-backend/src)
+  ⎿  <output +31 lines>
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\presentation\schedules.contro
+     ller.ts-587-
+            @Get('poli/:poliklinikId')
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\presentation\schedules.contro
+     ller.ts-588-
+            @Roles('ADMIN', 'STAF', 'PATIENT')
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\presentation\schedules.contro
+     ller.ts-589-
+            @ApiOperation({
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\presentation\schedules.contro
+     ller.ts-590-
+            summary: 'Melihat jadwal dokter/bidan aktif di
+            poliklinik tertentu',
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\presentation\schedules.contro
+     ller.ts-591-
+            description:
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\presentation\schedules.contro
+     ller.ts-592-
+            'Mengambil daftar jadwal dokter yang membuka praktek
+            pada unit poliklinik dan tanggal yang diminta.'
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\presentation\schedules.contro
+     ller.ts-593-
+            })
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\presentation\schedules.contro
+     ller.ts-594-
+            @ApiParam({
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\presentation\schedules.contro
+     ller.ts-595-
+            name: 'poliklinikId',
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\presentation\schedules.contro
+     ller.ts-596-
+            description: 'ID unik poliklinik',
+● Bash(rg -n -C 20 "getBookedPatients\(" D:\amanah-
+healthcare-backend/src)
+  ⎿  <output +57 lines>
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\presentation\schedules.contro
+     ller.ts-780-
+            description: 'ID unik jadwal praktek',
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\infrastructure\drizzle\reposi
+     tories\patients\drizzle-schedule-patient.repository.ts-52-
+            if (session) {
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\infrastructure\drizzle\reposi
+     tories\patients\drizzle-schedule-patient.repository.ts-53-
+            const sessStart =
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\infrastructure\drizzle\reposi
+     tories\patients\drizzle-schedule-patient.repository.ts-54-
+            session.startTime.length === 5
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\infrastructure\drizzle\reposi
+     tories\patients\drizzle-schedule-patient.repository.ts-55-
+            ? `${session.startTime}:00`
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\infrastructure\drizzle\reposi
+     tories\patients\drizzle-schedule-patient.repository.ts-56-
+            : session.startTime;
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\infrastructure\drizzle\reposi
+     tories\patients\drizzle-schedule-patient.repository.ts-57-
+            const sessEnd =
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\infrastructure\drizzle\reposi
+     tories\patients\drizzle-schedule-patient.repository.ts-58-
+            session.endTime.length === 5
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\infrastructure\drizzle\reposi
+     tories\patients\drizzle-schedule-patient.repository.ts-59-
+            ? `${session.endTime}:00`
+            D:\amanah-healthcare-
+     backend/src\modules\schedules\infrastructure\drizzle\reposi
+     tories\patients\drizzle-schedule-patient.repository.ts-60-
+            : session.endTime;
+● Bash(rg -n -C 30 "async getBookedPatients" D:\amanah-
+healthcare-
+backend/src\modules\schedules\infrastructure\drizzle\reposi
+tories\patients\drizzle-schedule-patient.repository.ts)
+  ⎿  <output +51 lines>
+            61-        conditions.push(
+            62-          or(
+            63-            eq(appointments.scheduleSessionId,
+            sessionId),
+            64-            and(
+            65-              eq(appointments.practitionerId
+            session.practitionerId),
+            66-              eq(appointments.scheduledDate,
+            session.scheduleDate),
+            67-
+            gte(appointments.scheduledStartTime, sessStart)
+            68-              lt(appointments.scheduledStartTime,
+            sessEnd),
+            69-            ),
+            70-          ),
+● Bash(sed -n '70,140p' D:\amanah-healthcare-
+backend/src\modules\schedules\infrastructure\drizzle\reposi
+tories\patients\drizzle-schedule-patient.repository.ts)
+  ⎿  <output +61 lines>
+
+                if (!session) {
+                  throw new NotFoundException(`Sesi jadwal
+            praktik tidak ditemukan`);
+                }
+
+                const sessStart =
+                  session.startTime.length === 5
+                    ? `${session.startTime}:00`
+                    : session.startTime;
+                const sessEnd =
+● Bash(sed -n '1,100p' D:\amanah-healthcare-
+backend/src/modules/schedules/infrastructure/drizzle/mapper
+s/booked-patient.mapper.ts)
+  ⎿  <output +64 lines>
+                  sessionTitle,
+                  room,
+                  guardian: apt.guardianNameSnapshot || null,
+                  complaint: apt.complaint || null,
+                  status,
+                  statusBadge,
+                  avatarUrl: apt.patientProfile?.avatarUrl ||
+            null,
+                };
+              }
+            }
+● Bash(rg -n -C 5 "2b22bd5e-53f6-4623-9d86-7fecb89afad0"
+D:\amanah-healthcare-backend/src)
+● Bash(rg -n "f8ec14ea-9130-4098-b697-767b0305d203"
+D:\amanah-healthcare-backend)
+  ⎿  D:\amanah-healthcare-
+     backend\docs\SCHEDULE_MANAGEMENT_API_SPEC.md:4843:
+            "appointmentId":
+            "f8ec14ea-9130-4098-b697-767b0305d203",
+            D:\amanah-healthcare-
+     backend\docs\SCHEDULE_MANAGEMENT_API_SPEC.md:4860:
+            "id": "f8ec14ea-9130-4098-b697-767b0305d203",
+            D:\amanah-healthcare-
+     backend\docs\SCHEDULE_MANAGEMENT_API_SPEC.md:4870:
+            "id": "f8ec14ea-9130-4098-b697-767b0305d203",
+            D:\amanah-healthcare-
+     backend\docs\SCHEDULE_MANAGEMENT_API_SPEC.md:6439:
+            "id": "f8ec14ea-9130-4098-b697-767b0305d203",
+            D:\amanah-healthcare-
+     backend\docs\SCHEDULE_MANAGEMENT_API_SPEC.md:6447:
+            "id": "f8ec14ea-9130-4098-b697-767b0305d203",
+            D:\amanah-healthcare-
+     backend\docs\SCHEDULE_MANAGEMENT_API_SPEC.md:8138:
+            "id": "f8ec14ea-9130-4098-b697-767b0305d203",
+            D:\amanah-healthcare-
+     backend\docs\SCHEDULE_MANAGEMENT_API_SPEC.md:8146:
+            "id": "f8ec14ea-9130-4098-b697-767b0305d203",
+● Bash(sed -n '4790,4880p' D:\amanah-healthcare-
+backend\docs\SCHEDULE_MANAGEMENT_API_SPEC.md)
+  ⎿  <output +81 lines>
+                      "bookingCode": "BOOK-ZIKRI-TODAY-02",
+                      "patientId":
+            "54d7a60e-8c91-4b50-b1e0-040b24445d5b",
+                      "patientName": "Eka Kuswandari",
+                      "queueNumber": "UM-102",
+                      "status": "waiting"
+                    }
+                  },
+                  {
+                    "intervalId": "morning:09:00-09:30",
+                    "slotId": "morning:09:00-09:30", (ctrl+o to
+     collapse)
+
+▾ Thought for 4s, 241 tokens
+  Initial comparison shows `Dewi Lestari` booked and `Eka
+  Kuswandari` waiting as per API specification. The objective
+  is to determine why the live database might show a
+  different status. This requires a query to retrieve current
+  data to ascertain discrepancies.
+
+● Bash(docker exec $(docker ps -qf "name=postgres") psql -U
+amanah_user -d amanah_db -c "SELECT id, booking_code,
+status, scheduled_date, scheduled_start_time,
+scheduled_end_time, cancellation_reason, updated_at FROM
+appointments WHERE id IN ('2b22bd5e-53f6-4623-9d86-
+7fecb89afad0', 'f8ec14ea-9130-4098-b697-767b0305d203');")
+  ⎿  psql: error: connection to server on socket
+            "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL:
+            role "amanah_user" does not exist
+● Bash(rg -n "POSTGRES_USER|POSTGRES_DB" D:\amanah-
+healthcare-backend)
+  ⎿  <output +4 lines>
+            D:\amanah-healthcare-backend\docker-
+     compose.relational.test.yaml:10:
+            POSTGRES_DB: ${DATABASE_NAME}
+            D:\amanah-healthcare-backend\docker-
+     compose.relational.test.yaml:12:
+            test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}
+            -d $${POSTGRES_DB}"]
+            D:\amanah-healthcare-backend\docker-compose.yaml:11:
+            POSTGRES_USER: ${DATABASE_USERNAME:-amanah}
+            D:\amanah-healthcare-backend\docker-compose.yaml:13:
+            POSTGRES_DB: ${DATABASE_NAME:-amanah_healthcare
+            D:\amanah-healthcare-backend\docker-compose.yaml:20:
+            "pg_isready -U $${POSTGRES_USER} -d
+            $${POSTGRES_DB}",
+            D:\amanah-healthcare-backend\docker-
+     compose.generators-relational.test.yaml:15:
+            POSTGRES_USER: ${DATABASE_USERNAME}
+            D:\amanah-healthcare-backend\docker-
+     compose.generators-relational.test.yaml:17:
+            POSTGRES_DB: ${DATABASE_NAME}
+            D:\amanah-healthcare-backend\docker-
+     compose.generators-relational.test.yaml:19:
+            test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}
+            -d $${POSTGRES_DB}"]
+            D:\amanah-healthcare-backend\feature-
+     spec\notification\04-backend-notifications.md:438:
+            POSTGRES_DB: app
+            D:\amanah-healthcare-backend\feature-
+     spec\notification\04-backend-notifications.md:439:
+            POSTGRES_USER: app
+● Bash(docker exec $(docker ps -qf "name=postgres") psql -U
+amanah -d amanah_healthcare -c "SELECT id, booking_code,
+status, scheduled_date, scheduled_start_time,
+scheduled_end_time, cancellation_reason, updated_at FROM
+appointments WHERE id IN ('2b22bd5e-53f6-4623-9d86-
+7fecb89afad0', 'f8ec14ea-9130-4098-b697-767b0305d203');")
+  ⎿  ERROR:  column "cancellation_reason" does not exist
+            LINE 1: ...d_date, scheduled_start_time,
+            scheduled_end_time, cancellati...
+
+            ^
+● Bash(docker exec $(docker ps -qf "name=postgres") psql -U
+amanah -d amanah_healthcare -c "SELECT id, booking_code,
+status, scheduled_date, scheduled_start_time,
+scheduled_end_time, updated_at FROM appointments WHERE id
+IN ('2b22bd5e-53f6-4623-9d86-7fecb89afad0', 'f8ec14ea-9130-
+4098-b697-767b0305d203');")
+  ⎿  id                  |    booking_code     |  status
+            | scheduled_date | scheduled_start_time |
+            scheduled_end_time |          updated_at
+            --------------------------------------+-------------
+     --------+-----------+----------------+---------------------
+     -+--------------------+-------------------------------
+             2b22bd5e-53f6-4623-9d86-7fecb89afad0 |
+            BOOK-ZIKRI-TODAY-01 | cancelled | 2026-09-26     |
+            08:00:00             | 08:30:00           |
+            2026-09-26 09:59:06.813424+07
+             f8ec14ea-9130-4098-b697-767b0305d203 |
+            BOOK-ZIKRI-TODAY-02 | cancelled | 2026-09-26     |
+            08:30:00             | 09:00:00           |
+            2026-09-26 09:59:06.813424+07
+            (2 rows)
+● Bash(rg -n -C 10 "cancelled" D:\amanah-healthcare-
+backend/scripts)
+  ⎿  <output +50 lines>
+            D:\amanah-healthcare-backend/scripts\e2e\test-
+     mobile-endpoints.ps1-136-$cancelAgainFailed
+            = $false
+            D:\amanah-healthcare-backend/scripts\e2e\test-
+     mobile-endpoints.ps1-137-try
+            {
+            D:\amanah-healthcare-backend/scripts\e2e\test-
+     mobile-endpoints.ps1-138-
+            Invoke-RestMethod -Uri
+            "$baseUrl/api/v1/leaves/$leaveId/cancel" -Metho
+            Patch -Headers $staffHeaders
+            D:\amanah-healthcare-backend/scripts\e2e\test-
+     mobile-endpoints.ps1-139-}
+            catch {
+            D:\amanah-healthcare-backend/scripts\e2e\test-
+     mobile-endpoints.ps1-140-
+            $cancelAgainFailed =
+            $_.Exception.Response.StatusCode.value__ -eq 40
+            D:\amanah-healthcare-backend/scripts\e2e\test-
+     mobile-endpoints.ps1-141-}
+            D:\amanah-healthcare-backend/scripts\e2e\test-
+     mobile-endpoints.ps1-142-Assert-Test
+            "Cancelling non-pending leave rejected with HTTP 400
+            Bad Request" $cancelAgainFailed
+            D:\amanah-healthcare-backend/scripts\e2e\test-
+     mobile-endpoints.ps1-143-
+            D:\amanah-healthcare-backend/scripts\e2e\test-
+     mobile-endpoints.ps1-144-Write-Host
+
+     "`n========================================================
+     ======================"
+            -ForegroundColor Cyan
+            D:\amanah-healthcare-backend/scripts\e2e\test-
+     mobile-endpoints.ps1-145-Write-Host
+            "Mobile Endpoints Suite Results: Passed = $passed,
+            Failed = $failed" -ForegroundColor $(if ($failed -eq
+            0) { "Green" } else { "Red" })
+● Bash(rg -n -C 5 "cancel|status" D:\amanah-healthcare-
+backend\scripts\test-schedules-contract.ps1)
+● Bash(sed -n '50,120p' D:\amanah-healthcare-
+backend\scripts\test-schedules-contract.ps1)
+  ⎿  <output +60 lines>
+            $adminDetail = Invoke-RestMethod -Uri
+            "$BaseUrl/admin/doctor-schedules/$doctorId" -Method
+            Get -Headers $adminHeaders
+            $resolvedDoctorId = if ($null -ne
+            $adminDetail.data.id) { $adminDetail.data.id } else
+            { $adminDetail.id }
+            Assert-Result "Admin Doctor Schedule Detail"
+            ($resolvedDoctorId -eq $doctorId) "Doctor ID
+            mismatch (Got: $resolvedDoctorId, Expected:
+            $doctorId)"
+
+            $adminEligibility = Invoke-RestMethod -Uri
+            "$BaseUrl/admin/doctor-
+     schedules/$doctorId/sessions/$targetSessionId/reschedule-
+     eligibility"
+            -Method Get -Headers $adminHeaders
+            Assert-Result "Admin Doctor Reschedule Eligibility
+            Route" ($adminEligibility.data.isEligible -eq $true)
+            "Admin eligibility check failed"
+
+            Write-Host
+
+     "`n========================================================
+     =="
+            -ForegroundColor Cyan
+            Write-Host "   CONTRACT VERIFICATION COMPLETE - ALL
+            CHECKS PASSED     " -ForegroundColor Cyan
+            Write-Host
+
+     "==========================================================
+     "
+            -ForegroundColor Cyan (ctrl+o to collapse)
+
+▾ Thought for 4s, 475 tokens
+  The assertions check the calculated available slots and
+  booked patient count against expected values, derived fro
+  schedule capacity and existing bookings. Unexpected value
+  were returned by the schedule API when querying a specifi
+  date. This needs further investigation.
+
+● Bash(docker exec $(docker ps -qf "name=postgres") psql -U
+amanah -d amanah_healthcare -c "SELECT id, booking_code,
+status, scheduled_date, scheduled_start_time,
+scheduled_end_time, updated_at FROM appointments ORDER BY
+updated_at DESC LIMIT 10;")
+  ⎿  <output +1 lines>
+            --------------------------------------+-------------
+     --------+-----------+----------------+---------------------
+     -+--------------------+-------------------------------
+             2b22bd5e-53f6-4623-9d86-7fecb89afad0 |
+            BOOK-ZIKRI-TODAY-01 | cancelled | 2026-09-26     |
+            08:00:00             | 08:30:00           |
+            2026-09-26 09:59:06.813424+07
+             f8ec14ea-9130-4098-b697-767b0305d203 |
+            BOOK-ZIKRI-TODAY-02 | cancelled | 2026-09-26     |
+            08:30:00             | 09:00:00           |
+            2026-09-26 09:59:06.813424+07
+             f5bfa11d-99db-4dfc-9991-4ab58b6c16fc |
+            BOOK-DEV-TODAY-02   | waiting   | 2026-09-19     |
+            10:30:00             | 11:00:00           |
+            2026-09-26 08:22:18.114389+07
+             ab9df9dc-f8c6-492e-a129-6e90199831ea |
+            BOOK-DEV-YEST-01    | completed | 2026-09-18     |
+            09:00:00             | 09:30:00           |
+            2026-09-26 08:22:18.114389+07
+             95da643b-aec0-4160-bf2b-4c1add6233eb |
+            BOOK-DEV-0001       | booked    | 2026-09-27     |
+            08:30:00             | 09:00:00           |
+            2026-09-26 08:22:18.114389+07
+             3894e8ff-d647-4921-89f9-755bc48ae4d4 |
+            BOOK-DEV-TODAY-01   | completed | 2026-09-19     |
+            09:00:00             | 09:30:00           |
+            2026-09-26 08:22:18.114389+07
+             cedbe4cb-3053-4d90-b88e-782a43f6146d | SIM-TEST-001
+            | booked    | 2026-09-23     | 08:00:00
+            | 12:00:00           | 2026-09-24 15:14:28.326206+07
+             22222222-3333-4444-5555-666666666666 |
+            BOOK-DEV-0002       | booked    | 2026-09-25     |
+            08:30:00             | 09:00:00           |
+            2026-09-24 15:14:28.326206+07
+            (8 rows)
+● Bash(docker logs $(docker ps -qf "name=backend") --since
+30m | rg -C 5 "09:59:06|appointments|cancel|BOOK-ZIKRI")
+  ⎿  docker: 'docker logs' requires 1 argument
+
+            Usage:  docker logs [OPTIONS] CONTAINER
+
+            Run 'docker logs --help' for more information
+● Bash(docker ps --format "{{.ID}} {{.Names}}")
+  ⎿  72da2d684cf8 amanah-healthcare-backend-api-1
+            a4fc670dff48 amanah-healthcare-backend-adminer-
+            8371353119c3 amanah-healthcare-backend-postgres-1
+            1ba85f9ac812 amanah-healthcare-backend-redis-1
+            fd3afe35f858 amanah-healthcare-backend-mailpit-
+● Bash(docker logs amanah-healthcare-backend-api-1 --since
+30m | rg -C 3 -i "2b22bd5e|f8ec14ea|cancel")
+  ⎿  <output +244 lines>
+                    "medicalRecordNumber": "RM-2026-0002",
+                    "age": "36 Thn",
+            --
+                    "room": "Ruang Poli Umum 1",
+                    "guardian": null,
+                    "complaint": "Konsultasi alergi kulit dan
+            gatal-gatal kambuhan",
+                    "status": "cancelled",
+                    "statusBadge": "Dibatalkan",
+                    "avatarUrl": null
+                  }
+● Bash(docker logs amanah-healthcare-backend-api-1 --since
+30m | rg -B 10 -A 20 "09:59:06")
+  ⎿  <output +181 lines>
+                      "schedules",
+                      "booked-patients"
+                    ]
+                  },
+                  "headers": {
+                    "user-agent": "Dart/3.13 (dart:io)",
+                    "accept": "application/json",
+                    "accept-encoding": "gzip",
+                    "host": "10.0.2.2:3001",
+                    "authorization": "[REDACTED]",
+○ Bash(rg -n -C 20 "days/:date" D:\amanah-healthcare-
+backend/src)
+  ⎿  <output +31 lines

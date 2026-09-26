@@ -101,6 +101,9 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     final List<AmanahQueueCardData> result = <AmanahQueueCardData>[];
     for (final DoctorSchedule s in todaySchedules) {
       for (final BookedPatient p in s.bookedPatients) {
+        if (p.isCancelled) {
+          continue;
+        }
         result.add(
           AmanahQueueCardData(
             id: p.id.isNotEmpty ? p.id : 'queue-${result.length + 1}',

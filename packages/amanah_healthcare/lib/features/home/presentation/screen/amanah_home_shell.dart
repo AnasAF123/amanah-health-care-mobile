@@ -368,7 +368,8 @@ class _AmanahHomeScreenContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final int totalBookedPatients = todaySchedules.fold<int>(
       0,
-      (int acc, DoctorSchedule s) => acc + s.bookedPatients.length,
+      (int acc, DoctorSchedule s) =>
+          acc + s.bookedPatients.where((BookedPatient p) => !p.isCancelled).length,
     );
 
     final List<AmanahActivityMetric> dynamicActivities = data.activities.map((

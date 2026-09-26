@@ -83,10 +83,18 @@ class DoctorSchedule {
         json['kapasitas_per_hari'] as int? ??
         8;
 
+    final List<dynamic>? bookedPatientsRaw =
+        json['bookedPatients'] as List<dynamic>?;
+    final List<BookedPatient> bookedPatients = bookedPatientsRaw != null
+        ? bookedPatientsRaw
+            .whereType<Map<String, dynamic>>()
+            .map(BookedPatient.fromJson)
+            .toList()
+        : <BookedPatient>[];
+
     final int bookedPatientCount = json['bookedPatientCount'] as int? ??
         json['pasien_terdaftar'] as int? ??
-        (json['bookedPatients'] as List<dynamic>?)?.length ??
-        0;
+        bookedPatients.where((BookedPatient p) => !p.isCancelled).length;
 
     final int availableSlots = json['availableSlots'] as int? ??
         json['slot_tersedia'] as int? ??
@@ -112,15 +120,6 @@ class DoctorSchedule {
       badge = ScheduleFormConstants.statusBuka;
       badgeVariant = AmanahBadgeVariant.success;
     }
-
-    final List<dynamic>? bookedPatientsRaw =
-        json['bookedPatients'] as List<dynamic>?;
-    final List<BookedPatient> bookedPatients = bookedPatientsRaw != null
-        ? bookedPatientsRaw
-            .whereType<Map<String, dynamic>>()
-            .map(BookedPatient.fromJson)
-            .toList()
-        : <BookedPatient>[];
 
     final String? staffId =
         json['staffId'] as String? ?? json['staff_id'] as String?;
