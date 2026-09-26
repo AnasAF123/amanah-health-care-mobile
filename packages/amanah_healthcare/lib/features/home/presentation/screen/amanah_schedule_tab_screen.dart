@@ -343,11 +343,13 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
         );
 
       case AmanahScheduleViewMode.sessions:
+        final List<DoctorSchedule> intervalSchedules =
+            _store.getIntervalSchedulesForDate(_selectedDate);
         return AmanahScheduleSessionsView(
           selectedDate: _selectedDate,
           daySetting: daySetting,
           isCuti: isCuti,
-          schedules: schedules,
+          schedules: intervalSchedules.isNotEmpty ? intervalSchedules : schedules,
           occupancyOverview: _store.occupancyOverview,
           dark: dark,
           onTapDetail: (DoctorSchedule sch) {

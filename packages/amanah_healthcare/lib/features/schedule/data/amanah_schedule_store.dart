@@ -44,6 +44,8 @@ class AmanahScheduleStore extends ChangeNotifier
   }
 
   late Map<String, List<DoctorSchedule>> _schedulesMap;
+  Map<String, List<DoctorSchedule>> _intervalSchedulesMap =
+      <String, List<DoctorSchedule>>{};
   String? _activeDoctorId;
 
   String? get activeDoctorId => _activeDoctorId;
@@ -93,6 +95,13 @@ class AmanahScheduleStore extends ChangeNotifier
   List<DoctorSchedule> getSchedulesForDate(DateTime date) {
     final String key = formatDateKey(date);
     return _schedulesMap[key] ?? const <DoctorSchedule>[];
+  }
+
+  List<DoctorSchedule> getIntervalSchedulesForDate(DateTime date) {
+    final String key = formatDateKey(date);
+    return List<DoctorSchedule>.unmodifiable(
+      _intervalSchedulesMap[key] ?? const <DoctorSchedule>[],
+    );
   }
 
   @override
@@ -297,6 +306,26 @@ class AmanahScheduleStore extends ChangeNotifier
       }).toList();
 
       _schedulesMap[dateStr] = enriched;
+
+      final String effectiveDoctorId = resolvedDoctorId.isNotEmpty
+          ? resolvedDoctorId
+          : (enriched.where((DoctorSchedule s) => s.doctorId.isNotEmpty).firstOrNull?.doctorId ??
+              enriched.where((DoctorSchedule s) => (s.practitionerId ?? '').isNotEmpty).firstOrNull?.practitionerId ??
+              '');
+
+      if (effectiveDoctorId.isNotEmpty) {
+        try {
+          final List<DoctorSchedule> intervalSlots =
+              await _repository.fetchDoctorDailyIntervalSlots(
+            doctorId: effectiveDoctorId,
+            date: dateStr,
+          );
+          if (intervalSlots.isNotEmpty) {
+            _intervalSchedulesMap[dateStr] = intervalSlots;
+          }
+        } catch (_) {}
+      }
+
       _isLoading = false;
       notifyListeners();
       return _schedulesMap[dateStr] ?? const <DoctorSchedule>[];
@@ -483,6 +512,7 @@ class AmanahScheduleStore extends ChangeNotifier
 
   void reset() {
     _schedulesMap = <String, List<DoctorSchedule>>{};
+    _intervalSchedulesMap = <String, List<DoctorSchedule>>{};
     _activeDoctorId = null;
     resetDayState();
     resetProjectionState();

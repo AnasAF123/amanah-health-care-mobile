@@ -915,3 +915,199 @@ updated_at DESC LIMIT 10;")
 ○ Bash(rg -n -C 20 "days/:date" D:\amanah-healthcare-
 backend/src)
   ⎿  <output +31 lines
+
+  const http = require("http");
+
+function request(url, options = {}, postData = null) {
+  return new Promise((resolve, reject) => {
+    const parsed = new URL(url);
+    const req = http.request({
+      hostname: parsed.hostname,
+      port: parsed.port,
+      path: parsed.pathname + parsed.search,
+      method: options.method || "GET",
+      headers: options.headers || {}
+    }, (res) => {
+      let data = "";
+      res.on("data", chunk => data += chunk);
+      res.on("end", () => {
+        try {
+          resolve({ status: res.statusCode, headers:
+res.headers, body: JSON.parse(data) });
+        } catch(e) {
+          resolve({ status: res.statusCode, headers:
+res.headers, raw: data });
+        }
+      });
+    });
+    req.on("error", reject);
+    if (postData) req.write(postData);
+    req.end();
+  });
+}
+
+async function run() {
+  const loginData = JSON.stringify({ email:
+"admin@amanah.com", password: "secret123" });
+  const loginRes = await
+request("http://localhost:3001/api/v1/auth/email/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json",
+"Content-Length": loginData.length }
+  }, loginData);
+
+  console.log("Admin Login status:", loginRes.status,
+"Token:", loginRes.body?.token ? "YES" : "NO");
+  console.log("Admin User:", loginRes.body?.user);
+
+  const token = loginRes.body?.token;
+  const cookieHeader = loginRes.headers["set-cookie"] ?
+loginRes.headers["set-cookie"].map(c =>
+c.split(";")[0]).join("; ") : "";
+  const headers = {
+    "Authorization": "Bearer " + token,
+    "Cookie": cookieHeader
+  };
+
+  const doctorId = "c518facb-372e-4f07-9766-f3eacf54221f";
+  const date = "2026-09-26";
+
+  const adminDetails = await
+request("http://localhost:3001/api/v1/admin/doctor-
+schedules/" + doctorId + "?month=2026-09&date=" + date, {
+headers });
+  console.log("\nAdmin doctor-schedules details status:",
+adminDetails.status);
+  console.log("Metrics:",
+JSON.stringify(adminDetails.body?.data?.metrics));
+  if (adminDetails.body?.data?.shifts) {
+    adminDetails.body.data.shifts.forEach(shift => {
+      console.log("\nShift:", shift.shiftName, "(",
+shift.shiftRange, "): total slots:", shift.slots?.length);
+      const counts = {};
+      shift.slots?.forEach(slot => {
+        const k = slot.temporalState + "/" + slot.uiStatus
++ "/" + slot.availabilityState;
+        counts[k] = (counts[k] || 0) + 1;
+      });
+      console.log("  Breakdown:", counts);
+      shift.slots?.forEach(slot => {
+        if (slot.temporalState !== "PAST" ||
+shift.shiftName !== "Dini Hari") {
+          console.log("    Slot:", slot.timeSlot, "|
+Temp:", slot.temporalState, "| UI:", slot.uiStatus, "(" +
+slot.uiLabel + ")", "| Avail:", slot.availabilityState, "|
+SessionId:", slot.sessionId);
+        }
+      });
+    });
+  }
+}
+
+run().catch(console.error);
+')
+  ⎿  <output +96 lines>
+                Slot: undefined | Temp: FUTURE | UI: AVAILABLE
+            (Tersedia) | Avail: AVAILABLE | SessionId:
+            177b3b6b-28e6-4d78-abf9-0c7d5f35432b
+                Slot: undefined | Temp: FUTURE | UI: UNSCHEDULED
+            (Belum Terjadwal) | Avail: UNSCHEDULED | SessionId:
+            null
+                Slot: undefined | Temp: FUTURE | UI: AVAILABLE
+            (Tersedia) | Avail: AVAILABLE | SessionId:
+            f5d186e7-1b11-429b-b7c9-f1e766d29376
+                Slot: undefined | Temp: FUTURE | UI: UNSCHEDULED
+            (Belum Terjadwal) | Avail: UNSCHEDULED | SessionId:
+            null
+                Slot: undefined | Temp: FUTURE | UI: UNSCHEDULED
+            (Belum Terjadwal) | Avail: UNSCHEDULED | SessionId:
+            null
+                Slot: undefined | Temp: FUTURE | UI: UNSCHEDULED
+            (Belum Terjadwal) | Avail: UNSCHEDULED | SessionId:
+            null
+                Slot: undefined | Temp: FUTURE | UI: UNSCHEDULED
+            (Belum Terjadwal) | Avail: UNSCHEDULED | SessionId:
+            null
+                Slot: undefined | Temp: FUTURE | UI: UNSCHEDULED
+            (Belum Terjadwal) | Avail: UNSCHEDULED | SessionId:
+            null
+                Slot: undefined | Temp: FUTURE | UI: UNSCHEDULED
+            (Belum Terjadwal) | Avail: UNSCHEDULED | SessionId:
+            null
+                Slot: undefined | Temp: FUTURE | UI: UNSCHEDULED
+            (Belum Terjadwal) | Avail: UNSCHEDULED | SessionId:
+            null
+○ Bash(node -e '
+const http = require("http");
+
+function request(url, options = {}, postData = null) {
+  return new Promise((resolve, reject) => {
+    const parsed = new URL(url);
+    const req = http.request({
+      hostname: parsed.hostname,
+      port: parsed.port,
+      path: parsed.pathname + parsed.search,
+      method: options.method || "GET",
+      headers: options.headers || {}
+    }, (res) => {
+      let data = "";
+      res.on("data", chunk => data += chunk);
+      res.on("end", () => {
+        try {
+          resolve({ status: res.statusCode, headers:
+res.headers, body: JSON.parse(data) });
+        } catch(e) {
+          resolve({ status: res.statusCode, headers:
+res.headers, raw: data });
+        }
+      });
+    });
+    req.on("error", reject);
+    if (postData) req.write(postData);
+    req.end();
+  });
+}
+
+async function run() {
+  const loginData = JSON.stringify({ email:
+"admin@amanah.com", password: "secret123" });
+  const loginRes = await
+request("http://localhost:3001/api/v1/auth/email/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json",
+"Content-Length": loginData.length }
+  }, loginData);
+
+  const token = loginRes.body?.token;
+  const headers = { "Authorization": "Bearer " + token };
+  const doctorId = "c518facb-372e-4f07-9766-f3eacf54221f";
+  const date = "2026-09-26";
+
+  const adminDetails = await
+request("http://localhost:3001/api/v1/admin/doctor-
+schedules/" + doctorId + "?month=2026-09&date=" + date, {
+headers });
+  const pagi = adminDetails.body?.data?.shifts?.find(s =>
+s.shiftName === "Pagi");
+  if (pagi && pagi.slots) {
+    console.log("Keys on slot:",
+Object.keys(pagi.slots[0]));
+    console.log("Last 4 slots of Pagi:",
+JSON.stringify(pagi.slots.slice(8), null, 2));
+  }
+}
+
+run().catch(console.error);
+')
+  ⎿  <output +123 lines>
+                "uiSubLabel": "12:00",
+                "uiVariant": "success_green",
+                "isClickable": true,
+                "actionType": "VIEW_SESSION",
+                "sessionId":
+            "d95d10c9-6b0f-4b25-b1bd-dd46f9747781",
+                "closureInfo": null,
+                "patientInfo": null,
+                "rescheduleInfo": null
+              }
+            ] (ctrl+o to collapse)
