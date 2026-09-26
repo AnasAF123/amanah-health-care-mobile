@@ -172,8 +172,11 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
               ? AmanahColorTokens.canvasLight
               : AmanahColorTokens.surfaceLight);
 
-    final List<DoctorSchedule> todaySchedules = _scheduleStore
-        .getSchedulesForDate(AmanahScheduleStore.baseToday);
+    final List<DoctorSchedule> intervalSchedules = _scheduleStore
+        .getIntervalSchedulesForDate(AmanahScheduleStore.baseToday);
+    final List<DoctorSchedule> todaySchedules = intervalSchedules.isNotEmpty
+        ? intervalSchedules
+        : _scheduleStore.getSchedulesForDate(AmanahScheduleStore.baseToday);
 
     return Scaffold(
       backgroundColor: bgColor,

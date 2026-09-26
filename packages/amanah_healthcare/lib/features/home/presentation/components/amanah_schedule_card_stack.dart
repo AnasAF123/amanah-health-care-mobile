@@ -118,6 +118,21 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
     final bool isToday = _isScheduleListForToday(schedules, now);
     if (!isToday) return 0;
 
+    // 1. Try to find the slot that is actively ongoing right now (start <= now < end):
+    for (int i = 0; i < schedules.length; i++) {
+      final String? start = schedules[i].startTime;
+      final String? end = schedules[i].endTime;
+      if (start == null || start.isEmpty || end == null || end.isEmpty) continue;
+      final int? startMinutes = _parseTimeToMinutes(start);
+      final int? endMinutes = _parseTimeToMinutes(end);
+      if (startMinutes != null && endMinutes != null) {
+        if (nowMinutes >= startMinutes && nowMinutes < endMinutes) {
+          return i;
+        }
+      }
+    }
+
+    // 2. If no slot is actively ongoing, find the first upcoming slot (now < end):
     for (int i = 0; i < schedules.length; i++) {
       final String? end = schedules[i].endTime;
       if (end == null || end.isEmpty) continue;
@@ -467,7 +482,7 @@ class AmanahScheduleEmptyCard extends StatelessWidget {
         : AmanahScheduleCardTokens.bgImageLight;
 
     return Semantics(
-      label: 'Belum ada jadwal praktik hari ini',
+      label: 'Belum ada jadwal praktik aktif saat ini',
       child: Container(
         height: AmanahScheduleCardTokens.cardHeight,
         width: double.infinity,
@@ -543,7 +558,7 @@ class AmanahScheduleEmptyCard extends StatelessWidget {
                       children: <Widget>[
                         Expanded(
                           child: Text(
-                            'Jadwal Hari Ini',
+                            'Jadwal Sedang Aktif',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -655,9 +670,10 @@ class AmanahScheduleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
-    final String primaryTitle = schedule.title.startsWith('Jadwal')
+    final String primaryTitle = schedule.title.startsWith('Jadwal') &&
+            schedule.title != 'Jadwal Hari Ini'
         ? schedule.title
-        : 'Jadwal Hari Ini';
+        : 'Jadwal Sedang Aktif';
     final String sessionLabel = schedule.sessionType.isNotEmpty
         ? 'Sesi ${schedule.sessionType}'
         : (!schedule.title.startsWith('Jadwal') ? schedule.title : '');
@@ -667,7 +683,7 @@ class AmanahScheduleCard extends StatelessWidget {
         : AmanahScheduleCardTokens.bgImageLight;
 
     return Semantics(
-      label: 'Jadwal Hari Ini, ${schedule.title}, ${schedule.time}',
+      label: 'Jadwal Sedang Aktif, ${schedule.title}, ${schedule.time}',
       child: Container(
         height: AmanahScheduleCardTokens.cardHeight,
         width: double.infinity,

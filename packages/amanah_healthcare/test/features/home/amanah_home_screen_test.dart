@@ -170,7 +170,7 @@ void main() {
 
       // Check Schedule Card Stack
       expect(find.byType(AmanahScheduleCardStack), findsOneWidget);
-      expect(find.text('Jadwal Hari Ini'), findsWidgets);
+      expect(find.text('Jadwal Sedang Aktif'), findsWidgets);
       expect(find.text('Sesi Pagi'), findsOneWidget);
       expect(find.text('07:00 - 11:00 WIB'), findsOneWidget);
       expect(find.text('Poli Gigi & Mulut'), findsOneWidget);
