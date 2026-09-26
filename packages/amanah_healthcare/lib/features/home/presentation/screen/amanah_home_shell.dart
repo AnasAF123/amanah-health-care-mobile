@@ -399,7 +399,10 @@ class _AmanahHomeScreenContent extends StatelessWidget {
         Expanded(
           child: AmanahPullToRefresh(
             onRefresh: () async {
-              await Future<void>.delayed(const Duration(milliseconds: 900));
+              await AmanahScheduleStore.instance.syncAll(
+                AmanahScheduleStore.baseToday,
+                forceRefresh: true,
+              );
             },
             child: ListView(
               physics: const BouncingScrollPhysics(

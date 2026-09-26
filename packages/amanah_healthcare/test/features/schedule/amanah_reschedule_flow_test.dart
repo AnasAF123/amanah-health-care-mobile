@@ -174,6 +174,8 @@ void main() {
 
         final AmanahScheduleStore store = AmanahScheduleStore.instance;
         store.reset();
+        AmanahScheduleStore.setCustomBaseToday(DateTime(2026, 9, 25));
+        addTearDown(() => AmanahScheduleStore.setCustomBaseToday(null));
         store.setRepository(
           AmanahScheduleRepository(
             baseUrl: 'http://test.api',
@@ -214,6 +216,7 @@ void main() {
         await tester.pumpAndSettle();
 
         // 5. Select Room explicitly
+        await tester.ensureVisible(find.text('Pilih Ruang Praktik'));
         await tester.tap(find.text('Pilih Ruang Praktik'));
         await tester.pumpAndSettle();
         expect(find.text('Pilih Ruang Praktik Target'), findsOneWidget);

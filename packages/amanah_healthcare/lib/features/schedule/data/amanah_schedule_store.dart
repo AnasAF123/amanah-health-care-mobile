@@ -222,17 +222,17 @@ class AmanahScheduleStore extends ChangeNotifier
                   '';
 
       List<DoctorSchedule> backendSchedules = const <DoctorSchedule>[];
-      if (resolvedDoctorId.isNotEmpty) {
-        try {
+      try {
+        backendSchedules = await _repository.fetchMySchedules(date: dateStr);
+      } catch (_) {
+        if (resolvedDoctorId.isNotEmpty) {
           backendSchedules = await _repository.fetchDoctorDailySchedules(
             doctorId: resolvedDoctorId,
             date: dateStr,
           );
-        } catch (_) {
-          backendSchedules = await _repository.fetchMySchedules(date: dateStr);
+        } else {
+          rethrow;
         }
-      } else {
-        backendSchedules = await _repository.fetchMySchedules(date: dateStr);
       }
 
       List<BookedPatient> allPatients = const <BookedPatient>[];
@@ -446,6 +446,7 @@ class AmanahScheduleStore extends ChangeNotifier
         ),
         loadCalendarSummary(monthKey),
         loadDaySettings(date),
+        loadOccupancyOverview(date: date),
       ]);
     } catch (e) {
       _errorMessage = e.toString();
