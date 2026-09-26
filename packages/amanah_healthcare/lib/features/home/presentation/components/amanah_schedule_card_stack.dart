@@ -42,6 +42,7 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
   @override
   void initState() {
     super.initState();
+    _currentIndex = _resolveRelevantIndex(widget.schedules);
     _shuffleController =
         AnimationController(
             vsync: this,
@@ -81,6 +82,72 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
               });
             }
           });
+  }
+
+  @override
+  void didUpdateWidget(AmanahScheduleCardStack oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // When the schedule list changes (e.g. after store refresh following
+    // CREATE/UPDATE/DELETE), re-resolve the relevant index so the card stack
+    // shows the correct session and never holds an out-of-bounds index.
+    if (oldWidget.schedules != widget.schedules) {
+      setState(() {
+        _currentIndex = _resolveRelevantIndex(widget.schedules);
+        _dragOffset = 0.0;
+      });
+    }
+  }
+
+  /// Returns the index of the first session whose endTime has not yet passed,
+  /// i.e. the currently active or next upcoming session for today.
+  ///
+  /// If all sessions have already ended (all past), returns the index of the
+  /// last session so the card still shows something meaningful.
+  ///
+  /// This is a pure presentation decision: the backend returns sessions in
+  /// chronological order; Flutter only needs to determine which one to surface
+  /// first on the home card.
+  int _resolveRelevantIndex(List<DoctorSchedule> schedules) {
+    if (schedules.isEmpty) return 0;
+    final DateTime now = DateTime.now();
+    final int nowMinutes = now.hour * 60 + now.minute;
+    final bool isToday = _isScheduleListForToday(schedules, now);
+    if (!isToday) return 0;
+
+    for (int i = 0; i < schedules.length; i++) {
+      final String? end = schedules[i].endTime;
+      if (end == null || end.isEmpty) continue;
+      final int? endMinutes = _parseTimeToMinutes(end);
+      if (endMinutes != null && nowMinutes < endMinutes) {
+        return i;
+      }
+    }
+    // All sessions have ended — show the last one.
+    return schedules.length - 1;
+  }
+
+  bool _isScheduleListForToday(List<DoctorSchedule> schedules, DateTime now) {
+    final DoctorSchedule first = schedules.first;
+    final String dateStr = first.scheduleDate ?? first.date;
+    if (dateStr.isEmpty) return false;
+    final DateTime? schedDate = DateTime.tryParse(dateStr);
+    if (schedDate == null) return false;
+    return schedDate.year == now.year &&
+        schedDate.month == now.month &&
+        schedDate.day == now.day;
+  }
+
+  int? _parseTimeToMinutes(String time) {
+    // Accepts "HH:mm" or "H:mm"; strips any trailing text (e.g. " WIB")
+    final String clean = time.split(' ').first;
+    final List<String> parts = clean.split(':');
+    if (parts.length < 2) return null;
+    final int? h = int.tryParse(parts[0]);
+    final int? m = int.tryParse(parts[1]);
+    if (h == null || m == null) return null;
+    // Backend uses "24:00" to mean end-of-day midnight.
+    if (h == 24 && m == 0) return 24 * 60;
+    return h * 60 + m;
   }
 
   void _dismissCard() {

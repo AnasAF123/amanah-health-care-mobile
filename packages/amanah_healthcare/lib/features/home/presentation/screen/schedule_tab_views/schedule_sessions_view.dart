@@ -25,6 +25,14 @@ class AmanahScheduleSessionsView extends StatelessWidget {
   final bool isCuti;
   final List<DoctorSchedule> schedules;
   final DateTime? selectedDate;
+  // occupancyOverview is retained as an accepted parameter for call-site
+  // compatibility but is no longer used for schedule list rendering.
+  // The anti-collision occupancy grid (/api/v1/schedules/occupancy-overview)
+  // is a per-shift structure; using it to reconstruct per-session display
+  // records caused multiple sessions sharing the same shift to collapse into
+  // a single synthetic entry. The authoritative schedule list from the store
+  // (_schedulesMap, populated by /api/v1/schedules/my-schedules) is the
+  // correct and complete source of truth for this view.
   final ScheduleOccupancyOverviewData? occupancyOverview;
   final bool dark;
   final void Function(DoctorSchedule) onTapDetail;
@@ -47,7 +55,6 @@ class AmanahScheduleSessionsView extends StatelessWidget {
       daySetting: daySetting,
       isDayClosed: isDayClosed,
       selectedDate: selectedDate,
-      occupancyOverview: occupancyOverview,
     );
 
     return Column(
@@ -169,23 +176,37 @@ class AmanahScheduleSessionsView extends StatelessWidget {
     );
   }
 
+  /// Resolves the [DoctorSchedule] list to display for the selected date,
+  /// applying temporal past-state and closed-day status overrides to each entry.
+  ///
+  /// Reads directly from the authoritative [schedules] list — the same data
+  /// that [AmanahScheduleStore] populates from the backend's
+  /// `GET /api/v1/schedules/my-schedules?date=...` endpoint.
+  ///
+  /// The previous implementation contained a "Priority 1" path that attempted
+  /// to reconstruct display entries from the occupancy-overview anti-collision
+  /// grid (`GET /api/v1/schedules/occupancy-overview`). That endpoint is a
+  /// per-shift 24-hour grid, not a per-session list. When the doctor has
+  /// multiple sessions within the same shift, the grid yields a single
+  /// OCCUPIED_BY_SELF slot per shift — causing all sessions in that shift to
+  /// collapse into one synthetic entry on screen. That path has been removed.
   List<DoctorSchedule> _resolveDisplaySchedules({
     required List<DoctorSchedule> schedules,
     required DayScheduleSetting daySetting,
     required bool isDayClosed,
     DateTime? selectedDate,
-    ScheduleOccupancyOverviewData? occupancyOverview,
   }) {
+    if (schedules.isEmpty) {
+      return const <DoctorSchedule>[];
+    }
+
+    // Resolve effective calendar date for temporal comparisons.
     DateTime? effectiveDate = selectedDate;
     if (effectiveDate == null && daySetting.scheduleDate != null) {
       effectiveDate = DateTime.tryParse(daySetting.scheduleDate!) ??
           tryParseDate(daySetting.scheduleDate!);
     }
-    final String? overviewDate = occupancyOverview?.date;
-    if (effectiveDate == null && overviewDate != null) {
-      effectiveDate = DateTime.tryParse(overviewDate) ?? tryParseDate(overviewDate);
-    }
-    if (effectiveDate == null && schedules.isNotEmpty) {
+    if (effectiveDate == null) {
       final String sDate = schedules.first.scheduleDate ?? schedules.first.date;
       effectiveDate = DateTime.tryParse(sDate) ?? tryParseDate(sDate);
     }
@@ -197,131 +218,10 @@ class AmanahScheduleSessionsView extends StatelessWidget {
       final String d = effectiveDate.day.toString().padLeft(2, '0');
       dateStr = '$y-$m-$d';
     } else {
-      dateStr = daySetting.scheduleDate ?? (occupancyOverview?.date ?? '');
+      dateStr = daySetting.scheduleDate ?? '';
     }
 
     final List<DoctorSchedule> result = <DoctorSchedule>[];
-
-    // Priority 1: If occupancyOverview contains doctor-scheduled slots, render per-slot schedules.
-    if (occupancyOverview != null && occupancyOverview.shifts.isNotEmpty) {
-      for (final ScheduleShiftOccupancy shift in occupancyOverview.shifts) {
-        for (final ScheduleShiftSlot slot in shift.slots) {
-          final bool isSelf = slot.status == 'OCCUPIED_BY_SELF' ||
-              slot.conflictInfo?.type == 'SELF';
-          if (!isSelf) {
-            continue;
-          }
-
-          DoctorSchedule? matchingParent;
-          if (slot.conflictInfo?.sessionId != null) {
-            matchingParent = schedules.cast<DoctorSchedule?>().firstWhere(
-              (DoctorSchedule? s) => s?.id == slot.conflictInfo!.sessionId,
-              orElse: () => null,
-            );
-          }
-          matchingParent ??= schedules.cast<DoctorSchedule?>().firstWhere(
-            (DoctorSchedule? s) =>
-                s?.sessionShift.toLowerCase() == shift.shift.toLowerCase(),
-            orElse: () => schedules.isNotEmpty ? schedules.first : null,
-          );
-
-          final bool isSlotPast = isTemporalSlotPast(
-            scheduleDate: effectiveDate,
-            scheduleDateStr: dateStr,
-            timeSlotOrEndTime: slot.endTime,
-          );
-
-          final bool isClosed = isDayClosed ||
-              (matchingParent != null &&
-                  (!matchingParent.isAvailable ||
-                      matchingParent.badge == ScheduleFormConstants.statusTutup ||
-                      matchingParent.badge == ScheduleFormConstants.statusCuti));
-
-          final String badge;
-          final AmanahBadgeVariant badgeVariant;
-
-          if (isSlotPast) {
-            badge = ScheduleFormConstants.badgeSelesai;
-            badgeVariant = AmanahBadgeVariant.warning;
-          } else if (isClosed) {
-            badge = ScheduleFormConstants.statusTutup;
-            badgeVariant = AmanahBadgeVariant.warning;
-          } else if ((matchingParent?.bookedPatientCount ?? 0) > 0) {
-            badge = ScheduleFormConstants.badgeTerisi;
-            badgeVariant = AmanahBadgeVariant.primary;
-          } else {
-            badge = ScheduleFormConstants.statusBuka;
-            badgeVariant = AmanahBadgeVariant.success;
-          }
-
-          final String formattedTime = slot.timeRange.isNotEmpty
-              ? (slot.timeRange.endsWith('WIB')
-                  ? slot.timeRange
-                  : '${slot.timeRange} WIB')
-              : '${slot.startTime} - ${slot.endTime} WIB';
-
-          final String roomName = slot.conflictInfo?.roomName ??
-              matchingParent?.room ??
-              occupancyOverview.roomName ??
-              'Ruang Poli Umum 1';
-
-          final String poliName = matchingParent?.poli ?? 'Poli Umum';
-          final String sessionTitle = matchingParent?.title ??
-              'Sesi Praktik ($poliName - $roomName)';
-
-          result.add(
-            DoctorSchedule(
-              id: slot.conflictInfo?.sessionId ??
-                  matchingParent?.id ??
-                  '${dateStr}_${slot.startTime}',
-              title: sessionTitle,
-              date: dateStr,
-              time: formattedTime,
-              poli: poliName,
-              room: roomName,
-              slotCount: (matchingParent?.bookedPatientCount ?? 0).toString(),
-              slotText: matchingParent?.slotText ??
-                  '${matchingParent?.bookedPatientCount ?? 0} Pasien Booking',
-              badge: badge,
-              badgeVariant: badgeVariant,
-              startTime: slot.startTime,
-              endTime: slot.endTime,
-              sessionShift: shift.shift,
-              sessionType: shift.shiftLabel,
-              scheduleDate: dateStr,
-              roomId: slot.conflictInfo?.roomId ??
-                  matchingParent?.roomId ??
-                  occupancyOverview.roomId,
-              poliklinikId: matchingParent?.poliklinikId,
-              serviceId: matchingParent?.serviceId,
-              capacity: 1,
-              availableSlots: isSlotPast || isClosed ? 0 : 1,
-              bookedPatientCount: matchingParent?.bookedPatientCount ?? 0,
-              bookedPatients:
-                  matchingParent?.bookedPatients ?? const <BookedPatient>[],
-              isAvailable: !isClosed && !isSlotPast,
-              notes: matchingParent?.notes,
-              version: matchingParent?.version,
-              staffId: matchingParent?.staffId,
-              practitionerId: slot.conflictInfo?.practitionerId ??
-                  matchingParent?.practitionerId ??
-                  occupancyOverview.practitionerId,
-              doctorName: slot.conflictInfo?.practitionerName ??
-                  matchingParent?.doctorName ??
-                  occupancyOverview.practitionerName,
-            ),
-          );
-        }
-      }
-    }
-
-    if (result.isNotEmpty) {
-      return result;
-    }
-
-    if (schedules.isEmpty) {
-      return const <DoctorSchedule>[];
-    }
 
     for (final DoctorSchedule sch in schedules) {
       final bool isSlotPast = isTemporalSlotPast(
@@ -365,5 +265,3 @@ class AmanahScheduleSessionsView extends StatelessWidget {
     return result;
   }
 }
-
-

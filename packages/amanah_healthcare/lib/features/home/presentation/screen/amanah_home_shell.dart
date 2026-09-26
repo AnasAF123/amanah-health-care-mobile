@@ -59,6 +59,13 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     _scheduleStore.addListener(_onStoreUpdated);
     _notificationStore.addListener(_onStoreUpdated);
     _permissionStore.addListener(_onStoreUpdated);
+    // Load today's schedules so the home screen card has data immediately,
+    // without requiring the user to first visit the Schedule tab.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _scheduleStore.loadSchedulesForDate(AmanahScheduleStore.baseToday);
+      }
+    });
   }
 
   void _onStoreUpdated() {
