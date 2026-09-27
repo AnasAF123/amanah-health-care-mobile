@@ -229,7 +229,7 @@ void main() {
       };
     }
 
-    test('fetchDoctorDailyIntervalSlots parses exactly 17 active cards (excludes 22 unscheduled & 9 expired)', () async {
+    test('fetchDoctorDailyIntervalSlots parses all 26 scheduled intervals (excludes 22 unscheduled & tags 9 past with Selesai)', () async {
       final Map<String, dynamic> adminData =
           buildBackendAdminResponse(date: '2026-09-26');
 
@@ -254,8 +254,8 @@ void main() {
         date: '2026-09-26',
       );
 
-      // Exactly 17 slots: 3 pagi, 12 siang, 2 malam
-      expect(slots.length, 17);
+      // Exactly 26 scheduled slots: 12 pagi (9 past Selesai + 3 active), 12 siang, 2 malam
+      expect(slots.length, 26);
 
       final List<DoctorSchedule> pagi =
           slots.where((DoctorSchedule s) => s.sessionShift == 'morning').toList();
@@ -264,34 +264,41 @@ void main() {
       final List<DoctorSchedule> malam =
           slots.where((DoctorSchedule s) => s.sessionShift == 'night').toList();
 
-      expect(pagi.length, 3);
+      expect(pagi.length, 12);
       expect(siang.length, 12);
       expect(malam.length, 2);
 
+      // Check past slot 06:00 (Selesai)
+      expect(pagi[0].startTime, '06:00');
+      expect(pagi[0].badge, 'Selesai');
+      expect(pagi[0].badgeVariant, AmanahBadgeVariant.warning);
+      expect(pagi[0].isPast, isTrue);
+      expect(pagi[0].isAvailable, isFalse);
+
       // Check slot 10:30 (Tersedia)
-      expect(pagi[0].startTime, '10:30');
-      expect(pagi[0].badge, 'Buka');
-      expect(pagi[0].badgeVariant, AmanahBadgeVariant.success);
-      expect(pagi[0].isAvailable, isTrue);
+      expect(pagi[9].startTime, '10:30');
+      expect(pagi[9].badge, 'Buka');
+      expect(pagi[9].badgeVariant, AmanahBadgeVariant.success);
+      expect(pagi[9].isAvailable, isTrue);
 
       // Check slot 11:00 (Ditutup: Rapat Koordinasi Komite Medik)
-      expect(pagi[1].startTime, '11:00');
-      expect(pagi[1].badge, 'Tutup');
-      expect(pagi[1].badgeVariant, AmanahBadgeVariant.warning);
-      expect(pagi[1].isAvailable, isFalse);
-      expect(pagi[1].notes, 'Rapat Koordinasi Komite Medik');
+      expect(pagi[10].startTime, '11:00');
+      expect(pagi[10].badge, 'Tutup');
+      expect(pagi[10].badgeVariant, AmanahBadgeVariant.warning);
+      expect(pagi[10].isAvailable, isFalse);
+      expect(pagi[10].notes, 'Rapat Koordinasi Komite Medik');
 
       // Check slot 11:30 (Tersedia)
-      expect(pagi[2].startTime, '11:30');
-      expect(pagi[2].badge, 'Buka');
-      expect(pagi[2].badgeVariant, AmanahBadgeVariant.success);
+      expect(pagi[11].startTime, '11:30');
+      expect(pagi[11].badge, 'Buka');
+      expect(pagi[11].badgeVariant, AmanahBadgeVariant.success);
 
       // Verify night slots
       expect(malam[0].startTime, '19:00');
       expect(malam[1].startTime, '20:00');
     });
 
-    testWidgets('AmanahScheduleSessionsView renders 17 cards when provided 17 interval slots', (WidgetTester tester) async {
+    testWidgets('AmanahScheduleSessionsView renders all 26 scheduled cards and tags past cards as Selesai', (WidgetTester tester) async {
       final Map<String, dynamic> adminData =
           buildBackendAdminResponse(date: '2026-09-26');
 
@@ -339,10 +346,11 @@ void main() {
         ),
       );
 
-      // 17 cards must be rendered
-      expect(find.byType(AmanahDoctorSessionCard), findsNWidgets(17));
+      // 26 cards must be rendered
+      expect(find.byType(AmanahDoctorSessionCard), findsNWidgets(26));
 
-      // Slot 10:30, 11:00, 11:30, 19:00, 20:00 are rendered
+      // Past slot 06:00, active 10:30, 11:00, 11:30, 19:00, 20:00 are rendered
+      expect(find.text('06:00'), findsWidgets);
       expect(find.text('10:30'), findsWidgets);
       expect(find.text('11:00'), findsWidgets);
       expect(find.text('11:30'), findsWidgets);

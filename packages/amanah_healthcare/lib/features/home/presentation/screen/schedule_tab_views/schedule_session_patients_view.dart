@@ -9,24 +9,27 @@ class AmanahScheduleSessionPatientsView extends StatelessWidget {
     required this.selectedSession,
     required this.dark,
     required this.onBackToSessions,
+    this.sessionPatients,
+    this.isLoading = false,
     super.key,
   });
 
   final DoctorSchedule? selectedSession;
   final bool dark;
   final VoidCallback onBackToSessions;
+  final List<BookedPatient>? sessionPatients;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     final DoctorSchedule? sch = selectedSession;
     final List<BookedPatient> patients =
-        sch?.bookedPatients ?? const <BookedPatient>[];
+        sessionPatients ?? sch?.bookedPatients ?? const <BookedPatient>[];
 
     return Column(
       key: const ValueKey<String>('view-session-patients'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        // Session Header Overview
         Container(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
@@ -98,8 +101,14 @@ class AmanahScheduleSessionPatientsView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-
-        if (patients.isNotEmpty)
+        if (isLoading && patients.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 48),
+              child: CircularProgressIndicator(),
+            ),
+          )
+        else if (patients.isNotEmpty)
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

@@ -6,9 +6,6 @@ import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model
 import 'package:amanah_healthcare/features/schedule/presentation/components/cards/amanah_booked_patient_card.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/drawers/amanah_patient_detail_modal.dart';
 
-/// Tab component displaying the history of completed and past patient consultations.
-///
-/// Fully interactive for doctors to review past medical records and consultation outcomes.
 class PresenceHistoryPatientTab extends StatefulWidget {
   const PresenceHistoryPatientTab({
     this.patients,
@@ -36,42 +33,7 @@ class _PresenceHistoryPatientTabState extends State<PresenceHistoryPatientTab> {
     if (widget.patients != null) {
       return widget.patients!;
     }
-    final List<({BookedPatient patient, DoctorSchedule schedule})> fromStore =
-        AmanahScheduleStore.instance.getAllHistoricalPatients();
-    if (fromStore.isNotEmpty) {
-      return fromStore;
-    }
-    // Fallback sample past patient record so the tab is never empty on test/demo
-    const DoctorSchedule mockPastSchedule = DoctorSchedule(
-      id: 'hist-sched-01',
-      title: 'Sesi Pagi',
-      date: 'Kamis, 24 September 2026',
-      scheduleDate: '2026-09-24',
-      time: '08:00 - 11:30 WIB',
-      poli: 'Poli Umum',
-      room: 'Ruang 101, Gedung A',
-      slotCount: '1',
-      slotText: '1 Pasien',
-      badge: 'Selesai',
-      badgeVariant: AmanahBadgeVariant.success,
-    );
-    return const <({BookedPatient patient, DoctorSchedule schedule})>[
-      (
-        patient: BookedPatient(
-          id: 'hist-pat-01',
-          patientName: 'Siti Rahmawati',
-          patientAge: '32 Thn',
-          patientRm: 'RM-2026-0982',
-          patientComplaint: 'Kontrol hasil lab darah lengkap dan evaluasi terapi',
-          queueNumber: '#01',
-          timeSlot: '08:00 - 08:30 WIB',
-          badge: 'Selesai',
-          badgeVariant: AmanahBadgeVariant.success,
-          status: 'completed',
-        ),
-        schedule: mockPastSchedule,
-      ),
-    ];
+    return AmanahScheduleStore.instance.getAllHistoricalPatients();
   }
 
   List<({BookedPatient patient, DoctorSchedule schedule})> get _filteredPatients {

@@ -4,7 +4,6 @@ import 'package:amanah_healthcare/features/schedule/data/schedule_store_day_mixi
 import 'package:amanah_healthcare/features/schedule/data/schedule_store_projection_mixin.dart';
 import 'package:amanah_healthcare/features/schedule/data/schedule_store_session_mixin.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
-import 'package:amanah_healthcare/features/schedule/presentation/components/form/schedule_shift_boundary_helper.dart';
 
 class AmanahScheduleStore extends ChangeNotifier
     with
@@ -120,29 +119,21 @@ class AmanahScheduleStore extends ChangeNotifier
 
   List<({BookedPatient patient, DoctorSchedule schedule})>
       getActiveBookedPatientsForDate(DateTime date) {
-    return getAllBookedPatientsForDate(date).where((item) {
-      if (item.patient.isCompleted || item.patient.isCancelled) {
-        return false;
-      }
-      final bool isExpired = isTemporalSlotPast(
-        scheduleDateStr: item.schedule.scheduleDate ?? item.schedule.date,
-        timeSlotOrEndTime: item.patient.timeSlot,
-      );
-      return !isExpired;
-    }).toList();
+    return getAllBookedPatientsForDate(date)
+        .where((item) =>
+            !item.patient.isCompleted &&
+            !item.patient.isCancelled &&
+            !item.schedule.isPast)
+        .toList();
   }
 
   List<({BookedPatient patient, DoctorSchedule schedule})>
       getCompletedPatientsForDate(DateTime date) {
-    return getAllBookedPatientsForDate(date).where((item) {
-      if (item.patient.isCompleted || item.patient.isCancelled) {
-        return true;
-      }
-      return isTemporalSlotPast(
-        scheduleDateStr: item.schedule.scheduleDate ?? item.schedule.date,
-        timeSlotOrEndTime: item.patient.timeSlot,
-      );
-    }).toList();
+    return getAllBookedPatientsForDate(date)
+        .where((item) =>
+            (item.patient.isCompleted || item.schedule.isPast) &&
+            !item.patient.isCancelled)
+        .toList();
   }
 
   List<({BookedPatient patient, DoctorSchedule schedule})>
@@ -152,13 +143,7 @@ class AmanahScheduleStore extends ChangeNotifier
     for (final List<DoctorSchedule> schedules in _schedulesMap.values) {
       for (final DoctorSchedule sch in schedules) {
         for (final BookedPatient p in sch.bookedPatients) {
-          final bool isPast = p.isCompleted ||
-              p.isCancelled ||
-              isTemporalSlotPast(
-                scheduleDateStr: sch.scheduleDate ?? sch.date,
-                timeSlotOrEndTime: p.timeSlot,
-              );
-          if (isPast) {
+          if (p.isCompleted || p.isCancelled || sch.isPast) {
             list.add((patient: p, schedule: sch));
           }
         }
@@ -166,8 +151,6 @@ class AmanahScheduleStore extends ChangeNotifier
     }
     return list;
   }
-
-  // --- Synchronous methods for UI instant updates and backwards compatibility ---
 
   void addSchedule(DateTime date, DoctorSchedule schedule) {
     final String key = formatDateKey(date);
@@ -200,8 +183,6 @@ class AmanahScheduleStore extends ChangeNotifier
     notifyListeners();
   }
 
-  // --- Asynchronous backend-connected methods ---
-
   @override
   Future<List<DoctorSchedule>> loadSchedulesForDate(
     DateTime date, {
@@ -217,18 +198,13 @@ class AmanahScheduleStore extends ChangeNotifier
     try {
       final String resolvedDoctorId = (doctorId != null && doctorId.isNotEmpty)
           ? doctorId
-          : (_activeDoctorId != null && _activeDoctorId!.isNotEmpty)
+          : (_activeDoctorId?.isNotEmpty == true
               ? _activeDoctorId!
               : _schedulesMap[dateStr]
                       ?.where((DoctorSchedule s) => s.doctorId.isNotEmpty)
                       .firstOrNull
                       ?.doctorId ??
-                  _schedulesMap.values
-                      .expand((List<DoctorSchedule> list) => list)
-                      .where((DoctorSchedule s) => s.doctorId.isNotEmpty)
-                      .firstOrNull
-                      ?.doctorId ??
-                  '';
+                  '');
 
       List<DoctorSchedule> backendSchedules = const <DoctorSchedule>[];
       try {
@@ -475,11 +451,6 @@ class AmanahScheduleStore extends ChangeNotifier
     }
   }
 
-  /// Authoritative full synchronization across all schedule subsystems:
-  /// - Doctor sessions (`/api/v1/schedules/my-schedules?date=...`)
-  /// - Monthly calendar summaries & status dots (`/api/v1/schedules/calendar-summary?month=...`)
-  /// - Daily operational quota & setting (`/api/v1/schedules/day-settings?date=...`)
-  /// - Clinic room & interval occupancy (`/api/v1/schedules/occupancy-overview?date=...`)
   Future<void> syncAll(
     DateTime date, {
     String? doctorId,

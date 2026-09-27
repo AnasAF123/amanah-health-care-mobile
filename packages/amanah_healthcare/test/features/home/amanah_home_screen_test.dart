@@ -247,7 +247,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.textContaining('Pilih antrean'), findsWidgets);
-      expect(find.text('Tarik antrean ke bawah untuk proses'), findsOneWidget);
+      expect(find.text('Tarik kartu ke bawah untuk memanggil'), findsOneWidget);
     });
 
     testWidgets('Tapping Kartu ID quick action opens Doctor ID Card screen', (
@@ -375,7 +375,7 @@ void main() {
 
         expect(find.textContaining('Pilih antrean'), findsWidgets);
         expect(
-          find.text('Tarik antrean ke bawah untuk proses'),
+          find.text('Tarik kartu ke bawah untuk memanggil'),
           findsOneWidget,
         );
       },

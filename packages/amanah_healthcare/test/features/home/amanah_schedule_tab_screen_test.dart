@@ -385,8 +385,8 @@ void main() {
         tester.view.devicePixelRatio = 2.75;
         addTearDown(() => tester.view.reset());
 
-        // Clear all schedules to trigger empty state
-        AmanahScheduleStore.instance.schedulesMap.clear();
+        AmanahScheduleStore.instance.reset();
+        AmanahScheduleStore.setCustomBaseToday(DateTime(2026, 8, 26));
 
         await tester.pumpWidget(
           createScheduleScreen(

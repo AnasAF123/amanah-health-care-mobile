@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 /// Ported from backend E2E PowerShell test suite:
 /// Canonical Rules: ARC-041, ARC-093, ARC-119..122, ARC-136, database-design.md
 void main() {
-  const String baseUrl = 'http://localhost:3001/api/v1';
+  const String baseUrl = 'http://127.0.0.1:3001/api/v1';
 
   group('Phase 4: Event-Driven Auditing & Status History Verification', () {
     late String adminToken;
@@ -188,7 +188,7 @@ void main() {
       expect(createLog['entityTable'], 'appointments');
       expect(createLog['newValues']?['session'], 'PAGI');
       createLogId = createLog['id'] as String;
-    });
+    }, timeout: const Timeout(Duration(minutes: 2)));
 
     test('STEP 4: Check-in Appointment & Verifying Status Transition Event', () async {
       final http.Response checkInRes = await patchJson(

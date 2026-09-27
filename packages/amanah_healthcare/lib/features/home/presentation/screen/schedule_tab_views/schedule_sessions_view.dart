@@ -26,14 +26,6 @@ class AmanahScheduleSessionsView extends StatelessWidget {
   final bool isCuti;
   final List<DoctorSchedule> schedules;
   final DateTime? selectedDate;
-  // occupancyOverview is retained as an accepted parameter for call-site
-  // compatibility but is no longer used for schedule list rendering.
-  // The anti-collision occupancy grid (/api/v1/schedules/occupancy-overview)
-  // is a per-shift structure; using it to reconstruct per-session display
-  // records caused multiple sessions sharing the same shift to collapse into
-  // a single synthetic entry. The authoritative schedule list from the store
-  // (_schedulesMap, populated by /api/v1/schedules/my-schedules) is the
-  // correct and complete source of truth for this view.
   final ScheduleOccupancyOverviewData? occupancyOverview;
   final bool dark;
   final void Function(DoctorSchedule) onTapDetail;
@@ -179,20 +171,6 @@ class AmanahScheduleSessionsView extends StatelessWidget {
     );
   }
 
-  /// Resolves the [DoctorSchedule] list to display for the selected date,
-  /// applying temporal past-state and closed-day status overrides to each entry.
-  ///
-  /// Reads directly from the authoritative [schedules] list — the same data
-  /// that [AmanahScheduleStore] populates from the backend's
-  /// `GET /api/v1/schedules/my-schedules?date=...` endpoint.
-  ///
-  /// The previous implementation contained a "Priority 1" path that attempted
-  /// to reconstruct display entries from the occupancy-overview anti-collision
-  /// grid (`GET /api/v1/schedules/occupancy-overview`). That endpoint is a
-  /// per-shift 24-hour grid, not a per-session list. When the doctor has
-  /// multiple sessions within the same shift, the grid yields a single
-  /// OCCUPIED_BY_SELF slot per shift — causing all sessions in that shift to
-  /// collapse into one synthetic entry on screen. That path has been removed.
   List<DoctorSchedule> _resolveDisplaySchedules({
     required List<DoctorSchedule> schedules,
     required DayScheduleSetting daySetting,
@@ -203,7 +181,6 @@ class AmanahScheduleSessionsView extends StatelessWidget {
       return const <DoctorSchedule>[];
     }
 
-    // Resolve effective calendar date for temporal comparisons.
     DateTime? effectiveDate = selectedDate;
     if (effectiveDate == null && daySetting.scheduleDate != null) {
       effectiveDate = DateTime.tryParse(daySetting.scheduleDate!) ??
@@ -227,11 +204,13 @@ class AmanahScheduleSessionsView extends StatelessWidget {
     final List<DoctorSchedule> result = <DoctorSchedule>[];
 
     for (final DoctorSchedule sch in schedules) {
-      final bool isSlotPast = isTemporalSlotPast(
-        scheduleDate: effectiveDate,
-        scheduleDateStr: dateStr,
-        timeSlotOrEndTime: sch.endTime,
-      );
+      final bool isSlotPast = sch.isPast ||
+          sch.badge == ScheduleFormConstants.badgeSelesai ||
+          isTemporalSlotPast(
+            scheduleDate: effectiveDate,
+            scheduleDateStr: dateStr,
+            timeSlotOrEndTime: sch.endTime,
+          );
 
       final bool isClosed = isDayClosed ||
           !sch.isAvailable ||

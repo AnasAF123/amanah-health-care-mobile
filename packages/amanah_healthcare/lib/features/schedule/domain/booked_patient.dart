@@ -20,9 +20,19 @@ class BookedPatient {
     this.status,
     this.statusBadge,
     this.nik,
+    this.phoneNumber,
+    this.address,
+    this.birthDate,
+    this.bloodType,
+    this.motherName,
+    this.occupation,
+    this.visitType,
   });
 
   factory BookedPatient.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic>? pMap = json['patient'] is Map<String, dynamic>
+        ? json['patient'] as Map<String, dynamic>
+        : null;
     final String rawStatus = (json['status'] as String? ?? 'booked').toLowerCase();
     AmanahBadgeVariant variant;
     String badgeText = json['statusBadge'] as String? ?? 'Terdaftar';
@@ -56,18 +66,21 @@ class BookedPatient {
     }
 
     return BookedPatient(
-      id: json['id'] as String? ?? '',
-      appointmentId: json['appointmentId'] as String? ?? json['id'] as String?,
-      patientName: json['fullName'] as String? ??
+      id: pMap?['id'] as String? ?? json['id'] as String? ?? '',
+      appointmentId: json['appointmentId'] as String? ?? (pMap != null ? json['id'] as String? : null),
+      patientName: pMap?['fullName'] as String? ??
+          json['fullName'] as String? ??
           json['patientName'] as String? ??
           json['name'] as String? ??
           '',
-      patientRm: json['medicalRecordNumber'] as String? ??
+      patientRm: pMap?['medicalRecordNumber'] as String? ??
+          json['medicalRecordNumber'] as String? ??
           json['patientRm'] as String? ??
           json['noRm'] as String? ??
           '',
-      patientAge: json['age'] as String? ?? json['patientAge'] as String? ?? '',
-      patientComplaint: json['complaint'] as String? ??
+      patientAge: pMap?['age'] as String? ?? json['age'] as String? ?? json['patientAge'] as String? ?? '',
+      patientComplaint: json['chiefComplaint'] as String? ??
+          json['complaint'] as String? ??
           json['patientComplaint'] as String? ??
           '',
       queueNumber: json['queueNumber'] as String? ?? '',
@@ -76,16 +89,24 @@ class BookedPatient {
           '',
       badge: badgeText,
       badgeVariant: variant,
-      avatarUrl: json['avatarUrl'] as String?,
-      patientGuardian: json['guardian'] as String? ??
+      avatarUrl: pMap?['avatarUrl'] as String? ?? json['avatarUrl'] as String?,
+      patientGuardian: pMap?['guardianName'] as String? ??
+          json['guardian'] as String? ??
           json['patientGuardian'] as String? ??
           json['emergencyContact'] as String?,
-      gender: json['gender'] as String?,
+      gender: pMap?['gender'] as String? ?? json['gender'] as String?,
       sessionTitle: json['sessionTitle'] as String?,
-      room: json['room'] as String?,
+      room: json['clinicRoomName'] as String? ?? json['room'] as String?,
       status: json['status'] as String?,
       statusBadge: json['statusBadge'] as String?,
-      nik: json['nik'] as String?,
+      nik: pMap?['nik'] as String? ?? json['nik'] as String?,
+      phoneNumber: pMap?['phoneNumber'] as String? ?? json['phoneNumber'] as String? ?? json['phone'] as String?,
+      address: pMap?['address'] as String? ?? json['address'] as String?,
+      birthDate: pMap?['birthDate'] as String? ?? json['birthDate'] as String?,
+      bloodType: pMap?['bloodType'] as String? ?? json['bloodType'] as String?,
+      motherName: pMap?['motherName'] as String? ?? json['motherName'] as String?,
+      occupation: pMap?['occupation'] as String? ?? json['occupation'] as String?,
+      visitType: json['visitType'] as String?,
     );
   }
 
@@ -107,6 +128,13 @@ class BookedPatient {
   final String? status;
   final String? statusBadge;
   final String? nik;
+  final String? phoneNumber;
+  final String? address;
+  final String? birthDate;
+  final String? bloodType;
+  final String? motherName;
+  final String? occupation;
+  final String? visitType;
 
   bool get isInService =>
       status?.toLowerCase() == 'in_service' ||
@@ -140,6 +168,13 @@ class BookedPatient {
       'status': status,
       'statusBadge': statusBadge ?? badge,
       if (nik != null) 'nik': nik,
+      if (phoneNumber != null) 'phoneNumber': phoneNumber,
+      if (address != null) 'address': address,
+      if (birthDate != null) 'birthDate': birthDate,
+      if (bloodType != null) 'bloodType': bloodType,
+      if (motherName != null) 'motherName': motherName,
+      if (occupation != null) 'occupation': occupation,
+      if (visitType != null) 'visitType': visitType,
     };
   }
 
@@ -162,6 +197,13 @@ class BookedPatient {
     String? status,
     String? statusBadge,
     String? nik,
+    String? phoneNumber,
+    String? address,
+    String? birthDate,
+    String? bloodType,
+    String? motherName,
+    String? occupation,
+    String? visitType,
   }) {
     return BookedPatient(
       id: id ?? this.id,
@@ -182,6 +224,13 @@ class BookedPatient {
       status: status ?? this.status,
       statusBadge: statusBadge ?? this.statusBadge,
       nik: nik ?? this.nik,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      address: address ?? this.address,
+      birthDate: birthDate ?? this.birthDate,
+      bloodType: bloodType ?? this.bloodType,
+      motherName: motherName ?? this.motherName,
+      occupation: occupation ?? this.occupation,
+      visitType: visitType ?? this.visitType,
     );
   }
 }

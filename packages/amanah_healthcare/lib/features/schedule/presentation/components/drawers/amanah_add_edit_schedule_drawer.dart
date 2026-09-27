@@ -14,7 +14,6 @@ import 'package:amanah_healthcare/features/schedule/presentation/components/form
 import 'package:amanah_healthcare/features/schedule/presentation/components/form/schedule_form_models.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/form/schedule_shift_boundary_helper.dart';
 
-/// Master Add & Edit Schedule Form Drawer (Doctor POV)
 class AmanahAddEditScheduleDrawer extends StatefulWidget {
   const AmanahAddEditScheduleDrawer({
     required this.initialDate,
@@ -127,7 +126,7 @@ class _AmanahAddEditScheduleDrawerState
     if (ctx != null && ctx.effectiveConsultationDurationMinutes > 0) {
       return ctx.effectiveConsultationDurationMinutes;
     }
-    return 30; // Database default from practitioner setting
+    return 30;
   }
 
   Future<void> _loadOccupancyData([String? preferredRoomName]) async {
@@ -196,7 +195,6 @@ class _AmanahAddEditScheduleDrawerState
       }
     } catch (_) {}
 
-    // On 429 or network delay, keep the valid initial data and load occupancy safely
     await _loadOccupancyData();
   }
 
@@ -438,11 +436,8 @@ class _AmanahAddEditScheduleDrawerState
               color: (dark ? Colors.white : AmanahColorTokens.brand).withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.info_outline_rounded,
-              size: 16,
-              color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
-            ),
+            child: Icon(Icons.info_outline_rounded,
+              size: 16, color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand),
           ),
         ),
       ),
@@ -461,15 +456,13 @@ class _AmanahAddEditScheduleDrawerState
           isLoading: _isSubmitting,
           onPressed: _handleSave,
         ),
-        secondary: isEditing
-            ? AmanahButton.ghost(
-                text: 'Hapus',
-                size: AmanahButtonSize.medium,
-                isFullWidth: true,
-                customForegroundColor: AmanahColorTokens.dangerDark,
-                onPressed: _handleDelete,
-              )
-            : null,
+        secondary: isEditing ? AmanahButton.ghost(
+          text: 'Hapus',
+          size: AmanahButtonSize.medium,
+          isFullWidth: true,
+          customForegroundColor: AmanahColorTokens.dangerDark,
+          onPressed: _handleDelete,
+        ) : null,
       ),
       body: ScheduleFormBodyContent(
         selectedDate: _selectedDate,

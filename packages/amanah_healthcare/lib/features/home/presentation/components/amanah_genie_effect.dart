@@ -273,8 +273,15 @@ Future<ui.Image> generateCardCoverSnapshot({
   canvas.restore();
 
   final ui.Picture picture = recorder.endRecording();
-  return picture.toImage(
-    (size.width * pixelRatio).toInt(),
-    (size.height * pixelRatio).toInt(),
-  );
+  try {
+    return picture.toImageSync(
+      (size.width * pixelRatio).toInt(),
+      (size.height * pixelRatio).toInt(),
+    );
+  } catch (_) {
+    return await picture.toImage(
+      (size.width * pixelRatio).toInt(),
+      (size.height * pixelRatio).toInt(),
+    );
+  }
 }

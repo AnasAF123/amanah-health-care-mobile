@@ -5,7 +5,6 @@ import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model
 import 'package:amanah_healthcare/features/schedule/presentation/components/cards/card_decoration_layers.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/drawers/patient_detail_modal_painters.dart';
 
-/// Patient Detail & Complaint Bottom Sheet Modal
 class AmanahPatientDetailModal extends StatelessWidget {
   const AmanahPatientDetailModal({
     required this.patient,
@@ -86,86 +85,23 @@ class _PatientProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        SizedBox(
-          width: 98,
-          height: 94,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.topCenter,
-            children: <Widget>[
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AmanahColorTokens.brandLight.withValues(alpha: 0.20),
-                    width: 3,
-                  ),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: AmanahColorTokens.pureBlack.withValues(alpha: 0.16),
-                      blurRadius: 18,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: ClipOval(
-                  child: Image.network(
-                    patient.avatarUrl ??
-                        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop',
-                    fit: BoxFit.cover,
-                    errorBuilder:
-                        (
-                          BuildContext context,
-                          Object error,
-                          StackTrace? stack,
-                        ) => ColoredBox(
-                          color: dark
-                              ? AmanahColorTokens.neutral700
-                              : AmanahColorTokens.neutral300,
-                          child: Center(
-                            child: Text(
-                              patient.patientName.isNotEmpty
-                                  ? patient.patientName.substring(0, 1)
-                                  : 'P',
-                              style: TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w800,
-                                color: dark
-                                    ? AmanahColorTokens.pureWhite
-                                    : AmanahColorTokens.neutral800,
-                              ),
-                            ),
-                          ),
-                        ),
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 8,
-                bottom: 3,
-                child: CustomPaint(
-                  size: const Size(38, 45),
-                  painter: QueueBadgePainter(patient.queueNumber),
-                ),
-              ),
-            ],
-          ),
+        CustomPaint(
+          size: const Size(64, 76),
+          painter: QueueBadgePainter(patient.queueNumber),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         Text(
           patient.patientName,
           textAlign: TextAlign.center,
           style: TextStyle(
             color: dark ? AmanahColorTokens.pureWhite : AmanahColorTokens.neutral950,
-            fontSize: 18,
+            fontSize: 20,
             fontWeight: FontWeight.w900,
             height: 1.1,
-            letterSpacing: 0,
+            letterSpacing: -0.2,
           ),
         ),
-        const SizedBox(height: 7),
+        const SizedBox(height: 8),
         _PatientMetaInline(patient: patient, dark: dark),
       ],
     );
@@ -188,7 +124,14 @@ class _PatientMetaInline extends StatelessWidget {
         children: <Widget>[
           Text(patient.patientRm, style: _style),
           _PatientMetaDivider(dark: dark),
-          Text('Usia ${patient.patientAge}', style: _style),
+          Text(
+            patient.patientAge.isNotEmpty
+                ? 'Usia ${patient.patientAge}'
+                : (patient.birthDate != null && patient.birthDate!.isNotEmpty
+                    ? patient.birthDate!
+                    : '-'),
+            style: _style,
+          ),
           _PatientMetaDivider(dark: dark),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -269,7 +212,7 @@ class _PatientSpecificationTable extends StatelessWidget {
         children: <Widget>[
           PatientSpecRow(
             label: 'Waktu / jam booking',
-            value: patient.timeSlot,
+            value: patient.timeSlot.isNotEmpty ? patient.timeSlot : '-',
             dark: dark,
           ),
           PatientSpecRow(
@@ -282,10 +225,53 @@ class _PatientSpecificationTable extends StatelessWidget {
             value: schedule.room,
             dark: dark,
           ),
-          if (patient.patientGuardian != null)
+          PatientSpecRow(
+            label: 'Nomor NIK KTP',
+            value: patient.nik != null && patient.nik!.isNotEmpty ? patient.nik! : '-',
+            dark: dark,
+          ),
+          PatientSpecRow(
+            label: 'Jenis Kelamin',
+            value: patient.gender != null && patient.gender!.isNotEmpty ? patient.gender! : '-',
+            dark: dark,
+          ),
+          PatientSpecRow(
+            label: 'Golongan Darah',
+            value: patient.bloodType != null && patient.bloodType!.isNotEmpty ? patient.bloodType! : '-',
+            dark: dark,
+          ),
+          PatientSpecRow(
+            label: 'Nama Ibu Kandung',
+            value: patient.motherName != null && patient.motherName!.isNotEmpty ? patient.motherName! : '-',
+            dark: dark,
+          ),
+          PatientSpecRow(
+            label: 'Pekerjaan',
+            value: patient.occupation != null && patient.occupation!.isNotEmpty ? patient.occupation! : '-',
+            dark: dark,
+          ),
+          if (patient.phoneNumber != null && patient.phoneNumber!.isNotEmpty)
             PatientSpecRow(
-              label: 'Nama pendamping',
+              label: 'No. Telepon / WhatsApp',
+              value: patient.phoneNumber!,
+              dark: dark,
+            ),
+          if (patient.address != null && patient.address!.isNotEmpty)
+            PatientSpecRow(
+              label: 'Alamat Domisili',
+              value: patient.address!,
+              dark: dark,
+            ),
+          if (patient.patientGuardian != null && patient.patientGuardian!.isNotEmpty)
+            PatientSpecRow(
+              label: 'Nama Pendamping / Darurat',
               value: patient.patientGuardian!,
+              dark: dark,
+            ),
+          if (patient.visitType != null && patient.visitType!.isNotEmpty)
+            PatientSpecRow(
+              label: 'Jenis Kunjungan',
+              value: patient.visitType!,
               dark: dark,
             ),
           _PatientComplaintBlock(

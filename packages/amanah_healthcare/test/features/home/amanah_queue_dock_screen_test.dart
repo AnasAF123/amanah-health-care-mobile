@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:amanah_healthcare/core/constants/doctor_queue_copywriting.dart';
+import 'package:amanah_healthcare/core/constants/doctor_queue_status.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_queue_data.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_dock_hollow_glow.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_queue_dock_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/features/queue/domain/entities/doctor_queue_appointment.dart';
+import 'package:amanah_healthcare/features/queue/domain/repositories/doctor_queue_repository.dart';
+import 'package:amanah_healthcare/features/queue/presentation/controllers/doctor_queue_controller.dart';
+import 'package:amanah_healthcare/features/queue/presentation/widgets/amanah_queue_active_session_sheet.dart';
+import 'package:amanah_healthcare/features/queue/presentation/widgets/amanah_queue_card_cover.dart';
 
 const List<AmanahQueueCardData> kTestQueueCards = <AmanahQueueCardData>[
   AmanahQueueCardData(
@@ -53,10 +60,76 @@ const List<AmanahQueueCardData> kTestQueueCards = <AmanahQueueCardData>[
   ),
 ];
 
+class FakeDoctorQueueRepository implements DoctorQueueRepository {
+  List<DoctorQueueAppointment> queue = <DoctorQueueAppointment>[];
+
+  @override
+  Future<List<DoctorQueueAppointment>> getDailyQueue({
+    required String poliklinikId,
+    required String date,
+    String? session,
+  }) async {
+    return queue;
+  }
+
+  @override
+  Future<DoctorQueueAppointment> callPatient(String appointmentId) async {
+    return DoctorQueueAppointment(
+      id: appointmentId,
+      queueNumber: 'U-001',
+      status: DoctorQueueStatus.called,
+      callCount: 1,
+      patientName: 'Ahmad Amikom',
+      appointmentDate: '2026-09-27',
+      session: 'Pagi',
+    );
+  }
+
+  @override
+  Future<DoctorQueueAppointment> respondPatient(String appointmentId) async {
+    return DoctorQueueAppointment(
+      id: appointmentId,
+      queueNumber: 'U-001',
+      status: DoctorQueueStatus.inConsultation,
+      callCount: 1,
+      patientName: 'Ahmad Amikom',
+      appointmentDate: '2026-09-27',
+      session: 'Pagi',
+    );
+  }
+
+  @override
+  Future<DoctorQueueAppointment> noShowPatient(String appointmentId) async {
+    return DoctorQueueAppointment(
+      id: appointmentId,
+      queueNumber: 'U-001',
+      status: DoctorQueueStatus.waiting,
+      callCount: 1,
+      patientName: 'Ahmad Amikom',
+      appointmentDate: '2026-09-27',
+      session: 'Pagi',
+    );
+  }
+
+  @override
+  Future<DoctorQueueAppointment> completeAppointment(String appointmentId) async {
+    return DoctorQueueAppointment(
+      id: appointmentId,
+      queueNumber: 'U-001',
+      status: DoctorQueueStatus.completed,
+      callCount: 1,
+      patientName: 'Ahmad Amikom',
+      appointmentDate: '2026-09-27',
+      session: 'Pagi',
+    );
+  }
+}
+
 void main() {
   Widget createQueueDockScreen({
     Brightness brightness = Brightness.light,
     List<AmanahQueueCardData>? cards,
+    DoctorQueueController? controller,
   }) {
     return MaterialApp(
       theme: ThemeData(
@@ -67,7 +140,13 @@ void main() {
           brightness: brightness,
         ),
       ),
-      home: AmanahQueueDockScreen(cards: cards ?? kTestQueueCards),
+      home: AmanahQueueDockScreen(
+        cards: cards ?? kTestQueueCards,
+        controller: controller ??
+            DoctorQueueController(
+              repository: FakeDoctorQueueRepository(),
+            ),
+      ),
     );
   }
 
@@ -87,7 +166,7 @@ void main() {
 
       // Check header and title
       expect(find.text('Pilih antrean\npasien'), findsOneWidget);
-      expect(find.text('Tarik antrean ke bawah untuk proses'), findsOneWidget);
+      expect(find.text('Tarik kartu ke bawah untuk memanggil'), findsOneWidget);
 
       // Check default cards on rail
       expect(find.text('#01'), findsWidgets);
@@ -109,7 +188,7 @@ void main() {
 
       // Check header and title
       expect(find.text('Pilih antrean\npasien'), findsOneWidget);
-      expect(find.text('Tarik antrean ke bawah untuk proses'), findsOneWidget);
+      expect(find.text('Tarik kartu ke bawah untuk memanggil'), findsOneWidget);
 
       // Verify scaffold background matches dark canvas token
       final Scaffold scaffold = tester.widget<Scaffold>(
@@ -214,19 +293,34 @@ void main() {
         createQueueDockScreen(brightness: Brightness.light),
       );
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 1200));
 
-      // Drag downwards past activation threshold
-      await tester.dragFrom(const Offset(200, 400), const Offset(0, 120));
+      final Finder carouselDetector = find.byWidgetPredicate(
+        (Widget w) => w is GestureDetector && w.onPanUpdate != null,
+      );
+      await tester.timedDrag(
+        carouselDetector,
+        const Offset(0, 120),
+        const Duration(milliseconds: 300),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pump(const Duration(milliseconds: 2000));
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 1000));
 
-      // Check overlay appears
-      expect(find.text('Antrean terpilih'), findsOneWidget);
-      expect(find.text('Panggil & Proses Pasien'), findsOneWidget);
-      expect(find.text('Pilih Antrean Lain'), findsOneWidget);
+      expect(find.byType(AmanahQueueActiveSessionSheet), findsOneWidget);
+      expect(
+        find.text(DoctorQueueCopywriting.actionPatientEntered),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(AmanahQueueActiveSessionSheet),
+          matching: find.byIcon(Icons.arrow_back_rounded),
+        ),
+        findsOneWidget,
+      );
+      await tester.pump(const Duration(milliseconds: 500));
     });
 
     testWidgets('Can close activation overlay with genie minimize suction', (
@@ -240,32 +334,38 @@ void main() {
         createQueueDockScreen(brightness: Brightness.light),
       );
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 1200));
 
-      // Activate card
-      await tester.dragFrom(const Offset(200, 400), const Offset(0, 120));
+      final Finder carouselDetector = find.byWidgetPredicate(
+        (Widget w) => w is GestureDetector && w.onPanUpdate != null,
+      );
+      await tester.timedDrag(
+        carouselDetector,
+        const Offset(0, 120),
+        const Duration(milliseconds: 300),
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pump(const Duration(milliseconds: 2000));
       await tester.pump(const Duration(milliseconds: 1000));
 
-      // Tap 'Pilih Antrean Lain'
-      await tester.tap(find.text('Pilih Antrean Lain'));
+      expect(find.byType(AmanahQueueActiveSessionSheet), findsOneWidget);
+
+      final Finder backButton = find.descendant(
+        of: find.byType(AmanahQueueActiveSessionSheet),
+        matching: find.byIcon(Icons.arrow_back_rounded),
+      );
+      await tester.tap(backButton);
       await tester.pump();
-      await tester.pump(
-        const Duration(milliseconds: 700),
-      ); // Genie minimize runs & completes
-      await tester.pump(
-        const Duration(milliseconds: 2500),
-      ); // ATM rail return choreography completes
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pump(const Duration(milliseconds: 2500));
       await tester.pump(const Duration(milliseconds: 300));
 
-      // Should be back on main dock screen
       expect(find.text('Pilih antrean\npasien'), findsOneWidget);
     });
 
     testWidgets(
-      'Can tap Panggil & Proses Pasien to collect card into history',
+      'Can tap actionPatientEntered to proceed and complete consultation',
       (WidgetTester tester) async {
         tester.view.physicalSize = const Size(1080, 2400);
         tester.view.devicePixelRatio = 2.75;
@@ -275,27 +375,43 @@ void main() {
           createQueueDockScreen(brightness: Brightness.light),
         );
         await tester.pump();
-        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump(const Duration(milliseconds: 1200));
 
-        // Activate card
-        await tester.dragFrom(const Offset(200, 400), const Offset(0, 120));
+        final Finder carouselDetector = find.byWidgetPredicate(
+          (Widget w) => w is GestureDetector && w.onPanUpdate != null,
+        );
+        await tester.timedDrag(
+          carouselDetector,
+          const Offset(0, 120),
+          const Duration(milliseconds: 300),
+        );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 500));
         await tester.pump(const Duration(milliseconds: 2000));
         await tester.pump(const Duration(milliseconds: 1000));
 
-        // Tap 'Panggil & Proses Pasien'
-        await tester.tap(find.text('Panggil & Proses Pasien'));
-        await tester.pump();
-        await tester.pump(
-          const Duration(milliseconds: 900),
-        ); // Retreat animation
-        await tester.pump(
-          const Duration(milliseconds: 600),
-        ); // Navigation transition
+        expect(find.byType(AmanahQueueActiveSessionSheet), findsOneWidget);
 
-        // Navigates to history screen
-        expect(find.text('Riwayat antrean diproses'), findsOneWidget);
+        await tester.tap(
+          find.text(DoctorQueueCopywriting.actionPatientEntered),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        expect(
+          find.text(DoctorQueueCopywriting.actionFinishConsultation),
+          findsOneWidget,
+        );
+
+        await tester.tap(
+          find.text(DoctorQueueCopywriting.actionFinishConsultation),
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 700));
+        await tester.pump(const Duration(milliseconds: 2500));
+        await tester.pump(const Duration(milliseconds: 300));
+
+        expect(find.text('Pilih antrean\npasien'), findsOneWidget);
       },
     );
   });

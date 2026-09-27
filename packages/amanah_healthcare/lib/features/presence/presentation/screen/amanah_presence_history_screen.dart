@@ -8,9 +8,6 @@ import 'package:amanah_healthcare/features/presence/presentation/screen/presence
 import 'package:amanah_healthcare/features/presence/presentation/screen/presence_history_timeline_tab.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 
-/// Master History Screen supporting segmented tabs:
-/// Tab 0: Presensi (Attendance Timeline)
-/// Tab 1: Pasien (Completed Patient History)
 class AmanahPresenceHistoryScreen extends StatefulWidget {
   const AmanahPresenceHistoryScreen({
     this.records,
@@ -43,14 +40,18 @@ class AmanahPresenceHistoryScreen extends StatefulWidget {
 }
 
 class _AmanahPresenceHistoryScreenState
-    extends State<AmanahPresenceHistoryScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
+    extends State<AmanahPresenceHistoryScreen> {
+  late int _activeTabIndex;
   AttendanceStatus? _statusFilter;
   String _unitFilter = 'all';
   int? _selectedDayFilter;
   bool _isDownloading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _activeTabIndex = widget.initialTab;
+  }
 
   bool get _hasActiveFilters =>
       _statusFilter != null ||
@@ -77,22 +78,6 @@ class _AmanahPresenceHistoryScreenState
           return true;
         })
         .toList(growable: false);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(
-      length: 2,
-      vsync: this,
-      initialIndex: widget.initialTab.clamp(0, 1),
-    );
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   void _resetFilters() {
@@ -158,102 +143,122 @@ class _AmanahPresenceHistoryScreenState
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            // 1. Master Screen Header
             AmanahScreenHeader(
               title: 'Riwayat Presensi',
               onBack: () => Navigator.of(context).pop(),
             ),
-
-            // 2. Segmented Pill Tab Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Container(
-                height: 42,
-                decoration: BoxDecoration(
-                  color: dark
-                      ? AmanahColorTokens.pureWhite.withValues(alpha: 0.06)
-                      : AmanahColorTokens.neutral200.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                padding: const EdgeInsets.all(3),
-                child: TabBar(
-                  controller: _tabController,
-                  indicator: BoxDecoration(
-                    borderRadius: BorderRadius.circular(11),
-                    gradient: dark
-                        ? AmanahColorTokens.btnCrispBlueDarkGradient
-                        : AmanahColorTokens.btnCrispBlueGradient,
-                    boxShadow: <BoxShadow>[
-                      if (dark)
-                        AmanahColorTokens.btnCrispBlueDarkShadow
-                      else
-                        AmanahColorTokens.btnCrispBlueShadow,
-                    ],
-                  ),
-                  labelColor: AmanahColorTokens.surfaceLight,
-                  unselectedLabelColor: dark
-                      ? AmanahColorTokens.neutral400
-                      : AmanahColorTokens.neutral600,
-                  labelStyle: const TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w800,
-                  ),
-                  unselectedLabelStyle: const TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: Colors.transparent,
-                  tabs: const <Widget>[
-                    Tab(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(Icons.access_time_rounded, size: 15),
-                          SizedBox(width: 6),
-                          Text('Presensi'),
-                        ],
-                      ),
-                    ),
-                    Tab(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(Icons.people_alt_rounded, size: 15),
-                          SizedBox(width: 6),
-                          Text('Pasien'),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: dark
+                    ? AmanahColorTokens.surfaceElevatedDark
+                    : AmanahColorTokens.neutral100,
+                borderRadius: BorderRadius.circular(14),
               ),
-            ),
-
-            // 3. Tab Bar View
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
+              child: Row(
                 children: <Widget>[
-                  // Tab 0: Presensi Timeline
-                  PresenceHistoryTimelineTab(
-                    records: _filteredRecords,
-                    hasActiveFilters: _hasActiveFilters,
-                    statusFilter: _statusFilter,
-                    unitFilter: _unitFilter,
-                    selectedDayFilter: _selectedDayFilter,
-                    isDownloading: _isDownloading,
-                    onOpenFilter: _openFilterDrawer,
-                    onResetFilter: _resetFilters,
-                    onDownloadPdf: _handleDownloadPdf,
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _activeTabIndex = 0),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: _activeTabIndex == 0
+                              ? (dark
+                                  ? AmanahColorTokens.surfaceSecondaryDark
+                                  : AmanahColorTokens.pureWhite)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: _activeTabIndex == 0
+                              ? <BoxShadow>[
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.06),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Presensi',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: _activeTabIndex == 0
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                              color: _activeTabIndex == 0
+                                  ? (dark
+                                      ? AmanahColorTokens.pureWhite
+                                      : AmanahColorTokens.neutral900)
+                                  : AmanahColorTokens.neutral400,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-
-                  // Tab 1: Pasien History
-                  PresenceHistoryPatientTab(
-                    patients: widget.patients,
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _activeTabIndex = 1),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: _activeTabIndex == 1
+                              ? (dark
+                                  ? AmanahColorTokens.surfaceSecondaryDark
+                                  : AmanahColorTokens.pureWhite)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: _activeTabIndex == 1
+                              ? <BoxShadow>[
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.06),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Pasien',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: _activeTabIndex == 1
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                              color: _activeTabIndex == 1
+                                  ? (dark
+                                      ? AmanahColorTokens.pureWhite
+                                      : AmanahColorTokens.neutral900)
+                                  : AmanahColorTokens.neutral400,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
+            ),
+            Expanded(
+              child: _activeTabIndex == 0
+                  ? PresenceHistoryTimelineTab(
+                      records: _filteredRecords,
+                      hasActiveFilters: _hasActiveFilters,
+                      statusFilter: _statusFilter,
+                      unitFilter: _unitFilter,
+                      selectedDayFilter: _selectedDayFilter,
+                      isDownloading: _isDownloading,
+                      onOpenFilter: _openFilterDrawer,
+                      onResetFilter: _resetFilters,
+                      onDownloadPdf: _handleDownloadPdf,
+                    )
+                  : PresenceHistoryPatientTab(
+                      patients: widget.patients,
+                    ),
             ),
           ],
         ),

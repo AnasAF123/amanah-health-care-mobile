@@ -179,32 +179,50 @@ class StackedPatientAvatars extends StatelessWidget {
                 ),
               ),
               child: ClipOval(
-                child: Image.network(
-                  p.avatarUrl ??
-                      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
-                  fit: BoxFit.cover,
-                  errorBuilder:
-                      (BuildContext context, Object error, StackTrace? stack) =>
-                          ColoredBox(
-                            color: dark
-                                ? AmanahColorTokens.neutral700
-                                : AmanahColorTokens.neutral300,
-                            child: Center(
-                              child: Text(
-                                p.patientName.isNotEmpty
-                                    ? p.patientName.substring(0, 1)
-                                    : 'P',
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700,
-                                  color: dark
-                                      ? AmanahColorTokens.pureWhite
-                                      : AmanahColorTokens.neutral800,
+                child: (p.avatarUrl != null && p.avatarUrl!.isNotEmpty)
+                    ? Image.network(
+                        p.avatarUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (BuildContext context, Object error, StackTrace? stack) =>
+                            ColoredBox(
+                              color: dark
+                                  ? AmanahColorTokens.neutral700
+                                  : AmanahColorTokens.neutral300,
+                              child: Center(
+                                child: Text(
+                                  p.patientName.isNotEmpty
+                                      ? p.patientName.substring(0, 1)
+                                      : 'P',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w700,
+                                    color: dark
+                                        ? AmanahColorTokens.pureWhite
+                                        : AmanahColorTokens.neutral800,
+                                  ),
                                 ),
                               ),
                             ),
+                      )
+                    : ColoredBox(
+                        color: dark
+                            ? AmanahColorTokens.neutral700
+                            : AmanahColorTokens.neutral300,
+                        child: Center(
+                          child: Text(
+                            p.patientName.isNotEmpty
+                                ? p.patientName.substring(0, 1)
+                                : 'P',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              color: dark
+                                  ? AmanahColorTokens.pureWhite
+                                  : AmanahColorTokens.neutral800,
+                            ),
                           ),
-                ),
+                        ),
+                      ),
               ),
             ),
           );

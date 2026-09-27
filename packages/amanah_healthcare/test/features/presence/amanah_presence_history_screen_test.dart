@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/amanah_presence_drawers.dart';
 import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_presence_history_screen.dart';
+import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 
 const List<AttendanceRecord> kTestAttendanceRecords = <AttendanceRecord>[
   AttendanceRecord(
@@ -75,10 +76,45 @@ const List<AttendanceRecord> kTestAttendanceRecords = <AttendanceRecord>[
   ),
 ];
 
+const DoctorSchedule kTestHistoricalSchedule = DoctorSchedule(
+  id: 'hist-sch-01',
+  title: 'Sesi Pagi',
+  date: 'Kamis, 24 September 2026',
+  scheduleDate: '2026-09-24',
+  time: '08:00 - 11:30 WIB',
+  poli: 'Poli Umum',
+  room: 'Ruang 101, Gedung A',
+  slotCount: '1',
+  slotText: '1 Pasien',
+  badge: 'Selesai',
+  badgeVariant: AmanahBadgeVariant.success,
+);
+
+const List<({BookedPatient patient, DoctorSchedule schedule})>
+    kTestHistoricalPatients =
+    <({BookedPatient patient, DoctorSchedule schedule})>[
+  (
+    patient: BookedPatient(
+      id: 'hist-pat-01',
+      patientName: 'Siti Rahmawati',
+      patientAge: '32 Thn',
+      patientRm: 'RM-2026-0982',
+      patientComplaint: 'Kontrol hasil lab darah lengkap dan evaluasi terapi',
+      queueNumber: '#01',
+      timeSlot: '08:00 - 08:30 WIB',
+      badge: 'Selesai',
+      badgeVariant: AmanahBadgeVariant.success,
+      status: 'completed',
+    ),
+    schedule: kTestHistoricalSchedule,
+  ),
+];
+
 void main() {
   Widget createPresenceHistoryScreen({
     Brightness brightness = Brightness.light,
     List<AttendanceRecord>? records,
+    List<({BookedPatient patient, DoctorSchedule schedule})>? patients,
   }) {
     return MaterialApp(
       theme: ThemeData(
@@ -91,6 +127,7 @@ void main() {
       ),
       home: AmanahPresenceHistoryScreen(
         records: records ?? kTestAttendanceRecords,
+        patients: patients ?? kTestHistoricalPatients,
       ),
     );
   }
@@ -284,6 +321,7 @@ void main() {
         MaterialApp(
           home: AmanahPresenceHistoryScreen(
             records: kTestAttendanceRecords,
+            patients: kTestHistoricalPatients,
             initialTab: 1,
           ),
         ),

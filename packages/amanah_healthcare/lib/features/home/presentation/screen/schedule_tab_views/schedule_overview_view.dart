@@ -57,10 +57,12 @@ class AmanahScheduleOverviewView extends StatelessWidget {
       if (item.patient.isCompleted || item.patient.isCancelled) {
         return false;
       }
-      final bool isExpired = isTemporalSlotPast(
-        scheduleDateStr: item.schedule.scheduleDate ?? item.schedule.date,
-        timeSlotOrEndTime: item.patient.timeSlot,
-      );
+      final bool isExpired = item.schedule.isPast ||
+          item.schedule.badge == ScheduleFormConstants.badgeSelesai ||
+          isTemporalSlotPast(
+            scheduleDateStr: item.schedule.scheduleDate ?? item.schedule.date,
+            timeSlotOrEndTime: item.patient.timeSlot,
+          );
       return !isExpired;
     }).toList();
 
@@ -72,17 +74,18 @@ class AmanahScheduleOverviewView extends StatelessWidget {
       if (item.patient.isCompleted) {
         return true;
       }
-      return isTemporalSlotPast(
-        scheduleDateStr: item.schedule.scheduleDate ?? item.schedule.date,
-        timeSlotOrEndTime: item.patient.timeSlot,
-      );
+      return item.schedule.isPast ||
+          item.schedule.badge == ScheduleFormConstants.badgeSelesai ||
+          isTemporalSlotPast(
+            scheduleDateStr: item.schedule.scheduleDate ?? item.schedule.date,
+            timeSlotOrEndTime: item.patient.timeSlot,
+          );
     }).toList();
 
     return Column(
       key: const ValueKey<String>('view-overview'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        // Top Row: Radial Capacity Gauge & Lihat Schedule Trigger
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -125,8 +128,6 @@ class AmanahScheduleOverviewView extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-
-        // Horizontal Date Carousel Strip
         AmanahDateCarouselStrip(
           selectedDate: selectedDate,
           baseToday: AmanahScheduleStore.baseToday,
@@ -141,8 +142,6 @@ class AmanahScheduleOverviewView extends StatelessWidget {
               AmanahScheduleStore.instance.getDaySettingForDate(d).isCuti,
         ),
         const SizedBox(height: 12),
-
-        // Section Title: Date & Patient Count
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -178,8 +177,6 @@ class AmanahScheduleOverviewView extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-
-        // Showcase Pasien Booking Cards
         if (activePatients.isNotEmpty) ...<Widget>[
           ListView.separated(
             shrinkWrap: true,
@@ -298,7 +295,7 @@ class AmanahScheduleOverviewView extends StatelessWidget {
             size: AmanahButtonSize.small,
             onPressed: () {
               Navigator.of(context).push(
-                AmanahPresenceHistoryScreen.route(initialTab: 1),
+                AmanahPresenceHistoryScreen.route(),
               );
             },
           ),
@@ -318,11 +315,11 @@ class AmanahScheduleOverviewView extends StatelessWidget {
           title: 'Semua Konsultasi Selesai',
           message:
               'Sebanyak $count pasien pada tanggal ini telah selesai berkonsultasi atau melewati waktu praktik.',
-          actionText: 'Lihat Riwayat Pasien',
+          actionText: 'Lihat Riwayat Presensi',
           actionLeadingIcon: Icons.history_rounded,
           onAction: () {
             Navigator.of(context).push(
-              AmanahPresenceHistoryScreen.route(initialTab: 1),
+              AmanahPresenceHistoryScreen.route(),
             );
           },
           secondaryActionText: 'Lihat Sesi Dokter',

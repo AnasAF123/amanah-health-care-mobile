@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:amanah_healthcare/features/home/data/amanah_notification_repository.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_visual_role.dart';
 
 enum AmanahNotificationCategory {
@@ -26,6 +27,66 @@ class AmanahNotificationItem {
     this.isUrgent = false,
     this.actionLabel,
   });
+
+  factory AmanahNotificationItem.fromJson(Map<String, dynamic> json) {
+    final String rawCat = (json['category'] as String? ?? 'all').toLowerCase();
+    AmanahNotificationCategory category;
+    if (rawCat.contains('queue') ||
+        rawCat.contains('appointment') ||
+        rawCat.contains('antrean')) {
+      category = AmanahNotificationCategory.queue;
+    } else if (rawCat.contains('clinical') ||
+        rawCat.contains('lab') ||
+        rawCat.contains('klinis')) {
+      category = AmanahNotificationCategory.clinical;
+    } else if (rawCat.contains('shift') ||
+        rawCat.contains('schedule') ||
+        rawCat.contains('poli')) {
+      category = AmanahNotificationCategory.shift;
+    } else {
+      category = AmanahNotificationCategory.all;
+    }
+
+    final bool isUrgent = json['isUrgent'] as bool? ?? false;
+    final bool isUnread = !(json['isRead'] as bool? ?? false);
+
+    AmanahNotificationVisual visual;
+    if (isUrgent) {
+      visual = AmanahNotificationVisual.clinicalCritical;
+    } else if (category == AmanahNotificationCategory.queue) {
+      visual = AmanahNotificationVisual.queueVitals;
+    } else if (category == AmanahNotificationCategory.shift) {
+      visual = AmanahNotificationVisual.shiftSchedule;
+    } else {
+      visual = AmanahNotificationVisual.clinicalConsult;
+    }
+
+    final String createdAtStr = json['createdAt'] as String? ?? '';
+    String timeStr = 'Baru saja';
+    String timestampStr = 'Hari ini';
+    if (createdAtStr.isNotEmpty) {
+      final DateTime? parsed = DateTime.tryParse(createdAtStr);
+      if (parsed != null) {
+        timeStr =
+            '${parsed.hour.toString().padLeft(2, '0')}:${parsed.minute.toString().padLeft(2, '0')}';
+        timestampStr =
+            '${parsed.hour.toString().padLeft(2, '0')}:${parsed.minute.toString().padLeft(2, '0')}';
+      }
+    }
+
+    return AmanahNotificationItem(
+      id: json['id'] as String? ?? '',
+      title: json['title'] as String? ?? 'Pemberitahuan',
+      desc: json['body'] as String? ?? json['desc'] as String? ?? '',
+      time: timeStr,
+      timestamp: timestampStr,
+      category: category,
+      visual: visual,
+      isUnread: isUnread,
+      isUrgent: isUrgent,
+      actionLabel: json['actionLabel'] as String?,
+    );
+  }
 
   final String id;
   final String title;
@@ -66,16 +127,21 @@ class AmanahNotificationItem {
 }
 
 class AmanahNotificationStore extends ChangeNotifier {
-  AmanahNotificationStore._() {
+  AmanahNotificationStore._({AmanahNotificationRepository? repository})
+      : _repository = repository ?? AmanahNotificationRepository() {
     _notifications = List<AmanahNotificationItem>.from(_initialNotifications);
   }
 
   static final AmanahNotificationStore instance = AmanahNotificationStore._();
 
-  static const List<AmanahNotificationItem>
-  _initialNotifications = <AmanahNotificationItem>[];
+  static const List<AmanahNotificationItem> _initialNotifications =
+      <AmanahNotificationItem>[];
 
+  final AmanahNotificationRepository _repository;
   late List<AmanahNotificationItem> _notifications;
+  bool _isLoading = false;
+
+  bool get isLoading => _isLoading;
 
   @visibleForTesting
   void seedForTesting(List<AmanahNotificationItem> items) {
@@ -109,7 +175,32 @@ class AmanahNotificationStore extends ChangeNotifier {
         .toList();
   }
 
-  void markAsRead(String id) {
+  Future<void> loadNotifications() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final List<AmanahNotificationItem> items =
+          await _repository.fetchNotifications();
+      if (items.isNotEmpty) {
+        _notifications = items;
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> refreshUnreadCount() async {
+    final int count = await _repository.fetchUnreadCount();
+    if (count == 0 && unreadCount > 0) {
+      _notifications = _notifications
+          .map((AmanahNotificationItem n) => n.copyWith(isUnread: false))
+          .toList();
+      notifyListeners();
+    }
+  }
+
+  Future<void> markAsRead(String id) async {
     bool updated = false;
     _notifications = _notifications.map((AmanahNotificationItem n) {
       if (n.id == id && n.isUnread) {
@@ -121,10 +212,11 @@ class AmanahNotificationStore extends ChangeNotifier {
 
     if (updated) {
       notifyListeners();
+      await _repository.markAsRead(id);
     }
   }
 
-  void markAllAsRead() {
+  Future<void> markAllAsRead() async {
     final bool hasUnread = _notifications.any(
       (AmanahNotificationItem n) => n.isUnread,
     );
@@ -135,6 +227,7 @@ class AmanahNotificationStore extends ChangeNotifier {
         .map((AmanahNotificationItem n) => n.copyWith(isUnread: false))
         .toList();
     notifyListeners();
+    await _repository.markAllAsRead();
   }
 
   void clearRead() {

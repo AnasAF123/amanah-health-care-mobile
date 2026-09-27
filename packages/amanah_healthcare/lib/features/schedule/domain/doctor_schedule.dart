@@ -25,6 +25,7 @@ class DoctorSchedule {
     this.availableSlots,
     this.bookedPatientCount = 0,
     this.isAvailable = true,
+    this.isPast = false,
     this.notes,
     this.sessionShift = 'morning',
     this.version,
@@ -100,10 +101,25 @@ class DoctorSchedule {
         json['slot_tersedia'] as int? ??
         (capacity - bookedPatientCount).clamp(0, capacity);
 
-    // Canonical status: OPEN ('Buka'), OCCUPIED ('Terisi'/'Penuh'), CLOSED ('Tutup')
+    final String? backendBadge = json['statusBadge'] as String?;
+    final String? backendVariant = json['badgeVariant'] as String?;
+    final bool isPast = json['isPast'] as bool? ?? false;
+
     final String badge;
     final AmanahBadgeVariant badgeVariant;
-    if (!isAvailable ||
+    if (backendBadge != null && backendBadge.isNotEmpty) {
+      badge = backendBadge;
+      if (backendVariant == 'warning') {
+        badgeVariant = AmanahBadgeVariant.warning;
+      } else if (backendVariant == 'primary') {
+        badgeVariant = AmanahBadgeVariant.primary;
+      } else {
+        badgeVariant = AmanahBadgeVariant.success;
+      }
+    } else if (isPast) {
+      badge = ScheduleFormConstants.badgeSelesai;
+      badgeVariant = AmanahBadgeVariant.warning;
+    } else if (!isAvailable ||
         rawStatus == ScheduleCanonicalStatus.closed ||
         rawStatus == ScheduleCanonicalStatus.tutup) {
       badge = ScheduleFormConstants.statusTutup;
@@ -171,6 +187,7 @@ class DoctorSchedule {
       availableSlots: availableSlots,
       bookedPatientCount: bookedPatientCount,
       isAvailable: isAvailable,
+      isPast: isPast,
       notes: json['notes'] as String?,
       sessionShift: sessionShift,
       version: version,
@@ -194,7 +211,7 @@ class DoctorSchedule {
   final AmanahBadgeVariant badgeVariant;
   final String? startTime;
   final String? endTime;
-  final String sessionType; // 'Dini Hari', 'Pagi', 'Siang', 'Malam'
+  final String sessionType;
   final List<BookedPatient> bookedPatients;
   final String? scheduleDate;
   final String? roomId;
@@ -204,6 +221,7 @@ class DoctorSchedule {
   final int? availableSlots;
   final int bookedPatientCount;
   final bool isAvailable;
+  final bool isPast;
   final String? notes;
   final String sessionShift;
   final String? version;
@@ -250,6 +268,7 @@ class DoctorSchedule {
       'availableSlots': availableSlots,
       'bookedPatientCount': bookedPatientCount,
       'isAvailable': isAvailable,
+      'isPast': isPast,
       'status': canonicalStatus,
       'status_sesi': mutationStatus,
       'badge': badge,
@@ -287,6 +306,7 @@ class DoctorSchedule {
     int? availableSlots,
     int? bookedPatientCount,
     bool? isAvailable,
+    bool? isPast,
     String? notes,
     String? sessionShift,
     String? version,
@@ -319,6 +339,7 @@ class DoctorSchedule {
       availableSlots: availableSlots ?? this.availableSlots,
       bookedPatientCount: bookedPatientCount ?? this.bookedPatientCount,
       isAvailable: isAvailable ?? this.isAvailable,
+      isPast: isPast ?? this.isPast,
       notes: notes ?? this.notes,
       sessionShift: sessionShift ?? this.sessionShift,
       version: version ?? this.version,

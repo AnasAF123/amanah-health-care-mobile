@@ -262,15 +262,12 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            // Top Overlay Screen Header
             AmanahScreenHeader(
               title: screenTitle,
               subtitle: screenSubtitle,
               onBack: backAction,
               trailing: _buildHeaderTrailing(context, dark, daySetting),
             ),
-
-            // Main Scrollable Viewport
             Expanded(
               child: AmanahPullToRefresh(
                 onRefresh: () async {
@@ -386,6 +383,8 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
         return AmanahScheduleSessionPatientsView(
           selectedSession: _selectedSession,
           dark: dark,
+          sessionPatients: _store.activeSessionPatients?.patients,
+          isLoading: _store.isSessionPatientsLoading,
           onBackToSessions: () {
             setState(() => _viewMode = AmanahScheduleViewMode.sessions);
           },
@@ -407,6 +406,9 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
           _selectedSession = schedule;
           _viewMode = AmanahScheduleViewMode.sessionPatients;
         });
+        if (schedule.sessionId.isNotEmpty) {
+          _store.fetchSessionPatients(schedule.sessionId);
+        }
       },
       onTapReschedule: () {
         AmanahRescheduleSessionDrawer.show(
