@@ -121,8 +121,15 @@ class _AmanahNotificationTabScreenState
                   );
                 },
                 child: filteredList.isEmpty
-                    ? Center(
-                        child: AmanahEmptyState.viewport(
+                    ? SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(
+                          parent: AlwaysScrollableScrollPhysics(),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                        child: AmanahEmptyState.box(
                           title:
                               _activeCategory == AmanahNotificationCategory.all
                                   ? 'Belum Ada Notifikasi'
@@ -134,17 +141,56 @@ class _AmanahNotificationTabScreenState
                           actionText: _activeCategory !=
                                   AmanahNotificationCategory.all
                               ? 'Lihat Semua Kategori'
-                              : null,
+                              : (widget.onBack != null ||
+                                      Navigator.of(context).canPop()
+                                  ? 'Kembali'
+                                  : null),
                           actionLeadingIcon: _activeCategory !=
                                   AmanahNotificationCategory.all
                               ? Icons.clear_all_rounded
-                              : null,
+                              : (widget.onBack != null ||
+                                      Navigator.of(context).canPop()
+                                  ? Icons.arrow_back_rounded
+                                  : null),
                           onAction: _activeCategory !=
                                   AmanahNotificationCategory.all
                               ? () => setState(
                                   () => _activeCategory =
                                       AmanahNotificationCategory.all,
                                 )
+                              : (widget.onBack != null ||
+                                      Navigator.of(context).canPop()
+                                  ? () {
+                                      if (widget.onBack != null) {
+                                        widget.onBack!.call();
+                                      } else {
+                                        Navigator.of(context).maybePop();
+                                      }
+                                    }
+                                  : null),
+                          secondaryActionText: _activeCategory !=
+                                      AmanahNotificationCategory.all &&
+                                  (widget.onBack != null ||
+                                      Navigator.of(context).canPop())
+                              ? 'Kembali'
+                              : null,
+                          secondaryActionLeadingIcon: _activeCategory !=
+                                      AmanahNotificationCategory.all &&
+                                  (widget.onBack != null ||
+                                      Navigator.of(context).canPop())
+                              ? Icons.arrow_back_rounded
+                              : null,
+                          onSecondaryAction: _activeCategory !=
+                                      AmanahNotificationCategory.all &&
+                                  (widget.onBack != null ||
+                                      Navigator.of(context).canPop())
+                              ? () {
+                                  if (widget.onBack != null) {
+                                    widget.onBack!.call();
+                                  } else {
+                                    Navigator.of(context).maybePop();
+                                  }
+                                }
                               : null,
                         ),
                       )
