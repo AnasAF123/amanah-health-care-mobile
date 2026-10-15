@@ -41,22 +41,22 @@ class AmanahQueueHistoryScreen extends StatelessWidget {
             ),
             Expanded(
               child: collectedCards.isEmpty
-                  ? AmanahEmptyState.viewport(
-                      tone: AmanahEmptyStateTone.brand,
-                      iconShape: AmanahEmptyStateIconShape.squircle,
-                      customIcon: Text(
-                        '#',
-                        style: TextStyle(
-                          color: dark
-                              ? AmanahColorTokens.brandAccent
-                              : AmanahColorTokens.brandPrimary,
-                          fontSize: 32,
-                          fontWeight: FontWeight.w900,
-                        ),
+                  ? SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
                       ),
-                      title: 'Belum ada antrean diproses',
-                      message:
-                          'Tarik kartu antrean pasien ke bawah pada rel 3D untuk memproses dan memanggil pasien!',
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
+                      child: AmanahEmptyState.box(
+                        title: 'Belum Ada Antrean Diproses',
+                        message:
+                            'Tarik kartu antrean pasien ke bawah pada rel 3D untuk memproses dan memanggil pasien.',
+                        actionText: 'Kembali ke Antrean',
+                        actionLeadingIcon: Icons.arrow_back_rounded,
+                        onAction: () => Navigator.of(context).pop(),
+                      ),
                     )
                   : GridView.builder(
                       padding: const EdgeInsets.all(AmanahSpacing.lg),

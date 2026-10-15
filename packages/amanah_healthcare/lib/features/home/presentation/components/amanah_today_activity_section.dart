@@ -60,11 +60,14 @@ class AmanahTodayActivitySection extends StatelessWidget {
 
         // Activity Cards Row (Flex 1:1)
         if (activities.isEmpty)
-          const AmanahEmptyState.card(
-            icon: Icons.insights_rounded,
+          AmanahEmptyState.box(
+            boxSize: 180.0,
             title: 'Belum Ada Data Aktivitas',
             message:
                 'Tidak ada ringkasan aktivitas dan antrean klinis untuk hari ini.',
+            actionText: 'Lihat Antrean',
+            actionLeadingIcon: Icons.queue_rounded,
+            onAction: onDetailTap,
           )
         else
           Row(
