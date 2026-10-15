@@ -132,7 +132,10 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
         Navigator.of(context).push(
           AmanahDoctorIdCardScreen.route(
             user: _currentUser,
-            profile: amanahHomeDashboardData.profile,
+            profile: AmanahDoctorProfile.fromAuthUser(
+              _currentUser,
+              unreadNotifications: _notificationStore.unreadCount,
+            ),
           ),
         );
       default:
@@ -378,7 +381,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
         // 1. Doctor Profile Header (Fixed master header, 100% aligned with other tab headers)
         AmanahHomeAppBar(
           user: user,
-          greeting: data.profile.greeting,
+          greeting: AmanahDoctorProfile.fromAuthUser(user).greeting,
           unreadNotifications: unreadNotifications,
           onNotificationTap: onNotificationTap,
           onProfileTap: onProfileTap,

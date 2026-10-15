@@ -81,6 +81,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - .env
     - assets/amanah/
     - assets/amanah/images/
     - assets/amanah/images/quick_access/

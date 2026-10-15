@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 
 export 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart'
@@ -16,16 +17,72 @@ class AmanahDoctorProfile {
     required this.role,
     required this.greeting,
     required this.unreadNotifications,
-    this.sip = 'SIP. 503/442.1/SIP-D/2026',
-    this.str = 'STR. 31.2.1.100.1.20.123456',
-    this.nik = '3171015508920003',
-    this.kkiNumber = 'KKI-ID-2026-98124',
-    this.email = 'amelia.cantika@rsamanah.co.id',
-    this.phone = '+62 812-3456-7890',
+    this.sip = '',
+    this.str = '',
+    this.nik = '',
+    this.kkiNumber = '',
+    this.email = '',
+    this.phone = '',
     this.hospital = 'RS Amanah Sehat',
-    this.department = 'Departemen Ilmu Kesehatan Anak',
+    this.department = 'Pelayanan Medis',
     this.avatarAsset = 'assets/amanah/id_card/images/woman-doctor-4.png',
   });
+
+  factory AmanahDoctorProfile.fromAuthUser(
+    AmanahAuthUser user, {
+    int unreadNotifications = 0,
+    String? customGreeting,
+  }) {
+    final int hour = DateTime.now().hour;
+    final String greeting = customGreeting ??
+        (hour < 11
+            ? 'Selamat Pagi'
+            : hour < 15
+                ? 'Selamat Siang'
+                : hour < 18
+                    ? 'Selamat Sore'
+                    : 'Selamat Malam');
+
+    final String doctorName = user.staff?.fullName?.trim().isNotEmpty == true
+        ? user.staff!.fullName!
+        : user.fullName.trim().isNotEmpty
+            ? user.fullName
+            : (user.isDoctor ? 'dr. Tenaga Medis' : 'Tenaga Medis');
+
+    final String role = user.staff?.profession?.trim().isNotEmpty == true
+        ? user.staff!.profession!
+        : user.displayRole;
+
+    final String sip = user.staff?.practitionerId?.trim().isNotEmpty == true
+        ? user.staff!.practitionerId!
+        : (user.staff?.idCardNumber?.trim().isNotEmpty == true
+            ? user.staff!.idCardNumber!
+            : 'ID-${user.id.isNotEmpty ? user.id.substring(0, user.id.length < 8 ? user.id.length : 8).toUpperCase() : "MEDIS"}');
+
+    final String nik = user.staff?.idCardNumber ?? '';
+    final String email = user.email;
+    final String phone = user.staff?.phoneNumber ?? user.phone;
+
+    return AmanahDoctorProfile(
+      name: doctorName,
+      role: role,
+      greeting: greeting,
+      unreadNotifications: unreadNotifications,
+      sip: sip,
+      str: sip,
+      nik: nik,
+      kkiNumber: sip,
+      email: email,
+      phone: phone,
+      hospital: 'RS Amanah Sehat',
+      department: user.isDoctor
+          ? 'Pelayanan Medis'
+          : user.isMidwife
+              ? 'Kebidanan & Kandungan'
+              : 'Administrasi Medis',
+      avatarAsset: 'assets/amanah/id_card/images/woman-doctor-4.png',
+    );
+  }
 
   final String name;
   final String role;

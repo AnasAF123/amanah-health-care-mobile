@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:amanah_healthcare/core/config/amanah_auth_environment.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_logger.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_repository.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
@@ -517,8 +518,8 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
       try {
         AmanahAuthLogger.logOAuth('Google auth initiated');
         final GoogleSignIn googleSignIn = GoogleSignIn(
-          serverClientId:
-              '649477011186-augsamgganq024tesomp0c8rvgs9c7ua.apps.googleusercontent.com',
+          serverClientId: AmanahAuthEnvironment.googleOAuthClientIdWeb,
+          scopes: const <String>['email', 'profile'],
         );
         final GoogleSignInAccount? account = await googleSignIn.signIn();
         if (account == null) {

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:amanah_healthcare/core/config/amanah_auth_environment.dart';
 import 'package:amanah_healthcare/core/network/client/amanah_http_client.dart';
 import 'package:amanah_healthcare/core/network/client/observable_http_client.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_token_storage.dart';
@@ -63,10 +64,7 @@ class AmanahAuthRepository {
 
   String get _baseUrl {
     if (_customBaseUrl != null) return _customBaseUrl;
-    if (!kIsWeb && Platform.isAndroid) {
-      return 'http://10.0.2.2:3001';
-    }
-    return 'http://localhost:3001';
+    return AmanahAuthEnvironment.authBaseUrl;
   }
 
   http.Client get _httpClient {

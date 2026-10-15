@@ -317,3 +317,9 @@ DESIGN.md
 # Android emulator local dumps
 bugreport-*.zip
 
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+client_secret*.json
+

@@ -98,18 +98,8 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
     );
   }
 
-  AmanahDoctorProfile get _doctorProfile => AmanahDoctorProfile(
-    name: widget.user.fullName,
-    role: 'Dokter Spesialis Anak',
-    greeting: 'Selamat Bertugas',
-    unreadNotifications: 3,
-    sip: 'SIP. 503/442.1/SIP-D/2026',
-    str: 'STR. 31.2.1.100.1.20.123456',
-    phone: _phone,
-    email: _email,
-    hospital: 'RS Amanah Sehat',
-    department: 'Departemen Ilmu Kesehatan Anak',
-  );
+  AmanahDoctorProfile get _doctorProfile =>
+      AmanahDoctorProfile.fromAuthUser(widget.user);
 
   Future<void> _openEditProfileDrawer() async {
     final AmanahEditProfileResult? result = await AmanahEditProfileDrawer.show(

@@ -11,6 +11,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:scanner_shared/scanner_shared.dart';
+import 'package:amanah_healthcare/core/config/amanah_auth_environment.dart';
 import 'package:amanah_healthcare/core/logging/app_log.dart';
 import 'package:amanah_healthcare/core/logging/logging_config.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/screen/auth_bottom_sheet_screen.dart';
@@ -59,17 +60,14 @@ Future<void> launchAmanahApp({
     ),
   );
 
-  _enableEdgeToEdgeMode();
+  await AmanahAuthEnvironment.initialize();
 
-  String authUrl = 'http://localhost:3001/api/auth';
-  if (!kIsWeb && Platform.isAndroid) {
-    authUrl = 'http://10.0.2.2:3001/api/auth';
-  }
+  _enableEdgeToEdgeMode();
 
   try {
     await FlutterBetterAuth.initialize(
-      url: authUrl,
-      scheme: 'amanahhealth',
+      url: AmanahAuthEnvironment.betterAuthUrl,
+      scheme: AmanahAuthEnvironment.authScheme,
     );
   } catch (e) {
     debugPrint('FlutterBetterAuth initialize error: $e');
