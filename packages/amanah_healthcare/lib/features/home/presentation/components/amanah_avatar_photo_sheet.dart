@@ -62,13 +62,6 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
   final ValueChanged<XFile>? onImageSelected;
   final VoidCallback? onDeleteAvatar;
 
-  static const List<String> presetAvatars = <String>[
-    'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=300&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=300&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1594824813628-984dd2e54133?q=80&w=300&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1537368910025-700350fe46c7?q=80&w=300&auto=format&fit=crop',
-  ];
-
   static Future<AmanahAvatarPhotoResult?> show(
     BuildContext context, {
     String title = 'Ganti Foto Profil Dokter',
@@ -318,56 +311,6 @@ class AmanahAvatarPhotoSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-
-          // 4. Preset Medical Avatars
-          Text(
-            'Atau Pilih Preset Avatar Klinis',
-            style: TextStyle(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w700,
-              color: subtextColor,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              for (int i = 0; i < presetAvatars.length; i++)
-                InkWell(
-                  onTap: () {
-                    Navigator.of(context).pop(
-                      AmanahAvatarPhotoResult.preset(presetAvatars[i]),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(100),
-                  child: Container(
-                    width: 54,
-                    height: 54,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AmanahColorTokens.brandPrimary.withValues(alpha: 0.35),
-                        width: 2,
-                      ),
-                    ),
-                    child: ClipOval(
-                      child: Image.network(
-                        presetAvatars[i],
-                        fit: BoxFit.cover,
-                        errorBuilder:
-                            (BuildContext ctx, Object err, StackTrace? st) {
-                              return const Icon(
-                                Icons.person_rounded,
-                                color: AmanahColorTokens.brandPrimary,
-                              );
-                            },
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 16),
 
           // 4. Reset or Delete Avatar
           if (hasCustomAvatar) ...<Widget>[

@@ -7,7 +7,6 @@ import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_notification_model.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_aurora_background.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_bottom_navigation_bar.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_clinic_analytics_section.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_home_app_bar.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_master_carousel_section.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
@@ -27,7 +26,7 @@ import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_p
 import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_qr_scanner_tab_screen.dart';
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
-import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_form_and_calendar_dialog.dart';
+import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_add_edit_schedule_drawer.dart';
 
 class AmanahHomeShell extends StatefulWidget {
   const AmanahHomeShell({this.user, this.onLogout, super.key});
@@ -35,12 +34,12 @@ class AmanahHomeShell extends StatefulWidget {
   final AmanahAuthUser? user;
   final VoidCallback? onLogout;
 
-  static const AmanahAuthUser defaultUser = AmanahAuthUser(
-    id: 'doc-001',
+  static const AmanahAuthUser _emptyUser = AmanahAuthUser(
+    id: '',
     role: AmanahUserRole.doctor,
-    fullName: 'dr. Rayhan Pratama, Sp.A',
-    email: 'dokter@amanah.health',
-    phone: '081234567890',
+    fullName: '',
+    email: '',
+    phone: '',
     password: '',
     isEmailVerified: false,
   );
@@ -50,7 +49,7 @@ class AmanahHomeShell extends StatefulWidget {
 }
 
 class _AmanahHomeShellState extends State<AmanahHomeShell> {
-  AmanahAuthUser get _currentUser => widget.user ?? AmanahHomeShell.defaultUser;
+  AmanahAuthUser get _currentUser => widget.user ?? AmanahHomeShell._emptyUser;
   final AmanahScheduleStore _scheduleStore = AmanahScheduleStore.instance;
   final AmanahNotificationStore _notificationStore =
       AmanahNotificationStore.instance;
@@ -200,8 +199,9 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                 AmanahHomeTab.home => _AmanahHomeScreenContent(
                   key: const ValueKey<String>('home_content'),
                   user: _currentUser,
-                  data: amanahHomeDashboardData,
                   todaySchedules: todaySchedules,
+                  quickActions: kDefaultQuickActions,
+                  activities: const <AmanahActivityMetric>[],
                   unreadNotifications: _notificationStore.unreadCount,
                   onNotificationTap: () {
                     Navigator.of(
@@ -232,9 +232,6 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   },
                   onSlideAction: (String slideId) {
                     _showToast('Membuka program promo: $slideId');
-                  },
-                  onAnalyticsViewDetails: () {
-                    _showToast('Membuka analisis tren data klinis');
                   },
                 ),
                 AmanahHomeTab.schedule => AmanahScheduleTabScreen(
@@ -271,7 +268,9 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                 AmanahHomeTab.notifications => AmanahLeavePermissionTabScreen(
                   key: const ValueKey<String>('permissions_content'),
                   doctorName: _currentUser.fullName,
-                  doctorRole: 'Dokter Spesialis Anak',
+                  doctorRole: _currentUser.isDoctor
+                      ? 'Dokter Spesialis'
+                      : 'Tenaga Medis',
                   onBack: () {
                     setState(() => _selectedTab = AmanahHomeTab.home);
                   },
@@ -327,8 +326,9 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
 class _AmanahHomeScreenContent extends StatelessWidget {
   const _AmanahHomeScreenContent({
     required this.user,
-    required this.data,
     required this.todaySchedules,
+    required this.quickActions,
+    required this.activities,
     required this.onNotificationTap,
     required this.onProfileTap,
     required this.onQuickActionTap,
@@ -338,13 +338,13 @@ class _AmanahHomeScreenContent extends StatelessWidget {
     this.onScheduleCardTap,
     this.onCreateScheduleTap,
     this.onSlideAction,
-    this.onAnalyticsViewDetails,
     super.key,
   });
 
   final AmanahAuthUser user;
-  final AmanahHomeDashboardData data;
   final List<DoctorSchedule> todaySchedules;
+  final List<AmanahQuickAction> quickActions;
+  final List<AmanahActivityMetric> activities;
   final VoidCallback onNotificationTap;
   final VoidCallback onProfileTap;
   final ValueChanged<AmanahQuickAction> onQuickActionTap;
@@ -353,32 +353,13 @@ class _AmanahHomeScreenContent extends StatelessWidget {
   final ValueChanged<DoctorSchedule>? onScheduleCardTap;
   final VoidCallback? onCreateScheduleTap;
   final ValueChanged<String>? onSlideAction;
-  final VoidCallback? onAnalyticsViewDetails;
   final int unreadNotifications;
 
   @override
   Widget build(BuildContext context) {
-    final int totalBookedPatients = todaySchedules.fold<int>(
-      0,
-      (int acc, DoctorSchedule s) => acc + s.bookedPatients.length,
-    );
-
-    final List<AmanahActivityMetric> dynamicActivities = data.activities.map((
-      AmanahActivityMetric act,
-    ) {
-      if (act.id == 'antrean-aktif') {
-        return act.copyWith(
-          count: totalBookedPatients > 0
-              ? totalBookedPatients.toString()
-              : act.count,
-        );
-      }
-      return act;
-    }).toList();
-
     return Column(
       children: <Widget>[
-        // 1. Doctor Profile Header (Fixed master header, 100% aligned with other tab headers)
+        // 1. Doctor Profile Header
         AmanahHomeAppBar(
           user: user,
           greeting: AmanahDoctorProfile.fromAuthUser(user).greeting,
@@ -399,7 +380,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
               ),
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
               children: <Widget>[
-                // 2. 3D Stack of Schedule Cards with Staggered Depth & Wave Petal Texture
+                // 2. 3D Stack of Schedule Cards
                 AmanahScheduleCardStack(
                   schedules: todaySchedules,
                   onCardTap: onScheduleCardTap,
@@ -407,28 +388,22 @@ class _AmanahHomeScreenContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // 3. Quick Access Menu Grid (Raised closer to the card stack)
+                // 3. Quick Access Menu Grid
                 AmanahQuickAccessSection(
-                  actions: data.quickActions,
+                  actions: quickActions,
                   onActionTap: onQuickActionTap,
                 ),
                 const SizedBox(height: 16),
 
-                // 4. Master 3D Deck Carousel (Promotions & Clinical Programs)
+                // 4. Master 3D Deck Carousel (Promotions & Clinical Programs) - Preserved exception
                 AmanahMasterCarouselSection(onSlideAction: onSlideAction),
                 const SizedBox(height: 20),
 
-                // 5. Today's Activity Stat Cards
+                // 5. Today's Activity Stat Cards (Shows empty state when activities are empty)
                 AmanahTodayActivitySection(
-                  activities: dynamicActivities,
+                  activities: activities,
                   onDetailTap: onDetailActivityTap,
                   onActivityTap: onActivityTap,
-                ),
-                const SizedBox(height: 24),
-
-                // 6. Clinic Performance & Trends Analytics (Area Chart & Monthly Timeline)
-                AmanahClinicAnalyticsSection(
-                  onViewDetails: onAnalyticsViewDetails,
                 ),
               ],
             ),

@@ -7,11 +7,19 @@ import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model
 import 'package:amanah_healthcare/features/presence/presentation/components/amanah_presence_drawers.dart';
 
 class AmanahPresenceHistoryScreen extends StatefulWidget {
-  const AmanahPresenceHistoryScreen({super.key});
+  const AmanahPresenceHistoryScreen({
+    super.key,
+    this.records = kAttendanceRecords,
+  });
 
-  static Route<void> route() {
+  final List<AttendanceRecord> records;
+
+  static Route<void> route({
+    List<AttendanceRecord> records = kAttendanceRecords,
+  }) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) => const AmanahPresenceHistoryScreen(),
+      builder: (BuildContext context) =>
+          AmanahPresenceHistoryScreen(records: records),
     );
   }
 
@@ -33,7 +41,7 @@ class _AmanahPresenceHistoryScreenState
       _selectedDayFilter != null;
 
   List<AttendanceRecord> get _filteredRecords {
-    return kAttendanceRecords
+    return widget.records
         .where((AttendanceRecord rec) {
           if (_statusFilter != null && rec.status != _statusFilter) {
             return false;
@@ -375,154 +383,186 @@ class _AmanahPresenceHistoryScreenState
             const SizedBox(height: 14),
           ],
 
-          // Distribution Section (Stacked Horizontal Pill Bar + Date Ticks)
-          Container(
-            width: double.infinity,
-            height: 10,
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              color: dark
-                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
-                  : AmanahColorTokens.canvasLight,
-              borderRadius: BorderRadius.circular(100),
-            ),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  flex: 60,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AmanahColorTokens.success,
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                  ),
+          if (records.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Center(
+                child: AmanahEmptyState.card(
+                  title: 'Belum Ada Riwayat Kehadiran',
+                  message:
+                      'Belum ada catatan presensi kehadiran pada periode ini.',
                 ),
-                const SizedBox(width: 2),
-                Expanded(
-                  flex: 15,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AmanahColorTokens.amberLight,
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 2),
-                Expanded(
-                  flex: 10,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AmanahColorTokens.danger,
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 2),
-                Expanded(
-                  flex: 15,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AmanahColorTokens.violet,
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 6),
-
-          // Date Ticks: 01 Ags, 08 Ags, 15 Ags, 22 Ags, 31 Ags
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              _DateTickText('01 Ags'),
-              _DateTickText('08 Ags'),
-              _DateTickText('15 Ags'),
-              _DateTickText('22 Ags'),
-              _DateTickText('31 Ags'),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Metrics & Legends Section
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.end,
-            spacing: 12,
-            runSpacing: 10,
-            children: <Widget>[
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(
-                    'Total jam kerja · Bulan ini',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: subtextColor,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: <Widget>[
-                      Text(
-                        '168 hr',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: textColor,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '(21 hari)',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: subtextColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ),
-              const Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                children: <Widget>[
-                  _LegendIndicator(color: AmanahColorTokens.success, label: 'Hadir'),
-                  _LegendIndicator(color: AmanahColorTokens.amberLight, label: 'Telat'),
-                  _LegendIndicator(color: AmanahColorTokens.danger, label: 'Missed'),
-                  _LegendIndicator(color: AmanahColorTokens.violet, label: 'Cuti'),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
+            )
+          else ...<Widget>[
+            Builder(
+              builder: (BuildContext context) {
+                final int hadirCount = records
+                    .where((AttendanceRecord r) => r.status == AttendanceStatus.hadir)
+                    .length;
+                final int telatCount = records
+                    .where((AttendanceRecord r) => r.status == AttendanceStatus.telat)
+                    .length;
+                final int missedCount = records
+                    .where((AttendanceRecord r) => r.status == AttendanceStatus.missed)
+                    .length;
+                final int cutiCount = records
+                    .where((AttendanceRecord r) => r.status == AttendanceStatus.cuti)
+                    .length;
+                final int total = records.length;
+                final int totalHours = (hadirCount + telatCount) * 8;
 
-          // Attendance Records Vertical Timeline List
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: records.length,
-            itemBuilder: (BuildContext context, int index) {
-              final AttendanceRecord item = records[index];
-              final bool isLast = index == records.length - 1;
-              return _buildTimelineItem(
-                item,
-                isLast,
-                dark,
-                textColor,
-                subtextColor,
-              );
-            },
-          ),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      width: double.infinity,
+                      height: 10,
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: dark
+                            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                            : AmanahColorTokens.canvasLight,
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                      child: Row(
+                        children: <Widget>[
+                          if (hadirCount > 0)
+                            Expanded(
+                              flex: hadirCount,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: AmanahColorTokens.success,
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                              ),
+                            ),
+                          if (telatCount > 0)
+                            Expanded(
+                              flex: telatCount,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: AmanahColorTokens.amberLight,
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                              ),
+                            ),
+                          if (missedCount > 0)
+                            Expanded(
+                              flex: missedCount,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: AmanahColorTokens.danger,
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                              ),
+                            ),
+                          if (cutiCount > 0)
+                            Expanded(
+                              flex: cutiCount,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: AmanahColorTokens.violet,
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.end,
+                      spacing: 12,
+                      runSpacing: 10,
+                      children: <Widget>[
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              'Total jam kerja · Periode ini',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: subtextColor,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
+                              children: <Widget>[
+                                Text(
+                                  '$totalHours hr',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w800,
+                                    color: textColor,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  '($total hari)',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: subtextColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          children: <Widget>[
+                            _LegendIndicator(
+                              color: AmanahColorTokens.success,
+                              label: 'Hadir',
+                            ),
+                            _LegendIndicator(
+                              color: AmanahColorTokens.amberLight,
+                              label: 'Telat',
+                            ),
+                            _LegendIndicator(
+                              color: AmanahColorTokens.danger,
+                              label: 'Missed',
+                            ),
+                            _LegendIndicator(
+                              color: AmanahColorTokens.violet,
+                              label: 'Cuti',
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: records.length,
+              itemBuilder: (BuildContext context, int index) {
+                final AttendanceRecord item = records[index];
+                final bool isLast = index == records.length - 1;
+                return _buildTimelineItem(
+                  item,
+                  isLast,
+                  dark,
+                  textColor,
+                  subtextColor,
+                );
+              },
+            ),
+          ],
         ],
       ),
     );
@@ -745,24 +785,6 @@ class _AmanahPresenceHistoryScreenState
         secondaryActionText: 'Reset Filter',
         secondaryActionLeadingIcon: Icons.restart_alt_rounded,
         onSecondaryAction: _resetFilters,
-      ),
-    );
-  }
-}
-
-class _DateTickText extends StatelessWidget {
-  const _DateTickText(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: AmanahColorTokens.neutral400,
       ),
     );
   }

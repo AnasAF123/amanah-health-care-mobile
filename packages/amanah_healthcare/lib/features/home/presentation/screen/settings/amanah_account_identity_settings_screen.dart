@@ -22,17 +22,15 @@ class AmanahAccountIdentitySettingsScreen extends StatefulWidget {
 class _AmanahAccountIdentitySettingsScreenState
     extends State<AmanahAccountIdentitySettingsScreen> {
   String _name = '';
-  String _phone = '+62 812-3456-7890';
-  String _email = 'rayhan.pratama@rsamanah.co.id';
+  String _phone = '';
+  String _email = '';
 
   @override
   void initState() {
     super.initState();
     _name = widget.user.fullName;
-    _phone = '+62 812-3456-7890';
-    _email = widget.user.email.isNotEmpty
-        ? widget.user.email
-        : 'rayhan.pratama@rsamanah.co.id';
+    _phone = widget.user.phone;
+    _email = widget.user.email;
   }
 
   void _editName() {

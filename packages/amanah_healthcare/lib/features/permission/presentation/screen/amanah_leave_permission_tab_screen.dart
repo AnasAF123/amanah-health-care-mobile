@@ -18,8 +18,8 @@ import 'package:amanah_healthcare/features/permission/presentation/components/am
 class AmanahLeavePermissionTabScreen extends StatefulWidget {
   const AmanahLeavePermissionTabScreen({
     this.onBack,
-    this.doctorName = 'dr. Rayhan Pratama, Sp.A',
-    this.doctorRole = 'Dokter Spesialis Anak',
+    this.doctorName = '',
+    this.doctorRole = '',
     this.doctorAvatarUrl = 'assets/amanah/auth/auth_background.png',
     super.key,
   });

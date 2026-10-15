@@ -563,20 +563,8 @@ class AmanahScheduleCard extends StatelessWidget {
   final VoidCallback onDismiss;
   final VoidCallback? onCardTap;
 
-  String _formatSlotText() {
-    if (schedule.bookedPatients.isNotEmpty) {
-      return '${schedule.bookedPatients.length} Pasien';
-    }
-    final String raw = schedule.slotCount
-        .replaceAll(RegExp(r'\s*/\s*\d+'), '')
-        .trim();
-    if (int.tryParse(raw) != null) {
-      return '$raw Pasien';
-    }
-    if (schedule.slotCount.isNotEmpty) {
-      return '${schedule.slotCount} Pasien';
-    }
-    return '12 Pasien';
+  String _formatPatientCount() {
+    return '${schedule.bookedPatients.length} Pasien';
   }
 
   @override
@@ -845,7 +833,7 @@ class AmanahScheduleCard extends StatelessWidget {
                             Flexible(
                               flex: 0,
                               child: AmanahBookingPill(
-                                patientCount: _formatSlotText(),
+                                patientCount: _formatPatientCount(),
                                 statusText: 'Terdaftar',
                               ),
                             ),

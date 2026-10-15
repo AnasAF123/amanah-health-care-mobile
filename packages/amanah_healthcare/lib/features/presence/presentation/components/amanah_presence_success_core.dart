@@ -10,8 +10,8 @@ class AmanahPresenceSuccessCore extends StatefulWidget {
     required this.onClose,
     required this.onGoHome,
     required this.onViewHistory,
+    required this.timeString,
     super.key,
-    this.timeString = '07:55 WIB',
     this.bottomPadding = 24,
   });
 

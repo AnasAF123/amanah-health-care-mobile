@@ -64,8 +64,6 @@ class DoctorSchedule {
     required this.time,
     required this.poli,
     required this.room,
-    required this.slotCount,
-    required this.slotText,
     required this.badge,
     required this.badgeVariant,
     this.startTime,
@@ -80,8 +78,6 @@ class DoctorSchedule {
   final String time;
   final String poli;
   final String room;
-  final String slotCount;
-  final String slotText;
   final String badge;
   final AmanahBadgeVariant badgeVariant;
   final String? startTime;
@@ -96,8 +92,6 @@ class DoctorSchedule {
     String? time,
     String? poli,
     String? room,
-    String? slotCount,
-    String? slotText,
     String? badge,
     AmanahBadgeVariant? badgeVariant,
     String? startTime,
@@ -112,8 +106,6 @@ class DoctorSchedule {
       time: time ?? this.time,
       poli: poli ?? this.poli,
       room: room ?? this.room,
-      slotCount: slotCount ?? this.slotCount,
-      slotText: slotText ?? this.slotText,
       badge: badge ?? this.badge,
       badgeVariant: badgeVariant ?? this.badgeVariant,
       startTime: startTime ?? this.startTime,
@@ -126,22 +118,18 @@ class DoctorSchedule {
 
 class DayScheduleSetting {
   const DayScheduleSetting({
-    required this.targetQuota,
     required this.isCuti,
     this.cutiReason,
   });
 
-  final int targetQuota;
   final bool isCuti;
   final String? cutiReason;
 
   DayScheduleSetting copyWith({
-    int? targetQuota,
     bool? isCuti,
     String? cutiReason,
   }) {
     return DayScheduleSetting(
-      targetQuota: targetQuota ?? this.targetQuota,
       isCuti: isCuti ?? this.isCuti,
       cutiReason: cutiReason ?? this.cutiReason,
     );

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
@@ -40,17 +41,9 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  bool _isTechnicianTyping = false;
+  final bool _isTechnicianTyping = false;
 
-  final List<AmanahChatMessage> _messages = <AmanahChatMessage>[
-    const AmanahChatMessage(
-      id: 'msg-1',
-      sender: 'it',
-      text:
-          'Halo dr. Amelia, ada kendala pada sistem SIMRS, scanner presensi, atau perangkat poli yang bisa tim IT bantu?',
-      time: '08:00',
-    ),
-  ];
+  final List<AmanahChatMessage> _messages = <AmanahChatMessage>[];
 
   @override
   void dispose() {
@@ -90,33 +83,11 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
 
     setState(() {
       _messages.add(userMsg);
-      _isTechnicianTyping = true;
       _textController.clear();
     });
 
     widget.onTicketCreated?.call(trimmed, 'Hari ini, $timeStr');
     _scrollToBottom();
-
-    Timer(const Duration(milliseconds: 900), () {
-      if (!mounted) {
-        return;
-      }
-      final DateTime replyNow = DateTime.now();
-      final String replyTime =
-          '${replyNow.hour.toString().padLeft(2, '0')}:${replyNow.minute.toString().padLeft(2, '0')}';
-      final AmanahChatMessage itReply = AmanahChatMessage(
-        id: 'msg-${DateTime.now().millisecondsSinceEpoch + 1}',
-        sender: 'it',
-        text:
-            'Laporan Anda sudah kami catat dan dibuatkan tiket penanganan. Teknisi IT sedang memverifikasi kendala ini.',
-        time: replyTime,
-      );
-      setState(() {
-        _messages.add(itReply);
-        _isTechnicianTyping = false;
-      });
-      _scrollToBottom();
-    });
   }
 
   @override
@@ -153,14 +124,26 @@ class _AmanahItChatScreenState extends State<AmanahItChatScreen>
 
             // Messages Viewport
             Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                itemCount: _messages.length + (_isTechnicianTyping ? 1 : 0),
+              child: _messages.isEmpty && !_isTechnicianTyping
+                  ? Center(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: AmanahEmptyState.card(
+                          icon: Icons.chat_bubble_outline_rounded,
+                          title: 'Belum Ada Percakapan',
+                          message:
+                              'Mulai percakapan dengan teknisi IT untuk kendala SIMRS, scanner presensi, atau perangkat poli.',
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      itemCount: _messages.length + (_isTechnicianTyping ? 1 : 0),
                 itemBuilder: (BuildContext context, int index) {
                   if (index == _messages.length && _isTechnicianTyping) {
                     return _buildTypingIndicator(dark);

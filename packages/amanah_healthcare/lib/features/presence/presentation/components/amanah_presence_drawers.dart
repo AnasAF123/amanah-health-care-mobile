@@ -11,18 +11,22 @@ class AmanahPresenceFilterDrawer extends StatefulWidget {
     required this.initialStatus,
     required this.initialUnit,
     required this.initialDay,
+    this.unitOptions = const <AttendanceFilterOption<String>>[],
     super.key,
   });
 
   final AttendanceStatus? initialStatus;
   final String initialUnit;
   final int? initialDay;
+  final List<AttendanceFilterOption<String>> unitOptions;
 
   static Future<Map<String, dynamic>?> show(
     BuildContext context, {
     required AttendanceStatus? currentStatus,
     required String currentUnit,
     required int? currentDay,
+    List<AttendanceFilterOption<String>> unitOptions =
+        const <AttendanceFilterOption<String>>[],
   }) {
     return showAmanahBottomSheet<Map<String, dynamic>>(
       context: context,
@@ -30,6 +34,7 @@ class AmanahPresenceFilterDrawer extends StatefulWidget {
         initialStatus: currentStatus,
         initialUnit: currentUnit,
         initialDay: currentDay,
+        unitOptions: unitOptions,
       ),
     );
   }
@@ -177,67 +182,69 @@ class _AmanahPresenceFilterDrawerState
           const SizedBox(height: 20),
 
           // 2. Unit Penugasan Filter Pills
-          Text(
-            'Unit Penugasan',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: subtextColor,
+          if (widget.unitOptions.isNotEmpty) ...<Widget>[
+            Text(
+              'Unit Penugasan',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: subtextColor,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: kUnitOptions
-                .map((AttendanceFilterOption<String> opt) {
-                  final bool isSelected = _draftUnit == opt.value;
-                  return InkWell(
-                    onTap: () => setState(() => _draftUnit = opt.value),
-                    borderRadius: BorderRadius.circular(12),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? selectedAccent
-                            : (dark
-                                  ? AmanahColorTokens.surfaceLight
-                                        .withValues(alpha: 0.05)
-                                  : AmanahColorTokens.canvasLight),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: widget.unitOptions
+                  .map((AttendanceFilterOption<String> opt) {
+                    final bool isSelected = _draftUnit == opt.value;
+                    return InkWell(
+                      onTap: () => setState(() => _draftUnit = opt.value),
+                      borderRadius: BorderRadius.circular(12),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
                           color: isSelected
                               ? selectedAccent
                               : (dark
                                     ? AmanahColorTokens.surfaceLight
-                                          .withValues(alpha: 0.10)
-                                    : AmanahColorTokens.neutral200),
+                                          .withValues(alpha: 0.05)
+                                    : AmanahColorTokens.canvasLight),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected
+                                ? selectedAccent
+                                : (dark
+                                      ? AmanahColorTokens.surfaceLight
+                                            .withValues(alpha: 0.10)
+                                      : AmanahColorTokens.neutral200),
+                          ),
+                        ),
+                        child: Text(
+                          opt.label,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: isSelected
+                                ? selectedForeground
+                                : (dark
+                                      ? AmanahColorTokens.neutral300
+                                      : AmanahColorTokens.neutral700),
+                          ),
                         ),
                       ),
-                      child: Text(
-                        opt.label,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                          color: isSelected
-                              ? selectedForeground
-                              : (dark
-                                    ? AmanahColorTokens.neutral300
-                                    : AmanahColorTokens.neutral700),
-                        ),
-                      ),
-                    ),
-                  );
-                })
-                .toList(growable: false),
-          ),
-          const SizedBox(height: 20),
+                    );
+                  })
+                  .toList(growable: false),
+            ),
+            const SizedBox(height: 20),
+          ],
 
           // 3. Calendar Grid (Agustus 2026)
           Row(
