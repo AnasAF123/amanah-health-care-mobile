@@ -29,7 +29,7 @@ class SocialAuthButton extends StatelessWidget {
               : AmanahColorTokens.neutral100)
         : (provider == AuthProviderType.email
               ? (dark
-                    ? AmanahColorTokens.brand.withValues(alpha: 0.16)
+                    ? AmanahColorTokens.cyanAccent.withValues(alpha: 0.16)
                     : theme.colorScheme.secondary.withValues(alpha: 0.72))
               : (dark ? AmanahColorTokens.canvasDark : theme.colorScheme.surface));
     final Color foregroundColor = theme.colorScheme.onSurface;

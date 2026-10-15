@@ -2,13 +2,17 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:app_store_shared/app_store_shared.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_better_auth/flutter_better_auth.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:scanner_shared/scanner_shared.dart';
+import 'package:amanah_healthcare/core/logging/app_log.dart';
+import 'package:amanah_healthcare/core/logging/logging_config.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/screen/auth_bottom_sheet_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_typography_tokens.dart';
@@ -48,7 +52,28 @@ Future<void> launchAmanahApp({
       WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
+  AppLog.init(
+    config: const LoggingConfig(
+      enableFileOutput: true,
+      enableConsoleOutput: kDebugMode,
+    ),
+  );
+
   _enableEdgeToEdgeMode();
+
+  String authUrl = 'http://localhost:3001/api/auth';
+  if (!kIsWeb && Platform.isAndroid) {
+    authUrl = 'http://10.0.2.2:3001/api/auth';
+  }
+
+  try {
+    await FlutterBetterAuth.initialize(
+      url: authUrl,
+      scheme: 'amanahhealth',
+    );
+  } catch (e) {
+    debugPrint('FlutterBetterAuth initialize error: $e');
+  }
 
   try {
     await CameraHelper.init();
@@ -93,31 +118,33 @@ class _AmanahAppState extends State<AmanahApp> {
           lazy: true,
         ),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: true,
-        title: 'Amanah Healthcare',
-        theme: ThemeData(
-          useMaterial3: true,
-          fontFamily: AmanahTypographyTokens.fontFamily,
-          brightness: Brightness.light,
-          scaffoldBackgroundColor: AmanahColorTokens.canvasLight,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AmanahColorTokens.brand,
+      child: BetterAuthProvider(
+        child: MaterialApp(
+          debugShowCheckedModeBanner: true,
+          title: 'Amanah Healthcare',
+          theme: ThemeData(
+            useMaterial3: true,
+            fontFamily: AmanahTypographyTokens.fontFamily,
             brightness: Brightness.light,
+            scaffoldBackgroundColor: AmanahColorTokens.canvasLight,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: AmanahColorTokens.brand,
+              brightness: Brightness.light,
+            ),
           ),
-        ),
-        darkTheme: ThemeData(
-          useMaterial3: true,
-          fontFamily: AmanahTypographyTokens.fontFamily,
-          brightness: Brightness.dark,
-          scaffoldBackgroundColor: AmanahColorTokens.canvasDark,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AmanahColorTokens.brand,
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            fontFamily: AmanahTypographyTokens.fontFamily,
             brightness: Brightness.dark,
+            scaffoldBackgroundColor: AmanahColorTokens.canvasDark,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: AmanahColorTokens.brand,
+              brightness: Brightness.dark,
+            ),
           ),
+          themeMode: ThemeMode.system,
+          home: const AuthBottomSheetScreen(),
         ),
-        themeMode: ThemeMode.system,
-        home: const AuthBottomSheetScreen(),
       ),
     );
   }

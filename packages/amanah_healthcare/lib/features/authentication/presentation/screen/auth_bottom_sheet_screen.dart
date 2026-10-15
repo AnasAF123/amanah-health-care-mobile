@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:amanah_healthcare/features/authentication/data/amanah_auth_logger.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_repository.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/components/auth_sheet_container.dart';
@@ -12,11 +14,15 @@ import 'package:amanah_healthcare/features/authentication/presentation/organisms
 import 'package:amanah_healthcare/features/authentication/presentation/organisms/password_changed_success_content.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/organisms/sign_in_content.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/organisms/sign_up_content.dart';
+import 'package:amanah_healthcare/features/authentication/presentation/screen/staff_onboarding_screen.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/state/auth_ui_state.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/state/password_requirements.dart';
+import 'package:amanah_healthcare/features/home/domain/amanah_notification_model.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_home_shell.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/features/permission/data/amanah_permission_store.dart';
+import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 
 class AuthBottomSheetScreen extends StatefulWidget {
@@ -64,6 +70,70 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
   bool _statusIsError = false;
   bool _sheetOpen = false;
   AmanahAuthUser? _authenticatedUser;
+  bool _showOnboardingScreen = true;
+  int _savedOnboardingStep = 0;
+  StaffOnboardingRoleOption? _savedOnboardingRole;
+  String _savedOnboardingLicense = '';
+  bool _isSignUpVerification = false;
+  String _pendingVerificationPassword = '';
+  String _pendingPhone = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreSession();
+  }
+
+  Future<void> _restoreSession() async {
+    AmanahAuthLogger.logLifecycle('Initiating cold startup session check');
+    try {
+      final AmanahAuthUser? user = await widget.repository.getSession();
+      if (user != null && mounted) {
+        AmanahAuthLogger.logLifecycle(
+          'Active session restored successfully',
+          details: <String, dynamic>{
+            'userId': user.id,
+            'name': user.fullName,
+            'role': user.role.name,
+            'needsOnboarding': user.needsOnboarding,
+          },
+        );
+        setState(() {
+          _authenticatedUser = user;
+          _showOnboardingScreen = true;
+        });
+        widget.onAuthenticated?.call(user);
+      } else {
+        AmanahAuthLogger.logLifecycle(
+          'No active session found (user remains on login screen)',
+        );
+      }
+    } catch (e) {
+      AmanahAuthLogger.logLifecycle('Session restoration check error: $e');
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    await widget.repository.signOut();
+    try {
+      await GoogleSignIn().signOut().timeout(
+        const Duration(milliseconds: 100),
+        onTimeout: () => null,
+      );
+    } catch (_) {}
+    AmanahScheduleStore.instance.reset();
+    AmanahNotificationStore.instance.reset();
+    AmanahPermissionStore.instance.reset();
+    if (mounted) {
+      setState(() {
+        _authenticatedUser = null;
+        _showOnboardingScreen = true;
+        _savedOnboardingStep = 0;
+        _savedOnboardingRole = null;
+        _savedOnboardingLicense = '';
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -87,13 +157,44 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
   Widget build(BuildContext context) {
     final AmanahAuthUser? user = _authenticatedUser;
     if (user != null) {
-      return AmanahHomeShell(
-        user: user,
-        onLogout: () {
-          setState(() => _authenticatedUser = null);
-        },
-      );
+      if (user.needsOnboarding && _showOnboardingScreen) {
+        return StaffOnboardingScreen(
+          user: user,
+          repository: widget.repository,
+          initialStep: _savedOnboardingStep,
+          initialRole: _savedOnboardingRole,
+          initialLicenseNumber: _savedOnboardingLicense,
+          onProgressChanged: (
+            int step,
+            StaffOnboardingRoleOption? role,
+            String license,
+          ) {
+            _savedOnboardingStep = step;
+            _savedOnboardingRole = role;
+            _savedOnboardingLicense = license;
+          },
+          onBack: () => setState(() => _showOnboardingScreen = false),
+          onOnboardingComplete: (AmanahAuthUser updatedUser) {
+            setState(() {
+              _authenticatedUser = updatedUser;
+              _showOnboardingScreen = false;
+            });
+            widget.onAuthenticated?.call(updatedUser);
+          },
+          onLogout: _handleLogout,
+        );
+      }
+
+      if (!user.needsOnboarding) {
+        return AmanahHomeShell(
+          user: user,
+          onLogout: _handleLogout,
+        );
+      }
     }
+
+    final bool hasPendingOnboarding =
+        user != null && user.needsOnboarding;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -103,6 +204,9 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
           _AuthBackground(assetPath: widget.backgroundAsset),
           const _AuthBackgroundScrim(),
           _AuthClosedActions(
+            hasPendingOnboarding: hasPendingOnboarding,
+            onResumeOnboarding: () =>
+                setState(() => _showOnboardingScreen = true),
             onSignIn: () => _showAuthSheet(AuthSheetMode.signIn),
             onSignUp: () => _showAuthSheet(AuthSheetMode.signUp),
           ),
@@ -202,7 +306,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
         },
         onEmailAuth: () => _handleCredentialSignIn(sheetContext, sheetSetState),
         onGoogleAuth: () =>
-            _handleProviderAuth(AuthProviderType.google, sheetSetState),
+            _handleProviderAuth(sheetContext, AuthProviderType.google, sheetSetState),
         onSwitchToSignUp: () => Navigator.of(
           sheetContext,
         ).pop(const _AuthSheetResult(AuthSheetMode.signUp)),
@@ -216,7 +320,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
         confirmPasswordController: _confirmPasswordController,
         loadingProvider: _loadingProvider,
         onGoogleAuth: () =>
-            _handleProviderAuth(AuthProviderType.google, sheetSetState),
+            _handleProviderAuth(sheetContext, AuthProviderType.google, sheetSetState),
         onCreateAccount: () =>
             _handleCreateAccount(sheetContext, sheetSetState),
         onSwitchToSignIn: () => Navigator.of(
@@ -258,7 +362,8 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
       AuthSheetMode.signIn => 'Selamat Datang Kembali',
       AuthSheetMode.signUp => 'Buat Akun Barumu',
       AuthSheetMode.forgotPassword => 'Lupa password',
-      AuthSheetMode.otpVerification => 'Masukkan kode',
+      AuthSheetMode.otpVerification =>
+        _isSignUpVerification ? 'Verifikasi Akun' : 'Masukkan kode',
       AuthSheetMode.changePassword => 'Ganti password',
       AuthSheetMode.passwordChangedSuccess => '',
     };
@@ -276,14 +381,16 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
   }
 
   String get _headerDescription {
-    final String resetTarget = _resetEmailController.text.trim();
+    final String target = _isSignUpVerification
+        ? _emailController.text.trim()
+        : _resetEmailController.text.trim();
     return switch (_mode) {
       AuthSheetMode.signIn => 'Masuk untuk melanjutkan ke akunmu',
       AuthSheetMode.signUp => 'Mulai pengalaman kesehatan yang dipersonalisasi',
       AuthSheetMode.forgotPassword =>
         'Masukkan emailmu, kita akan mengirim OTP ke sana',
       AuthSheetMode.otpVerification =>
-        'Kode OTP telah dikirimkan ke ${resetTarget.isEmpty ? 'emailmu' : resetTarget}',
+        'Kode OTP telah dikirimkan ke ${target.isEmpty ? 'emailmu' : target}',
       AuthSheetMode.changePassword =>
         'Silakan masukkan password baru kamu di bawah ini.',
       AuthSheetMode.passwordChangedSuccess => '',
@@ -312,36 +419,91 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     _statusIsError = false;
     _refreshSheet(sheetSetState);
 
-    final AmanahAuthUser? user = await widget.repository.signIn(
-      identifier: _identifierController.text.trim(),
-      password: _passwordController.text,
+    final String identifier = _identifierController.text.trim();
+    AmanahAuthLogger.logLifecycle(
+      'Email credential sign in initiated',
+      details: <String, dynamic>{'identifier': identifier},
     );
 
-    if (!mounted) {
-      return;
-    }
+    try {
+      final AmanahAuthUser? user = await widget.repository.authenticate(
+        identifier,
+        _passwordController.text,
+      );
 
-    _loadingProvider = null;
-    if (user == null) {
+      if (!mounted) {
+        return;
+      }
+
+      _loadingProvider = null;
+      if (user == null) {
+        _hasCredentialError = true;
+        _credentialErrorMessage =
+            'Email atau password yang Anda masukkan salah. Silakan periksa kembali.';
+        AmanahAuthLogger.logLifecycle(
+          'Email credential sign in failed: invalid credentials',
+          details: <String, dynamic>{'identifier': identifier},
+        );
+      } else {
+        _hasCredentialError = false;
+        _credentialErrorMessage = null;
+        AmanahAuthLogger.logLifecycle(
+          'Email credential sign in succeeded',
+          details: <String, dynamic>{
+            'userId': user.id,
+            'role': user.role.name,
+            'needsOnboarding': user.needsOnboarding,
+          },
+        );
+      }
+      _refreshSheet(sheetSetState);
+
+      if (user != null) {
+        widget.onAuthenticated?.call(user);
+        setState(() {
+          _authenticatedUser = user;
+          _showOnboardingScreen = true;
+        });
+        if (sheetContext.mounted) {
+          Navigator.of(sheetContext).pop();
+        }
+      }
+    } on AmanahAuthPatientRestrictedException catch (e) {
+      if (!mounted) return;
+      _loadingProvider = null;
+      _hasCredentialError = true;
+      _credentialErrorMessage = e.message;
+      AmanahAuthLogger.logLifecycle(
+        'Email credential sign in restricted',
+        details: <String, dynamic>{'error': e.message},
+      );
+      _refreshSheet(sheetSetState);
+    } on AmanahAuthException catch (e) {
+      if (!mounted) return;
+      _loadingProvider = null;
+      _hasCredentialError = true;
+      _credentialErrorMessage = e.message;
+      AmanahAuthLogger.logLifecycle(
+        'Email credential sign in error',
+        details: <String, dynamic>{'error': e.message},
+      );
+      _refreshSheet(sheetSetState);
+    } catch (e) {
+      if (!mounted) return;
+      _loadingProvider = null;
       _hasCredentialError = true;
       _credentialErrorMessage =
-          'Email atau password yang Anda masukkan salah. Silakan periksa kembali.';
-    } else {
-      _hasCredentialError = false;
-      _credentialErrorMessage = null;
-    }
-    _refreshSheet(sheetSetState);
-
-    if (user != null) {
-      widget.onAuthenticated?.call(user);
-      setState(() => _authenticatedUser = user);
-      if (sheetContext.mounted) {
-        Navigator.of(sheetContext).pop();
-      }
+          'Terjadi kesalahan pada server. Silakan coba lagi.';
+      AmanahAuthLogger.logLifecycle(
+        'Email credential sign in unexpected error',
+        details: <String, dynamic>{'error': e.toString()},
+      );
+      _refreshSheet(sheetSetState);
     }
   }
 
   Future<void> _handleProviderAuth(
+    BuildContext sheetContext,
     AuthProviderType provider,
     StateSetter sheetSetState,
   ) async {
@@ -351,22 +513,92 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     _statusIsError = false;
     _refreshSheet(sheetSetState);
 
-    await Future<void>.delayed(const Duration(milliseconds: 700));
+    if (provider == AuthProviderType.google) {
+      try {
+        AmanahAuthLogger.logOAuth('Google auth initiated');
+        final GoogleSignIn googleSignIn = GoogleSignIn(
+          serverClientId:
+              '649477011186-augsamgganq024tesomp0c8rvgs9c7ua.apps.googleusercontent.com',
+        );
+        final GoogleSignInAccount? account = await googleSignIn.signIn();
+        if (account == null) {
+          AmanahAuthLogger.logOAuth('Google sign-in cancelled by user');
+          _loadingProvider = null;
+          _refreshSheet(sheetSetState);
+          return;
+        }
 
-    if (!mounted) {
-      return;
+        final GoogleSignInAuthentication auth = await account.authentication;
+        final String? idToken = auth.idToken;
+
+        if (idToken == null || idToken.isEmpty) {
+          throw const AmanahAuthException(
+            'Gagal mendapatkan ID token dari Google.',
+          );
+        }
+
+        final AmanahAuthUser? user =
+            await widget.repository.signInWithGoogle(idToken);
+        if (!mounted) return;
+
+        _loadingProvider = null;
+        _refreshSheet(sheetSetState);
+
+        if (user != null) {
+          AmanahAuthLogger.logOAuth(
+            'Google auth succeeded',
+            details: <String, dynamic>{
+              'userId': user.id,
+              'role': user.role.name,
+              'needsOnboarding': user.needsOnboarding,
+            },
+          );
+          widget.onAuthenticated?.call(user);
+          setState(() {
+            _authenticatedUser = user;
+            _showOnboardingScreen = true;
+          });
+          if (sheetContext.mounted) {
+            Navigator.of(sheetContext).pop();
+          }
+        }
+      } on AmanahAuthPatientRestrictedException catch (e) {
+        if (!mounted) return;
+        _loadingProvider = null;
+        _statusMessage = e.message;
+        _statusIsError = true;
+        AmanahAuthLogger.logOAuth(
+          'Google auth restricted for patient role',
+          details: <String, dynamic>{'error': e.message},
+        );
+        _refreshSheet(sheetSetState);
+      } on AmanahAuthException catch (e) {
+        if (!mounted) return;
+        _loadingProvider = null;
+        _statusMessage = e.message;
+        _statusIsError = true;
+        AmanahAuthLogger.logOAuth(
+          'Google auth failed',
+          details: <String, dynamic>{'error': e.message},
+        );
+        _refreshSheet(sheetSetState);
+      } catch (e) {
+        if (!mounted) return;
+        _loadingProvider = null;
+        _statusMessage = 'Gagal masuk dengan Google: $e';
+        _statusIsError = true;
+        AmanahAuthLogger.logOAuth(
+          'Google auth unexpected error',
+          details: <String, dynamic>{'error': e.toString()},
+        );
+        _refreshSheet(sheetSetState);
+      }
+    } else {
+      _loadingProvider = null;
+      _statusMessage = 'Metode masuk ini belum didukung.';
+      _statusIsError = true;
+      _refreshSheet(sheetSetState);
     }
-
-    final String providerName = switch (provider) {
-      AuthProviderType.google => 'Google',
-      AuthProviderType.email => 'email',
-    };
-
-    _loadingProvider = null;
-    _statusMessage =
-        'Demo autentikasi $providerName berhasil. Integrasi backend belum diaktifkan.';
-    _statusIsError = false;
-    _refreshSheet(sheetSetState);
   }
 
   Future<void> _handleCreateAccount(
@@ -388,21 +620,64 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     _statusIsError = false;
     _refreshSheet(sheetSetState);
 
-    await Future<void>.delayed(const Duration(milliseconds: 700));
+    final String name = _fullNameController.text.trim();
+    final String email = _emailController.text.trim();
+    final String password = _newPasswordController.text;
+    final String phone = _phoneController.text.trim();
 
-    if (!mounted) {
-      return;
-    }
+    AmanahAuthLogger.logLifecycle(
+      'Manual sign up initiated',
+      details: <String, dynamic>{'name': name, 'email': email, 'phone': phone},
+    );
 
-    _loadingProvider = null;
-    _identifierController.text = _emailController.text;
-    _statusMessage =
-        'Akun ${_fullNameController.text.trim()} berhasil dibuat. Silakan masuk.';
-    _statusIsError = false;
-    if (sheetContext.mounted) {
-      Navigator.of(
-        sheetContext,
-      ).pop(const _AuthSheetResult(AuthSheetMode.signIn));
+    try {
+      await widget.repository.signUp(
+        name: name,
+        email: email,
+        password: password,
+      );
+
+      if (!mounted) return;
+
+      _loadingProvider = null;
+      _isSignUpVerification = true;
+      _pendingVerificationPassword = password;
+      _pendingPhone = phone;
+      for (final TextEditingController controller in _otpControllers) {
+        controller.clear();
+      }
+
+      AmanahAuthLogger.logLifecycle(
+        'Manual sign up account created, transitioning to email OTP verification',
+        details: <String, dynamic>{'email': email},
+      );
+
+      _refreshSheet(sheetSetState);
+      if (sheetContext.mounted) {
+        Navigator.of(
+          sheetContext,
+        ).pop(const _AuthSheetResult(AuthSheetMode.otpVerification));
+      }
+    } on AmanahAuthException catch (e) {
+      if (!mounted) return;
+      _loadingProvider = null;
+      _statusMessage = e.message;
+      _statusIsError = true;
+      AmanahAuthLogger.logLifecycle(
+        'Manual sign up failed',
+        details: <String, dynamic>{'error': e.message},
+      );
+      _refreshSheet(sheetSetState);
+    } catch (e) {
+      if (!mounted) return;
+      _loadingProvider = null;
+      _statusMessage = 'Gagal mendaftar akun. Silakan coba lagi.';
+      _statusIsError = true;
+      AmanahAuthLogger.logLifecycle(
+        'Manual sign up unexpected error',
+        details: <String, dynamic>{'error': e.toString()},
+      );
+      _refreshSheet(sheetSetState);
     }
   }
 
@@ -415,25 +690,68 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
       return;
     }
 
+    _isSignUpVerification = false;
+    final String email = _resetEmailController.text.trim();
     _loadingProvider = AuthProviderType.email;
     _statusMessage = null;
     _statusIsError = false;
     _refreshSheet(sheetSetState);
 
-    await Future<void>.delayed(const Duration(milliseconds: 600));
+    AmanahAuthLogger.logLifecycle(
+      'Password reset OTP requested',
+      details: <String, dynamic>{'email': email},
+    );
 
-    if (!mounted) {
-      return;
-    }
+    try {
+      final bool success = await widget.repository.requestPasswordReset(email);
 
-    for (final TextEditingController controller in _otpControllers) {
-      controller.clear();
-    }
-    _loadingProvider = null;
-    if (sheetContext.mounted) {
-      Navigator.of(
-        sheetContext,
-      ).pop(const _AuthSheetResult(AuthSheetMode.otpVerification));
+      if (!mounted) return;
+      _loadingProvider = null;
+
+      if (success) {
+        AmanahAuthLogger.logLifecycle(
+          'Password reset OTP sent successfully',
+          details: <String, dynamic>{'email': email},
+        );
+        for (final TextEditingController controller in _otpControllers) {
+          controller.clear();
+        }
+        _refreshSheet(sheetSetState);
+        if (sheetContext.mounted) {
+          Navigator.of(
+            sheetContext,
+          ).pop(const _AuthSheetResult(AuthSheetMode.otpVerification));
+        }
+      } else {
+        AmanahAuthLogger.logLifecycle(
+          'Password reset OTP request failed: email not accepted',
+          details: <String, dynamic>{'email': email},
+        );
+        _statusMessage =
+            'Gagal mengirim OTP. Pastikan email Anda telah terdaftar.';
+        _statusIsError = true;
+        _refreshSheet(sheetSetState);
+      }
+    } on AmanahAuthException catch (e) {
+      if (!mounted) return;
+      _loadingProvider = null;
+      _statusMessage = e.message;
+      _statusIsError = true;
+      AmanahAuthLogger.logLifecycle(
+        'Password reset OTP request failed',
+        details: <String, dynamic>{'error': e.message},
+      );
+      _refreshSheet(sheetSetState);
+    } catch (e) {
+      if (!mounted) return;
+      _loadingProvider = null;
+      _statusMessage = 'Terjadi kesalahan saat meminta OTP reset password.';
+      _statusIsError = true;
+      AmanahAuthLogger.logLifecycle(
+        'Password reset OTP request unexpected error',
+        details: <String, dynamic>{'error': e.toString()},
+      );
+      _refreshSheet(sheetSetState);
     }
   }
 
@@ -457,22 +775,151 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     _statusIsError = false;
     _refreshSheet(sheetSetState);
 
-    await Future<void>.delayed(const Duration(milliseconds: 700));
+    if (_isSignUpVerification) {
+      final String email = _emailController.text.trim();
+      AmanahAuthLogger.logLifecycle(
+        'Verifying sign up email OTP challenge',
+        details: <String, dynamic>{'email': email},
+      );
 
-    if (!mounted) {
-      return;
-    }
+      try {
+        AmanahAuthUser? user = await widget.repository.verifyEmailOtp(
+          email,
+          code,
+        );
 
-    _loadingProvider = null;
-    _resetPasswordController.clear();
-    _resetConfirmPasswordController.clear();
-    _statusMessage = null;
-    _statusIsError = false;
-    _refreshSheet(sheetSetState);
-    if (sheetContext.mounted) {
-      Navigator.of(
-        sheetContext,
-      ).pop(const _AuthSheetResult(AuthSheetMode.changePassword));
+        // Fallback: If Better Auth does not auto-return session token on verifyEmail, authenticate
+        if (user == null && _pendingVerificationPassword.isNotEmpty) {
+          user = await widget.repository.authenticate(
+            email,
+            _pendingVerificationPassword,
+          );
+        }
+
+        if (!mounted) return;
+        _loadingProvider = null;
+
+        if (user != null) {
+          // Attach phone from registration if not yet stored on user
+          if (user.phone.isEmpty && _pendingPhone.isNotEmpty) {
+            user = user.copyWith(phone: _pendingPhone);
+          }
+
+          AmanahAuthLogger.logLifecycle(
+            'Sign up email OTP verified successfully',
+            details: <String, dynamic>{
+              'userId': user.id,
+              'email': user.email,
+              'role': user.role.name,
+              'needsOnboarding': user.needsOnboarding,
+            },
+          );
+
+          _isSignUpVerification = false;
+          _pendingVerificationPassword = '';
+          _refreshSheet(sheetSetState);
+
+          widget.onAuthenticated?.call(user);
+          setState(() {
+            _authenticatedUser = user;
+            _showOnboardingScreen = true;
+          });
+          if (sheetContext.mounted) {
+            Navigator.of(sheetContext).pop();
+          }
+        } else {
+          _statusMessage = 'Kode OTP salah atau telah kedaluwarsa.';
+          _statusIsError = true;
+          _refreshSheet(sheetSetState);
+        }
+      } on AmanahAuthPatientRestrictedException catch (e) {
+        if (!mounted) return;
+        _loadingProvider = null;
+        _statusMessage = e.message;
+        _statusIsError = true;
+        _refreshSheet(sheetSetState);
+      } on AmanahAuthException catch (e) {
+        if (!mounted) return;
+        _loadingProvider = null;
+        _statusMessage = e.message;
+        _statusIsError = true;
+        AmanahAuthLogger.logLifecycle(
+          'Sign up email OTP verification error',
+          details: <String, dynamic>{'error': e.message},
+        );
+        _refreshSheet(sheetSetState);
+      } catch (e) {
+        if (!mounted) return;
+        _loadingProvider = null;
+        _statusMessage = 'Terjadi kesalahan saat memverifikasi kode OTP.';
+        _statusIsError = true;
+        AmanahAuthLogger.logLifecycle(
+          'Sign up email OTP verification unexpected error',
+          details: <String, dynamic>{'error': e.toString()},
+        );
+        _refreshSheet(sheetSetState);
+      }
+    } else {
+      final String email = _resetEmailController.text.trim();
+      AmanahAuthLogger.logLifecycle(
+        'Verifying password reset OTP challenge',
+        details: <String, dynamic>{'email': email},
+      );
+
+      try {
+        final bool valid = await widget.repository.checkVerificationOtp(
+          email,
+          code,
+        );
+
+        if (!mounted) return;
+        _loadingProvider = null;
+
+        if (valid) {
+          AmanahAuthLogger.logLifecycle(
+            'Password reset OTP verified successfully',
+            details: <String, dynamic>{'email': email},
+          );
+          _resetPasswordController.clear();
+          _resetConfirmPasswordController.clear();
+          _statusMessage = null;
+          _statusIsError = false;
+          _refreshSheet(sheetSetState);
+          if (sheetContext.mounted) {
+            Navigator.of(
+              sheetContext,
+            ).pop(const _AuthSheetResult(AuthSheetMode.changePassword));
+          }
+        } else {
+          AmanahAuthLogger.logLifecycle(
+            'Password reset OTP verification rejected',
+            details: <String, dynamic>{'email': email},
+          );
+          _statusMessage = 'Kode OTP salah atau telah kedaluwarsa.';
+          _statusIsError = true;
+          _refreshSheet(sheetSetState);
+        }
+      } on AmanahAuthException catch (e) {
+        if (!mounted) return;
+        _loadingProvider = null;
+        _statusMessage = e.message;
+        _statusIsError = true;
+        AmanahAuthLogger.logLifecycle(
+          'Password reset OTP verification error',
+          details: <String, dynamic>{'error': e.message},
+        );
+        _refreshSheet(sheetSetState);
+      } catch (e) {
+        if (!mounted) return;
+        _loadingProvider = null;
+        _statusMessage = 'Terjadi kesalahan saat memverifikasi kode OTP.';
+        _statusIsError = true;
+        AmanahAuthLogger.logLifecycle(
+          'Password reset OTP verification unexpected error',
+          details: <String, dynamic>{'error': e.toString()},
+        );
+        _refreshSheet(sheetSetState);
+      }
     }
   }
 
@@ -490,27 +937,82 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
       return;
     }
 
+    if (_resetPasswordController.text != _resetConfirmPasswordController.text) {
+      _statusMessage = 'Konfirmasi password tidak cocok.';
+      _statusIsError = true;
+      _refreshSheet(sheetSetState);
+      return;
+    }
+
+    final String code = _otpControllers
+        .map((TextEditingController controller) => controller.text.trim())
+        .join();
+    final String email = _resetEmailController.text.trim();
+
     _loadingProvider = AuthProviderType.email;
     _statusMessage = null;
     _statusIsError = false;
     _refreshSheet(sheetSetState);
 
-    await Future<void>.delayed(const Duration(milliseconds: 700));
+    AmanahAuthLogger.logLifecycle(
+      'Submitting new password with verified OTP',
+      details: <String, dynamic>{'email': email},
+    );
 
-    if (!mounted) {
-      return;
-    }
+    try {
+      final bool success = await widget.repository.resetPassword(
+        email,
+        code,
+        _resetPasswordController.text,
+      );
 
-    _loadingProvider = null;
-    _passwordController.text = _resetPasswordController.text;
-    _identifierController.text = _resetEmailController.text;
-    _statusMessage = null;
-    _statusIsError = false;
-    _refreshSheet(sheetSetState);
-    if (sheetContext.mounted) {
-      Navigator.of(
-        sheetContext,
-      ).pop(const _AuthSheetResult(AuthSheetMode.passwordChangedSuccess));
+      if (!mounted) return;
+      _loadingProvider = null;
+
+      if (success) {
+        AmanahAuthLogger.logLifecycle(
+          'Password reset completed successfully',
+          details: <String, dynamic>{'email': email},
+        );
+        _passwordController.text = _resetPasswordController.text;
+        _identifierController.text = _resetEmailController.text;
+        _statusMessage = null;
+        _statusIsError = false;
+        _refreshSheet(sheetSetState);
+        if (sheetContext.mounted) {
+          Navigator.of(
+            sheetContext,
+          ).pop(const _AuthSheetResult(AuthSheetMode.passwordChangedSuccess));
+        }
+      } else {
+        AmanahAuthLogger.logLifecycle(
+          'Password reset rejected by server',
+          details: <String, dynamic>{'email': email},
+        );
+        _statusMessage = 'Gagal memperbarui password. Silakan coba lagi.';
+        _statusIsError = true;
+        _refreshSheet(sheetSetState);
+      }
+    } on AmanahAuthException catch (e) {
+      if (!mounted) return;
+      _loadingProvider = null;
+      _statusMessage = e.message;
+      _statusIsError = true;
+      AmanahAuthLogger.logLifecycle(
+        'Password reset error',
+        details: <String, dynamic>{'error': e.message},
+      );
+      _refreshSheet(sheetSetState);
+    } catch (e) {
+      if (!mounted) return;
+      _loadingProvider = null;
+      _statusMessage = 'Terjadi kesalahan saat memperbarui password.';
+      _statusIsError = true;
+      AmanahAuthLogger.logLifecycle(
+        'Password reset unexpected error',
+        details: <String, dynamic>{'error': e.toString()},
+      );
+      _refreshSheet(sheetSetState);
     }
   }
 }
@@ -592,10 +1094,17 @@ class _AuthBackgroundScrim extends StatelessWidget {
 }
 
 class _AuthClosedActions extends StatelessWidget {
-  const _AuthClosedActions({required this.onSignIn, required this.onSignUp});
+  const _AuthClosedActions({
+    required this.onSignIn,
+    required this.onSignUp,
+    this.hasPendingOnboarding = false,
+    this.onResumeOnboarding,
+  });
 
   final VoidCallback onSignIn;
   final VoidCallback onSignUp;
+  final bool hasPendingOnboarding;
+  final VoidCallback? onResumeOnboarding;
 
   @override
   Widget build(BuildContext context) {
@@ -636,8 +1145,8 @@ class _AuthClosedActions extends StatelessWidget {
             ),
             const SizedBox(height: 28),
             AmanahButton.hero(
-              text: 'Mulai',
-              onPressed: onSignUp,
+              text: hasPendingOnboarding ? 'Lanjutkan Pengisian Data' : 'Mulai',
+              onPressed: hasPendingOnboarding ? onResumeOnboarding : onSignUp,
               size: AmanahButtonSize.large,
               isFullWidth: true,
             ),
