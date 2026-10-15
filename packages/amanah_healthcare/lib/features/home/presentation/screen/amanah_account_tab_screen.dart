@@ -5,7 +5,6 @@ import 'package:amanah_healthcare/features/home/presentation/components/account/
 import 'package:amanah_healthcare/features/home/presentation/components/account/amanah_account_preferences_card.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/account/amanah_dual_stack_profile_card.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/account/amanah_winged_mail_banner.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_avatar_photo_sheet.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_edit_profile_drawer.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_pull_to_refresh.dart';
@@ -48,7 +47,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
     super.initState();
     _phone = widget.user.phone;
     _email = widget.user.email;
-    _bio = widget.user.staffProfile?.profession ?? '';
+    _bio = widget.user.staff?.profession ?? '';
     _isEmailVerified = widget.user.isEmailVerified;
   }
 
@@ -269,10 +268,8 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: AmanahDualStackProfileCard(
                           userName: widget.user.fullName,
-                          roleText: widget.user.staffProfile?.profession ??
-                              (widget.user.role == AmanahUserRole.doctor
-                                  ? 'Dokter Spesialis'
-                                  : 'Tenaga Medis'),
+                          roleText: widget.user.staff?.profession ??
+                              widget.user.displayRole,
                           phoneText: _phone,
                           customAvatarPath: _customAvatarPath,
                           presetAvatarUrl: _presetAvatarUrl,
