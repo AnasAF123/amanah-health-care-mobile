@@ -62,8 +62,8 @@ class DoctorSchedule {
     required this.title,
     required this.date,
     required this.time,
-    required this.poli,
-    required this.room,
+    this.poli,
+    this.room,
     required this.badge,
     required this.badgeVariant,
     this.startTime,
@@ -76,8 +76,8 @@ class DoctorSchedule {
   final String title;
   final String date;
   final String time;
-  final String poli;
-  final String room;
+  final String? poli;
+  final String? room;
   final String badge;
   final AmanahBadgeVariant badgeVariant;
   final String? startTime;

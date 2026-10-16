@@ -194,16 +194,18 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                   value: schedule.time,
                   dark: dark,
                 ),
-                PatientSpecRow(
-                  label: 'Ruang Praktik',
-                  value: schedule.room,
-                  dark: dark,
-                ),
-                PatientSpecRow(
-                  label: 'Poli / Spesialisasi',
-                  value: schedule.poli,
-                  dark: dark,
-                ),
+                if (schedule.room != null && schedule.room!.trim().isNotEmpty)
+                  PatientSpecRow(
+                    label: 'Ruang Praktik',
+                    value: schedule.room!,
+                    dark: dark,
+                  ),
+                if (schedule.poli != null && schedule.poli!.trim().isNotEmpty)
+                  PatientSpecRow(
+                    label: 'Poli / Spesialisasi',
+                    value: schedule.poli!,
+                    dark: dark,
+                  ),
                 _SessionSpecTotalPatientsRow(
                   bookedCount: schedule.bookedPatients.length,
                   dark: dark,

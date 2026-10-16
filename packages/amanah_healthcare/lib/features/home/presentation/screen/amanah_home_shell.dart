@@ -26,7 +26,7 @@ import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_p
 import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_qr_scanner_tab_screen.dart';
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
-import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_add_edit_schedule_drawer.dart';
+import 'package:amanah_healthcare/features/schedule/presentation/organisms/doctor_schedule_roster_sheet.dart';
 
 class AmanahHomeShell extends StatefulWidget {
   const AmanahHomeShell({this.user, this.onLogout, super.key});
@@ -68,7 +68,10 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     _scheduleStore.addListener(_onStoreUpdated);
     _notificationStore.addListener(_onStoreUpdated);
     _permissionStore.addListener(_onStoreUpdated);
+    _scheduleStore.syncTodaySchedules();
   }
+
+  Future<void> _loadHomeSchedules() => _scheduleStore.syncTodaySchedules();
 
   void _onStoreUpdated() {
     if (mounted) {
@@ -171,8 +174,8 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
               ? AmanahColorTokens.canvasLight
               : AmanahColorTokens.surfaceLight);
 
-    final List<DoctorSchedule> todaySchedules = _scheduleStore
-        .getSchedulesForDate(AmanahScheduleStore.baseToday);
+    final List<DoctorSchedule> todaySchedules =
+        _scheduleStore.getSchedulesForDate(AmanahScheduleStore.baseToday);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -203,6 +206,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   quickActions: kDefaultQuickActions,
                   activities: const <AmanahActivityMetric>[],
                   unreadNotifications: _notificationStore.unreadCount,
+                  onRefresh: _loadHomeSchedules,
                   onNotificationTap: () {
                     Navigator.of(
                       context,
@@ -215,15 +219,8 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                     _handleQuickAction(action.id);
                   },
                   onScheduleCardTap: _navigateToScheduleWithSession,
-                  onCreateScheduleTap: () {
-                    AmanahAddEditScheduleDrawer.show(
-                      context,
-                      initialDate: AmanahScheduleStore.baseToday,
-                      onSavedDate: (_) {
-                        _showToast('Jadwal praktik berhasil disimpan');
-                      },
-                    );
-                  },
+                  onCreateScheduleTap: () =>
+                      DoctorScheduleRosterSheet.show(context),
                   onDetailActivityTap: () {
                     _handleQuickAction('queue');
                   },
@@ -338,6 +335,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
     this.onScheduleCardTap,
     this.onCreateScheduleTap,
     this.onSlideAction,
+    this.onRefresh,
     super.key,
   });
 
@@ -353,6 +351,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
   final ValueChanged<DoctorSchedule>? onScheduleCardTap;
   final VoidCallback? onCreateScheduleTap;
   final ValueChanged<String>? onSlideAction;
+  final Future<void> Function()? onRefresh;
   final int unreadNotifications;
 
   @override
@@ -372,7 +371,11 @@ class _AmanahHomeScreenContent extends StatelessWidget {
         Expanded(
           child: AmanahPullToRefresh(
             onRefresh: () async {
-              await Future<void>.delayed(const Duration(milliseconds: 900));
+              if (onRefresh != null) {
+                await onRefresh!();
+              } else {
+                await Future<void>.delayed(const Duration(milliseconds: 900));
+              }
             },
             child: ListView(
               physics: const BouncingScrollPhysics(

@@ -251,31 +251,38 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Text(
-                                  schedule.poli,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: dark
-                                        ? AmanahColorTokens.surfaceLight
-                                        : AmanahColorTokens.neutral900,
-                                    fontSize: 14.5,
-                                    fontWeight: FontWeight.w800,
+                                if (schedule.poli != null &&
+                                    schedule.poli!.trim().isNotEmpty)
+                                  Text(
+                                    schedule.poli!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: dark
+                                          ? AmanahColorTokens.surfaceLight
+                                          : AmanahColorTokens.neutral900,
+                                      fontSize: 14.5,
+                                      fontWeight: FontWeight.w800,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  schedule.room,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: dark
-                                        ? AmanahColorTokens.neutral300
-                                        : AmanahColorTokens.neutral500,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
+                                if (schedule.room != null &&
+                                    schedule.room!.trim().isNotEmpty) ...<Widget>[
+                                  if (schedule.poli != null &&
+                                      schedule.poli!.trim().isNotEmpty)
+                                    const SizedBox(height: 2),
+                                  Text(
+                                    schedule.room!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: dark
+                                          ? AmanahColorTokens.neutral300
+                                          : AmanahColorTokens.neutral500,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
+                                ],
                               ],
                             ),
                           ),

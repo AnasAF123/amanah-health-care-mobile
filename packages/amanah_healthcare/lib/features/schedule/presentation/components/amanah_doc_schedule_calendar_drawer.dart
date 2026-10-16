@@ -223,8 +223,8 @@ class _AmanahDocScheduleCalendarDrawerState
                 onTap: isPast
                     ? null
                     : () {
-                        widget.onSelectDate(date);
                         Navigator.of(context).pop();
+                        widget.onSelectDate(date);
                       },
                 child: Container(
                   decoration: BoxDecoration(

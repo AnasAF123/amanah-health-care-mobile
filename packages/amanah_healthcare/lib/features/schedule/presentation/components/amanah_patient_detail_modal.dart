@@ -273,14 +273,17 @@ class _PatientSpecificationTable extends StatelessWidget {
           ),
           PatientSpecRow(
             label: 'Sesi praktik',
-            value: '${schedule.title} (${schedule.poli})',
+            value: (schedule.poli != null && schedule.poli!.trim().isNotEmpty)
+                ? '${schedule.title} (${schedule.poli})'
+                : schedule.title,
             dark: dark,
           ),
-          PatientSpecRow(
-            label: 'Ruang praktik',
-            value: schedule.room,
-            dark: dark,
-          ),
+          if (schedule.room != null && schedule.room!.trim().isNotEmpty)
+            PatientSpecRow(
+              label: 'Ruang praktik',
+              value: schedule.room!,
+              dark: dark,
+            ),
           if (patient.patientGuardian != null)
             PatientSpecRow(
               label: 'Nama pendamping',

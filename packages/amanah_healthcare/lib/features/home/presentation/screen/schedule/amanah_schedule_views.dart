@@ -23,7 +23,7 @@ class AmanahScheduleOverviewView extends StatelessWidget {
     required this.onSelectDate,
     required this.onSelectCalendarDate,
     required this.onReopenSchedule,
-    required this.onAddSchedule,
+    this.onOpenSettings,
     required this.onViewSessions,
     required this.hasSchedulesForDate,
     required this.isCutiForDate,
@@ -40,7 +40,7 @@ class AmanahScheduleOverviewView extends StatelessWidget {
   final ValueChanged<DateTime> onSelectDate;
   final ValueChanged<DateTime> onSelectCalendarDate;
   final VoidCallback onReopenSchedule;
-  final VoidCallback onAddSchedule;
+  final VoidCallback? onOpenSettings;
   final VoidCallback onViewSessions;
   final bool Function(DateTime) hasSchedulesForDate;
   final bool Function(DateTime) isCutiForDate;
@@ -205,12 +205,13 @@ class AmanahScheduleOverviewView extends StatelessWidget {
             message: isCuti
                 ? 'Dokter sedang cuti pada tanggal ini.'
                 : 'Belum ada pasien yang mendaftar pada sesi praktik di tanggal ini.',
-            actionText: 'Tambah Jadwal',
-            actionLeadingIcon: Icons.add_rounded,
-            onAction: onAddSchedule,
-            secondaryActionText: 'Lihat Sesi Dokter',
-            secondaryActionLeadingIcon: Icons.calendar_month_outlined,
-            onSecondaryAction: onViewSessions,
+            actionText: 'Lihat Sesi Kalender',
+            actionLeadingIcon: Icons.calendar_month_outlined,
+            onAction: () => onSelectCalendarDate(selectedDate),
+            secondaryActionText:
+                onOpenSettings != null ? 'Pengaturan Jadwal' : null,
+            secondaryActionLeadingIcon: Icons.tune_rounded,
+            onSecondaryAction: onOpenSettings,
           ),
       ],
     );
@@ -226,7 +227,7 @@ class AmanahScheduleSessionsView extends StatelessWidget {
     required this.onTapDetail,
     required this.onTapEdit,
     required this.onTapDelete,
-    required this.onAddSchedule,
+    this.onOpenSettings,
   });
 
   final List<DoctorSchedule> schedules;
@@ -235,7 +236,7 @@ class AmanahScheduleSessionsView extends StatelessWidget {
   final ValueChanged<DoctorSchedule> onTapDetail;
   final ValueChanged<DoctorSchedule> onTapEdit;
   final ValueChanged<DoctorSchedule> onTapDelete;
-  final VoidCallback onAddSchedule;
+  final VoidCallback? onOpenSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -298,10 +299,11 @@ class AmanahScheduleSessionsView extends StatelessWidget {
             title: 'Belum Ada Sesi Praktik',
             message: isCuti
                 ? 'Dokter sedang cuti pada tanggal ini.'
-                : 'Belum ada sesi praktik dokter yang ditambahkan pada tanggal ini.',
-            actionText: 'Tambah Jadwal Dokter',
-            actionLeadingIcon: Icons.add_rounded,
-            onAction: onAddSchedule,
+                : 'Belum ada sesi praktik dokter yang aktif pada tanggal ini.',
+            actionText:
+                onOpenSettings != null ? 'Pengaturan Jadwal Shift' : null,
+            actionLeadingIcon: Icons.tune_rounded,
+            onAction: onOpenSettings,
           ),
       ],
     );

@@ -3,10 +3,12 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_p
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/schedule/amanah_schedule_views.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
-import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
-import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_add_edit_schedule_drawer.dart';
+import 'package:amanah_healthcare/features/schedule/domain/entities/session_patient.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_cards_and_drawers.dart';
+import 'package:amanah_healthcare/features/schedule/presentation/organisms/doctor_schedule_roster_sheet.dart';
+import 'package:amanah_healthcare/features/schedule/presentation/organisms/schedule_calendar_detail_sheet.dart';
+import 'package:amanah_healthcare/features/schedule/presentation/state/schedule_overview_controller.dart';
 
 enum AmanahScheduleViewMode { overview, sessions, sessionPatients }
 
@@ -32,67 +34,26 @@ class AmanahScheduleTabScreen extends StatefulWidget {
 }
 
 class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
-  final AmanahScheduleStore _store = AmanahScheduleStore.instance;
-
-  DateTime _selectedDate = AmanahScheduleStore.baseToday;
+  late final ScheduleOverviewController _controller;
   AmanahScheduleViewMode _viewMode = AmanahScheduleViewMode.overview;
   DoctorSchedule? _selectedSession;
 
   @override
   void initState() {
     super.initState();
-    _selectedDate = widget.initialDate ?? AmanahScheduleStore.baseToday;
+    _controller = ScheduleOverviewController(
+      initialDate: widget.initialDate ?? DateTime.now(),
+    );
     if (widget.initialViewMode != null) {
       _viewMode = widget.initialViewMode!;
     }
-    if (widget.initialSessionId != null) {
-      final List<DoctorSchedule> list = _store.getSchedulesForDate(
-        _selectedDate,
-      );
-      int idx = list.indexWhere(
-        (DoctorSchedule s) => s.id == widget.initialSessionId,
-      );
-      if (idx < 0 && list.isNotEmpty) {
-        idx = 0;
-      }
-      if (idx >= 0 && idx < list.length) {
-        _selectedSession = list[idx];
-        if (widget.openDetailOnLaunch) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              final DayScheduleSetting daySetting = _store.getDaySettingForDate(
-                _selectedDate,
-              );
-              _showSessionDetailSheet(context, list[idx], daySetting.isCuti);
-            }
-          });
-        }
-      }
-    }
-    _store.addListener(_onStoreUpdated);
+    _controller.initialize();
   }
 
   @override
   void dispose() {
-    _store.removeListener(_onStoreUpdated);
+    _controller.dispose();
     super.dispose();
-  }
-
-  void _onStoreUpdated() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
-  void _handleSavedDate(DateTime date) {
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      _selectedDate = date;
-      _selectedSession = null;
-      _viewMode = AmanahScheduleViewMode.sessions;
-    });
   }
 
   String _formatDateSubtitle(DateTime date) {
@@ -128,89 +89,97 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
 
-    final DayScheduleSetting daySetting = _store.getDaySettingForDate(
-      _selectedDate,
-    );
-    final bool isCuti = daySetting.isCuti;
-    final List<DoctorSchedule> schedules = _store.getSchedulesForDate(
-      _selectedDate,
-    );
-    final List<({BookedPatient patient, DoctorSchedule schedule})>
-    bookedPatients = _store.getAllBookedPatientsForDate(_selectedDate);
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (BuildContext context, _) {
+        final DateTime selectedDate = _controller.selectedDate;
+        final bool isCuti = _controller.isCutiOnSelectedDate;
+        final DayScheduleSetting daySetting = DayScheduleSetting(isCuti: isCuti);
 
-    String screenTitle = 'Jadwal Praktik';
-    String? screenSubtitle;
-    VoidCallback? backAction;
+        final List<({BookedPatient patient, DoctorSchedule schedule})>
+            bookedPatients = _controller.bookedPatients.map((SessionPatient sp) {
+          final BookedPatient bp = sp.toBookedPatient();
+          final DoctorSchedule mockSchedule = DoctorSchedule(
+            id: sp.appointmentId,
+            title: sp.sessionTitle,
+            date: _formatDateSubtitle(selectedDate),
+            time: sp.estimatedStartAt ?? 'Sesi Praktik',
+            room: sp.room.isNotEmpty ? sp.room : null,
+            badge: sp.statusBadge,
+            badgeVariant: sp.badgeVariant,
+          );
+          return (patient: bp, schedule: mockSchedule);
+        }).toList();
 
-    if (_viewMode == AmanahScheduleViewMode.sessionPatients) {
-      screenTitle = 'Daftar Pasien Booking';
-      screenSubtitle = _selectedSession?.title;
-      backAction = () =>
-          setState(() => _viewMode = AmanahScheduleViewMode.sessions);
-    } else if (_viewMode == AmanahScheduleViewMode.sessions) {
-      screenTitle = 'Jadwal Praktik';
-      screenSubtitle = _formatDateSubtitle(_selectedDate);
-      backAction = () =>
-          setState(() => _viewMode = AmanahScheduleViewMode.overview);
-    } else {
-      backAction = widget.onBack;
-    }
+        String screenTitle = 'Jadwal Praktik';
+        String? screenSubtitle;
+        VoidCallback? backAction;
 
-    return Scaffold(
-      backgroundColor: dark
-          ? AmanahColorTokens.canvasDark
-          : AmanahColorTokens.canvasLight,
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            AmanahScreenHeader(
-              title: screenTitle,
-              subtitle: screenSubtitle,
-              onBack: backAction,
-              trailing: _viewMode != AmanahScheduleViewMode.sessionPatients
-                  ? AmanahScreenHeaderIconAction(
-                      icon: Icons.add_rounded,
-                      semanticsLabel: 'Tambah jadwal praktik',
-                      foregroundColor: dark
-                          ? AmanahColorTokens.tabActiveDark
-                          : AmanahColorTokens.brand,
-                      onPressed: () {
-                        AmanahAddEditScheduleDrawer.show(
-                          context,
-                          initialDate: _selectedDate,
-                          onSavedDate: _handleSavedDate,
-                        );
-                      },
-                    )
-                  : null,
-            ),
-            Expanded(
-              child: AmanahPullToRefresh(
-                onRefresh: () async {
-                  await Future<void>.delayed(const Duration(milliseconds: 900));
-                },
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(
-                    parent: AlwaysScrollableScrollPhysics(),
-                  ),
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 260),
-                    child: _buildCurrentView(
-                      context: context,
-                      dark: dark,
-                      daySetting: daySetting,
-                      isCuti: isCuti,
-                      schedules: schedules,
-                      bookedPatients: bookedPatients,
+        if (_viewMode == AmanahScheduleViewMode.sessionPatients) {
+          screenTitle = 'Daftar Pasien Booking';
+          screenSubtitle = _selectedSession?.title;
+          backAction = () =>
+              setState(() => _viewMode = AmanahScheduleViewMode.sessions);
+        } else if (_viewMode == AmanahScheduleViewMode.sessions) {
+          screenTitle = 'Jadwal Praktik';
+          screenSubtitle = _formatDateSubtitle(selectedDate);
+          backAction = () =>
+              setState(() => _viewMode = AmanahScheduleViewMode.overview);
+        } else {
+          backAction = widget.onBack;
+        }
+
+        return Scaffold(
+          backgroundColor: dark
+              ? AmanahColorTokens.canvasDark
+              : AmanahColorTokens.canvasLight,
+          body: SafeArea(
+            child: Column(
+              children: <Widget>[
+                AmanahScreenHeader(
+                  title: screenTitle,
+                  subtitle: screenSubtitle,
+                  onBack: backAction,
+                  trailing: _viewMode != AmanahScheduleViewMode.sessionPatients
+                      ? AmanahScreenHeaderIconAction(
+                          icon: Icons.tune_rounded,
+                          semanticsLabel: 'Pengaturan jadwal shift praktik',
+                          foregroundColor: dark
+                              ? AmanahColorTokens.tabActiveDark
+                              : AmanahColorTokens.brand,
+                          onPressed: () {
+                            DoctorScheduleRosterSheet.show(context);
+                          },
+                        )
+                      : null,
+                ),
+                Expanded(
+                  child: AmanahPullToRefresh(
+                    onRefresh: _controller.refresh,
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 260),
+                        child: _buildCurrentView(
+                          context: context,
+                          dark: dark,
+                          daySetting: daySetting,
+                          isCuti: isCuti,
+                          bookedPatients: bookedPatients,
+                          selectedDate: selectedDate,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -219,67 +188,63 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
     required bool dark,
     required DayScheduleSetting daySetting,
     required bool isCuti,
-    required List<DoctorSchedule> schedules,
     required List<({BookedPatient patient, DoctorSchedule schedule})>
-    bookedPatients,
+        bookedPatients,
+    required DateTime selectedDate,
   }) {
     switch (_viewMode) {
       case AmanahScheduleViewMode.overview:
         return AmanahScheduleOverviewView(
-          selectedDate: _selectedDate,
-          baseToday: AmanahScheduleStore.baseToday,
+          selectedDate: selectedDate,
+          baseToday: DateTime.now(),
           daySetting: daySetting,
           isCuti: isCuti,
-          schedules: schedules,
+          schedules: const <DoctorSchedule>[],
           bookedPatients: bookedPatients,
           dark: dark,
-          dateSubtitle: _formatDateSubtitle(_selectedDate),
-          onSelectDate: (DateTime d) => setState(() => _selectedDate = d),
-          onSelectCalendarDate: (DateTime d) => setState(() {
-            _selectedDate = d;
-            _viewMode = AmanahScheduleViewMode.sessions;
-          }),
-          onReopenSchedule: () => _store.setDayCuti(_selectedDate, false),
-          onAddSchedule: () {
-            AmanahAddEditScheduleDrawer.show(
-              context,
-              initialDate: _selectedDate,
-              onSavedDate: _handleSavedDate,
-            );
+          dateSubtitle: _formatDateSubtitle(selectedDate),
+          onSelectDate: _controller.selectDate,
+          onSelectCalendarDate: (DateTime d) {
+            _controller.selectDate(d);
+            ScheduleCalendarDetailSheet.show(context, selectedDate: d);
+          },
+          onReopenSchedule: () => _controller.reopenSchedule(context, selectedDate),
+          onOpenSettings: () {
+            DoctorScheduleRosterSheet.show(context);
           },
           onViewSessions: () {
-            setState(() => _viewMode = AmanahScheduleViewMode.sessions);
+            ScheduleCalendarDetailSheet.show(context, selectedDate: selectedDate);
           },
-          hasSchedulesForDate: (DateTime d) =>
-              _store.getSchedulesForDate(d).isNotEmpty,
-          isCutiForDate: (DateTime d) => _store.getDaySettingForDate(d).isCuti,
+          hasSchedulesForDate: _controller.hasSchedulesForDate,
+          isCutiForDate: _controller.isCutiForDate,
         );
 
       case AmanahScheduleViewMode.sessions:
         return AmanahScheduleSessionsView(
-          schedules: schedules,
+          schedules: const <DoctorSchedule>[],
           isCuti: isCuti,
           dark: dark,
           onTapDetail: (DoctorSchedule sch) {
-            _showSessionDetailSheet(context, sch, isCuti);
-          },
-          onTapEdit: (DoctorSchedule sch) {
-            AmanahAddEditScheduleDrawer.show(
+            AmanahScheduleDetailDrawer.show(
               context,
-              initialDate: _selectedDate,
-              scheduleToEdit: sch,
-              onSavedDate: _handleSavedDate,
+              schedule: sch,
+              isDayCuti: isCuti,
+              onViewPatients: () {
+                setState(() {
+                  _selectedSession = sch;
+                  _viewMode = AmanahScheduleViewMode.sessionPatients;
+                });
+              },
+              onTapEdit: () {
+                DoctorScheduleRosterSheet.show(context);
+              },
+              onTapDelete: () {},
             );
           },
-          onTapDelete: (DoctorSchedule sch) {
-            _store.deleteSchedule(_selectedDate, sch.id);
-          },
-          onAddSchedule: () {
-            AmanahAddEditScheduleDrawer.show(
-              context,
-              initialDate: _selectedDate,
-              onSavedDate: _handleSavedDate,
-            );
+          onTapEdit: (_) {},
+          onTapDelete: (_) {},
+          onOpenSettings: () {
+            DoctorScheduleRosterSheet.show(context);
           },
         );
 
@@ -292,34 +257,5 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
           },
         );
     }
-  }
-
-  void _showSessionDetailSheet(
-    BuildContext context,
-    DoctorSchedule schedule,
-    bool isCuti,
-  ) {
-    AmanahScheduleDetailDrawer.show(
-      context,
-      schedule: schedule,
-      isDayCuti: isCuti,
-      onViewPatients: () {
-        setState(() {
-          _selectedSession = schedule;
-          _viewMode = AmanahScheduleViewMode.sessionPatients;
-        });
-      },
-      onTapEdit: () {
-        AmanahAddEditScheduleDrawer.show(
-          context,
-          initialDate: _selectedDate,
-          scheduleToEdit: schedule,
-          onSavedDate: _handleSavedDate,
-        );
-      },
-      onTapDelete: () {
-        _store.deleteSchedule(_selectedDate, schedule.id);
-      },
-    );
   }
 }

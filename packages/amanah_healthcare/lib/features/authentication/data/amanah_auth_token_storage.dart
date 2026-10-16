@@ -1,7 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:amanah_healthcare/core/network/auth_token_provider.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_logger.dart';
 
-class AmanahAuthTokenStorage {
+class AmanahAuthTokenStorage implements AuthTokenProvider {
   const AmanahAuthTokenStorage({FlutterSecureStorage storage = const FlutterSecureStorage()})
       : _storage = storage;
 

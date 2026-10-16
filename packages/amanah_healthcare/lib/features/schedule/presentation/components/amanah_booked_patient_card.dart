@@ -269,31 +269,38 @@ class AmanahBookedPatientCard extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Text(
-                                  schedule.poli,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: AmanahThemeTokens.textPrimary(
-                                      context,
+                                if (schedule.poli != null &&
+                                    schedule.poli!.trim().isNotEmpty)
+                                  Text(
+                                    schedule.poli!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: AmanahThemeTokens.textPrimary(
+                                        context,
+                                      ),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
                                     ),
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w800,
                                   ),
-                                ),
-                                const SizedBox(height: 1),
-                                Text(
-                                  schedule.room,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: AmanahThemeTokens.textTertiary(
-                                      context,
+                                if (schedule.room != null &&
+                                    schedule.room!.trim().isNotEmpty) ...<Widget>[
+                                  if (schedule.poli != null &&
+                                      schedule.poli!.trim().isNotEmpty)
+                                    const SizedBox(height: 1),
+                                  Text(
+                                    schedule.room!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: AmanahThemeTokens.textTertiary(
+                                        context,
+                                      ),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
                                   ),
-                                ),
+                                ],
                               ],
                             ),
                           ),
