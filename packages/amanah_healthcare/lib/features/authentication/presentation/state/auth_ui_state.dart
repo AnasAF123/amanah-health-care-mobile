@@ -1,6 +1,5 @@
 enum AuthSheetMode {
   signIn,
-  signUp,
   forgotPassword,
   otpVerification,
   changePassword,

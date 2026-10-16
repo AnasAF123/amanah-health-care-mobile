@@ -43,7 +43,7 @@ class UserAvatar {
   }) {
     final String cleanInitials = extractInitials(name);
     return UserAvatar(
-      url: '/api/v1/users/$userId/avatar',
+      url: '',
       initials: cleanInitials,
       type: 'initials',
       hasCustomAvatar: false,

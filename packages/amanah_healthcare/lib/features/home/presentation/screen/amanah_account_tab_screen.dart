@@ -193,6 +193,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
         Navigator.of(context).push<void>(
           MaterialPageRoute<void>(
             builder: (BuildContext ctx) => AmanahPrivacySecuritySettingsScreen(
+              user: widget.user,
               onBack: () => Navigator.of(ctx).pop(),
             ),
           ),

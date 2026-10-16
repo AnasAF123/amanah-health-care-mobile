@@ -12,6 +12,7 @@ class AmanahStaffProfile {
     this.poliklinikId,
     this.fullName,
     this.profession,
+    this.staffCode,
     this.idCardNumber,
     this.photoUrl,
     this.phoneNumber,
@@ -26,7 +27,8 @@ class AmanahStaffProfile {
       poliklinikId: json['poliklinikId'] as String?,
       fullName: json['fullName'] as String?,
       profession: json['profession'] as String?,
-      idCardNumber: json['idCardNumber'] as String?,
+      staffCode: json['staffCode'] as String? ?? json['staff_code'] as String?,
+      idCardNumber: json['idCardNumber'] as String? ?? json['nationalId'] as String?,
       photoUrl: json['photoUrl'] as String?,
       phoneNumber: json['phoneNumber'] as String?,
       isActive: json['isActive'] as bool? ?? true,
@@ -39,6 +41,7 @@ class AmanahStaffProfile {
   final String? poliklinikId;
   final String? fullName;
   final String? profession;
+  final String? staffCode;
   final String? idCardNumber;
   final String? photoUrl;
   final String? phoneNumber;
@@ -57,7 +60,7 @@ class AmanahAuthUser {
     this.password = '',
     this.isEmailVerified = false,
     this.needsOnboarding = false,
-    this.systemRole = 'PATIENT',
+    this.systemRole = '',
     this.staff,
   });
 
@@ -96,62 +99,17 @@ class AmanahAuthUser {
       isEmailVerified: json['isEmailVerified'] as bool? ??
           json['emailVerified'] as bool? ??
           false,
-      needsOnboarding:
-          json['needsOnboarding'] as bool? ?? isPatientRole(roleStr),
-      systemRole: json['systemRole'] as String? ?? 'PATIENT',
+      needsOnboarding: json['needsOnboarding'] as bool? ?? false,
+      systemRole: json['systemRole'] as String? ?? roleStr,
       staff: json['staff'] != null
           ? AmanahStaffProfile.fromJson(json['staff'] as Map<String, dynamic>)
           : null,
     );
   }
 
-  factory AmanahAuthUser.fromBetterAuthJson(Map<String, dynamic> json) {
-    final String roleStr = json['role'] is Map
-        ? (json['role']['code'] as String? ?? '')
-        : (json['role'] as String? ?? '');
-    final AmanahUserRole mappedRole = parseRole(roleStr);
-    final bool needsOnboarding =
-        json['needsOnboarding'] as bool? ?? isPatientRole(roleStr);
-    final String systemRole =
-        json['systemRole'] as String? ?? (json['role'] as String? ?? 'PATIENT');
-    final Map<String, dynamic>? staffJson =
-        json['staff'] as Map<String, dynamic>?;
-
-    final String id = json['id'] as String? ?? '';
-    final String fullName =
-        json['name'] as String? ?? json['fullName'] as String? ?? '';
-    final String? imageUrl =
-        json['imageUrl'] as String? ?? json['image'] as String?;
-
-    final UserAvatar resolvedAvatar = json['avatar'] != null
-        ? UserAvatar.fromJson(json['avatar'] as Map<String, dynamic>)
-        : (imageUrl != null && imageUrl.isNotEmpty
-            ? UserAvatar(
-                url: imageUrl,
-                initials: UserAvatar.extractInitials(fullName),
-                type: imageUrl.startsWith('http') ? 'oauth' : 'custom',
-                hasCustomAvatar: true,
-                directUrl: imageUrl,
-              )
-            : UserAvatar.fromFallback(userId: id, name: fullName));
-
-    return AmanahAuthUser(
-      id: id,
-      role: mappedRole,
-      fullName: fullName,
-      email: json['email'] as String? ?? '',
-      phone: json['phone'] as String? ?? json['phoneNumber'] as String? ?? '',
-      imageUrl: imageUrl,
-      avatar: resolvedAvatar,
-      password: '',
-      isEmailVerified: json['emailVerified'] as bool? ??
-          json['isEmailVerified'] as bool? ??
-          false,
-      needsOnboarding: needsOnboarding,
-      systemRole: systemRole,
-      staff: staffJson != null ? AmanahStaffProfile.fromJson(staffJson) : null,
-    );
-  }
+  @Deprecated('Use AuthUserMapper.fromJson in data/mappers instead')
+  factory AmanahAuthUser.fromBetterAuthJson(Map<String, dynamic> json) =>
+      AmanahAuthUser.fromJson(json);
 
   final String id;
   final AmanahUserRole role;

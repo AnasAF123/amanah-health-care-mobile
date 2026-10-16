@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 
@@ -13,7 +14,12 @@ class AuthInputField extends StatelessWidget {
     this.textInputAction,
     this.autofillHints,
     this.validator,
+    this.inputFormatters,
+    this.maxLength,
     this.obscureText = false,
+    this.readOnly = false,
+    this.enabled = true,
+    this.helperText,
     this.trailing,
     this.onFieldSubmitted,
     this.onChanged,
@@ -28,7 +34,12 @@ class AuthInputField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final Iterable<String>? autofillHints;
   final String? Function(String?)? validator;
+  final List<TextInputFormatter>? inputFormatters;
+  final int? maxLength;
   final bool obscureText;
+  final bool readOnly;
+  final bool enabled;
+  final String? helperText;
   final Widget? trailing;
   final ValueChanged<String>? onFieldSubmitted;
   final ValueChanged<String>? onChanged;
@@ -61,10 +72,23 @@ class AuthInputField extends StatelessWidget {
       textField: true,
       child: TextFormField(
         controller: controller,
+        readOnly: readOnly,
+        enabled: enabled,
         keyboardType: keyboardType,
         textInputAction: textInputAction,
         autofillHints: autofillHints,
         validator: validator,
+        inputFormatters: inputFormatters,
+        maxLength: maxLength,
+        buildCounter: maxLength != null
+            ? (
+                BuildContext context, {
+                required int currentLength,
+                required bool isFocused,
+                required int? maxLength,
+              }) =>
+                null
+            : null,
         obscureText: obscureText,
         onFieldSubmitted: onFieldSubmitted,
         onChanged: onChanged,
@@ -76,6 +100,11 @@ class AuthInputField extends StatelessWidget {
         decoration: InputDecoration(
           constraints: const BoxConstraints(minHeight: 50),
           hintText: hintText,
+          helperText: helperText,
+          helperStyle: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
           hintStyle: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.36),
             fontWeight: FontWeight.w500,

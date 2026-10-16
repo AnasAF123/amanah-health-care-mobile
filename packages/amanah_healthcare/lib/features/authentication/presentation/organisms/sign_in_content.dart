@@ -1,5 +1,4 @@
-﻿import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/authentication/presentation/components/account_switch_action.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/components/auth_divider.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/components/auth_inline_validation_message.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/components/auth_input_field.dart';
@@ -17,7 +16,6 @@ class SignInContent extends StatelessWidget {
     required this.onForgotPassword,
     required this.onEmailAuth,
     required this.onGoogleAuth,
-    required this.onSwitchToSignUp,
     super.key,
     this.loadingProvider,
     this.hasCredentialError = false,
@@ -31,7 +29,6 @@ class SignInContent extends StatelessWidget {
   final VoidCallback onForgotPassword;
   final VoidCallback onEmailAuth;
   final VoidCallback onGoogleAuth;
-  final VoidCallback onSwitchToSignUp;
   final AuthProviderType? loadingProvider;
   final bool hasCredentialError;
   final String? credentialErrorMessage;
@@ -90,11 +87,18 @@ class SignInContent extends StatelessWidget {
             loading: loadingProvider == AuthProviderType.google,
             onPressed: onGoogleAuth,
           ),
-          const SizedBox(height: LARGE_SPACE),
-          AccountSwitchAction(
-            message: 'Belum punya akun? ',
-            actionLabel: 'Daftar',
-            onTap: onSwitchToSignUp,
+          const SizedBox(height: MEDIUM_SPACE),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: SMALL_SPACE),
+            child: Center(
+              child: Text(
+                'Akses portal terbatas untuk staf dan tenaga medis terdaftar Klinik Amanah.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ),
           ),
         ],
       ),
