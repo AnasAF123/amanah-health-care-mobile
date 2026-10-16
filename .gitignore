@@ -278,7 +278,6 @@ packages/amanah_healthcare/ios/Runner/vls.lproj/InfoPlist.strings
 packages/amanah_healthcare/ios/Runner/zea.lproj/InfoPlist.strings
 *.pyc
 __pycache__/
-**/failures/
 .reference/
 
 # impeccable-ignore-start
