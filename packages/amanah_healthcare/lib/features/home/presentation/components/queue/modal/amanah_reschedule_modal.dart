@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/presentation/components/amanah_skeleton.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/queue/modal/dynamic_session_tile.dart';
@@ -347,23 +348,12 @@ class _AmanahRescheduleModalState extends State<AmanahRescheduleModal> {
             const SizedBox(height: 8),
 
             if (_isLoading)
-              Container(
-                padding: const EdgeInsets.all(24),
-                alignment: Alignment.center,
-                child: Column(
-                  children: <Widget>[
-                    const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Memuat sesi dokter dari sistem klinik...',
-                      style: TextStyle(fontSize: 12, color: subtextColor),
-                    ),
-                  ],
-                ),
+              const Column(
+                children: <Widget>[
+                  AmanahSkeleton.card(height: 54),
+                  SizedBox(height: 8),
+                  AmanahSkeleton.card(height: 54),
+                ],
               )
             else if (_errorMessage != null)
               Container(
@@ -419,9 +409,9 @@ class _AmanahRescheduleModalState extends State<AmanahRescheduleModal> {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 2.1,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 2.35,
                 ),
                 itemCount: availableShifts.length,
                 itemBuilder: (BuildContext context, int index) {

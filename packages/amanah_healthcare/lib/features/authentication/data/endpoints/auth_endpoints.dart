@@ -7,6 +7,7 @@ abstract final class AuthEndpoints {
   // Path constants composed with ApiPrefix
   static const String pathEmailLogin = '${ApiPrefix.v1}/auth/email/login';
   static const String pathGoogleLogin = '${ApiPrefix.v1}/auth/google';
+  static const String pathRefresh = '${ApiPrefix.v1}/auth/refresh';
   static const String pathSession = '${ApiPrefix.v1}/auth/me';
   static const String pathSignOut = '${ApiPrefix.betterAuth}/auth/sign-out';
   static const String pathRequestPasswordReset =
@@ -36,6 +37,7 @@ abstract final class AuthEndpoints {
   // String aliases for direct path resolution
   static const String emailLogin = pathEmailLogin;
   static const String googleLogin = pathGoogleLogin;
+  static const String refresh = pathRefresh;
   static const String session = pathSession;
   static const String signOut = pathSignOut;
   static const String requestPasswordReset = pathRequestPasswordReset;
@@ -61,6 +63,11 @@ abstract final class AuthEndpoints {
   static const ApiEndpoint googleLoginEndpoint = ApiEndpoint(
     path: pathGoogleLogin,
     method: HttpMethod.post,
+  );
+  static const ApiEndpoint refreshEndpoint = ApiEndpoint(
+    path: pathRefresh,
+    method: HttpMethod.post,
+    requiresAuth: true,
   );
   static const ApiEndpoint sessionEndpoint = ApiEndpoint(
     path: pathSession,

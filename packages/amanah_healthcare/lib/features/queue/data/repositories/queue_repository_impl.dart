@@ -220,4 +220,31 @@ class QueueRepositoryImpl implements QueueRepository {
       throw QueueFailure(e.toString());
     }
   }
+
+  @override
+  Future<List<QueuePatientCard>> getDoctorProcessedQueue({String? date}) async {
+    try {
+      final dynamic raw = await _remoteDataSource.getDoctorProcessedQueue(
+        date: date,
+      );
+
+      List<dynamic> patientList = <dynamic>[];
+      if (raw is List) {
+        patientList = raw;
+      } else if (raw is Map<String, dynamic> && raw['data'] is List) {
+        patientList = raw['data'] as List<dynamic>;
+      }
+
+      return patientList
+          .whereType<Map<String, dynamic>>()
+          .map((item) => QueuePatientMapper.fromJson(item))
+          .toList();
+    } on ApiException catch (e) {
+      AppLog.error('[QueueRepository] Failed to get doctor processed patients: ${e.message}');
+      throw QueueFailure(e.message, code: e.code);
+    } catch (e) {
+      AppLog.error('[QueueRepository] Unexpected error getting doctor processed queue: $e');
+      throw QueueFailure(e.toString());
+    }
+  }
 }

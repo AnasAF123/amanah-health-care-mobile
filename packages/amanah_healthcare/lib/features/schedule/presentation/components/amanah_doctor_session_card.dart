@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_card_layers.dart';
@@ -106,58 +107,9 @@ class AmanahDoctorSessionCard extends StatelessWidget {
               Positioned(
                 top: 14,
                 left: 14,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: dark
-                            ? AmanahColorTokens.canvasDark.withValues(alpha: 0.70)
-                            : AmanahColorTokens.surfaceLight.withValues(alpha: 0.90),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: dark
-                              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
-                              : AmanahColorTokens.neutral200,
-                        ),
-                        boxShadow: <BoxShadow>[
-                          BoxShadow(
-                            color: AmanahColorTokens.pureBlack.withValues(alpha: 0.05),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: amanahBadgeTone(schedule.badgeVariant).primary,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const SizedBox(width: 8, height: 8),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            schedule.badge,
-                            style: TextStyle(
-                              color: dark
-                                  ? AmanahColorTokens.surfaceLight
-                                  : AmanahColorTokens.neutral900,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                child: AmanahStatusBadge(
+                  text: schedule.badge,
+                  variant: schedule.badgeVariant,
                 ),
               ),
 

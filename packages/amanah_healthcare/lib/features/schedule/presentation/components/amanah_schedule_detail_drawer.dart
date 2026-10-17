@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_card_layers.dart';
@@ -100,64 +101,15 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Container(
+              AmanahStatusBadge(
+                text: isDayCuti ? 'Cuti' : schedule.badge,
+                variant: isDayCuti
+                    ? AmanahBadgeVariant.warning
+                    : schedule.badgeVariant,
+                fontSize: 11,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
                   vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: isDayCuti
-                      ? AmanahColorTokens.warning.withValues(alpha: 0.20)
-                      : (schedule.badgeVariant == AmanahBadgeVariant.success
-                            ? (dark
-                                  ? AmanahColorTokens.success.withValues(alpha: 0.20)
-                                  : AmanahColorTokens.successSurface)
-                            : schedule.badgeVariant ==
-                                  AmanahBadgeVariant.warning
-                            ? (dark
-                                  ? AmanahColorTokens.warning.withValues(alpha: 0.20)
-                                  : AmanahColorTokens.amberSurfaceSoft)
-                            : (dark
-                                  ? AmanahColorTokens.brandLight.withValues(alpha: 0.20)
-                                  : AmanahColorTokens.brandSurface)),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: isDayCuti
-                            ? AmanahColorTokens.warning
-                            : amanahBadgeTone(schedule.badgeVariant).primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const SizedBox(width: 6, height: 6),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      isDayCuti ? 'Cuti' : schedule.badge,
-                      style: TextStyle(
-                        color: isDayCuti
-                            ? AmanahColorTokens.warning
-                            : (schedule.badgeVariant ==
-                                      AmanahBadgeVariant.success
-                                  ? (dark
-                                        ? AmanahColorTokens.emerald
-                                        : AmanahColorTokens.successDark)
-                                  : schedule.badgeVariant ==
-                                        AmanahBadgeVariant.warning
-                                  ? (dark
-                                        ? AmanahColorTokens.amberLight
-                                        : AmanahColorTokens.warningDark)
-                                  : (dark
-                                        ? AmanahColorTokens.brandSoft
-                                        : AmanahColorTokens.auroraAccentDark)),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ],

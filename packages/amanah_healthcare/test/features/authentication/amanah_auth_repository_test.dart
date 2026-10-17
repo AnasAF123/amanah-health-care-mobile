@@ -9,21 +9,41 @@ import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_use
 
 class FakeAuthLocalDataSource implements AuthLocalDataSource {
   String? _token;
+  String? _refreshToken;
 
   @override
   Future<String?> getToken() async => _token;
 
   @override
+  Future<String?> getRefreshToken() async => _refreshToken;
+
+  @override
   Future<void> saveToken(String token) async => _token = token;
 
   @override
+  Future<void> saveTokens({
+    required String accessToken,
+    required String refreshToken,
+  }) async {
+    _token = accessToken;
+    _refreshToken = refreshToken;
+  }
+
+  @override
   Future<void> deleteToken() async => _token = null;
+
+  @override
+  Future<void> deleteAllTokens() async {
+    _token = null;
+    _refreshToken = null;
+  }
 }
 
 class FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   http.Response? emailLoginResponse;
   http.Response? googleLoginResponse;
   http.Response? sessionResponse;
+  http.Response? refreshTokenResponse;
   http.Response? changePasswordResponse;
   bool signOutCalled = false;
 
@@ -38,6 +58,14 @@ class FakeAuthRemoteDataSource implements AuthRemoteDataSource {
   @override
   Future<http.Response> getSession(String token) async =>
       sessionResponse ?? http.Response('{"error": "not configured"}', 500);
+
+  @override
+  Future<http.Response> refreshToken(String refreshToken) async =>
+      refreshTokenResponse ??
+      http.Response(
+        '{"token": "new_refreshed_token", "refreshToken": "new_refresh_token"}',
+        200,
+      );
 
   @override
   Future<void> signOut(String? token) async {

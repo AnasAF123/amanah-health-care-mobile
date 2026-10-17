@@ -15,6 +15,14 @@ class BookedPatient {
     required this.badgeVariant,
     this.avatarUrl,
     this.patientGuardian,
+    this.poliklinikName,
+    this.etaRange,
+    this.actualStartedAt,
+    this.actualCompletedAt,
+    this.consultationDurationFormatted,
+    this.scheduledStartTime,
+    this.scheduledEndTime,
+    this.status,
   });
 
   final String id;
@@ -30,6 +38,26 @@ class BookedPatient {
   final AmanahBadgeVariant badgeVariant;
   final String? avatarUrl;
   final String? patientGuardian;
+  final String? poliklinikName;
+  final String? etaRange;
+  final String? actualStartedAt;
+  final String? actualCompletedAt;
+  final String? consultationDurationFormatted;
+  final String? scheduledStartTime;
+  final String? scheduledEndTime;
+  final String? status;
+
+  bool get isCompleted {
+    final String s = (status ?? badge).toUpperCase();
+    return s == 'COMPLETED' || s == 'SELESAI';
+  }
+
+  String get etaDisplay {
+    if (etaRange != null && etaRange!.trim().isNotEmpty) {
+      return etaRange!;
+    }
+    return timeSlot;
+  }
 
   String get effectiveAppointmentId =>
       (appointmentId != null && appointmentId!.isNotEmpty) ? appointmentId! : id;
@@ -51,6 +79,14 @@ class BookedPatient {
     AmanahBadgeVariant? badgeVariant,
     String? avatarUrl,
     String? patientGuardian,
+    String? poliklinikName,
+    String? etaRange,
+    String? actualStartedAt,
+    String? actualCompletedAt,
+    String? consultationDurationFormatted,
+    String? scheduledStartTime,
+    String? scheduledEndTime,
+    String? status,
   }) {
     return BookedPatient(
       id: id ?? this.id,
@@ -66,6 +102,15 @@ class BookedPatient {
       badgeVariant: badgeVariant ?? this.badgeVariant,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       patientGuardian: patientGuardian ?? this.patientGuardian,
+      poliklinikName: poliklinikName ?? this.poliklinikName,
+      etaRange: etaRange ?? this.etaRange,
+      actualStartedAt: actualStartedAt ?? this.actualStartedAt,
+      actualCompletedAt: actualCompletedAt ?? this.actualCompletedAt,
+      consultationDurationFormatted:
+          consultationDurationFormatted ?? this.consultationDurationFormatted,
+      scheduledStartTime: scheduledStartTime ?? this.scheduledStartTime,
+      scheduledEndTime: scheduledEndTime ?? this.scheduledEndTime,
+      status: status ?? this.status,
     );
   }
 }

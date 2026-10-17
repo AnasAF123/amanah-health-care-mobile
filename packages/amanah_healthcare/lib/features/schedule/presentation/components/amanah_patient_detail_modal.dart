@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_patient_detail_painters.dart';
@@ -189,30 +190,11 @@ class _PatientMetaInline extends StatelessWidget {
           _PatientMetaDivider(dark: dark),
           Text('Usia ${patient.patientAge}', style: _style),
           _PatientMetaDivider(dark: dark),
-          Container(
+          AmanahStatusBadge(
+            text: patient.badge,
+            variant: patient.badgeVariant,
+            fontSize: 10,
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: patient.badgeVariant == AmanahBadgeVariant.success
-                  ? (dark
-                        ? AmanahColorTokens.success.withValues(alpha: 0.20)
-                        : AmanahColorTokens.successSurface)
-                  : (dark
-                        ? AmanahColorTokens.brandLight.withValues(alpha: 0.20)
-                        : AmanahColorTokens.brandSurface),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              patient.badge,
-              style: TextStyle(
-                color: patient.badgeVariant == AmanahBadgeVariant.success
-                    ? (dark ? AmanahColorTokens.emerald : AmanahColorTokens.successDark)
-                    : (dark
-                          ? AmanahColorTokens.brandSoft
-                          : AmanahColorTokens.auroraAccentDark),
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
           ),
         ],
       ),

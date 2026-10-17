@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
@@ -20,6 +21,8 @@ class AmanahPatientIntakeDrawer extends StatefulWidget {
     this.initialMrn,
     this.initialAge,
     this.initialComplaint,
+    this.initialStatusText,
+    this.initialStatusVariant,
   });
 
   final String appointmentId;
@@ -28,6 +31,8 @@ class AmanahPatientIntakeDrawer extends StatefulWidget {
   final String? initialMrn;
   final String? initialAge;
   final String? initialComplaint;
+  final String? initialStatusText;
+  final AmanahBadgeVariant? initialStatusVariant;
 
   static void show(
     BuildContext context, {
@@ -37,6 +42,8 @@ class AmanahPatientIntakeDrawer extends StatefulWidget {
     String? mrn,
     String? age,
     String? complaint,
+    String? statusText,
+    AmanahBadgeVariant? statusVariant,
   }) {
     showAmanahBottomSheet<void>(
       context: context,
@@ -47,6 +54,8 @@ class AmanahPatientIntakeDrawer extends StatefulWidget {
         initialMrn: mrn,
         initialAge: age,
         initialComplaint: complaint,
+        initialStatusText: statusText,
+        initialStatusVariant: statusVariant,
       ),
     );
   }
@@ -83,19 +92,8 @@ class _AmanahPatientIntakeDrawerState extends State<AmanahPatientIntakeDrawer> {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final PatientIntakeRecord? intake = _controller.intake;
 
-    String headerTitle = 'Formulir Klinis Pasien';
-    if (intake != null) {
-      if (intake.isMaternal) {
-        headerTitle = 'Formulir KIA & Kehamilan (ANC)';
-      } else if (intake.isImmunization) {
-        headerTitle = 'Skrining Imunisasi & Tumbuh Kembang';
-      } else {
-        headerTitle = 'Formulir Pasien & Rekam Medis';
-      }
-    }
-
     return AmanahBottomSheetScaffold(
-      title: headerTitle,
+      title: 'Detail Pasien',
       fixedHeightFactor: 0.90,
       minHeight: 520,
       bodyPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -199,6 +197,8 @@ class _AmanahPatientIntakeDrawerState extends State<AmanahPatientIntakeDrawer> {
             queueNumber: widget.initialQueueNumber ?? '-',
             flow: intake?.flow ?? 'regular',
             isDark: isDark,
+            statusText: widget.initialStatusText,
+            statusVariant: widget.initialStatusVariant,
           ),
           const SizedBox(height: 16),
           if (_controller.isEmpty)

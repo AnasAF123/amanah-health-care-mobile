@@ -52,6 +52,7 @@ class AmanahAuthRepository implements AuthRepository {
     final Map<String, dynamic> data =
         jsonDecode(response.body) as Map<String, dynamic>;
     final String? token = data['token'] as String?;
+    final String? refreshToken = data['refreshToken'] as String?;
     final Map<String, dynamic> userMap =
         (data['user'] as Map<String, dynamic>?) ?? data;
 
@@ -66,7 +67,14 @@ class AmanahAuthRepository implements AuthRepository {
     }
 
     if (token != null) {
-      await _localDataSource.saveToken(token);
+      if (refreshToken != null && refreshToken.isNotEmpty) {
+        await _localDataSource.saveTokens(
+          accessToken: token,
+          refreshToken: refreshToken,
+        );
+      } else {
+        await _localDataSource.saveToken(token);
+      }
       unawaited(AmanahPushService.instance.registerDeviceWithBackend());
     }
     return AuthUserMapper.fromJson(userMap);
@@ -155,7 +163,7 @@ class AmanahAuthRepository implements AuthRepository {
 
       if (response.statusCode == 200) {
         if (response.body.trim().isEmpty || response.body.trim() == 'null') {
-          await _localDataSource.deleteToken();
+          await _localDataSource.deleteAllTokens();
           return null;
         }
 
@@ -176,11 +184,48 @@ class AmanahAuthRepository implements AuthRepository {
         }
       }
       if (response.statusCode == 401) {
-        await _localDataSource.deleteToken();
+        await _localDataSource.deleteAllTokens();
       }
       return null;
     } catch (_) {
       return null;
+    }
+  }
+
+  @override
+  Future<bool> refreshToken() async {
+    final String? currentRefreshToken =
+        await _localDataSource.getRefreshToken();
+    if (currentRefreshToken == null || currentRefreshToken.isEmpty) {
+      return false;
+    }
+
+    try {
+      final http.Response response =
+          await _remoteDataSource.refreshToken(currentRefreshToken);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data =
+            jsonDecode(response.body) as Map<String, dynamic>;
+        final String? newToken = data['token'] as String?;
+        final String? newRefreshToken = data['refreshToken'] as String?;
+
+        if (newToken != null && newToken.isNotEmpty) {
+          await _localDataSource.saveTokens(
+            accessToken: newToken,
+            refreshToken: (newRefreshToken != null &&
+                    newRefreshToken.isNotEmpty)
+                ? newRefreshToken
+                : currentRefreshToken,
+          );
+          return true;
+        }
+      } else if (response.statusCode == 401) {
+        await _localDataSource.deleteAllTokens();
+      }
+      return false;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -193,7 +238,7 @@ class AmanahAuthRepository implements AuthRepository {
     if (token != null && token.isNotEmpty) {
       await _remoteDataSource.signOut(token);
     }
-    await _localDataSource.deleteToken();
+    await _localDataSource.deleteAllTokens();
   }
 
   @override

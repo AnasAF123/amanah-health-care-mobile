@@ -6,7 +6,7 @@ abstract final class ScheduleEndpoints {
   static const String pathCalendarSummary =
       '${ApiPrefix.v1}/schedules/calendar-summary';
   static const String pathBookedPatients =
-      '${ApiPrefix.v1}/schedules/booked-patients';
+      '${ApiPrefix.v1}/appointments';
   static const String pathMySchedules = '${ApiPrefix.v1}/schedules/my-schedules';
 
   static String pathSessionPatients(String sessionId) =>

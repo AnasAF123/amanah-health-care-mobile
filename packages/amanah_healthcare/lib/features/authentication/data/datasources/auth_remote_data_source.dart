@@ -13,6 +13,7 @@ abstract interface class AuthRemoteDataSource {
   Future<http.Response> emailLogin(String identifier, String password);
   Future<http.Response> googleLogin(String idToken);
   Future<http.Response> getSession(String token);
+  Future<http.Response> refreshToken(String refreshToken);
   Future<void> signOut(String? token);
   Future<http.Response> requestPasswordReset(String email);
   Future<http.Response> checkVerificationOtp(String email, String otp);
@@ -104,6 +105,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<http.Response> getSession(String token) {
     final Uri uri = Uri.parse('$_baseUrl${AuthEndpoints.session}');
     return _httpClient.get(uri, headers: _headers(token: token));
+  }
+
+  @override
+  Future<http.Response> refreshToken(String refreshToken) {
+    final Uri uri = Uri.parse('$_baseUrl${AuthEndpoints.refresh}');
+    return _httpClient.post(uri, headers: _headers(token: refreshToken));
   }
 
   @override

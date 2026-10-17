@@ -111,9 +111,19 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
       ),
     );
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: keyboardInset),
-      child: Align(alignment: Alignment.bottomCenter, child: sheet),
+    final Widget sheetWithShield = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {},
+      child: sheet,
+    );
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => Navigator.of(context).maybePop(),
+      child: Padding(
+        padding: EdgeInsets.only(bottom: keyboardInset),
+        child: Align(alignment: Alignment.bottomCenter, child: sheetWithShield),
+      ),
     );
   }
 }

@@ -104,6 +104,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
             title: sp.sessionTitle,
             date: _formatDateSubtitle(selectedDate),
             time: sp.estimatedStartAt ?? 'Sesi Praktik',
+            poli: sp.poliklinikName,
             room: sp.room.isNotEmpty ? sp.room : null,
             badge: sp.statusBadge,
             badgeVariant: sp.badgeVariant,

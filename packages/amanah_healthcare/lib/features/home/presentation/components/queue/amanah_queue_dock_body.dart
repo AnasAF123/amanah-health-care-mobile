@@ -39,6 +39,7 @@ class AmanahQueueDockBody extends StatelessWidget {
     this.onSelectSession,
     this.onCardTap,
     this.onResetQueue,
+    this.onCallPatient,
     super.key,
   });
 
@@ -68,6 +69,7 @@ class AmanahQueueDockBody extends StatelessWidget {
   final VoidCallback onPanCancel;
   final ValueChanged<DragUpdateDetails> onPanUpdate;
   final ValueChanged<DragEndDetails> onPanEnd;
+  final VoidCallback? onCallPatient;
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +101,7 @@ class AmanahQueueDockBody extends StatelessWidget {
     } else if (dragMode == QueueDragMode.up && verticalDrag <= -20.0) {
       headlineText = 'Lepaskan untuk\nbatalkan antrean';
     } else if (dragMode == QueueDragMode.left && horizontalDrag <= -20.0) {
-      headlineText = 'Pindahkan ke\nurutan belakang';
+      headlineText = 'Lepaskan untuk\njadwalkan ulang';
     }
 
     return SafeArea(
@@ -237,6 +239,7 @@ class AmanahQueueDockBody extends StatelessWidget {
                     dragProgress: dragProgress,
                     isLongPressing: false,
                     label: DoctorQueueCopywriting.pullCardToCall,
+                    onCallPatient: onCallPatient,
                   ),
                 ),
               ),

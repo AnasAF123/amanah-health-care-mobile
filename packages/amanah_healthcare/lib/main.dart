@@ -77,6 +77,7 @@ class _AmanahAppState extends State<AmanahApp> {
       ],
       child: BetterAuthProvider(
         child: MaterialApp(
+          navigatorKey: GlobalVars.navigatorKey,
           debugShowCheckedModeBanner: true,
           title: 'Amanah Healthcare',
           theme: ThemeData(

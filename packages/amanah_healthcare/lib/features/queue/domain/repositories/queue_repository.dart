@@ -39,4 +39,7 @@ abstract interface class QueueRepository {
 
   /// Fetches completed patients for a session.
   Future<List<QueuePatientCard>> getCompletedQueue(String sessionId);
+
+  /// Fetches appointments processed by the authenticated doctor for a given date (defaults to today).
+  Future<List<QueuePatientCard>> getDoctorProcessedQueue({String? date});
 }

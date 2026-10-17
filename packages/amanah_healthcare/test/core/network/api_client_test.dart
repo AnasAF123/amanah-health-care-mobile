@@ -12,9 +12,13 @@ import 'package:amanah_healthcare/core/network/http_api_client.dart';
 
 class MockTokenProvider implements AuthTokenProvider {
   String? token = 'mock_jwt_token_456';
+  String? refreshTokenValue = 'mock_refresh_token_789';
 
   @override
   Future<String?> getToken() async => token;
+
+  @override
+  Future<String?> getRefreshToken() async => refreshTokenValue;
 }
 
 void main() {

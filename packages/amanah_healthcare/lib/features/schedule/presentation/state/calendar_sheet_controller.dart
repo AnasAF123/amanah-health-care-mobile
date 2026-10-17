@@ -22,7 +22,7 @@ class CalendarSheetController extends ChangeNotifier {
   final GetMySchedulesUseCase _getMySchedulesUseCase;
   final GetSessionPatientsUseCase _getSessionPatientsUseCase;
 
-  bool _isLoadingSessions = false;
+  bool _isLoadingSessions = true;
   String? _errorMessage;
   List<MyScheduleSession> _activeSessions = const <MyScheduleSession>[];
 

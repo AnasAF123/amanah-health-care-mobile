@@ -22,6 +22,7 @@ abstract interface class QueueRemoteDataSource {
     String? reason,
   });
   Future<dynamic> getRescheduleOptions(String appointmentId);
+  Future<dynamic> getDoctorProcessedQueue({String? date});
 }
 
 class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
@@ -134,6 +135,14 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
   Future<dynamic> getRescheduleOptions(String appointmentId) async {
     final ApiResponse<dynamic> res = await _apiClient.request(
       QueueEndpoints.rescheduleOptions(appointmentId),
+    );
+    return _extractData(res.data);
+  }
+
+  @override
+  Future<dynamic> getDoctorProcessedQueue({String? date}) async {
+    final ApiResponse<dynamic> res = await _apiClient.request(
+      QueueEndpoints.doctorProcessedAppointments(date: date),
     );
     return _extractData(res.data);
   }

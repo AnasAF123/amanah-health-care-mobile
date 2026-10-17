@@ -1,9 +1,12 @@
 import 'package:amanah_healthcare/features/schedule/data/dto/session_patient_dto.dart';
-import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
+import 'package:amanah_healthcare/features/schedule/domain/constants/appointment_status_dictionary.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/session_patient.dart';
 
 abstract final class SessionPatientMapper {
   static SessionPatient fromDto(SessionPatientDto dto) {
+    final AppointmentStatusDescriptor descriptor =
+        AppointmentStatusDescriptor.resolve(dto.status);
+
     return SessionPatient(
       id: dto.id,
       appointmentId: dto.appointmentId,
@@ -17,32 +20,18 @@ abstract final class SessionPatientMapper {
       guardian: dto.guardian,
       complaint: dto.complaint,
       status: dto.status,
-      statusBadge: dto.statusBadge,
+      statusBadge: dto.statusBadge.isNotEmpty ? dto.statusBadge : descriptor.badge,
       avatarUrl: dto.avatarUrl,
       estimatedStartAt: dto.estimatedStartAt,
       estimatedEndAt: dto.estimatedEndAt,
-      badgeVariant: _resolveBadgeVariant(dto.status),
+      badgeVariant: descriptor.badgeVariant,
+      poliklinikName: dto.poliklinikName,
+      etaRange: dto.etaRange,
+      actualStartedAt: dto.actualStartedAt,
+      actualCompletedAt: dto.actualCompletedAt,
+      consultationDurationFormatted: dto.consultationDurationFormatted,
+      scheduledStartTime: dto.scheduledStartTime,
+      scheduledEndTime: dto.scheduledEndTime,
     );
-  }
-
-  static AmanahBadgeVariant _resolveBadgeVariant(String status) {
-    switch (status.toUpperCase()) {
-      case 'COMPLETED':
-      case 'SELESAI':
-        return AmanahBadgeVariant.success;
-      case 'SERVING':
-      case 'EXAMINING':
-        return AmanahBadgeVariant.trend;
-      case 'CALLED':
-      case 'DIPANGGIL':
-        return AmanahBadgeVariant.live;
-      case 'CANCELLED':
-      case 'BATAL':
-        return AmanahBadgeVariant.warning;
-      case 'REGISTERED':
-      case 'WAITING':
-      default:
-        return AmanahBadgeVariant.primary;
-    }
   }
 }

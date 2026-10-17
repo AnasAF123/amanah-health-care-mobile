@@ -8,3 +8,4 @@ export 'data/mappers/patient_intake_mapper.dart';
 export 'data/repositories/intake_repository_impl.dart';
 export 'presentation/state/patient_intake_controller.dart';
 export 'presentation/components/amanah_patient_intake_drawer.dart';
+export 'presentation/components/patient_detail_grouped_card.dart';

@@ -9,6 +9,8 @@ abstract interface class AuthRepository {
 
   Future<AmanahAuthUser?> getSession();
 
+  Future<bool> refreshToken();
+
   Future<void> signOut();
 
   Future<bool> requestPasswordReset(String email);

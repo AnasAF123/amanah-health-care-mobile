@@ -19,6 +19,13 @@ class SessionPatient {
     this.estimatedStartAt,
     this.estimatedEndAt,
     this.badgeVariant = AmanahBadgeVariant.primary,
+    this.poliklinikName,
+    this.etaRange,
+    this.actualStartedAt,
+    this.actualCompletedAt,
+    this.consultationDurationFormatted,
+    this.scheduledStartTime,
+    this.scheduledEndTime,
   });
 
   final String id;
@@ -38,6 +45,13 @@ class SessionPatient {
   final String? estimatedStartAt;
   final String? estimatedEndAt;
   final AmanahBadgeVariant badgeVariant;
+  final String? poliklinikName;
+  final String? etaRange;
+  final String? actualStartedAt;
+  final String? actualCompletedAt;
+  final String? consultationDurationFormatted;
+  final String? scheduledStartTime;
+  final String? scheduledEndTime;
 
   BookedPatient toBookedPatient() {
     return BookedPatient(
@@ -54,6 +68,14 @@ class SessionPatient {
       badgeVariant: badgeVariant,
       avatarUrl: avatarUrl,
       patientGuardian: guardian,
+      poliklinikName: poliklinikName,
+      etaRange: etaRange,
+      actualStartedAt: actualStartedAt,
+      actualCompletedAt: actualCompletedAt,
+      consultationDurationFormatted: consultationDurationFormatted,
+      scheduledStartTime: scheduledStartTime,
+      scheduledEndTime: scheduledEndTime,
+      status: status,
     );
   }
 }

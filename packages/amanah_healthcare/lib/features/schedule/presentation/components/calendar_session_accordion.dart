@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/presentation/components/amanah_skeleton.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/patient_record/patient_record.dart';
@@ -18,6 +19,17 @@ class CalendarSessionAccordion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
+
+    if (controller.isLoadingSessions) {
+      return Column(
+        children: const <Widget>[
+          AmanahSkeleton.card(height: 72),
+          SizedBox(height: 12),
+          AmanahSkeleton.card(height: 72),
+        ],
+      );
+    }
+
     final List<MyScheduleSession> sessions = controller.activeSessions;
 
     if (sessions.isEmpty) {
@@ -161,30 +173,20 @@ class CalendarSessionAccordion extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
                   child: isLoading
-                      ? const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24),
-                          child: Center(
-                            child: SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(strokeWidth: 2.5),
-                            ),
-                          ),
+                      ? const Column(
+                          children: <Widget>[
+                            AmanahSkeleton.card(height: 64, borderRadius: 12),
+                            SizedBox(height: 8),
+                            AmanahSkeleton.card(height: 64, borderRadius: 12),
+                          ],
                         )
                       : (patients == null || patients.isEmpty)
-                          ? Container(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              alignment: Alignment.center,
-                              child: Text(
-                                'Belum ada pasien terdaftar di sesi ini.',
-                                style: TextStyle(
-                                  color: dark
-                                      ? AmanahColorTokens.neutral400
-                                      : AmanahColorTokens.neutral500,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                          ? AmanahEmptyState.box(
+                              title: 'Belum Ada Pasien',
+                              message:
+                                  'Belum ada pasien yang terdaftar pada sesi praktik ini.',
+                              boxSize: 130,
+                              variant: AmanahEmptyStateVariant.compact,
                             )
                           : Column(
                               children: patients
@@ -200,6 +202,12 @@ class CalendarSessionAccordion extends StatelessWidget {
                                           mrn: p.medicalRecordNumber,
                                           age: p.age,
                                           complaint: p.complaint,
+                                          statusText:
+                                              p.statusBadge.isNotEmpty
+                                                  ? p.statusBadge
+                                                  : p.status,
+                                          statusVariant:
+                                              p.badgeVariant,
                                         );
                                       },
                                     ),

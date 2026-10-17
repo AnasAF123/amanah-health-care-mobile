@@ -98,5 +98,30 @@ void main() {
       expect(controller.intake, isNull);
       expect(controller.errorMessage, contains('Server internal error'));
     });
+
+    test('RegularIntakeData relationshipDisplay formats contextual relationship correctly', () {
+      const dataWithContext = RegularIntakeData(
+        relationshipContext: 'Anak dari Lexguard Didier',
+        relationshipType: 'child',
+      );
+      expect(dataWithContext.relationshipDisplay, 'Anak dari Lexguard Didier');
+
+      const dataWithAccountHolder = RegularIntakeData(
+        accountHolderName: 'Lexguard Didier',
+        relationshipType: 'child',
+      );
+      expect(dataWithAccountHolder.relationshipDisplay, 'Anak dari Lexguard Didier');
+
+      const dataSpouse = RegularIntakeData(
+        accountHolderName: 'Lexguard Didier',
+        relationshipType: 'spouse',
+      );
+      expect(dataSpouse.relationshipDisplay, 'Pasangan dari Lexguard Didier');
+
+      const dataSelf = RegularIntakeData(
+        relationshipType: 'self',
+      );
+      expect(dataSelf.relationshipDisplay, 'Akun Utama (Diri Sendiri)');
+    });
   });
 }

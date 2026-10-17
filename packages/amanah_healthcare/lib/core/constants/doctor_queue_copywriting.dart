@@ -1,6 +1,11 @@
 class DoctorQueueCopywriting {
   static const String headerTitle = 'Antrian Poliklinik';
-  static const String pullCardToCall = 'Tarik kartu ke bawah untuk memanggil';
+  static const String pullCardToCall = 'Tarik kartu ke bawah untuk memproses pasien';
+  static const String callPatientThis = 'Panggil Pasien Ini';
+  static const String releaseToProcess = 'Lepaskan untuk proses antrean';
+  static const String releaseToReschedule = 'Lepaskan untuk jadwalkan ulang';
+  static const String releaseToCancel = 'Lepaskan untuk batalkan';
+  static const String actionMarkCompleted = 'Tandai Sudah Selesai';
   static const String callPrefix = 'Panggilan ke-';
   static const String callMaxSuffix = '/3';
   static const String actionCallAgain = 'Panggil Lagi';

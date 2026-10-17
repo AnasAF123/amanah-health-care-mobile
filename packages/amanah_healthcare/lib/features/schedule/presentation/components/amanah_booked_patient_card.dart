@@ -1,5 +1,5 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_queue_badge.dart';
@@ -26,13 +26,38 @@ class AmanahBookedPatientCard extends StatelessWidget {
         ? 'assets/amanah/images/booking-card-bg-dark.png'
         : 'assets/amanah/images/booking-card-bg-light.png';
 
+    String formatTimeOnly(String? rawIsoOrTime) {
+      if (rawIsoOrTime == null || rawIsoOrTime.trim().isEmpty) return '-';
+      if (rawIsoOrTime.contains('T')) {
+        final DateTime? parsed = DateTime.tryParse(rawIsoOrTime)?.toLocal();
+        if (parsed != null) {
+          return '${parsed.hour.toString().padLeft(2, '0')}:${parsed.minute.toString().padLeft(2, '0')}';
+        }
+      }
+      if (rawIsoOrTime.contains(':')) {
+        final List<String> parts = rawIsoOrTime.split(':');
+        if (parts.length >= 2) {
+          return '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}';
+        }
+      }
+      return rawIsoOrTime;
+    }
+
     final String rawSlot = patient.timeSlot;
-    final String startTime = rawSlot.contains(' - ')
-        ? rawSlot.split(' - ').first.trim()
-        : '08:00';
-    final String endTime = rawSlot.contains(' - ')
-        ? rawSlot.split(' - ').last.replaceAll(' WIB', '').trim()
-        : '09:30';
+    final String startTime = patient.actualStartedAt != null
+        ? formatTimeOnly(patient.actualStartedAt)
+        : (patient.scheduledStartTime != null
+            ? formatTimeOnly(patient.scheduledStartTime)
+            : (rawSlot.contains(' - ')
+                ? rawSlot.split(' - ').first.trim()
+                : '08:00'));
+    final String endTime = patient.actualCompletedAt != null
+        ? formatTimeOnly(patient.actualCompletedAt)
+        : (patient.scheduledEndTime != null
+            ? formatTimeOnly(patient.scheduledEndTime)
+            : (rawSlot.contains(' - ')
+                ? rawSlot.split(' - ').last.replaceAll(' WIB', '').trim()
+                : '09:30'));
 
     return Semantics(
       button: true,
@@ -95,58 +120,9 @@ class AmanahBookedPatientCard extends StatelessWidget {
               Positioned(
                 top: 14,
                 left: 14,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: dark
-                            ? AmanahColorTokens.canvasDark.withValues(alpha: 0.70)
-                            : AmanahColorTokens.surfaceLight.withValues(alpha: 0.90),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: dark
-                              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
-                              : AmanahColorTokens.neutral200,
-                        ),
-                        boxShadow: <BoxShadow>[
-                          BoxShadow(
-                            color: AmanahColorTokens.pureBlack.withValues(alpha: 0.05),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: amanahBadgeTone(patient.badgeVariant).primary,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const SizedBox(width: 8, height: 8),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            patient.badge,
-                            style: TextStyle(
-                              color: dark
-                                  ? AmanahColorTokens.surfaceLight
-                                  : AmanahColorTokens.neutral900,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                child: AmanahStatusBadge(
+                  text: patient.badge,
+                  variant: patient.badgeVariant,
                 ),
               ),
 
@@ -259,7 +235,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
 
-                      // Specifications Row: Exactly 3 Columns (Poli & Room | Mulai | Selesai)
+                      // Specifications Row: Conditional (Estimasi Giliran vs Mulai & Selesai)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -269,10 +245,10 @@ class AmanahBookedPatientCard extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                if (schedule.poli != null &&
-                                    schedule.poli!.trim().isNotEmpty)
+                                if ((patient.poliklinikName ?? schedule.poli) != null &&
+                                    (patient.poliklinikName ?? schedule.poli)!.trim().isNotEmpty)
                                   Text(
-                                    schedule.poli!,
+                                    (patient.poliklinikName ?? schedule.poli)!,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
@@ -285,8 +261,8 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                   ),
                                 if (schedule.room != null &&
                                     schedule.room!.trim().isNotEmpty) ...<Widget>[
-                                  if (schedule.poli != null &&
-                                      schedule.poli!.trim().isNotEmpty)
+                                  if ((patient.poliklinikName ?? schedule.poli) != null &&
+                                      (patient.poliklinikName ?? schedule.poli)!.trim().isNotEmpty)
                                     const SizedBox(height: 1),
                                   Text(
                                     schedule.room!,
@@ -312,98 +288,147 @@ class AmanahBookedPatientCard extends StatelessWidget {
                             color: AmanahThemeTokens.divider(context),
                           ),
 
-                          Expanded(
-                            flex: 3,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.access_time_rounded,
-                                      size: 13,
-                                      color: AmanahThemeTokens.textPrimary(
-                                        context,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 3),
-                                    Text(
-                                      startTime,
-                                      style: TextStyle(
+                          if (!patient.isCompleted) ...<Widget>[
+                            Expanded(
+                              flex: 6,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Icon(
+                                        Icons.schedule_rounded,
+                                        size: 13,
                                         color: AmanahThemeTokens.textPrimary(
                                           context,
                                         ),
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w800,
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 1),
-                                Text(
-                                  'Mulai',
-                                  style: TextStyle(
-                                    color: AmanahThemeTokens.textTertiary(
-                                      context,
-                                    ),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
+                                      const SizedBox(width: 4),
+                                      Flexible(
+                                        child: Text(
+                                          patient.etaDisplay,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: AmanahThemeTokens.textPrimary(
+                                              context,
+                                            ),
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          Container(
-                            width: 1,
-                            height: 28,
-                            margin: const EdgeInsets.symmetric(horizontal: 6),
-                            color: AmanahThemeTokens.divider(context),
-                          ),
-
-                          Expanded(
-                            flex: 3,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.schedule_rounded,
-                                      size: 13,
-                                      color: AmanahThemeTokens.textPrimary(
+                                  const SizedBox(height: 1),
+                                  Text(
+                                    'Estimasi Giliran',
+                                    style: TextStyle(
+                                      color: AmanahThemeTokens.textTertiary(
                                         context,
                                       ),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                    const SizedBox(width: 3),
-                                    Text(
-                                      endTime,
-                                      style: TextStyle(
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ] else ...<Widget>[
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Icon(
+                                        Icons.access_time_rounded,
+                                        size: 13,
                                         color: AmanahThemeTokens.textPrimary(
                                           context,
                                         ),
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w800,
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 1),
-                                Text(
-                                  'Selesai',
-                                  style: TextStyle(
-                                    color: AmanahThemeTokens.textTertiary(
-                                      context,
-                                    ),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
+                                      const SizedBox(width: 3),
+                                      Text(
+                                        startTime,
+                                        style: TextStyle(
+                                          color: AmanahThemeTokens.textPrimary(
+                                            context,
+                                          ),
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 1),
+                                  Text(
+                                    'Mulai',
+                                    style: TextStyle(
+                                      color: AmanahThemeTokens.textTertiary(
+                                        context,
+                                      ),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+
+                            Container(
+                              width: 1,
+                              height: 28,
+                              margin: const EdgeInsets.symmetric(horizontal: 6),
+                              color: AmanahThemeTokens.divider(context),
+                            ),
+
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Icon(
+                                        Icons.check_circle_outline_rounded,
+                                        size: 13,
+                                        color: AmanahThemeTokens.textPrimary(
+                                          context,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 3),
+                                      Text(
+                                        endTime,
+                                        style: TextStyle(
+                                          color: AmanahThemeTokens.textPrimary(
+                                            context,
+                                          ),
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 1),
+                                  Text(
+                                    'Selesai',
+                                    style: TextStyle(
+                                      color: AmanahThemeTokens.textTertiary(
+                                        context,
+                                      ),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                       const SizedBox(height: 12),

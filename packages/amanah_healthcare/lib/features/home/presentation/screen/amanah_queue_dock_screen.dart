@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/core/constants/doctor_queue_status.dart';
+import 'package:amanah_healthcare/core/presentation/components/amanah_bottom_banner.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_queue_data.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/queue/amanah_queue_active_session_sheet.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/queue/amanah_queue_dock_animator.dart';
@@ -67,7 +68,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
       onUpdate: () => setState(() {}),
       onProcessCard: _handleActivate,
       onCancelComplete: _handleSwipeUpCancel,
-      onRotateComplete: _handleSwipeLeftRotate,
+      onRotateComplete: _handleSwipeLeftReschedule,
     );
 
     _animator = AmanahQueueDockAnimator(
@@ -139,21 +140,37 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     );
   }
 
-  void _handleSwipeLeftRotate() {
+  void _handleSwipeLeftReschedule() {
     if (_cards.isEmpty) return;
-    final AmanahQueueCardData skipped = _cards.removeAt(0);
-    _cards.add(skipped);
-    _showSnack('Antrean ${skipped.queueNumber} dipindahkan ke belakang.');
+    final AmanahQueueCardData targetCard = _cards.first;
+    _handleRescheduleAction(targetCard);
+  }
+
+  Future<void> _handleCallPatientAction() async {
+    if (_cards.isEmpty) return;
+    final AmanahQueueCardData current = _cards.first;
+    setState(() => _isActionLoading = true);
+    try {
+      await _queueStore.callPatient(current.id);
+      if (!mounted) return;
+      _showSnack(
+        'Nomor antrean ${current.queueNumber} (${current.patientName}) dipanggil.',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      _showSnack('Gagal memanggil pasien: $e', isError: true);
+    } finally {
+      if (mounted) setState(() => _isActionLoading = false);
+    }
   }
 
   void _showSnack(String msg, {bool isError = false}) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: isError ? Colors.red : AmanahColorTokens.brandPrimary,
-      ),
-    );
+    if (isError) {
+      AmanahBottomBanner.error(context, message: msg);
+    } else {
+      AmanahBottomBanner.success(context, message: msg);
+    }
   }
 
   Future<void> _handleActivate() async {
@@ -166,9 +183,9 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
       card: chosen,
       onCallBackend: () async {
         try {
-          await _queueStore.callPatient(chosen.id);
+          await _queueStore.startService(chosen.id);
         } catch (e) {
-          debugPrint('[AmanahQueueDockScreen] Error calling patient: $e');
+          debugPrint('[AmanahQueueDockScreen] Error starting service: $e');
         }
       },
     );
@@ -193,50 +210,6 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
       );
     } catch (e) {
       _showSnack('Gagal menyelesaikan konsultasi: $e', isError: true);
-    } finally {
-      if (mounted) setState(() => _isActionLoading = false);
-    }
-  }
-
-  Future<void> _handlePatientEnteredAction(AmanahQueueCardData card) async {
-    setState(() => _isActionLoading = true);
-    try {
-      await _queueStore.startService(card.id);
-      _showSnack(
-        'Pemeriksaan untuk ${card.patientName} (${card.queueNumber}) telah dimulai.',
-      );
-    } catch (e) {
-      _showSnack('Gagal memulai pemeriksaan: $e', isError: true);
-    } finally {
-      if (mounted) setState(() => _isActionLoading = false);
-    }
-  }
-
-  Future<void> _handleCallAgainAction(AmanahQueueCardData card) async {
-    setState(() => _isActionLoading = true);
-    try {
-      await _queueStore.callPatient(card.id);
-      _showSnack(
-        'Nomor antrean ${card.queueNumber} (${card.patientName}) dipanggil.',
-      );
-    } catch (e) {
-      _showSnack('Gagal memanggil ulang pasien: $e', isError: true);
-    } finally {
-      if (mounted) setState(() => _isActionLoading = false);
-    }
-  }
-
-  Future<void> _handleSkipAction(AmanahQueueCardData card) async {
-    setState(() => _isActionLoading = true);
-    try {
-      await _queueStore.reportNoShow(card.id);
-      if (!mounted) return;
-      await _animator.closeOverlay(
-        context: context,
-        onDismissComplete: _gesture.resetPositions,
-      );
-    } catch (e) {
-      _showSnack('Gagal memproses no-show: $e', isError: true);
     } finally {
       if (mounted) setState(() => _isActionLoading = false);
     }
@@ -287,11 +260,16 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
   }
 
   Future<void> _openHistory() async {
-    final String? sessionId = _queueStore.activeSession?.sessionId;
     final List<AmanahQueueCardData> allHistory = List.from(_collectedCards);
-    if (sessionId != null) {
+    final processed = await _queueStore.loadDoctorProcessedAppointments();
+    final existingIds = allHistory.map((c) => c.id).toSet();
+    for (final p in processed) {
+      if (!existingIds.contains(p.id)) allHistory.add(p.toUiCard());
+    }
+
+    final String? sessionId = _queueStore.activeSession?.sessionId;
+    if (allHistory.isEmpty && sessionId != null) {
       final completed = await _queueStore.loadCompletedPatients(sessionId);
-      final existingIds = allHistory.map((c) => c.id).toSet();
       for (final p in completed) {
         if (!existingIds.contains(p.id)) allHistory.add(p.toUiCard());
       }
@@ -327,24 +305,6 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
       activeSession: _queueStore.activeSession,
       onSelectSession: _queueStore.selectSession,
     );
-  }
-
-  DoctorQueueStatus _mapPatientStatus(String raw) {
-    switch (raw.toLowerCase()) {
-      case 'in_service':
-      case 'in_consultation':
-        return DoctorQueueStatus.inConsultation;
-      case 'completed':
-        return DoctorQueueStatus.completed;
-      case 'no_show':
-      case 'tidak hadir':
-        return DoctorQueueStatus.noShow;
-      case 'called':
-      case 'dipanggil':
-        return DoctorQueueStatus.called;
-      default:
-        return DoctorQueueStatus.waiting;
-    }
   }
 
   @override
@@ -408,6 +368,8 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                 onCardSelect: _bringCardToFront,
                 onCardTap: _openPatientIntake,
                 onResetQueue: _queueStore.loadTodaySessionsAndQueue,
+                onCallPatient:
+                    _cards.isNotEmpty ? _handleCallPatientAction : null,
                 onPanDown: (details) => _gesture.onPanDown(
                   details,
                   isIdle: _animator.activationStage == 'idle',
@@ -434,19 +396,13 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                       card: chosen,
                       isGenieSettled: _animator.isGenieSettled,
                       isGenieRunning: _animator.isGenieRunning,
-                      callCount: 1,
-                      status: _mapPatientStatus(chosen.status),
+                      status: DoctorQueueStatus.inConsultation,
                       isLoading: _isActionLoading,
                       onClose: () => _animator.closeOverlay(
                         context: context,
                         onDismissComplete: _gesture.resetPositions,
                       ),
-                      onCallAgain: () => _handleCallAgainAction(chosen),
-                      onPatientEntered: () =>
-                          _handlePatientEnteredAction(chosen),
-                      onSkipNoShow: () => _handleSkipAction(chosen),
                       onComplete: () => _handleCompleteAction(chosen),
-                      onReschedule: () => _handleRescheduleAction(chosen),
                     );
                   },
                 ),

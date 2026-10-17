@@ -198,6 +198,8 @@ class AmanahScheduleOverviewView extends StatelessWidget {
                     mrn: item.patient.patientRm,
                     age: item.patient.patientAge,
                     complaint: item.patient.patientComplaint,
+                    statusText: item.patient.badge,
+                    statusVariant: item.patient.badgeVariant,
                   );
                 },
               );
@@ -419,6 +421,8 @@ class AmanahScheduleSessionPatientsView extends StatelessWidget {
                     mrn: patient.patientRm,
                     age: patient.patientAge,
                     complaint: patient.patientComplaint,
+                    statusText: patient.badge,
+                    statusVariant: patient.badgeVariant,
                   );
                 },
               );

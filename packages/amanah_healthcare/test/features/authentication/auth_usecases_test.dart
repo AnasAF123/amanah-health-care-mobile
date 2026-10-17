@@ -49,6 +49,9 @@ class FakeAuthRepository implements AuthRepository {
   Future<AmanahAuthUser?> getSession() async => mockUser;
 
   @override
+  Future<bool> refreshToken() async => true;
+
+  @override
   Future<void> signOut() async {
     signOutCalled = true;
   }

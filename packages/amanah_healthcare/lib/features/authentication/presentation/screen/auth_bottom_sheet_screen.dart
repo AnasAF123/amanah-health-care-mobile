@@ -1,11 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/auth/amanah_auth_session_manager.dart';
+import 'package:amanah_healthcare/core/notifications/amanah_push_service.dart';
+import 'package:amanah_healthcare/core/presentation/components/amanah_bottom_banner.dart';
 import 'package:amanah_healthcare/core/usecase/use_case.dart';
-import 'package:amanah_healthcare/features/authentication/data/datasources/google_auth_service.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_logger.dart';
-import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_repository.dart';
+import 'package:amanah_healthcare/features/authentication/data/datasources/google_auth_service.dart';
+import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/authentication/domain/usecases/restore_session.dart';
 import 'package:amanah_healthcare/features/authentication/domain/usecases/sign_out.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/components/auth_closed_view.dart';
@@ -13,9 +16,10 @@ import 'package:amanah_healthcare/features/authentication/presentation/organisms
 import 'package:amanah_healthcare/features/authentication/presentation/screen/staff_onboarding_screen.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_notification_model.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_home_shell.dart';
-import 'package:amanah_healthcare/core/notifications/amanah_push_service.dart';
 import 'package:amanah_healthcare/features/permission/data/amanah_permission_store.dart';
+import 'package:amanah_healthcare/features/queue/presentation/state/amanah_queue_store.dart';
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
+import 'package:amanah_healthcare/helpers/global_vars.dart';
 
 class AuthBottomSheetScreen extends StatefulWidget {
   const AuthBottomSheetScreen({
@@ -44,14 +48,65 @@ class AuthBottomSheetScreen extends StatefulWidget {
   State<AuthBottomSheetScreen> createState() => _AuthBottomSheetScreenState();
 }
 
-class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
+class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen>
+    with WidgetsBindingObserver {
   AmanahAuthUser? _authenticatedUser;
   bool _showOnboardingScreen = true;
+  StreamSubscription<AuthSessionEvent>? _sessionSubscription;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _listenToSessionEvents();
     _restoreSession();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _sessionSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _listenToSessionEvents() {
+    _sessionSubscription = AmanahAuthSessionManager.instance.eventStream
+        .listen((AuthSessionEvent event) {
+      if (event == AuthSessionEvent.expired && mounted) {
+        _handleSessionExpired();
+      }
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _authenticatedUser != null) {
+      AmanahAuthLogger.logLifecycle('App resumed: verifying session validity');
+      unawaited(
+        AmanahAuthSessionManager.instance.verifySessionValidity(
+          authRepository: widget.repository,
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleSessionExpired() async {
+    AmanahAuthLogger.logLifecycle(
+      'Session expired event received: redirecting to auth screen',
+    );
+
+    // Pop any child screens on top of navigator back to root
+    GlobalVars.navigatorKey.currentState
+        ?.popUntil((Route<dynamic> r) => r.isFirst);
+
+    await _handleLogout();
+
+    if (mounted) {
+      AmanahBottomBanner.warning(
+        context,
+        message: 'Sesi Anda telah kedaluwarsa. Silakan masuk kembali.',
+      );
+    }
   }
 
   Future<void> _restoreSession() async {
@@ -89,6 +144,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
     AmanahScheduleStore.instance.reset();
     AmanahNotificationStore.instance.reset();
     AmanahPermissionStore.instance.reset();
+    AmanahQueueStore.instance.reset();
     if (mounted) {
       setState(() {
         _authenticatedUser = null;

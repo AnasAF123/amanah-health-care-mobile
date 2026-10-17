@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:amanah_healthcare/features/authentication/data/datasources/google_auth_service.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
-import 'package:amanah_healthcare/features/authentication/domain/failures/auth_failure.dart';
 import 'package:amanah_healthcare/features/authentication/domain/repositories/auth_repository.dart';
 import 'package:amanah_healthcare/features/authentication/domain/staff_onboarding_poli_option.dart';
 import 'package:amanah_healthcare/features/authentication/domain/usecases/sign_in_with_google.dart';
@@ -83,6 +82,8 @@ class MockAuthRepositoryForGoogle implements AuthRepository {
   Future<AmanahAuthUser?> authenticate(String identifier, String password) async => null;
   @override
   Future<AmanahAuthUser?> getSession() async => null;
+  @override
+  Future<bool> refreshToken() async => true;
   @override
   Future<void> signOut() async {}
   @override

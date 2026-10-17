@@ -60,7 +60,7 @@ void main() {
         AmanahBadgeVariant.trend,
       );
 
-      const SessionPatientDto dtoCalled = SessionPatientDto(
+      const SessionPatientDto dtoWaiting = SessionPatientDto(
         id: '2',
         appointmentId: '2',
         fullName: 'Test',
@@ -70,12 +70,12 @@ void main() {
         queueNumber: '2',
         sessionTitle: 'Pagi',
         room: 'R1',
-        status: 'CALLED',
-        statusBadge: 'Dipanggil',
+        status: 'WAITING',
+        statusBadge: 'Menunggu',
       );
       expect(
-        SessionPatientMapper.fromDto(dtoCalled).badgeVariant,
-        AmanahBadgeVariant.live,
+        SessionPatientMapper.fromDto(dtoWaiting).badgeVariant,
+        AmanahBadgeVariant.primary,
       );
 
       const SessionPatientDto dtoCancelled = SessionPatientDto(
@@ -95,6 +95,106 @@ void main() {
         SessionPatientMapper.fromDto(dtoCancelled).badgeVariant,
         AmanahBadgeVariant.warning,
       );
+    });
+
+    test('correctly parses admin appointments payload and checks isCompleted / etaDisplay', () {
+      final Map<String, dynamic> adminAppointmentJson = <String, dynamic>{
+        'id': 'ff880d35-c83d-4279-984d-6e96dbbf23da',
+        'bookingCode': 'BOOK-MVC49HZ4-32',
+        'patientName': 'Riza',
+        'poliklinikName': 'Poli Umum',
+        'roomName': 'Ruang Poli Umum 1',
+        'queueNumber': 'USG-S001',
+        'status': 'BOOKED',
+        'sessionName': 'Sesi SIANG',
+        'etaRange': '18:00 - 18:30 WIB',
+        'actualStartedAt': null,
+        'actualCompletedAt': null,
+      };
+
+      final SessionPatientDto dto = SessionPatientDto.fromJson(adminAppointmentJson);
+      expect(dto.fullName, 'Riza');
+      expect(dto.poliklinikName, 'Poli Umum');
+      expect(dto.room, 'Ruang Poli Umum 1');
+      expect(dto.queueNumber, 'USG-S001');
+      expect(dto.etaRange, '18:00 - 18:30 WIB');
+      expect(dto.status, 'BOOKED');
+
+      final SessionPatient entity = SessionPatientMapper.fromDto(dto);
+      expect(entity.etaRange, '18:00 - 18:30 WIB');
+      expect(entity.poliklinikName, 'Poli Umum');
+
+      final BookedPatient bp = entity.toBookedPatient();
+      expect(bp.isCompleted, isFalse);
+      expect(bp.etaDisplay, '18:00 - 18:30 WIB');
+      expect(bp.poliklinikName, 'Poli Umum');
+
+      final BookedPatient completedBp = bp.copyWith(status: 'COMPLETED');
+      expect(completedBp.isCompleted, isTrue);
+    });
+
+    test('verifies Dr. Zikri 2 patients exact status resolution via AppointmentStatusDescriptor', () {
+      // Patient 1: Riza (BOOKED) -> 'Sudah Buat Janji'
+      final SessionPatientDto rizaDto = SessionPatientDto.fromJson(<String, dynamic>{
+        'id': 'ff880d35-c83d-4279-984d-6e96dbbf23da',
+        'patientName': 'Riza',
+        'status': 'BOOKED',
+        'queueNumber': 'USG-S001',
+      });
+      expect(rizaDto.statusBadge, 'Sudah Buat Janji');
+      final SessionPatient rizaEntity = SessionPatientMapper.fromDto(rizaDto);
+      expect(rizaEntity.badgeVariant, AmanahBadgeVariant.primary);
+      expect(rizaEntity.statusBadge, 'Sudah Buat Janji');
+
+      // Patient 2: Siti Aminah (WAITING) -> 'Menunggu'
+      final SessionPatientDto sitiDto = SessionPatientDto.fromJson(<String, dynamic>{
+        'id': 'a1b2c3d4-e5f6-4a1b-8c2d-3e4f5a6b7c8d',
+        'patientName': 'Siti Aminah Updated',
+        'status': 'WAITING',
+        'queueNumber': 'S002',
+      });
+      expect(sitiDto.statusBadge, 'Menunggu');
+      final SessionPatient sitiEntity = SessionPatientMapper.fromDto(sitiDto);
+      expect(sitiEntity.badgeVariant, AmanahBadgeVariant.primary);
+      expect(sitiEntity.statusBadge, 'Menunggu');
+
+      // IN_SERVICE -> 'Sedang Diperiksa'
+      final SessionPatient inService = SessionPatientMapper.fromDto(
+        const SessionPatientDto(
+          id: '3',
+          appointmentId: '3',
+          fullName: 'Test',
+          medicalRecordNumber: 'RM-3',
+          age: '20',
+          gender: 'L',
+          queueNumber: '3',
+          sessionTitle: 'Pagi',
+          room: 'R1',
+          status: 'IN_SERVICE',
+          statusBadge: '',
+        ),
+      );
+      expect(inService.statusBadge, 'Sedang Diperiksa');
+      expect(inService.badgeVariant, AmanahBadgeVariant.trend);
+
+      // LATE -> 'Terlambat'
+      final SessionPatient latePatient = SessionPatientMapper.fromDto(
+        const SessionPatientDto(
+          id: '4',
+          appointmentId: '4',
+          fullName: 'Test',
+          medicalRecordNumber: 'RM-4',
+          age: '20',
+          gender: 'L',
+          queueNumber: '4',
+          sessionTitle: 'Pagi',
+          room: 'R1',
+          status: 'LATE',
+          statusBadge: '',
+        ),
+      );
+      expect(latePatient.statusBadge, 'Terlambat');
+      expect(latePatient.badgeVariant, AmanahBadgeVariant.warning);
     });
   });
 }

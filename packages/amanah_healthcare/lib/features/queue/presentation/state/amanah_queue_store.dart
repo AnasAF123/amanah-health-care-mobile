@@ -24,6 +24,7 @@ import 'package:amanah_healthcare/features/queue/domain/usecases/start_service_u
 class AmanahQueueStore extends ChangeNotifier {
   AmanahQueueStore._() {
     final QueueRepository repo = QueueRepositoryImpl();
+    _queueRepo = repo;
     _getSessionsUseCase = GetDoctorTodaySessionsUseCase(repo);
     _getQueueUseCase = GetSessionQueueUseCase(repo);
     _callPatientUseCase = CallPatientUseCase(repo);
@@ -43,6 +44,7 @@ class AmanahQueueStore extends ChangeNotifier {
 
   static final AmanahQueueStore instance = AmanahQueueStore._();
 
+  late final QueueRepository _queueRepo;
   late final GetDoctorTodaySessionsUseCase _getSessionsUseCase;
   late final GetSessionQueueUseCase _getQueueUseCase;
   late final CallPatientUseCase _callPatientUseCase;
@@ -251,6 +253,16 @@ class AmanahQueueStore extends ChangeNotifier {
     }
   }
 
+  /// Fetches appointments processed by this doctor (IN_SERVICE & COMPLETED) from backend.
+  Future<List<QueuePatientCard>> loadDoctorProcessedAppointments({String? date}) async {
+    try {
+      return await _queueRepo.getDoctorProcessedQueue(date: date);
+    } catch (e) {
+      AppLog.error('[AmanahQueueStore] Error loading doctor processed appointments: $e');
+      return <QueuePatientCard>[];
+    }
+  }
+
   /// Auto-selects the optimal session based on current clock time.
   QueueSessionInfo? _resolveOptimalActiveSession(List<QueueSessionInfo> sessions) {
     if (sessions.isEmpty) return null;
@@ -281,5 +293,15 @@ class AmanahQueueStore extends ChangeNotifier {
       }
     } catch (_) {}
     return null;
+  }
+
+  /// Resets queue state, active session, and waiting patients upon logout or session expiry.
+  void reset() {
+    _sessions = <QueueSessionInfo>[];
+    _activeSession = null;
+    _waitingPatients = <QueuePatientCard>[];
+    _isLoading = false;
+    _errorMessage = null;
+    notifyListeners();
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/patient_record/domain/entities/patient_intake_record.dart';
-import 'package:amanah_healthcare/features/patient_record/presentation/components/intake_info_row.dart';
+import 'package:amanah_healthcare/features/patient_record/presentation/components/patient_detail_grouped_card.dart';
 
 /// Clinical presentation view for Maternal & Obstetric Intake Form (ANC / Kehamilan / Persalinan).
 class MaternalIntakeView extends StatelessWidget {
@@ -19,236 +18,137 @@ class MaternalIntakeView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // Group 1: Status Obstetrik & Kehamilan
+        PatientDetailGroupSection(
+          title: 'Status Obstetrik & Kehamilan (ANC)',
+          isDark: isDark,
           children: <Widget>[
-            Text(
-              'Riwayat Medis KIA & Kehamilan (ANC)',
-              style: TextStyle(
-                color: isDark
-                    ? AmanahColorTokens.surfaceLight
-                    : AmanahColorTokens.neutral900,
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
             if (maternal.gpa != null)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.pink.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: Colors.pink.withValues(alpha: 0.30),
-                  ),
-                ),
-                child: Text(
-                  maternal.gpa!,
-                  style: TextStyle(
-                    color: Colors.pink.shade700,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
+              PatientDetailTile(
+                icon: Icons.pregnant_woman_rounded,
+                label: 'Status Gravida / Paritas / Abortus (GPA)',
+                value: maternal.gpa!,
+                isDark: isDark,
               ),
+            PatientDetailTile(
+              icon: Icons.event_note_rounded,
+              label: 'Hari Pertama Haid Terakhir (HPHT)',
+              value: maternal.hpht ?? '-',
+              isDark: isDark,
+            ),
+            PatientDetailTile(
+              icon: Icons.event_available_rounded,
+              label: 'Taksiran Persalinan (HPL)',
+              value: maternal.estimatedDueDate ?? '-',
+              isDark: isDark,
+            ),
+            PatientDetailTile(
+              icon: Icons.hourglass_bottom_rounded,
+              label: 'Usia Kehamilan Saat Ini',
+              value: maternal.gestationalAgeFormatted ?? '-',
+              isDark: isDark,
+            ),
+            PatientDetailTile(
+              icon: Icons.favorite_border_rounded,
+              label: 'Nama Suami / Pasangan',
+              value: maternal.partnerName ?? '-',
+              isDark: isDark,
+              showDivider: false,
+            ),
           ],
         ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isDark
-                ? AmanahColorTokens.surfaceSecondaryDark
-                : AmanahColorTokens.surfaceLight,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark
-                  ? AmanahColorTokens.neutral800
-                  : AmanahColorTokens.neutral200,
+
+        // Group 2: Pemeriksaan Fisik & Skrining
+        PatientDetailGroupSection(
+          title: 'Pemeriksaan Fisik & Skrining Awal',
+          isDark: isDark,
+          children: <Widget>[
+            PatientDetailTile(
+              icon: Icons.straighten_rounded,
+              label: 'Tinggi Badan',
+              value: maternal.heightCm != null ? '${maternal.heightCm} cm' : '-',
+              isDark: isDark,
             ),
-          ),
-          child: Column(
-            children: <Widget>[
-              IntakeInfoRow(
-                label: 'HPHT',
-                value: maternal.hpht ?? '-',
-                isDark: isDark,
-              ),
-              IntakeInfoRow(
-                label: 'Taksiran Persalinan (HPL)',
-                value: maternal.estimatedDueDate ?? '-',
-                isDark: isDark,
-              ),
-              IntakeInfoRow(
-                label: 'Usia Kehamilan',
-                value: maternal.gestationalAgeFormatted ?? '-',
-                isDark: isDark,
-              ),
-              const Divider(height: 20),
-              IntakeInfoRow(
-                label: 'TB / BB Awal',
-                value:
-                    '${maternal.heightCm != null ? "${maternal.heightCm} cm" : "-"} / ${maternal.prePregnancyWeightKg != null ? "${maternal.prePregnancyWeightKg} kg" : "-"}',
-                isDark: isDark,
-              ),
-              IntakeInfoRow(
-                label: 'LiLA / IMT Awal',
-                value:
-                    '${maternal.upperArmCircumferenceCm != null ? "${maternal.upperArmCircumferenceCm} cm" : "-"} / ${maternal.initialBmi ?? "-"}',
-                isDark: isDark,
-              ),
-              IntakeInfoRow(
-                label: 'Gol. Darah / Status TT',
-                value:
-                    '${maternal.motherBloodType ?? "-"} / ${maternal.tetanusStatus ?? "-"}',
-                isDark: isDark,
-              ),
-              IntakeInfoRow(
-                label: 'Nama Suami / Pasangan',
-                value: maternal.partnerName ?? '-',
-                isDark: isDark,
-              ),
-            ],
-          ),
+            PatientDetailTile(
+              icon: Icons.monitor_weight_outlined,
+              label: 'Berat Badan Pra-Kehamilan',
+              value: maternal.prePregnancyWeightKg != null
+                  ? '${maternal.prePregnancyWeightKg} kg'
+                  : '-',
+              isDark: isDark,
+            ),
+            PatientDetailTile(
+              icon: Icons.fitness_center_rounded,
+              label: 'Lingkar Lengan Atas (LiLA)',
+              value: maternal.upperArmCircumferenceCm != null
+                  ? '${maternal.upperArmCircumferenceCm} cm'
+                  : '-',
+              isDark: isDark,
+            ),
+            PatientDetailTile(
+              icon: Icons.speed_rounded,
+              label: 'Indeks Massa Tubuh (IMT)',
+              value: maternal.initialBmi != null ? '${maternal.initialBmi}' : '-',
+              isDark: isDark,
+            ),
+            PatientDetailTile(
+              icon: Icons.bloodtype_outlined,
+              label: 'Golongan Darah Ibu',
+              value: maternal.motherBloodType ?? '-',
+              isDark: isDark,
+            ),
+            PatientDetailTile(
+              icon: Icons.vaccines_outlined,
+              label: 'Status Imunisasi Tetanus Toksoid (TT)',
+              value: maternal.tetanusStatus ?? '-',
+              isDark: isDark,
+              showDivider: false,
+            ),
+          ],
         ),
-        if (maternal.previousPregnancies.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 18),
-          Text(
-            'Riwayat Persalinan Sebelumnya',
-            style: TextStyle(
-              color: isDark
-                  ? AmanahColorTokens.surfaceLight
-                  : AmanahColorTokens.neutral900,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-            ),
+
+        // Group 3: Riwayat Persalinan Sebelumnya
+        if (maternal.previousPregnancies.isNotEmpty)
+          PatientDetailGroupSection(
+            title: 'Riwayat Persalinan Sebelumnya',
+            isDark: isDark,
+            children: maternal.previousPregnancies
+                .asMap()
+                .entries
+                .map((MapEntry<int, PreviousPregnancyItem> entry) {
+              final int index = entry.key;
+              final PreviousPregnancyItem p = entry.value;
+              final bool isLast =
+                  index == maternal.previousPregnancies.length - 1;
+              return PatientDetailTile(
+                icon: Icons.child_friendly_rounded,
+                label: 'Anak Ke-${p.orderNumber} (Tahun ${p.birthYear ?? "-"})',
+                value:
+                    '${p.childSex ?? "Anak"}, Persalinan ${p.deliveryMethod ?? "Normal"} di ${p.deliveryPlace ?? "Faskes"}',
+                isDark: isDark,
+                showDivider: !isLast,
+              );
+            }).toList(),
           ),
-          const SizedBox(height: 8),
-          ...maternal.previousPregnancies.map((PreviousPregnancyItem p) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? AmanahColorTokens.surfaceDark
-                    : AmanahColorTokens.neutral50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: isDark
-                      ? AmanahColorTokens.neutral800
-                      : AmanahColorTokens.neutral200,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(
-                        'Anak Ke-${p.orderNumber} (${p.birthYear ?? "-"})',
-                        style: TextStyle(
-                          color: isDark
-                              ? AmanahColorTokens.surfaceLight
-                              : AmanahColorTokens.neutral900,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
-                        ),
-                      ),
-                      Text(
-                        '${p.childSex ?? "-"} • ${p.birthWeightGrams != null ? "${p.birthWeightGrams} g" : "-"}',
-                        style: TextStyle(
-                          color: isDark
-                              ? AmanahColorTokens.neutral400
-                              : AmanahColorTokens.neutral600,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Cara: ${p.deliveryMethod ?? "-"} • Penolong: ${p.birthAttendant ?? "-"} • Tempat: ${p.deliveryPlace ?? "-"}',
-                    style: TextStyle(
-                      color: isDark
-                          ? AmanahColorTokens.neutral400
-                          : AmanahColorTokens.neutral600,
-                      fontSize: 11,
-                    ),
-                  ),
-                  if (p.complications != null &&
-                      p.complications != 'Tidak ada') ...<Widget>[
-                    const SizedBox(height: 3),
-                    Text(
-                      'Komplikasi: ${p.complications}',
-                      style: TextStyle(
-                        color: AmanahColorTokens.danger,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            );
-          }),
-        ],
-        if (maternal.contraceptiveHistories.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 18),
-          Text(
-            'Riwayat Kontrasepsi (KB)',
-            style: TextStyle(
-              color: isDark
-                  ? AmanahColorTokens.surfaceLight
-                  : AmanahColorTokens.neutral900,
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-            ),
+
+        // Group 4: Riwayat Kontrasepsi (KB)
+        if (maternal.contraceptiveHistories.isNotEmpty)
+          PatientDetailGroupSection(
+            title: 'Riwayat Kontrasepsi (KB)',
+            isDark: isDark,
+            children: maternal.contraceptiveHistories.asMap().entries.map((MapEntry<int, ContraceptiveHistoryItem> entry) {
+              final int index = entry.key;
+              final ContraceptiveHistoryItem c = entry.value;
+              final bool isLast = index == maternal.contraceptiveHistories.length - 1;
+              return PatientDetailTile(
+                icon: Icons.medication_outlined,
+                label: c.durationText ?? (c.startDate != null ? 'Mulai: ${c.startDate}' : '-'),
+                value: c.contraceptiveType,
+                isDark: isDark,
+                showDivider: !isLast,
+              );
+            }).toList(),
           ),
-          const SizedBox(height: 8),
-          ...maternal.contraceptiveHistories.map((ContraceptiveHistoryItem c) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 6),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? AmanahColorTokens.surfaceDark
-                    : AmanahColorTokens.neutral50,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: isDark
-                      ? AmanahColorTokens.neutral800
-                      : AmanahColorTokens.neutral200,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Text(
-                    c.contraceptiveType,
-                    style: TextStyle(
-                      color: isDark
-                          ? AmanahColorTokens.surfaceLight
-                          : AmanahColorTokens.neutral900,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
-                  Text(
-                    c.durationText ??
-                        (c.startDate != null ? 'Mulai: ${c.startDate}' : '-'),
-                    style: TextStyle(
-                      color: isDark
-                          ? AmanahColorTokens.neutral400
-                          : AmanahColorTokens.neutral600,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-        ],
       ],
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/queue/domain/entities/reschedule_options_entity.dart';
+import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
 
 /// Presentation widget rendering a dynamic clinical session/shift card option.
 class DynamicSessionTile extends StatelessWidget {
@@ -74,7 +75,10 @@ class DynamicSessionTile extends StatelessWidget {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    shift.shift,
+                    ClinicalSessionResolver.resolveSessionName(
+                      sessionShift: shift.sessionShift,
+                      fallback: shift.shift,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

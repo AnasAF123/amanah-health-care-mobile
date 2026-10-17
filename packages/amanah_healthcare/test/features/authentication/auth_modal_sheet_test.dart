@@ -30,6 +30,9 @@ class MockAuthRepository implements AuthRepository {
   Future<AmanahAuthUser?> getSession() async => null;
 
   @override
+  Future<bool> refreshToken() async => true;
+
+  @override
   Future<void> signOut() async {}
 
   @override

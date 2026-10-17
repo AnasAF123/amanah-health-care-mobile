@@ -18,13 +18,13 @@ class AmanahQueueActiveSessionSheet extends StatefulWidget {
     required this.isGenieSettled,
     required this.isGenieRunning,
     required this.onClose,
-    required this.onCallAgain,
-    required this.onPatientEntered,
-    required this.onSkipNoShow,
     required this.onComplete,
+    this.onCallAgain,
+    this.onPatientEntered,
+    this.onSkipNoShow,
     this.onReschedule,
     this.callCount = 1,
-    this.status = DoctorQueueStatus.called,
+    this.status = DoctorQueueStatus.inConsultation,
     this.isLoading = false,
     super.key,
   });
@@ -33,10 +33,10 @@ class AmanahQueueActiveSessionSheet extends StatefulWidget {
   final bool isGenieSettled;
   final bool isGenieRunning;
   final VoidCallback onClose;
-  final VoidCallback onCallAgain;
-  final VoidCallback onPatientEntered;
-  final VoidCallback onSkipNoShow;
   final VoidCallback onComplete;
+  final VoidCallback? onCallAgain;
+  final VoidCallback? onPatientEntered;
+  final VoidCallback? onSkipNoShow;
   final VoidCallback? onReschedule;
   final int callCount;
   final DoctorQueueStatus status;
@@ -122,24 +122,25 @@ class _AmanahQueueActiveSessionSheetState
     final double flipAngle = _flipAnimation.value;
     final bool isBackface = flipAngle > (math.pi / 2);
 
-    final String statusBadgeText = widget.status ==
-            DoctorQueueStatus.inConsultation
-        ? '${DoctorQueueCopywriting.statusInConsultation} (${DoctorQueueCopywriting.consultationDurationDefault})'
-        : '${DoctorQueueCopywriting.callPrefix}${widget.callCount}${DoctorQueueCopywriting.callMaxSuffix}';
+    final String statusBadgeText = DoctorQueueCopywriting.statusInConsultation;
 
     return Positioned.fill(
       child: Stack(
         children: <Widget>[
           Positioned.fill(
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 350),
-              opacity: widget.isGenieSettled
-                  ? 1.0
-                  : (widget.isGenieRunning ? 0.0 : 0.95),
-              child: Container(
-                color: isDark
-                    ? AmanahColorTokens.canvasDark.withValues(alpha: 0.95)
-                    : AmanahColorTokens.canvasLight.withValues(alpha: 0.97),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: widget.onClose,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 350),
+                opacity: widget.isGenieSettled
+                    ? 1.0
+                    : (widget.isGenieRunning ? 0.0 : 0.95),
+                child: Container(
+                  color: isDark
+                      ? AmanahColorTokens.canvasDark.withValues(alpha: 0.95)
+                      : AmanahColorTokens.canvasLight.withValues(alpha: 0.97),
+                ),
               ),
             ),
           ),
@@ -274,82 +275,19 @@ class _AmanahQueueActiveSessionSheetState
                         horizontal: 24,
                         vertical: 16,
                       ),
-                      child: widget.status == DoctorQueueStatus.inConsultation
-                          ? Column(
-                              children: <Widget>[
-                                AmanahButton.primary(
-                                  text: DoctorQueueCopywriting
-                                      .actionFinishConsultation,
-                                  size: AmanahButtonSize.hero,
-                                  isFullWidth: true,
-                                  borderRadius: BorderRadius.circular(18),
-                                  onPressed: widget.isLoading
-                                      ? null
-                                      : widget.onComplete,
-                                ),
-                              ],
-                            )
-                          : Column(
-                              children: <Widget>[
-                                AmanahButton.primary(
-                                  text: DoctorQueueCopywriting
-                                      .actionPatientEntered,
-                                  size: AmanahButtonSize.hero,
-                                  isFullWidth: true,
-                                  borderRadius: BorderRadius.circular(18),
-                                  onPressed: widget.isLoading
-                                      ? null
-                                      : widget.onPatientEntered,
-                                ),
-                                const SizedBox(height: 10),
-                                Row(
-                                  children: <Widget>[
-                                    if (widget.callCount < 3) ...<Widget>[
-                                      Expanded(
-                                        child: AmanahButton.secondary(
-                                          text: DoctorQueueCopywriting
-                                              .actionCallAgain,
-                                          size: AmanahButtonSize.medium,
-                                          borderRadius:
-                                              BorderRadius.circular(16),
-                                          onPressed: widget.isLoading
-                                              ? null
-                                              : widget.onCallAgain,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                    ],
-                                    Expanded(
-                                      child: AmanahButton.secondary(
-                                        text: DoctorQueueCopywriting
-                                            .actionSkipNoShow,
-                                        size: AmanahButtonSize.medium,
-                                        borderRadius:
-                                            BorderRadius.circular(16),
-                                        onPressed: widget.isLoading
-                                            ? null
-                                            : widget.onSkipNoShow,
-                                      ),
-                                    ),
-                                    if (widget.onReschedule != null) ...<Widget>[
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: AmanahButton.secondary(
-                                          text: DoctorQueueCopywriting
-                                              .actionReschedule,
-                                          size: AmanahButtonSize.medium,
-                                          borderRadius:
-                                              BorderRadius.circular(16),
-                                          onPressed: widget.isLoading
-                                              ? null
-                                              : widget.onReschedule,
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ],
-                            ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          AmanahButton.primary(
+                            text: DoctorQueueCopywriting.actionMarkCompleted,
+                            size: AmanahButtonSize.hero,
+                            isFullWidth: true,
+                            borderRadius: BorderRadius.circular(18),
+                            onPressed:
+                                widget.isLoading ? null : widget.onComplete,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -1,3 +1,4 @@
+import 'package:amanah_healthcare/features/schedule/domain/constants/appointment_status_dictionary.dart';
 import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
 
 class SessionPatientDto {
@@ -18,6 +19,13 @@ class SessionPatientDto {
     this.avatarUrl,
     this.estimatedStartAt,
     this.estimatedEndAt,
+    this.poliklinikName,
+    this.etaRange,
+    this.actualStartedAt,
+    this.actualCompletedAt,
+    this.consultationDurationFormatted,
+    this.scheduledStartTime,
+    this.scheduledEndTime,
   });
 
   factory SessionPatientDto.fromJson(Map<String, dynamic> json) {
@@ -35,9 +43,10 @@ class SessionPatientDto {
         (patientMap == null ? json['id'] as String? : null) ??
         aptId;
 
-    final String rawSession = json['sessionTitle'] as String? ??
+    final String rawSession = json['sessionName'] as String? ??
+        json['sessionTitle'] as String? ??
         json['sessionLabel'] as String? ??
-        'Sesi Praktik';
+        (json['session'] != null ? 'Sesi ${json['session']}' : 'Sesi Praktik');
 
     return SessionPatientDto(
       id: pId,
@@ -49,7 +58,7 @@ class SessionPatientDto {
       medicalRecordNumber: patientMap?['medicalRecordNumber'] as String? ??
           json['medicalRecordNumber'] as String? ??
           json['patientRm'] as String? ??
-          '-',
+          (json['bookingCode'] != null ? json['bookingCode'].toString() : '-'),
       age: patientMap?['age']?.toString() ??
           json['age']?.toString() ??
           json['patientAge']?.toString() ??
@@ -65,18 +74,28 @@ class SessionPatientDto {
           '',
       guardian: patientMap?['guardianName'] as String? ??
           json['guardian'] as String? ??
+          json['parentUserName'] as String? ??
           json['patientGuardian'] as String?,
       complaint: json['chiefComplaint'] as String? ??
           json['complaint'] as String? ??
           json['patientComplaint'] as String?,
-      status: json['status'] as String? ?? 'REGISTERED',
-      statusBadge: json['statusBadge'] as String? ??
-          json['badge'] as String? ??
-          'Terdaftar',
-      avatarUrl: patientMap?['avatarUrl'] as String? ??
+      status: (json['status'] as String? ?? 'WAITING').toUpperCase(),
+      statusBadge: AppointmentStatusDescriptor.resolve(
+        json['status'] as String?,
+      ).badge,
+      avatarUrl: json['patientAvatarUrl'] as String? ??
+          patientMap?['avatarUrl'] as String? ??
           json['avatarUrl'] as String?,
       estimatedStartAt: json['estimatedStartAt']?.toString(),
       estimatedEndAt: json['estimatedEndAt']?.toString(),
+      poliklinikName: json['poliklinikName'] as String? ?? json['poli'] as String?,
+      etaRange: json['etaRange'] as String?,
+      actualStartedAt: json['actualStartedAt']?.toString(),
+      actualCompletedAt: json['actualCompletedAt']?.toString(),
+      consultationDurationFormatted:
+          json['consultationDurationFormatted'] as String?,
+      scheduledStartTime: json['scheduledStartTime'] as String?,
+      scheduledEndTime: json['scheduledEndTime'] as String?,
     );
   }
 
@@ -96,6 +115,13 @@ class SessionPatientDto {
   final String? avatarUrl;
   final String? estimatedStartAt;
   final String? estimatedEndAt;
+  final String? poliklinikName;
+  final String? etaRange;
+  final String? actualStartedAt;
+  final String? actualCompletedAt;
+  final String? consultationDurationFormatted;
+  final String? scheduledStartTime;
+  final String? scheduledEndTime;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -115,6 +141,13 @@ class SessionPatientDto {
       'avatarUrl': avatarUrl,
       'estimatedStartAt': estimatedStartAt,
       'estimatedEndAt': estimatedEndAt,
+      'poliklinikName': poliklinikName,
+      'etaRange': etaRange,
+      'actualStartedAt': actualStartedAt,
+      'actualCompletedAt': actualCompletedAt,
+      'consultationDurationFormatted': consultationDurationFormatted,
+      'scheduledStartTime': scheduledStartTime,
+      'scheduledEndTime': scheduledEndTime,
     };
   }
 }

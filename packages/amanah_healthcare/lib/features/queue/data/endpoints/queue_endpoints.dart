@@ -60,4 +60,13 @@ class QueueEndpoints {
         method: HttpMethod.get,
         requiresAuth: true,
       );
+
+  static ApiEndpoint doctorProcessedAppointments({String? date}) {
+    final String query = date != null ? '?date=$date' : '';
+    return ApiEndpoint(
+      path: '/api/v1/appointments/doctor/processed$query',
+      method: HttpMethod.get,
+      requiresAuth: true,
+    );
+  }
 }
