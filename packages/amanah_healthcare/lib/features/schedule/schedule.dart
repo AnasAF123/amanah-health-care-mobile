@@ -23,6 +23,7 @@ export 'domain/usecases/get_booked_patients.dart';
 export 'domain/usecases/get_session_patients.dart';
 export 'domain/usecases/get_my_schedules.dart';
 export 'domain/usecases/toggle_day_status.dart';
+export 'domain/helpers/clinical_session_resolver.dart';
 
 // Presentation
 export 'presentation/components/session_roster_tile.dart';

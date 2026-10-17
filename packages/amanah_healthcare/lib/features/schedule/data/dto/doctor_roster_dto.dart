@@ -1,3 +1,5 @@
+import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
+
 class DoctorRosterSessionDto {
   const DoctorRosterSessionDto({
     required this.sessionId,
@@ -11,10 +13,16 @@ class DoctorRosterSessionDto {
   });
 
   factory DoctorRosterSessionDto.fromJson(Map<String, dynamic> json) {
+    final String rawLabel = json['sessionLabel'] as String? ?? '';
+    final String sessionCode = json['sessionCode'] as String? ?? '';
+    final String resolvedLabel = rawLabel.isNotEmpty
+        ? ClinicalSessionResolver.sanitize(rawLabel)
+        : ClinicalSessionResolver.resolveSessionName(sessionShift: sessionCode);
+
     return DoctorRosterSessionDto(
       sessionId: json['sessionId'] as String? ?? '',
-      sessionCode: json['sessionCode'] as String? ?? '',
-      sessionLabel: json['sessionLabel'] as String? ?? '',
+      sessionCode: sessionCode,
+      sessionLabel: resolvedLabel,
       timeRange: json['timeRange'] as String? ?? '',
       isActive: json['isActive'] as bool? ?? false,
       isTemplateActive: json['isTemplateActive'] as bool?,

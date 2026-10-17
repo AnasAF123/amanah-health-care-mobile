@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_schedule_card_widgets.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_schedule_ticket_painters.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_schedule_card_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
@@ -214,31 +213,23 @@ class AmanahScheduleCard extends StatelessWidget {
                           ],
                         ),
 
-                        // Center Row: Compact Primary Time & Status Badge
-                        Row(
-                          children: <Widget>[
-                            Flexible(
-                              child: Text(
-                                schedule.time,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 19.5,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.4,
-                                  height: 1.0,
-                                  color: dark
-                                      ? AmanahScheduleCardTokens.timeColorDark
-                                      : AmanahScheduleCardTokens.timeColorLight,
-                                ),
-                              ),
+                        // Center Row: Compact Primary Time
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            schedule.time,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 19.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.4,
+                              height: 1.0,
+                              color: dark
+                                  ? AmanahScheduleCardTokens.timeColorDark
+                                  : AmanahScheduleCardTokens.timeColorLight,
                             ),
-                            const SizedBox(width: 8),
-                            AmanahStatusBadge(
-                              variant: schedule.badgeVariant,
-                              text: schedule.badge,
-                            ),
-                          ],
+                          ),
                         ),
 
                         // Footer Row: Poli & Room info on left, Booking Pill on right

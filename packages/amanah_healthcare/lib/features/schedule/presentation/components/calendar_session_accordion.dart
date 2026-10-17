@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
-import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
+import 'package:amanah_healthcare/features/patient_record/patient_record.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/my_schedule_session.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/session_patient.dart';
-import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_patient_detail_modal.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/calendar_patient_card.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/state/calendar_sheet_controller.dart';
 
@@ -193,19 +192,14 @@ class CalendarSessionAccordion extends StatelessWidget {
                                     (SessionPatient p) => CalendarPatientCard(
                                       patient: p,
                                       onTap: () {
-                                        AmanahPatientDetailModal.show(
+                                        AmanahPatientIntakeDrawer.show(
                                           context,
-                                          p.toBookedPatient(),
-                                          DoctorSchedule(
-                                            id: session.sessionId,
-                                            title: session.sessionLabel,
-                                            date: session.scheduleDate,
-                                            time: session.timeRange ?? 'Sesi Praktik',
-                                            poli: session.poliklinikName,
-                                            room: session.roomName,
-                                            badge: session.status,
-                                            badgeVariant: AmanahBadgeVariant.primary,
-                                          ),
+                                          appointmentId: p.appointmentId,
+                                          patientName: p.fullName,
+                                          queueNumber: p.queueNumber,
+                                          mrn: p.medicalRecordNumber,
+                                          age: p.age,
+                                          complaint: p.complaint,
                                         );
                                       },
                                     ),

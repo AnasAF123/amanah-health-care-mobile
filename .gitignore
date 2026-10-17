@@ -321,4 +321,7 @@ bugreport-*.zip
 .env.*
 !.env.example
 client_secret*.json
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase_options.dart
 

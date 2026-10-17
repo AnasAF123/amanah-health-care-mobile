@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_notification_model.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_filter_bar.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_pull_to_refresh.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
@@ -29,12 +28,12 @@ class AmanahNotificationTabScreen extends StatefulWidget {
 class _AmanahNotificationTabScreenState
     extends State<AmanahNotificationTabScreen> {
   final AmanahNotificationStore _store = AmanahNotificationStore.instance;
-  AmanahNotificationCategory _activeCategory = AmanahNotificationCategory.all;
 
   @override
   void initState() {
     super.initState();
     _store.addListener(_onStoreChanged);
+    _store.fetchMyNotifications();
   }
 
   @override
@@ -67,9 +66,7 @@ class _AmanahNotificationTabScreenState
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
-    final List<AmanahNotificationItem> filteredList = _store.getFiltered(
-      _activeCategory,
-    );
+    final List<AmanahNotificationItem> notificationList = _store.notifications;
     final int unreadCount = _store.unreadCount;
 
     return Scaffold(
@@ -94,33 +91,13 @@ class _AmanahNotificationTabScreenState
               ),
             ),
 
-            // 2. Filter Bar
-            AmanahFilterBar<AmanahNotificationCategory>(
-              selectedValue: _activeCategory,
-              onSelected: (AmanahNotificationCategory cat) {
-                setState(() => _activeCategory = cat);
-              },
-              items: AmanahNotificationCategory.values
-                  .map(
-                    (AmanahNotificationCategory cat) =>
-                        AmanahFilterBarItem<AmanahNotificationCategory>(
-                      value: cat,
-                      label: cat.label,
-                      badgeCount: _store.countForCategory(cat),
-                    ),
-                  )
-                  .toList(),
-            ),
-
-            // 3. Notification List Viewport / Empty State
+            // 2. Notification List Viewport / Empty State
             Expanded(
               child: AmanahPullToRefresh(
                 onRefresh: () async {
-                  await Future<void>.delayed(
-                    const Duration(milliseconds: 600),
-                  );
+                  await _store.fetchMyNotifications();
                 },
-                child: filteredList.isEmpty
+                child: notificationList.isEmpty
                     ? SingleChildScrollView(
                         physics: const BouncingScrollPhysics(
                           parent: AlwaysScrollableScrollPhysics(),
@@ -130,60 +107,19 @@ class _AmanahNotificationTabScreenState
                           vertical: 16,
                         ),
                         child: AmanahEmptyState.box(
-                          title:
-                              _activeCategory == AmanahNotificationCategory.all
-                                  ? 'Belum Ada Notifikasi'
-                                  : 'Tidak Ada Notifikasi',
+                          title: 'Belum Ada Notifikasi',
                           message:
-                              _activeCategory == AmanahNotificationCategory.all
-                                  ? 'Semua notifikasi penting terkait antrean, jadwal shift, dan update klinis akan muncul di sini.'
-                                  : 'Tidak ada pemberitahuan pada kategori "${_activeCategory.label}".',
-                          actionText: _activeCategory !=
-                                  AmanahNotificationCategory.all
-                              ? 'Lihat Semua Kategori'
-                              : (widget.onBack != null ||
-                                      Navigator.of(context).canPop()
-                                  ? 'Kembali'
-                                  : null),
-                          actionLeadingIcon: _activeCategory !=
-                                  AmanahNotificationCategory.all
-                              ? Icons.clear_all_rounded
-                              : (widget.onBack != null ||
-                                      Navigator.of(context).canPop()
-                                  ? Icons.arrow_back_rounded
-                                  : null),
-                          onAction: _activeCategory !=
-                                  AmanahNotificationCategory.all
-                              ? () => setState(
-                                  () => _activeCategory =
-                                      AmanahNotificationCategory.all,
-                                )
-                              : (widget.onBack != null ||
-                                      Navigator.of(context).canPop()
-                                  ? () {
-                                      if (widget.onBack != null) {
-                                        widget.onBack!.call();
-                                      } else {
-                                        Navigator.of(context).maybePop();
-                                      }
-                                    }
-                                  : null),
-                          secondaryActionText: _activeCategory !=
-                                      AmanahNotificationCategory.all &&
-                                  (widget.onBack != null ||
-                                      Navigator.of(context).canPop())
+                              'Semua pembaruan antrean klinis dan operasional akan tampil di sini secara real-time.',
+                          actionText: (widget.onBack != null ||
+                                  Navigator.of(context).canPop())
                               ? 'Kembali'
                               : null,
-                          secondaryActionLeadingIcon: _activeCategory !=
-                                      AmanahNotificationCategory.all &&
-                                  (widget.onBack != null ||
-                                      Navigator.of(context).canPop())
+                          actionLeadingIcon: (widget.onBack != null ||
+                                  Navigator.of(context).canPop())
                               ? Icons.arrow_back_rounded
                               : null,
-                          onSecondaryAction: _activeCategory !=
-                                      AmanahNotificationCategory.all &&
-                                  (widget.onBack != null ||
-                                      Navigator.of(context).canPop())
+                          onAction: (widget.onBack != null ||
+                                  Navigator.of(context).canPop())
                               ? () {
                                   if (widget.onBack != null) {
                                     widget.onBack!.call();
@@ -199,7 +135,7 @@ class _AmanahNotificationTabScreenState
                         physics: const BouncingScrollPhysics(
                           parent: AlwaysScrollableScrollPhysics(),
                         ),
-                        itemCount: filteredList.length,
+                        itemCount: notificationList.length,
                         separatorBuilder: (BuildContext context, int index) =>
                             Divider(
                           height: 1,
@@ -212,7 +148,7 @@ class _AmanahNotificationTabScreenState
                         ),
                         itemBuilder: (BuildContext context, int index) {
                           final AmanahNotificationItem item =
-                              filteredList[index];
+                              notificationList[index];
                           return AmanahNotificationTile(
                             item: item,
                             dark: dark,

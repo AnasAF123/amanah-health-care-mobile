@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:amanah_healthcare/core/constants/api_error_code.dart';
+import 'package:amanah_healthcare/core/notifications/amanah_push_service.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_token_storage.dart';
 import 'package:amanah_healthcare/features/authentication/data/datasources/auth_local_data_source.dart';
 import 'package:amanah_healthcare/features/authentication/data/datasources/auth_remote_data_source.dart';
@@ -65,6 +67,7 @@ class AmanahAuthRepository implements AuthRepository {
 
     if (token != null) {
       await _localDataSource.saveToken(token);
+      unawaited(AmanahPushService.instance.registerDeviceWithBackend());
     }
     return AuthUserMapper.fromJson(userMap);
   }
@@ -183,6 +186,9 @@ class AmanahAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
+    try {
+      await AmanahPushService.instance.unregisterDeviceWithBackend();
+    } catch (_) {}
     final String? token = await _localDataSource.getToken();
     if (token != null && token.isNotEmpty) {
       await _remoteDataSource.signOut(token);

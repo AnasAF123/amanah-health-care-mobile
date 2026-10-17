@@ -10,6 +10,8 @@ class AmanahQueueHeaderBar extends StatelessWidget {
     required this.onOpenHistory,
     required this.historyCount,
     required this.showSuccess,
+    this.sessionLabel,
+    this.onSelectSession,
   });
 
   final VoidCallback onBack;
@@ -17,6 +19,8 @@ class AmanahQueueHeaderBar extends StatelessWidget {
   final VoidCallback onOpenHistory;
   final int historyCount;
   final bool showSuccess;
+  final String? sessionLabel;
+  final VoidCallback? onSelectSession;
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +31,27 @@ class AmanahQueueHeaderBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          IconButton(
-            onPressed: onBack,
-            icon: const Icon(Icons.arrow_back_rounded),
-            color: isDark
-                ? AmanahColorTokens.surfaceLight
-                : AmanahColorTokens.neutral800,
+          Expanded(
+            child: Row(
+              children: <Widget>[
+                IconButton(
+                  onPressed: onBack,
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  color: isDark
+                      ? AmanahColorTokens.surfaceLight
+                      : AmanahColorTokens.neutral800,
+                ),
+                if (onSelectSession != null && !showSuccess)
+                  IconButton(
+                    onPressed: onSelectSession,
+                    icon: const Icon(Icons.schedule_rounded),
+                    color: isDark
+                        ? AmanahColorTokens.surfaceLight
+                        : AmanahColorTokens.neutral800,
+                    tooltip: 'Pilih Sesi Praktik',
+                  ),
+              ],
+            ),
           ),
           AnimatedOpacity(
             duration: const Duration(milliseconds: 300),

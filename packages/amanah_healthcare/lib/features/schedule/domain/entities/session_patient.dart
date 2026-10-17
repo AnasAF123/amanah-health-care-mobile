@@ -42,6 +42,8 @@ class SessionPatient {
   BookedPatient toBookedPatient() {
     return BookedPatient(
       id: id,
+      appointmentId: appointmentId,
+      patientId: id,
       patientName: fullName,
       patientRm: medicalRecordNumber,
       patientAge: age,

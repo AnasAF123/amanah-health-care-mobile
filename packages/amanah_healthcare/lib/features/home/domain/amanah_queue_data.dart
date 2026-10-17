@@ -1,6 +1,8 @@
 class AmanahQueueCardData {
   const AmanahQueueCardData({
     required this.id,
+    this.appointmentId,
+    this.patientId,
     required this.queueNumber,
     required this.patientName,
     required this.complaint,
@@ -15,9 +17,12 @@ class AmanahQueueCardData {
     this.status = 'Menunggu',
     this.watermarkAsset = 'assets/amanah/id_card/images/wm.svg',
     this.guardian,
+    this.allowedActions = const <String>[],
   });
 
   final String id;
+  final String? appointmentId;
+  final String? patientId;
   final String queueNumber;
   final String patientName;
   final String complaint;
@@ -32,6 +37,13 @@ class AmanahQueueCardData {
   final String status;
   final String watermarkAsset;
   final String? guardian;
+  final List<String> allowedActions;
+
+  String get effectiveAppointmentId =>
+      (appointmentId != null && appointmentId!.isNotEmpty) ? appointmentId! : id;
+
+  String get effectivePatientId =>
+      (patientId != null && patientId!.isNotEmpty) ? patientId! : id;
 
   String get patientRm =>
       'RM-2026-${queueNumber.replaceAll('#', '').padLeft(4, '0')}';

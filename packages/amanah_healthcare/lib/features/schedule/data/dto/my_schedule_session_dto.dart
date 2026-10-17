@@ -1,3 +1,5 @@
+import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
+
 class MyScheduleSessionDto {
   const MyScheduleSessionDto({
     required this.id,
@@ -17,15 +19,18 @@ class MyScheduleSessionDto {
   });
 
   factory MyScheduleSessionDto.fromJson(Map<String, dynamic> json) {
+    final ClinicalSessionShift shift = ClinicalSessionResolver.resolveShift(
+      session: json['session']?.toString(),
+      sessionShift: json['sessionShift'] as String?,
+      sessionLabel: json['sessionLabel'] as String?,
+      fallback: json['title'] as String?,
+    );
+
     return MyScheduleSessionDto(
       id: json['id'] as String? ?? '',
       sessionId: json['sessionId'] as String? ?? json['id'] as String? ?? '',
-      sessionShift: json['sessionShift'] as String? ??
-          json['session']?.toString().toLowerCase() ??
-          'morning',
-      sessionLabel: json['sessionLabel'] as String? ??
-          json['title'] as String? ??
-          'Sesi Praktik',
+      sessionShift: shift.code,
+      sessionLabel: shift.displaySessionName,
       scheduleDate: json['scheduleDate'] as String? ??
           json['specificDate'] as String? ??
           '',

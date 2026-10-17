@@ -13,6 +13,7 @@ import 'package:amanah_healthcare/features/authentication/presentation/organisms
 import 'package:amanah_healthcare/features/authentication/presentation/screen/staff_onboarding_screen.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_notification_model.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_home_shell.dart';
+import 'package:amanah_healthcare/core/notifications/amanah_push_service.dart';
 import 'package:amanah_healthcare/features/permission/data/amanah_permission_store.dart';
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 
@@ -73,6 +74,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> {
           _showOnboardingScreen = true;
         });
         widget.onAuthenticated?.call(user);
+        unawaited(AmanahPushService.instance.registerDeviceWithBackend());
       }
     } catch (e) {
       AmanahAuthLogger.logLifecycle('Session restoration check error: $e');

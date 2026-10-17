@@ -5,8 +5,7 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_e
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_watermark_path.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
-import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
-import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_patient_detail_modal.dart';
+import 'package:amanah_healthcare/features/patient_record/patient_record.dart';
 
 class AmanahQueueHistoryScreen extends StatelessWidget {
   const AmanahQueueHistoryScreen({
@@ -72,32 +71,14 @@ class AmanahQueueHistoryScreen extends StatelessWidget {
                         final AmanahQueueCardData card = collectedCards[index];
                         return GestureDetector(
                           onTap: () {
-                            AmanahPatientDetailModal.show(
+                            AmanahPatientIntakeDrawer.show(
                               context,
-                              BookedPatient(
-                                id: card.id,
-                                patientName: card.patientName,
-                                patientComplaint: card.complaint,
-                                queueNumber: card.queueNumber,
-                                timeSlot: card.timeSlot,
-                                avatarUrl: card.doctorImage,
-                                patientAge: '${card.age} Thn',
-                                patientRm: card.patientRm,
-                                badge: card.priority,
-                                badgeVariant: card.priority == 'Prioritas'
-                                    ? AmanahBadgeVariant.warning
-                                    : AmanahBadgeVariant.primary,
-                              ),
-                              DoctorSchedule(
-                                id: 'sch_${card.id}',
-                                title: 'Praktik Dokter',
-                                date: 'Hari ini',
-                                time: card.timeSlot,
-                                poli: card.poly,
-                                room: card.room,
-                                badge: card.priority,
-                                badgeVariant: AmanahBadgeVariant.primary,
-                              ),
+                              appointmentId: card.effectiveAppointmentId,
+                              patientName: card.patientName,
+                              queueNumber: card.queueNumber,
+                              mrn: card.patientRm,
+                              age: '${card.age} Thn',
+                              complaint: card.complaint,
                             );
                           },
                           child: Container(

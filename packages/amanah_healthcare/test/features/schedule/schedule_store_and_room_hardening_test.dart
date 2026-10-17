@@ -47,8 +47,8 @@ class _FakeStoreRepo implements ScheduleRepository {
   Future<List<SessionPatient>> getSessionPatients(
     String sessionId, {
     String? date,
-  }) =>
-      throw UnimplementedError();
+  }) async =>
+      patients;
 
   @override
   Future<void> toggleDayStatus(

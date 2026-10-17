@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:amanah_healthcare/features/schedule/data/dto/doctor_roster_dto.dart';
 import 'package:amanah_healthcare/features/schedule/data/mappers/doctor_roster_mapper.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/doctor_roster.dart';
+import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
 
 void main() {
   group('DoctorRosterMapper', () {
@@ -22,20 +23,20 @@ void main() {
             isDoctorActive: true,
             hasOverride: true,
             sessions: <DoctorRosterSessionDto>[
-              const DoctorRosterSessionDto(
+              DoctorRosterSessionDto(
                 sessionId: 'sess-morning',
                 sessionCode: 'morning',
-                sessionLabel: 'Sesi Pagi',
+                sessionLabel: ClinicalSessionShift.morning.displaySessionName,
                 timeRange: '08:00 - 12:00',
                 isActive: true,
                 isTemplateActive: true,
                 preferredRoomId: 'room-1',
                 preferredRoomName: 'Ruang 101',
               ),
-              const DoctorRosterSessionDto(
+              DoctorRosterSessionDto(
                 sessionId: 'sess-night',
                 sessionCode: 'night',
-                sessionLabel: 'Sesi Malam',
+                sessionLabel: ClinicalSessionShift.night.displaySessionName,
                 timeRange: '19:00 - 22:00',
                 isActive: false,
                 isTemplateActive: false,
@@ -61,13 +62,24 @@ void main() {
       final DoctorRosterSession session1 = day.sessions[0];
       expect(session1.sessionId, 'sess-morning');
       expect(session1.sessionCode, 'morning');
-      expect(session1.sessionLabel, 'Sesi Pagi');
+      expect(session1.sessionLabel, ClinicalSessionShift.morning.displaySessionName);
       expect(session1.isActive, true);
       expect(session1.preferredRoomName, 'Ruang 101');
 
       final DoctorRosterSession session2 = day.sessions[1];
       expect(session2.isActive, false);
       expect(session2.preferredRoomName, isNull);
+    });
+
+    test('DoctorRosterSessionDto.fromJson normalizes i18n keys to canonical display name', () {
+      final DoctorRosterSessionDto dto = DoctorRosterSessionDto.fromJson(<String, dynamic>{
+        'sessionId': 'sess-1',
+        'sessionCode': 'morning',
+        'sessionLabel': 'session.morning',
+        'timeRange': '06:00 - 12:00',
+        'isActive': true,
+      });
+      expect(dto.sessionLabel, ClinicalSessionShift.morning.displaySessionName);
     });
   });
 }

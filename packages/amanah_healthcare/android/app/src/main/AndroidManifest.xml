@@ -5,6 +5,10 @@
         android:name="android.permission.INTERNET"/>
     <uses-permission
         android:name="android.permission.CAMERA"/>
+    <uses-permission
+        android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission
+        android:name="android.permission.VIBRATE"/>
     <!-- Some dependencies may request this permission, which is not used in our app -->
     <uses-permission
         android:name="android.permission.RECORD_AUDIO"
@@ -73,6 +77,10 @@
         <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
             android:value="false"/>
+        <!-- Default notification channel for FCM background delivery -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="high_importance_channel"/>
         <!-- Quick tile / setting (only available on Android 24+ / Nougat) -->
         <service
             android:name=".AppMainTile"

@@ -14,6 +14,7 @@ class AmanahAuthTokenStorage implements AuthTokenProvider {
     await _storage.write(key: tokenKey, value: token);
   }
 
+  @override
   Future<String?> getToken() async {
     final String? token = await _storage.read(key: tokenKey);
     AmanahAuthLogger.logStorage(

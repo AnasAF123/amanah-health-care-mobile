@@ -5,7 +5,7 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_date_carousel_strip.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_doc_schedule_calendar_drawer.dart';
-import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_patient_detail_modal.dart';
+import 'package:amanah_healthcare/features/patient_record/patient_record.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_booked_patient_card.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_doctor_session_card.dart';
 
@@ -190,10 +190,14 @@ class AmanahScheduleOverviewView extends StatelessWidget {
                 schedule: item.schedule,
                 imageIndex: index,
                 onTapDetail: () {
-                  AmanahPatientDetailModal.show(
+                  AmanahPatientIntakeDrawer.show(
                     context,
-                    item.patient,
-                    item.schedule,
+                    appointmentId: item.patient.effectiveAppointmentId,
+                    patientName: item.patient.patientName,
+                    queueNumber: item.patient.queueNumber,
+                    mrn: item.patient.patientRm,
+                    age: item.patient.patientAge,
+                    complaint: item.patient.patientComplaint,
                   );
                 },
               );
@@ -407,7 +411,15 @@ class AmanahScheduleSessionPatientsView extends StatelessWidget {
                 schedule: sch!,
                 imageIndex: index,
                 onTapDetail: () {
-                  AmanahPatientDetailModal.show(context, patient, sch);
+                  AmanahPatientIntakeDrawer.show(
+                    context,
+                    appointmentId: patient.effectiveAppointmentId,
+                    patientName: patient.patientName,
+                    queueNumber: patient.queueNumber,
+                    mrn: patient.patientRm,
+                    age: patient.patientAge,
+                    complaint: patient.patientComplaint,
+                  );
                 },
               );
             },

@@ -3,6 +3,8 @@ enum AmanahBadgeVariant { success, primary, warning, live, trend }
 class BookedPatient {
   const BookedPatient({
     required this.id,
+    this.appointmentId,
+    this.patientId,
     required this.patientName,
     required this.patientRm,
     required this.patientAge,
@@ -16,6 +18,8 @@ class BookedPatient {
   });
 
   final String id;
+  final String? appointmentId;
+  final String? patientId;
   final String patientName;
   final String patientRm;
   final String patientAge;
@@ -27,8 +31,16 @@ class BookedPatient {
   final String? avatarUrl;
   final String? patientGuardian;
 
+  String get effectiveAppointmentId =>
+      (appointmentId != null && appointmentId!.isNotEmpty) ? appointmentId! : id;
+
+  String get effectivePatientId =>
+      (patientId != null && patientId!.isNotEmpty) ? patientId! : id;
+
   BookedPatient copyWith({
     String? id,
+    String? appointmentId,
+    String? patientId,
     String? patientName,
     String? patientRm,
     String? patientAge,
@@ -42,6 +54,8 @@ class BookedPatient {
   }) {
     return BookedPatient(
       id: id ?? this.id,
+      appointmentId: appointmentId ?? this.appointmentId,
+      patientId: patientId ?? this.patientId,
       patientName: patientName ?? this.patientName,
       patientRm: patientRm ?? this.patientRm,
       patientAge: patientAge ?? this.patientAge,

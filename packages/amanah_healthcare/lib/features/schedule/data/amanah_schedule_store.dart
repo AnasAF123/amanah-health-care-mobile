@@ -3,6 +3,7 @@ import 'package:amanah_healthcare/features/schedule/data/repositories/schedule_r
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/my_schedule_session.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/session_patient.dart';
+import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
 import 'package:amanah_healthcare/features/schedule/domain/repositories/schedule_repository.dart';
 
 class AmanahScheduleStore extends ChangeNotifier {
@@ -46,28 +47,29 @@ class AmanahScheduleStore extends ChangeNotifier {
     final DateTime now = DateTime.now();
     final String dateStr =
         '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-    try {
-      final ScheduleRepository repo = repository ?? ScheduleRepositoryImpl();
-      final List<MyScheduleSession> sessions =
-          await repo.getMySchedules(date: dateStr);
-      final List<SessionPatient> patients =
-          await repo.getBookedPatients(dateStr);
+    final ScheduleRepository repo = repository ?? ScheduleRepositoryImpl();
+    final List<MyScheduleSession> sessions =
+        await repo.getMySchedules(date: dateStr);
 
-      final List<DoctorSchedule> mapped = sessions.map((MyScheduleSession s) {
-        final List<BookedPatient> sessionPatients = patients
-            .where((SessionPatient p) =>
-                p.sessionTitle.toLowerCase().contains(s.sessionShift.toLowerCase()) ||
-                p.sessionTitle.toLowerCase().contains(s.sessionLabel.toLowerCase()))
+    final List<DoctorSchedule> mapped = await Future.wait(
+      sessions.map((MyScheduleSession s) async {
+        final String targetSessionId =
+            s.sessionId.isNotEmpty ? s.sessionId : s.id;
+        final List<SessionPatient> sessionPatients = targetSessionId.isNotEmpty
+            ? await repo.getSessionPatients(targetSessionId, date: dateStr)
+            : const <SessionPatient>[];
+
+        final List<BookedPatient> booked = sessionPatients
             .map((SessionPatient p) => p.toBookedPatient())
             .toList();
 
-        final String sessionType = switch (s.sessionShift) {
-          'morning' => 'Pagi',
-          'afternoon' => 'Siang',
-          'night' => 'Malam',
-          'early_morning' => 'Dini Hari',
-          _ => s.sessionLabel,
-        };
+        final String sessionType = ClinicalSessionResolver.resolveShiftName(
+          sessionShift: s.sessionShift,
+          sessionLabel: s.sessionLabel,
+        );
+
+        final int patientCount =
+            booked.isNotEmpty ? booked.length : s.bookedCount;
 
         return DoctorSchedule(
           id: s.id,
@@ -76,20 +78,17 @@ class AmanahScheduleStore extends ChangeNotifier {
           time: s.timeRange ?? '${s.startTime ?? ''} - ${s.endTime ?? ''}',
           poli: s.poliklinikName,
           room: s.roomName,
-          badge:
-              '${sessionPatients.isNotEmpty ? sessionPatients.length : s.bookedCount} Pasien',
-          badgeVariant: (sessionPatients.isNotEmpty || s.bookedCount > 0)
+          badge: '$patientCount Pasien',
+          badgeVariant: patientCount > 0
               ? AmanahBadgeVariant.live
               : AmanahBadgeVariant.primary,
           sessionType: sessionType,
-          bookedPatients: sessionPatients,
+          bookedPatients: booked,
         );
-      }).toList();
+      }),
+    );
 
-      setSchedulesForDate(baseToday, mapped);
-    } catch (_) {
-      // Graceful fallback
-    }
+    setSchedulesForDate(baseToday, mapped);
   }
 
   DayScheduleSetting getDaySettingForDate(DateTime date) {

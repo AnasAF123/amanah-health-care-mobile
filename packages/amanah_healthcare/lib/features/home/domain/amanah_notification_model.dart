@@ -1,4 +1,13 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:amanah_healthcare/core/config/amanah_auth_environment.dart';
+import 'package:amanah_healthcare/core/logging/app_log.dart';
+import 'package:amanah_healthcare/core/network/api_client.dart';
+import 'package:amanah_healthcare/core/network/api_endpoint.dart';
+import 'package:amanah_healthcare/core/network/api_response.dart';
+import 'package:amanah_healthcare/core/network/authorized_api_client.dart';
+import 'package:amanah_healthcare/core/network/http_api_client.dart';
+import 'package:amanah_healthcare/features/authentication/data/amanah_auth_token_storage.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_visual_role.dart';
 
 enum AmanahNotificationCategory {
@@ -68,14 +77,24 @@ class AmanahNotificationItem {
 class AmanahNotificationStore extends ChangeNotifier {
   AmanahNotificationStore._() {
     _notifications = <AmanahNotificationItem>[];
+    _apiClient = AuthorizedApiClient(
+      innerClient: HttpApiClient(
+        baseUrl: AmanahAuthEnvironment.authBaseUrl,
+      ),
+      tokenProvider: const AmanahAuthTokenStorage(),
+    );
   }
 
   static final AmanahNotificationStore instance = AmanahNotificationStore._();
 
+  late final ApiClient _apiClient;
   List<AmanahNotificationItem> _notifications = <AmanahNotificationItem>[];
+  bool _isLoading = false;
 
   List<AmanahNotificationItem> get notifications =>
       List<AmanahNotificationItem>.unmodifiable(_notifications);
+
+  bool get isLoading => _isLoading;
 
   int get unreadCount =>
       _notifications.where((AmanahNotificationItem n) => n.isUnread).length;
@@ -100,6 +119,94 @@ class AmanahNotificationStore extends ChangeNotifier {
         .toList();
   }
 
+  static AmanahNotificationCategory _mapCategory(String? cat) {
+    if (cat == null) return AmanahNotificationCategory.all;
+    switch (cat.toLowerCase()) {
+      case 'queue':
+      case 'appointment':
+        return AmanahNotificationCategory.queue;
+      case 'clinical':
+      case 'lab':
+        return AmanahNotificationCategory.clinical;
+      case 'shift':
+      case 'schedule':
+        return AmanahNotificationCategory.shift;
+      default:
+        return AmanahNotificationCategory.all;
+    }
+  }
+
+  static AmanahNotificationVisual _mapVisual(String? cat, bool isUrgent) {
+    if (isUrgent) return AmanahNotificationVisual.clinicalCritical;
+    final String c = (cat ?? '').toLowerCase();
+    if (c == 'queue' || c == 'appointment') return AmanahNotificationVisual.queueVitals;
+    if (c == 'shift' || c == 'schedule') return AmanahNotificationVisual.shiftSchedule;
+    return AmanahNotificationVisual.clinicalConsult;
+  }
+
+  static String _formatTime(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return '';
+    try {
+      final DateTime dt = DateTime.parse(dateStr).toLocal();
+      final String h = dt.hour.toString().padLeft(2, '0');
+      final String m = dt.minute.toString().padLeft(2, '0');
+      return '$h:$m';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  /// Fetches real notifications from backend SSOT.
+  Future<void> fetchMyNotifications() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final ApiResponse<dynamic> res = await _apiClient.request(
+        const ApiEndpoint(
+          path: '/api/v1/notifications/me?limit=50',
+          method: HttpMethod.get,
+          requiresAuth: true,
+        ),
+      );
+
+      dynamic rawData = res.data;
+      if (rawData is Map<String, dynamic> && rawData.containsKey('data')) {
+        rawData = rawData['data'];
+      }
+
+      if (rawData is List) {
+        _notifications = rawData.whereType<Map<String, dynamic>>().map((item) {
+          final String id = item['id']?.toString() ?? '';
+          final String title = item['title']?.toString() ?? 'Pemberitahuan';
+          final String desc =
+              item['body']?.toString() ?? item['desc']?.toString() ?? '';
+          final String createdAt = item['createdAt']?.toString() ?? '';
+          final bool isRead = item['isRead'] as bool? ?? false;
+          final bool isUrgent = item['isUrgent'] as bool? ?? false;
+          final String categoryStr = item['category']?.toString() ?? '';
+
+          return AmanahNotificationItem(
+            id: id,
+            title: title,
+            desc: desc,
+            time: _formatTime(createdAt),
+            timestamp: createdAt,
+            category: _mapCategory(categoryStr),
+            isUnread: !isRead,
+            isUrgent: isUrgent,
+            visual: _mapVisual(categoryStr, isUrgent),
+          );
+        }).toList();
+      }
+    } catch (e) {
+      AppLog.warning('[AmanahNotificationStore] Failed to fetch notifications: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   void markAsRead(String id) {
     bool updated = false;
     _notifications = _notifications.map((AmanahNotificationItem n) {
@@ -112,6 +219,16 @@ class AmanahNotificationStore extends ChangeNotifier {
 
     if (updated) {
       notifyListeners();
+      // Sync with backend asynchronously
+      unawaited(
+        _apiClient.request(
+          ApiEndpoint(
+            path: '/api/v1/notifications/$id/read',
+            method: HttpMethod.patch,
+            requiresAuth: true,
+          ),
+        ).catchError((_) => const ApiResponse<dynamic>(statusCode: 500, data: null)),
+      );
     }
   }
 
@@ -126,6 +243,17 @@ class AmanahNotificationStore extends ChangeNotifier {
         .map((AmanahNotificationItem n) => n.copyWith(isUnread: false))
         .toList();
     notifyListeners();
+
+    // Sync with backend asynchronously
+    unawaited(
+      _apiClient.request(
+        const ApiEndpoint(
+          path: '/api/v1/notifications/read-all',
+          method: HttpMethod.patch,
+          requiresAuth: true,
+        ),
+      ).catchError((_) => const ApiResponse<dynamic>(statusCode: 500, data: null)),
+    );
   }
 
   void clearRead() {

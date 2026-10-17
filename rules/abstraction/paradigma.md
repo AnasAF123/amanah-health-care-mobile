@@ -1,5 +1,5 @@
 # paradigma.md — Paradigma & Aturan Abstraksi (Flutter/Dart)
-
+tiru saja cara penulisan dan structure directory dari auth module, jika user ingin integrate sesuatu hal baru ke dalam repo milik nya
 > Acuan untuk memecah `AmanahAuthRepository` (400+ baris, satu class mengerjakan semuanya) menjadi layer yang modular, bebas hardcode URL, dan berbasis OOP + inheritance.
 
 **Isi dokumen**

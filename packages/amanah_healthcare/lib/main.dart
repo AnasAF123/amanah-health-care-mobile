@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:app_store_shared/app_store_shared.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_better_auth/flutter_better_auth.dart';
@@ -11,13 +10,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:scanner_shared/scanner_shared.dart';
-import 'package:amanah_healthcare/core/config/amanah_auth_environment.dart';
-import 'package:amanah_healthcare/core/logging/app_log.dart';
-import 'package:amanah_healthcare/core/logging/logging_config.dart';
+import 'package:amanah_healthcare/core/init/amanah_core_initializer.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/screen/auth_bottom_sheet_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_typography_tokens.dart';
-import 'package:amanah_healthcare/helpers/camera_helper.dart';
 import 'package:amanah_healthcare/helpers/entry_points_helper.dart';
 import 'package:amanah_healthcare/helpers/global_vars.dart';
 import 'package:amanah_healthcare/helpers/permission_helper.dart';
@@ -49,46 +45,9 @@ Future<void> launchAmanahApp({
   GlobalVars.storeLabel = storeLabel;
   GlobalVars.scannerLabel = scannerLabel;
 
-  final WidgetsBinding widgetsBinding =
-      WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-
-  AppLog.init(
-    config: const LoggingConfig(
-      enableFileOutput: true,
-      enableConsoleOutput: kDebugMode,
-    ),
-  );
-
-  await AmanahAuthEnvironment.initialize();
-
-  _enableEdgeToEdgeMode();
-
-  try {
-    await FlutterBetterAuth.initialize(
-      url: AmanahAuthEnvironment.betterAuthUrl,
-      scheme: AmanahAuthEnvironment.authScheme,
-    );
-  } catch (e) {
-    debugPrint('FlutterBetterAuth initialize error: $e');
-  }
-
-  try {
-    await CameraHelper.init();
-  } catch (e) {
-    debugPrint('CameraHelper init: $e');
-  }
+  await AmanahCoreInitializer.initialize();
 
   runApp(const AmanahApp());
-}
-
-void _enableEdgeToEdgeMode() {
-  if (Platform.isAndroid) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent),
-    );
-  }
 }
 
 class AmanahApp extends StatefulWidget {

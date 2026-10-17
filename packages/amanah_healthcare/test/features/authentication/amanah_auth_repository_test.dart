@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_repository.dart';
@@ -94,11 +95,17 @@ class FakeAuthRemoteDataSource implements AuthRemoteDataSource {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late FakeAuthLocalDataSource fakeLocal;
   late FakeAuthRemoteDataSource fakeRemote;
   late AmanahAuthRepository repository;
 
   setUp(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+      (MethodCall methodCall) async => null,
+    );
     fakeLocal = FakeAuthLocalDataSource();
     fakeRemote = FakeAuthRemoteDataSource();
     repository = AmanahAuthRepository(
