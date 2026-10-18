@@ -13,10 +13,14 @@ class AmanahPresenceSuccessCore extends StatefulWidget {
     required this.timeString,
     super.key,
     this.bottomPadding = 24,
+    this.isCheckOut = false,
+    this.validatedDurationHours,
   });
 
   final String timeString;
   final double bottomPadding;
+  final bool isCheckOut;
+  final double? validatedDurationHours;
   final VoidCallback onClose;
   final VoidCallback onGoHome;
   final VoidCallback onViewHistory;
@@ -162,6 +166,9 @@ class _AmanahPresenceSuccessCoreState extends State<AmanahPresenceSuccessCore>
                                   child: _SuccessContent(
                                     palette: palette,
                                     timeString: widget.timeString,
+                                    isCheckOut: widget.isCheckOut,
+                                    validatedDurationHours:
+                                        widget.validatedDurationHours,
                                   ),
                                 ),
                               ),
@@ -309,20 +316,28 @@ class _SuccessHeader extends StatelessWidget {
 }
 
 class _SuccessContent extends StatelessWidget {
-  const _SuccessContent({required this.palette, required this.timeString});
+  const _SuccessContent({
+    required this.palette,
+    required this.timeString,
+    this.isCheckOut = false,
+    this.validatedDurationHours,
+  });
 
   final _SuccessPalette palette;
   final String timeString;
+  final bool isCheckOut;
+  final double? validatedDurationHours;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final String title = isCheckOut ? 'Dinas Selesai!' : 'Presensi Berhasil!';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Text(
-          'Presensi Berhasil!',
+          title,
           textAlign: TextAlign.center,
           style:
               theme.textTheme.titleLarge?.copyWith(
@@ -338,25 +353,50 @@ class _SuccessContent extends StatelessWidget {
               ),
         ),
         const SizedBox(height: 8),
-        Text.rich(
-          TextSpan(
-            text: 'Anda telah berhasil melakukan rekam presensi\npada pukul ',
-            children: <InlineSpan>[
-              TextSpan(
-                text: timeString,
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-              const TextSpan(text: '. Selamat bekerja!'),
-            ],
+        if (isCheckOut)
+          Text.rich(
+            TextSpan(
+              text: 'Presensi kepulangan berhasil dicatat\npada pukul ',
+              children: <InlineSpan>[
+                TextSpan(
+                  text: timeString,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                TextSpan(
+                  text: validatedDurationHours != null && validatedDurationHours! > 0
+                      ? '.\nTotal durasi kerja: ${validatedDurationHours!.toStringAsFixed(1)} jam. Terima kasih!'
+                      : '. Terima kasih atas dedikasi Anda!',
+                ),
+              ],
+            ),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              height: 1.42,
+              color: palette.subtitle,
+            ),
+          )
+        else
+          Text.rich(
+            TextSpan(
+              text: 'Anda telah berhasil melakukan rekam presensi\npada pukul ',
+              children: <InlineSpan>[
+                TextSpan(
+                  text: timeString,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const TextSpan(text: '. Selamat bekerja!'),
+              ],
+            ),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              height: 1.42,
+              color: palette.subtitle,
+            ),
           ),
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            height: 1.42,
-            color: palette.subtitle,
-          ),
-        ),
       ],
     );
   }

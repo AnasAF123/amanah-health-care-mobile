@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/features/permission/data/repositories/permission_repository_impl.dart';
 import 'package:amanah_healthcare/features/permission/domain/amanah_permission_model.dart';
+import 'package:amanah_healthcare/features/permission/domain/entities/eligible_session.dart';
+import 'package:amanah_healthcare/features/permission/domain/repositories/permission_repository.dart';
 import 'package:amanah_healthcare/features/permission/presentation/theme/amanah_permission_tokens.dart';
 
 class AmanahPermissionFormData {
@@ -11,23 +14,25 @@ class AmanahPermissionFormData {
     required this.startDate,
     required this.endDate,
     required this.reason,
-    this.substituteDoctor,
+    this.scope = 'full_day',
+    this.sessionIds,
   });
 
   final AmanahPermissionType type;
   final String startDate;
   final String endDate;
   final String reason;
-  final String? substituteDoctor;
+  final String scope;
+  final List<String>? sessionIds;
 }
 
-/// Permission Form Drawer (Create & Edit matching Web prototype lines 1062-1230)
 class AmanahPermissionFormDrawer extends StatefulWidget {
   const AmanahPermissionFormDrawer({
     required this.doctorName,
     required this.doctorRole,
     required this.doctorAvatarUrl,
     this.editingRecord,
+    this.repository,
     super.key,
   });
 
@@ -35,6 +40,7 @@ class AmanahPermissionFormDrawer extends StatefulWidget {
   final String doctorRole;
   final String doctorAvatarUrl;
   final AmanahPermissionRecord? editingRecord;
+  final PermissionRepository? repository;
 
   static Future<AmanahPermissionFormData?> show({
     required BuildContext context,
@@ -42,6 +48,7 @@ class AmanahPermissionFormDrawer extends StatefulWidget {
     required String doctorRole,
     required String doctorAvatarUrl,
     AmanahPermissionRecord? editingRecord,
+    PermissionRepository? repository,
   }) {
     return showAmanahBottomSheet<AmanahPermissionFormData>(
       context: context,
@@ -50,6 +57,7 @@ class AmanahPermissionFormDrawer extends StatefulWidget {
         doctorRole: doctorRole,
         doctorAvatarUrl: doctorAvatarUrl,
         editingRecord: editingRecord,
+        repository: repository,
       ),
     );
   }
@@ -61,32 +69,38 @@ class AmanahPermissionFormDrawer extends StatefulWidget {
 
 class _AmanahPermissionFormDrawerState
     extends State<AmanahPermissionFormDrawer> {
-  late final TextEditingController _typeController;
+  late final PermissionRepository _repository;
   late final TextEditingController _reasonController;
-  late final TextEditingController _substituteDoctorController;
 
+  AmanahPermissionType _selectedType = AmanahPermissionType.cutiTahunan;
   late DateTime _startDate;
   late DateTime _endDate;
+  String _scope = 'full_day'; // 'full_day' or 'session'
 
-  String? _typeError;
+  List<EligibleSession> _eligibleSessions = <EligibleSession>[];
+  final Set<String> _selectedSessionIds = <String>{};
+  bool _isLoadingSessions = false;
+
   String? _endDateError;
   String? _reasonError;
+  String? _sessionError;
   bool _isSubmitting = false;
 
-  final List<String> _typeSuggestions = <String>[
-    'Cuti Tahunan',
-    'Seminar / Simposium',
-    'Urusan Keluarga',
-    'Tugas Luar RS',
-    'Izin Sakit',
+  final List<AmanahPermissionType> _types = <AmanahPermissionType>[
+    AmanahPermissionType.cutiTahunan,
+    AmanahPermissionType.izinSakit,
+    AmanahPermissionType.seminarSimposium,
+    AmanahPermissionType.urusanKeluarga,
+    AmanahPermissionType.tugasLuarRS,
   ];
 
   @override
   void initState() {
     super.initState();
+    _repository = widget.repository ?? PermissionRepositoryImpl();
     final AmanahPermissionRecord? record = widget.editingRecord;
     if (record != null) {
-      _typeController = TextEditingController(text: record.type.label);
+      _selectedType = record.type;
       _startDate =
           DateTime.tryParse(record.startDate) ??
           DateTime.now().add(const Duration(days: 3));
@@ -94,25 +108,18 @@ class _AmanahPermissionFormDrawerState
           DateTime.tryParse(record.endDate) ??
           DateTime.now().add(const Duration(days: 5));
       _reasonController = TextEditingController(text: record.reason);
-      _substituteDoctorController = TextEditingController(
-        text: record.substituteDoctor ?? '',
-      );
     } else {
-      _typeController = TextEditingController(text: 'Cuti Tahunan');
       _startDate = DateTime.now().add(const Duration(days: 3));
-      _endDate = DateTime.now().add(const Duration(days: 5));
+      _endDate = DateTime.now().add(const Duration(days: 3));
       _reasonController = TextEditingController();
-      _substituteDoctorController = TextEditingController(
-        text: 'dr. Budi Santoso, Sp.A',
-      );
     }
+
+    _loadEligibleSessions();
   }
 
   @override
   void dispose() {
-    _typeController.dispose();
     _reasonController.dispose();
-    _substituteDoctorController.dispose();
     super.dispose();
   }
 
@@ -147,20 +154,45 @@ class _AmanahPermissionFormDrawerState
     return diff > 0 ? diff : 1;
   }
 
+  Future<void> _loadEligibleSessions() async {
+    setState(() => _isLoadingSessions = true);
+    try {
+      final List<EligibleSession> sessions =
+          await _repository.getEligibleSessions(_formatDate(_startDate));
+      if (mounted) {
+        setState(() {
+          _eligibleSessions = sessions;
+          _selectedSessionIds.clear();
+          if (sessions.isNotEmpty) {
+            _selectedSessionIds.add(sessions.first.sessionId);
+          }
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _eligibleSessions = <EligibleSession>[]);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingSessions = false);
+      }
+    }
+  }
+
   bool _validate() {
     bool valid = true;
     setState(() {
-      _typeError = null;
       _endDateError = null;
       _reasonError = null;
-
-      if (_typeController.text.trim().isEmpty) {
-        _typeError = 'Subjek perizinan wajib diisi';
-        valid = false;
-      }
+      _sessionError = null;
 
       if (_endDate.isBefore(_startDate)) {
         _endDateError = 'Tanggal selesai tidak boleh sebelum tanggal mulai';
+        valid = false;
+      }
+
+      if (_scope == 'session' && _selectedSessionIds.isEmpty) {
+        _sessionError = 'Pilih minimal satu sesi yang ingin diajukan izin';
         valid = false;
       }
 
@@ -195,6 +227,7 @@ class _AmanahPermissionFormDrawerState
           _endDate = _startDate;
         }
       });
+      _loadEligibleSessions();
     }
   }
 
@@ -210,9 +243,7 @@ class _AmanahPermissionFormDrawerState
     );
 
     if (picked != null && mounted) {
-      setState(() {
-        _endDate = picked;
-      });
+      setState(() => _endDate = picked);
     }
   }
 
@@ -222,19 +253,17 @@ class _AmanahPermissionFormDrawerState
     }
 
     setState(() => _isSubmitting = true);
-    Future<void>.delayed(const Duration(milliseconds: 300), () {
+    Future<void>.delayed(const Duration(milliseconds: 200), () {
       if (mounted) {
-        final AmanahPermissionType matchedType =
-            AmanahPermissionType.fromString(_typeController.text.trim());
-
         Navigator.of(context).pop(
           AmanahPermissionFormData(
-            type: matchedType,
+            type: _selectedType,
             startDate: _formatDate(_startDate),
             endDate: _formatDate(_endDate),
             reason: _reasonController.text.trim(),
-            substituteDoctor: _substituteDoctorController.text.trim().isNotEmpty
-                ? _substituteDoctorController.text.trim()
+            scope: _scope,
+            sessionIds: _scope == 'session'
+                ? _selectedSessionIds.toList()
                 : null,
           ),
         );
@@ -262,7 +291,7 @@ class _AmanahPermissionFormDrawerState
     final bool isEditing = widget.editingRecord != null;
 
     return AmanahBottomSheetScaffold(
-      title: isEditing ? 'Edit perizinan' : 'Pengajuan izin baru',
+      title: isEditing ? 'Edit perizinan' : 'Pengajuan izin staf',
       fixedHeightFactor: 0.92,
       minHeight: 520,
       bodyPadding: const EdgeInsets.fromLTRB(
@@ -287,299 +316,321 @@ class _AmanahPermissionFormDrawerState
           onPressed: _handleSubmit,
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          // Field 1: Subjek Perizinan
-          Text(
-            'Subjek Perizinan *',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: textColor,
-            ),
-          ),
-          const SizedBox(height: 6),
-          TextField(
-            controller: _typeController,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: textColor,
-            ),
-            decoration: InputDecoration(
-              hintText: 'Contoh: Urusan Keluarga, Seminar / Simposium, Cuti...',
-              hintStyle: TextStyle(
-                fontSize: 12,
-                color: subtextColor,
-              ),
-              filled: true,
-              fillColor: inputBg,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 12,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: borderColor),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: _typeError != null
-                      ? AmanahColorTokens.danger
-                      : borderColor,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(
-                  color: AmanahColorTokens.brand,
-                  width: 1.5,
-                ),
-              ),
-            ),
-          ),
-          if (_typeError != null) ...<Widget>[
-            const SizedBox(height: 4),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            // 1. Jenis / Subjek Perizinan
             Text(
-              _typeError!,
-              style: const TextStyle(
-                fontSize: 11,
-                color: AmanahColorTokens.danger,
-                fontWeight: FontWeight.w500,
+              'Jenis Perizinan *',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: textColor,
               ),
             ),
-          ],
-
-          // Quick Suggestion Chips
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: _typeSuggestions.map((String s) {
-              return InkWell(
-                onTap: () {
-                  setState(() {
-                    _typeController.text = s;
-                    _typeError = null;
-                  });
-                },
-                borderRadius: BorderRadius.circular(100),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _types.map((AmanahPermissionType t) {
+                final bool isSelected = _selectedType == t;
+                return ChoiceChip(
+                  label: Text(t.label),
+                  selected: isSelected,
+                  onSelected: (bool sel) {
+                    if (sel) setState(() => _selectedType = t);
+                  },
+                  labelStyle: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected ? Colors.white : textColor,
                   ),
-                  decoration: BoxDecoration(
-                    color: dark
-                        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
-                        : AmanahColorTokens.canvasLight,
+                  selectedColor: AmanahColorTokens.brand,
+                  backgroundColor: dark
+                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                      : AmanahColorTokens.canvasLight,
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(100),
-                    border: Border.all(
-                      color: dark
-                          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
-                          : AmanahColorTokens.neutral200,
+                    side: BorderSide(
+                      color: isSelected ? AmanahColorTokens.brand : borderColor,
                     ),
                   ),
-                  child: Text(
-                    s,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: subtextColor,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 18),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 18),
 
-          // Field 2: Rentang Tanggal
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  'Rentang Tanggal *',
+            // 2. Rentang Tanggal
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  'Tanggal Izin *',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: textColor,
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
+                Text(
+                  '$_calculatedDays Hari',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: AmanahColorTokens.brand,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _buildDatePickerTile(
+              label: 'Mulai',
+              dateString: _formatDateIndo(_startDate),
+              onTap: _pickStartDate,
+              dark: dark,
+              borderColor: borderColor,
+              textColor: textColor,
+            ),
+            const SizedBox(height: 8),
+            _buildDatePickerTile(
+              label: 'Selesai',
+              dateString: _formatDateIndo(_endDate),
+              onTap: _pickEndDate,
+              dark: dark,
+              borderColor: _endDateError != null
+                  ? AmanahColorTokens.danger
+                  : borderColor,
+              textColor: textColor,
+            ),
+            if (_endDateError != null) ...<Widget>[
+              const SizedBox(height: 4),
               Text(
-                '$_calculatedDays Hari Kerja',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  color: textColor,
+                _endDateError!,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AmanahColorTokens.danger,
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 8),
+            const SizedBox(height: 18),
 
-          // Start Date Selector Button
-          _buildDatePickerTile(
-            label: 'Mulai Izin',
-            dateString: _formatDateIndo(_startDate),
-            onTap: _pickStartDate,
-            dark: dark,
-            borderColor: borderColor,
-            textColor: textColor,
-          ),
-          const SizedBox(height: 8),
-
-          // End Date Selector Button
-          _buildDatePickerTile(
-            label: 'Selesai Izin',
-            dateString: _formatDateIndo(_endDate),
-            onTap: _pickEndDate,
-            dark: dark,
-            borderColor: _endDateError != null
-                ? AmanahColorTokens.danger
-                : borderColor,
-            textColor: textColor,
-          ),
-          if (_endDateError != null) ...<Widget>[
-            const SizedBox(height: 4),
+            // 3. Lingkup Izin (1 Hari Penuh vs Sesi Tertentu)
             Text(
-              _endDateError!,
-              style: const TextStyle(
-                fontSize: 11,
-                color: AmanahColorTokens.danger,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-          const SizedBox(height: 18),
-
-          // Field 3: Pesan / Alasan Perizinan
-          Text(
-            'Pesan / Alasan Perizinan *',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: textColor,
-            ),
-          ),
-          const SizedBox(height: 6),
-          TextField(
-            controller: _reasonController,
-            maxLines: 3,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: textColor,
-            ),
-            decoration: InputDecoration(
-              hintText: 'Tuliskan keterangan keperluan izin...',
-              hintStyle: TextStyle(
+              'Lingkup Perizinan *',
+              style: TextStyle(
                 fontSize: 12,
-                color: subtextColor,
-              ),
-              filled: true,
-              fillColor: inputBg,
-              contentPadding: const EdgeInsets.all(14),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: borderColor),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(
-                  color: _reasonError != null
-                      ? AmanahColorTokens.danger
-                      : borderColor,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(
-                  color: AmanahColorTokens.brand,
-                  width: 1.5,
-                ),
+                fontWeight: FontWeight.w700,
+                color: textColor,
               ),
             ),
-          ),
-          if (_reasonError != null) ...<Widget>[
-            const SizedBox(height: 4),
-            Text(
-              _reasonError!,
-              style: const TextStyle(
-                fontSize: 11,
-                color: AmanahColorTokens.danger,
-                fontWeight: FontWeight.w500,
-              ),
+            const SizedBox(height: 8),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => setState(() => _scope = 'full_day'),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: _scope == 'full_day'
+                          ? AmanahColorTokens.brand.withValues(alpha: 0.12)
+                          : inputBg,
+                      side: BorderSide(
+                        color: _scope == 'full_day'
+                            ? AmanahColorTokens.brand
+                            : borderColor,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: Text(
+                      '1 Hari Penuh',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: _scope == 'full_day'
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        color: _scope == 'full_day'
+                            ? AmanahColorTokens.brand
+                            : textColor,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => setState(() => _scope = 'session'),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: _scope == 'session'
+                          ? AmanahColorTokens.brand.withValues(alpha: 0.12)
+                          : inputBg,
+                      side: BorderSide(
+                        color: _scope == 'session'
+                            ? AmanahColorTokens.brand
+                            : borderColor,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: Text(
+                      'Sesi Tertentu',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: _scope == 'session'
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        color: _scope == 'session'
+                            ? AmanahColorTokens.brand
+                            : textColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-          const SizedBox(height: 18),
 
-          // Field 4: Dokter Pengganti (Opsional)
-          Row(
-            children: <Widget>[
-              Text(
-                'Dokter Pengganti',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: textColor,
+            // Sesi Roster Selector if scope == 'session'
+            if (_scope == 'session') ...<Widget>[
+              const SizedBox(height: 12),
+              if (_isLoadingSessions)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Center(
+                    child: SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                )
+              else if (_eligibleSessions.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AmanahColorTokens.brandSurface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AmanahColorTokens.brand.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: const Text(
+                    'Tidak ditemukan sesi dinas terjadwal pada tanggal ini. Izin akan diproses sebagai izin umum.',
+                    style: TextStyle(fontSize: 11, color: AmanahColorTokens.brand),
+                  ),
+                )
+              else
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _eligibleSessions.map((EligibleSession s) {
+                    final bool isSelected =
+                        _selectedSessionIds.contains(s.sessionId);
+                    return FilterChip(
+                      label: Text(
+                        '${s.sessionCode.toUpperCase()} (${s.startsAt.substring(0, 5)} - ${s.endsAt.substring(0, 5)})',
+                      ),
+                      selected: isSelected,
+                      onSelected: (bool sel) {
+                        setState(() {
+                          if (sel) {
+                            _selectedSessionIds.add(s.sessionId);
+                          } else {
+                            _selectedSessionIds.remove(s.sessionId);
+                          }
+                        });
+                      },
+                      labelStyle: TextStyle(
+                        fontSize: 11,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected ? Colors.white : textColor,
+                      ),
+                      selectedColor: AmanahColorTokens.brand,
+                      backgroundColor: inputBg,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: isSelected
+                              ? AmanahColorTokens.brand
+                              : borderColor,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              if (_sessionError != null) ...<Widget>[
+                const SizedBox(height: 4),
+                Text(
+                  _sessionError!,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AmanahColorTokens.danger,
+                  ),
+                ),
+              ],
+            ],
+            const SizedBox(height: 18),
+
+            // 4. Pesan / Alasan
+            Text(
+              'Alasan Pengajuan *',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
+            ),
+            const SizedBox(height: 6),
+            TextField(
+              controller: _reasonController,
+              maxLines: 3,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: textColor,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Tuliskan keterangan lengkap keperluan izin Anda...',
+                hintStyle: TextStyle(fontSize: 12, color: subtextColor),
+                filled: true,
+                fillColor: inputBg,
+                contentPadding: const EdgeInsets.all(14),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: _reasonError != null
+                        ? AmanahColorTokens.danger
+                        : borderColor,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(
+                    color: AmanahColorTokens.brand,
+                    width: 1.5,
+                  ),
                 ),
               ),
-              const SizedBox(width: 4),
+            ),
+            if (_reasonError != null) ...<Widget>[
+              const SizedBox(height: 4),
               Text(
-                '(Opsional)',
-                style: TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w500,
-                  color: subtextColor,
+                _reasonError!,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AmanahColorTokens.danger,
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 6),
-          TextField(
-            controller: _substituteDoctorController,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: textColor,
-            ),
-            decoration: InputDecoration(
-              hintText: 'Nama dokter pengganti...',
-              hintStyle: TextStyle(
-                fontSize: 12,
-                color: subtextColor,
-              ),
-              filled: true,
-              fillColor: inputBg,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 14,
-                vertical: 12,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: borderColor),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: borderColor),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(
-                  color: AmanahColorTokens.brand,
-                  width: 1.5,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: AmanahSpacing.xxl),
-        ],
+            const SizedBox(height: AmanahSpacing.xxl),
+          ],
+        ),
       ),
     );
   }
@@ -607,61 +658,54 @@ class _AmanahPermissionFormDrawerState
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Expanded(
-              child: Row(
-                children: <Widget>[
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: dark
-                          ? AmanahColorTokens.brand.withValues(alpha: 0.15)
-                          : AmanahColorTokens.brandSurface,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      Icons.calendar_today_rounded,
-                      size: 16,
-                      color: dark
-                          ? AmanahColorTokens.brandSoft
-                          : AmanahColorTokens.brand,
-                    ),
+            Row(
+              children: <Widget>[
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: dark
+                        ? AmanahColorTokens.brand.withValues(alpha: 0.15)
+                        : AmanahColorTokens.brandSurface,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          label,
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w500,
-                            color: dark
-                                ? AmanahColorTokens.neutral400
-                                : AmanahColorTokens.neutral500,
-                          ),
-                        ),
-                        Text(
-                          dateString,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: textColor,
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: Icon(
+                    Icons.calendar_today_rounded,
+                    size: 16,
+                    color: dark
+                        ? AmanahColorTokens.brandSoft
+                        : AmanahColorTokens.brand,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w500,
+                        color: dark
+                            ? AmanahColorTokens.neutral400
+                            : AmanahColorTokens.neutral500,
+                      ),
+                    ),
+                    Text(
+                      dateString,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: textColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
             Icon(
               Icons.keyboard_arrow_down_rounded,
               size: 20,
-              color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral400,
+              color: AmanahColorTokens.neutral400,
             ),
           ],
         ),

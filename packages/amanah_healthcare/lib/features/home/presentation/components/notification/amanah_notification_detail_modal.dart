@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_notification_model.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_visual_role.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_clay_icon.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/features/permission/presentation/screen/amanah_leave_permission_tab_screen.dart';
+import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_presence_history_screen.dart';
 
 class AmanahNotificationDetailModal extends StatelessWidget {
   const AmanahNotificationDetailModal({
@@ -63,6 +66,35 @@ class AmanahNotificationDetailModal extends StatelessWidget {
               height: 1.45,
             ),
           ),
+          if (item.sourceType == 'leave' ||
+              item.sourceType == 'replacement' ||
+              item.actionUrl == '/permission') ...<Widget>[
+            const SizedBox(height: 24),
+            AmanahButton(
+              text: 'Buka Modul Cuti & Pengganti',
+              icon: Icons.calendar_month_rounded,
+              isFullWidth: true,
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  AmanahLeavePermissionTabScreen.route(),
+                );
+              },
+            ),
+          ] else if (item.sourceType == 'attendance') ...<Widget>[
+            const SizedBox(height: 24),
+            AmanahButton(
+              text: 'Buka Riwayat Presensi',
+              icon: Icons.history_rounded,
+              isFullWidth: true,
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  AmanahPresenceHistoryScreen.route(),
+                );
+              },
+            ),
+          ],
         ],
       ),
     );

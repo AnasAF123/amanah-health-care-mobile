@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/permission/domain/amanah_permission_model.dart';
@@ -6,26 +6,22 @@ import 'package:amanah_healthcare/features/permission/domain/amanah_permission_m
 class AmanahPermissionDetailDrawer extends StatelessWidget {
   const AmanahPermissionDetailDrawer({
     required this.item,
-    required this.onEdit,
     required this.onCancel,
     super.key,
   });
 
   final AmanahPermissionRecord item;
-  final VoidCallback onEdit;
   final VoidCallback onCancel;
 
   static Future<void> show({
     required BuildContext context,
     required AmanahPermissionRecord item,
-    required VoidCallback onEdit,
     required VoidCallback onCancel,
   }) {
     return showAmanahBottomSheet<void>(
       context: context,
       builder: (BuildContext ctx) => AmanahPermissionDetailDrawer(
         item: item,
-        onEdit: onEdit,
         onCancel: onCancel,
       ),
     );
@@ -60,10 +56,6 @@ class AmanahPermissionDetailDrawer extends StatelessWidget {
       trailing: _PermissionDetailOverflow(
         item: item,
         onDownloadPdf: () => _showPdfInfoToast(context),
-        onEdit: () {
-          Navigator.of(context).pop();
-          onEdit();
-        },
         onCancel: () {
           Navigator.of(context).pop();
           onCancel();
@@ -129,10 +121,6 @@ class AmanahPermissionDetailDrawer extends StatelessWidget {
                   : 'Oleh: ${item.reviewerName}',
             ),
           ],
-          if (item.status == AmanahPermissionStatus.disetujui) ...<Widget>[
-            const SizedBox(height: AmanahSpacing.lg),
-            const _ApprovedNotice(),
-          ],
         ],
       ),
     );
@@ -143,13 +131,11 @@ class _PermissionDetailOverflow extends StatelessWidget {
   const _PermissionDetailOverflow({
     required this.item,
     required this.onDownloadPdf,
-    required this.onEdit,
     required this.onCancel,
   });
 
   final AmanahPermissionRecord item;
   final VoidCallback onDownloadPdf;
-  final VoidCallback onEdit;
   final VoidCallback onCancel;
 
   @override
@@ -173,9 +159,6 @@ class _PermissionDetailOverflow extends StatelessWidget {
           case 'pdf':
             onDownloadPdf();
             break;
-          case 'edit':
-            onEdit();
-            break;
           case 'cancel':
             onCancel();
             break;
@@ -193,18 +176,10 @@ class _PermissionDetailOverflow extends StatelessWidget {
         if (canMutate) ...<PopupMenuEntry<String>>[
           const PopupMenuDivider(height: 1),
           const PopupMenuItem<String>(
-            value: 'edit',
-            child: _MenuItemLabel(
-              icon: Icons.edit_outlined,
-              label: 'Edit Izin',
-              tone: AmanahStatusTone.brand,
-            ),
-          ),
-          const PopupMenuItem<String>(
             value: 'cancel',
             child: _MenuItemLabel(
               icon: Icons.delete_outline_rounded,
-              label: 'Batalkan',
+              label: 'Batalkan Izin',
               tone: AmanahStatusTone.danger,
             ),
           ),
@@ -477,49 +452,6 @@ class _SubstituteDoctorSection extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ApprovedNotice extends StatelessWidget {
-  const _ApprovedNotice();
-
-  @override
-  Widget build(BuildContext context) {
-    final bool dark = AmanahThemeTokens.isDark(context);
-    final AmanahTone tone = AmanahThemeTokens.status(AmanahStatusTone.success);
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: dark ? tone.dark.withValues(alpha: 0.28) : tone.surface,
-        borderRadius: BorderRadius.circular(AmanahRadius.lg),
-        border: Border.all(
-          color: dark ? tone.primary.withValues(alpha: 0.30) : tone.border,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: Row(
-          children: <Widget>[
-            Icon(
-              Icons.check_circle_outline_rounded,
-              size: 18,
-              color: dark ? tone.light : tone.onSurface,
-            ),
-            const SizedBox(width: AmanahSpacing.sm),
-            Expanded(
-              child: Text(
-                'Izin telah disetujui (Terkonfirmasi di SIMRS)',
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w700,
-                  color: dark ? tone.light : tone.onSurface,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -68,6 +68,8 @@ class AmanahPushService implements AmanahPushNotificationService {
 
   final List<void Function(RemoteMessage message)> _messageListeners =
       <void Function(RemoteMessage message)>[];
+  final List<void Function(RemoteMessage message)> _tapListeners =
+      <void Function(RemoteMessage message)>[];
 
   @override
   bool get isInitialized => _isInitialized;
@@ -80,6 +82,16 @@ class AmanahPushService implements AmanahPushNotificationService {
   @override
   void removeMessageListener(void Function(RemoteMessage message) listener) {
     _messageListeners.remove(listener);
+  }
+
+  @override
+  void addTapListener(void Function(RemoteMessage message) listener) {
+    _tapListeners.add(listener);
+  }
+
+  @override
+  void removeTapListener(void Function(RemoteMessage message) listener) {
+    _tapListeners.remove(listener);
   }
 
   ApiClient get apiClient {
@@ -393,5 +405,12 @@ class AmanahPushService implements AmanahPushNotificationService {
     AppLog.info(
       '[AmanahPushService] Notification tapped by user: data=${message.data}',
     );
+    for (final listener in _tapListeners) {
+      try {
+        listener(message);
+      } catch (e) {
+        debugPrint('[AmanahPushService] Tap listener error: $e');
+      }
+    }
   }
 }

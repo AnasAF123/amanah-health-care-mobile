@@ -34,6 +34,9 @@ class AmanahNotificationItem {
     this.isUnread = true,
     this.isUrgent = false,
     this.actionLabel,
+    this.actionUrl,
+    this.sourceType,
+    this.sourceId,
   });
 
   final String id;
@@ -46,6 +49,9 @@ class AmanahNotificationItem {
   final bool isUrgent;
   final String? actionLabel;
   final AmanahNotificationVisual visual;
+  final String? actionUrl;
+  final String? sourceType;
+  final String? sourceId;
 
   AmanahNotificationItem copyWith({
     String? id,
@@ -58,6 +64,9 @@ class AmanahNotificationItem {
     bool? isUrgent,
     String? actionLabel,
     AmanahNotificationVisual? visual,
+    String? actionUrl,
+    String? sourceType,
+    String? sourceId,
   }) {
     return AmanahNotificationItem(
       id: id ?? this.id,
@@ -70,6 +79,9 @@ class AmanahNotificationItem {
       isUrgent: isUrgent ?? this.isUrgent,
       actionLabel: actionLabel ?? this.actionLabel,
       visual: visual ?? this.visual,
+      actionUrl: actionUrl ?? this.actionUrl,
+      sourceType: sourceType ?? this.sourceType,
+      sourceId: sourceId ?? this.sourceId,
     );
   }
 }
@@ -119,7 +131,11 @@ class AmanahNotificationStore extends ChangeNotifier {
         .toList();
   }
 
-  static AmanahNotificationCategory _mapCategory(String? cat) {
+  static AmanahNotificationCategory _mapCategory(String? cat, [String? sourceType]) {
+    final String s = (sourceType ?? '').toLowerCase();
+    if (s == 'attendance' || s == 'leave' || s == 'replacement') {
+      return AmanahNotificationCategory.shift;
+    }
     if (cat == null) return AmanahNotificationCategory.all;
     switch (cat.toLowerCase()) {
       case 'queue':
@@ -130,14 +146,21 @@ class AmanahNotificationStore extends ChangeNotifier {
         return AmanahNotificationCategory.clinical;
       case 'shift':
       case 'schedule':
+      case 'attendance':
+      case 'leave':
+      case 'replacement':
         return AmanahNotificationCategory.shift;
       default:
         return AmanahNotificationCategory.all;
     }
   }
 
-  static AmanahNotificationVisual _mapVisual(String? cat, bool isUrgent) {
+  static AmanahNotificationVisual _mapVisual(String? cat, bool isUrgent, [String? sourceType]) {
     if (isUrgent) return AmanahNotificationVisual.clinicalCritical;
+    final String s = (sourceType ?? '').toLowerCase();
+    if (s == 'attendance') return AmanahNotificationVisual.shiftReminder;
+    if (s == 'leave' || s == 'replacement') return AmanahNotificationVisual.shiftSchedule;
+
     final String c = (cat ?? '').toLowerCase();
     if (c == 'queue' || c == 'appointment') return AmanahNotificationVisual.queueVitals;
     if (c == 'shift' || c == 'schedule') return AmanahNotificationVisual.shiftSchedule;
@@ -185,6 +208,19 @@ class AmanahNotificationStore extends ChangeNotifier {
           final bool isRead = item['isRead'] as bool? ?? false;
           final bool isUrgent = item['isUrgent'] as bool? ?? false;
           final String categoryStr = item['category']?.toString() ?? '';
+          final String sourceType = item['sourceType']?.toString() ?? '';
+          final String sourceId = item['sourceId']?.toString() ?? '';
+
+          String? actionUrl = item['actionUrl']?.toString();
+          String? actionLabel;
+          final dynamic actionsList = item['actions'];
+          if (actionsList is List && actionsList.isNotEmpty) {
+            final dynamic firstAct = actionsList.first;
+            if (firstAct is Map) {
+              actionLabel = firstAct['label']?.toString();
+              actionUrl ??= firstAct['url']?.toString();
+            }
+          }
 
           return AmanahNotificationItem(
             id: id,
@@ -192,10 +228,14 @@ class AmanahNotificationStore extends ChangeNotifier {
             desc: desc,
             time: _formatTime(createdAt),
             timestamp: createdAt,
-            category: _mapCategory(categoryStr),
+            category: _mapCategory(categoryStr, sourceType),
             isUnread: !isRead,
             isUrgent: isUrgent,
-            visual: _mapVisual(categoryStr, isUrgent),
+            visual: _mapVisual(categoryStr, isUrgent, sourceType),
+            actionLabel: actionLabel,
+            actionUrl: actionUrl,
+            sourceType: sourceType.isNotEmpty ? sourceType : null,
+            sourceId: sourceId.isNotEmpty ? sourceId : null,
           );
         }).toList();
       }

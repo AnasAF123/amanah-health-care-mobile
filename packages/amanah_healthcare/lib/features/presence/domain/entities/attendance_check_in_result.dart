@@ -1,0 +1,24 @@
+/// Pure Dart domain entity representing attendance scan or checkout confirmation.
+class AttendanceCheckInResult {
+  const AttendanceCheckInResult({
+    required this.id,
+    required this.staffId,
+    required this.shift,
+    required this.status,
+    required this.checkInAt,
+    required this.timeFormatted,
+    this.checkOutAt,
+    this.validatedDurationHours,
+    this.isReplacement = false,
+  });
+
+  final String id;
+  final String staffId;
+  final String shift;
+  final String status;
+  final DateTime checkInAt;
+  final String timeFormatted;
+  final DateTime? checkOutAt;
+  final double? validatedDurationHours;
+  final bool isReplacement;
+}

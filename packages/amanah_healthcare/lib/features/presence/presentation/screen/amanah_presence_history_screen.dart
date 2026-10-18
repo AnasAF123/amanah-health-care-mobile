@@ -1,25 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:amanah_healthcare/core/notifications/amanah_push_service.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
-import 'package:amanah_healthcare/features/presence/data/amanah_presence_store.dart';
+import 'package:amanah_healthcare/features/presence/data/repositories/attendance_repository_impl.dart';
 import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model.dart';
+import 'package:amanah_healthcare/features/presence/domain/usecases/get_attendance_history_usecase.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/amanah_presence_drawers.dart';
+import 'package:amanah_healthcare/features/presence/presentation/components/history/presence_filter_chips_banner.dart';
+import 'package:amanah_healthcare/features/presence/presentation/components/history/presence_history_summary_bar.dart';
+import 'package:amanah_healthcare/features/presence/presentation/components/history/presence_history_toolbar.dart';
+import 'package:amanah_healthcare/features/presence/presentation/components/history/presence_timeline_item.dart';
 
 class AmanahPresenceHistoryScreen extends StatefulWidget {
   const AmanahPresenceHistoryScreen({
     super.key,
-    this.records = kAttendanceRecords,
+    this.initialRecords,
   });
 
-  final List<AttendanceRecord> records;
+  final List<AttendanceRecord>? initialRecords;
 
-  static Route<void> route({
-    List<AttendanceRecord> records = kAttendanceRecords,
-  }) {
+  static Route<void> route({List<AttendanceRecord>? records}) {
     return MaterialPageRoute<void>(
       builder: (BuildContext context) =>
-          AmanahPresenceHistoryScreen(records: records),
+          AmanahPresenceHistoryScreen(initialRecords: records),
     );
   }
 
@@ -30,6 +35,11 @@ class AmanahPresenceHistoryScreen extends StatefulWidget {
 
 class _AmanahPresenceHistoryScreenState
     extends State<AmanahPresenceHistoryScreen> {
+  late final GetAttendanceHistoryUseCase _getHistoryUseCase;
+  List<AttendanceRecord> _records = <AttendanceRecord>[];
+  bool _isLoading = true;
+  String? _errorMessage;
+
   AttendanceStatus? _statusFilter;
   String _unitFilter = 'all';
   int? _selectedDayFilter;
@@ -41,7 +51,7 @@ class _AmanahPresenceHistoryScreenState
       _selectedDayFilter != null;
 
   List<AttendanceRecord> get _filteredRecords {
-    return widget.records
+    return _records
         .where((AttendanceRecord rec) {
           if (_statusFilter != null && rec.status != _statusFilter) {
             return false;
@@ -57,6 +67,62 @@ class _AmanahPresenceHistoryScreenState
           return true;
         })
         .toList(growable: false);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getHistoryUseCase = GetAttendanceHistoryUseCase(
+      AttendanceRepositoryImpl(),
+    );
+
+    if (widget.initialRecords != null && widget.initialRecords!.isNotEmpty) {
+      _records = widget.initialRecords!;
+      _isLoading = false;
+    } else {
+      _loadHistory();
+    }
+
+    AmanahPushService.instance.addMessageListener(_onPushReceived);
+  }
+
+  @override
+  void dispose() {
+    AmanahPushService.instance.removeMessageListener(_onPushReceived);
+    super.dispose();
+  }
+
+  void _onPushReceived(RemoteMessage message) {
+    final Map<String, dynamic> data = message.data;
+    if (data['category'] == 'attendance' ||
+        data['category'] == 'shift' ||
+        data['sourceDomain'] == 'attendance' ||
+        message.notification?.title?.toLowerCase().contains('presensi') ==
+            true) {
+      _loadHistory();
+    }
+  }
+
+  Future<void> _loadHistory() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final List<AttendanceRecord> items = await _getHistoryUseCase();
+      if (!mounted) return;
+      setState(() {
+        _records = items;
+        _isLoading = false;
+      });
+    } catch (err) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = err.toString().replaceAll('Exception: ', '');
+        _isLoading = false;
+      });
+    }
   }
 
   void _resetFilters() {
@@ -95,7 +161,7 @@ class _AmanahPresenceHistoryScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text(
-              'Laporan presensi berhasil diunduh (PDF)',
+              'Laporan riwayat presensi berhasil diunduh (PDF)',
               style: TextStyle(fontSize: 12),
             ),
             behavior: SnackBarBehavior.floating,
@@ -121,29 +187,17 @@ class _AmanahPresenceHistoryScreenState
     final Color subtextColor =
         dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
 
-    final List<AttendanceRecord> records = _filteredRecords;
-
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            // 1. Master Screen Header
             AmanahScreenHeader(
               title: 'Riwayat Presensi',
               onBack: () => Navigator.of(context).pop(),
             ),
-
-            // 2. Main Content Viewport
             Expanded(
-              child: records.isEmpty
-                  ? _buildEmptyState(dark, textColor, subtextColor)
-                  : _buildTimelineViewport(
-                      records,
-                      dark,
-                      textColor,
-                      subtextColor,
-                    ),
+              child: _buildBody(dark, textColor, subtextColor),
             ),
           ],
         ),
@@ -151,401 +205,99 @@ class _AmanahPresenceHistoryScreenState
     );
   }
 
-  Widget _buildTimelineViewport(
-    List<AttendanceRecord> records,
-    bool dark,
-    Color textColor,
-    Color subtextColor,
-  ) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          // Header Row: Timeline Title + Info Button + Filter & Download Toolbar
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Text(
-                    'Timeline',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: textColor,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  InkWell(
-                    onTap: () => AmanahPresenceInfoDrawer.show(context),
-                    borderRadius: BorderRadius.circular(100),
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: dark
-                            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
-                            : AmanahColorTokens.canvasLight,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.info_outline_rounded,
-                        size: 13,
-                        color: subtextColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                children: <Widget>[
-                  // Filter Action Button
-                  InkWell(
-                    onTap: _openFilterDrawer,
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: _hasActiveFilters
-                            ? (dark
-                                  ? AmanahColorTokens.tabActiveDark.withValues(
-                                      alpha: 0.16,
-                                    )
-                                  : AmanahColorTokens.brandSurface)
-                            : (dark
-                                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
-                                  : AmanahColorTokens.surfaceLight),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: _hasActiveFilters
-                              ? (dark
-                                    ? AmanahColorTokens.tabActiveDark
-                                          .withValues(alpha: 0.50)
-                                    : AmanahColorTokens.brandAccent)
-                              : (dark
-                                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
-                                    : AmanahColorTokens.neutral200),
-                        ),
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: <Widget>[
-                          Icon(
-                            Icons.tune_rounded,
-                            size: 16,
-                            color: _hasActiveFilters
-                                ? (dark
-                                      ? AmanahColorTokens.tabActiveDark
-                                      : AmanahColorTokens.brandPrimary)
-                                : subtextColor,
-                          ),
-                          if (_hasActiveFilters)
-                            Positioned(
-                              top: 4,
-                              right: 4,
-                              child: Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: dark
-                                      ? AmanahColorTokens.tabActiveDark
-                                      : AmanahColorTokens.brandAccent,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
+  Widget _buildBody(bool dark, Color textColor, Color subtextColor) {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator.adaptive(),
+      );
+    }
 
-                  // Download PDF Action Button
-                  InkWell(
-                    onTap: _handleDownloadPdf,
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: dark
-                            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
-                            : AmanahColorTokens.surfaceLight,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: dark
-                              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
-                              : AmanahColorTokens.neutral200,
-                        ),
-                      ),
-                      child: _isDownloading
-                          ? const Center(
-                              child: SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    AmanahColorTokens.brandPrimary,
-                                  ),
-                                ),
-                              ),
-                            )
-                          : Icon(
-                              Icons.download_rounded,
-                              size: 16,
-                              color: subtextColor,
-                            ),
-                    ),
-                  ),
-                ],
+    if (_errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(Icons.error_outline_rounded,
+                  size: 44, color: AmanahColorTokens.dangerDark),
+              const SizedBox(height: 12),
+              Text(
+                _errorMessage!,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: textColor),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: _loadHistory,
+                icon: const Icon(Icons.refresh_rounded, size: 16),
+                label: const Text('Coba Lagi'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AmanahColorTokens.brandPrimary,
+                  foregroundColor: AmanahColorTokens.surfaceLight,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+        ),
+      );
+    }
 
-          // Active Filter Chips Banner (If filters applied)
-          if (_hasActiveFilters) ...<Widget>[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: dark
-                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
-                    : AmanahColorTokens.canvasLight,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: dark
-                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
-                      : AmanahColorTokens.neutral200,
-                ),
-              ),
-              child: Row(
-                children: <Widget>[
-                  Text(
-                    'Filter: ',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: subtextColor,
-                    ),
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      child: Row(
-                        children: <Widget>[
-                          if (_statusFilter != null) ...<Widget>[
-                            _buildFilterChip(
-                              _statusFilter!.name.toUpperCase(),
-                              dark,
-                            ),
-                            const SizedBox(width: 4),
-                          ],
-                          if (_unitFilter != 'all') ...<Widget>[
-                            _buildFilterChip(_unitFilter, dark),
-                            const SizedBox(width: 4),
-                          ],
-                          if (_selectedDayFilter != null) ...<Widget>[
-                            _buildFilterChip(
-                              'Tgl $_selectedDayFilter Ags',
-                              dark,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: _resetFilters,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Text(
-                        'Reset',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: dark
-                              ? AmanahColorTokens.tabActiveDark
-                              : AmanahColorTokens.brandAccent,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+    final List<AttendanceRecord> records = _filteredRecords;
+
+    if (records.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _loadHistory,
+        child: _buildEmptyState(dark, textColor, subtextColor),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadHistory,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            // Timeline Title Row + Filters
+            PresenceHistoryToolbar(
+              textColor: textColor,
+              subtextColor: subtextColor,
+              dark: dark,
+              hasActiveFilters: _hasActiveFilters,
+              isDownloading: _isDownloading,
+              onOpenInfo: () => AmanahPresenceInfoDrawer.show(context),
+              onOpenFilter: _openFilterDrawer,
+              onDownloadPdf: _handleDownloadPdf,
             ),
-            const SizedBox(height: 14),
-          ],
+            const SizedBox(height: 12),
 
-          if (records.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40),
-              child: Center(
-                child: AmanahEmptyState.card(
-                  title: 'Belum Ada Riwayat Kehadiran',
-                  message:
-                      'Belum ada catatan presensi kehadiran pada periode ini.',
-                ),
+            // Active Filter Chips Banner
+            if (_hasActiveFilters) ...<Widget>[
+              PresenceFilterChipsBanner(
+                statusFilter: _statusFilter,
+                unitFilter: _unitFilter,
+                selectedDayFilter: _selectedDayFilter,
+                onReset: _resetFilters,
+                dark: dark,
+                subtextColor: subtextColor,
               ),
-            )
-          else ...<Widget>[
-            Builder(
-              builder: (BuildContext context) {
-                final int hadirCount = records
-                    .where((AttendanceRecord r) => r.status == AttendanceStatus.hadir)
-                    .length;
-                final int telatCount = records
-                    .where((AttendanceRecord r) => r.status == AttendanceStatus.telat)
-                    .length;
-                final int missedCount = records
-                    .where((AttendanceRecord r) => r.status == AttendanceStatus.missed)
-                    .length;
-                final int cutiCount = records
-                    .where((AttendanceRecord r) => r.status == AttendanceStatus.cuti)
-                    .length;
-                final int total = records.length;
-                final int totalHours = (hadirCount + telatCount) * 8;
+              const SizedBox(height: 14),
+            ],
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Container(
-                      width: double.infinity,
-                      height: 10,
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: dark
-                            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
-                            : AmanahColorTokens.canvasLight,
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          if (hadirCount > 0)
-                            Expanded(
-                              flex: hadirCount,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: AmanahColorTokens.success,
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                              ),
-                            ),
-                          if (telatCount > 0)
-                            Expanded(
-                              flex: telatCount,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: AmanahColorTokens.amberLight,
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                              ),
-                            ),
-                          if (missedCount > 0)
-                            Expanded(
-                              flex: missedCount,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: AmanahColorTokens.danger,
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                              ),
-                            ),
-                          if (cutiCount > 0)
-                            Expanded(
-                              flex: cutiCount,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: AmanahColorTokens.violet,
-                                  borderRadius: BorderRadius.circular(100),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      alignment: WrapAlignment.spaceBetween,
-                      crossAxisAlignment: WrapCrossAlignment.end,
-                      spacing: 12,
-                      runSpacing: 10,
-                      children: <Widget>[
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Text(
-                              'Total jam kerja · Periode ini',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: subtextColor,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              textBaseline: TextBaseline.alphabetic,
-                              children: <Widget>[
-                                Text(
-                                  '$totalHours hr',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w800,
-                                    color: textColor,
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  '($total hari)',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: subtextColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const Wrap(
-                          spacing: 8,
-                          runSpacing: 4,
-                          children: <Widget>[
-                            _LegendIndicator(
-                              color: AmanahColorTokens.success,
-                              label: 'Hadir',
-                            ),
-                            _LegendIndicator(
-                              color: AmanahColorTokens.amberLight,
-                              label: 'Telat',
-                            ),
-                            _LegendIndicator(
-                              color: AmanahColorTokens.danger,
-                              label: 'Missed',
-                            ),
-                            _LegendIndicator(
-                              color: AmanahColorTokens.violet,
-                              label: 'Cuti',
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              },
+            // Summary Metrics Bar
+            PresenceHistorySummaryBar(
+              records: records,
+              dark: dark,
+              textColor: textColor,
+              subtextColor: subtextColor,
             ),
             const SizedBox(height: 20),
+
+            // Timeline Items List
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -553,269 +305,40 @@ class _AmanahPresenceHistoryScreenState
               itemBuilder: (BuildContext context, int index) {
                 final AttendanceRecord item = records[index];
                 final bool isLast = index == records.length - 1;
-                return _buildTimelineItem(
-                  item,
-                  isLast,
-                  dark,
-                  textColor,
-                  subtextColor,
+                return PresenceTimelineItem(
+                  item: item,
+                  isLast: isLast,
+                  dark: dark,
+                  textColor: textColor,
+                  subtextColor: subtextColor,
                 );
               },
             ),
           ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String label, bool dark) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: dark
-            ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.16)
-            : AmanahColorTokens.neutral200,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: dark
-              ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.34)
-              : AmanahColorTokens.neutral200,
         ),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: dark
-              ? AmanahColorTokens.tabActiveDark
-              : AmanahColorTokens.neutral900,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimelineItem(
-    AttendanceRecord item,
-    bool isLast,
-    bool dark,
-    Color textColor,
-    Color subtextColor,
-  ) {
-    Color iconBorderColor = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
-        : AmanahColorTokens.neutral300;
-    Color iconBgColor = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
-        : AmanahColorTokens.canvasLight;
-    Color iconColor = subtextColor;
-    Color titleColor = textColor;
-    IconData iconData = Icons.login_rounded;
-    Color lineColor = dark
-        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
-        : AmanahColorTokens.neutral300;
-
-    if (item.isLatest) {
-      switch (item.status) {
-        case AttendanceStatus.hadir:
-          iconBorderColor = AmanahColorTokens.successDark;
-          iconBgColor = AmanahColorTokens.successSurface;
-          iconColor = AmanahColorTokens.successDark;
-          titleColor = AmanahColorTokens.successDark;
-          iconData = Icons.login_rounded;
-          lineColor = AmanahColorTokens.success;
-        case AttendanceStatus.telat:
-          iconBorderColor = AmanahColorTokens.warningDark;
-          iconBgColor = AmanahColorTokens.warningSurface;
-          iconColor = AmanahColorTokens.warningDark;
-          titleColor = AmanahColorTokens.warningDark;
-          iconData = Icons.schedule_rounded;
-          lineColor = AmanahColorTokens.amberLight;
-        case AttendanceStatus.missed:
-          iconBorderColor = AmanahColorTokens.dangerDark;
-          iconBgColor = AmanahColorTokens.dangerSurface;
-          iconColor = AmanahColorTokens.dangerDark;
-          titleColor = AmanahColorTokens.dangerDark;
-          iconData = Icons.close_rounded;
-          lineColor = AmanahColorTokens.danger;
-        case AttendanceStatus.cuti:
-          iconBorderColor = AmanahColorTokens.violetDark;
-          iconBgColor = AmanahColorTokens.violetSurface;
-          iconColor = AmanahColorTokens.violetDark;
-          titleColor = AmanahColorTokens.violetDark;
-          iconData = Icons.event_note_rounded;
-          lineColor = AmanahColorTokens.violet;
-      }
-    } else {
-      switch (item.status) {
-        case AttendanceStatus.hadir:
-          iconData = Icons.login_rounded;
-        case AttendanceStatus.telat:
-          iconData = Icons.schedule_rounded;
-        case AttendanceStatus.missed:
-          iconData = Icons.close_rounded;
-        case AttendanceStatus.cuti:
-          iconData = Icons.event_note_rounded;
-      }
-    }
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        // Left timeline node & connecting line
-        Column(
-          children: <Widget>[
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: iconBgColor,
-                shape: BoxShape.circle,
-                border: Border.all(color: iconBorderColor, width: 2),
-              ),
-              child: Icon(iconData, size: 14, color: iconColor),
-            ),
-            if (!isLast)
-              Container(
-                width: item.isLatest ? 2 : 1.5,
-                height: 48,
-                margin: const EdgeInsets.symmetric(vertical: 2),
-                color: lineColor,
-              ),
-          ],
-        ),
-        const SizedBox(width: 12),
-
-        // Date Column (85px)
-        SizedBox(
-          width: 85,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const SizedBox(height: 4),
-              Text(
-                item.date,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: textColor,
-                  height: 1.1,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                item.time,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: subtextColor,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        // Right details Column (Text aligned right)
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 4, bottom: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Text(
-                  item.title,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: item.isLatest
-                        ? FontWeight.w700
-                        : FontWeight.w600,
-                    color: titleColor,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  item.location,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w400,
-                    color: subtextColor,
-                    height: 1.2,
-                  ),
-                ),
-                if (item.status == AttendanceStatus.cuti) ...<Widget>[
-                  const SizedBox(height: 4),
-                  InkWell(
-                    onTap: () => AmanahPresenceLeaveReasonDrawer.show(
-                      context,
-                      record: item,
-                    ),
-                    child: const Text(
-                      'Lihat Alasan',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AmanahColorTokens.violetDark,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 
   Widget _buildEmptyState(bool dark, Color textColor, Color subtextColor) {
     return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      physics: const AlwaysScrollableScrollPhysics(
+        parent: BouncingScrollPhysics(),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
       child: AmanahEmptyState.box(
         title: 'Tidak Ada Data Presensi',
         message:
             'Tidak ditemukan riwayat presensi yang sesuai dengan filter tanggal atau status yang diterapkan.',
-        actionText: 'Ubah Filter',
-        actionLeadingIcon: Icons.tune_rounded,
-        onAction: _openFilterDrawer,
-        secondaryActionText: 'Reset Filter',
-        secondaryActionLeadingIcon: Icons.restart_alt_rounded,
-        onSecondaryAction: _resetFilters,
+        actionText: _hasActiveFilters ? 'Ubah Filter' : 'Perbarui Data',
+        actionLeadingIcon:
+            _hasActiveFilters ? Icons.tune_rounded : Icons.refresh_rounded,
+        onAction: _hasActiveFilters ? _openFilterDrawer : _loadHistory,
+        secondaryActionText: _hasActiveFilters ? 'Reset Filter' : null,
+        secondaryActionLeadingIcon:
+            _hasActiveFilters ? Icons.restart_alt_rounded : null,
+        onSecondaryAction: _hasActiveFilters ? _resetFilters : null,
       ),
-    );
-  }
-}
-
-class _LegendIndicator extends StatelessWidget {
-  const _LegendIndicator({required this.color, required this.label});
-
-  final Color color;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Container(
-          width: 6,
-          height: 6,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-            color: AmanahColorTokens.neutral500,
-          ),
-        ),
-      ],
     );
   }
 }

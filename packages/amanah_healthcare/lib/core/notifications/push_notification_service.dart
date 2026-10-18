@@ -23,4 +23,10 @@ abstract interface class AmanahPushNotificationService {
 
   /// Removes a previously registered message listener.
   void removeMessageListener(void Function(RemoteMessage message) listener);
+
+  /// Adds a listener for when a push notification is tapped by the user.
+  void addTapListener(void Function(RemoteMessage message) listener);
+
+  /// Removes a previously registered tap listener.
+  void removeTapListener(void Function(RemoteMessage message) listener);
 }

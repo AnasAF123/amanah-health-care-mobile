@@ -9,12 +9,16 @@ class AmanahPresenceSuccessDrawer extends StatelessWidget {
     super.key,
     String? timeString,
     this.bottomPadding = 24,
+    this.isCheckOut = false,
+    this.validatedDurationHours,
     this.onGoHome,
     this.onViewHistory,
   }) : timeString = timeString ?? _formatCurrentTime();
 
   final String timeString;
   final double bottomPadding;
+  final bool isCheckOut;
+  final double? validatedDurationHours;
   final VoidCallback onClose;
   final VoidCallback? onGoHome;
   final VoidCallback? onViewHistory;
@@ -29,6 +33,8 @@ class AmanahPresenceSuccessDrawer extends StatelessWidget {
   static Future<void> show(
     BuildContext context, {
     String? timeString,
+    bool isCheckOut = false,
+    double? validatedDurationHours,
     double bottomPadding = 24,
     VoidCallback? onGoHome,
     VoidCallback? onViewHistory,
@@ -39,6 +45,8 @@ class AmanahPresenceSuccessDrawer extends StatelessWidget {
       context: context,
       builder: (BuildContext ctx) => AmanahPresenceSuccessDrawer(
         timeString: timeString,
+        isCheckOut: isCheckOut,
+        validatedDurationHours: validatedDurationHours,
         bottomPadding: bottomPadding,
         onClose: () => Navigator.of(ctx).pop(),
         onGoHome: () {
@@ -62,6 +70,8 @@ class AmanahPresenceSuccessDrawer extends StatelessWidget {
     return AmanahPresenceSuccessCore(
       timeString: timeString,
       bottomPadding: bottomPadding,
+      isCheckOut: isCheckOut,
+      validatedDurationHours: validatedDurationHours,
       onClose: onClose,
       onGoHome:
           onGoHome ??

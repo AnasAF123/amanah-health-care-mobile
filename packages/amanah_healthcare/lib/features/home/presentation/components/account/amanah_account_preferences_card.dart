@@ -69,6 +69,15 @@ class AmanahAccountPreferencesCard extends StatelessWidget {
                 ),
                 _divider(context),
                 AmanahPreferenceRowItem(
+                  icon: Icons.receipt_long_rounded,
+                  title: 'Laporan slip gaji & insentif',
+                  badgeText: 'Payroll',
+                  badgeColor: AmanahColorTokens.success,
+                  dark: dark,
+                  onTap: () => onItemTap('payroll'),
+                ),
+                _divider(context),
+                AmanahPreferenceRowItem(
                   icon: Icons.storage_rounded,
                   title: 'Data & penyimpanan laporan',
                   dark: dark,

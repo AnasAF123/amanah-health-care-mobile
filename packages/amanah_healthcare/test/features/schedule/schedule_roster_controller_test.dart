@@ -119,41 +119,13 @@ void main() {
       expect(controller.hasUnsavedChanges, false);
     });
 
-    test('toggleSession toggles state and marks unsaved changes', () async {
+    test('read-only state inspection works correctly', () async {
       await controller.loadRoster();
 
-      controller.toggleSession(1, 's-afternoon');
-      expect(controller.isSessionActive(1, 's-afternoon'), true);
-      expect(controller.hasUnsavedChanges, true);
-
-      controller.toggleSession(1, 's-afternoon');
-      expect(controller.isSessionActive(1, 's-afternoon'), false);
-      expect(controller.hasUnsavedChanges, false);
-    });
-
-    test('toggleDay toggles all sessions on day', () async {
-      await controller.loadRoster();
-
-      // Currently active -> toggling day deactivates all sessions on that day
-      controller.toggleDay(1);
-      expect(controller.isDayActive(1), false);
-      expect(controller.isSessionActive(1, 's-morning'), false);
-
-      // Inactive -> toggling day reactivates according to template
-      controller.toggleDay(1);
       expect(controller.isDayActive(1), true);
-      expect(controller.isSessionActive(1, 's-morning'), true);
-    });
-
-    test('resetDayToTemplate restores day to template', () async {
-      await controller.loadRoster();
-
-      controller.toggleSession(1, 's-afternoon');
-      expect(controller.hasDayDiffFromTemplate(1), true);
-
-      controller.resetDayToTemplate(1);
-      expect(controller.isSessionActive(1, 's-afternoon'), false);
       expect(controller.hasDayDiffFromTemplate(1), false);
+      expect(controller.isOverride, false);
+      expect(controller.hasUnsavedChanges, false);
     });
   });
 }

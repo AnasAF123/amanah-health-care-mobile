@@ -15,6 +15,7 @@ import 'package:amanah_healthcare/features/home/presentation/screen/settings/ama
 import 'package:amanah_healthcare/features/home/presentation/screen/settings/amanah_it_support_settings_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/settings/amanah_privacy_security_settings_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/features/payroll/payroll.dart';
 
 class AmanahAccountTabScreen extends StatefulWidget {
   const AmanahAccountTabScreen({
@@ -197,6 +198,11 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
               onBack: () => Navigator.of(ctx).pop(),
             ),
           ),
+        );
+        break;
+      case 'payroll':
+        Navigator.of(context).push<void>(
+          AmanahPayrollHistoryScreen.route(),
         );
         break;
       case 'data':
