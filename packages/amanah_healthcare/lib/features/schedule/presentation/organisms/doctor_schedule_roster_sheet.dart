@@ -64,7 +64,7 @@ class _DoctorScheduleRosterSheetState extends State<DoctorScheduleRosterSheet> {
       listenable: _controller,
       builder: (BuildContext context, _) {
         return AmanahBottomSheetScaffold(
-          title: 'Pengaturan Jadwal Shift',
+          title: 'Roster Jadwal Shift Praktik',
           maxHeightFactor: 0.90,
           minHeight: 520,
           trailing: InkWell(
@@ -204,62 +204,6 @@ class _DoctorScheduleRosterSheetState extends State<DoctorScheduleRosterSheet> {
                         ],
                       ),
                     ),
-          footer: _controller.isLoading || _controller.errorMessage != null
-              ? null
-              : Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AmanahSpacing.xxl,
-                    vertical: AmanahSpacing.md,
-                  ),
-                  decoration: BoxDecoration(
-                    color: dark
-                        ? AmanahColorTokens.canvasDark
-                        : AmanahColorTokens.surfaceLight,
-                    border: Border(
-                      top: BorderSide(
-                        color: dark
-                            ? AmanahColorTokens.neutral800
-                            : AmanahColorTokens.neutral200,
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    children: <Widget>[
-                      if (_controller.isOverride) ...<Widget>[
-                        Expanded(
-                          child: AmanahButton.secondary(
-                            text: 'Reset Template',
-                            isLoading: _controller.isResetting,
-                            size: AmanahButtonSize.medium,
-                            onPressed: () async {
-                              final bool ok =
-                                  await _controller.resetAllToTemplate(context);
-                              if (ok && context.mounted) {
-                                Navigator.of(context).pop();
-                              }
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                      ],
-                      Expanded(
-                        child: AmanahButton.primary(
-                          text: 'Simpan',
-                          isLoading: _controller.isSaving,
-                          isDisabled: !_controller.hasUnsavedChanges,
-                          size: AmanahButtonSize.medium,
-                          onPressed: () async {
-                            final bool ok =
-                                await _controller.saveOverrides(context);
-                            if (ok && context.mounted) {
-                              Navigator.of(context).pop();
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
         );
       },
     );

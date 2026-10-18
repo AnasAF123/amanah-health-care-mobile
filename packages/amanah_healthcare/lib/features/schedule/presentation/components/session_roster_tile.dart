@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/doctor_roster.dart';
 
@@ -6,13 +8,11 @@ class SessionRosterTile extends StatelessWidget {
   const SessionRosterTile({
     required this.session,
     required this.isActive,
-    required this.onChanged,
     super.key,
   });
 
   final DoctorRosterSession session;
   final bool isActive;
-  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -73,12 +73,13 @@ class SessionRosterTile extends StatelessWidget {
               ],
             ),
           ),
-          Switch.adaptive(
-            value: isActive,
-            activeThumbColor: dark
-                ? AmanahColorTokens.tabActiveDark
-                : AmanahColorTokens.brand,
-            onChanged: onChanged,
+          AmanahStatusBadge(
+            text: isActive ? 'Aktif' : 'Libur',
+            variant: isActive
+                ? AmanahBadgeVariant.success
+                : AmanahBadgeVariant.warning,
+            fontSize: 10.5,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           ),
         ],
       ),

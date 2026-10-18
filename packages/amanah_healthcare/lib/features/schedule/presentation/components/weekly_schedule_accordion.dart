@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/doctor_roster.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/session_roster_tile.dart';
@@ -168,8 +170,6 @@ class _WeeklyScheduleAccordionState extends State<WeeklyScheduleAccordion> {
             final bool isFocused = day.dow == focusedDow;
             final bool isExpanded = _expandedDays.contains(day.dow);
             final bool isDayActive = widget.controller.isDayActive(day.dow);
-            final bool hasDiff =
-                widget.controller.hasDayDiffFromTemplate(day.dow);
 
             return Container(
               decoration: BoxDecoration(
@@ -277,48 +277,19 @@ class _WeeklyScheduleAccordionState extends State<WeeklyScheduleAccordion> {
 
                       const Spacer(),
 
-                      // Reset day to template button if modified
-                      if (hasDiff)
-                        IconButton(
-                          icon: const Icon(Icons.replay_rounded, size: 18),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          tooltip: 'Kembalikan hari ini ke template klinik',
-                          color: dark
-                              ? AmanahColorTokens.neutral400
-                              : AmanahColorTokens.neutral500,
-                          onPressed: () =>
-                              widget.controller.resetDayToTemplate(day.dow),
-                        ),
-                      if (hasDiff) const SizedBox(width: 8),
-
-                      // Day Active / Libur Label
-                      Text(
-                        isDayActive ? 'Aktif' : 'Libur',
-                        style: TextStyle(
-                          color: isDayActive
-                              ? (dark
-                                  ? AmanahColorTokens.tabActiveDark
-                                  : AmanahColorTokens.brand)
-                              : (dark
-                                  ? AmanahColorTokens.neutral400
-                                  : AmanahColorTokens.neutral500),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
+                      // Day Active / Libur Status Badge
+                      AmanahStatusBadge(
+                        text: isDayActive ? 'Aktif' : 'Libur',
+                        variant: isDayActive
+                            ? AmanahBadgeVariant.success
+                            : AmanahBadgeVariant.warning,
+                        fontSize: 11,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
                         ),
                       ),
                       const SizedBox(width: 8),
-
-                      // Day Level Master Switch
-                      Switch.adaptive(
-                        value: isDayActive,
-                        activeThumbColor: dark
-                            ? AmanahColorTokens.tabActiveDark
-                            : AmanahColorTokens.brand,
-                        onChanged: (_) =>
-                            widget.controller.toggleDay(day.dow),
-                      ),
-                      const SizedBox(width: 4),
 
                       // Expand Chevron
                       Icon(
@@ -348,10 +319,6 @@ class _WeeklyScheduleAccordionState extends State<WeeklyScheduleAccordion> {
                       return SessionRosterTile(
                         session: session,
                         isActive: active,
-                        onChanged: (_) => widget.controller.toggleSession(
-                          day.dow,
-                          session.sessionId,
-                        ),
                       );
                     }).toList(),
                   ),
