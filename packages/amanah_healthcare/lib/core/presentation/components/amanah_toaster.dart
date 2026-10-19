@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import 'package:amanah_healthcare/core/feedback/feedback.dart';
+
 enum AmanahToastType { error, success, info }
 
 class AmanahToaster {
@@ -15,12 +17,21 @@ class AmanahToaster {
     required String message,
     AmanahToastType type = AmanahToastType.info,
     Duration duration = const Duration(milliseconds: 3500),
+    bool needVibration = true,
   }) {
     dismiss();
 
-    final OverlayState? overlay =
+    switch (type) {
+      case AmanahToastType.success:
+        unawaited(DefaultFeedbackService.instance.notifySuccess(needVibration: needVibration));
+      case AmanahToastType.error:
+        unawaited(DefaultFeedbackService.instance.notifyException(needVibration: needVibration));
+      case AmanahToastType.info:
+        unawaited(DefaultFeedbackService.instance.notifySystem(needVibration: needVibration));
+    }
+
+    final OverlayState overlay =
         Overlay.of(context, rootOverlay: true);
-    if (overlay == null) return;
 
     final OverlayEntry entry = OverlayEntry(
       builder: (BuildContext ctx) => _AmanahToastWidget(

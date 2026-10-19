@@ -1,28 +1,36 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model.dart';
 import 'package:amanah_healthcare/features/presence/domain/entities/attendance_check_in_result.dart';
+import 'package:amanah_healthcare/features/presence/domain/services/qr_token_parser.dart';
 import 'package:amanah_healthcare/features/presence/domain/usecases/checkout_attendance_usecase.dart';
 import 'package:amanah_healthcare/features/presence/domain/usecases/get_attendance_history_usecase.dart';
 import 'package:amanah_healthcare/features/presence/domain/usecases/record_attendance_usecase.dart';
+import 'package:amanah_healthcare/features/presence/presentation/services/scanner_feedback_service.dart';
 
 enum AmanahQrDrawerView { menu, manualPin, myQr }
 
-enum AttendanceFlowState { idle, processing, success }
+enum AttendanceFlowState { idle, detecting, processing, success, error }
 
 enum AttendanceScanMode { checkIn, checkOut }
 
+/// Authoritative Orchestrator for QR Scanning, Camera State, and Attendance Submission.
+/// Enforces single-source-of-truth state machine and prevents concurrency deadlocks.
 class PresenceScannerController extends ChangeNotifier {
   PresenceScannerController({
     required RecordAttendanceUseCase recordAttendanceUseCase,
     required CheckoutAttendanceUseCase checkoutAttendanceUseCase,
     GetAttendanceHistoryUseCase? getAttendanceHistoryUseCase,
+    IScannerFeedbackService? feedbackService,
   })  : _recordAttendanceUseCase = recordAttendanceUseCase,
         _checkoutAttendanceUseCase = checkoutAttendanceUseCase,
-        _getAttendanceHistoryUseCase = getAttendanceHistoryUseCase;
+        _getAttendanceHistoryUseCase = getAttendanceHistoryUseCase,
+        _feedbackService = feedbackService ?? ScannerFeedbackService();
 
   final RecordAttendanceUseCase _recordAttendanceUseCase;
   final CheckoutAttendanceUseCase _checkoutAttendanceUseCase;
   final GetAttendanceHistoryUseCase? _getAttendanceHistoryUseCase;
+  final IScannerFeedbackService _feedbackService;
 
   AttendanceFlowState _flowState = AttendanceFlowState.idle;
   AttendanceScanMode _scanMode = AttendanceScanMode.checkIn;
@@ -36,6 +44,7 @@ class PresenceScannerController extends ChangeNotifier {
   String? _pinError;
   String? _errorMessage;
   AttendanceCheckInResult? _lastResult;
+  int _sessionGeneration = 0;
 
   AttendanceFlowState get flowState => _flowState;
   AttendanceScanMode get scanMode => _scanMode;
@@ -50,13 +59,24 @@ class PresenceScannerController extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   AttendanceCheckInResult? get lastResult => _lastResult;
 
+  /// Deterministic gate: Only allow processing new QR candidate when completely idle.
+  bool get isScanningAllowed =>
+      _flowState == AttendanceFlowState.idle &&
+      !_isDrawerOpen &&
+      !_isHelpOpen;
+
   bool get isFlowActive => _flowState != AttendanceFlowState.idle;
   bool get isLastResultCheckout => _lastResult?.checkOutAt != null;
 
+  /// Switches active scanning mode without unmounting or restarting the camera.
   void setScanMode(AttendanceScanMode mode) {
     if (_scanMode == mode) return;
+    _sessionGeneration++;
     _scanMode = mode;
     _errorMessage = null;
+    if (_flowState != AttendanceFlowState.success) {
+      _flowState = AttendanceFlowState.idle;
+    }
     notifyListeners();
   }
 
@@ -69,7 +89,6 @@ class PresenceScannerController extends ChangeNotifier {
         final AttendanceRecord latest = records.first;
         final DateTime now = DateTime.now();
         if (latest.dayNumber == now.day) {
-          // If staff already has attendance today, smart default to check-out
           _scanMode = AttendanceScanMode.checkOut;
           notifyListeners();
         }
@@ -148,68 +167,123 @@ class PresenceScannerController extends ChangeNotifier {
   }
 
   void reset() {
+    _sessionGeneration++;
     _flowState = AttendanceFlowState.idle;
     _isDrawerOpen = false;
     _drawerView = AmanahQrDrawerView.menu;
     _pinError = null;
     _manualPin = '';
     _errorMessage = null;
+    _lastResult = null;
     notifyListeners();
   }
 
+  /// Authoritative entry point for raw camera barcode detection.
+  Future<AttendanceCheckInResult?> handleDetectedBarcode(String rawBarcode) async {
+    if (!isScanningAllowed) {
+      return null;
+    }
+
+    final int generation = ++_sessionGeneration;
+    _flowState = AttendanceFlowState.detecting;
+    _isDrawerOpen = false;
+    _errorMessage = null;
+    notifyListeners();
+
+    if (_sessionGeneration != generation) {
+      return null;
+    }
+
+    final String? token = QrTokenParser.parse(rawBarcode);
+    if (token == null || token.isEmpty) {
+      if (_sessionGeneration == generation) {
+        _errorMessage = 'Format QR Code tidak dikenali.';
+        _flowState = AttendanceFlowState.error;
+        _isDrawerOpen = true;
+        notifyListeners();
+        await _feedbackService.onScanError();
+      }
+      return null;
+    }
+
+    _flowState = AttendanceFlowState.processing;
+    notifyListeners();
+
+    return _executeAttendanceSubmission(token, generation);
+  }
+
+  /// Direct submission entry point (used by manual PIN or programmatic triggers).
   Future<AttendanceCheckInResult?> submitAttendance(String code) async {
     if (isFlowActive) return null;
 
-    final String trimmed = code.trim();
-    if (trimmed.isEmpty) return null;
+    final String? token = QrTokenParser.parse(code);
+    if (token == null || token.isEmpty) return null;
 
+    final int generation = ++_sessionGeneration;
     _flowState = AttendanceFlowState.processing;
     _isDrawerOpen = false;
     _errorMessage = null;
     notifyListeners();
 
+    return _executeAttendanceSubmission(token, generation);
+  }
+
+  Future<AttendanceCheckInResult?> _executeAttendanceSubmission(
+    String token,
+    int generation,
+  ) async {
     try {
-      AttendanceCheckInResult result;
+      final AttendanceCheckInResult result;
       if (_scanMode == AttendanceScanMode.checkIn) {
-        try {
-          result = await _recordAttendanceUseCase(
-            qrToken: trimmed,
-            deviceInfo: 'Amanah Mobile (Android/iOS)',
-          );
-        } catch (err) {
-          final String errMsg = _formatError(err);
-          if (errMsg.toLowerCase().contains('sudah melakukan presensi masuk') ||
-              errMsg.contains('409')) {
-            _scanMode = AttendanceScanMode.checkOut;
-            result = await _checkoutAttendanceUseCase(
-              qrToken: trimmed,
-            );
-          } else {
-            rethrow;
-          }
-        }
-      } else {
-        result = await _checkoutAttendanceUseCase(
-          qrToken: trimmed,
+        result = await _recordAttendanceUseCase(
+          qrToken: token,
+          deviceInfo: 'Amanah Mobile (Android/iOS)',
         );
+      } else {
+        result = await _checkoutAttendanceUseCase(qrToken: token);
       }
+
+      if (_sessionGeneration != generation) {
+        return null;
+      }
+
       _lastResult = result;
       _flowState = AttendanceFlowState.success;
+      _isDrawerOpen = true;
       notifyListeners();
+      await _feedbackService.onScanSuccess();
       return result;
     } catch (err) {
+      if (_sessionGeneration != generation) {
+        return null;
+      }
+
       _errorMessage = _formatError(err);
-      _flowState = AttendanceFlowState.idle;
-      _isDrawerOpen = false;
+      _flowState = AttendanceFlowState.error;
+      _isDrawerOpen = true;
       notifyListeners();
+      await _feedbackService.onScanError();
       return null;
     }
   }
 
-  void clearError() {
-    _errorMessage = null;
+  void openResultDrawer() {
+    _isDrawerOpen = true;
     notifyListeners();
   }
+
+  void closeResultDrawer() {
+    _sessionGeneration++;
+    _isDrawerOpen = false;
+    _flowState = AttendanceFlowState.idle;
+    _errorMessage = null;
+    _lastResult = null;
+    notifyListeners();
+  }
+
+  void acknowledgeError() => closeResultDrawer();
+
+  void clearError() => acknowledgeError();
 
   Future<AttendanceCheckInResult?> submitManualPin() async {
     final String pin = _manualPin.trim();
@@ -225,25 +299,27 @@ class PresenceScannerController extends ChangeNotifier {
   }
 
   Future<AttendanceCheckInResult?> submitCheckout({String? qrToken}) async {
+    final int generation = ++_sessionGeneration;
     _flowState = AttendanceFlowState.processing;
     notifyListeners();
 
     try {
       final AttendanceCheckInResult result =
           await _checkoutAttendanceUseCase(qrToken: qrToken);
+      if (_sessionGeneration != generation) return null;
       _lastResult = result;
       _flowState = AttendanceFlowState.success;
       notifyListeners();
       return result;
     } catch (err) {
+      if (_sessionGeneration != generation) return null;
       _errorMessage = _formatError(err);
-      _flowState = AttendanceFlowState.idle;
+      _flowState = AttendanceFlowState.error;
       _isDrawerOpen = false;
       notifyListeners();
       return null;
     }
   }
-
 
   String _formatError(dynamic err) {
     final String str = err.toString();

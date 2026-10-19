@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
@@ -8,13 +8,15 @@ import 'package:amanah_healthcare/features/presence/domain/entities/attendance_c
 import 'package:amanah_healthcare/features/presence/domain/repositories/attendance_repository.dart';
 import 'package:amanah_healthcare/features/presence/domain/usecases/checkout_attendance_usecase.dart';
 import 'package:amanah_healthcare/features/presence/domain/usecases/get_attendance_history_usecase.dart';
+import 'package:amanah_healthcare/features/presence/domain/entities/presence_status_payload.dart';
 import 'package:amanah_healthcare/features/presence/domain/usecases/record_attendance_usecase.dart';
-import 'package:amanah_healthcare/features/presence/presentation/components/amanah_presence_success_drawer.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/attendance_processing_overlay.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/dialogs/presence_info_dialog.dart';
+import 'package:amanah_healthcare/features/presence/presentation/components/drawers/amanah_presence_result_drawer.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/drawers/presence_scanner_master_drawer.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/presence_scanner_camera_viewport.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/presence_scanner_top_bar.dart';
+import 'package:amanah_healthcare/features/presence/presentation/services/scanner_feedback_service.dart';
 import 'package:scanner_shared/scanner_shared.dart';
 import 'package:amanah_healthcare/core/logging/app_log.dart';
 import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_presence_history_screen.dart';
@@ -55,10 +57,25 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
   late final AnimationController _drawerAnimationController;
   final ValueNotifier<ScannerHardwareController?> _scannerHardwareNotifier =
       ValueNotifier<ScannerHardwareController?>(null);
-  bool _isScanningBlocked = false;
+
+  Timer? _mlDiagnosticTimer;
+  DateTime _lastDetectionTimestamp = DateTime.fromMillisecondsSinceEpoch(0);
+  DateTime _lastMissTimestamp = DateTime.now();
+  int _consecutiveMissCount = 0;
+  int _consecutiveHitCount = 0;
+
+  static String _formatTime(DateTime dt) {
+    final String h = dt.hour.toString().padLeft(2, '0');
+    final String m = dt.minute.toString().padLeft(2, '0');
+    final String s = dt.second.toString().padLeft(2, '0');
+    final String ms = dt.millisecond.toString().padLeft(3, '0');
+    return '$h:$m:$s.$ms';
+  }
 
   void resetPresence() {
-    _isScanningBlocked = false;
+    _consecutiveHitCount = 0;
+    _consecutiveMissCount = 0;
+    _lastMissTimestamp = DateTime.now();
     if (widget.animateLaser && !_laserController.isAnimating) {
       _laserController.repeat(reverse: true);
     }
@@ -72,11 +89,13 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     super.initState();
     ScanTrace.start();
     AppLog.scanner('[QR SCANNER] 🚀 Initializing QR scanner screen');
+
     final AttendanceRepository repository = AttendanceRepositoryImpl();
     _controller = PresenceScannerController(
       recordAttendanceUseCase: RecordAttendanceUseCase(repository),
       checkoutAttendanceUseCase: CheckoutAttendanceUseCase(repository),
       getAttendanceHistoryUseCase: GetAttendanceHistoryUseCase(repository),
+      feedbackService: ScannerFeedbackService(),
     );
 
     _laserController = AnimationController(
@@ -107,10 +126,25 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     _laserAnimation = Tween<double>(begin: 0.10, end: 0.90).animate(
       CurvedAnimation(parent: _laserController, curve: Curves.easeInOut),
     );
+
+    _mlDiagnosticTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+      if (!mounted) return;
+      final DateTime now = DateTime.now();
+      final int diff = now.difference(_lastDetectionTimestamp).inMilliseconds;
+      if (diff >= 500) {
+        _consecutiveMissCount++;
+        _consecutiveHitCount = 0;
+        _lastMissTimestamp = now;
+        debugPrint(
+          '[ML TEST] [${_formatTime(now)}] ⚪ Tidak terdeteksi QR (standby #$_consecutiveMissCount, durasi kosong: ${diff}ms)',
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
+    _mlDiagnosticTimer?.cancel();
     _laserController.dispose();
     _drawerAnimationController.dispose();
     _scannerHardwareNotifier.dispose();
@@ -159,72 +193,51 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
   }
 
   Future<void> _handleBarcodeDetected(String value) async {
-    String code = value.trim();
-    if (code.startsWith('{') && code.endsWith('}')) {
-      try {
-        final dynamic decoded = jsonDecode(code);
-        if (decoded is Map && decoded['token'] != null) {
-          code = decoded['token'].toString().trim();
-        }
-      } catch (_) {
-        // Keep raw code if not JSON
-      }
-    }
-
-    if (code.isEmpty || _controller.isFlowActive || _isScanningBlocked) {
+    // 1. Authoritative scan gate: ignore frames if already processing or drawer/dialog open
+    if (!_controller.isScanningAllowed) {
       return;
     }
 
-    ScanTrace.mark('firstDetect');
-    _isScanningBlocked = true;
-    _laserController.stop();
-    ScanTrace.mark('accepted');
-    AppLog.scanner(
-      '[QR SCANNER] ⚡ QR Code detected & locked | token: ${code.substring(0, code.length.clamp(0, 10))}...',
-    );
+    final DateTime now = DateTime.now();
+    final bool isFirstLockOn = _consecutiveHitCount == 0;
+    final int reactionMs = now.difference(_lastMissTimestamp).inMilliseconds;
 
-    await HapticFeedback.mediumImpact();
-    if (!mounted) {
-      return;
+    _lastDetectionTimestamp = now;
+    _consecutiveMissCount = 0;
+    _consecutiveHitCount++;
+
+    if (isFirstLockOn) {
+      debugPrint(
+        '[ML TEST] [${_formatTime(now)}] 🚀 LOCK-ON INSTAN! (Reaksi kembali ke QR: ${reactionMs}ms) 🟢 TERDETEKSI QR! Frame #1 | Payload: $value',
+      );
+    } else {
+      debugPrint(
+        '[ML TEST] [${_formatTime(now)}] 🟢 TERDETEKSI QR (Frame #$_consecutiveHitCount) | Payload: $value',
+      );
     }
 
-    _drawerAnimationController.stop();
-    _drawerAnimationController.reset();
-    widget.onDrawerStateChanged?.call(true);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScanTrace.mark('loadingPainted');
-    });
-
+    // Submit to authoritative orchestrator (camera stream stays uninterrupted)
     final AttendanceCheckInResult? result =
-        await _controller.submitAttendance(code);
-
-    ScanTrace.mark('apiDone');
-    AppLog.scanner(
-      '[QR SCANNER] 📡 API submission finished | status: ${result != null ? "SUCCESS" : "ERROR"} | detail: ${_controller.errorMessage ?? "OK"}',
-    );
+        await _controller.handleDetectedBarcode(value);
 
     if (!mounted) return;
 
+    // Immediate feedback handling
     if (result != null) {
-      _isScanningBlocked = false;
-      _showSuccessDrawer(
-        result.timeFormatted,
-        isCheckOut: _controller.isLastResultCheckout,
-        validatedDurationHours: result.validatedDurationHours,
+      _showResultDrawer(
+        PresenceStatusPayload.fromSuccess(
+          timeFormatted: result.timeFormatted,
+          isCheckOut: _controller.isLastResultCheckout,
+          validatedDurationHours: result.validatedDurationHours,
+        ),
       );
       return;
     }
 
     if (_controller.errorMessage != null) {
-      await HapticFeedback.heavyImpact();
-      if (!mounted) return;
-      await _showErrorDialog(_controller.errorMessage!);
-    } else {
-      _isScanningBlocked = false;
-      if (widget.animateLaser && !_laserController.isAnimating) {
-        _laserController.repeat(reverse: true);
-      }
+      _showResultDrawer(
+        PresenceStatusPayload.fromError(_controller.errorMessage!),
+      );
     }
   }
 
@@ -240,47 +253,34 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     if (!mounted) return;
 
     if (result != null) {
-      _isScanningBlocked = false;
-      _showSuccessDrawer(
-        result.timeFormatted,
-        isCheckOut: _controller.isLastResultCheckout,
-        validatedDurationHours: result.validatedDurationHours,
+      _showResultDrawer(
+        PresenceStatusPayload.fromSuccess(
+          timeFormatted: result.timeFormatted,
+          isCheckOut: _controller.isLastResultCheckout,
+          validatedDurationHours: result.validatedDurationHours,
+        ),
       );
       return;
     }
 
     if (_controller.errorMessage != null) {
-      await HapticFeedback.heavyImpact();
-      if (!mounted) return;
-      await _showErrorDialog(_controller.errorMessage!);
+      _showResultDrawer(
+        PresenceStatusPayload.fromError(_controller.errorMessage!),
+      );
     }
   }
 
-  Future<void> _showErrorDialog(String message) async {
-    await PresenceInfoDialog.show(context, message: message);
-    if (mounted) {
-      _controller.clearError();
-      await Future<void>.delayed(const Duration(milliseconds: 1500));
-      if (mounted) {
-        _isScanningBlocked = false;
-        if (widget.animateLaser && !_laserController.isAnimating) {
-          _laserController.repeat(reverse: true);
-        }
-      }
+  void _showResultDrawer(PresenceStatusPayload payload) {
+    _controller.openResultDrawer();
+    widget.onDrawerStateChanged?.call(true);
+    if (widget.animateLaser && _laserController.isAnimating) {
+      _laserController.stop();
     }
-  }
+    unawaited(_scannerHardwareNotifier.value?.pauseCamera());
 
-
-  void _showSuccessDrawer(
-    String timeFormatted, {
-    bool isCheckOut = false,
-    double? validatedDurationHours,
-  }) {
-    AmanahPresenceSuccessDrawer.show(
+    AmanahPresenceResultDrawer.show(
       context,
-      timeString: timeFormatted,
-      isCheckOut: isCheckOut,
-      validatedDurationHours: validatedDurationHours,
+      payload: payload,
       bottomPadding: _drawerBottomPadding(context),
       onGoHome: widget.onBack,
       onViewHistory: () {
@@ -288,6 +288,10 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
       },
     ).whenComplete(() {
       if (mounted) {
+        _consecutiveHitCount = 0;
+        _consecutiveMissCount = 0;
+        _lastMissTimestamp = DateTime.now();
+        unawaited(_scannerHardwareNotifier.value?.resumeCamera());
         resetPresence();
       }
     });
@@ -352,7 +356,15 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                   isDrawerOpen: _controller.isDrawerOpen,
                   enableCameraScanner: widget.enableCameraScanner,
                   bottomNavigationClearance: widget.bottomNavigationClearance,
+                  scanMode: _controller.scanMode,
+                  onSelectScanMode: (AttendanceScanMode mode) {
+                    _controller.setScanMode(mode);
+                    if (widget.animateLaser && !_laserController.isAnimating) {
+                      _laserController.repeat(reverse: true);
+                    }
+                  },
                   onBarcodeDetected: _handleBarcodeDetected,
+                  hardwareNotifier: _scannerHardwareNotifier,
                   onScannerCreated: (ScannerHardwareController hardware) {
                     _scannerHardwareNotifier.value = hardware;
                     ScanTrace.mark('cameraReady');
@@ -385,7 +397,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                 ),
               ),
 
-              // 3. Top Floating Navigation Bar & Mode Switcher
+              // 3. Top Floating Navigation Bar
               PresenceScannerTopBar(
                 onBack: widget.onBack ??
                     () => Navigator.of(context).maybePop(),
@@ -422,8 +434,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                     _controller.isFrontCamera,
                 isFlashOn: _scannerHardwareNotifier.value?.isTorchOn ??
                     _controller.isFlashOn,
-                scanMode: _controller.scanMode,
-                onSelectScanMode: _controller.setScanMode,
                 dark: dark,
               ),
 
@@ -453,7 +463,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
               ),
 
               // 5. Processing Overlay
-              if (_controller.flowState == AttendanceFlowState.processing)
+              if (_controller.flowState == AttendanceFlowState.detecting ||
+                  _controller.flowState == AttendanceFlowState.processing)
                 const Positioned.fill(child: AttendanceProcessingOverlay()),
             ],
           ),

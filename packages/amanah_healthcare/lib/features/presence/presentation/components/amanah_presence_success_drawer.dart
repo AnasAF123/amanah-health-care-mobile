@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
-import 'package:amanah_healthcare/features/presence/presentation/components/amanah_presence_success_core.dart';
+import 'package:amanah_healthcare/features/presence/domain/entities/presence_status_payload.dart';
+import 'package:amanah_healthcare/features/presence/presentation/components/drawers/amanah_presence_result_drawer.dart';
 import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_presence_history_screen.dart';
 
+/// Legacy adapter wrapping [AmanahPresenceResultDrawer] for backward-compatible call sites.
 class AmanahPresenceSuccessDrawer extends StatelessWidget {
   AmanahPresenceSuccessDrawer({
     required this.onClose,
@@ -67,19 +69,18 @@ class AmanahPresenceSuccessDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AmanahPresenceSuccessCore(
-      timeString: timeString,
-      bottomPadding: bottomPadding,
+    final PresenceStatusPayload payload = PresenceStatusPayload.fromSuccess(
+      timeFormatted: timeString,
       isCheckOut: isCheckOut,
       validatedDurationHours: validatedDurationHours,
+    );
+
+    return AmanahPresenceResultDrawer(
+      payload: payload,
+      bottomPadding: bottomPadding,
       onClose: onClose,
-      onGoHome:
-          onGoHome ??
-          () {
-            onClose();
-          },
-      onViewHistory:
-          onViewHistory ??
+      onGoHome: onGoHome,
+      onViewHistory: onViewHistory ??
           () {
             onClose();
             Navigator.of(context).push(AmanahPresenceHistoryScreen.route());

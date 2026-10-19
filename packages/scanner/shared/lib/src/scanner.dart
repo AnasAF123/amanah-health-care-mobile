@@ -44,11 +44,17 @@ abstract class Scanner {
   });
 }
 
-/// Abstract contract for controlling hardware camera features (flash & flip)
+/// Abstract contract for controlling hardware camera features (flash, flip & zoom)
 abstract class ScannerHardwareController {
   Future<void> toggleTorch();
   Future<void> switchCamera();
+  Future<void> setZoomScale(double zoomScale);
+  Future<void> resetZoomScale();
+  Future<void> pauseCamera();
+  Future<void> resumeCamera();
   bool get isTorchOn;
   bool get isFrontCamera;
+  double get currentZoom;
   ValueNotifier<bool?> get torchState;
+  ValueNotifier<double> get zoomState;
 }

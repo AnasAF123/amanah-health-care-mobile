@@ -11,6 +11,7 @@ import 'package:amanah_healthcare/core/network/api_client.dart';
 import 'package:amanah_healthcare/core/network/api_endpoint.dart';
 import 'package:amanah_healthcare/core/network/authorized_api_client.dart';
 import 'package:amanah_healthcare/core/network/http_api_client.dart';
+import 'package:amanah_healthcare/core/feedback/feedback.dart';
 import 'package:amanah_healthcare/core/notifications/device_token_storage.dart';
 import 'package:amanah_healthcare/core/notifications/push_notification_service.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_token_storage.dart';
@@ -44,11 +45,13 @@ class AmanahPushService implements AmanahPushNotificationService {
     DeviceTokenStorage tokenStorage = const DeviceTokenStorage(),
     AmanahAuthTokenStorage authTokenStorage = const AmanahAuthTokenStorage(),
     FlutterLocalNotificationsPlugin? localNotifications,
+    FeedbackService? feedbackService,
   })  : _customApiClient = apiClient,
         _tokenStorage = tokenStorage,
         _authTokenStorage = authTokenStorage,
         _localNotifications =
-            localNotifications ?? FlutterLocalNotificationsPlugin();
+            localNotifications ?? FlutterLocalNotificationsPlugin(),
+        _feedbackService = feedbackService;
 
   static final AmanahPushService instance = AmanahPushService();
 
@@ -61,6 +64,10 @@ class AmanahPushService implements AmanahPushNotificationService {
   final DeviceTokenStorage _tokenStorage;
   final AmanahAuthTokenStorage _authTokenStorage;
   final ApiClient? _customApiClient;
+  final FeedbackService? _feedbackService;
+
+  FeedbackService get _activeFeedbackService =>
+      _feedbackService ?? DefaultFeedbackService.instance;
 
   ApiClient? _apiClient;
   String? _lastKnownFcmToken;
@@ -354,6 +361,23 @@ class AmanahPushService implements AmanahPushNotificationService {
       '[AmanahPushService] Foreground push notification received: ${message.notification?.title}',
     );
 
+    // Dynamic sensory feedback dispatch (defaults to system variant + vibration)
+    final String? variantStr = message.data['soundVariant']?.toString() ??
+        message.data['variant']?.toString();
+    final dynamic rawVibration =
+        message.data['needVibration'] ?? message.data['vibrate'];
+    final bool needVibration = rawVibration == null ||
+        (rawVibration.toString().toLowerCase() != 'false' &&
+            rawVibration != false);
+
+    if (variantStr == 'success') {
+      unawaited(_activeFeedbackService.notifySuccess(needVibration: needVibration));
+    } else if (variantStr == 'exception' || variantStr == 'error') {
+      unawaited(_activeFeedbackService.notifyException(needVibration: needVibration));
+    } else {
+      unawaited(_activeFeedbackService.notifySystem(needVibration: needVibration));
+    }
+
     for (final listener in _messageListeners) {
       try {
         listener(message);
@@ -386,8 +410,8 @@ class AmanahPushService implements AmanahPushNotificationService {
             importance: Importance.max,
             priority: Priority.high,
             icon: '@mipmap/ic_launcher',
-            playSound: true,
-            enableVibration: true,
+            playSound: false,
+            enableVibration: false,
           ),
           iOS: DarwinNotificationDetails(
             presentAlert: true,

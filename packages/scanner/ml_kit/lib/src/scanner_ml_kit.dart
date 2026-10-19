@@ -131,8 +131,9 @@ class _SmoothBarcodeScannerMLKitState extends State<_SmoothBarcodeScannerMLKit>
         torchEnabled: false,
         formats: _barcodeFormats,
         facing: CameraFacing.back,
-        detectionSpeed: DetectionSpeed.normal,
-        detectionTimeoutMs: 100,
+        detectionSpeed: DetectionSpeed.unrestricted,
+        detectionTimeoutMs: 0,
+        cameraResolution: const Size(1920, 1080),
         returnImage: false,
       ),
     );

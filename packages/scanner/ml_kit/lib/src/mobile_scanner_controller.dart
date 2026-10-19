@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:scanner_shared/scanner_shared.dart';
@@ -16,20 +18,34 @@ class CustomScannerController implements ScannerHardwareController {
   final TorchState _torchState;
   final AvailableCamerasState _availableCamerasState;
   final CameraFacingState _cameraFacingState;
+  final ValueNotifier<double> _zoomState = ValueNotifier<double>(0.0);
 
   bool _isStarted = false;
   bool _isStarting = false;
   bool _isClosing = false;
   bool _isClosed = false;
   bool _isListening = false;
+  bool _pendingStart = false;
+  bool _pendingStop = false;
+  double _currentZoom = 0.0;
 
   Future<void> start() async {
-    if (isStarted || _isStarting || isClosing) {
+    if (isStarted) {
+      return;
+    }
+    if (_isClosing) {
+      _pendingStart = true;
+      _pendingStop = false;
+      return;
+    }
+    if (_isStarting) {
       return;
     }
 
     _isStarting = true;
     _isClosed = false;
+    _pendingStart = false;
+
     try {
       if (!_isListening) {
         _controller.addListener(_onControllerChanged);
@@ -40,7 +56,6 @@ class CustomScannerController implements ScannerHardwareController {
       _onControllerChanged();
 
       if (isTorchOn) {
-        // Slight delay, because it doesn't always work if called immediately
         Future<void>.delayed(const Duration(milliseconds: 250), () {
           turnTorchOn();
         });
@@ -53,12 +68,23 @@ class CustomScannerController implements ScannerHardwareController {
       _isStarted = false;
     } finally {
       _isStarting = false;
+      if (_pendingStop) {
+        _pendingStop = false;
+        unawaited(stop());
+      }
     }
   }
 
   void _onControllerChanged() {
     _availableCamerasState.value = _controller.value.availableCameras ?? 0;
     _cameraFacingState.value = _controller.facing;
+    final double reportedZoom = _controller.value.zoomScale;
+    if (reportedZoom >= 0.0 && reportedZoom <= 1.0) {
+      if (_currentZoom != reportedZoom) {
+        _currentZoom = reportedZoom;
+        _zoomState.value = reportedZoom;
+      }
+    }
   }
 
   MobileScannerController get controller => _controller;
@@ -70,13 +96,22 @@ class CustomScannerController implements ScannerHardwareController {
   bool get isClosed => _isClosed;
 
   Future<void> stop() async {
-    if (isClosed || isClosing || _isStarting) {
+    if (isClosed) {
+      return;
+    }
+    if (_isStarting) {
+      _pendingStop = true;
+      _pendingStart = false;
+      return;
+    }
+    if (_isClosing) {
       return;
     }
 
     _isClosing = true;
-    _isStarting = false;
+    _pendingStop = false;
     _isStarted = false;
+
     try {
       await _controller.stop();
       if (_isListening) {
@@ -87,8 +122,43 @@ class CustomScannerController implements ScannerHardwareController {
     } catch (_) {
     } finally {
       _isClosing = false;
+      if (_pendingStart) {
+        _pendingStart = false;
+        unawaited(start());
+      }
     }
   }
+
+  @override
+  double get currentZoom => _currentZoom;
+
+  @override
+  ValueNotifier<double> get zoomState => _zoomState;
+
+  @override
+  Future<void> setZoomScale(double zoomScale) async {
+    final double clamped = zoomScale.clamp(0.0, 1.0);
+    _currentZoom = clamped;
+    _zoomState.value = clamped;
+    try {
+      await _controller.setZoomScale(clamped);
+    } catch (_) {}
+  }
+
+  @override
+  Future<void> resetZoomScale() async {
+    _currentZoom = 0.0;
+    _zoomState.value = 0.0;
+    try {
+      await _controller.resetZoomScale();
+    } catch (_) {}
+  }
+
+  @override
+  Future<void> pauseCamera() => stop();
+
+  @override
+  Future<void> resumeCamera() => start();
 
   bool get hasTorch => _torchState.value != null;
 

@@ -3,6 +3,7 @@ import 'package:amanah_healthcare/features/presence/domain/entities/attendance_c
 import 'package:amanah_healthcare/features/presence/domain/repositories/attendance_repository.dart';
 import 'package:amanah_healthcare/features/presence/domain/usecases/checkout_attendance_usecase.dart';
 import 'package:amanah_healthcare/features/presence/domain/usecases/record_attendance_usecase.dart';
+import 'package:amanah_healthcare/features/presence/presentation/services/scanner_feedback_service.dart';
 import 'package:amanah_healthcare/features/presence/presentation/state/presence_scanner_controller.dart';
 
 class _MockFailingAttendanceRepository implements AttendanceRepository {
@@ -25,6 +26,17 @@ class _MockFailingAttendanceRepository implements AttendanceRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class _FakeFeedbackService implements IScannerFeedbackService {
+  @override
+  Future<void> onScanSuccess() async {}
+
+  @override
+  Future<void> onScanError() async {}
+
+  @override
+  Future<void> onButtonTap() async {}
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -36,6 +48,7 @@ void main() {
       controller = PresenceScannerController(
         recordAttendanceUseCase: RecordAttendanceUseCase(repo),
         checkoutAttendanceUseCase: CheckoutAttendanceUseCase(repo),
+        feedbackService: _FakeFeedbackService(),
       );
     });
 
@@ -46,7 +59,7 @@ void main() {
       final result = await controller.submitAttendance('TEST-TOKEN');
 
       expect(result, isNull);
-      expect(controller.isFlowActive, isFalse);
+      expect(controller.flowState, equals(AttendanceFlowState.error));
       expect(controller.errorMessage, isNotNull);
       expect(
         controller.errorMessage,
@@ -55,6 +68,7 @@ void main() {
 
       controller.clearError();
       expect(controller.errorMessage, isNull);
+      expect(controller.isFlowActive, isFalse);
     });
   });
 }
