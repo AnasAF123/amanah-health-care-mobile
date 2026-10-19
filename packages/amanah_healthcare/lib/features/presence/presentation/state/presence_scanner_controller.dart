@@ -45,6 +45,8 @@ class PresenceScannerController extends ChangeNotifier {
   String? _errorMessage;
   AttendanceCheckInResult? _lastResult;
   int _sessionGeneration = 0;
+  String? _pendingCheckoutToken;
+  bool _requiresEarlyDepartureNotes = false;
 
   AttendanceFlowState get flowState => _flowState;
   AttendanceScanMode get scanMode => _scanMode;
@@ -58,6 +60,14 @@ class PresenceScannerController extends ChangeNotifier {
   String? get pinError => _pinError;
   String? get errorMessage => _errorMessage;
   AttendanceCheckInResult? get lastResult => _lastResult;
+  String? get pendingCheckoutToken => _pendingCheckoutToken;
+  bool get requiresEarlyDepartureNotes => _requiresEarlyDepartureNotes;
+
+  void clearPendingEarlyDeparture() {
+    _requiresEarlyDepartureNotes = false;
+    _pendingCheckoutToken = null;
+    notifyListeners();
+  }
 
   /// Deterministic gate: Only allow processing new QR candidate when completely idle.
   bool get isScanningAllowed =>
@@ -258,6 +268,15 @@ class PresenceScannerController extends ChangeNotifier {
         return null;
       }
 
+      final String errStr = err.toString();
+      if (_scanMode == AttendanceScanMode.checkOut &&
+          (errStr.contains('alasan kepulangan lebih awal') ||
+              errStr.contains('early departure') ||
+              errStr.contains('EarlyDepartureNotesRequired'))) {
+        _requiresEarlyDepartureNotes = true;
+        _pendingCheckoutToken = token;
+      }
+
       _errorMessage = _formatError(err);
       _flowState = AttendanceFlowState.error;
       _isDrawerOpen = true;
@@ -278,6 +297,8 @@ class PresenceScannerController extends ChangeNotifier {
     _flowState = AttendanceFlowState.idle;
     _errorMessage = null;
     _lastResult = null;
+    _requiresEarlyDepartureNotes = false;
+    _pendingCheckoutToken = null;
     notifyListeners();
   }
 
@@ -298,31 +319,53 @@ class PresenceScannerController extends ChangeNotifier {
     return submitAttendance(pin);
   }
 
-  Future<AttendanceCheckInResult?> submitCheckout({String? qrToken}) async {
+  Future<AttendanceCheckInResult?> submitCheckout({
+    String? qrToken,
+    String? notes,
+  }) async {
     final int generation = ++_sessionGeneration;
     _flowState = AttendanceFlowState.processing;
     notifyListeners();
 
     try {
-      final AttendanceCheckInResult result =
-          await _checkoutAttendanceUseCase(qrToken: qrToken);
+      final AttendanceCheckInResult result = await _checkoutAttendanceUseCase(
+        qrToken: qrToken,
+        notes: notes,
+      );
       if (_sessionGeneration != generation) return null;
       _lastResult = result;
       _flowState = AttendanceFlowState.success;
+      _requiresEarlyDepartureNotes = false;
+      _pendingCheckoutToken = null;
+      _isDrawerOpen = true;
       notifyListeners();
+      await _feedbackService.onScanSuccess();
       return result;
     } catch (err) {
       if (_sessionGeneration != generation) return null;
+      final String errStr = err.toString();
+      if (errStr.contains('alasan kepulangan lebih awal') ||
+          errStr.contains('early departure') ||
+          errStr.contains('EarlyDepartureNotesRequired')) {
+        _requiresEarlyDepartureNotes = true;
+        _pendingCheckoutToken = qrToken;
+      }
       _errorMessage = _formatError(err);
       _flowState = AttendanceFlowState.error;
       _isDrawerOpen = false;
       notifyListeners();
+      await _feedbackService.onScanError();
       return null;
     }
   }
 
   String _formatError(dynamic err) {
     final String str = err.toString();
+    if (str.contains('alasan kepulangan lebih awal') ||
+        str.contains('early departure') ||
+        str.contains('EarlyDepartureNotesRequired')) {
+      return 'Catatan alasan kepulangan lebih awal wajib diisi.';
+    }
     if (str.contains('sudah melakukan presensi masuk') ||
         (str.contains('409') && _scanMode == AttendanceScanMode.checkIn)) {
       return 'Anda sudah melakukan presensi masuk hari ini.';

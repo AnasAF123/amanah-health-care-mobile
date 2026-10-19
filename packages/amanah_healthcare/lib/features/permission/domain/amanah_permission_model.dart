@@ -1,3 +1,5 @@
+import 'package:amanah_healthcare/core/time/time.dart';
+
 enum AmanahPermissionStatus {
   menunggu,
   disetujui,
@@ -119,27 +121,11 @@ class AmanahPermissionRecord {
   String get formattedDateRange => '$formattedStartDate — $formattedEndDate';
 
   static String formatDateIndo(String dateStr) {
-    try {
-      final DateTime date = DateTime.parse(dateStr);
-      final List<String> monthNames = <String>[
-        '',
-        'Jan',
-        'Feb',
-        'Mar',
-        'Apr',
-        'Mei',
-        'Jun',
-        'Jul',
-        'Agu',
-        'Sep',
-        'Okt',
-        'Nov',
-        'Des',
-      ];
-      return '${date.day} ${monthNames[date.month]} ${date.year}';
-    } catch (_) {
+    final DateTime? parsed = parseIsoDateString(dateStr);
+    if (parsed == null) {
       return dateStr;
     }
+    return formatLocalizedDate(parsed, style: 'human_short');
   }
 
   AmanahPermissionRecord copyWith({

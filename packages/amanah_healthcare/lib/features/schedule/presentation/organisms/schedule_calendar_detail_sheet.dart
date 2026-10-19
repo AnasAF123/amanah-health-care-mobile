@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/time/time.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
@@ -59,34 +60,8 @@ class _ScheduleCalendarDetailSheetState
     super.dispose();
   }
 
-  String _formatDateHeader(DateTime date) {
-    const List<String> days = <String>[
-      'Senin',
-      'Selasa',
-      'Rabu',
-      'Kamis',
-      'Jumat',
-      'Sabtu',
-      'Minggu',
-    ];
-    const List<String> months = <String>[
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember',
-    ];
-    final String dayName = days[(date.weekday - 1).clamp(0, 6)];
-    final String monthName = months[(date.month - 1).clamp(0, 11)];
-    return '$dayName, ${date.day} $monthName ${date.year}';
-  }
+  String _formatDateHeader(DateTime date) =>
+      formatLocalizedDate(date, style: 'human_full');
 
   @override
   Widget build(BuildContext context) {

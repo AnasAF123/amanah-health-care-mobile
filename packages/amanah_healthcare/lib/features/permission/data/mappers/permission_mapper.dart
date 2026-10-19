@@ -4,15 +4,46 @@ import 'package:amanah_healthcare/features/permission/data/dto/replacement_item_
 import 'package:amanah_healthcare/features/permission/domain/entities/eligible_session.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/leave_request_entity.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/replacement_item.dart';
+import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
 
 abstract final class PermissionMapper {
+  /// Resolves raw backend session keys (e.g. "session.morning", "session.afternoon")
+  /// into canonical Indonesian labels ("Sesi Pagi", "Sesi Siang", "Sesi Malam").
+  static String _resolveSessionLabel({
+    required String? rawLabel,
+    String? sessionCode,
+  }) {
+    if (rawLabel != null && rawLabel.trim().isNotEmpty) {
+      final String sanitized = ClinicalSessionResolver.sanitize(rawLabel);
+      if (sanitized != rawLabel) {
+        return sanitized;
+      }
+    }
+    return ClinicalSessionResolver.resolveSessionName(
+      sessionShift: sessionCode,
+      sessionLabel: rawLabel,
+    );
+  }
+
+  /// Normalizes "06:00:00" to "06:00".
+  static String _formatTime(String rawTime) {
+    final String trimmed = rawTime.trim();
+    if (trimmed.length >= 5 && trimmed.contains(':')) {
+      return trimmed.substring(0, 5);
+    }
+    return trimmed;
+  }
+
   static EligibleSession toEligibleSession(EligibleSessionDto dto) {
     return EligibleSession(
       sessionId: dto.sessionId,
       sessionCode: dto.sessionCode,
-      sessionLabel: dto.sessionLabel,
-      startsAt: dto.startsAt,
-      endsAt: dto.endsAt,
+      sessionLabel: _resolveSessionLabel(
+        rawLabel: dto.sessionLabel,
+        sessionCode: dto.sessionCode,
+      ),
+      startsAt: _formatTime(dto.startsAt),
+      endsAt: _formatTime(dto.endsAt),
       workDate: dto.workDate,
     );
   }
@@ -22,7 +53,10 @@ abstract final class PermissionMapper {
       id: dto.id,
       sessionId: dto.sessionId,
       sessionCode: dto.sessionCode,
-      sessionLabel: dto.sessionLabel,
+      sessionLabel: _resolveSessionLabel(
+        rawLabel: dto.sessionLabel,
+        sessionCode: dto.sessionCode,
+      ),
       workDate: dto.workDate,
     );
   }
@@ -66,7 +100,10 @@ abstract final class PermissionMapper {
           dto.claimedAt != null ? DateTime.tryParse(dto.claimedAt!) : null,
       createdAt: DateTime.tryParse(dto.createdAt) ?? DateTime.now(),
       sessionCode: dto.sessionCode,
-      sessionLabel: dto.sessionLabel,
+      sessionLabel: _resolveSessionLabel(
+        rawLabel: dto.sessionLabel,
+        sessionCode: dto.sessionCode,
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/time/time.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_pull_to_refresh.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/schedule/amanah_schedule_views.dart';
@@ -56,34 +57,8 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
     super.dispose();
   }
 
-  String _formatDateSubtitle(DateTime date) {
-    const List<String> days = <String>[
-      'Senin',
-      'Selasa',
-      'Rabu',
-      'Kamis',
-      'Jumat',
-      'Sabtu',
-      'Minggu',
-    ];
-    const List<String> months = <String>[
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember',
-    ];
-    final String dayName = days[(date.weekday - 1).clamp(0, 6)];
-    final String monthName = months[(date.month - 1).clamp(0, 11)];
-    return '$dayName, ${date.day} $monthName ${date.year}';
-  }
+  String _formatDateSubtitle(DateTime date) =>
+      formatLocalizedDate(date, style: 'human_full');
 
   @override
   Widget build(BuildContext context) {

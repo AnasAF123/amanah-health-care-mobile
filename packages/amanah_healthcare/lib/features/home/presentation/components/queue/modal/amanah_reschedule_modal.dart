@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/core/presentation/components/amanah_skeleton.dart';
+import 'package:amanah_healthcare/core/time/time.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/queue/modal/dynamic_session_tile.dart';
@@ -62,31 +63,6 @@ class AmanahRescheduleModal extends StatefulWidget {
 }
 
 class _AmanahRescheduleModalState extends State<AmanahRescheduleModal> {
-  static const List<String> _dayNames = <String>[
-    'Senin',
-    'Selasa',
-    'Rabu',
-    'Kamis',
-    'Jumat',
-    'Sabtu',
-    'Minggu',
-  ];
-
-  static const List<String> _monthNames = <String>[
-    'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember',
-  ];
-
   bool _isLoading = true;
   String? _errorMessage;
   RescheduleOptionsEntity? _options;
@@ -168,20 +144,10 @@ class _AmanahRescheduleModalState extends State<AmanahRescheduleModal> {
     }
   }
 
-  String _formatDate(DateTime dt) {
-    final String dayName = _dayNames[dt.weekday - 1];
-    final String day = dt.day.toString().padLeft(2, '0');
-    final String monthName = _monthNames[dt.month - 1];
-    final int year = dt.year;
-    return '$dayName, $day $monthName $year';
-  }
+  String _formatDate(DateTime dt) =>
+      formatLocalizedDate(dt, style: 'human_full');
 
-  String _toIsoDate(DateTime dt) {
-    final String year = dt.year.toString().padLeft(4, '0');
-    final String month = dt.month.toString().padLeft(2, '0');
-    final String day = dt.day.toString().padLeft(2, '0');
-    return '$year-$month-$day';
-  }
+  String _toIsoDate(DateTime dt) => formatIsoDateString(dt);
 
   List<RescheduleShiftOption> _getShiftsForSelectedDate() {
     if (_options == null) return <RescheduleShiftOption>[];

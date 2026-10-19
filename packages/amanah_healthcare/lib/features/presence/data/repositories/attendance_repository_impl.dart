@@ -37,6 +37,8 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       checkInAt: checkInAt,
       timeFormatted: timeFormatted,
       isReplacement: json['isReplacement'] == true,
+      isEarlyDeparture: json['isEarlyDeparture'] == true,
+      notes: json['notes']?.toString(),
       validatedDurationHours: json['validatedDurationHours'] != null
           ? double.tryParse(json['validatedDurationHours'].toString())
           : null,
@@ -44,9 +46,14 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
   }
 
   @override
-  Future<AttendanceCheckInResult> recordCheckout({String? qrToken}) async {
-    final Map<String, dynamic> json =
-        await _remoteDataSource.submitCheckout(qrToken: qrToken);
+  Future<AttendanceCheckInResult> recordCheckout({
+    String? qrToken,
+    String? notes,
+  }) async {
+    final Map<String, dynamic> json = await _remoteDataSource.submitCheckout(
+      qrToken: qrToken,
+      notes: notes,
+    );
 
     final String checkInStr = json['checkInAt']?.toString() ?? '';
     final DateTime checkInAt = DateTime.tryParse(checkInStr) ?? DateTime.now();
@@ -67,6 +74,8 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       checkOutAt: checkOutAt,
       timeFormatted: timeFormatted,
       isReplacement: json['isReplacement'] == true,
+      isEarlyDeparture: json['isEarlyDeparture'] == true,
+      notes: json['notes']?.toString(),
       validatedDurationHours: json['validatedDurationHours'] != null
           ? double.tryParse(json['validatedDurationHours'].toString())
           : null,

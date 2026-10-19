@@ -36,6 +36,7 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
     this.headerPadding = const EdgeInsets.fromLTRB(24, 8, 16, 12),
     this.showHeaderDivider = true,
     this.extendBodyBehindHeader = false,
+    this.hugContent = false,
   });
 
   final String title;
@@ -50,6 +51,7 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
   final EdgeInsetsGeometry headerPadding;
   final bool showHeaderDivider;
   final bool extendBodyBehindHeader;
+  final bool hugContent;
 
   @override
   Widget build(BuildContext context) {
@@ -65,8 +67,21 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
         ? AmanahThemeTokens.canvas(context)
         : AmanahThemeTokens.elevatedSurface(context);
 
+    final EdgeInsets effectiveBodyPadding =
+        bodyPadding.resolve(Directionality.of(context));
+    final double effectiveBottomPadding = footer == null
+        ? effectiveBodyPadding.bottom + (bottomInset > 0 ? bottomInset : 16)
+        : effectiveBodyPadding.bottom;
+
+    final EdgeInsets resolvedBodyPadding = EdgeInsets.fromLTRB(
+      effectiveBodyPadding.left,
+      effectiveBodyPadding.top,
+      effectiveBodyPadding.right,
+      effectiveBottomPadding,
+    );
+
     final Widget sheet = Container(
-      height: fixedHeight ?? maxHeight,
+      height: fixedHeight ?? (hugContent ? null : maxHeight),
       constraints: BoxConstraints(
         maxHeight: maxHeight,
         minHeight: minHeight ?? 0,
@@ -86,6 +101,7 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
           top: Radius.circular(AmanahRadius.sheet),
         ),
         child: Column(
+          mainAxisSize: hugContent ? MainAxisSize.min : MainAxisSize.max,
           children: <Widget>[
             const _AmanahSheetHandle(),
             _AmanahSheetHeader(
@@ -95,15 +111,23 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
               padding: headerPadding,
               showDivider: showHeaderDivider,
             ),
-            Expanded(
-              child: extendBodyBehindHeader
-                  ? body
-                  : SingleChildScrollView(
+            hugContent
+                ? Flexible(
+                    child: SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
-                      padding: bodyPadding,
+                      padding: resolvedBodyPadding,
                       child: body,
                     ),
-            ),
+                  )
+                : Expanded(
+                    child: extendBodyBehindHeader
+                        ? body
+                        : SingleChildScrollView(
+                            physics: const BouncingScrollPhysics(),
+                            padding: resolvedBodyPadding,
+                            child: body,
+                          ),
+                  ),
             if (footer != null)
               _AmanahSheetFooter(bottomInset: bottomInset, child: footer!),
           ],
@@ -111,10 +135,19 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
       ),
     );
 
+    final Widget animatedSheet = hugContent
+        ? AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeInOutCubic,
+            alignment: Alignment.bottomCenter,
+            child: sheet,
+          )
+        : sheet;
+
     final Widget sheetWithShield = GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {},
-      child: sheet,
+      child: animatedSheet,
     );
 
     return GestureDetector(

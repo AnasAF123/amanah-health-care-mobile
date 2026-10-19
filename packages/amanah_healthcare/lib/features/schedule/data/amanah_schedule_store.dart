@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/time/time.dart';
 import 'package:amanah_healthcare/features/schedule/data/repositories/schedule_repository_impl.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/my_schedule_session.dart';
@@ -25,12 +26,7 @@ class AmanahScheduleStore extends ChangeNotifier {
   Map<String, List<DoctorSchedule>> get schedulesMap => _schedulesMap;
   Map<String, DayScheduleSetting> get daySettingsMap => _daySettingsMap;
 
-  static String formatDateKey(DateTime date) {
-    final String y = date.year.toString().padLeft(4, '0');
-    final String m = date.month.toString().padLeft(2, '0');
-    final String d = date.day.toString().padLeft(2, '0');
-    return '$y-$m-$d';
-  }
+  static String formatDateKey(DateTime date) => formatIsoDateString(date);
 
   List<DoctorSchedule> getSchedulesForDate(DateTime date) {
     final String key = formatDateKey(date);

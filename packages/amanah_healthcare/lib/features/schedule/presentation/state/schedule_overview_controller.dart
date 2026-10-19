@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/core/presentation/components/amanah_toaster.dart';
+import 'package:amanah_healthcare/core/time/time.dart';
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/features/schedule/data/repositories/schedule_repository_impl.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/calendar_day_summary.dart';
@@ -44,9 +45,7 @@ class ScheduleOverviewController extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   List<SessionPatient> get bookedPatients => _bookedPatients;
 
-  String _formatDateString(DateTime d) {
-    return '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-  }
+  String _formatDateString(DateTime d) => formatIsoDateString(d);
 
   String _formatMonthString(DateTime d) {
     return '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}';

@@ -6,7 +6,10 @@ class CheckoutAttendanceUseCase {
 
   final AttendanceRepository _repository;
 
-  Future<AttendanceCheckInResult> call({String? qrToken}) {
-    return _repository.recordCheckout(qrToken: qrToken);
+  Future<AttendanceCheckInResult> call({
+    String? qrToken,
+    String? notes,
+  }) {
+    return _repository.recordCheckout(qrToken: qrToken, notes: notes);
   }
 }

@@ -8,7 +8,10 @@ abstract interface class AttendanceRepository {
     String? deviceInfo,
   });
 
-  Future<AttendanceCheckInResult> recordCheckout({String? qrToken});
+  Future<AttendanceCheckInResult> recordCheckout({
+    String? qrToken,
+    String? notes,
+  });
 
   Future<List<AttendanceRecord>> getMyHistory();
 }

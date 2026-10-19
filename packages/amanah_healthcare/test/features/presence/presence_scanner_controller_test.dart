@@ -17,7 +17,13 @@ class _MockFailingAttendanceRepository implements AttendanceRepository {
   }
 
   @override
-  Future<AttendanceCheckInResult> recordCheckout({String? qrToken}) async {
+  Future<AttendanceCheckInResult> recordCheckout({
+    String? qrToken,
+    String? notes,
+  }) async {
+    if (notes == 'EARLY_ERROR') {
+      throw Exception('Catatan alasan kepulangan lebih awal (early departure) wajib diisi.');
+    }
     throw Exception('Presensi pulang sudah tercatat sebelumnya untuk hari ini.');
   }
 
@@ -69,6 +75,26 @@ void main() {
       controller.clearError();
       expect(controller.errorMessage, isNull);
       expect(controller.isFlowActive, isFalse);
+    });
+
+    test('detects early departure notes requirement upon checkout error', () async {
+      controller.setScanMode(AttendanceScanMode.checkOut);
+      final result = await controller.submitCheckout(
+        qrToken: 'TOKEN_123',
+        notes: 'EARLY_ERROR',
+      );
+
+      expect(result, isNull);
+      expect(controller.requiresEarlyDepartureNotes, isTrue);
+      expect(controller.pendingCheckoutToken, equals('TOKEN_123'));
+      expect(
+        controller.errorMessage,
+        equals('Catatan alasan kepulangan lebih awal wajib diisi.'),
+      );
+
+      controller.clearPendingEarlyDeparture();
+      expect(controller.requiresEarlyDepartureNotes, isFalse);
+      expect(controller.pendingCheckoutToken, isNull);
     });
   });
 }

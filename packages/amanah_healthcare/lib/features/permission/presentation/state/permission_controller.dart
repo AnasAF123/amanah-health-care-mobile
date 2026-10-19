@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/core/presentation/components/amanah_toaster.dart';
+import 'package:amanah_healthcare/core/time/time.dart';
 import 'package:amanah_healthcare/features/permission/data/repositories/permission_repository_impl.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/eligible_session.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/leave_request_entity.dart';
@@ -57,9 +58,7 @@ class PermissionController extends ChangeNotifier {
   bool get isLoadingSessions => _isLoadingSessions;
   String? get errorMessage => _errorMessage;
 
-  String _formatDate(DateTime d) {
-    return '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-  }
+  String _formatDate(DateTime d) => formatIsoDateString(d);
 
   Future<void> fetchMyLeaves({BuildContext? context}) async {
     _isLoading = true;

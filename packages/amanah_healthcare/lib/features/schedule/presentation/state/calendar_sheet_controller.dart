@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/time/time.dart';
 import 'package:amanah_healthcare/features/schedule/data/repositories/schedule_repository_impl.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/my_schedule_session.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/session_patient.dart';
@@ -40,9 +41,7 @@ class CalendarSheetController extends ChangeNotifier {
   Set<String> get expandedSessionIds =>
       Set<String>.unmodifiable(_expandedSessionIds);
 
-  String _formatDateString(DateTime d) {
-    return '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-  }
+  String _formatDateString(DateTime d) => formatIsoDateString(d);
 
   bool isExpanded(String sessionId) => _expandedSessionIds.contains(sessionId);
 

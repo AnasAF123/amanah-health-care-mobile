@@ -13,7 +13,10 @@ abstract interface class AttendanceRemoteDataSource {
     String? deviceInfo,
   });
 
-  Future<Map<String, dynamic>> submitCheckout({String? qrToken});
+  Future<Map<String, dynamic>> submitCheckout({
+    String? qrToken,
+    String? notes,
+  });
 
   Future<List<dynamic>> getMyHistory();
 }
@@ -62,14 +65,21 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> submitCheckout({String? qrToken}) async {
-    final Map<String, dynamic>? body = qrToken != null
-        ? <String, dynamic>{'qrToken': qrToken}
-        : null;
+  Future<Map<String, dynamic>> submitCheckout({
+    String? qrToken,
+    String? notes,
+  }) async {
+    final Map<String, dynamic> body = <String, dynamic>{};
+    if (qrToken != null && qrToken.isNotEmpty) {
+      body['qrToken'] = qrToken;
+    }
+    if (notes != null && notes.trim().isNotEmpty) {
+      body['notes'] = notes.trim();
+    }
 
     final ApiResponse<dynamic> res = await _apiClient.request(
       AttendanceEndpoints.checkoutEndpoint,
-      body: body,
+      body: body.isNotEmpty ? body : null,
     );
 
     final dynamic data = _extractData(res.data);

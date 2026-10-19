@@ -11,6 +11,7 @@ import 'package:amanah_healthcare/features/presence/domain/usecases/get_attendan
 import 'package:amanah_healthcare/features/presence/domain/entities/presence_status_payload.dart';
 import 'package:amanah_healthcare/features/presence/domain/usecases/record_attendance_usecase.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/attendance_processing_overlay.dart';
+import 'package:amanah_healthcare/features/presence/presentation/components/dialogs/early_checkout_reason_modal.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/dialogs/presence_info_dialog.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/drawers/amanah_presence_result_drawer.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/drawers/presence_scanner_master_drawer.dart';
@@ -234,6 +235,30 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
       return;
     }
 
+    // Intercept early departure requiring reason notes
+    if (_controller.requiresEarlyDepartureNotes &&
+        _controller.pendingCheckoutToken != null) {
+      final String token = _controller.pendingCheckoutToken!;
+      _controller.clearPendingEarlyDeparture();
+      final String? reason = await EarlyCheckoutReasonModal.show(context);
+      if (!mounted) return;
+      if (reason != null && reason.trim().isNotEmpty) {
+        final AttendanceCheckInResult? earlyResult =
+            await _controller.submitCheckout(qrToken: token, notes: reason);
+        if (!mounted) return;
+        if (earlyResult != null) {
+          _showResultDrawer(
+            PresenceStatusPayload.fromSuccess(
+              timeFormatted: earlyResult.timeFormatted,
+              isCheckOut: true,
+              validatedDurationHours: earlyResult.validatedDurationHours,
+            ),
+          );
+          return;
+        }
+      }
+    }
+
     if (_controller.errorMessage != null) {
       _showResultDrawer(
         PresenceStatusPayload.fromError(_controller.errorMessage!),
@@ -261,6 +286,30 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
         ),
       );
       return;
+    }
+
+    // Intercept early departure requiring reason notes for manual PIN
+    if (_controller.requiresEarlyDepartureNotes &&
+        _controller.pendingCheckoutToken != null) {
+      final String token = _controller.pendingCheckoutToken!;
+      _controller.clearPendingEarlyDeparture();
+      final String? reason = await EarlyCheckoutReasonModal.show(context);
+      if (!mounted) return;
+      if (reason != null && reason.trim().isNotEmpty) {
+        final AttendanceCheckInResult? earlyResult =
+            await _controller.submitCheckout(qrToken: token, notes: reason);
+        if (!mounted) return;
+        if (earlyResult != null) {
+          _showResultDrawer(
+            PresenceStatusPayload.fromSuccess(
+              timeFormatted: earlyResult.timeFormatted,
+              isCheckOut: true,
+              validatedDurationHours: earlyResult.validatedDurationHours,
+            ),
+          );
+          return;
+        }
+      }
     }
 
     if (_controller.errorMessage != null) {
