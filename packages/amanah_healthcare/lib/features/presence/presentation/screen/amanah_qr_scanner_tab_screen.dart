@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
@@ -10,11 +11,15 @@ import 'package:amanah_healthcare/features/presence/domain/usecases/get_attendan
 import 'package:amanah_healthcare/features/presence/domain/usecases/record_attendance_usecase.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/amanah_presence_success_drawer.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/attendance_processing_overlay.dart';
+import 'package:amanah_healthcare/features/presence/presentation/components/dialogs/presence_info_dialog.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/drawers/presence_scanner_master_drawer.dart';
-import 'package:amanah_healthcare/features/presence/presentation/components/floating_circular_button.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/presence_scanner_camera_viewport.dart';
+import 'package:amanah_healthcare/features/presence/presentation/components/presence_scanner_top_bar.dart';
+import 'package:scanner_shared/scanner_shared.dart';
+import 'package:amanah_healthcare/core/logging/app_log.dart';
 import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_presence_history_screen.dart';
 import 'package:amanah_healthcare/features/presence/presentation/state/presence_scanner_controller.dart';
+import 'package:amanah_healthcare/features/presence/presentation/utils/scan_trace.dart';
 
 export 'package:amanah_healthcare/features/presence/presentation/state/presence_scanner_controller.dart'
     show AmanahQrDrawerView, AttendanceFlowState, AttendanceScanMode;
@@ -48,8 +53,15 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
   late final AnimationController _laserController;
   late final Animation<double> _laserAnimation;
   late final AnimationController _drawerAnimationController;
+  final ValueNotifier<ScannerHardwareController?> _scannerHardwareNotifier =
+      ValueNotifier<ScannerHardwareController?>(null);
+  bool _isScanningBlocked = false;
 
   void resetPresence() {
+    _isScanningBlocked = false;
+    if (widget.animateLaser && !_laserController.isAnimating) {
+      _laserController.repeat(reverse: true);
+    }
     _controller.reset();
     _drawerAnimationController.reset();
     widget.onDrawerStateChanged?.call(false);
@@ -58,6 +70,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
   @override
   void initState() {
     super.initState();
+    ScanTrace.start();
+    AppLog.scanner('[QR SCANNER] 🚀 Initializing QR scanner screen');
     final AttendanceRepository repository = AttendanceRepositoryImpl();
     _controller = PresenceScannerController(
       recordAttendanceUseCase: RecordAttendanceUseCase(repository),
@@ -99,6 +113,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
   void dispose() {
     _laserController.dispose();
     _drawerAnimationController.dispose();
+    _scannerHardwareNotifier.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -113,13 +128,15 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     );
   }
 
-  Future<void> _closeDrawer() async {
+  Future<void> closeDrawer() async {
     widget.onDrawerStateChanged?.call(false);
     await _drawerAnimationController.reverse();
     if (mounted) {
       _controller.closeDrawer();
     }
   }
+
+  Future<void> _closeDrawer() => closeDrawer();
 
   void _toggleDrawer() {
     if (_controller.isDrawerOpen) {
@@ -142,12 +159,31 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
   }
 
   Future<void> _handleBarcodeDetected(String value) async {
-    final String code = value.trim();
-    if (code.isEmpty || _controller.isFlowActive) {
+    String code = value.trim();
+    if (code.startsWith('{') && code.endsWith('}')) {
+      try {
+        final dynamic decoded = jsonDecode(code);
+        if (decoded is Map && decoded['token'] != null) {
+          code = decoded['token'].toString().trim();
+        }
+      } catch (_) {
+        // Keep raw code if not JSON
+      }
+    }
+
+    if (code.isEmpty || _controller.isFlowActive || _isScanningBlocked) {
       return;
     }
 
-    await HapticFeedback.selectionClick();
+    ScanTrace.mark('firstDetect');
+    _isScanningBlocked = true;
+    _laserController.stop();
+    ScanTrace.mark('accepted');
+    AppLog.scanner(
+      '[QR SCANNER] ⚡ QR Code detected & locked | token: ${code.substring(0, code.length.clamp(0, 10))}...',
+    );
+
+    await HapticFeedback.mediumImpact();
     if (!mounted) {
       return;
     }
@@ -156,12 +192,22 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     _drawerAnimationController.reset();
     widget.onDrawerStateChanged?.call(true);
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScanTrace.mark('loadingPainted');
+    });
+
     final AttendanceCheckInResult? result =
         await _controller.submitAttendance(code);
+
+    ScanTrace.mark('apiDone');
+    AppLog.scanner(
+      '[QR SCANNER] 📡 API submission finished | status: ${result != null ? "SUCCESS" : "ERROR"} | detail: ${_controller.errorMessage ?? "OK"}',
+    );
 
     if (!mounted) return;
 
     if (result != null) {
+      _isScanningBlocked = false;
       _showSuccessDrawer(
         result.timeFormatted,
         isCheckOut: _controller.isLastResultCheckout,
@@ -171,7 +217,14 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     }
 
     if (_controller.errorMessage != null) {
-      _showErrorSnackBar(_controller.errorMessage!);
+      await HapticFeedback.heavyImpact();
+      if (!mounted) return;
+      await _showErrorDialog(_controller.errorMessage!);
+    } else {
+      _isScanningBlocked = false;
+      if (widget.animateLaser && !_laserController.isAnimating) {
+        _laserController.repeat(reverse: true);
+      }
     }
   }
 
@@ -187,6 +240,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     if (!mounted) return;
 
     if (result != null) {
+      _isScanningBlocked = false;
       _showSuccessDrawer(
         result.timeFormatted,
         isCheckOut: _controller.isLastResultCheckout,
@@ -196,9 +250,26 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     }
 
     if (_controller.errorMessage != null) {
-      _showErrorSnackBar(_controller.errorMessage!);
+      await HapticFeedback.heavyImpact();
+      if (!mounted) return;
+      await _showErrorDialog(_controller.errorMessage!);
     }
   }
+
+  Future<void> _showErrorDialog(String message) async {
+    await PresenceInfoDialog.show(context, message: message);
+    if (mounted) {
+      _controller.clearError();
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      if (mounted) {
+        _isScanningBlocked = false;
+        if (widget.animateLaser && !_laserController.isAnimating) {
+          _laserController.repeat(reverse: true);
+        }
+      }
+    }
+  }
+
 
   void _showSuccessDrawer(
     String timeFormatted, {
@@ -220,19 +291,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
         resetPresence();
       }
     });
-  }
-
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(fontSize: 12),
-        ),
-        backgroundColor: AmanahColorTokens.dangerDark,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 
   void _handleCopyQr() {
@@ -259,41 +317,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
 
   Future<void> _showHelpDialog() async {
     _controller.setHelpOpen(true);
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Row(
-          children: <Widget>[
-            Icon(Icons.help_outline_rounded,
-                color: AmanahColorTokens.brandPrimary),
-            SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Panduan Presensi',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-              ),
-            ),
-          ],
-        ),
-        content: const Text(
-          'Arahkan kamera smartphone ke QR Code presensi dinas RS Amanah Sehat, atau gunakan Presensi Manual dengan kode 6-digit.',
-          style: TextStyle(fontSize: 13, height: 1.4),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
-              'Mengerti',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: AmanahColorTokens.brandPrimary,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    await PresenceHelpDialog.show(context);
     if (mounted) {
       _controller.setHelpOpen(false);
     }
@@ -329,6 +353,11 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                   enableCameraScanner: widget.enableCameraScanner,
                   bottomNavigationClearance: widget.bottomNavigationClearance,
                   onBarcodeDetected: _handleBarcodeDetected,
+                  onScannerCreated: (ScannerHardwareController hardware) {
+                    _scannerHardwareNotifier.value = hardware;
+                    ScanTrace.mark('cameraReady');
+                    AppLog.scanner('[QR SCANNER] 📷 Scanner hardware initialized and ready');
+                  },
                 ),
               ),
 
@@ -356,118 +385,46 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                 ),
               ),
 
-              // 3. Top Floating Navigation Bar
-              Positioned(
-                top: (MediaQuery.paddingOf(context).top > 0)
-                    ? MediaQuery.paddingOf(context).top + 8
-                    : 16,
-                left: 16,
-                right: 16,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    FloatingCircularButton(
-                      onTap: widget.onBack ??
-                          () => Navigator.of(context).maybePop(),
-                      icon: Icons.arrow_back_rounded,
-                      label: 'Kembali',
-                      dark: dark,
-                    ),
-                    Row(
-                      children: <Widget>[
-                        FloatingCircularButton(
-                          onTap: _showHelpDialog,
-                          icon: Icons.help_outline_rounded,
-                          label: 'Bantuan Presensi',
-                          dark: dark,
-                          size: 40,
-                          isActive: _controller.isHelpOpen,
-                        ),
-                        const SizedBox(width: 8),
-                        FloatingCircularButton(
-                          onTap: _toggleDrawer,
-                          icon: Icons.grid_view_rounded,
-                          label: 'Buka Menu Presensi',
-                          dark: dark,
-                          size: 40,
-                          isActive: _controller.isDrawerOpen &&
-                              _controller.drawerView == AmanahQrDrawerView.menu,
-                        ),
-                        if (!PresenceScannerCameraViewport.safeHasACamera()) ...<Widget>[
-                          const SizedBox(width: 8),
-                          FloatingCircularButton(
-                            onTap: _controller.toggleCamera,
-                            icon: Icons.cameraswitch_rounded,
-                            label: 'Ubah Kamera',
-                            dark: dark,
-                            size: 40,
-                            isActive: _controller.isFrontCamera,
-                          ),
-                          const SizedBox(width: 8),
-                          FloatingCircularButton(
-                            onTap: _controller.toggleFlash,
-                            icon: _controller.isFlashOn
-                                ? Icons.flash_on_rounded
-                                : Icons.flash_off_rounded,
-                            label: 'Senter Flash',
-                            dark: dark,
-                            size: 40,
-                            isActive: _controller.isFlashOn,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              // 3b. Floating Segmented Mode Switcher (Presensi Masuk vs Presensi Pulang)
-              Positioned(
-                top: (MediaQuery.paddingOf(context).top > 0)
-                    ? MediaQuery.paddingOf(context).top + 64
-                    : 76,
-                left: 20,
-                right: 20,
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AmanahColorTokens.pureBlack.withValues(alpha: 0.72),
-                      borderRadius: BorderRadius.circular(100),
-                      border: Border.all(
-                        color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.18),
-                        width: 1,
-                      ),
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                          color: AmanahColorTokens.pureBlack.withValues(alpha: 0.35),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        _PresenceModePill(
-                          label: 'Presensi Masuk',
-                          icon: Icons.login_rounded,
-                          isSelected: _controller.scanMode == AttendanceScanMode.checkIn,
-                          activeColor: AmanahColorTokens.success,
-                          onTap: () => _controller.setScanMode(AttendanceScanMode.checkIn),
-                        ),
-                        const SizedBox(width: 4),
-                        _PresenceModePill(
-                          label: 'Presensi Pulang',
-                          icon: Icons.logout_rounded,
-                          isSelected: _controller.scanMode == AttendanceScanMode.checkOut,
-                          activeColor: AmanahColorTokens.brandPrimary,
-                          onTap: () => _controller.setScanMode(AttendanceScanMode.checkOut),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              // 3. Top Floating Navigation Bar & Mode Switcher
+              PresenceScannerTopBar(
+                onBack: widget.onBack ??
+                    () => Navigator.of(context).maybePop(),
+                onShowHelp: _showHelpDialog,
+                onToggleDrawer: _toggleDrawer,
+                isHelpOpen: _controller.isHelpOpen,
+                isDrawerOpen: _controller.isDrawerOpen,
+                drawerView: _controller.drawerView,
+                hasCamera: PresenceScannerCameraViewport.safeHasACamera(),
+                hasMoreThanOneCamera:
+                    PresenceScannerCameraViewport.safeHasMoreThanOneCamera(),
+                hardwareNotifier: _scannerHardwareNotifier,
+                onSwitchCamera: () async {
+                  await _scannerHardwareNotifier.value?.switchCamera();
+                  final bool isFront =
+                      _scannerHardwareNotifier.value?.isFrontCamera ??
+                          !_controller.isFrontCamera;
+                  _controller.syncCameraFacing(isFront);
+                  AppLog.scanner(
+                    '[QR SCANNER] 🔄 Switched camera facing: ${isFront ? "FRONT" : "BACK"}',
+                  );
+                },
+                onToggleFlash: () async {
+                  await _scannerHardwareNotifier.value?.toggleTorch();
+                  final bool isTorch =
+                      _scannerHardwareNotifier.value?.isTorchOn ??
+                          !_controller.isFlashOn;
+                  _controller.syncFlash(isTorch);
+                  AppLog.scanner(
+                    '[QR SCANNER] 💡 Toggled torch: ${isTorch ? "ON" : "OFF"}',
+                  );
+                },
+                isFrontCamera: _scannerHardwareNotifier.value?.isFrontCamera ??
+                    _controller.isFrontCamera,
+                isFlashOn: _scannerHardwareNotifier.value?.isTorchOn ??
+                    _controller.isFlashOn,
+                scanMode: _controller.scanMode,
+                onSelectScanMode: _controller.setScanMode,
+                dark: dark,
               ),
 
               // 4. Master Slide-up Drawer
@@ -502,67 +459,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
           ),
         );
       },
-    );
-  }
-}
-
-class _PresenceModePill extends StatelessWidget {
-  const _PresenceModePill({
-    required this.label,
-    required this.icon,
-    required this.isSelected,
-    required this.activeColor,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final bool isSelected;
-  final Color activeColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? activeColor.withValues(alpha: 0.25)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(100),
-          border: isSelected
-              ? Border.all(color: activeColor.withValues(alpha: 0.70), width: 1.2)
-              : Border.all(color: Colors.transparent, width: 1.2),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(
-              icon,
-              size: 15,
-              color: isSelected
-                  ? activeColor
-                  : AmanahColorTokens.surfaceLight.withValues(alpha: 0.60),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected
-                    ? AmanahColorTokens.surfaceLight
-                    : AmanahColorTokens.surfaceLight.withValues(alpha: 0.60),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

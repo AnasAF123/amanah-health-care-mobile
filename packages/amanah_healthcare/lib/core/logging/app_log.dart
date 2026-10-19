@@ -180,6 +180,24 @@ class AppLog {
     );
   }
 
+  /// Shortcut for QR Scanner telemetry events
+  static void scanner(
+    String message, {
+    LogLevel level = LogLevel.info,
+    Map<String, dynamic>? context,
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    write(
+      message,
+      category: LogCategory.scanner,
+      level: level,
+      context: context,
+      error: error,
+      stackTrace: stackTrace,
+    );
+  }
+
   /// Convenience log level shortcuts
   static void trace(String message, {LogCategory category = LogCategory.system, Map<String, dynamic>? context}) =>
       instance.trace(message, category: category, context: context);

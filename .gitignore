@@ -322,4 +322,7 @@ bugreport-*.zip
 !.env.example
 client_secret*.json
 **/GoogleService-Info.plist
+**/env/dev.device.json
+**/env/dev.local.json
+!**/env/dev.device.example.json
 

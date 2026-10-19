@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_better_auth/flutter_better_auth.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:amanah_healthcare/core/config/amanah_auth_environment.dart';
+import 'package:amanah_healthcare/core/config/app_config.dart';
 import 'package:amanah_healthcare/core/logging/app_log.dart';
 import 'package:amanah_healthcare/core/logging/logging_config.dart';
 import 'package:amanah_healthcare/core/notifications/amanah_push_service.dart';
@@ -54,6 +55,18 @@ class AmanahCoreInitializer {
       authEnvOk = true;
     } catch (e) {
       AppLog.error('[CoreInitializer] AmanahAuthEnvironment initialization failed', error: e);
+    }
+
+    try {
+      AppConfig.validate();
+      AppLog.info(
+        '[CoreInitializer] AppConfig verified: env=${AppConfig.env}, baseUrl=${AmanahAuthEnvironment.authBaseUrl}',
+      );
+    } catch (e) {
+      AppLog.error('[CoreInitializer] AppConfig validation error: $e');
+      if (AppConfig.isProduction) {
+        rethrow;
+      }
     }
 
     _enableEdgeToEdgeMode();

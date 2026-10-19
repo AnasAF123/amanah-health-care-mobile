@@ -84,8 +84,23 @@ class PresenceScannerController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void syncFlash(bool on) {
+    if (_isFlashOn == on) return;
+    _isFlashOn = on;
+    notifyListeners();
+  }
+
   void toggleCamera() {
     _isFrontCamera = !_isFrontCamera;
+    if (_isFrontCamera) {
+      _isFlashOn = false;
+    }
+    notifyListeners();
+  }
+
+  void syncCameraFacing(bool front) {
+    if (_isFrontCamera == front) return;
+    _isFrontCamera = front;
     if (_isFrontCamera) {
       _isFlashOn = false;
     }
@@ -154,12 +169,25 @@ class PresenceScannerController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final AttendanceCheckInResult result;
+      AttendanceCheckInResult result;
       if (_scanMode == AttendanceScanMode.checkIn) {
-        result = await _recordAttendanceUseCase(
-          qrToken: trimmed,
-          deviceInfo: 'Amanah Mobile (Android/iOS)',
-        );
+        try {
+          result = await _recordAttendanceUseCase(
+            qrToken: trimmed,
+            deviceInfo: 'Amanah Mobile (Android/iOS)',
+          );
+        } catch (err) {
+          final String errMsg = _formatError(err);
+          if (errMsg.toLowerCase().contains('sudah melakukan presensi masuk') ||
+              errMsg.contains('409')) {
+            _scanMode = AttendanceScanMode.checkOut;
+            result = await _checkoutAttendanceUseCase(
+              qrToken: trimmed,
+            );
+          } else {
+            rethrow;
+          }
+        }
       } else {
         result = await _checkoutAttendanceUseCase(
           qrToken: trimmed,
@@ -171,9 +199,16 @@ class PresenceScannerController extends ChangeNotifier {
       return result;
     } catch (err) {
       _errorMessage = _formatError(err);
-      reset();
+      _flowState = AttendanceFlowState.idle;
+      _isDrawerOpen = false;
+      notifyListeners();
       return null;
     }
+  }
+
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
   }
 
   Future<AttendanceCheckInResult?> submitManualPin() async {
@@ -202,10 +237,13 @@ class PresenceScannerController extends ChangeNotifier {
       return result;
     } catch (err) {
       _errorMessage = _formatError(err);
-      reset();
+      _flowState = AttendanceFlowState.idle;
+      _isDrawerOpen = false;
+      notifyListeners();
       return null;
     }
   }
+
 
   String _formatError(dynamic err) {
     final String str = err.toString();

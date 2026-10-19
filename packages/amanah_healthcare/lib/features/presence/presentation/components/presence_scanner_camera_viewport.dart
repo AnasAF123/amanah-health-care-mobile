@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:scanner_shared/scanner_shared.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/camera_permission_viewport.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/scanner_overlay.dart';
@@ -17,6 +18,7 @@ class PresenceScannerCameraViewport extends StatelessWidget {
     super.key,
     this.enableCameraScanner = true,
     this.bottomNavigationClearance = 0,
+    this.onScannerCreated,
   });
 
   final Animation<double> laserAnimation;
@@ -25,6 +27,7 @@ class PresenceScannerCameraViewport extends StatelessWidget {
   final ValueChanged<String> onBarcodeDetected;
   final bool enableCameraScanner;
   final double bottomNavigationClearance;
+  final void Function(ScannerHardwareController controller)? onScannerCreated;
 
   static bool safeHasACamera() {
     try {
@@ -58,16 +61,6 @@ class PresenceScannerCameraViewport extends StatelessWidget {
     );
   }
 
-  EdgeInsetsDirectional _scannerContentPadding() {
-    return EdgeInsetsDirectional.only(
-      top: 72,
-      bottom: isDrawerOpen
-          ? 250
-          : (bottomNavigationClearance > 0
-              ? bottomNavigationClearance + 20
-              : 92),
-    );
-  }
 
   bool _shouldUseLegacyCameraScanner(BuildContext context) {
     if (!enableCameraScanner || !safeHasACamera()) {
@@ -106,11 +99,30 @@ class PresenceScannerCameraViewport extends StatelessWidget {
               ),
             ),
           ),
-          Positioned.fill(
-            child: IgnorePointer(
-              child: PresenceScannerTargetOverlay(
-                laserAnimation: laserAnimation,
-                contentPadding: _scannerContentPadding(),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: AspectRatio(
+                aspectRatio: 1.0,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: AmanahColorTokens.brandLight.withValues(alpha: 0.3),
+                        width: 1.5,
+                      ),
+                      color: AmanahColorTokens.pureBlack.withValues(alpha: 0.4),
+                    ),
+                    child: IgnorePointer(
+                      child: PresenceScannerTargetOverlay(
+                        laserAnimation: laserAnimation,
+                        contentPadding: EdgeInsetsDirectional.zero,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -126,61 +138,66 @@ class PresenceScannerCameraViewport extends StatelessWidget {
   }
 
   Widget _buildLegacyScanner(BuildContext context) {
-    final EdgeInsetsDirectional scannerContentPadding =
-        _scannerContentPadding();
-
-    return Stack(
-      children: <Widget>[
-        GlobalVars.barcodeScanner.getScanner(
-          onScan: (String val) async {
-            onBarcodeDetected(val);
-            return true;
-          },
-          hapticFeedback: () => HapticFeedback.selectionClick(),
-          onCameraFlashError: onCameraFlashError,
-          trackCustomEvent: (
-            String msg,
-            String category, {
-            int? eventValue,
-            String? barcode,
-          }) {},
-          hasMoreThanOneCamera: safeHasMoreThanOneCamera(),
-          toggleCameraModeTooltip: '',
-          toggleFlashModeTooltip: '',
-          barcodeScannerIcon: const SizedBox.shrink(),
-          torchOnIcon: const SizedBox.shrink(),
-          torchOffIcon: const SizedBox.shrink(),
-          visorColor: AmanahColorTokens.brandLight,
-          contentPadding: scannerContentPadding,
-        ),
-        Positioned.fill(
-          child: IgnorePointer(
-            child: DecoratedBox(
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 28),
+        child: AspectRatio(
+          aspectRatio: 1.0,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[
-                    AmanahColorTokens.pureBlack.withValues(alpha: 0.35),
-                    Colors.transparent,
-                    AmanahColorTokens.pureBlack.withValues(alpha: 0.50),
-                  ],
-                  stops: const <double>[0.0, 0.48, 1.0],
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: AmanahColorTokens.brandLight.withValues(alpha: 0.6),
+                  width: 2,
                 ),
+              ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  GlobalVars.barcodeScanner.getScanner(
+                    onScan: (String val) async {
+                      onBarcodeDetected(val);
+                      return true;
+                    },
+                    hapticFeedback: () => HapticFeedback.selectionClick(),
+                    onCameraFlashError: onCameraFlashError,
+                    trackCustomEvent: (
+                      String msg,
+                      String category, {
+                      int? eventValue,
+                      String? barcode,
+                    }) {},
+                    hasMoreThanOneCamera: safeHasMoreThanOneCamera(),
+                    toggleCameraModeTooltip: '',
+                    toggleFlashModeTooltip: '',
+                    barcodeScannerIcon: const SizedBox.shrink(),
+                    torchOnIcon: const SizedBox.shrink(),
+                    torchOffIcon: const SizedBox.shrink(),
+                    visorColor: AmanahColorTokens.brandLight,
+                    contentPadding: EdgeInsetsDirectional.zero,
+                    onScannerCreated: onScannerCreated,
+                    showDefaultVisor: false,
+                    showDefaultBottomControls: false,
+                  ),
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      child: RepaintBoundary(
+                        child: PresenceScannerTargetOverlay(
+                          laserAnimation: laserAnimation,
+                          contentPadding: EdgeInsetsDirectional.zero,
+                          drawFrame: false,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
-        Positioned.fill(
-          child: IgnorePointer(
-            child: PresenceScannerTargetOverlay(
-              laserAnimation: laserAnimation,
-              contentPadding: scannerContentPadding,
-              drawFrame: false,
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -196,10 +213,7 @@ class PresenceScannerCameraViewport extends StatelessWidget {
     }
 
     final PermissionListener? listener = context.watch<PermissionListener?>();
-    if (enableCameraScanner &&
-        safeHasACamera() &&
-        listener != null &&
-        listener.value.status != DevicePermissionStatus.checking) {
+    if (enableCameraScanner && safeHasACamera() && listener != null) {
       return Stack(
         fit: StackFit.expand,
         children: <Widget>[

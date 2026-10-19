@@ -9,8 +9,8 @@ class GlobalVars {
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
 
-  static late final Scanner barcodeScanner;
-  static late final AppStore appStore;
-  static late final StoreLabel storeLabel;
-  static late final ScannerLabel scannerLabel;
+  static late Scanner barcodeScanner;
+  static late AppStore appStore;
+  static late StoreLabel storeLabel;
+  static late ScannerLabel scannerLabel;
 }

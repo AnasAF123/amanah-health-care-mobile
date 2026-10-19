@@ -34,6 +34,9 @@ class ScannerZXing extends Scanner {
     String? toggleCameraModeTooltip,
     String? toggleFlashModeTooltip,
     EdgeInsetsGeometry? contentPadding,
+    void Function(ScannerHardwareController controller)? onScannerCreated,
+    bool showDefaultVisor = true,
+    bool showDefaultBottomControls = true,
   }) {
     return _SmoothBarcodeScannerZXing(
       onScan: onScan,

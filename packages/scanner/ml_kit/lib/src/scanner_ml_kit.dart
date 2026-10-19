@@ -34,6 +34,9 @@ class ScannerMLKit extends Scanner {
     String? toggleCameraModeTooltip,
     String? toggleFlashModeTooltip,
     EdgeInsetsGeometry? contentPadding,
+    void Function(ScannerHardwareController controller)? onScannerCreated,
+    bool showDefaultVisor = true,
+    bool showDefaultBottomControls = true,
   }) {
     return _SmoothBarcodeScannerMLKit(
       onScan: onScan,
@@ -48,6 +51,9 @@ class ScannerMLKit extends Scanner {
       torchOffIcon: torchOffIcon,
       visorColor: visorColor,
       contentPadding: contentPadding,
+      onScannerCreated: onScannerCreated,
+      showDefaultVisor: showDefaultVisor,
+      showDefaultBottomControls: showDefaultBottomControls,
     );
   }
 }
@@ -67,6 +73,9 @@ class _SmoothBarcodeScannerMLKit extends StatefulWidget {
     this.toggleCameraModeTooltip,
     this.toggleFlashModeTooltip,
     this.contentPadding,
+    this.onScannerCreated,
+    this.showDefaultVisor = true,
+    this.showDefaultBottomControls = true,
   });
 
   final Future<bool> Function(String) onScan;
@@ -90,6 +99,9 @@ class _SmoothBarcodeScannerMLKit extends StatefulWidget {
   final EdgeInsetsGeometry? contentPadding;
   final String? toggleCameraModeTooltip;
   final String? toggleFlashModeTooltip;
+  final void Function(ScannerHardwareController controller)? onScannerCreated;
+  final bool showDefaultVisor;
+  final bool showDefaultBottomControls;
 
   @override
   State<StatefulWidget> createState() => _SmoothBarcodeScannerMLKitState();
@@ -98,19 +110,7 @@ class _SmoothBarcodeScannerMLKit extends StatefulWidget {
 class _SmoothBarcodeScannerMLKitState extends State<_SmoothBarcodeScannerMLKit>
     with SingleTickerProviderStateMixin {
   static const List<BarcodeFormat> _barcodeFormats = <BarcodeFormat>[
-    BarcodeFormat.aztec,
-    BarcodeFormat.codabar,
-    BarcodeFormat.code39,
-    BarcodeFormat.code93,
-    BarcodeFormat.code128,
-    BarcodeFormat.dataMatrix,
-    BarcodeFormat.ean8,
-    BarcodeFormat.ean13,
-    BarcodeFormat.itf,
-    BarcodeFormat.pdf417,
     BarcodeFormat.qrCode,
-    BarcodeFormat.upcA,
-    BarcodeFormat.upcE,
   ];
 
   static const ValueKey<String> _visibilityKey = ValueKey<String>(
@@ -127,13 +127,12 @@ class _SmoothBarcodeScannerMLKitState extends State<_SmoothBarcodeScannerMLKit>
 
     _cameraController = CustomScannerController(
       controller: MobileScannerController(
-        autoStart: false,
+        autoStart: true,
         torchEnabled: false,
         formats: _barcodeFormats,
         facing: CameraFacing.back,
         detectionSpeed: DetectionSpeed.normal,
-        detectionTimeoutMs: 250,
-        // to be raised in order to avoid crashes
+        detectionTimeoutMs: 100,
         returnImage: false,
       ),
     );
@@ -141,6 +140,30 @@ class _SmoothBarcodeScannerMLKitState extends State<_SmoothBarcodeScannerMLKit>
       onPause: _onPause,
       onResume: _onResume,
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.onScannerCreated?.call(_cameraController);
+      _cameraController.start();
+    });
+  }
+
+  static Barcode? _pickBestBarcode(List<Barcode> barcodes) {
+    if (barcodes.isEmpty) return null;
+    Barcode? best;
+    double maxArea = -1;
+    for (final Barcode b in barcodes) {
+      final String? val = b.rawValue ?? b.displayValue;
+      if (val == null || val.trim().isEmpty) continue;
+      final double area = (b.size.width > 0 && b.size.height > 0)
+          ? b.size.width * b.size.height
+          : 1.0;
+      if (area > maxArea) {
+        maxArea = area;
+        best = b;
+      }
+    }
+    return best;
   }
 
   Future<void> _onResume() async {
@@ -166,52 +189,85 @@ class _SmoothBarcodeScannerMLKitState extends State<_SmoothBarcodeScannerMLKit>
             MobileScanner(
               controller: _cameraController.controller,
               fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => EMPTY_WIDGET,
+              errorBuilder: (BuildContext context, MobileScannerException error, Widget? child) {
+                debugPrint('[MobileScanner] Camera error: ${error.errorCode} - ${error.errorDetails?.message}');
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        const Icon(
+                          Icons.camera_alt_outlined,
+                          color: Colors.amber,
+                          size: 40,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Kamera tidak dapat dimulai (${error.errorCode.name})',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: () => _cameraController.start(),
+                          child: const Text('Coba Lagi'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
               onDetect: (final BarcodeCapture capture) async {
-                for (final Barcode barcode in capture.barcodes) {
-                  final String? string = barcode.displayValue;
-                  if (string != null) {
-                    await widget.onScan(string);
-                  }
+                final Barcode? best = _pickBestBarcode(capture.barcodes);
+                final String? string = best?.rawValue ?? best?.displayValue;
+                if (string != null && string.trim().isNotEmpty) {
+                  await widget.onScan(string.trim());
                 }
               },
             ),
-            Center(
-              child: SmoothBarcodeScannerVisor(
-                icon: widget.barcodeScannerIcon,
-                contentPadding: widget.contentPadding,
-                color: widget.visorColor ?? Colors.white,
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: EdgeInsetsDirectional.only(
-                  start: SmoothBarcodeScannerVisor.CORNER_PADDING,
-                  end: SmoothBarcodeScannerVisor.CORNER_PADDING,
-                  bottom:
-                      SmoothBarcodeScannerVisor.CORNER_PADDING +
-                      MediaQuery.viewPaddingOf(context).bottom,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    _ToggleCameraIcon(
-                      toggleCameraModeTooltip: widget.toggleCameraModeTooltip,
-                      hapticFeedback: widget.hapticFeedback,
-                    ),
-                    _TorchIcon(
-                      torchOnIcon: widget.torchOnIcon,
-                      torchOffIcon: widget.torchOffIcon,
-                      toggleFlashModeTooltip: widget.toggleFlashModeTooltip,
-                      hapticFeedback: widget.hapticFeedback,
-                      onCameraFlashError: widget.onCameraFlashError,
-                    ),
-                  ],
+            if (widget.showDefaultVisor)
+              Center(
+                child: SmoothBarcodeScannerVisor(
+                  icon: widget.barcodeScannerIcon,
+                  contentPadding: widget.contentPadding,
+                  color: widget.visorColor ?? Colors.white,
                 ),
               ),
-            ),
+            if (widget.showDefaultBottomControls)
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Padding(
+                  padding: EdgeInsetsDirectional.only(
+                    start: SmoothBarcodeScannerVisor.CORNER_PADDING,
+                    end: SmoothBarcodeScannerVisor.CORNER_PADDING,
+                    bottom:
+                        SmoothBarcodeScannerVisor.CORNER_PADDING +
+                        MediaQuery.viewPaddingOf(context).bottom,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      _ToggleCameraIcon(
+                        toggleCameraModeTooltip: widget.toggleCameraModeTooltip,
+                        hapticFeedback: widget.hapticFeedback,
+                      ),
+                      _TorchIcon(
+                        torchOnIcon: widget.torchOnIcon,
+                        torchOffIcon: widget.torchOffIcon,
+                        toggleFlashModeTooltip: widget.toggleFlashModeTooltip,
+                        hapticFeedback: widget.hapticFeedback,
+                        onCameraFlashError: widget.onCameraFlashError,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),

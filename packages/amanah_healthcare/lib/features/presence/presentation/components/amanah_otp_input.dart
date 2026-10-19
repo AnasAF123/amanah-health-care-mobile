@@ -57,11 +57,12 @@ class _AmanahOtpInputState extends State<AmanahOtpInput> {
 
   void _onDigitChanged(int index, String value) {
     if (value.length > 1) {
-      // Paste handling
-      final String digitsOnly = value.replaceAll(RegExp(r'\D'), '');
+      // Paste handling for 6-character alphanumeric QR tokens (e.g. 5B8ZJ5)
+      final String charsOnly =
+          value.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
       for (int i = 0; i < widget.length; i++) {
-        if (i < digitsOnly.length) {
-          _controllers[i].text = digitsOnly[i];
+        if (i < charsOnly.length) {
+          _controllers[i].text = charsOnly[i];
         }
       }
       final String otp = _currentOtp;
@@ -70,7 +71,7 @@ class _AmanahOtpInputState extends State<AmanahOtpInput> {
         widget.onCompleted!(otp);
       }
       final int nextFocus =
-          digitsOnly.length < widget.length ? digitsOnly.length : widget.length - 1;
+          charsOnly.length < widget.length ? charsOnly.length : widget.length - 1;
       _focusNodes[nextFocus].requestFocus();
       return;
     }
@@ -172,7 +173,8 @@ class _DigitBox extends StatelessWidget {
         controller: controller,
         focusNode: focusNode,
         scrollPadding: EdgeInsets.zero,
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.text,
+        textCapitalization: TextCapitalization.characters,
         textAlign: TextAlign.center,
         maxLength: 1,
         style: TextStyle(
@@ -181,7 +183,7 @@ class _DigitBox extends StatelessWidget {
           color: textColor,
         ),
         inputFormatters: <TextInputFormatter>[
-          FilteringTextInputFormatter.digitsOnly,
+          FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
         ],
         decoration: InputDecoration(
           counterText: '',
@@ -205,7 +207,15 @@ class _DigitBox extends StatelessWidget {
             ),
           ),
         ),
-        onChanged: onChanged,
+        onChanged: (String val) {
+          if (val.isNotEmpty && val != val.toUpperCase()) {
+            controller.value = controller.value.copyWith(
+              text: val.toUpperCase(),
+              selection: const TextSelection.collapsed(offset: 1),
+            );
+          }
+          onChanged(val.toUpperCase());
+        },
       ),
     );
   }

@@ -13,25 +13,28 @@ class CameraHelper {
     if (!isSupported) {
       _cameras = <CameraDescription>[];
     } else {
-      _cameras = await availableCameras();
+      try {
+        _cameras = await availableCameras();
+      } catch (_) {
+        _cameras = <CameraDescription>[];
+      }
     }
   }
 
   /// Returns if the device has more than one camera
   static bool get hasMoreThanOneCamera {
-    if (_cameras == null) {
-      throw Exception('Please call [init] before!');
+    if (_cameras != null && _cameras!.isNotEmpty) {
+      return _cameras!.length > 1;
     }
-    return _cameras!.length > 1;
+    return Platform.isAndroid || Platform.isIOS;
   }
 
   /// Returns if the device has at least one camera
   static bool get hasACamera {
-    if (_cameras == null) {
-      throw Exception('Please call [init] before!');
-    } else {
-      return _cameras!.isNotEmpty;
+    if (_cameras != null && _cameras!.isNotEmpty) {
+      return true;
     }
+    return Platform.isAndroid || Platform.isIOS;
   }
 
   static bool get isSupported => kIsWeb || Platform.isAndroid || Platform.isIOS;

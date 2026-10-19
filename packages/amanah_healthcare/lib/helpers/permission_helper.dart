@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -22,23 +22,31 @@ class PermissionListener extends ValueNotifier<DevicePermission> {
   }
 
   Future<void> _refreshPermissionStatus() async {
-    bool permissionGranted;
-    if (permission == Permission.camera && !CameraHelper.hasACamera) {
-      /// If a device doesn't have a camera, let's pretend the permission is
-      /// granted.
-      permissionGranted = true;
-    } else {
-      permissionGranted = await permission.isGranted;
+    try {
+      bool permissionGranted;
+      if (permission == Permission.camera && !CameraHelper.hasACamera) {
+        /// If a device doesn't have a camera, let's pretend the permission is
+        /// granted.
+        permissionGranted = true;
+      } else {
+        permissionGranted = await permission.isGranted;
+      }
+
+      value = DevicePermission._(
+        permission,
+        permissionGranted
+            ? DevicePermissionStatus.granted
+            : DevicePermissionStatus.unknown,
+      );
+    } catch (e) {
+      debugPrint('[PermissionListener] Error checking permission: $e');
+      value = DevicePermission._(
+        permission,
+        DevicePermissionStatus.unknown,
+      );
+    } finally {
+      _status = _DevicePermissionStatus.answered;
     }
-
-    value = DevicePermission._(
-      permission,
-      permissionGranted
-          ? DevicePermissionStatus.granted
-          : DevicePermissionStatus.unknown,
-    );
-
-    _status = _DevicePermissionStatus.answered;
   }
 
   Future<void> askPermission({

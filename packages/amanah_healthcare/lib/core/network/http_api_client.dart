@@ -182,7 +182,8 @@ class HttpApiClient implements ApiClient {
     String? message;
     if (decoded is Map<String, dynamic>) {
       code = decoded['code'] as String?;
-      message = decoded['message'] as String? ??
+      message = decoded['detail'] as String? ??
+          decoded['message'] as String? ??
           (decoded['error'] is Map
               ? decoded['error']['message'] as String?
               : decoded['error'] as String?);

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/helpers/permission_helper.dart';
 
-class CameraPermissionViewport extends StatelessWidget {
+class CameraPermissionViewport extends StatefulWidget {
   const CameraPermissionViewport({
     super.key,
     required this.status,
@@ -13,8 +13,26 @@ class CameraPermissionViewport extends StatelessWidget {
   final VoidCallback onRequestPermission;
 
   @override
+  State<CameraPermissionViewport> createState() =>
+      _CameraPermissionViewportState();
+}
+
+class _CameraPermissionViewportState extends State<CameraPermissionViewport> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.status == DevicePermissionStatus.unknown) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          widget.onRequestPermission();
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (status == DevicePermissionStatus.checking) {
+    if (widget.status == DevicePermissionStatus.checking) {
       return const ColoredBox(
         color: AmanahColorTokens.canvasDark,
         child: Center(child: CircularProgressIndicator.adaptive()),
@@ -46,7 +64,7 @@ class CameraPermissionViewport extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               ElevatedButton(
-                onPressed: onRequestPermission,
+                onPressed: widget.onRequestPermission,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AmanahColorTokens.brandAccent,
                   foregroundColor: AmanahColorTokens.surfaceLight,

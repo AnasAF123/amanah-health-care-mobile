@@ -119,11 +119,11 @@ class ObservableHttpClient extends http.BaseClient {
       final http.StreamedResponse response = await _inner.send(request);
       stopwatch.stop();
 
-      final String? contentType = response.headers['content-type'];
+      final String? contentType = response.headers['content-type']?.toLowerCase();
       final bool isTextual = contentType == null ||
-          contentType.contains('application/json') ||
+          contentType.contains('json') ||
           contentType.contains('text/') ||
-          contentType.contains('application/xml');
+          contentType.contains('xml');
 
       // If response body inspection is disabled or content is binary/streaming, forward directly
       if (!_config.logResponseBody || !isTextual || response.contentLength != null && response.contentLength! > _config.maxBodyCharacters * 2) {

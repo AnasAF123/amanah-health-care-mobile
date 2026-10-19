@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:scanner_shared/scanner_shared.dart';
 import 'package:torch_light/torch_light.dart';
 
-class CustomScannerController {
+class CustomScannerController implements ScannerHardwareController {
   CustomScannerController({required MobileScannerController controller})
     : _controller = controller,
       _torchState = TorchState(),
@@ -93,6 +94,7 @@ class CustomScannerController {
 
   ValueNotifier<bool?> get hasTorchState => _torchState;
 
+  @override
   bool get isTorchOn => _torchState.value == true;
 
   void turnTorchOff() {
@@ -109,7 +111,8 @@ class CustomScannerController {
     }
   }
 
-  void toggleTorch() {
+  @override
+  Future<void> toggleTorch() async {
     if (isTorchOn) {
       turnTorchOff();
     } else {
@@ -119,6 +122,15 @@ class CustomScannerController {
 
   ValueNotifier<int> get availableCameras => _availableCamerasState;
   ValueNotifier<CameraFacing> get cameraFacing => _cameraFacingState;
+
+  @override
+  ValueNotifier<bool?> get torchState => _torchState;
+
+  @override
+  bool get isFrontCamera => _controller.facing == CameraFacing.front;
+
+  @override
+  Future<void> switchCamera() => toggleCamera();
 
   Future<void> toggleCamera() async {
     await _controller.switchCamera();

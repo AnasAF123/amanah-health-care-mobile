@@ -1,14 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:app_store_apple_store/app_store_apple.dart';
+import 'package:app_store_google_play/app_store_google.dart';
 import 'package:app_store_shared/app_store_shared.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_better_auth/flutter_better_auth.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
+import 'package:scanner_ml_kit/scanner_ml_kit.dart';
 import 'package:scanner_shared/scanner_shared.dart';
 import 'package:amanah_healthcare/core/init/amanah_core_initializer.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/screen/auth_bottom_sheet_screen.dart';
@@ -19,17 +20,23 @@ import 'package:amanah_healthcare/helpers/global_vars.dart';
 import 'package:amanah_healthcare/helpers/permission_helper.dart';
 
 void main() {
-  debugPrint('--------');
-  debugPrint('The app must not be started using the main.dart file');
-  debugPrint('Please start the app using:');
-  debugPrint(' - flutter run -t lib/entrypoints/android/main_google_play.dart');
-  debugPrint(' - flutter run -t lib/entrypoints/ios/main_ios.dart');
-  debugPrint('--------');
+  WidgetsFlutterBinding.ensureInitialized();
 
-  if (Platform.isAndroid) {
-    SystemNavigator.pop();
+  if (Platform.isIOS || Platform.isMacOS) {
+    launchAmanahApp(
+      barcodeScanner: const ScannerMLKit(),
+      appStore: AppleAppStore('588797948'),
+      storeLabel: StoreLabel.AppleAppStore,
+      scannerLabel: ScannerLabel.MLKit,
+    );
   } else {
-    exit(2);
+    // Default to Android Google Play / generic target
+    launchAmanahApp(
+      barcodeScanner: const ScannerMLKit(),
+      appStore: GooglePlayStore(),
+      scannerLabel: ScannerLabel.MLKit,
+      storeLabel: StoreLabel.GooglePlayStore,
+    );
   }
 }
 
@@ -58,14 +65,6 @@ class AmanahApp extends StatefulWidget {
 }
 
 class _AmanahAppState extends State<AmanahApp> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FlutterNativeSplash.remove();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return MultiProvider(

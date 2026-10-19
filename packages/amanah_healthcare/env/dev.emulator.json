@@ -1,0 +1,9 @@
+{
+  "APP_ENV": "development",
+  "AUTH_BASE_URL": "http://10.0.2.2:3001",
+  "AUTH_SCHEME": "amanahhealth",
+  "GOOGLE_PROJECT_ID": "klinik-amanah-healthcare",
+  "GOOGLE_OAUTH_CLIENT_ID_ANDROID": "649477011186-akbd11b8rgbbs8ipot3cf27alle6ac8v.apps.googleusercontent.com",
+  "GOOGLE_OAUTH_CLIENT_ID_IOS": "",
+  "GOOGLE_OAUTH_CLIENT_ID_WEB": "649477011186-augsamgganq024tesomp0c8rvgs9c7ua.apps.googleusercontent.com"
+}

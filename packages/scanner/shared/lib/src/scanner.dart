@@ -32,5 +32,23 @@ abstract class Scanner {
 
     /// Padding to apply to the content (eg: the visor)
     EdgeInsetsGeometry? contentPadding,
+
+    /// Optional callback when underlying hardware controller is ready
+    void Function(ScannerHardwareController controller)? onScannerCreated,
+
+    /// Whether to render legacy Smooth App visor
+    bool showDefaultVisor = true,
+
+    /// Whether to render legacy Smooth App bottom controls
+    bool showDefaultBottomControls = true,
   });
+}
+
+/// Abstract contract for controlling hardware camera features (flash & flip)
+abstract class ScannerHardwareController {
+  Future<void> toggleTorch();
+  Future<void> switchCamera();
+  bool get isTorchOn;
+  bool get isFrontCamera;
+  ValueNotifier<bool?> get torchState;
 }

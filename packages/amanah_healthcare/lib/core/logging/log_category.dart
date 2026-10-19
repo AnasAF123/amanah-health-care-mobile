@@ -15,6 +15,7 @@ class LogCategory {
   static const LogCategory database = LogCategory('database');
   static const LogCategory system = LogCategory('system');
   static const LogCategory ui = LogCategory('ui');
+  static const LogCategory scanner = LogCategory('scanner');
 
   /// Factory for dynamic / custom categories
   const factory LogCategory.custom(String name) = LogCategory;

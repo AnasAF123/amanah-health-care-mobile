@@ -61,6 +61,8 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
   AmanahScheduleViewMode? _scheduleInitialViewMode;
   bool _scheduleOpenDetailOnLaunch = false;
   bool _isScanDrawerOpen = false;
+  final GlobalKey<AmanahQrScannerTabScreenState> _scannerKey =
+      GlobalKey<AmanahQrScannerTabScreenState>();
 
   @override
   void initState() {
@@ -177,7 +179,26 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     final List<DoctorSchedule> todaySchedules =
         _scheduleStore.getSchedulesForDate(AmanahScheduleStore.baseToday);
 
-    return Scaffold(
+    return PopScope(
+      canPop: _selectedTab == AmanahHomeTab.home && !_isScanDrawerOpen,
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
+        if (didPop) return;
+        if (_isScanDrawerOpen) {
+          _scannerKey.currentState?.closeDrawer();
+          setState(() => _isScanDrawerOpen = false);
+          return;
+        }
+        if (_selectedTab != AmanahHomeTab.home) {
+          setState(() {
+            _scheduleInitialSessionId = null;
+            _scheduleInitialViewMode = null;
+            _scheduleOpenDetailOnLaunch = false;
+            _selectedTab = AmanahHomeTab.home;
+          });
+          return;
+        }
+      },
+      child: Scaffold(
       backgroundColor: bgColor,
       extendBody: true,
       body: Stack(
@@ -246,7 +267,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   },
                 ),
                 AmanahHomeTab.scan => AmanahQrScannerTabScreen(
-                  key: const ValueKey<String>('scan_content'),
+                  key: _scannerKey,
                   user: _currentUser,
                   bottomNavigationClearance:
                       96 + MediaQuery.viewPaddingOf(context).bottom,
@@ -316,9 +337,11 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                 });
               },
             ),
+      ),
     );
   }
 }
+
 
 class _AmanahHomeScreenContent extends StatelessWidget {
   const _AmanahHomeScreenContent({

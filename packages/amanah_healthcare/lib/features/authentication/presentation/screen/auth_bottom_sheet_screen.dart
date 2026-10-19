@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:amanah_healthcare/core/auth/amanah_auth_session_manager.dart';
 import 'package:amanah_healthcare/core/notifications/amanah_push_service.dart';
 import 'package:amanah_healthcare/core/presentation/components/amanah_bottom_banner.dart';
@@ -16,6 +17,7 @@ import 'package:amanah_healthcare/features/authentication/presentation/organisms
 import 'package:amanah_healthcare/features/authentication/presentation/screen/staff_onboarding_screen.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_notification_model.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_home_shell.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/permission/data/amanah_permission_store.dart';
 import 'package:amanah_healthcare/features/queue/presentation/state/amanah_queue_store.dart';
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
@@ -52,6 +54,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen>
     with WidgetsBindingObserver {
   AmanahAuthUser? _authenticatedUser;
   bool _showOnboardingScreen = true;
+  bool _isRestoringSession = true;
   StreamSubscription<AuthSessionEvent>? _sessionSubscription;
 
   @override
@@ -127,12 +130,24 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen>
         setState(() {
           _authenticatedUser = user;
           _showOnboardingScreen = true;
+          _isRestoringSession = false;
         });
         widget.onAuthenticated?.call(user);
         unawaited(AmanahPushService.instance.registerDeviceWithBackend());
+      } else if (mounted) {
+        setState(() {
+          _isRestoringSession = false;
+        });
       }
     } catch (e) {
       AmanahAuthLogger.logLifecycle('Session restoration check error: $e');
+      if (mounted) {
+        setState(() {
+          _isRestoringSession = false;
+        });
+      }
+    } finally {
+      FlutterNativeSplash.remove();
     }
   }
 
@@ -163,6 +178,13 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (_isRestoringSession) {
+      return const Scaffold(
+        backgroundColor: AmanahColorTokens.canvasDark,
+        body: SizedBox.expand(),
+      );
+    }
+
     final AmanahAuthUser? user = _authenticatedUser;
     if (user != null) {
       if (user.needsOnboarding && _showOnboardingScreen) {

@@ -72,7 +72,7 @@ class AmanahNotificationDetailModal extends StatelessWidget {
             const SizedBox(height: 24),
             AmanahButton(
               text: 'Buka Modul Cuti & Pengganti',
-              icon: Icons.calendar_month_rounded,
+              leadingIcon: Icons.calendar_month_rounded,
               isFullWidth: true,
               onPressed: () {
                 Navigator.of(context).pop();
@@ -85,7 +85,7 @@ class AmanahNotificationDetailModal extends StatelessWidget {
             const SizedBox(height: 24),
             AmanahButton(
               text: 'Buka Riwayat Presensi',
-              icon: Icons.history_rounded,
+              leadingIcon: Icons.history_rounded,
               isFullWidth: true,
               onPressed: () {
                 Navigator.of(context).pop();

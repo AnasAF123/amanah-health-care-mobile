@@ -1,41 +1,70 @@
 {
   "version": "0.2.0",
   "configurations": [
-    
     {
-      "name": "Amanah Healthcare (Android - Google Play)",
+      "name": "Amanah (Physical Device USB - dev.device)",
       "type": "dart",
       "request": "launch",
       "program": "lib/entrypoints/android/main_google_play.dart",
       "cwd": "packages/amanah_healthcare",
       "args": [
-        "--android-skip-build-dependency-validation"
+        "--android-skip-build-dependency-validation",
+        "--dart-define-from-file=env/dev.device.json"
       ]
     },
     {
-      "name": "Android - FDroid",
+      "name": "Amanah (Android Emulator - dev.emulator)",
       "type": "dart",
       "request": "launch",
-      "program": "lib/entrypoints/android/main_fdroid.dart",
+      "program": "lib/entrypoints/android/main_google_play.dart",
       "cwd": "packages/amanah_healthcare",
       "args": [
-        "--android-skip-build-dependency-validation"
+        "--android-skip-build-dependency-validation",
+        "--dart-define-from-file=env/dev.emulator.json"
       ]
     },
     {
-      "name": "iOS/macOS",
+      "name": "Amanah (Staging - staging.json)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/entrypoints/android/main_google_play.dart",
+      "cwd": "packages/amanah_healthcare",
+      "args": [
+        "--android-skip-build-dependency-validation",
+        "--dart-define-from-file=env/staging.json"
+      ]
+    },
+    {
+      "name": "Amanah (Production - prod.json)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/entrypoints/android/main_google_play.dart",
+      "cwd": "packages/amanah_healthcare",
+      "args": [
+        "--android-skip-build-dependency-validation",
+        "--dart-define-from-file=env/prod.json"
+      ]
+    },
+    {
+      "name": "iOS / macOS (dev.device)",
       "type": "dart",
       "request": "launch",
       "program": "lib/entrypoints/ios/main_ios.dart",
-      "cwd": "packages/amanah_healthcare"
+      "cwd": "packages/amanah_healthcare",
+      "args": [
+        "--dart-define-from-file=env/dev.device.json"
+      ]
     },
     {
-      "name": "Windows Desktop",
+      "name": "Windows Desktop (dev.device)",
       "type": "dart",
       "request": "launch",
-      "program": "lib/entrypoints/android/main_google_play.dart",
+      "program": "lib/main.dart",
       "cwd": "packages/amanah_healthcare",
-      "deviceId": "windows"
+      "deviceId": "windows",
+      "args": [
+        "--dart-define-from-file=env/dev.device.json"
+      ]
     }
   ]
 }
