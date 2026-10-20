@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/state/staff_onboarding_controller.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_avatar_photo_sheet.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_edit_profile_drawer.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 import 'package:amanah_healthcare/widgets/amanah_avatar.dart';

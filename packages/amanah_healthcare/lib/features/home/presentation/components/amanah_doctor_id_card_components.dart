@@ -250,7 +250,7 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
         'sip': widget.profile.sip,
         'hospital': widget.profile.hospital.toUpperCase(),
         'department': widget.profile.department,
-        'avatarUrl': '/assets/images/doctors/woman-doctor-4.png',
+        'avatarUrl': widget.profile.avatarUrl ?? '/assets/images/doctors/woman-doctor-4.png',
         'v': DateTime.now().millisecondsSinceEpoch.toString(),
       },
     );
@@ -308,7 +308,7 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
       'sip': widget.profile.sip,
       'hospital': widget.profile.hospital.toUpperCase(),
       'department': widget.profile.department,
-      'avatarUrl': '/assets/images/doctors/woman-doctor-4.png',
+      'avatarUrl': widget.profile.avatarUrl ?? '/assets/images/doctors/woman-doctor-4.png',
     };
   }
 
@@ -320,6 +320,7 @@ class _AmanahDoctorIdCardStageState extends State<AmanahDoctorIdCardStage>
       'hospital': profile.hospital,
       'department': profile.department,
       'avatarAsset': profile.avatarAsset,
+      'avatarUrl': profile.avatarUrl ?? '',
     });
   }
 

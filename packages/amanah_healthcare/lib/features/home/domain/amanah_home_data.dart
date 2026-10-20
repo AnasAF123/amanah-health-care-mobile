@@ -26,6 +26,7 @@ class AmanahDoctorProfile {
     this.hospital = 'RS Amanah Sehat',
     this.department = 'Pelayanan Medis',
     this.avatarAsset = 'assets/amanah/id_card/images/woman-doctor-4.png',
+    this.avatarUrl,
   });
 
   factory AmanahDoctorProfile.fromAuthUser(
@@ -62,6 +63,7 @@ class AmanahDoctorProfile {
     final String nik = user.staff?.idCardNumber ?? '';
     final String email = user.email;
     final String phone = user.staff?.phoneNumber ?? user.phone;
+    final String? avatarUrl = user.avatar.directUrl ?? (user.avatar.url.isNotEmpty ? user.avatar.url : null);
 
     return AmanahDoctorProfile(
       name: doctorName,
@@ -81,6 +83,7 @@ class AmanahDoctorProfile {
               ? 'Kebidanan & Kandungan'
               : 'Administrasi Medis',
       avatarAsset: 'assets/amanah/id_card/images/woman-doctor-4.png',
+      avatarUrl: avatarUrl,
     );
   }
 
@@ -97,6 +100,7 @@ class AmanahDoctorProfile {
   final String hospital;
   final String department;
   final String avatarAsset;
+  final String? avatarUrl;
 }
 
 class AmanahQuickAction {

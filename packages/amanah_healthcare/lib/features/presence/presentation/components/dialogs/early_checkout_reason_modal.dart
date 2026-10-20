@@ -77,7 +77,7 @@ class _EarlyCheckoutReasonModalState extends State<EarlyCheckoutReasonModal> {
             'Mohon masukkan alasan kepulangan lebih awal.',
             style: TextStyle(fontSize: 12),
           ),
-          backgroundColor: AmanahColorTokens.destructive,
+          backgroundColor: AmanahColorTokens.danger,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -95,7 +95,7 @@ class _EarlyCheckoutReasonModalState extends State<EarlyCheckoutReasonModal> {
     final bool dark = theme.brightness == Brightness.dark;
 
     final Color surfaceColor =
-        dark ? AmanahColorTokens.cardDark : AmanahColorTokens.surfaceLight;
+        dark ? AmanahColorTokens.surfaceDark : AmanahColorTokens.surfaceLight;
     final Color textColor =
         dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
     final Color subtextColor =

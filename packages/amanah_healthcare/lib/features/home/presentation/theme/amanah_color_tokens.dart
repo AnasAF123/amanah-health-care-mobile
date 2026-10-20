@@ -508,6 +508,7 @@ abstract final class AmanahColorTokens {
   static const Color dangerDark = Color(0xFFDC2626);
   static const Color dangerSurface = Color(0xFFFFF1F2);
   static const Color dangerBorder = Color(0xFFFECDD3);
+  static const Color destructive = danger;
 
   static const Color violet = Color(0xFF8B5CF6);
   static const Color violetDark = Color(0xFF6D28D9);
@@ -569,6 +570,7 @@ abstract final class AmanahColorTokens {
 
   /// Level 1 Card Surface (#0F1422 from .web MasterCarousel, ClinicAnalytics, etc.)
   static const Color surfaceDark = Color(0xFF0F1422);
+  static const Color cardDark = surfaceDark;
 
   /// Level 2 Inset / Sub-card Container Surface (#131B2E from .web)
   static const Color surfaceSecondaryDark = Color(0xFF131B2E);
@@ -698,7 +700,7 @@ abstract final class AmanahColorTokens {
   // 7. Navigation & Tab Accent Tokens (from BottomNavBar.tsx)
   // ---------------------------------------------------------------------------
   static const Color tabActiveLight = Color(0xFF0D66E9);
-  static const Color tabActiveDark = Color(0xFF22D3EE); // text-cyan-400 from .web
+  static const Color tabActiveDark = Color(0xFF38BDF8); // AmanahColorTokens.skySoft (harmonious clinical sky accent)
   static const Color tabInactiveLight = Color(0xFF9CA3AF);
   static const Color tabInactiveDark = Color(0xFF737373); // text-neutral-500 from .web
 

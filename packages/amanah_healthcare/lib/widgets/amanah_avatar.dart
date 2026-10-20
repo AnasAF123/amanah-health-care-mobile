@@ -18,8 +18,45 @@ class AmanahAvatar extends StatelessWidget {
     this.initialsColor,
     this.semanticsLabel,
     this.isLoading = false,
+    this.shape = BoxShape.circle,
+    this.borderRadius,
     super.key,
   });
+
+  /// Factory constructor for staff/doctor avatars with squircle/rounded rectangle styling
+  factory AmanahAvatar.staff({
+    String? avatarUrl,
+    required String name,
+    double size = 42.0,
+    VoidCallback? onTap,
+    BoxBorder? border,
+    List<BoxShadow>? boxShadow,
+    Color? backgroundColor,
+    Color? initialsColor,
+    String? semanticsLabel,
+    Key? key,
+  }) {
+    final String cleanInitials = UserAvatar.extractInitials(name);
+    final bool hasUrl = avatarUrl != null && avatarUrl.trim().isNotEmpty;
+    return AmanahAvatar(
+      key: key,
+      avatar: UserAvatar(
+        url: hasUrl ? avatarUrl.trim() : '',
+        initials: cleanInitials,
+        type: hasUrl ? 'custom' : 'initials',
+        hasCustomAvatar: hasUrl,
+      ),
+      radius: size / 2,
+      shape: BoxShape.rectangle,
+      borderRadius: BorderRadius.circular(AmanahRadius.md),
+      border: border,
+      boxShadow: boxShadow,
+      backgroundColor: backgroundColor,
+      initialsColor: initialsColor,
+      semanticsLabel: semanticsLabel ?? name,
+      onTap: onTap,
+    );
+  }
 
   final UserAvatar avatar;
   final String? baseUrl;
@@ -31,6 +68,8 @@ class AmanahAvatar extends StatelessWidget {
   final Color? initialsColor;
   final String? semanticsLabel;
   final bool isLoading;
+  final BoxShape shape;
+  final BorderRadius? borderRadius;
 
   static String resolveDefaultBaseUrl() {
     if (!kIsWeb && Platform.isAndroid) {
@@ -61,16 +100,27 @@ class AmanahAvatar extends StatelessWidget {
 
     final Color brandBg = backgroundColor ?? AmanahColorTokens.brand;
     final Color textColor = initialsColor ?? Colors.white;
+    final BorderRadius effectiveBorderRadius = borderRadius ??
+        (shape == BoxShape.circle
+            ? BorderRadius.circular(radius)
+            : BorderRadius.circular(AmanahRadius.md));
+
+    Widget clipContent(Widget child) {
+      if (shape == BoxShape.circle) {
+        return ClipOval(child: child);
+      }
+      return ClipRRect(borderRadius: effectiveBorderRadius, child: child);
+    }
 
     if (avatar.type == 'initials' || avatar.url.isEmpty) {
-      avatarContent = _buildInitialsWidget(brandBg, textColor);
+      avatarContent = _buildInitialsWidget(brandBg, textColor, effectiveBorderRadius);
     } else {
       final String fullUrl = _resolvedFullUrl;
       avatarContent = SizedBox(
         width: radius * 2,
         height: radius * 2,
-        child: ClipOval(
-          child: Image.network(
+        child: clipContent(
+          Image.network(
             fullUrl,
             fit: BoxFit.cover,
             alignment: Alignment.topCenter,
@@ -96,7 +146,7 @@ class AmanahAvatar extends StatelessWidget {
               Object error,
               StackTrace? stackTrace,
             ) {
-              return _buildInitialsWidget(brandBg, textColor);
+              return _buildInitialsWidget(brandBg, textColor, effectiveBorderRadius);
             },
           ),
         ),
@@ -112,7 +162,8 @@ class AmanahAvatar extends StatelessWidget {
             width: radius * 2,
             height: radius * 2,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
+              shape: shape,
+              borderRadius: shape == BoxShape.rectangle ? effectiveBorderRadius : null,
               color: Colors.black.withValues(alpha: 0.45),
             ),
             alignment: Alignment.center,
@@ -135,11 +186,12 @@ class AmanahAvatar extends StatelessWidget {
         width: radius * 2,
         height: radius * 2,
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
+          shape: shape,
+          borderRadius: shape == BoxShape.rectangle ? effectiveBorderRadius : null,
           border: border,
           boxShadow: boxShadow,
         ),
-        child: ClipOval(child: avatarContent),
+        child: clipContent(avatarContent),
       );
     }
 
@@ -162,16 +214,37 @@ class AmanahAvatar extends StatelessWidget {
     return decorated;
   }
 
-  Widget _buildInitialsWidget(Color brandBg, Color textColor) {
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: brandBg,
+  Widget _buildInitialsWidget(Color brandBg, Color textColor, BorderRadius effectiveBorderRadius) {
+    if (shape == BoxShape.circle) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: brandBg,
+        child: Text(
+          avatar.initials.isNotEmpty ? avatar.initials : 'AH',
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.w800,
+            fontSize: radius * 0.75,
+            letterSpacing: 0.5,
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      width: radius * 2,
+      height: radius * 2,
+      decoration: BoxDecoration(
+        color: brandBg,
+        borderRadius: effectiveBorderRadius,
+      ),
+      alignment: Alignment.center,
       child: Text(
         avatar.initials.isNotEmpty ? avatar.initials : 'AH',
         style: TextStyle(
           color: textColor,
           fontWeight: FontWeight.w800,
-          fontSize: radius * 0.75,
+          fontSize: radius * 0.72,
           letterSpacing: 0.5,
         ),
       ),

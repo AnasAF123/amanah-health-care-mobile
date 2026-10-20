@@ -93,8 +93,14 @@ abstract final class PermissionMapper {
       workDate: dto.workDate,
       originalStaffProfileId: dto.originalStaffProfileId,
       originalPractitionerId: dto.originalPractitionerId,
+      originalStaffName: dto.originalStaffName,
+      originalStaffRole: dto.originalStaffRole,
+      originalStaffAvatarUrl: dto.originalStaffAvatarUrl,
       claimedByStaffProfileId: dto.claimedByStaffProfileId,
       claimedByPractitionerId: dto.claimedByPractitionerId,
+      claimedByName: dto.claimedByName,
+      claimedByRole: dto.claimedByRole,
+      claimedByAvatarUrl: dto.claimedByAvatarUrl,
       status: dto.status,
       claimedAt:
           dto.claimedAt != null ? DateTime.tryParse(dto.claimedAt!) : null,
@@ -104,6 +110,9 @@ abstract final class PermissionMapper {
         rawLabel: dto.sessionLabel,
         sessionCode: dto.sessionCode,
       ),
+      startTime: dto.startTime,
+      endTime: dto.endTime,
+      leaveReason: dto.leaveReason,
     );
   }
 }

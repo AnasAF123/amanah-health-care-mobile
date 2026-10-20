@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
+export 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart'
+    show AmanahBadgeVariant;
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 /// Resolved visual styling contract for [AmanahStatusBadge] and [AmanahPill].

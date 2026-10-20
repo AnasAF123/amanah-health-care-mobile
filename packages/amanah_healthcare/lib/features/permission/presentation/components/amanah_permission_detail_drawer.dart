@@ -51,7 +51,7 @@ class AmanahPermissionDetailDrawer extends StatelessWidget {
     return AmanahBottomSheetScaffold(
       title: 'Detail perizinan',
       subtitle: item.formattedDateRange,
-      minHeight: 480,
+      hugContent: true,
       maxHeightFactor: 0.88,
       trailing: _PermissionDetailOverflow(
         item: item,
@@ -352,41 +352,58 @@ class _PermissionTextSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool dark = AmanahThemeTokens.isDark(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AmanahSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: AmanahThemeTokens.textPrimary(context),
-            ),
+      padding: const EdgeInsets.symmetric(vertical: AmanahSpacing.md),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: dark
+              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.04)
+              : AmanahColorTokens.neutral100,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: dark
+                ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.08)
+                : AmanahColorTokens.neutral200,
           ),
-          const SizedBox(height: AmanahSpacing.sm),
-          Text(
-            body,
-            style: TextStyle(
-              fontSize: 13.5,
-              fontWeight: FontWeight.w500,
-              color: AmanahThemeTokens.textSecondary(context),
-              height: 1.5,
-            ),
-          ),
-          if (footer != null) ...<Widget>[
-            const SizedBox(height: AmanahSpacing.xs),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
             Text(
-              footer!,
+              title,
               style: TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w600,
-                color: AmanahThemeTokens.textTertiary(context),
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AmanahThemeTokens.textSecondary(context),
               ),
             ),
+            const SizedBox(height: 4),
+            Text(
+              body,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w500,
+                color: AmanahThemeTokens.textPrimary(context),
+                height: 1.4,
+              ),
+            ),
+            if (footer != null) ...<Widget>[
+              const SizedBox(height: 6),
+              Text(
+                footer!,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AmanahThemeTokens.textTertiary(context),
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

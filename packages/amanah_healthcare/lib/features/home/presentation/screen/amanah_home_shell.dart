@@ -289,6 +289,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   doctorRole: _currentUser.isDoctor
                       ? 'Dokter Spesialis'
                       : 'Tenaga Medis',
+                  staffProfileId: _currentUser.staff?.id ?? '',
                   onBack: () {
                     setState(() => _selectedTab = AmanahHomeTab.home);
                   },

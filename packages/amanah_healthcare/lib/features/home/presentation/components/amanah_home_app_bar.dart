@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/widgets/amanah_avatar.dart';
 
 /// Organism: DoctorProfileHeader App Bar matching DoctorProfileHeader.tsx (.web)
 /// Renders doctor avatar, doctor name with drop shadow, greeting, and frosted unread notification bell.
@@ -37,7 +38,10 @@ class AmanahHomeAppBar extends StatelessWidget {
             height: AmanahComponentSize.iconButton,
             child: Row(
               children: <Widget>[
-                const _DoctorAvatar(),
+                _DoctorAvatar(
+                  avatar: user.avatar,
+                  name: user.fullName,
+                ),
                 const SizedBox(width: AmanahSpacing.md),
                 Expanded(
                   child: Column(
@@ -92,53 +96,33 @@ class AmanahHomeAppBar extends StatelessWidget {
   }
 }
 
-/// Atom: Doctor Avatar with circular border and fallback hero asset
+/// Atom: Doctor Avatar with circular border and dynamic AmanahAvatar
 class _DoctorAvatar extends StatelessWidget {
-  const _DoctorAvatar();
+  const _DoctorAvatar({
+    required this.avatar,
+    required this.name,
+  });
+
+  final UserAvatar avatar;
+  final String name;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      label: 'Foto profil dokter',
-      image: true,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.35),
-            width: 1.5,
-          ),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: AmanahColorTokens.pureBlack.withValues(alpha: 0.12),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: ClipOval(
-          child: Image.asset(
-            'assets/amanah/images/woman-signin-hero.png',
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter,
-            filterQuality: FilterQuality.high,
-            errorBuilder:
-                (BuildContext context, Object error, StackTrace? stackTrace) {
-                  return Container(
-                    color: AmanahColorTokens.brand.withValues(alpha: 0.40),
-                    alignment: Alignment.center,
-                    child: const Icon(
-                      Icons.person,
-                      color: AmanahColorTokens.surfaceLight,
-                      size: 22,
-                    ),
-                  );
-                },
-          ),
-        ),
+    return AmanahAvatar(
+      avatar: avatar,
+      radius: 20,
+      border: Border.all(
+        color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.35),
+        width: 1.5,
       ),
+      boxShadow: <BoxShadow>[
+        BoxShadow(
+          color: AmanahColorTokens.pureBlack.withValues(alpha: 0.12),
+          blurRadius: 8,
+          offset: const Offset(0, 3),
+        ),
+      ],
+      semanticsLabel: 'Foto profil dokter $name',
     );
   }
 }

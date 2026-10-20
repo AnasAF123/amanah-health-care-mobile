@@ -273,13 +273,20 @@ class AmanahDualStackProfileCard extends StatelessWidget {
   }
 
   Widget _fallbackAvatar() {
-    return Image.asset(
-      'assets/amanah/auth/auth_background.png',
-      fit: BoxFit.cover,
-      alignment: Alignment.topCenter,
-      errorBuilder: (BuildContext ctx, Object err, StackTrace? st) => Container(
-        color: AmanahColorTokens.sky,
-        child: const Icon(Icons.person_rounded, color: AmanahColorTokens.surfaceLight, size: 30),
+    final String cleanInitials = userName.isNotEmpty
+        ? userName.trim().split(' ').where((String s) => s.isNotEmpty).map((String s) => s[0]).take(2).join().toUpperCase()
+        : 'AH';
+    return Container(
+      color: AmanahColorTokens.brand,
+      alignment: Alignment.center,
+      child: Text(
+        cleanInitials,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w800,
+          fontSize: 26,
+          letterSpacing: 0.5,
+        ),
       ),
     );
   }

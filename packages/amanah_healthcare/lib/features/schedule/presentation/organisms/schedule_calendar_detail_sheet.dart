@@ -70,6 +70,7 @@ class _ScheduleCalendarDetailSheetState
       builder: (BuildContext context, _) {
         return AmanahBottomSheetScaffold(
           title: 'Sesi Praktik Kalender',
+          subtitle: _formatDateHeader(widget.selectedDate),
           maxHeightFactor: 0.88,
           minHeight: 460,
           body: _controller.isLoadingSessions
@@ -116,33 +117,7 @@ class _ScheduleCalendarDetailSheetState
                   : SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
                       padding: const EdgeInsets.only(bottom: 24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 14),
-                            child: Row(
-                              children: <Widget>[
-                                const Icon(
-                                  Icons.event_note_rounded,
-                                  size: 16,
-                                  color: AmanahColorTokens.brand,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  _formatDateHeader(widget.selectedDate),
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: AmanahColorTokens.neutral600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          CalendarSessionAccordion(controller: _controller),
-                        ],
-                      ),
+                      child: CalendarSessionAccordion(controller: _controller),
                     ),
         );
       },

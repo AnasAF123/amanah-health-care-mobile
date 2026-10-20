@@ -378,8 +378,12 @@ class _AttendanceModeSwitcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isCheckIn = scanMode == AttendanceScanMode.checkIn;
+
     return Container(
-      padding: const EdgeInsets.all(4),
+      width: 290,
+      height: 42,
+      padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: AmanahColorTokens.pureBlack.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(100),
@@ -395,92 +399,101 @@ class _AttendanceModeSwitcher extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Stack(
         children: <Widget>[
-          _PresenceModePill(
-            label: 'Presensi Masuk',
-            icon: Icons.login_rounded,
-            isSelected: scanMode == AttendanceScanMode.checkIn,
-            activeColor: AmanahColorTokens.brandLight,
-            onTap: () {
-              HapticFeedback.selectionClick();
-              onSelectScanMode(AttendanceScanMode.checkIn);
-            },
-          ),
-          const SizedBox(width: 4),
-          _PresenceModePill(
-            label: 'Presensi Pulang',
-            icon: Icons.logout_rounded,
-            isSelected: scanMode == AttendanceScanMode.checkOut,
-            activeColor: AmanahColorTokens.brandLight,
-            onTap: () {
-              HapticFeedback.selectionClick();
-              onSelectScanMode(AttendanceScanMode.checkOut);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PresenceModePill extends StatelessWidget {
-  const _PresenceModePill({
-    required this.label,
-    required this.icon,
-    required this.isSelected,
-    required this.activeColor,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final bool isSelected;
-  final Color activeColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? activeColor.withValues(alpha: 0.25)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(100),
-          border: isSelected
-              ? Border.all(color: activeColor.withValues(alpha: 0.70), width: 1.2)
-              : Border.all(color: Colors.transparent, width: 1.2),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(
-              icon,
-              size: 15,
-              color: isSelected
-                  ? activeColor
-                  : AmanahColorTokens.surfaceLight.withValues(alpha: 0.60),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected
-                    ? AmanahColorTokens.surfaceLight
-                    : AmanahColorTokens.surfaceLight.withValues(alpha: 0.60),
+          // Smooth Animated Sliding Pill Indicator
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 240),
+            curve: Curves.easeInOutCubic,
+            alignment: isCheckIn ? Alignment.centerLeft : Alignment.centerRight,
+            child: FractionallySizedBox(
+              widthFactor: 0.5,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AmanahColorTokens.brandLight.withValues(alpha: 0.28),
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(
+                    color: AmanahColorTokens.brandLight.withValues(alpha: 0.70),
+                    width: 1.2,
+                  ),
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+          // Interactive Buttons Row
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    onSelectScanMode(AttendanceScanMode.checkIn);
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Icon(
+                          Icons.login_rounded,
+                          size: 15,
+                          color: isCheckIn
+                              ? AmanahColorTokens.brandLight
+                              : AmanahColorTokens.surfaceLight.withValues(alpha: 0.60),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Presensi Masuk',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: isCheckIn ? FontWeight.w700 : FontWeight.w500,
+                            color: isCheckIn
+                                ? AmanahColorTokens.surfaceLight
+                                : AmanahColorTokens.surfaceLight.withValues(alpha: 0.60),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    onSelectScanMode(AttendanceScanMode.checkOut);
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Icon(
+                          Icons.logout_rounded,
+                          size: 15,
+                          color: !isCheckIn
+                              ? AmanahColorTokens.brandLight
+                              : AmanahColorTokens.surfaceLight.withValues(alpha: 0.60),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Presensi Pulang',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: !isCheckIn ? FontWeight.w700 : FontWeight.w500,
+                            color: !isCheckIn
+                                ? AmanahColorTokens.surfaceLight
+                                : AmanahColorTokens.surfaceLight.withValues(alpha: 0.60),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

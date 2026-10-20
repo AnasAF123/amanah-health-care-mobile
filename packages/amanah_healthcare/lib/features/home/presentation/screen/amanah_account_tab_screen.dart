@@ -5,8 +5,8 @@ import 'package:amanah_healthcare/features/home/presentation/components/account/
 import 'package:amanah_healthcare/features/home/presentation/components/account/amanah_account_preferences_card.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/account/amanah_dual_stack_profile_card.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/account/amanah_winged_mail_banner.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_avatar_photo_sheet.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_edit_profile_drawer.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_pull_to_refresh.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_doctor_id_card_screen.dart';
@@ -38,7 +38,6 @@ class AmanahAccountTabScreen extends StatefulWidget {
 class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   String _phone = '';
   String _email = '';
-  String _bio = '';
   bool _isEmailVerified = false;
   String? _customAvatarPath;
   String? _presetAvatarUrl;
@@ -48,8 +47,8 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
     super.initState();
     _phone = widget.user.phone;
     _email = widget.user.email;
-    _bio = widget.user.staff?.profession ?? '';
     _isEmailVerified = widget.user.isEmailVerified;
+    _presetAvatarUrl = widget.user.avatar.directUrl ?? (widget.user.avatar.url.isNotEmpty ? widget.user.avatar.url : null);
   }
 
   @override
@@ -79,46 +78,14 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
       AmanahDoctorProfile.fromAuthUser(widget.user);
 
   Future<void> _openEditProfileDrawer() async {
-    final AmanahEditProfileResult? result = await AmanahEditProfileDrawer.show(
-      context: context,
-      doctorName: widget.user.fullName,
-      initialPhone: _phone,
-      initialEmail: _email,
-      initialBio: _bio,
-    );
-
-    if (result != null && mounted) {
-      setState(() {
-        _phone = result.phone;
-        _email = result.email;
-        _bio = result.bio;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: <Widget>[
-              Icon(Icons.check_circle_rounded, color: AmanahColorTokens.surfaceLight, size: 18),
-              SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Profil dokter berhasil diperbarui',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: AmanahColorTokens.neutral900,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          duration: const Duration(seconds: 2),
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext ctx) => AmanahAccountIdentitySettingsScreen(
+          user: widget.user,
+          onBack: () => Navigator.of(ctx).pop(),
         ),
-      );
-    }
+      ),
+    );
   }
 
   Future<void> _openAvatarPhotoSheet() async {
