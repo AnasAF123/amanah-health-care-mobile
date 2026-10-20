@@ -95,7 +95,8 @@ class StaffOnboardingController extends ChangeNotifier {
 
   void _initFields() {
     fullNameController = TextEditingController(text: user.fullName);
-    nikController = TextEditingController(text: user.staff?.idCardNumber ?? '');
+    nikController =
+        TextEditingController(text: user.staff?.nationalId ?? '');
     birthPlaceController = TextEditingController();
     phoneController = TextEditingController(text: user.phone);
 

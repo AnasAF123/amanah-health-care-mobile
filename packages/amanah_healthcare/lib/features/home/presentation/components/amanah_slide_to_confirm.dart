@@ -179,7 +179,7 @@ class _AmanahSlideToConfirmState extends State<AmanahSlideToConfirm>
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
-    final double knobSize = widget.height - (_knobPadding * 2);
+    final double knobSize = widget.height - 2.0 - (_knobPadding * 2);
     final BorderRadius effectiveRadius = widget.borderRadius ??
         BorderRadius.circular(widget.height / 2);
 
@@ -299,12 +299,15 @@ class _AmanahSlideToConfirmState extends State<AmanahSlideToConfirm>
                   // 4. Skeuomorphic 3D Convex Squircle Knob
                   Positioned(
                     left: _knobPadding + _dragPosition,
-                    top: _knobPadding,
-                    child: GestureDetector(
-                      onHorizontalDragStart: _onDragStart,
-                      onHorizontalDragUpdate: (DragUpdateDetails d) => _onDragUpdate(d, maxDrag),
-                      onHorizontalDragEnd: (DragEndDetails d) => _onDragEnd(d, maxDrag),
-                      child: _buildSkeuomorphicKnob(knobSize, dark, effectiveRadius),
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: GestureDetector(
+                        onHorizontalDragStart: _onDragStart,
+                        onHorizontalDragUpdate: (DragUpdateDetails d) => _onDragUpdate(d, maxDrag),
+                        onHorizontalDragEnd: (DragEndDetails d) => _onDragEnd(d, maxDrag),
+                        child: _buildSkeuomorphicKnob(knobSize, dark, effectiveRadius),
+                      ),
                     ),
                   ),
                 ],

@@ -60,7 +60,7 @@ class AmanahDoctorProfile {
             ? user.staff!.idCardNumber!
             : 'ID-${user.id.isNotEmpty ? user.id.substring(0, user.id.length < 8 ? user.id.length : 8).toUpperCase() : "MEDIS"}');
 
-    final String nik = user.staff?.idCardNumber ?? '';
+    final String nik = user.staff?.nationalId ?? '';
     final String email = user.email;
     final String phone = user.staff?.phoneNumber ?? user.phone;
     final String? avatarUrl = user.avatar.directUrl ?? (user.avatar.url.isNotEmpty ? user.avatar.url : null);

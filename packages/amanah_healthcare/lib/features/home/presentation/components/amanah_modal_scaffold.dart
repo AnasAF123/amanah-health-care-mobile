@@ -36,6 +36,7 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
     this.headerPadding = const EdgeInsets.fromLTRB(24, 8, 16, 12),
     this.showHeaderDivider = true,
     this.extendBodyBehindHeader = false,
+    this.disableInternalScroll = false,
     this.hugContent = false,
   });
 
@@ -51,6 +52,7 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
   final EdgeInsetsGeometry headerPadding;
   final bool showHeaderDivider;
   final bool extendBodyBehindHeader;
+  final bool disableInternalScroll;
   final bool hugContent;
 
   @override
@@ -113,14 +115,16 @@ class AmanahBottomSheetScaffold extends StatelessWidget {
             ),
             hugContent
                 ? Flexible(
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: resolvedBodyPadding,
-                      child: body,
-                    ),
+                    child: disableInternalScroll
+                        ? body
+                        : SingleChildScrollView(
+                            physics: const BouncingScrollPhysics(),
+                            padding: resolvedBodyPadding,
+                            child: body,
+                          ),
                   )
                 : Expanded(
-                    child: extendBodyBehindHeader
+                    child: (extendBodyBehindHeader || disableInternalScroll)
                         ? body
                         : SingleChildScrollView(
                             physics: const BouncingScrollPhysics(),

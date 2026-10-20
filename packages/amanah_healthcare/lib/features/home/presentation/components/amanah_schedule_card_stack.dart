@@ -1,30 +1,38 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_dual_stack_ticket_shell.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_schedule_card.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_schedule_empty_card.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_schedule_card_tokens.dart';
+import 'package:amanah_healthcare/features/payroll/presentation/screen/amanah_payroll_history_screen.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 
+export 'package:amanah_healthcare/features/home/presentation/components/amanah_dual_stack_ticket_shell.dart';
 export 'package:amanah_healthcare/features/home/presentation/components/amanah_schedule_card.dart';
 export 'package:amanah_healthcare/features/home/presentation/components/amanah_schedule_card_widgets.dart';
 export 'package:amanah_healthcare/features/home/presentation/components/amanah_schedule_empty_card.dart';
 export 'package:amanah_healthcare/features/home/presentation/components/amanah_schedule_ticket_painters.dart';
+export 'package:amanah_healthcare/features/home/presentation/components/amanah_ticket_card_shell.dart';
 
 /// Organism: Stack of 3D Doctor Schedule Cards on the Home Screen.
-/// Provides drag swipe mechanics, 3D card layering depth, and dismiss animations.
-/// Matching ScheduleCardStack.tsx (.web) 1:1
+/// Provides drag swipe mechanics, 3D card layering depth, dismiss animations,
+/// and an integrated dual-stack pixelated bottom lip for payroll reports.
 class AmanahScheduleCardStack extends StatefulWidget {
   const AmanahScheduleCardStack({
     required this.schedules,
     this.onCardTap,
     this.onCreateSchedule,
+    this.onSalaryReportTap,
+    this.showSalaryLip = true,
     super.key,
   });
 
   final List<DoctorSchedule> schedules;
   final ValueChanged<DoctorSchedule>? onCardTap;
   final VoidCallback? onCreateSchedule;
+  final VoidCallback? onSalaryReportTap;
+  final bool showSalaryLip;
 
   @override
   State<AmanahScheduleCardStack> createState() =>
@@ -166,15 +174,39 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
     );
   }
 
+  Widget _wrapWithDualStack(Widget coreContent) {
+    if (!widget.showSalaryLip) {
+      return coreContent;
+    }
+
+    return AmanahDualStackTicketShell(
+      bottomTitle: 'Laporan Slip Gaji & Insentif',
+      bottomActionLabel: 'Lihat Gaji',
+      bottomLeadingIcon: Icons.receipt_long_rounded,
+      onBottomActionTap: () {
+        if (widget.onSalaryReportTap != null) {
+          widget.onSalaryReportTap!();
+        } else {
+          Navigator.of(context).push<void>(
+            AmanahPayrollHistoryScreen.route(),
+          );
+        }
+      },
+      child: coreContent,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.schedules.isEmpty) {
-      return SizedBox(
-        height: AmanahScheduleCardTokens.cardHeight,
-        width: double.infinity,
-        child: RepaintBoundary(
-          child: AmanahScheduleEmptyCard(
-            onCreateSchedule: widget.onCreateSchedule,
+      return _wrapWithDualStack(
+        SizedBox(
+          height: AmanahScheduleCardTokens.cardHeight,
+          width: double.infinity,
+          child: RepaintBoundary(
+            child: AmanahScheduleEmptyCard(
+              onCreateSchedule: widget.onCreateSchedule,
+            ),
           ),
         ),
       );
@@ -183,16 +215,18 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
     final int total = widget.schedules.length;
 
     if (total == 1) {
-      return SizedBox(
-        height: AmanahScheduleCardTokens.cardHeight,
-        width: double.infinity,
-        child: RepaintBoundary(
-          child: AmanahScheduleCard(
-            schedule: widget.schedules[0],
-            onDismiss: () {},
-            onCardTap: widget.onCardTap != null
-                ? () => widget.onCardTap!(widget.schedules[0])
-                : null,
+      return _wrapWithDualStack(
+        SizedBox(
+          height: AmanahScheduleCardTokens.cardHeight,
+          width: double.infinity,
+          child: RepaintBoundary(
+            child: AmanahScheduleCard(
+              schedule: widget.schedules[0],
+              onDismiss: () {},
+              onCardTap: widget.onCardTap != null
+                  ? () => widget.onCardTap!(widget.schedules[0])
+                  : null,
+            ),
           ),
         ),
       );
@@ -339,7 +373,7 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
               ? <Widget>[card0Widget, card2Widget, card1Widget]
               : <Widget>[card2Widget, card1Widget, card0Widget]);
 
-    return GestureDetector(
+    final Widget stackWidget = GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
         if (widget.schedules.isNotEmpty && !isShuffling) {
@@ -378,5 +412,7 @@ class _AmanahScheduleCardStackState extends State<AmanahScheduleCardStack>
         child: Stack(clipBehavior: Clip.none, children: stackChildren),
       ),
     );
+
+    return _wrapWithDualStack(stackWidget);
   }
 }

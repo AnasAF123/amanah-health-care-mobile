@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/authentication/data/staff_profile_store.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/account/amanah_account_hero_banner.dart';
@@ -36,8 +37,7 @@ class AmanahAccountTabScreen extends StatefulWidget {
 }
 
 class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
-  String _phone = '';
-  String _email = '';
+  final StaffProfileStore _profileStore = StaffProfileStore.instance;
   bool _isEmailVerified = false;
   String? _customAvatarPath;
   String? _presetAvatarUrl;
@@ -45,10 +45,11 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   @override
   void initState() {
     super.initState();
-    _phone = widget.user.phone;
-    _email = widget.user.email;
     _isEmailVerified = widget.user.isEmailVerified;
-    _presetAvatarUrl = widget.user.avatar.directUrl ?? (widget.user.avatar.url.isNotEmpty ? widget.user.avatar.url : null);
+    _presetAvatarUrl = widget.user.avatar.directUrl ??
+        (widget.user.avatar.url.isNotEmpty ? widget.user.avatar.url : null);
+    _profileStore.addListener(_onStoreUpdated);
+    _profileStore.seedFromUser(widget.user);
   }
 
   @override
@@ -59,6 +60,33 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
     }
   }
 
+  void _onStoreUpdated() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    _profileStore.removeListener(_onStoreUpdated);
+    super.dispose();
+  }
+
+  AmanahStaffProfile? get _activeStaff =>
+      _profileStore.profile ?? widget.user.staff;
+  String get _fullName => _activeStaff?.fullName ?? widget.user.fullName;
+  String get _phone => _activeStaff?.phoneNumber ?? widget.user.phone;
+  String get _roleText => _activeStaff?.profession ?? widget.user.displayRole;
+
+  AmanahDoctorProfile get _doctorProfile {
+    final AmanahAuthUser effectiveUser = widget.user.copyWith(
+      fullName: _fullName,
+      phone: _phone,
+      staff: _activeStaff,
+    );
+    return AmanahDoctorProfile.fromAuthUser(effectiveUser);
+  }
+
   void _handleVerifyEmail() {
     setState(() {
       _isEmailVerified = true;
@@ -66,16 +94,13 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Tautan verifikasi telah dikirim ke $_email. Email berhasil diverifikasi.',
+          'Tautan verifikasi telah dikirim ke ${widget.user.email}. Email berhasil diverifikasi.',
         ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: AmanahColorTokens.sky,
       ),
     );
   }
-
-  AmanahDoctorProfile get _doctorProfile =>
-      AmanahDoctorProfile.fromAuthUser(widget.user);
 
   Future<void> _openEditProfileDrawer() async {
     await Navigator.of(context).push<void>(
@@ -109,14 +134,15 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: <Widget>[
-              Icon(Icons.camera_alt_rounded, color: AmanahColorTokens.surfaceLight, size: 18),
-              SizedBox(width: 8),
+              const Icon(Icons.camera_alt_rounded,
+                  color: AmanahColorTokens.surfaceLight, size: 18),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Foto profil dokter berhasil diperbarui',
-                  style: TextStyle(
+                  'Foto profil ${widget.user.roleLabel.toLowerCase()} berhasil diperbarui',
+                  style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
                   ),
@@ -136,9 +162,14 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   }
 
   void _handleOpenDoctorIdCard() {
+    final AmanahAuthUser effectiveUser = widget.user.copyWith(
+      fullName: _fullName,
+      phone: _phone,
+      staff: _activeStaff,
+    );
     Navigator.of(context).push<void>(
       AmanahDoctorIdCardScreen.route(
-        user: widget.user,
+        user: effectiveUser,
         profile: _doctorProfile,
       ),
     );
@@ -208,7 +239,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
         children: <Widget>[
           // Pinned App Header (100% consistent with Home, Schedule, Permissions)
           AmanahScreenHeader(
-            title: 'Profil Dokter',
+            title: 'Profil ${widget.user.roleLabel}',
             onBack: widget.onBack,
             titleAlignment: AmanahScreenHeaderTitleAlignment.start,
           ),
@@ -217,7 +248,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
           Expanded(
             child: AmanahPullToRefresh(
               onRefresh: () async {
-                await Future<void>.delayed(const Duration(milliseconds: 900));
+                await _profileStore.fetchProfile(force: true);
               },
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(
@@ -241,9 +272,8 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: AmanahDualStackProfileCard(
-                          userName: widget.user.fullName,
-                          roleText: widget.user.staff?.profession ??
-                              widget.user.displayRole,
+                          userName: _fullName,
+                          roleText: _roleText,
                           phoneText: _phone,
                           customAvatarPath: _customAvatarPath,
                           presetAvatarUrl: _presetAvatarUrl,
@@ -261,7 +291,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: AmanahWingedMailBanner(
-                          email: _email,
+                          email: widget.user.email,
                           isVerified: _isEmailVerified,
                           dark: dark,
                           onActionTap: _openEditProfileDrawer,
@@ -287,7 +317,11 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                       offset: const Offset(0, -14),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: _LogoutButton(onTap: widget.onLogout, dark: dark),
+                        child: _LogoutButton(
+                          onTap: widget.onLogout,
+                          dark: dark,
+                          roleLabel: widget.user.roleLabel,
+                        ),
                       ),
                     ),
                   ],
@@ -302,23 +336,28 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
 }
 
 class _LogoutButton extends StatelessWidget {
-  const _LogoutButton({required this.onTap, required this.dark});
+  const _LogoutButton({
+    required this.onTap,
+    required this.dark,
+    required this.roleLabel,
+  });
 
   final VoidCallback onTap;
   final bool dark;
+  final String roleLabel;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 12),
       child: AmanahButton.ghost(
-        text: 'Keluar dari Akun Dokter',
+        text: 'Keluar dari Akun $roleLabel',
         leadingIcon: Icons.logout_rounded,
         isFullWidth: true,
         customForegroundColor: dark
             ? AmanahColorTokens.dangerBorder
             : AmanahColorTokens.dangerDark,
-        semanticsLabel: 'Keluar dari Akun Dokter',
+        semanticsLabel: 'Keluar dari Akun $roleLabel',
         onPressed: onTap,
       ),
     );

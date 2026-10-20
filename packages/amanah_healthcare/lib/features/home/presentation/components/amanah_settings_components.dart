@@ -77,12 +77,14 @@ class AmanahSettingInfoRow extends StatelessWidget {
     required this.label,
     required this.value,
     this.isHighlighted = false,
+    this.trailing,
     super.key,
   });
 
   final String label;
   final String value;
   final bool isHighlighted;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -120,6 +122,10 @@ class AmanahSettingInfoRow extends StatelessWidget {
               ],
             ),
           ),
+          if (trailing != null) ...<Widget>[
+            const SizedBox(width: 8),
+            trailing!,
+          ],
         ],
       ),
     );

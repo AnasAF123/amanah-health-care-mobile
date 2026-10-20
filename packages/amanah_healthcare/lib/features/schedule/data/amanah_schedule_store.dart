@@ -8,17 +8,17 @@ import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_sess
 import 'package:amanah_healthcare/features/schedule/domain/repositories/schedule_repository.dart';
 
 class AmanahScheduleStore extends ChangeNotifier {
-  AmanahScheduleStore._() {
+  AmanahScheduleStore._({TimeService? timeService})
+      : _timeService = timeService ?? DefaultTimeService() {
     _schedulesMap = <String, List<DoctorSchedule>>{};
     _daySettingsMap = <String, DayScheduleSetting>{};
   }
 
   static final AmanahScheduleStore instance = AmanahScheduleStore._();
 
-  static DateTime get baseToday {
-    final DateTime now = DateTime.now();
-    return DateTime(now.year, now.month, now.day);
-  }
+  final TimeService _timeService;
+
+  static DateTime get baseToday => DefaultTimeService().today();
 
   late Map<String, List<DoctorSchedule>> _schedulesMap;
   late Map<String, DayScheduleSetting> _daySettingsMap;
@@ -39,10 +39,13 @@ class AmanahScheduleStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> syncTodaySchedules({ScheduleRepository? repository}) async {
-    final DateTime now = DateTime.now();
-    final String dateStr =
-        '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+  Future<void> syncTodaySchedules({
+    ScheduleRepository? repository,
+    TimeService? timeService,
+  }) async {
+    final TimeService ts = timeService ?? _timeService;
+    final DateTime today = ts.today();
+    final String dateStr = formatIsoDateString(today);
     final ScheduleRepository repo = repository ?? ScheduleRepositoryImpl();
     final List<MyScheduleSession> sessions =
         await repo.getMySchedules(date: dateStr);
@@ -84,7 +87,7 @@ class AmanahScheduleStore extends ChangeNotifier {
       }),
     );
 
-    setSchedulesForDate(baseToday, mapped);
+    setSchedulesForDate(today, mapped);
   }
 
   DayScheduleSetting getDaySettingForDate(DateTime date) {

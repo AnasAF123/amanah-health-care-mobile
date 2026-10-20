@@ -34,6 +34,31 @@ class StaffCredentialRepository {
     return AmanahHttpClient.instance;
   }
 
+  /// 0. Ambil data profil staf dokter login saat ini (authoritative SSOT)
+  /// Endpoint: GET /api/v1/staffs/me
+  Future<AmanahStaffProfile> getMyProfile() async {
+    final String? token = await _tokenStorage.getToken();
+    if (token == null || token.isEmpty) {
+      throw const AmanahAuthException('Sesi Anda telah kedaluwarsa. Silakan masuk kembali.');
+    }
+
+    final Uri uri = Uri.parse('$_baseUrl${AuthEndpoints.staffProfile}');
+    final http.Response response = await _httpClient.get(
+      uri,
+      headers: <String, String>{
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return AmanahStaffProfile.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
+      );
+    }
+    throw const AmanahAuthException('Gagal memuat profil staf dari server.');
+  }
+
   /// 1. Ambil daftar SIP / STR dokter login
   /// Endpoint: GET /api/v1/staffs/me/credentials
   Future<List<StaffCredentialModel>> getMyCredentials() async {
@@ -153,11 +178,18 @@ class StaffCredentialRepository {
     return response.statusCode == 200 || response.statusCode == 204;
   }
 
-  /// 5. Self-update nama atau nomor telepon staf dokter
+  /// 5. Self-update data profil staf dokter (Data Pribadi, Kontak, Alamat Domisili)
   /// Endpoint: PATCH /api/v1/staffs/me
   Future<AmanahStaffProfile> updateMyProfile({
     String? fullName,
     String? phoneNumber,
+    String? email,
+    String? birthPlace,
+    String? birthDate,
+    String? gender,
+    String? nationalId,
+    String? licenseNumber,
+    Map<String, dynamic>? address,
   }) async {
     final String? token = await _tokenStorage.getToken();
     if (token == null || token.isEmpty) {
@@ -175,6 +207,13 @@ class StaffCredentialRepository {
       body: jsonEncode(<String, dynamic>{
         if (fullName != null && fullName.trim().isNotEmpty) 'fullName': fullName.trim(),
         if (phoneNumber != null && phoneNumber.trim().isNotEmpty) 'phoneNumber': phoneNumber.trim(),
+        if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
+        if (birthPlace != null && birthPlace.trim().isNotEmpty) 'birthPlace': birthPlace.trim(),
+        if (birthDate != null && birthDate.trim().isNotEmpty) 'birthDate': birthDate.trim(),
+        if (gender != null && gender.trim().isNotEmpty) 'gender': gender.trim().toLowerCase(),
+        if (nationalId != null && nationalId.trim().isNotEmpty) 'nationalId': nationalId.trim(),
+        if (licenseNumber != null && licenseNumber.trim().isNotEmpty) 'licenseNumber': licenseNumber.trim(),
+        if (address != null && address.isNotEmpty) 'address': address,
       }),
     );
 
@@ -183,6 +222,6 @@ class StaffCredentialRepository {
         jsonDecode(response.body) as Map<String, dynamic>,
       );
     }
-    throw const AmanahAuthException('Gagal memperbarui profil dokter.');
+    throw const AmanahAuthException('Gagal memperbarui profil.');
   }
 }

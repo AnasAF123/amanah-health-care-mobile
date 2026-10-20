@@ -53,8 +53,6 @@ class AmanahAccountPreferencesCard extends StatelessWidget {
                 AmanahPreferenceRowItem(
                   icon: Icons.shield_outlined,
                   title: 'Keamanan akun & PIN',
-                  badgeText: 'PIN Aktif',
-                  badgeColor: AmanahColorTokens.success,
                   dark: dark,
                   onTap: () => onItemTap('security'),
                 ),
@@ -62,8 +60,6 @@ class AmanahAccountPreferencesCard extends StatelessWidget {
                 AmanahPreferenceRowItem(
                   icon: Icons.badge_outlined,
                   title: 'Akun & identitas dokter',
-                  badgeText: 'Terverifikasi',
-                  badgeColor: AmanahColorTokens.sky,
                   dark: dark,
                   onTap: () => onItemTap('account'),
                 ),
@@ -71,8 +67,6 @@ class AmanahAccountPreferencesCard extends StatelessWidget {
                 AmanahPreferenceRowItem(
                   icon: Icons.receipt_long_rounded,
                   title: 'Laporan slip gaji & insentif',
-                  badgeText: 'Payroll',
-                  badgeColor: AmanahColorTokens.success,
                   dark: dark,
                   onTap: () => onItemTap('payroll'),
                 ),
@@ -87,8 +81,6 @@ class AmanahAccountPreferencesCard extends StatelessWidget {
                 AmanahPreferenceRowItem(
                   icon: Icons.support_agent_rounded,
                   title: 'Bantuan teknisi IT RS',
-                  badgeText: 'Online 24 Jam',
-                  badgeColor: AmanahColorTokens.brand,
                   dark: dark,
                   onTap: () => onItemTap('help'),
                 ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:scanner_shared/scanner_shared.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_slide_to_confirm.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/camera_permission_viewport.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/scanner_overlay.dart';
@@ -182,15 +183,35 @@ class PresenceScannerCameraViewport extends StatelessWidget {
               ),
             ),
 
-            // 3. Attendance Mode Switcher (Check-In vs Check-Out)
+            // 3. Attendance Mode Switcher (Direct Slide-To-Confirm with AmanahRadius.md)
             Positioned(
-              top: cutoutRect.bottom + 20,
-              left: 20,
-              right: 20,
+              top: cutoutRect.bottom + 24,
+              left: 28,
+              right: 28,
               child: Center(
-                child: _AttendanceModeSwitcher(
-                  scanMode: scanMode,
-                  onSelectScanMode: onSelectScanMode,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 320),
+                  child: AmanahSlideToConfirm(
+                    key: ValueKey<AttendanceScanMode>(scanMode),
+                    text: scanMode == AttendanceScanMode.checkIn
+                        ? 'Geser ke Presensi Pulang'
+                        : 'Geser ke Presensi Masuk',
+                    completedText: scanMode == AttendanceScanMode.checkIn
+                        ? 'Beralih ke Pulang...'
+                        : 'Beralih ke Masuk...',
+                    variant: AmanahSlideVariant.brandGradient,
+                    height: 52.0,
+                    borderRadius: BorderRadius.circular(AmanahRadius.md),
+                    onConfirmed: () async {
+                      HapticFeedback.mediumImpact();
+                      onSelectScanMode(
+                        scanMode == AttendanceScanMode.checkIn
+                            ? AttendanceScanMode.checkOut
+                            : AttendanceScanMode.checkIn,
+                      );
+                      return false;
+                    },
+                  ),
                 ),
               ),
             ),
@@ -365,136 +386,4 @@ class _InKernelZoomSlider extends StatelessWidget {
   }
 }
 
-/// Attendance mode switcher positioned below the camera cutout.
-/// Both "Presensi Masuk" and "Presensi Pulang" respect the brand theme.
-class _AttendanceModeSwitcher extends StatelessWidget {
-  const _AttendanceModeSwitcher({
-    required this.scanMode,
-    required this.onSelectScanMode,
-  });
 
-  final AttendanceScanMode scanMode;
-  final ValueChanged<AttendanceScanMode> onSelectScanMode;
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isCheckIn = scanMode == AttendanceScanMode.checkIn;
-
-    return Container(
-      width: 290,
-      height: 42,
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: AmanahColorTokens.pureBlack.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(100),
-        border: Border.all(
-          color: AmanahColorTokens.surfaceLight.withValues(alpha: 0.18),
-          width: 1,
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: AmanahColorTokens.pureBlack.withValues(alpha: 0.35),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: <Widget>[
-          // Smooth Animated Sliding Pill Indicator
-          AnimatedAlign(
-            duration: const Duration(milliseconds: 240),
-            curve: Curves.easeInOutCubic,
-            alignment: isCheckIn ? Alignment.centerLeft : Alignment.centerRight,
-            child: FractionallySizedBox(
-              widthFactor: 0.5,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AmanahColorTokens.brandLight.withValues(alpha: 0.28),
-                  borderRadius: BorderRadius.circular(100),
-                  border: Border.all(
-                    color: AmanahColorTokens.brandLight.withValues(alpha: 0.70),
-                    width: 1.2,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Interactive Buttons Row
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    onSelectScanMode(AttendanceScanMode.checkIn);
-                  },
-                  behavior: HitTestBehavior.opaque,
-                  child: Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(
-                          Icons.login_rounded,
-                          size: 15,
-                          color: isCheckIn
-                              ? AmanahColorTokens.brandLight
-                              : AmanahColorTokens.surfaceLight.withValues(alpha: 0.60),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Presensi Masuk',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: isCheckIn ? FontWeight.w700 : FontWeight.w500,
-                            color: isCheckIn
-                                ? AmanahColorTokens.surfaceLight
-                                : AmanahColorTokens.surfaceLight.withValues(alpha: 0.60),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    onSelectScanMode(AttendanceScanMode.checkOut);
-                  },
-                  behavior: HitTestBehavior.opaque,
-                  child: Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(
-                          Icons.logout_rounded,
-                          size: 15,
-                          color: !isCheckIn
-                              ? AmanahColorTokens.brandLight
-                              : AmanahColorTokens.surfaceLight.withValues(alpha: 0.60),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Presensi Pulang',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: !isCheckIn ? FontWeight.w700 : FontWeight.w500,
-                            color: !isCheckIn
-                                ? AmanahColorTokens.surfaceLight
-                                : AmanahColorTokens.surfaceLight.withValues(alpha: 0.60),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
