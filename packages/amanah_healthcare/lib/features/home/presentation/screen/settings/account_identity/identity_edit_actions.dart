@@ -24,12 +24,9 @@ mixin IdentityEditActions on State<AmanahAccountIdentitySettingsScreen> {
   }
 
   void showErrorFeedback(String error) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(error),
-        backgroundColor: AmanahColorTokens.danger,
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(error), backgroundColor: AmanahColorTokens.danger));
   }
 
   /// Unified action executor with mounted check and snackbar notifications.
@@ -105,11 +102,8 @@ mixin IdentityEditActions on State<AmanahAccountIdentitySettingsScreen> {
       title: 'Ubah Nama Lengkap',
       label: 'Nama lengkap resmi beserta gelar profesional',
       initialValue: controller.name,
-      placeholder: widget.user.isDoctor
-          ? 'dr. Nama Dokter, Sp.A'
-          : 'Nama Lengkap',
-      validator: (String v) =>
-          v.trim().isEmpty ? 'Nama lengkap tidak boleh kosong.' : null,
+      placeholder: widget.user.isDoctor ? 'dr. Nama Dokter, Sp.A' : 'Nama Lengkap',
+      validator: (String v) => v.trim().isEmpty ? 'Nama lengkap tidak boleh kosong.' : null,
       onSave: (String val) => controller.updateField(fullName: val),
     );
   }
@@ -132,8 +126,7 @@ mixin IdentityEditActions on State<AmanahAccountIdentitySettingsScreen> {
       label: 'Kota atau kabupaten tempat lahir sesuai KTP',
       initialValue: controller.birthPlace ?? '',
       placeholder: 'Contoh: Bandung',
-      validator: (String v) =>
-          v.trim().isEmpty ? 'Tempat lahir tidak boleh kosong.' : null,
+      validator: (String v) => v.trim().isEmpty ? 'Tempat lahir tidak boleh kosong.' : null,
       onSave: (String val) => controller.updateField(birthPlace: val),
     );
   }
@@ -196,41 +189,35 @@ mixin IdentityEditActions on State<AmanahAccountIdentitySettingsScreen> {
   }
 
   Future<void> editProvince() => pickRegion(
-        title: 'Pilih Provinsi',
-        selectedId: controller.province?.id,
-        loader: controller.loadProvinces,
-        onPicked: controller.updateProvince,
-      );
+    title: 'Pilih Provinsi',
+    selectedId: controller.province?.id,
+    loader: controller.loadProvinces,
+    onPicked: controller.updateProvince,
+  );
 
   Future<void> editRegency() => pickRegion(
-        title: 'Pilih Kabupaten / Kota',
-        selectedId: controller.regency?.id,
-        blockedReason: controller.hasProvince
-            ? null
-            : 'Pilih provinsi terlebih dahulu.',
-        loader: controller.loadRegencies,
-        onPicked: controller.updateRegency,
-      );
+    title: 'Pilih Kabupaten / Kota',
+    selectedId: controller.regency?.id,
+    blockedReason: controller.hasProvince ? null : 'Pilih provinsi terlebih dahulu.',
+    loader: controller.loadRegencies,
+    onPicked: controller.updateRegency,
+  );
 
   Future<void> editDistrict() => pickRegion(
-        title: 'Pilih Kecamatan',
-        selectedId: controller.district?.id,
-        blockedReason: controller.hasRegency
-            ? null
-            : 'Pilih kabupaten/kota terlebih dahulu.',
-        loader: controller.loadDistricts,
-        onPicked: controller.updateDistrict,
-      );
+    title: 'Pilih Kecamatan',
+    selectedId: controller.district?.id,
+    blockedReason: controller.hasRegency ? null : 'Pilih kabupaten/kota terlebih dahulu.',
+    loader: controller.loadDistricts,
+    onPicked: controller.updateDistrict,
+  );
 
   Future<void> editVillage() => pickRegion(
-        title: 'Pilih Kelurahan / Desa',
-        selectedId: controller.village?.id,
-        blockedReason: controller.hasDistrict
-            ? null
-            : 'Pilih kecamatan terlebih dahulu.',
-        loader: controller.loadVillages,
-        onPicked: controller.updateVillage,
-      );
+    title: 'Pilih Kelurahan / Desa',
+    selectedId: controller.village?.id,
+    blockedReason: controller.hasDistrict ? null : 'Pilih kecamatan terlebih dahulu.',
+    loader: controller.loadVillages,
+    onPicked: controller.updateVillage,
+  );
 
   void editLine1() {
     editText(

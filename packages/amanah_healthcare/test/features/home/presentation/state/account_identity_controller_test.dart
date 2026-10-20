@@ -50,22 +50,20 @@ class _FakeCredentialRepo extends StaffCredentialRepository {
 
 class _FakeRegionApi extends RegionApiService {
   @override
-  Future<List<RegionItem>> getProvinces({bool forceRefresh = false}) async =>
-      const <RegionItem>[RegionItem(id: '31', name: 'DKI JAKARTA')];
+  Future<List<RegionItem>> getProvinces({bool forceRefresh = false}) async => const <RegionItem>[
+    RegionItem(id: '31', name: 'DKI JAKARTA'),
+  ];
 
   @override
-  Future<List<RegionItem>> getRegencies(String provinceId,
-          {bool forceRefresh = false}) async =>
+  Future<List<RegionItem>> getRegencies(String provinceId, {bool forceRefresh = false}) async =>
       const <RegionItem>[RegionItem(id: '3171', name: 'JAKARTA SELATAN')];
 
   @override
-  Future<List<RegionItem>> getDistricts(String regencyId,
-          {bool forceRefresh = false}) async =>
+  Future<List<RegionItem>> getDistricts(String regencyId, {bool forceRefresh = false}) async =>
       const <RegionItem>[RegionItem(id: '3171010', name: 'TEBET')];
 
   @override
-  Future<List<RegionItem>> getVillages(String districtId,
-          {bool forceRefresh = false}) async =>
+  Future<List<RegionItem>> getVillages(String districtId, {bool forceRefresh = false}) async =>
       const <RegionItem>[RegionItem(id: '3171010001', name: 'TEBET BARAT')];
 }
 
@@ -115,8 +113,10 @@ void main() {
     });
 
     test('initializes properties from user and store', () {
-      final AccountIdentityController controller =
-          AccountIdentityController(user: testUser, store: store);
+      final AccountIdentityController controller = AccountIdentityController(
+        user: testUser,
+        store: store,
+      );
 
       expect(controller.name, equals('Dr. Test'));
       expect(controller.phone, equals('08123456789'));
@@ -141,14 +141,12 @@ void main() {
     });
 
     test('updating province clears regency, district, and village', () async {
-      final AccountIdentityController controller =
-          AccountIdentityController(user: testUser, store: store);
-
-      const RegionItem newProvince = RegionItem(
-        id: '32',
-        name: 'JAWA BARAT',
-        label: 'Jawa Barat',
+      final AccountIdentityController controller = AccountIdentityController(
+        user: testUser,
+        store: store,
       );
+
+      const RegionItem newProvince = RegionItem(id: '32', name: 'JAWA BARAT', label: 'Jawa Barat');
 
       await controller.updateProvince(newProvince);
 
@@ -164,8 +162,10 @@ void main() {
     });
 
     test('updating regency clears district and village', () async {
-      final AccountIdentityController controller =
-          AccountIdentityController(user: testUser, store: store);
+      final AccountIdentityController controller = AccountIdentityController(
+        user: testUser,
+        store: store,
+      );
 
       const RegionItem newRegency = RegionItem(
         id: '3172',
@@ -185,8 +185,10 @@ void main() {
     });
 
     test('formatBirthDateDisplay formats date cleanly', () {
-      final AccountIdentityController controller =
-          AccountIdentityController(user: testUser, store: store);
+      final AccountIdentityController controller = AccountIdentityController(
+        user: testUser,
+        store: store,
+      );
 
       final String formatted = controller.formatBirthDateDisplay();
       expect(formatted, isNotEmpty);
@@ -196,13 +198,12 @@ void main() {
     });
 
     test('formatIsoDate formats date into yyyy-MM-dd pattern', () {
-      final AccountIdentityController controller =
-          AccountIdentityController(user: testUser, store: store);
-
-      expect(
-        controller.formatIsoDate(DateTime(2026, 10, 20)),
-        equals('2026-10-20'),
+      final AccountIdentityController controller = AccountIdentityController(
+        user: testUser,
+        store: store,
       );
+
+      expect(controller.formatIsoDate(DateTime(2026, 10, 20)), equals('2026-10-20'));
 
       controller.dispose();
     });

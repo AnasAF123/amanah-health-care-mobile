@@ -85,3 +85,16 @@ lib/features/<nama_fitur>/
    - Hindari menampilkan klaim "data kosong" secara prematur. Gunakan shimmer/skeleton saat fetching data berlangsung.
 4. **Batas Ukuran File**:
    - Pertahankan batas maksimal 500 baris per file. Jika melebihi, pisahkan layer komponen/delegates ke file terpisah.
+
+---
+
+## 5. Code Formatting & Pre-Commit Policy (`dart format`)
+
+1. **Dart Formatter Sebagai Standar Formatter Resmi**:
+   - Selalu gunakan `dart format` (bawaan Dart SDK) dengan `page_width: 100` yang terkonfigurasi di `analysis_options.yaml`.
+   - Dilarang membiarkan trailing whitespace, pemecahan baris yang berantakan, atau indentasi tidak konsisten.
+2. **Pre-Commit Hook Otomatis (`.githooks/pre-commit`)**:
+   - Hook git lokal aktif via `core.hooksPath .githooks` (jalankan `scripts/setup-hooks.ps1` untuk aktivasi jika baru clone).
+   - Setiap kali `git commit` dijalankan, hook otomatis memformat semua file `.dart` yang di-stage dan me-re-stage sebelum commit dibuat.
+3. **Pemeriksaan Mandiri Sebelum Lapor Selesai**:
+   - Jalankan `dart format` pada file yang dimodifikasi dan pastikan `flutter analyze` tidak memiliki error.

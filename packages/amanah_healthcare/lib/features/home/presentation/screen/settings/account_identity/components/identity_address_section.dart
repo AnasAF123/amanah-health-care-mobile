@@ -34,7 +34,8 @@ class IdentityAddressSection extends StatelessWidget {
         ),
         AmanahSettingEditableRow(
           label: 'Kabupaten / Kota',
-          value: controller.regency?.displayName ??
+          value:
+              controller.regency?.displayName ??
               (controller.hasProvince
                   ? 'Pilih Kabupaten / Kota'
                   : 'Pilih provinsi terlebih dahulu'),
@@ -42,15 +43,15 @@ class IdentityAddressSection extends StatelessWidget {
         ),
         AmanahSettingEditableRow(
           label: 'Kecamatan',
-          value: controller.district?.displayName ??
-              (controller.hasRegency
-                  ? 'Pilih Kecamatan'
-                  : 'Pilih kabupaten/kota terlebih dahulu'),
+          value:
+              controller.district?.displayName ??
+              (controller.hasRegency ? 'Pilih Kecamatan' : 'Pilih kabupaten/kota terlebih dahulu'),
           onEdit: onEditDistrict,
         ),
         AmanahSettingEditableRow(
           label: 'Kelurahan / Desa',
-          value: controller.village?.displayName ??
+          value:
+              controller.village?.displayName ??
               (controller.hasDistrict
                   ? 'Pilih Kelurahan / Desa'
                   : 'Pilih kecamatan terlebih dahulu'),

@@ -46,17 +46,11 @@ void main() {
       });
 
       test('empty string returns error', () {
-        expect(
-          IdentityValidators.phone(''),
-          equals('Nomor telepon tidak boleh kosong.'),
-        );
+        expect(IdentityValidators.phone(''), equals('Nomor telepon tidak boleh kosong.'));
       });
 
       test('less than 9 digits returns error', () {
-        expect(
-          IdentityValidators.phone('08123456'),
-          equals('Nomor telepon minimal 9 digit.'),
-        );
+        expect(IdentityValidators.phone('08123456'), equals('Nomor telepon minimal 9 digit.'));
       });
     });
 
@@ -67,29 +61,14 @@ void main() {
       });
 
       test('empty string returns error', () {
-        expect(
-          IdentityValidators.email(''),
-          equals('Email tidak boleh kosong.'),
-        );
+        expect(IdentityValidators.email(''), equals('Email tidak boleh kosong.'));
       });
 
       test('missing @ or domain returns error', () {
-        expect(
-          IdentityValidators.email('invalid-email'),
-          equals('Format email tidak valid.'),
-        );
-        expect(
-          IdentityValidators.email('user@'),
-          equals('Format email tidak valid.'),
-        );
-        expect(
-          IdentityValidators.email('@domain.com'),
-          equals('Format email tidak valid.'),
-        );
-        expect(
-          IdentityValidators.email('user@..'),
-          equals('Format email tidak valid.'),
-        );
+        expect(IdentityValidators.email('invalid-email'), equals('Format email tidak valid.'));
+        expect(IdentityValidators.email('user@'), equals('Format email tidak valid.'));
+        expect(IdentityValidators.email('@domain.com'), equals('Format email tidak valid.'));
+        expect(IdentityValidators.email('user@..'), equals('Format email tidak valid.'));
       });
     });
   });
