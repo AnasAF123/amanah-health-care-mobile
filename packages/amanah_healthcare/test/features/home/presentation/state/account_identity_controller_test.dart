@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:amanah_healthcare/features/authentication/data/region_api_service.dart';
 import 'package:amanah_healthcare/features/authentication/data/staff_credential_repository.dart';
 import 'package:amanah_healthcare/features/authentication/data/staff_profile_store.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
@@ -47,6 +48,27 @@ class _FakeCredentialRepo extends StaffCredentialRepository {
   }
 }
 
+class _FakeRegionApi extends RegionApiService {
+  @override
+  Future<List<RegionItem>> getProvinces({bool forceRefresh = false}) async =>
+      const <RegionItem>[RegionItem(id: '31', name: 'DKI JAKARTA')];
+
+  @override
+  Future<List<RegionItem>> getRegencies(String provinceId,
+          {bool forceRefresh = false}) async =>
+      const <RegionItem>[RegionItem(id: '3171', name: 'JAKARTA SELATAN')];
+
+  @override
+  Future<List<RegionItem>> getDistricts(String regencyId,
+          {bool forceRefresh = false}) async =>
+      const <RegionItem>[RegionItem(id: '3171010', name: 'TEBET')];
+
+  @override
+  Future<List<RegionItem>> getVillages(String districtId,
+          {bool forceRefresh = false}) async =>
+      const <RegionItem>[RegionItem(id: '3171010001', name: 'TEBET BARAT')];
+}
+
 void main() {
   group('AccountIdentityController Tests', () {
     const AmanahAuthUser testUser = AmanahAuthUser(
@@ -83,9 +105,11 @@ void main() {
 
     late StaffProfileStore store;
     late _FakeCredentialRepo fakeRepo;
+    late _FakeRegionApi fakeRegionApi;
 
     setUp(() {
       fakeRepo = _FakeCredentialRepo();
+      fakeRegionApi = _FakeRegionApi();
       store = StaffProfileStore.forTesting(repository: fakeRepo);
       store.seed(testUser.staff!);
     });
@@ -102,11 +126,16 @@ void main() {
       expect(controller.gender, equals('male'));
       expect(controller.nik, equals('3201234567890001'));
       expect(controller.poliklinikName, equals('Poli Umum'));
+      expect(controller.poliklinikDisplay, equals('Poli Umum'));
       expect(controller.province?.id, equals('31'));
       expect(controller.regency?.id, equals('3171'));
       expect(controller.district?.id, equals('3171010'));
       expect(controller.village?.id, equals('3171010001'));
       expect(controller.line1, equals('Jl. Tebet No. 10'));
+      expect(controller.hasProvince, isTrue);
+      expect(controller.hasRegency, isTrue);
+      expect(controller.hasDistrict, isTrue);
+      expect(controller.birthDateParsed, equals(DateTime(1990, 5, 15)));
 
       controller.dispose();
     });
@@ -127,6 +156,9 @@ void main() {
       expect(controller.regency, isNull);
       expect(controller.district, isNull);
       expect(controller.village, isNull);
+      expect(controller.hasProvince, isTrue);
+      expect(controller.hasRegency, isFalse);
+      expect(controller.hasDistrict, isFalse);
 
       controller.dispose();
     });
@@ -146,6 +178,8 @@ void main() {
       expect(controller.regency?.id, equals('3172'));
       expect(controller.district, isNull);
       expect(controller.village, isNull);
+      expect(controller.hasRegency, isTrue);
+      expect(controller.hasDistrict, isFalse);
 
       controller.dispose();
     });
@@ -157,6 +191,44 @@ void main() {
       final String formatted = controller.formatBirthDateDisplay();
       expect(formatted, isNotEmpty);
       expect(formatted, isNot(equals('Belum diisi')));
+
+      controller.dispose();
+    });
+
+    test('formatIsoDate formats date into yyyy-MM-dd pattern', () {
+      final AccountIdentityController controller =
+          AccountIdentityController(user: testUser, store: store);
+
+      expect(
+        controller.formatIsoDate(DateTime(2026, 10, 20)),
+        equals('2026-10-20'),
+      );
+
+      controller.dispose();
+    });
+
+    test('region loader methods delegate to region service', () async {
+      final AccountIdentityController controller = AccountIdentityController(
+        user: testUser,
+        store: store,
+        regionApi: fakeRegionApi,
+      );
+
+      final List<RegionItem> provinces = await controller.loadProvinces();
+      expect(provinces.length, equals(1));
+      expect(provinces.first.id, equals('31'));
+
+      final List<RegionItem> regencies = await controller.loadRegencies();
+      expect(regencies.length, equals(1));
+      expect(regencies.first.id, equals('3171'));
+
+      final List<RegionItem> districts = await controller.loadDistricts();
+      expect(districts.length, equals(1));
+      expect(districts.first.id, equals('3171010'));
+
+      final List<RegionItem> villages = await controller.loadVillages();
+      expect(villages.length, equals(1));
+      expect(villages.first.id, equals('3171010001'));
 
       controller.dispose();
     });

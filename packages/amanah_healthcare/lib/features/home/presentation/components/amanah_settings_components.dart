@@ -575,6 +575,7 @@ class AmanahSettingEditDialog extends StatefulWidget {
     this.placeholder,
     this.keyboardType,
     this.obscureText = false,
+    this.validator,
     super.key,
   });
 
@@ -585,6 +586,7 @@ class AmanahSettingEditDialog extends StatefulWidget {
   final String? placeholder;
   final TextInputType? keyboardType;
   final bool obscureText;
+  final String? Function(String)? validator;
 
   static Future<void> show({
     required BuildContext context,
@@ -595,6 +597,7 @@ class AmanahSettingEditDialog extends StatefulWidget {
     String? placeholder,
     TextInputType? keyboardType,
     bool obscureText = false,
+    String? Function(String)? validator,
   }) {
     return showDialog<void>(
       context: context,
@@ -606,6 +609,7 @@ class AmanahSettingEditDialog extends StatefulWidget {
         placeholder: placeholder,
         keyboardType: keyboardType,
         obscureText: obscureText,
+        validator: validator,
       ),
     );
   }
@@ -617,6 +621,7 @@ class AmanahSettingEditDialog extends StatefulWidget {
 
 class _AmanahSettingEditDialogState extends State<AmanahSettingEditDialog> {
   late final TextEditingController _controller;
+  String? _errorText;
 
   @override
   void initState() {
@@ -683,6 +688,11 @@ class _AmanahSettingEditDialogState extends State<AmanahSettingEditDialog> {
               keyboardType: widget.keyboardType,
               obscureText: widget.obscureText,
               autofocus: true,
+              onChanged: (_) {
+                if (_errorText != null) {
+                  setState(() => _errorText = null);
+                }
+              },
               style: TextStyle(
                 color: textColor,
                 fontSize: 13,
@@ -690,6 +700,7 @@ class _AmanahSettingEditDialogState extends State<AmanahSettingEditDialog> {
               ),
               decoration: InputDecoration(
                 hintText: widget.placeholder,
+                errorText: _errorText,
                 hintStyle: TextStyle(
                   color: subtextColor.withValues(alpha: 0.60),
                   fontSize: 13,
@@ -732,6 +743,14 @@ class _AmanahSettingEditDialogState extends State<AmanahSettingEditDialog> {
                   text: 'Simpan',
                   size: AmanahButtonSize.small,
                   onPressed: () {
+                    if (widget.validator != null) {
+                      final String? error =
+                          widget.validator!(_controller.text);
+                      if (error != null) {
+                        setState(() => _errorText = error);
+                        return;
+                      }
+                    }
                     widget.onSave(_controller.text);
                     Navigator.of(context).pop();
                   },

@@ -48,8 +48,21 @@ class AccountIdentityController extends ChangeNotifier {
   String? get nik => _nik;
   String? get birthPlace => _birthPlace;
   String? get birthDate => _birthDate;
+  DateTime? get birthDateParsed {
+    if (_birthDate == null || _birthDate!.isEmpty) return null;
+    return DateTime.tryParse(_birthDate!);
+  }
+
   String? get gender => _gender;
   String? get poliklinikName => _poliklinikName;
+  String get poliklinikDisplay {
+    if (_poliklinikName != null && _poliklinikName!.isNotEmpty) {
+      return _poliklinikName!;
+    }
+    return (user.isDoctor || user.isMidwife)
+        ? 'Poliklinik Penugasan'
+        : 'Tidak ada penugasan';
+  }
 
   RegionItem? get province => _province;
   RegionItem? get regency => _regency;
@@ -57,12 +70,47 @@ class AccountIdentityController extends ChangeNotifier {
   RegionItem? get village => _village;
   String? get line1 => _line1;
 
+  bool get hasProvince => _province != null && _province!.id.isNotEmpty;
+  bool get hasRegency => _regency != null && _regency!.id.isNotEmpty;
+  bool get hasDistrict => _district != null && _district!.id.isNotEmpty;
+
   bool get isLoading => _store.isLoading;
   bool get isSaving => _store.isSaving;
   String? get errorMessage => _store.errorMessage;
 
+  @visibleForTesting
   RegionApiService get regionApi => _regionApi;
   StaffProfileStore get store => _store;
+
+  /// Loads list of provinces from region service.
+  Future<List<RegionItem>> loadProvinces() => _regionApi.getProvinces();
+
+  /// Loads list of regencies for the currently selected province.
+  Future<List<RegionItem>> loadRegencies() {
+    if (_province == null || _province!.id.isEmpty) {
+      return Future.value(<RegionItem>[]);
+    }
+    return _regionApi.getRegencies(_province!.id);
+  }
+
+  /// Loads list of districts for the currently selected regency.
+  Future<List<RegionItem>> loadDistricts() {
+    if (_regency == null || _regency!.id.isEmpty) {
+      return Future.value(<RegionItem>[]);
+    }
+    return _regionApi.getDistricts(_regency!.id);
+  }
+
+  /// Loads list of villages for the currently selected district.
+  Future<List<RegionItem>> loadVillages() {
+    if (_district == null || _district!.id.isEmpty) {
+      return Future.value(<RegionItem>[]);
+    }
+    return _regionApi.getVillages(_district!.id);
+  }
+
+  /// Formats date to canonical ISO-8601 `yyyy-MM-dd` using TimeService SSOT.
+  String formatIsoDate(DateTime date) => _timeService.formatDate(date, style: 'iso');
 
   void _initFromUser() {
     _name = user.fullName;
