@@ -110,7 +110,7 @@ class AmanahIsometricBoxPalette {
 /// Native Flutter Canvas implementation of emptystate.html
 class AmanahIsometricEmptyBox extends StatefulWidget {
   const AmanahIsometricEmptyBox({
-    this.size = 240.0,
+    this.size,
     this.showCaption = false,
     this.captionText = 'Empty box',
     this.showControls = false,
@@ -119,7 +119,8 @@ class AmanahIsometricEmptyBox extends StatefulWidget {
   });
 
   /// The width and height footprint of the isometric canvas.
-  final double size;
+  /// If null, dynamically expands to fill available parent width.
+  final double? size;
 
   /// Whether to draw the subtle "Empty box" caption under the box shadow.
   final bool showCaption;
@@ -134,8 +135,7 @@ class AmanahIsometricEmptyBox extends StatefulWidget {
   final bool autoPlay;
 
   @override
-  State<AmanahIsometricEmptyBox> createState() =>
-      _AmanahIsometricEmptyBoxState();
+  State<AmanahIsometricEmptyBox> createState() => _AmanahIsometricEmptyBoxState();
 }
 
 class _AmanahIsometricEmptyBoxState extends State<AmanahIsometricEmptyBox>
@@ -148,13 +148,10 @@ class _AmanahIsometricEmptyBoxState extends State<AmanahIsometricEmptyBox>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(
-        milliseconds: (AmanahIsometricBoxConfig.cycleDuration * 1000) ~/ 1,
-      ),
+      duration: const Duration(milliseconds: (AmanahIsometricBoxConfig.cycleDuration * 1000) ~/ 1),
     );
 
-    final bool isTesting =
-        WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final bool isTesting = WidgetsBinding.instance.runtimeType.toString().contains('Test');
     if (widget.autoPlay && !isTesting) {
       _controller.repeat();
       _isPlaying = true;
@@ -194,38 +191,54 @@ class _AmanahIsometricEmptyBoxState extends State<AmanahIsometricEmptyBox>
         ? AmanahIsometricBoxPalette.dark()
         : AmanahIsometricBoxPalette.light();
 
+    Widget buildCanvas(double width, double height) {
+      return SizedBox(
+        width: width,
+        height: height,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (BuildContext context, Widget? child) {
+            return CustomPaint(
+              size: Size(width, height),
+              painter: _IsometricBoxPainter(
+                progress: _controller.value,
+                colors: colors,
+                showCaption: widget.showCaption,
+                captionText: widget.captionText,
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    final Widget canvasWidget;
+    if (widget.size != null) {
+      canvasWidget = buildCanvas(widget.size!, widget.size!);
+    } else {
+      canvasWidget = LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double availableWidth = constraints.maxWidth.isFinite
+              ? constraints.maxWidth
+              : 280.0;
+          // Maintain a balanced isometric height proportion that fits dynamic parent containers
+          final double dynamicHeight = math.min(availableWidth * 0.75, 240.0);
+          return buildCanvas(availableWidth, dynamicHeight);
+        },
+      );
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        SizedBox(
-          width: widget.size,
-          height: widget.size,
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (BuildContext context, Widget? child) {
-              return CustomPaint(
-                size: Size(widget.size, widget.size),
-                painter: _IsometricBoxPainter(
-                  progress: _controller.value,
-                  colors: colors,
-                  showCaption: widget.showCaption,
-                  captionText: widget.captionText,
-                ),
-              );
-            },
-          ),
-        ),
+        canvasWidget,
         if (widget.showControls) ...<Widget>[
           const SizedBox(height: 12),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              _ControlButton(
-                text: 'Ulangi Animasi',
-                dark: dark,
-                onPressed: _replay,
-              ),
+              _ControlButton(text: 'Ulangi Animasi', dark: dark, onPressed: _replay),
               const SizedBox(width: 8),
               _ControlButton(
                 text: _isPlaying ? 'Jeda Animasi' : 'Mulai Animasi',
@@ -241,11 +254,7 @@ class _AmanahIsometricEmptyBoxState extends State<AmanahIsometricEmptyBox>
 }
 
 class _ControlButton extends StatelessWidget {
-  const _ControlButton({
-    required this.text,
-    required this.dark,
-    required this.onPressed,
-  });
+  const _ControlButton({required this.text, required this.dark, required this.onPressed});
 
   final String text;
   final bool dark;
@@ -273,9 +282,7 @@ class _ControlButton extends StatelessWidget {
             style: TextStyle(
               fontSize: 11.5,
               fontWeight: FontWeight.w600,
-              color: dark
-                  ? AmanahColorTokens.neutral400
-                  : AmanahColorTokens.neutral600,
+              color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral600,
             ),
           ),
         ),
@@ -285,11 +292,7 @@ class _ControlButton extends StatelessWidget {
 }
 
 class _BoxInterior {
-  const _BoxInterior({
-    required this.backLeft,
-    required this.backRight,
-    required this.floor,
-  });
+  const _BoxInterior({required this.backLeft, required this.backRight, required this.floor});
 
   final List<Offset> backLeft;
   final List<Offset> backRight;
@@ -323,10 +326,7 @@ class _IsometricBoxPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // Determine uniform scaling to fit custom canvas sizes while keeping 1:1 aspect
-    final double scale = math.min(
-      size.width / _baseWidth,
-      size.height / _baseHeight,
-    );
+    final double scale = math.min(size.width / _baseWidth, size.height / _baseHeight);
 
     canvas.save();
     canvas.translate(
@@ -335,10 +335,8 @@ class _IsometricBoxPainter extends CustomPainter {
     );
     canvas.scale(scale, scale);
 
-    final double elapsedSeconds =
-        progress * AmanahIsometricBoxConfig.cycleDuration;
-    final double cycleTime =
-        elapsedSeconds % AmanahIsometricBoxConfig.cycleDuration;
+    final double elapsedSeconds = progress * AmanahIsometricBoxConfig.cycleDuration;
+    final double cycleTime = elapsedSeconds % AmanahIsometricBoxConfig.cycleDuration;
 
     const double cx = _baseWidth / 2;
     const double cy = _baseHeight / 2 + 10;
@@ -363,26 +361,14 @@ class _IsometricBoxPainter extends CustomPainter {
     final double flapAngle = openT * AmanahIsometricBoxConfig.maxFlapAngle;
 
     // 3. Draw Interior
-    final _BoxInterior interior = _computeInterior(
-      cx,
-      cy,
-      AmanahIsometricBoxConfig.depth,
-    );
+    final _BoxInterior interior = _computeInterior(cx, cy, AmanahIsometricBoxConfig.depth);
     _drawPolygon(canvas, interior.backLeft, colors.interiorBackLeft);
     _drawPolygon(canvas, interior.backRight, colors.interiorBackRight);
     _drawPolygon(canvas, interior.floor, colors.interiorFloor);
 
     // 4. Draw Back Flaps
-    _drawPolygon(
-      canvas,
-      _computeFlapBackLeft(flapAngle, cx, cy),
-      colors.flapBackLeft,
-    );
-    _drawPolygon(
-      canvas,
-      _computeFlapBackRight(flapAngle, cx, cy),
-      colors.flapBackRight,
-    );
+    _drawPolygon(canvas, _computeFlapBackLeft(flapAngle, cx, cy), colors.flapBackLeft);
+    _drawPolygon(canvas, _computeFlapBackRight(flapAngle, cx, cy), colors.flapBackRight);
 
     // 5. Draw Exterior Box
     final _BoxExterior exterior = _computeExterior(cx, cy);
@@ -390,16 +376,8 @@ class _IsometricBoxPainter extends CustomPainter {
     _drawPolygon(canvas, exterior.right, colors.exteriorRight);
 
     // 6. Draw Front Flaps
-    _drawPolygon(
-      canvas,
-      _computeFlapFrontLeft(flapAngle, cx, cy),
-      colors.flapFrontLeft,
-    );
-    _drawPolygon(
-      canvas,
-      _computeFlapFrontRight(flapAngle, cx, cy),
-      colors.flapFrontRight,
-    );
+    _drawPolygon(canvas, _computeFlapFrontLeft(flapAngle, cx, cy), colors.flapFrontLeft);
+    _drawPolygon(canvas, _computeFlapFrontRight(flapAngle, cx, cy), colors.flapFrontRight);
 
     // 7. Compute & Draw Insect Flight Trajectory (Dotted Trail)
     final double flyProgress = _computeProgress(
@@ -408,20 +386,13 @@ class _IsometricBoxPainter extends CustomPainter {
       AmanahIsometricBoxConfig.flyEmergeEnd,
     );
     final double flyT = _easeInOutQuad(flyProgress);
-    final List<Offset> trajectoryPoints = _buildTrajectoryPoints(
-      cx,
-      cy,
-      targetX,
-      targetY,
-    );
+    final List<Offset> trajectoryPoints = _buildTrajectoryPoints(cx, cy, targetX, targetY);
 
     _drawDottedTrail(canvas, trajectoryPoints, flyT, elapsedSeconds);
 
     // 8. Draw Insect
     final Offset flyPos = _getPointAtProgress(trajectoryPoints, flyT);
-    final double floatOffset = flyT >= 1
-        ? math.sin(elapsedSeconds * 1.8) * 3
-        : 0;
+    final double floatOffset = flyT >= 1 ? math.sin(elapsedSeconds * 1.8) * 3 : 0;
     final double insectOpacity = math.min(
       1.0,
       _computeProgress(
@@ -431,13 +402,7 @@ class _IsometricBoxPainter extends CustomPainter {
       ),
     );
 
-    _drawInsect(
-      canvas,
-      flyPos.dx,
-      flyPos.dy + floatOffset,
-      elapsedSeconds,
-      insectOpacity,
-    );
+    _drawInsect(canvas, flyPos.dx, flyPos.dy + floatOffset, elapsedSeconds, insectOpacity);
 
     // 9. Draw Sparkles
     final double sparkleOpacity = _computeProgress(
@@ -449,12 +414,7 @@ class _IsometricBoxPainter extends CustomPainter {
 
     // 10. Optional Caption
     if (showCaption) {
-      _drawCaption(
-        canvas,
-        cx,
-        cy + AmanahIsometricBoxConfig.height + 45,
-        captionText,
-      );
+      _drawCaption(canvas, cx, cy + AmanahIsometricBoxConfig.height + 45, captionText);
     }
 
     canvas.restore();
@@ -462,13 +422,7 @@ class _IsometricBoxPainter extends CustomPainter {
 
   // --- Geometry Projection Math ---
 
-  static Offset _project(
-    double x,
-    double y,
-    double z,
-    double originX,
-    double originY,
-  ) {
+  static Offset _project(double x, double y, double z, double originX, double originY) {
     return Offset(
       originX + (x - y) * AmanahIsometricBoxConfig.radiusX,
       originY +
@@ -478,10 +432,8 @@ class _IsometricBoxPainter extends CustomPainter {
   }
 
   static List<Offset> _computeFlapBackLeft(double angle, double cx, double cy) {
-    final double xOffset =
-        AmanahIsometricBoxConfig.flapLength * math.cos(angle);
-    final double zOffset =
-        1 + AmanahIsometricBoxConfig.flapLength * math.sin(angle);
+    final double xOffset = AmanahIsometricBoxConfig.flapLength * math.cos(angle);
+    final double zOffset = 1 + AmanahIsometricBoxConfig.flapLength * math.sin(angle);
     return <Offset>[
       _project(0, 1, 1, cx, cy),
       _project(0, 0, 1, cx, cy),
@@ -490,15 +442,9 @@ class _IsometricBoxPainter extends CustomPainter {
     ];
   }
 
-  static List<Offset> _computeFlapBackRight(
-    double angle,
-    double cx,
-    double cy,
-  ) {
-    final double yOffset =
-        AmanahIsometricBoxConfig.flapLength * math.cos(angle);
-    final double zOffset =
-        1 + AmanahIsometricBoxConfig.flapLength * math.sin(angle);
+  static List<Offset> _computeFlapBackRight(double angle, double cx, double cy) {
+    final double yOffset = AmanahIsometricBoxConfig.flapLength * math.cos(angle);
+    final double zOffset = 1 + AmanahIsometricBoxConfig.flapLength * math.sin(angle);
     return <Offset>[
       _project(0, 0, 1, cx, cy),
       _project(1, 0, 1, cx, cy),
@@ -507,15 +453,9 @@ class _IsometricBoxPainter extends CustomPainter {
     ];
   }
 
-  static List<Offset> _computeFlapFrontLeft(
-    double angle,
-    double cx,
-    double cy,
-  ) {
-    final double yOffset =
-        1 - AmanahIsometricBoxConfig.flapLength * math.cos(angle);
-    final double zOffset =
-        1 + AmanahIsometricBoxConfig.flapLength * math.sin(angle);
+  static List<Offset> _computeFlapFrontLeft(double angle, double cx, double cy) {
+    final double yOffset = 1 - AmanahIsometricBoxConfig.flapLength * math.cos(angle);
+    final double zOffset = 1 + AmanahIsometricBoxConfig.flapLength * math.sin(angle);
     return <Offset>[
       _project(0, 1, 1, cx, cy),
       _project(1, 1, 1, cx, cy),
@@ -524,15 +464,9 @@ class _IsometricBoxPainter extends CustomPainter {
     ];
   }
 
-  static List<Offset> _computeFlapFrontRight(
-    double angle,
-    double cx,
-    double cy,
-  ) {
-    final double xOffset =
-        1 - AmanahIsometricBoxConfig.flapLength * math.cos(angle);
-    final double zOffset =
-        1 + AmanahIsometricBoxConfig.flapLength * math.sin(angle);
+  static List<Offset> _computeFlapFrontRight(double angle, double cx, double cy) {
+    final double xOffset = 1 - AmanahIsometricBoxConfig.flapLength * math.cos(angle);
+    final double zOffset = 1 + AmanahIsometricBoxConfig.flapLength * math.sin(angle);
     return <Offset>[
       _project(1, 0, 1, cx, cy),
       _project(1, 1, 1, cx, cy),
@@ -584,13 +518,7 @@ class _IsometricBoxPainter extends CustomPainter {
 
   // --- Flight Trajectory & Bézier Math ---
 
-  static Offset _evaluateCubic(
-    Offset p0,
-    Offset p1,
-    Offset p2,
-    Offset p3,
-    double t,
-  ) {
+  static Offset _evaluateCubic(Offset p0, Offset p1, Offset p2, Offset p3, double t) {
     final double oneMinusT = 1.0 - t;
     final double u2 = oneMinusT * oneMinusT;
     final double u3 = u2 * oneMinusT;
@@ -603,12 +531,7 @@ class _IsometricBoxPainter extends CustomPainter {
     );
   }
 
-  static List<Offset> _buildTrajectoryPoints(
-    double cx,
-    double cy,
-    double targetX,
-    double targetY,
-  ) {
+  static List<Offset> _buildTrajectoryPoints(double cx, double cy, double targetX, double targetY) {
     final List<List<Offset>> segments = <List<Offset>>[
       <Offset>[
         Offset(cx, cy + 16),
@@ -650,10 +573,7 @@ class _IsometricBoxPainter extends CustomPainter {
 
   static Offset _getPointAtProgress(List<Offset> points, double progress) {
     final double clamped = progress.clamp(0.0, 1.0);
-    final int index = math.min(
-      (clamped * (points.length - 1)).floor(),
-      points.length - 1,
-    );
+    final int index = math.min((clamped * (points.length - 1)).floor(), points.length - 1);
     return points[index];
   }
 
@@ -687,11 +607,7 @@ class _IsometricBoxPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(cx, cy + 12),
-        width: radiusX * 2.2,
-        height: 28,
-      ),
+      Rect.fromCenter(center: Offset(cx, cy + 12), width: radiusX * 2.2, height: 28),
       shadowPaint,
     );
   }
@@ -706,10 +622,7 @@ class _IsometricBoxPainter extends CustomPainter {
       return;
     }
 
-    final int targetIndex = math.min(
-      (progress * (points.length - 1)).floor(),
-      points.length - 1,
-    );
+    final int targetIndex = math.min((progress * (points.length - 1)).floor(), points.length - 1);
 
     final Path path = Path()..moveTo(points[0].dx, points[0].dy);
     for (int i = 1; i <= targetIndex; i++) {
@@ -741,13 +654,7 @@ class _IsometricBoxPainter extends CustomPainter {
     }
   }
 
-  void _drawInsect(
-    Canvas canvas,
-    double x,
-    double y,
-    double elapsedSeconds,
-    double opacity,
-  ) {
+  void _drawInsect(Canvas canvas, double x, double y, double elapsedSeconds, double opacity) {
     if (opacity <= 0) {
       return;
     }
@@ -768,10 +675,7 @@ class _IsometricBoxPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     // Oval Body
-    canvas.drawOval(
-      Rect.fromCenter(center: Offset.zero, width: 7.0, height: 10.0),
-      bodyPaint,
-    );
+    canvas.drawOval(Rect.fromCenter(center: Offset.zero, width: 7.0, height: 10.0), bodyPaint);
 
     // Head
     canvas.drawCircle(const Offset(0, -5), 2.0, bodyPaint);
@@ -795,13 +699,7 @@ class _IsometricBoxPainter extends CustomPainter {
     canvas.restore();
   }
 
-  void _drawSparkles(
-    Canvas canvas,
-    double cx,
-    double cy,
-    double elapsedSeconds,
-    double opacity,
-  ) {
+  void _drawSparkles(Canvas canvas, double cx, double cy, double elapsedSeconds, double opacity) {
     if (opacity <= 0) {
       return;
     }
@@ -822,13 +720,7 @@ class _IsometricBoxPainter extends CustomPainter {
     canvas.drawCircle(Offset(cx + 22, cy - 32), 1.5, dotPaint);
   }
 
-  void _drawStar(
-    Canvas canvas,
-    double x,
-    double y,
-    double outerRadius,
-    double opacity,
-  ) {
+  void _drawStar(Canvas canvas, double x, double y, double outerRadius, double opacity) {
     final double innerRadius = outerRadius * 0.26;
     final Path path = Path();
 
@@ -856,20 +748,13 @@ class _IsometricBoxPainter extends CustomPainter {
     final TextPainter textPainter = TextPainter(
       text: TextSpan(
         text: text,
-        style: TextStyle(
-          fontSize: 15.0,
-          fontWeight: FontWeight.w500,
-          color: colors.caption,
-        ),
+        style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.w500, color: colors.caption),
       ),
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
     )..layout();
 
-    textPainter.paint(
-      canvas,
-      Offset(cx - textPainter.width / 2, cy - textPainter.height / 2),
-    );
+    textPainter.paint(canvas, Offset(cx - textPainter.width / 2, cy - textPainter.height / 2));
   }
 
   // --- Easing Math from POC ---

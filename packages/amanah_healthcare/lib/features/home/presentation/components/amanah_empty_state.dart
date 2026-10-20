@@ -70,7 +70,7 @@ class AmanahEmptyState extends StatelessWidget {
     this.variant = AmanahEmptyStateVariant.viewport,
     this.iconShape = AmanahEmptyStateIconShape.squircle,
     this.tone = AmanahEmptyStateTone.neutral,
-    this.boxSize = 220.0,
+    this.boxSize,
     this.showAnimationControls = false,
     this.actionText,
     this.onAction,
@@ -91,7 +91,7 @@ class AmanahEmptyState extends StatelessWidget {
     required String title,
     Key? key,
     String? message,
-    double boxSize = 220.0,
+    double? boxSize,
     bool showAnimationControls = false,
     AmanahEmptyStateVariant variant = AmanahEmptyStateVariant.card,
     String? actionText,
@@ -100,11 +100,10 @@ class AmanahEmptyState extends StatelessWidget {
     String? secondaryActionText,
     VoidCallback? onSecondaryAction,
     IconData? secondaryActionLeadingIcon,
-    AmanahEmptyStateActionLayout actionLayout =
-        AmanahEmptyStateActionLayout.auto,
+    AmanahEmptyStateActionLayout actionLayout = AmanahEmptyStateActionLayout.auto,
     Widget? customAction,
     EdgeInsetsGeometry? padding,
-    double? maxWidth = 320,
+    double? maxWidth = double.infinity,
   }) : this(
          key: key,
          title: title,
@@ -132,9 +131,8 @@ class AmanahEmptyState extends StatelessWidget {
     String? message,
     IconData? icon,
     Widget? customIcon,
-    AmanahEmptyStateIllustration illustration =
-        AmanahEmptyStateIllustration.badge,
-    double boxSize = 220.0,
+    AmanahEmptyStateIllustration illustration = AmanahEmptyStateIllustration.badge,
+    double? boxSize,
     AmanahEmptyStateIconShape iconShape = AmanahEmptyStateIconShape.squircle,
     AmanahEmptyStateTone tone = AmanahEmptyStateTone.neutral,
     String? actionText,
@@ -143,8 +141,7 @@ class AmanahEmptyState extends StatelessWidget {
     String? secondaryActionText,
     VoidCallback? onSecondaryAction,
     IconData? secondaryActionLeadingIcon,
-    AmanahEmptyStateActionLayout actionLayout =
-        AmanahEmptyStateActionLayout.auto,
+    AmanahEmptyStateActionLayout actionLayout = AmanahEmptyStateActionLayout.auto,
     Widget? customAction,
     EdgeInsetsGeometry? padding,
     double? maxWidth = 280,
@@ -178,9 +175,8 @@ class AmanahEmptyState extends StatelessWidget {
     String? message,
     IconData? icon,
     Widget? customIcon,
-    AmanahEmptyStateIllustration illustration =
-        AmanahEmptyStateIllustration.badge,
-    double boxSize = 220.0,
+    AmanahEmptyStateIllustration illustration = AmanahEmptyStateIllustration.badge,
+    double? boxSize,
     AmanahEmptyStateIconShape iconShape = AmanahEmptyStateIconShape.circle,
     AmanahEmptyStateTone tone = AmanahEmptyStateTone.neutral,
     String? actionText,
@@ -189,8 +185,7 @@ class AmanahEmptyState extends StatelessWidget {
     String? secondaryActionText,
     VoidCallback? onSecondaryAction,
     IconData? secondaryActionLeadingIcon,
-    AmanahEmptyStateActionLayout actionLayout =
-        AmanahEmptyStateActionLayout.auto,
+    AmanahEmptyStateActionLayout actionLayout = AmanahEmptyStateActionLayout.auto,
     Widget? customAction,
     EdgeInsetsGeometry? padding,
     double? maxWidth = 300,
@@ -259,7 +254,7 @@ class AmanahEmptyState extends StatelessWidget {
   final AmanahEmptyStateVariant variant;
   final AmanahEmptyStateIconShape iconShape;
   final AmanahEmptyStateTone tone;
-  final double boxSize;
+  final double? boxSize;
   final bool showAnimationControls;
   final String? actionText;
   final VoidCallback? onAction;
@@ -319,12 +314,8 @@ class AmanahEmptyState extends StatelessWidget {
           decoration: BoxDecoration(
             color: AmanahThemeTokens.surface(context),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: AmanahThemeTokens.outline(context),
-            ),
-            boxShadow: <BoxShadow>[
-              AmanahElevation.soft(dark: dark),
-            ],
+            border: Border.all(color: AmanahThemeTokens.outline(context)),
+            boxShadow: <BoxShadow>[AmanahElevation.soft(dark: dark)],
           ),
           child: content,
         );
@@ -336,10 +327,7 @@ class AmanahEmptyState extends StatelessWidget {
 
   Widget _buildIllustration(BuildContext context, bool dark) {
     if (illustration == AmanahEmptyStateIllustration.isometricBox) {
-      return AmanahIsometricEmptyBox(
-        size: boxSize,
-        showControls: showAnimationControls,
-      );
+      return AmanahIsometricEmptyBox(size: boxSize, showControls: showAnimationControls);
     }
 
     if (customIcon != null) {
@@ -350,23 +338,16 @@ class AmanahEmptyState extends StatelessWidget {
   }
 
   Widget _buildIconBadge(BuildContext context, bool dark) {
-    final double defaultContainerSize =
-        variant == AmanahEmptyStateVariant.compact ? 48.0 : 64.0;
-    final double defaultIconSize = variant == AmanahEmptyStateVariant.compact
-        ? 22.0
-        : 28.0;
+    final double defaultContainerSize = variant == AmanahEmptyStateVariant.compact ? 48.0 : 64.0;
+    final double defaultIconSize = variant == AmanahEmptyStateVariant.compact ? 22.0 : 28.0;
 
     final double badgeSize = iconContainerSize ?? defaultContainerSize;
     final double resolvedIconSize = iconSize ?? defaultIconSize;
 
-    final (Color bgColor, Color borderColor, Color iconColor) =
-        _resolveToneColors(dark);
+    final (Color bgColor, Color borderColor, Color iconColor) = _resolveToneColors(dark);
 
-    final BorderRadius? borderRadius =
-        iconShape == AmanahEmptyStateIconShape.squircle
-        ? BorderRadius.circular(
-            variant == AmanahEmptyStateVariant.compact ? 18.0 : 24.0,
-          )
+    final BorderRadius? borderRadius = iconShape == AmanahEmptyStateIconShape.squircle
+        ? BorderRadius.circular(variant == AmanahEmptyStateVariant.compact ? 18.0 : 24.0)
         : null;
 
     final BoxShape shape = iconShape == AmanahEmptyStateIconShape.circle
@@ -394,18 +375,18 @@ class AmanahEmptyState extends StatelessWidget {
     switch (tone) {
       case AmanahEmptyStateTone.neutral:
         return (
-          dark ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05) : AmanahColorTokens.neutral100,
-          dark ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10) : AmanahColorTokens.neutral200,
+          dark
+              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+              : AmanahColorTokens.neutral100,
+          dark
+              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+              : AmanahColorTokens.neutral200,
           dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
         );
       case AmanahEmptyStateTone.brand:
         return (
-          dark
-              ? AmanahColorTokens.brand.withValues(alpha: 0.15)
-              : AmanahColorTokens.brandSurface,
-          dark
-              ? AmanahColorTokens.brand.withValues(alpha: 0.30)
-              : AmanahColorTokens.brandMuted,
+          dark ? AmanahColorTokens.brand.withValues(alpha: 0.15) : AmanahColorTokens.brandSurface,
+          dark ? AmanahColorTokens.brand.withValues(alpha: 0.30) : AmanahColorTokens.brandMuted,
           dark ? AmanahColorTokens.brandAccent : AmanahColorTokens.brandPrimary,
         );
       case AmanahEmptyStateTone.warning:
@@ -420,12 +401,8 @@ class AmanahEmptyState extends StatelessWidget {
         );
       case AmanahEmptyStateTone.danger:
         return (
-          dark
-              ? AmanahColorTokens.danger.withValues(alpha: 0.15)
-              : AmanahColorTokens.dangerSurface,
-          dark
-              ? AmanahColorTokens.danger.withValues(alpha: 0.30)
-              : AmanahColorTokens.dangerBorder,
+          dark ? AmanahColorTokens.danger.withValues(alpha: 0.15) : AmanahColorTokens.dangerSurface,
+          dark ? AmanahColorTokens.danger.withValues(alpha: 0.30) : AmanahColorTokens.dangerBorder,
           dark ? AmanahColorTokens.danger : AmanahColorTokens.dangerDark,
         );
       case AmanahEmptyStateTone.success:
@@ -451,31 +428,31 @@ class AmanahEmptyState extends StatelessWidget {
     return Text(
       title,
       textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: fontSize,
-        fontWeight: FontWeight.w800,
-        color: textColor,
-      ),
+      style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w800, color: textColor),
     );
   }
 
   Widget _buildMessage(Color subtextColor) {
-    final double fontSize = variant == AmanahEmptyStateVariant.compact
-        ? 11.0
-        : 12.0;
+    final double fontSize = variant == AmanahEmptyStateVariant.compact ? 11.0 : 12.0;
+
+    final Widget textWidget = Text(
+      message!,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w500,
+        color: subtextColor,
+        height: 1.4,
+      ),
+    );
+
+    if (maxWidth == null || maxWidth!.isInfinite) {
+      return textWidget;
+    }
 
     return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: maxWidth ?? 280),
-      child: Text(
-        message!,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.w500,
-          color: subtextColor,
-          height: 1.4,
-        ),
-      ),
+      constraints: BoxConstraints(maxWidth: maxWidth!),
+      child: textWidget,
     );
   }
 
@@ -574,9 +551,7 @@ class AmanahEmptyState extends StatelessWidget {
       text: sText,
       leadingIcon: secondaryActionLeadingIcon,
       size: AmanahButtonSize.medium,
-      customForegroundColor: dark
-          ? AmanahColorTokens.neutral200
-          : AmanahColorTokens.neutral700,
+      customForegroundColor: dark ? AmanahColorTokens.neutral200 : AmanahColorTokens.neutral700,
       onPressed: sAction,
     );
   }
@@ -600,17 +575,8 @@ class AmanahEmptyState extends StatelessWidget {
   };
 
   EdgeInsetsGeometry get _defaultPadding => switch (variant) {
-    AmanahEmptyStateVariant.viewport => const EdgeInsets.symmetric(
-      horizontal: 24,
-      vertical: 32,
-    ),
-    AmanahEmptyStateVariant.card => const EdgeInsets.symmetric(
-      horizontal: 20,
-      vertical: 28,
-    ),
-    AmanahEmptyStateVariant.compact => const EdgeInsets.symmetric(
-      horizontal: 16,
-      vertical: 20,
-    ),
+    AmanahEmptyStateVariant.viewport => const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+    AmanahEmptyStateVariant.card => const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+    AmanahEmptyStateVariant.compact => const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
   };
 }

@@ -7,11 +7,7 @@ import 'package:amanah_healthcare/features/permission/presentation/theme/amanah_
 /// Master Permission Card Component (Stitched Stacked Ticket Motif)
 /// Replicating lines 695-796 in LeavePermissionTabScreen.tsx (.web) 1:1
 class AmanahPermissionCard extends StatelessWidget {
-  const AmanahPermissionCard({
-    required this.item,
-    required this.onTap,
-    super.key,
-  });
+  const AmanahPermissionCard({required this.item, required this.onTap, super.key});
 
   final AmanahPermissionRecord item;
   final VoidCallback onTap;
@@ -21,14 +17,8 @@ class AmanahPermissionCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color statusBg = AmanahPermissionTokens.getStatusBg(
-      item.status,
-      dark: dark,
-    );
-    final Color statusText = AmanahPermissionTokens.getStatusText(
-      item.status,
-      dark: dark,
-    );
+    final Color statusBg = AmanahPermissionTokens.getStatusBg(item.status, dark: dark);
+    final Color statusText = AmanahPermissionTokens.getStatusText(item.status, dark: dark);
 
     final Color cardWrapperBg = dark
         ? AmanahPermissionTokens.cardWrapperDark
@@ -66,8 +56,8 @@ class AmanahPermissionCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(24),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: AmanahColorTokens.pureBlack.withValues(alpha: dark ? 0.40 : 0.04),
-                  blurRadius: 12,
+                  color: AmanahColorTokens.pureBlack.withValues(alpha: dark ? 0.40 : 0.08),
+                  blurRadius: 10,
                   offset: const Offset(0, 3),
                 ),
               ],
@@ -77,10 +67,7 @@ class AmanahPermissionCard extends StatelessWidget {
               children: <Widget>[
                 // 1. Top Stacking Layer Status Header
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 7,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
                   child: Center(
                     child: Text(
                       item.status.label,
@@ -113,10 +100,7 @@ class AmanahPermissionCard extends StatelessWidget {
                         dashSpace: 3.5,
                       ),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         decoration: BoxDecoration(
                           color: innerStitchBg,
                           borderRadius: BorderRadius.circular(20),
@@ -157,8 +141,7 @@ class AmanahPermissionCard extends StatelessWidget {
                                 // Mulai
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: <Widget>[
                                       Row(
                                         children: <Widget>[
@@ -184,8 +167,7 @@ class AmanahPermissionCard extends StatelessWidget {
                                         ],
                                       ),
                                       Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 20, top: 2),
+                                        padding: const EdgeInsets.only(left: 20, top: 2),
                                         child: Text(
                                           'Mulai',
                                           style: TextStyle(
@@ -204,8 +186,7 @@ class AmanahPermissionCard extends StatelessWidget {
                                 // Selesai
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: <Widget>[
                                       Row(
                                         children: <Widget>[
@@ -231,8 +212,7 @@ class AmanahPermissionCard extends StatelessWidget {
                                         ],
                                       ),
                                       Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 20, top: 2),
+                                        padding: const EdgeInsets.only(left: 20, top: 2),
                                         child: Text(
                                           'Selesai',
                                           style: TextStyle(
@@ -303,10 +283,7 @@ class _DashedRoundedRectPainter extends CustomPainter {
       while (distance < metric.length) {
         final double next = distance + dashWidth;
         dashPath.addPath(
-          metric.extractPath(
-            distance,
-            next > metric.length ? metric.length : next,
-          ),
+          metric.extractPath(distance, next > metric.length ? metric.length : next),
           Offset.zero,
         );
         distance = next + dashSpace;

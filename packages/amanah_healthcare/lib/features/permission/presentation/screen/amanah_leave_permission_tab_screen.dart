@@ -57,12 +57,10 @@ class AmanahLeavePermissionTabScreen extends StatefulWidget {
   }
 
   @override
-  State<AmanahLeavePermissionTabScreen> createState() =>
-      _AmanahLeavePermissionTabScreenState();
+  State<AmanahLeavePermissionTabScreen> createState() => _AmanahLeavePermissionTabScreenState();
 }
 
-class _AmanahLeavePermissionTabScreenState
-    extends State<AmanahLeavePermissionTabScreen> {
+class _AmanahLeavePermissionTabScreenState extends State<AmanahLeavePermissionTabScreen> {
   late final PermissionController _controller;
   late final PageController _pageController;
   AmanahPermissionStatus? _statusFilter;
@@ -104,10 +102,8 @@ class _AmanahLeavePermissionTabScreenState
     return AmanahPermissionRecord(
       id: entity.id,
       userId: entity.staffId,
-      userName:
-          widget.doctorName.isNotEmpty ? widget.doctorName : 'Staf Amanah',
-      userRole:
-          widget.doctorRole.isNotEmpty ? widget.doctorRole : 'Staf Klinik',
+      userName: widget.doctorName.isNotEmpty ? widget.doctorName : 'Staf Amanah',
+      userRole: widget.doctorRole.isNotEmpty ? widget.doctorRole : 'Staf Klinik',
       userAvatarUrl: widget.doctorAvatarUrl ?? '',
       startDate: entity.startDate,
       endDate: entity.endDate,
@@ -122,8 +118,7 @@ class _AmanahLeavePermissionTabScreenState
   }
 
   Future<void> _handleOpenCreateForm() async {
-    final AmanahPermissionFormData? result =
-        await AmanahPermissionFormDrawer.show(
+    final AmanahPermissionFormData? result = await AmanahPermissionFormDrawer.show(
       context: context,
       doctorName: widget.doctorName,
       doctorRole: widget.doctorRole,
@@ -184,93 +179,106 @@ class _AmanahLeavePermissionTabScreenState
     return await _controller.claimReplacement(item.id, context: context);
   }
 
+  void _switchSegment(int index) {
+    if (_activeSegment != index) {
+      setState(() => _activeSegment = index);
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOutCubic,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
     final List<LeaveRequestEntity> rawLeaves = _controller.myLeaves;
-    final List<AmanahPermissionRecord> allRecords =
-        rawLeaves.map(_mapEntityToRecord).toList();
+    final List<AmanahPermissionRecord> allRecords = rawLeaves.map(_mapEntityToRecord).toList();
 
-    return Scaffold(
-      backgroundColor: AmanahThemeTokens.canvas(context),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: <Widget>[
-            // 1. Header with Add Action
-            AmanahScreenHeader(
-              title: 'Perizinan',
-              onBack: widget.onBack,
-              rightAction: AmanahButton.icon(
-                icon: Icons.add_rounded,
-                onPressed: _handleOpenCreateForm,
-                customBackgroundColor: Colors.transparent,
-                customBorder: Border.all(color: Colors.transparent),
-                customForegroundColor: dark
-                    ? AmanahColorTokens.tabActiveDark
-                    : AmanahColorTokens.brand,
-                semanticsLabel: 'Tambah Perizinan Baru',
+    final VoidCallback? effectiveBack = _activeSegment == 1
+        ? () => _switchSegment(0)
+        : widget.onBack;
+
+    return PopScope(
+      canPop: _activeSegment == 0,
+      onPopInvokedWithResult: (bool didPop, dynamic result) {
+        if (!didPop && _activeSegment == 1) {
+          _switchSegment(0);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AmanahThemeTokens.canvas(context),
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: <Widget>[
+              // 1. Header with Add Action
+              AmanahScreenHeader(
+                title: 'Perizinan',
+                onBack: effectiveBack,
+                rightAction: AmanahButton.icon(
+                  icon: Icons.add_rounded,
+                  onPressed: _handleOpenCreateForm,
+                  customBackgroundColor: Colors.transparent,
+                  customBorder: Border.all(color: Colors.transparent),
+                  customForegroundColor: dark
+                      ? AmanahColorTokens.tabActiveDark
+                      : AmanahColorTokens.brand,
+                  semanticsLabel: 'Tambah Perizinan Baru',
+                ),
               ),
-            ),
 
-            // 2. Orchestrated Segment Switcher
-            AmanahPermissionSegmentSwitcher(
-              activeSegment: _activeSegment,
-              onSegmentChanged: (int index) {
-                if (_activeSegment != index) {
-                  setState(() => _activeSegment = index);
-                  _pageController.animateToPage(
-                    index,
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeInOutCubic,
-                  );
-                }
-              },
-              myLeavesCount: allRecords.length,
-              openReplacementsCount: _controller.availableReplacements.length,
-              dark: dark,
-            ),
-
-            // 3. Tab Body Viewports (Swipeable PageView)
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                onPageChanged: (int index) {
-                  if (_activeSegment != index) {
-                    setState(() => _activeSegment = index);
-                  }
-                },
-                physics: const BouncingScrollPhysics(),
-                children: <Widget>[
-                  AmanahMyPermissionsView(
-                    records: allRecords,
-                    statusFilter: _statusFilter,
-                    onFilterSelected: (AmanahPermissionStatus? status) {
-                      setState(() => _statusFilter = status);
-                    },
-                    onRefresh: () async {
-                      await _controller.fetchMyLeaves();
-                    },
-                    onItemTap: _handleOpenDetail,
-                    onAddPermission: _handleOpenCreateForm,
-                    isLoading: _controller.isLoading,
-                  ),
-                  AmanahReplacementOpportunitiesView(
-                    items: _controller.availableReplacements,
-                    onRefresh: () async {
-                      await _controller.fetchAvailableReplacements();
-                    },
-                    onItemTap: _handleOpenReplacementDetail,
-                    onClaim: _handleClaimReplacement,
-                    staffProfileId: widget.staffProfileId,
-                    doctorName: widget.doctorName,
-                  ),
-                ],
+              // 2. Orchestrated Segment Switcher
+              AmanahPermissionSegmentSwitcher(
+                activeSegment: _activeSegment,
+                onSegmentChanged: _switchSegment,
+                myLeavesCount: allRecords.length,
+                openReplacementsCount: _controller.availableReplacements.length,
+                dark: dark,
               ),
-            ),
-          ],
+
+              // 3. Tab Body Viewports (Swipeable PageView)
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (int index) {
+                    if (_activeSegment != index) {
+                      setState(() => _activeSegment = index);
+                    }
+                  },
+                  physics: const BouncingScrollPhysics(),
+                  children: <Widget>[
+                    AmanahMyPermissionsView(
+                      records: allRecords,
+                      statusFilter: _statusFilter,
+                      onFilterSelected: (AmanahPermissionStatus? status) {
+                        setState(() => _statusFilter = status);
+                      },
+                      onRefresh: () async {
+                        await _controller.fetchMyLeaves();
+                      },
+                      onItemTap: _handleOpenDetail,
+                      onAddPermission: _handleOpenCreateForm,
+                      isLoading: _controller.isLoading,
+                    ),
+                    AmanahReplacementOpportunitiesView(
+                      items: _controller.availableReplacements,
+                      onRefresh: () async {
+                        await _controller.fetchAvailableReplacements();
+                      },
+                      onItemTap: _handleOpenReplacementDetail,
+                      onClaim: _handleClaimReplacement,
+                      staffProfileId: widget.staffProfileId,
+                      doctorName: widget.doctorName,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -60,10 +60,7 @@ class PresenceScannerCameraViewport extends StatelessWidget {
         title: const Text('Flash Error'),
         content: const Text('Could not toggle camera flash.'),
         actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
+          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('OK')),
         ],
       ),
     );
@@ -75,8 +72,7 @@ class PresenceScannerCameraViewport extends StatelessWidget {
     }
 
     final PermissionListener? listener = context.watch<PermissionListener?>();
-    return listener == null ||
-        listener.value.status == DevicePermissionStatus.granted;
+    return listener == null || listener.value.status == DevicePermissionStatus.granted;
   }
 
   Widget _buildCameraPreview(BuildContext context) {
@@ -90,19 +86,14 @@ class PresenceScannerCameraViewport extends StatelessWidget {
         },
         hapticFeedback: () => HapticFeedback.selectionClick(),
         onCameraFlashError: onCameraFlashError,
-        trackCustomEvent: (
-          String msg,
-          String category, {
-          int? eventValue,
-          String? barcode,
-        }) {},
+        trackCustomEvent: (String msg, String category, {int? eventValue, String? barcode}) {},
         hasMoreThanOneCamera: safeHasMoreThanOneCamera(),
         toggleCameraModeTooltip: '',
         toggleFlashModeTooltip: '',
         barcodeScannerIcon: const SizedBox.shrink(),
         torchOnIcon: const SizedBox.shrink(),
         torchOffIcon: const SizedBox.shrink(),
-        visorColor: AmanahColorTokens.brandLight,
+        visorColor: AmanahColorTokens.brand,
         contentPadding: EdgeInsetsDirectional.zero,
         onScannerCreated: onScannerCreated,
         showDefaultVisor: false,
@@ -136,50 +127,33 @@ class PresenceScannerCameraViewport extends StatelessWidget {
               ),
             ),
 
-            // 2. Cutout frame border, medical grid and laser scan line
+            // 2. Cutout frame with 4 minimalist rounded corner brackets and medical grid
             Positioned(
               left: cutoutRect.left,
               top: cutoutRect.top,
               width: cutoutRect.width,
               height: cutoutRect.height,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24.0),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: <Widget>[
-                    const Opacity(
-                      opacity: 0.15,
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(24.0),
+                    child: const Opacity(
+                      opacity: 0.12,
                       child: CustomPaint(painter: MedicalGridPainter()),
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24.0),
-                        border: Border.all(
-                          color: AmanahColorTokens.brandLight.withValues(alpha: 0.75),
-                          width: 2.0,
-                        ),
-                      ),
+                  ),
+                  const CustomPaint(
+                    painter: PresenceScannerFramePainter(color: AmanahColorTokens.brand),
+                  ),
+                  if (hardwareNotifier != null)
+                    Positioned(
+                      left: 18,
+                      right: 18,
+                      bottom: 12,
+                      child: _InKernelZoomSlider(hardwareNotifier: hardwareNotifier!),
                     ),
-                    IgnorePointer(
-                      child: RepaintBoundary(
-                        child: PresenceScannerTargetOverlay(
-                          laserAnimation: laserAnimation,
-                          contentPadding: EdgeInsetsDirectional.zero,
-                          drawFrame: false,
-                        ),
-                      ),
-                    ),
-                    if (hardwareNotifier != null)
-                      Positioned(
-                        left: 18,
-                        right: 18,
-                        bottom: 12,
-                        child: _InKernelZoomSlider(
-                          hardwareNotifier: hardwareNotifier!,
-                        ),
-                      ),
-                  ],
-                ),
+                ],
               ),
             ),
 
@@ -236,10 +210,7 @@ class PresenceScannerCameraViewport extends StatelessWidget {
     if (_shouldUseCameraScanner(context)) {
       return Stack(
         fit: StackFit.expand,
-        children: <Widget>[
-          _buildCameraPreview(context),
-          _buildViewfinderMask(context),
-        ],
+        children: <Widget>[_buildCameraPreview(context), _buildViewfinderMask(context)],
       );
     }
 
@@ -277,22 +248,12 @@ class _ViewfinderMaskPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Path backgroundPath = Path()
-      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    final Path backgroundPath = Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
 
     final Path cutoutPath = Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(
-          cutoutRect,
-          Radius.circular(borderRadius),
-        ),
-      );
+      ..addRRect(RRect.fromRectAndRadius(cutoutRect, Radius.circular(borderRadius)));
 
-    final Path maskPath = Path.combine(
-      PathOperation.difference,
-      backgroundPath,
-      cutoutPath,
-    );
+    final Path maskPath = Path.combine(PathOperation.difference, backgroundPath, cutoutPath);
 
     final Paint paint = Paint()
       ..color = maskColor
@@ -349,17 +310,15 @@ class _InKernelZoomSlider extends StatelessWidget {
                     child: SliderTheme(
                       data: SliderThemeData(
                         trackHeight: 2.5,
-                        activeTrackColor: AmanahColorTokens.brandLight,
+                        activeTrackColor: AmanahColorTokens.brand,
                         inactiveTrackColor: AmanahColorTokens.surfaceLight.withValues(alpha: 0.25),
                         thumbColor: AmanahColorTokens.surfaceLight,
-                        overlayColor: AmanahColorTokens.brandLight.withValues(alpha: 0.20),
+                        overlayColor: AmanahColorTokens.brand.withValues(alpha: 0.20),
                         thumbShape: const RoundSliderThumbShape(
                           enabledThumbRadius: 5.5,
                           elevation: 2.0,
                         ),
-                        overlayShape: const RoundSliderOverlayShape(
-                          overlayRadius: 12.0,
-                        ),
+                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 12.0),
                       ),
                       child: Slider(
                         value: currentZoom.clamp(0.0, 1.0),
@@ -385,5 +344,3 @@ class _InKernelZoomSlider extends StatelessWidget {
     );
   }
 }
-
-

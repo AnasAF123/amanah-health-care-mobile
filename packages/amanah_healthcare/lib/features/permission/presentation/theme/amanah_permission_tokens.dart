@@ -9,18 +9,12 @@ import 'package:amanah_healthcare/features/permission/domain/amanah_permission_m
 /// existing permission widgets stable while resolving status colors from the
 /// shared Amanah design-system vocabulary.
 abstract final class AmanahPermissionTokens {
-  static Color getStatusBg(
-    AmanahPermissionStatus status, {
-    required bool dark,
-  }) {
+  static Color getStatusBg(AmanahPermissionStatus status, {required bool dark}) {
     final AmanahTone tone = _statusTone(status, dark: dark);
     return tone.surface;
   }
 
-  static Color getStatusText(
-    AmanahPermissionStatus status, {
-    required bool dark,
-  }) {
+  static Color getStatusText(AmanahPermissionStatus status, {required bool dark}) {
     final AmanahTone tone = _statusTone(status, dark: dark);
     return tone.onSurface;
   }
@@ -40,17 +34,12 @@ abstract final class AmanahPermissionTokens {
 
   static const Color cardWrapperLight = AmanahColorTokens.surfaceLight;
   static const Color cardWrapperDark = AmanahColorTokens.surfaceDark;
-  static const Color cardBorderLight = AmanahColorTokens.neutral100;
-  static final Color cardBorderDark =
-      AmanahColorTokens.surfaceLight.withValues(alpha: 0.10);
-  static final Color innerStitchBgLight =
-      AmanahColorTokens.neutral50.withValues(alpha: 0.40);
-  static final Color innerStitchBgDark =
-      AmanahColorTokens.surfaceLight.withValues(alpha: 0.04);
-  static final Color dashedStrokeLight =
-      AmanahColorTokens.neutral200.withValues(alpha: 0.90);
-  static final Color dashedStrokeDark =
-      AmanahColorTokens.surfaceLight.withValues(alpha: 0.15);
+  static const Color cardBorderLight = AmanahColorTokens.neutral200;
+  static final Color cardBorderDark = AmanahColorTokens.surfaceLight.withValues(alpha: 0.10);
+  static const Color innerStitchBgLight = AmanahColorTokens.neutral50;
+  static final Color innerStitchBgDark = AmanahColorTokens.surfaceLight.withValues(alpha: 0.04);
+  static const Color dashedStrokeLight = AmanahColorTokens.neutral300;
+  static final Color dashedStrokeDark = AmanahColorTokens.surfaceLight.withValues(alpha: 0.15);
   static const Color textTitleLight = AmanahColorTokens.neutral900;
   static const Color textTitleDark = AmanahColorTokens.surfaceLight;
   static const Color textMutedLight = AmanahColorTokens.neutral500;
