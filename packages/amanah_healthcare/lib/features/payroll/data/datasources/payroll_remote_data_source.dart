@@ -10,19 +10,18 @@ import 'package:amanah_healthcare/features/payroll/data/endpoints/payroll_endpoi
 
 abstract interface class PayrollRemoteDataSource {
   Future<StaffPayrollSummaryDto> getMyPayroll({String? periodId});
+  Future<List<MonthlyPayrollGroupDto>> getMyPayrollHistory();
   Future<List<PayrollPeriodDto>> getPayrollPeriods();
 }
 
 class PayrollRemoteDataSourceImpl implements PayrollRemoteDataSource {
-  PayrollRemoteDataSourceImpl({
-    ApiClient? apiClient,
-  }) : _apiClient = apiClient ??
-            AuthorizedApiClient(
-              innerClient: HttpApiClient(
-                baseUrl: AmanahAuthEnvironment.authBaseUrl,
-              ),
-              tokenProvider: const AmanahAuthTokenStorage(),
-            );
+  PayrollRemoteDataSourceImpl({ApiClient? apiClient})
+    : _apiClient =
+          apiClient ??
+          AuthorizedApiClient(
+            innerClient: HttpApiClient(baseUrl: AmanahAuthEnvironment.authBaseUrl),
+            tokenProvider: const AmanahAuthTokenStorage(),
+          );
 
   final ApiClient _apiClient;
 
@@ -37,8 +36,9 @@ class PayrollRemoteDataSourceImpl implements PayrollRemoteDataSource {
 
   @override
   Future<StaffPayrollSummaryDto> getMyPayroll({String? periodId}) async {
-    final Map<String, String>? queryParams =
-        periodId != null ? <String, String>{'periodId': periodId} : null;
+    final Map<String, String>? queryParams = periodId != null
+        ? <String, String>{'periodId': periodId}
+        : null;
 
     final ApiResponse<dynamic> res = await _apiClient.request(
       PayrollEndpoints.mySummaryEndpoint,
@@ -52,10 +52,22 @@ class PayrollRemoteDataSourceImpl implements PayrollRemoteDataSource {
   }
 
   @override
+  Future<List<MonthlyPayrollGroupDto>> getMyPayrollHistory() async {
+    final ApiResponse<dynamic> res = await _apiClient.request(PayrollEndpoints.myHistoryEndpoint);
+
+    final dynamic data = _extractData(res.data);
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map((Map<String, dynamic> e) => MonthlyPayrollGroupDto.fromJson(e))
+          .toList();
+    }
+    return <MonthlyPayrollGroupDto>[];
+  }
+
+  @override
   Future<List<PayrollPeriodDto>> getPayrollPeriods() async {
-    final ApiResponse<dynamic> res = await _apiClient.request(
-      PayrollEndpoints.periodsEndpoint,
-    );
+    final ApiResponse<dynamic> res = await _apiClient.request(PayrollEndpoints.periodsEndpoint);
 
     final dynamic data = _extractData(res.data);
     if (data is List) {
