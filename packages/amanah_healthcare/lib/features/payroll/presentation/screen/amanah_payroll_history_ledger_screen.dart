@@ -7,6 +7,7 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 import 'package:amanah_healthcare/features/payroll/domain/entities/monthly_payroll_group.dart';
 import 'package:amanah_healthcare/features/payroll/domain/entities/payroll_entry.dart';
 import 'package:amanah_healthcare/features/payroll/presentation/components/payroll_entry_tile.dart';
+import 'package:amanah_healthcare/features/payroll/presentation/components/payroll_export_period_drawer.dart';
 import 'package:amanah_healthcare/features/payroll/presentation/components/payroll_skeleton_view.dart';
 import 'package:amanah_healthcare/features/payroll/presentation/state/payroll_controller.dart';
 import 'package:amanah_healthcare/features/payroll/presentation/utils/payroll_formatters.dart';
@@ -40,6 +41,13 @@ class _AmanahPayrollHistoryLedgerScreenState extends State<AmanahPayrollHistoryL
     super.dispose();
   }
 
+  void _openExportDrawer() {
+    PayrollExportPeriodDrawer.show(
+      context: context,
+      periods: _controller.periods,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
@@ -53,6 +61,11 @@ class _AmanahPayrollHistoryLedgerScreenState extends State<AmanahPayrollHistoryL
             AmanahScreenHeader(
               title: 'History Penggajian',
               onBack: () => Navigator.of(context).pop(),
+              trailing: AmanahScreenHeaderIconAction(
+                icon: Icons.download_rounded,
+                semanticsLabel: 'Unduh Rekap Penggajian',
+                onPressed: _openExportDrawer,
+              ),
             ),
             Expanded(
               child: ListenableBuilder(

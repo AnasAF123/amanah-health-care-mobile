@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:amanah_healthcare/core/notifications/amanah_push_service.dart';
+import 'package:amanah_healthcare/features/export/presentation/components/amanah_export_sheet.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
@@ -39,7 +40,7 @@ class _AmanahPresenceHistoryScreenState extends State<AmanahPresenceHistoryScree
   String _unitFilter = 'all';
   int? _selectedDayFilter;
   DateTime? _selectedDateFilter;
-  bool _isDownloading = false;
+  final bool _isDownloading = false;
 
   bool get _hasActiveFilters =>
       _statusFilter != null ||
@@ -99,6 +100,7 @@ class _AmanahPresenceHistoryScreenState extends State<AmanahPresenceHistoryScree
     final Map<String, dynamic> data = message.data;
     if (data['category'] == 'attendance' ||
         data['category'] == 'shift' ||
+        data['category'] == 'export' ||
         data['sourceDomain'] == 'attendance' ||
         message.notification?.title?.toLowerCase().contains('presensi') == true) {
       _loadHistory();
@@ -164,26 +166,26 @@ class _AmanahPresenceHistoryScreenState extends State<AmanahPresenceHistoryScree
   }
 
   void _handleDownloadPdf() {
-    if (_isDownloading) {
-      return;
+    final Map<String, dynamic> exportParams = <String, dynamic>{};
+    if (_statusFilter != null) {
+      exportParams['status'] = _statusFilter!.name;
     }
-    setState(() => _isDownloading = true);
-    Future<void>.delayed(const Duration(milliseconds: 1200), () {
-      if (mounted) {
-        setState(() => _isDownloading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              'Laporan riwayat presensi berhasil diunduh (PDF)',
-              style: TextStyle(fontSize: 12),
-            ),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    });
+    if (_unitFilter != 'all') {
+      exportParams['unit'] = _unitFilter;
+    }
+    if (_selectedDateFilter != null) {
+      final String yyyymmdd = _selectedDateFilter!.toIso8601String().substring(0, 10);
+      exportParams['startDate'] = yyyymmdd;
+      exportParams['endDate'] = yyyymmdd;
+    }
+
+    AmanahExportSheet.show(
+      context: context,
+      exportType: 'attendance',
+      sheetTitle: 'Unduh Rekap Presensi',
+      sheetSubtitle: 'Ekspor riwayat presensi tabular resmi',
+      parameters: exportParams,
+    );
   }
 
   @override

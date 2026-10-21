@@ -73,7 +73,12 @@ class PayrollController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _historyGroups = await _getMyPayrollHistoryUseCase.execute();
+      final List<dynamic> results = await Future.wait<dynamic>([
+        _getMyPayrollHistoryUseCase.execute(),
+        _getPayrollPeriodsUseCase.execute(),
+      ]);
+      _historyGroups = results[0] as List<MonthlyPayrollGroup>;
+      _periods = results[1] as List<PayrollPeriod>;
     } catch (e) {
       if (context != null && context.mounted) {
         AmanahToaster.error(context, message: e.toString());
