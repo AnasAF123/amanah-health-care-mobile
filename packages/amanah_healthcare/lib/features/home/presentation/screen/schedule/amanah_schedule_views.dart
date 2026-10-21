@@ -62,7 +62,7 @@ class AmanahScheduleOverviewView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Text(
-              'Pasien Booking',
+              'Pasien',
               style: TextStyle(
                 color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
                 fontSize: 13.5,
@@ -112,7 +112,7 @@ class AmanahScheduleOverviewView extends StatelessWidget {
           )
         else
           AmanahEmptyState.box(
-            title: 'Belum Ada Pasien Booking',
+            title: 'Belum Ada Pasien',
             message: isCuti
                 ? 'Dokter sedang cuti pada tanggal ini.'
                 : 'Belum ada pasien yang mendaftar pada sesi praktik di tanggal ini.',
@@ -315,7 +315,7 @@ class AmanahScheduleSessionPatientsView extends StatelessWidget {
           )
         else
           AmanahEmptyState.box(
-            title: 'Belum Ada Pasien Booking',
+            title: 'Belum Ada Pasien',
             message: 'Belum ada pasien yang mendaftar pada sesi praktik ini.',
             actionText: 'Kembali ke Sesi Praktik',
             actionLeadingIcon: Icons.arrow_back_rounded,

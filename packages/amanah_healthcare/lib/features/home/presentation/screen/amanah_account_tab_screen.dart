@@ -6,7 +6,6 @@ import 'package:amanah_healthcare/features/home/presentation/components/account/
 import 'package:amanah_healthcare/features/home/presentation/components/account/amanah_account_preferences_card.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/account/amanah_dual_stack_profile_card.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/account/amanah_winged_mail_banner.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_avatar_photo_sheet.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_pull_to_refresh.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
@@ -46,7 +45,8 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   void initState() {
     super.initState();
     _isEmailVerified = widget.user.isEmailVerified;
-    _presetAvatarUrl = widget.user.avatar.directUrl ??
+    _presetAvatarUrl =
+        widget.user.avatar.directUrl ??
         (widget.user.avatar.url.isNotEmpty ? widget.user.avatar.url : null);
     _profileStore.addListener(_onStoreUpdated);
     _profileStore.seedFromUser(widget.user);
@@ -72,8 +72,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
     super.dispose();
   }
 
-  AmanahStaffProfile? get _activeStaff =>
-      _profileStore.profile ?? widget.user.staff;
+  AmanahStaffProfile? get _activeStaff => _profileStore.profile ?? widget.user.staff;
   String get _fullName => _activeStaff?.fullName ?? widget.user.fullName;
   String get _phone => _activeStaff?.phoneNumber ?? widget.user.phone;
   String get _roleText => _activeStaff?.profession ?? widget.user.displayRole;
@@ -113,66 +112,15 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
     );
   }
 
-  Future<void> _openAvatarPhotoSheet() async {
-    final AmanahAvatarPhotoResult? result = await AmanahAvatarPhotoSheet.show(
-      context,
-    );
-
-    if (result != null && mounted) {
-      setState(() {
-        if (result.isReset) {
-          _customAvatarPath = null;
-          _presetAvatarUrl = null;
-        } else if (result.customImagePath != null) {
-          _customAvatarPath = result.customImagePath;
-          _presetAvatarUrl = null;
-        } else if (result.presetAvatarUrl != null) {
-          _presetAvatarUrl = result.presetAvatarUrl;
-          _customAvatarPath = null;
-        }
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: <Widget>[
-              const Icon(Icons.camera_alt_rounded,
-                  color: AmanahColorTokens.surfaceLight, size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Foto profil ${widget.user.roleLabel.toLowerCase()} berhasil diperbarui',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: AmanahColorTokens.neutral900,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
   void _handleOpenDoctorIdCard() {
     final AmanahAuthUser effectiveUser = widget.user.copyWith(
       fullName: _fullName,
       phone: _phone,
       staff: _activeStaff,
     );
-    Navigator.of(context).push<void>(
-      AmanahDoctorIdCardScreen.route(
-        user: effectiveUser,
-        profile: _doctorProfile,
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push<void>(AmanahDoctorIdCardScreen.route(user: effectiveUser, profile: _doctorProfile));
   }
 
   void _handleMenuItemTap(String id) {
@@ -199,16 +147,13 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
         );
         break;
       case 'payroll':
-        Navigator.of(context).push<void>(
-          AmanahPayrollHistoryScreen.route(),
-        );
+        Navigator.of(context).push<void>(AmanahPayrollHistoryScreen.route());
         break;
       case 'data':
         Navigator.of(context).push<void>(
           MaterialPageRoute<void>(
-            builder: (BuildContext ctx) => AmanahDataStorageSettingsScreen(
-              onBack: () => Navigator.of(ctx).pop(),
-            ),
+            builder: (BuildContext ctx) =>
+                AmanahDataStorageSettingsScreen(onBack: () => Navigator.of(ctx).pop()),
           ),
         );
         break;
@@ -251,20 +196,13 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                 await _profileStore.fetchProfile(force: true);
               },
               child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(
-                  parent: AlwaysScrollableScrollPhysics(),
-                ),
-                padding: EdgeInsets.only(
-                  bottom: 120 + MediaQuery.paddingOf(context).bottom,
-                ),
+                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                padding: EdgeInsets.only(bottom: 120 + MediaQuery.paddingOf(context).bottom),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     // 1. Top Header Region with Medical Hero Illustration
-                    AmanahAccountHeroBanner(
-                      dark: dark,
-                      onIdCardTap: _handleOpenDoctorIdCard,
-                    ),
+                    AmanahAccountHeroBanner(dark: dark, onIdCardTap: _handleOpenDoctorIdCard),
 
                     // 2. Signature Dual-Stack Profile Card
                     Transform.translate(
@@ -279,7 +217,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                           presetAvatarUrl: _presetAvatarUrl,
                           dark: dark,
                           onEditTap: _openEditProfileDrawer,
-                          onAvatarTap: _openAvatarPhotoSheet,
+                          onAvatarTap: () {},
                           onLoyaltyTap: _handleOpenDoctorIdCard,
                         ),
                       ),
@@ -336,11 +274,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
 }
 
 class _LogoutButton extends StatelessWidget {
-  const _LogoutButton({
-    required this.onTap,
-    required this.dark,
-    required this.roleLabel,
-  });
+  const _LogoutButton({required this.onTap, required this.dark, required this.roleLabel});
 
   final VoidCallback onTap;
   final bool dark;
@@ -354,9 +288,7 @@ class _LogoutButton extends StatelessWidget {
         text: 'Keluar dari Akun $roleLabel',
         leadingIcon: Icons.logout_rounded,
         isFullWidth: true,
-        customForegroundColor: dark
-            ? AmanahColorTokens.dangerBorder
-            : AmanahColorTokens.dangerDark,
+        customForegroundColor: dark ? AmanahColorTokens.dangerBorder : AmanahColorTokens.dangerDark,
         semanticsLabel: 'Keluar dari Akun $roleLabel',
         onPressed: onTap,
       ),

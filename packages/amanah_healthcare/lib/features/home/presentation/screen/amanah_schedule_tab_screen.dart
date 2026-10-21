@@ -91,7 +91,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
         VoidCallback? backAction;
 
         if (_viewMode == AmanahScheduleViewMode.sessionPatients) {
-          screenTitle = 'Daftar Pasien Booking';
+          screenTitle = 'Daftar Pasien';
           screenSubtitle = _selectedSession?.title;
           backAction = () => setState(() => _viewMode = AmanahScheduleViewMode.sessions);
         } else if (_viewMode == AmanahScheduleViewMode.sessions) {

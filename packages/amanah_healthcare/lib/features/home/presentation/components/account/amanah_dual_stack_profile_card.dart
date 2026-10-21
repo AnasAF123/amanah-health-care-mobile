@@ -8,7 +8,7 @@ class AmanahDualStackProfileCard extends StatelessWidget {
   const AmanahDualStackProfileCard({
     required this.userName,
     required this.roleText,
-    required this.phoneText,
+    this.phoneText = '',
     required this.dark,
     required this.onEditTap,
     required this.onAvatarTap,
@@ -36,9 +36,7 @@ class AmanahDualStackProfileCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         color: AmanahThemeTokens.surfaceHighlight(context),
         border: Border.all(
-          color: dark
-              ? AmanahThemeTokens.outlineStrong(context)
-              : AmanahColorTokens.brandMuted,
+          color: dark ? AmanahThemeTokens.outlineStrong(context) : AmanahColorTokens.brandMuted,
           width: 1,
         ),
         boxShadow: <BoxShadow>[
@@ -70,16 +68,12 @@ class AmanahDualStackProfileCard extends StatelessWidget {
                         : AmanahColorTokens.surfaceLight,
                     borderRadius: BorderRadius.circular(22),
                     border: Border.all(
-                      color: dark
-                          ? AmanahThemeTokens.outline(context)
-                          : AmanahColorTokens.skyLight,
+                      color: dark ? AmanahThemeTokens.outline(context) : AmanahColorTokens.skyLight,
                       width: 1,
                     ),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
-                        color: AmanahColorTokens.pureBlack.withValues(
-                          alpha: dark ? 0.35 : 0.06,
-                        ),
+                        color: AmanahColorTokens.pureBlack.withValues(alpha: dark ? 0.35 : 0.06),
                         blurRadius: 14,
                         offset: const Offset(0, 3),
                       ),
@@ -95,9 +89,7 @@ class AmanahDualStackProfileCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: dark
-                                  ? AmanahColorTokens.brand
-                                  : AmanahColorTokens.skySubtle,
+                              color: dark ? AmanahColorTokens.brand : AmanahColorTokens.skySubtle,
                               width: 2.2,
                             ),
                             boxShadow: <BoxShadow>[
@@ -131,12 +123,12 @@ class AmanahDualStackProfileCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '$roleText • $phoneText',
+                              roleText,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 12.5,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                                 color: dark
                                     ? AmanahColorTokens.neutral400
                                     : AmanahColorTokens.neutral600,
@@ -164,14 +156,9 @@ class AmanahDualStackProfileCard extends StatelessWidget {
                 ),
                 InkWell(
                   onTap: onLoyaltyTap,
-                  borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(24),
-                  ),
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -256,8 +243,7 @@ class AmanahDualStackProfileCard extends StatelessWidget {
         File(customAvatarPath!),
         fit: BoxFit.cover,
         alignment: Alignment.topCenter,
-        errorBuilder: (BuildContext ctx, Object err, StackTrace? st) =>
-            _fallbackAvatar(),
+        errorBuilder: (BuildContext ctx, Object err, StackTrace? st) => _fallbackAvatar(),
       );
     }
     if (presetAvatarUrl != null) {
@@ -265,8 +251,7 @@ class AmanahDualStackProfileCard extends StatelessWidget {
         presetAvatarUrl!,
         fit: BoxFit.cover,
         alignment: Alignment.topCenter,
-        errorBuilder: (BuildContext ctx, Object err, StackTrace? st) =>
-            _fallbackAvatar(),
+        errorBuilder: (BuildContext ctx, Object err, StackTrace? st) => _fallbackAvatar(),
       );
     }
     return _fallbackAvatar();
@@ -274,7 +259,14 @@ class AmanahDualStackProfileCard extends StatelessWidget {
 
   Widget _fallbackAvatar() {
     final String cleanInitials = userName.isNotEmpty
-        ? userName.trim().split(' ').where((String s) => s.isNotEmpty).map((String s) => s[0]).take(2).join().toUpperCase()
+        ? userName
+              .trim()
+              .split(' ')
+              .where((String s) => s.isNotEmpty)
+              .map((String s) => s[0])
+              .take(2)
+              .join()
+              .toUpperCase()
         : 'AH';
     return Container(
       color: AmanahColorTokens.brand,

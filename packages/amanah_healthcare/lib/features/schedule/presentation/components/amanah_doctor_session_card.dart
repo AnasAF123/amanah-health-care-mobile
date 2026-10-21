@@ -29,11 +29,9 @@ class AmanahDoctorSessionCard extends StatelessWidget {
         ? 'assets/amanah/images/booking-card-bg-dark.png'
         : 'assets/amanah/images/booking-card-bg-light.png';
 
-    final String startTime =
-        schedule.startTime ?? schedule.time.split(' - ').first;
+    final String startTime = schedule.startTime ?? schedule.time.split(' - ').first;
     final String endTime =
-        schedule.endTime ??
-        schedule.time.split(' - ').last.replaceAll(' WIB', '');
+        schedule.endTime ?? schedule.time.split(' - ').last.replaceAll(' WIB', '');
     final int bookedCount = schedule.bookedPatients.length;
 
     return Semantics(
@@ -72,12 +70,8 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                   cardBgAsset,
                   fit: BoxFit.cover,
                   alignment: Alignment.centerRight,
-                  errorBuilder:
-                      (
-                        BuildContext context,
-                        Object error,
-                        StackTrace? stackTrace,
-                      ) => Container(
+                  errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) =>
+                      Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
@@ -107,10 +101,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
               Positioned(
                 top: 14,
                 left: 14,
-                child: AmanahStatusBadge(
-                  text: schedule.badge,
-                  variant: schedule.badgeVariant,
-                ),
+                child: AmanahStatusBadge(text: schedule.badge, variant: schedule.badgeVariant),
               ),
 
               Positioned(
@@ -121,10 +112,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: dark
                             ? AmanahColorTokens.canvasDark.withValues(alpha: 0.70)
@@ -155,7 +143,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            '$bookedCount Pasien Booking',
+                            '$bookedCount Pasien',
                             style: TextStyle(
                               color: dark
                                   ? AmanahColorTokens.surfaceLight
@@ -186,7 +174,9 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                       Text(
                         schedule.title,
                         style: TextStyle(
-                          color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
+                          color: dark
+                              ? AmanahColorTokens.surfaceLight
+                              : AmanahColorTokens.neutral900,
                           fontSize: 24,
                           fontWeight: FontWeight.w900,
                           letterSpacing: -0.3,
@@ -203,8 +193,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                if (schedule.poli != null &&
-                                    schedule.poli!.trim().isNotEmpty)
+                                if (schedule.poli != null && schedule.poli!.trim().isNotEmpty)
                                   Text(
                                     schedule.poli!,
                                     maxLines: 1,
@@ -219,8 +208,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                                   ),
                                 if (schedule.room != null &&
                                     schedule.room!.trim().isNotEmpty) ...<Widget>[
-                                  if (schedule.poli != null &&
-                                      schedule.poli!.trim().isNotEmpty)
+                                  if (schedule.poli != null && schedule.poli!.trim().isNotEmpty)
                                     const SizedBox(height: 2),
                                   Text(
                                     schedule.room!,
@@ -282,9 +270,7 @@ class AmanahDoctorSessionCard extends StatelessWidget {
                                 ],
                               ),
                               Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
+                                margin: const EdgeInsets.symmetric(horizontal: 8),
                                 width: 1,
                                 height: 26,
                                 color: dark

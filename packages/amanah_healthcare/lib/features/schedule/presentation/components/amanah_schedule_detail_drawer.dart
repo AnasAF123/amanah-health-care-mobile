@@ -90,9 +90,7 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                     Text(
                       schedule.date,
                       style: TextStyle(
-                        color: dark
-                            ? AmanahColorTokens.neutral400
-                            : AmanahColorTokens.neutral500,
+                        color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -103,14 +101,9 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
               const SizedBox(width: 8),
               AmanahStatusBadge(
                 text: isDayCuti ? 'Cuti' : schedule.badge,
-                variant: isDayCuti
-                    ? AmanahBadgeVariant.warning
-                    : schedule.badgeVariant,
+                variant: isDayCuti ? AmanahBadgeVariant.warning : schedule.badgeVariant,
                 fontSize: 11,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               ),
             ],
           ),
@@ -141,23 +134,11 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                       : schedule.title,
                   dark: dark,
                 ),
-                PatientSpecRow(
-                  label: 'Jam Praktik',
-                  value: schedule.time,
-                  dark: dark,
-                ),
+                PatientSpecRow(label: 'Jam Praktik', value: schedule.time, dark: dark),
                 if (schedule.room != null && schedule.room!.trim().isNotEmpty)
-                  PatientSpecRow(
-                    label: 'Ruang Praktik',
-                    value: schedule.room!,
-                    dark: dark,
-                  ),
+                  PatientSpecRow(label: 'Ruang Praktik', value: schedule.room!, dark: dark),
                 if (schedule.poli != null && schedule.poli!.trim().isNotEmpty)
-                  PatientSpecRow(
-                    label: 'Poli / Spesialisasi',
-                    value: schedule.poli!,
-                    dark: dark,
-                  ),
+                  PatientSpecRow(label: 'Poli / Spesialisasi', value: schedule.poli!, dark: dark),
                 _SessionSpecTotalPatientsRow(
                   bookedCount: schedule.bookedPatients.length,
                   dark: dark,
@@ -195,14 +176,11 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                   Expanded(
                     child: Row(
                       children: <Widget>[
-                        _StackedPatientAvatars(
-                          patients: schedule.bookedPatients,
-                          dark: dark,
-                        ),
+                        _StackedPatientAvatars(patients: schedule.bookedPatients, dark: dark),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Lihat Pasien Booking (${schedule.bookedPatients.length} Pasien)',
+                            'Lihat Pasien (${schedule.bookedPatients.length} Pasien)',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -221,9 +199,7 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                   Icon(
                     Icons.chevron_right_rounded,
                     size: 16,
-                    color: dark
-                        ? AmanahColorTokens.brandSoft
-                        : AmanahColorTokens.brandAccent,
+                    color: dark ? AmanahColorTokens.brandSoft : AmanahColorTokens.brandAccent,
                   ),
                 ],
               ),
@@ -237,10 +213,7 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
 }
 
 class _SessionSpecTotalPatientsRow extends StatelessWidget {
-  const _SessionSpecTotalPatientsRow({
-    required this.bookedCount,
-    required this.dark,
-  });
+  const _SessionSpecTotalPatientsRow({required this.bookedCount, required this.dark});
 
   final int bookedCount;
   final bool dark;
@@ -263,7 +236,7 @@ class _SessionSpecTotalPatientsRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Text(
-            'Total Pasien Booking',
+            'Total Pasien',
             style: TextStyle(
               color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
               fontSize: 12.5,
@@ -349,27 +322,22 @@ class _StackedPatientAvatars extends StatelessWidget {
                   p.avatarUrl ??
                       'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
                   fit: BoxFit.cover,
-                  errorBuilder:
-                      (BuildContext context, Object error, StackTrace? stack) =>
-                          ColoredBox(
-                            color: dark
-                                ? AmanahColorTokens.neutral700
-                                : AmanahColorTokens.neutral300,
-                            child: Center(
-                              child: Text(
-                                p.patientName.isNotEmpty
-                                    ? p.patientName.substring(0, 1)
-                                    : 'P',
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700,
-                                  color: dark
-                                      ? AmanahColorTokens.surfaceLight
-                                      : AmanahColorTokens.neutral800,
-                                ),
-                              ),
+                  errorBuilder: (BuildContext context, Object error, StackTrace? stack) =>
+                      ColoredBox(
+                        color: dark ? AmanahColorTokens.neutral700 : AmanahColorTokens.neutral300,
+                        child: Center(
+                          child: Text(
+                            p.patientName.isNotEmpty ? p.patientName.substring(0, 1) : 'P',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              color: dark
+                                  ? AmanahColorTokens.surfaceLight
+                                  : AmanahColorTokens.neutral800,
                             ),
                           ),
+                        ),
+                      ),
                 ),
               ),
             ),

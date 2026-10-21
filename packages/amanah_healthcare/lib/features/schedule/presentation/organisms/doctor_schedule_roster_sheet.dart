@@ -149,34 +149,14 @@ class _DoctorScheduleRosterSheetState extends State<DoctorScheduleRosterSheet> {
               : SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.only(bottom: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      if (_controller.roster != null) ...<Widget>[
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Text(
-                            '${_controller.roster!.doctorName} • ${_controller.roster!.specialization}',
-                            style: TextStyle(
-                              color: dark
-                                  ? AmanahColorTokens.neutral400
-                                  : AmanahColorTokens.neutral600,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                      WeeklyScheduleAccordion(
-                        controller: _controller,
-                        focusedDate: _focusedDate,
-                        onClearFocusedDate: () {
-                          setState(() {
-                            _focusedDate = null;
-                          });
-                        },
-                      ),
-                    ],
+                  child: WeeklyScheduleAccordion(
+                    controller: _controller,
+                    focusedDate: _focusedDate,
+                    onClearFocusedDate: () {
+                      setState(() {
+                        _focusedDate = null;
+                      });
+                    },
                   ),
                 ),
           footer: _controller.isLoading || _controller.errorMessage != null

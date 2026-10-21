@@ -6,6 +6,7 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_p
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/notification/amanah_notification_detail_modal.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/notification/amanah_notification_tile.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/notification/notification_skeleton_view.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahNotificationTabScreen extends StatefulWidget {
@@ -15,18 +16,15 @@ class AmanahNotificationTabScreen extends StatefulWidget {
 
   static Route<void> route({VoidCallback? onBack}) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) =>
-          AmanahNotificationTabScreen(onBack: onBack),
+      builder: (BuildContext context) => AmanahNotificationTabScreen(onBack: onBack),
     );
   }
 
   @override
-  State<AmanahNotificationTabScreen> createState() =>
-      _AmanahNotificationTabScreenState();
+  State<AmanahNotificationTabScreen> createState() => _AmanahNotificationTabScreenState();
 }
 
-class _AmanahNotificationTabScreenState
-    extends State<AmanahNotificationTabScreen> {
+class _AmanahNotificationTabScreenState extends State<AmanahNotificationTabScreen> {
   final AmanahNotificationStore _store = AmanahNotificationStore.instance;
 
   @override
@@ -70,9 +68,7 @@ class _AmanahNotificationTabScreenState
     final int unreadCount = _store.unreadCount;
 
     return Scaffold(
-      backgroundColor: dark
-          ? AmanahColorTokens.canvasDark
-          : AmanahColorTokens.canvasLight,
+      backgroundColor: dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.canvasLight,
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -80,46 +76,47 @@ class _AmanahNotificationTabScreenState
             // 1. Unified Master Header Bar
             AmanahScreenHeader(
               title: 'Notifikasi',
-              subtitle: unreadCount > 0
-                  ? '$unreadCount belum dibaca'
-                  : 'Semua sudah dibaca',
+              subtitle: unreadCount > 0 ? '$unreadCount belum dibaca' : 'Semua sudah dibaca',
               onBack: widget.onBack,
-              trailing: _AmanahNotificationOptionsMenu(
-                dark: dark,
-                onMarkAllRead: () => _store.markAllAsRead(),
-                onClearRead: () => _store.clearRead(),
-              ),
+              trailing: unreadCount > 0
+                  ? IconButton(
+                      icon: Icon(
+                        Icons.done_all_rounded,
+                        size: 20,
+                        color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
+                      ),
+                      tooltip: 'Tandai Semua Dibaca',
+                      onPressed: () => _store.markAllAsRead(),
+                    )
+                  : null,
             ),
 
-            // 2. Notification List Viewport / Empty State
+            // 2. Notification List Viewport / Skeleton / Empty State
             Expanded(
               child: AmanahPullToRefresh(
                 onRefresh: () async {
                   await _store.fetchMyNotifications();
                 },
-                child: notificationList.isEmpty
+                child: _store.isLoading && notificationList.isEmpty
+                    ? const NotificationSkeletonView()
+                    : notificationList.isEmpty
                     ? SingleChildScrollView(
                         physics: const BouncingScrollPhysics(
                           parent: AlwaysScrollableScrollPhysics(),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         child: AmanahEmptyState.box(
                           title: 'Belum Ada Notifikasi',
                           message:
                               'Semua pembaruan antrean klinis dan operasional akan tampil di sini secara real-time.',
-                          actionText: (widget.onBack != null ||
-                                  Navigator.of(context).canPop())
+                          actionText: (widget.onBack != null || Navigator.of(context).canPop())
                               ? 'Kembali'
                               : null,
-                          actionLeadingIcon: (widget.onBack != null ||
-                                  Navigator.of(context).canPop())
+                          actionLeadingIcon:
+                              (widget.onBack != null || Navigator.of(context).canPop())
                               ? Icons.arrow_back_rounded
                               : null,
-                          onAction: (widget.onBack != null ||
-                                  Navigator.of(context).canPop())
+                          onAction: (widget.onBack != null || Navigator.of(context).canPop())
                               ? () {
                                   if (widget.onBack != null) {
                                     widget.onBack!.call();
@@ -136,19 +133,15 @@ class _AmanahNotificationTabScreenState
                           parent: AlwaysScrollableScrollPhysics(),
                         ),
                         itemCount: notificationList.length,
-                        separatorBuilder: (BuildContext context, int index) =>
-                            Divider(
+                        separatorBuilder: (BuildContext context, int index) => Divider(
                           height: 1,
                           thickness: 1,
                           color: dark
-                              ? AmanahColorTokens.surfaceLight.withValues(
-                                  alpha: 0.05,
-                                )
+                              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
                               : AmanahColorTokens.neutral100,
                         ),
                         itemBuilder: (BuildContext context, int index) {
-                          final AmanahNotificationItem item =
-                              notificationList[index];
+                          final AmanahNotificationItem item = notificationList[index];
                           return AmanahNotificationTile(
                             item: item,
                             dark: dark,
@@ -161,105 +154,6 @@ class _AmanahNotificationTabScreenState
           ],
         ),
       ),
-    );
-  }
-}
-
-class _AmanahNotificationOptionsMenu extends StatelessWidget {
-  const _AmanahNotificationOptionsMenu({
-    required this.onMarkAllRead,
-    required this.onClearRead,
-    required this.dark,
-  });
-
-  final VoidCallback onMarkAllRead;
-  final VoidCallback onClearRead;
-  final bool dark;
-
-  @override
-  Widget build(BuildContext context) {
-    return PopupMenuButton<String>(
-      icon: Icon(
-        Icons.more_vert_rounded,
-        size: 20,
-        color: dark
-            ? AmanahColorTokens.neutral200
-            : AmanahColorTokens.neutral600,
-      ),
-      constraints: const BoxConstraints(minWidth: 180, maxWidth: 220),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: dark
-          ? AmanahColorTokens.surfaceSecondaryDark
-          : AmanahColorTokens.surfaceLight,
-      elevation: 12,
-      onSelected: (String value) {
-        if (value == 'mark_all') {
-          onMarkAllRead();
-        } else if (value == 'clear_read') {
-          onClearRead();
-        }
-      },
-      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-        PopupMenuItem<String>(
-          value: 'mark_all',
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Icon(
-                Icons.done_all_rounded,
-                size: 18,
-                color: dark
-                    ? AmanahColorTokens.tabActiveDark
-                    : AmanahColorTokens.brandAccent,
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  'Tandai Semua Dibaca',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: dark
-                        ? AmanahColorTokens.surfaceLight
-                        : AmanahColorTokens.neutral900,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const PopupMenuDivider(height: 1),
-        PopupMenuItem<String>(
-          value: 'clear_read',
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const Icon(
-                Icons.delete_outline_rounded,
-                size: 18,
-                color: AmanahColorTokens.danger,
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  'Bersihkan Terbaca',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: dark
-                        ? AmanahColorTokens.dangerBorder
-                        : AmanahColorTokens.dangerDark,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

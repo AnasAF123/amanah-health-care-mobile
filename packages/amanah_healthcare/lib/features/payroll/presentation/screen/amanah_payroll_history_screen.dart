@@ -111,7 +111,14 @@ class _AmanahPayrollHistoryScreenState extends State<AmanahPayrollHistoryScreen>
                   }
 
                   final StaffPayrollSummary? summary = _controller.summary;
-                  if (summary == null) {
+                  final bool hasNoTransactions =
+                      summary == null ||
+                      (summary.entries.isEmpty &&
+                          summary.netPayroll == 0 &&
+                          summary.grossEarnings == 0 &&
+                          summary.baseHours == 0);
+
+                  if (hasNoTransactions) {
                     return const Center(
                       child: AmanahEmptyState(
                         title: 'Data belum tersedia',

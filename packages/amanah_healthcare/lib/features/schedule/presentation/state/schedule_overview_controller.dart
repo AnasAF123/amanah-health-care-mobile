@@ -18,13 +18,22 @@ class ScheduleOverviewController extends ChangeNotifier {
     GetCalendarSummaryUseCase? getCalendarSummaryUseCase,
     ToggleDayStatusUseCase? toggleDayStatusUseCase,
     DateTime? initialDate,
-  })  : _getBookedPatientsUseCase = getBookedPatientsUseCase ??
-            GetBookedPatientsUseCase(repository ?? ScheduleRepositoryImpl()),
-        _getCalendarSummaryUseCase = getCalendarSummaryUseCase ??
-            GetCalendarSummaryUseCase(repository ?? ScheduleRepositoryImpl()),
-        _toggleDayStatusUseCase = toggleDayStatusUseCase ??
-            ToggleDayStatusUseCase(repository ?? ScheduleRepositoryImpl()),
-        _selectedDate = initialDate ?? DateTime.now();
+  }) : _getBookedPatientsUseCase =
+           getBookedPatientsUseCase ??
+           GetBookedPatientsUseCase(repository ?? ScheduleRepositoryImpl()),
+       _getCalendarSummaryUseCase =
+           getCalendarSummaryUseCase ??
+           GetCalendarSummaryUseCase(repository ?? ScheduleRepositoryImpl()),
+       _toggleDayStatusUseCase =
+           toggleDayStatusUseCase ?? ToggleDayStatusUseCase(repository ?? ScheduleRepositoryImpl()),
+       _selectedDate = initialDate ?? DateTime.now() {
+    // Pre-populate with global in-memory cache to prevent visual flickers across tab switches
+    if (_globalSummaryCache.isNotEmpty) {
+      _calendarSummaries.addAll(_globalSummaryCache);
+    }
+  }
+
+  static final Map<String, CalendarDaySummary> _globalSummaryCache = <String, CalendarDaySummary>{};
 
   final GetBookedPatientsUseCase _getBookedPatientsUseCase;
   final GetCalendarSummaryUseCase _getCalendarSummaryUseCase;
@@ -35,8 +44,7 @@ class ScheduleOverviewController extends ChangeNotifier {
   bool _isLoadingSummary = false;
   String? _errorMessage;
   List<SessionPatient> _bookedPatients = const <SessionPatient>[];
-  final Map<String, CalendarDaySummary> _calendarSummaries =
-      <String, CalendarDaySummary>{};
+  final Map<String, CalendarDaySummary> _calendarSummaries = <String, CalendarDaySummary>{};
 
   DateTime get selectedDate => _selectedDate;
   bool get isLoadingPatients => _isLoadingPatients;
@@ -51,11 +59,9 @@ class ScheduleOverviewController extends ChangeNotifier {
     return '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}';
   }
 
-  CalendarDaySummary? get currentDaySummary =>
-      _calendarSummaries[_formatDateString(_selectedDate)];
+  CalendarDaySummary? get currentDaySummary => _calendarSummaries[_formatDateString(_selectedDate)];
 
-  bool get isCutiOnSelectedDate =>
-      currentDaySummary?.isOnLeave ?? false;
+  bool get isCutiOnSelectedDate => currentDaySummary?.isOnLeave ?? false;
 
   bool hasSchedulesForDate(DateTime date) {
     final String key = _formatDateString(date);
@@ -81,8 +87,8 @@ class ScheduleOverviewController extends ChangeNotifier {
       return;
     }
 
-    final bool monthChanged = _selectedDate.year != newDate.year ||
-        _selectedDate.month != newDate.month;
+    final bool monthChanged =
+        _selectedDate.year != newDate.year || _selectedDate.month != newDate.month;
 
     _selectedDate = newDate;
     notifyListeners();
@@ -123,6 +129,7 @@ class ScheduleOverviewController extends ChangeNotifier {
       );
       for (final CalendarDaySummary item in list) {
         _calendarSummaries[item.date] = item;
+        _globalSummaryCache[item.date] = item;
       }
     } catch (e) {
       // Non-fatal, fallback to neutral indicators
@@ -142,21 +149,13 @@ class ScheduleOverviewController extends ChangeNotifier {
   Future<bool> reopenSchedule(BuildContext context, DateTime date) async {
     try {
       final String dateStr = _formatDateString(date);
-      await _toggleDayStatusUseCase(
-        ToggleDayStatusParams(
-          date: dateStr,
-          isClosed: false,
-        ),
-      );
+      await _toggleDayStatusUseCase(ToggleDayStatusParams(date: dateStr, isClosed: false));
 
       await refresh();
       await AmanahScheduleStore.instance.syncTodaySchedules();
 
       if (context.mounted) {
-        AmanahToaster.success(
-          context,
-          message: 'Jadwal praktik berhasil dibuka kembali',
-        );
+        AmanahToaster.success(context, message: 'Jadwal praktik berhasil dibuka kembali');
       }
       return true;
     } catch (e) {
