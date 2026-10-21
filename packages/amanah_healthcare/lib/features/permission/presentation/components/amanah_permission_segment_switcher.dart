@@ -38,9 +38,7 @@ class AmanahPermissionSegmentSwitcher extends StatelessWidget {
             AnimatedAlign(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOutCubic,
-              alignment: activeSegment == 0
-                  ? Alignment.centerLeft
-                  : Alignment.centerRight,
+              alignment: activeSegment == 0 ? Alignment.centerLeft : Alignment.centerRight,
               child: FractionallySizedBox(
                 widthFactor: 0.5,
                 child: Container(
@@ -79,33 +77,24 @@ class AmanahPermissionSegmentSwitcher extends StatelessWidget {
                             'Izin Saya',
                             style: TextStyle(
                               fontSize: 12,
-                              fontWeight: activeSegment == 0
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
+                              fontWeight: activeSegment == 0 ? FontWeight.w700 : FontWeight.w500,
                               color: activeSegment == 0
-                                  ? (dark
-                                      ? Colors.white
-                                      : AmanahColorTokens.neutral900)
+                                  ? (dark ? Colors.white : AmanahColorTokens.neutral900)
                                   : AmanahColorTokens.neutral500,
                             ),
                           ),
                           if (myLeavesCount > 0) ...<Widget>[
                             const SizedBox(width: 6),
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 1.5,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                               decoration: BoxDecoration(
                                 color: activeSegment == 0
                                     ? (dark
-                                        ? AmanahColorTokens.surfaceLight
-                                            .withValues(alpha: 0.20)
-                                        : AmanahColorTokens.neutral200)
+                                          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.20)
+                                          : AmanahColorTokens.neutral200)
                                     : (dark
-                                        ? AmanahColorTokens.surfaceLight
-                                            .withValues(alpha: 0.10)
-                                        : AmanahColorTokens.neutral300),
+                                          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                                          : AmanahColorTokens.neutral300),
                                 borderRadius: BorderRadius.circular(100),
                               ),
                               child: Text(
@@ -140,33 +129,28 @@ class AmanahPermissionSegmentSwitcher extends StatelessWidget {
                             'Jadwal Pengganti',
                             style: TextStyle(
                               fontSize: 12,
-                              fontWeight: activeSegment == 1
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
+                              fontWeight: activeSegment == 1 ? FontWeight.w700 : FontWeight.w500,
                               color: activeSegment == 1
-                                  ? (dark
-                                      ? Colors.white
-                                      : AmanahColorTokens.neutral900)
+                                  ? (dark ? Colors.white : AmanahColorTokens.neutral900)
                                   : AmanahColorTokens.neutral500,
                             ),
                           ),
                           if (openReplacementsCount > 0) ...<Widget>[
                             const SizedBox(width: 6),
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 1.5,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                               decoration: BoxDecoration(
-                                color: AmanahColorTokens.brand,
+                                color: dark
+                                    ? AmanahColorTokens.tabActiveDark
+                                    : AmanahColorTokens.brand,
                                 borderRadius: BorderRadius.circular(100),
                               ),
                               child: Text(
                                 '$openReplacementsCount',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,
-                                  color: Colors.white,
+                                  color: dark ? AmanahColorTokens.neutral950 : Colors.white,
                                 ),
                               ),
                             ),

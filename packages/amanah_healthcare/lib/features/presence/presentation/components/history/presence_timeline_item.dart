@@ -78,115 +78,187 @@ class PresenceTimelineItem extends StatelessWidget {
       }
     }
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        // Left timeline node & connecting line
-        Column(
-          children: <Widget>[
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: iconBgColor,
-                shape: BoxShape.circle,
-                border: Border.all(color: iconBorderColor, width: 2),
-              ),
-              child: Icon(iconData, size: 14, color: iconColor),
-            ),
-            if (!isLast)
-              Container(
-                width: item.isLatest ? 2 : 1.5,
-                height: 48,
-                margin: const EdgeInsets.symmetric(vertical: 2),
-                color: lineColor,
-              ),
-          ],
-        ),
-        const SizedBox(width: 12),
+    final String dateHeader = item.dayName.isNotEmpty ? '${item.dayName}, ${item.date}' : item.date;
 
-        // Date Column (85px)
-        SizedBox(
-          width: 85,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          // Left timeline node & connecting line
+          Column(
             children: <Widget>[
-              const SizedBox(height: 4),
-              Text(
-                item.date,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: textColor,
-                  height: 1.1,
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: iconBorderColor, width: 2),
                 ),
+                child: Icon(iconData, size: 14, color: iconColor),
               ),
-              const SizedBox(height: 2),
-              Text(
-                item.time,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: subtextColor,
+              if (!isLast)
+                Expanded(
+                  child: Container(
+                    width: item.isLatest ? 2 : 1.5,
+                    margin: const EdgeInsets.symmetric(vertical: 2),
+                    color: lineColor,
+                  ),
                 ),
-              ),
             ],
           ),
-        ),
+          const SizedBox(width: 14),
 
-        // Right details Column (Text aligned right)
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 4, bottom: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Text(
-                  item.title,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: item.isLatest
-                        ? FontWeight.w700
-                        : FontWeight.w600,
-                    color: titleColor,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  item.location,
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w400,
-                    color: subtextColor,
-                    height: 1.2,
-                  ),
-                ),
-                if (item.status == AttendanceStatus.cuti) ...<Widget>[
-                  const SizedBox(height: 4),
-                  InkWell(
-                    onTap: () => AmanahPresenceLeaveReasonDrawer.show(
-                      context,
-                      record: item,
-                    ),
-                    child: const Text(
-                      'Lihat Alasan',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AmanahColorTokens.violetDark,
-                        decoration: TextDecoration.underline,
+          // Content Box: Space Between rows (compact and clean)
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  // 1. Header: [ Hari, Tanggal <--- space-between ---> Shift ]
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Flexible(
+                        child: Text(
+                          dateHeader,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: textColor,
+                            height: 1.1,
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Text(
+                        item.title,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: item.isLatest ? FontWeight.w700 : FontWeight.w600,
+                          color: titleColor,
+                          height: 1.1,
+                        ),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 6),
+
+                  // 2. Row Masuk: [ Masuk <--- space-between ---> Jam Masuk ]
+                  if (item.checkInTimeFormatted != null) ...<Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          'Masuk',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: subtextColor,
+                          ),
+                        ),
+                        Text(
+                          item.checkInTimeFormatted!,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: textColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  // 3. Row Keluar: [ Keluar <--- space-between ---> Jam Keluar ]
+                  if (item.checkOutTimeFormatted != null) ...<Widget>[
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          'Keluar',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: subtextColor,
+                          ),
+                        ),
+                        Text(
+                          item.checkOutTimeFormatted!,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: textColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  // 4. Missing / Cuti details
+                  if (item.checkInTimeFormatted == null &&
+                      item.checkOutTimeFormatted == null &&
+                      item.status != AttendanceStatus.cuti) ...<Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          'Keterangan',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: subtextColor,
+                          ),
+                        ),
+                        Text(
+                          item.status == AttendanceStatus.missed
+                              ? 'Tidak Tercatat Presensi'
+                              : (item.notes?.isNotEmpty == true ? item.notes! : '-'),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: subtextColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  if (item.status == AttendanceStatus.cuti) ...<Widget>[
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          'Izin / Cuti Resmi',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: subtextColor,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () => AmanahPresenceLeaveReasonDrawer.show(context, record: item),
+                          child: const Text(
+                            'Lihat Alasan',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AmanahColorTokens.violetDark,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

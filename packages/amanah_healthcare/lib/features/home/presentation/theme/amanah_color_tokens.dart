@@ -94,8 +94,7 @@ abstract final class AmanahComponentSize {
 ///
 /// Components consume these semantic roles rather than guessing raw hex colors.
 abstract final class AmanahThemeTokens {
-  static bool isDark(BuildContext context) =>
-      Theme.of(context).brightness == Brightness.dark;
+  static bool isDark(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
 
   // ---------------------------------------------------------------------------
   // Surface & Canvas Hierarchy
@@ -129,27 +128,23 @@ abstract final class AmanahThemeTokens {
       isDark(context) ? AmanahColorTokens.surfaceAccentDark : AmanahColorTokens.brandSurface;
 
   /// Subtle muted container surface (fields, chips, inactive tabs)
-  static Color surfaceMuted(BuildContext context) => isDark(context)
-      ? Colors.white.withValues(alpha: 0.05)
-      : AmanahColorTokens.neutral100;
+  static Color surfaceMuted(BuildContext context) =>
+      isDark(context) ? Colors.white.withValues(alpha: 0.05) : AmanahColorTokens.neutral100;
 
   // ---------------------------------------------------------------------------
   // Outlines & Dividers
   // ---------------------------------------------------------------------------
   /// Standard structural outline/border (rgba(255,255,255,0.08) in dark, #E2E8F0 in light)
-  static Color outline(BuildContext context) => isDark(context)
-      ? Colors.white.withValues(alpha: 0.08)
-      : AmanahColorTokens.neutral200;
+  static Color outline(BuildContext context) =>
+      isDark(context) ? Colors.white.withValues(alpha: 0.08) : AmanahColorTokens.neutral200;
 
   /// High-emphasis structural outline (rgba(255,255,255,0.16) in dark, #CBD5E1 in light)
-  static Color outlineStrong(BuildContext context) => isDark(context)
-      ? Colors.white.withValues(alpha: 0.16)
-      : AmanahColorTokens.neutral300;
+  static Color outlineStrong(BuildContext context) =>
+      isDark(context) ? Colors.white.withValues(alpha: 0.16) : AmanahColorTokens.neutral300;
 
   /// Structural horizontal/vertical divider
-  static Color divider(BuildContext context) => isDark(context)
-      ? Colors.white.withValues(alpha: 0.08)
-      : AmanahColorTokens.neutral200;
+  static Color divider(BuildContext context) =>
+      isDark(context) ? Colors.white.withValues(alpha: 0.08) : AmanahColorTokens.neutral200;
 
   // ---------------------------------------------------------------------------
   // Typography & Foregrounds
@@ -159,27 +154,23 @@ abstract final class AmanahThemeTokens {
       isDark(context) ? Colors.white : AmanahColorTokens.neutral900;
 
   /// Medium-emphasis secondary text (#CBD5E1 in dark, #475569 in light)
-  static Color textSecondary(BuildContext context) => isDark(context)
-      ? AmanahColorTokens.neutral300
-      : AmanahColorTokens.neutral600;
+  static Color textSecondary(BuildContext context) =>
+      isDark(context) ? AmanahColorTokens.neutral300 : AmanahColorTokens.neutral600;
 
   /// Low-emphasis tertiary text (#94A3B8 in dark, #64748B in light)
-  static Color textTertiary(BuildContext context) => isDark(context)
-      ? AmanahColorTokens.neutral400
-      : AmanahColorTokens.neutral500;
+  static Color textTertiary(BuildContext context) =>
+      isDark(context) ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
 
   /// Muted / placeholder text (#64748B in dark, #94A3B8 in light)
-  static Color textMuted(BuildContext context) => isDark(context)
-      ? AmanahColorTokens.neutral500
-      : AmanahColorTokens.neutral400;
+  static Color textMuted(BuildContext context) =>
+      isDark(context) ? AmanahColorTokens.neutral500 : AmanahColorTokens.neutral400;
 
   /// Backdrop scrim for modal sheets and overlays
   static Color scrim(BuildContext context) =>
       Colors.black.withValues(alpha: isDark(context) ? 0.72 : 0.60);
 
-  static Color accent(BuildContext context) => isDark(context)
-      ? AmanahColorTokens.cyanAccent
-      : AmanahColorTokens.brand;
+  static Color accent(BuildContext context) =>
+      isDark(context) ? AmanahColorTokens.cyanAccent : AmanahColorTokens.brand;
 
   static Color accentSurface(BuildContext context) => isDark(context)
       ? AmanahColorTokens.surfaceAccentDark.withValues(alpha: 0.70)
@@ -206,12 +197,12 @@ abstract final class AmanahThemeTokens {
         case AmanahStatusTone.info:
         case AmanahStatusTone.pending:
           return AmanahTone(
-            primary: AmanahColorTokens.brand,
-            light: AmanahColorTokens.brand.withValues(alpha: 0.16),
-            dark: AmanahColorTokens.brandAccent,
-            surface: AmanahColorTokens.brand.withValues(alpha: 0.16),
-            onSurface: const Color(0xFF60A5FA),
-            border: AmanahColorTokens.brand.withValues(alpha: 0.32),
+            primary: AmanahColorTokens.tabActiveDark,
+            light: AmanahColorTokens.tabActiveDark.withValues(alpha: 0.16),
+            dark: AmanahColorTokens.tabActiveDark,
+            surface: AmanahColorTokens.tabActiveDark.withValues(alpha: 0.16),
+            onSurface: AmanahColorTokens.tabActiveDark,
+            border: AmanahColorTokens.tabActiveDark.withValues(alpha: 0.32),
           );
         case AmanahStatusTone.success:
         case AmanahStatusTone.approved:
@@ -700,7 +691,9 @@ abstract final class AmanahColorTokens {
   // 7. Navigation & Tab Accent Tokens (from BottomNavBar.tsx)
   // ---------------------------------------------------------------------------
   static const Color tabActiveLight = Color(0xFF0D66E9);
-  static const Color tabActiveDark = Color(0xFF38BDF8); // AmanahColorTokens.skySoft (harmonious clinical sky accent)
+  static const Color tabActiveDark = Color(
+    0xFF38BDF8,
+  ); // AmanahColorTokens.skySoft (harmonious clinical sky accent)
   static const Color tabInactiveLight = Color(0xFF9CA3AF);
   static const Color tabInactiveDark = Color(0xFF737373); // text-neutral-500 from .web
 
@@ -826,4 +819,3 @@ abstract final class AmanahColorTokens {
   static const Color scheduleTransparent = Color(0x00000000);
   static const Color scheduleShadowLight = Color(0x0F000000);
 }
-

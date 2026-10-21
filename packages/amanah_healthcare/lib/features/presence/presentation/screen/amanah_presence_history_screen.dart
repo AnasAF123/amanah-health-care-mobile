@@ -14,41 +14,38 @@ import 'package:amanah_healthcare/features/presence/presentation/components/hist
 import 'package:amanah_healthcare/features/presence/presentation/components/history/presence_timeline_item.dart';
 
 class AmanahPresenceHistoryScreen extends StatefulWidget {
-  const AmanahPresenceHistoryScreen({
-    super.key,
-    this.initialRecords,
-  });
+  const AmanahPresenceHistoryScreen({super.key, this.initialRecords});
 
   final List<AttendanceRecord>? initialRecords;
 
   static Route<void> route({List<AttendanceRecord>? records}) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) =>
-          AmanahPresenceHistoryScreen(initialRecords: records),
+      builder: (BuildContext context) => AmanahPresenceHistoryScreen(initialRecords: records),
     );
   }
 
   @override
-  State<AmanahPresenceHistoryScreen> createState() =>
-      _AmanahPresenceHistoryScreenState();
+  State<AmanahPresenceHistoryScreen> createState() => _AmanahPresenceHistoryScreenState();
 }
 
-class _AmanahPresenceHistoryScreenState
-    extends State<AmanahPresenceHistoryScreen> {
+class _AmanahPresenceHistoryScreenState extends State<AmanahPresenceHistoryScreen> {
   late final GetAttendanceHistoryUseCase _getHistoryUseCase;
   List<AttendanceRecord> _records = <AttendanceRecord>[];
+  AttendanceHistorySummary? _summary;
   bool _isLoading = true;
   String? _errorMessage;
 
   AttendanceStatus? _statusFilter;
   String _unitFilter = 'all';
   int? _selectedDayFilter;
+  DateTime? _selectedDateFilter;
   bool _isDownloading = false;
 
   bool get _hasActiveFilters =>
       _statusFilter != null ||
       _unitFilter != 'all' ||
-      _selectedDayFilter != null;
+      _selectedDayFilter != null ||
+      _selectedDateFilter != null;
 
   List<AttendanceRecord> get _filteredRecords {
     return _records
@@ -57,11 +54,19 @@ class _AmanahPresenceHistoryScreenState
             return false;
           }
           if (_unitFilter != 'all' &&
+              rec.location.isNotEmpty &&
               !rec.location.toLowerCase().contains(_unitFilter.toLowerCase())) {
             return false;
           }
-          if (_selectedDayFilter != null &&
-              rec.dayNumber != _selectedDayFilter) {
+          if (_selectedDateFilter != null) {
+            final DateTime? d = rec.attendanceDate ?? rec.checkInAt;
+            if (d == null ||
+                d.year != _selectedDateFilter!.year ||
+                d.month != _selectedDateFilter!.month ||
+                d.day != _selectedDateFilter!.day) {
+              return false;
+            }
+          } else if (_selectedDayFilter != null && rec.dayNumber != _selectedDayFilter) {
             return false;
           }
           return true;
@@ -72,9 +77,7 @@ class _AmanahPresenceHistoryScreenState
   @override
   void initState() {
     super.initState();
-    _getHistoryUseCase = GetAttendanceHistoryUseCase(
-      AttendanceRepositoryImpl(),
-    );
+    _getHistoryUseCase = GetAttendanceHistoryUseCase(AttendanceRepositoryImpl());
 
     if (widget.initialRecords != null && widget.initialRecords!.isNotEmpty) {
       _records = widget.initialRecords!;
@@ -97,8 +100,7 @@ class _AmanahPresenceHistoryScreenState
     if (data['category'] == 'attendance' ||
         data['category'] == 'shift' ||
         data['sourceDomain'] == 'attendance' ||
-        message.notification?.title?.toLowerCase().contains('presensi') ==
-            true) {
+        message.notification?.title?.toLowerCase().contains('presensi') == true) {
       _loadHistory();
     }
   }
@@ -110,10 +112,11 @@ class _AmanahPresenceHistoryScreenState
     });
 
     try {
-      final List<AttendanceRecord> items = await _getHistoryUseCase();
+      final AttendanceHistoryResult res = await _getHistoryUseCase.getResult();
       if (!mounted) return;
       setState(() {
-        _records = items;
+        _records = res.records;
+        _summary = res.summary;
         _isLoading = false;
       });
     } catch (err) {
@@ -130,15 +133,24 @@ class _AmanahPresenceHistoryScreenState
       _statusFilter = null;
       _unitFilter = 'all';
       _selectedDayFilter = null;
+      _selectedDateFilter = null;
     });
   }
 
   Future<void> _openFilterDrawer() async {
+    final DateTime? focused = _records.isNotEmpty && _records.first.attendanceDate != null
+        ? _records.first.attendanceDate
+        : null;
+    final Set<int> eventDays = _records.map((r) => r.dayNumber).toSet();
+
     final Map<String, dynamic>? result = await AmanahPresenceFilterDrawer.show(
       context,
       currentStatus: _statusFilter,
       currentUnit: _unitFilter,
       currentDay: _selectedDayFilter,
+      currentDate: _selectedDateFilter,
+      focusedDate: focused,
+      eventDays: eventDays,
     );
 
     if (result != null && mounted) {
@@ -146,6 +158,7 @@ class _AmanahPresenceHistoryScreenState
         _statusFilter = result['status'] as AttendanceStatus?;
         _unitFilter = (result['unit'] as String?) ?? 'all';
         _selectedDayFilter = result['day'] as int?;
+        _selectedDateFilter = result['date'] as DateTime?;
       });
     }
   }
@@ -165,9 +178,7 @@ class _AmanahPresenceHistoryScreenState
               style: TextStyle(fontSize: 12),
             ),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -180,12 +191,9 @@ class _AmanahPresenceHistoryScreenState
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color bgColor =
-        dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.canvasLight;
-    final Color textColor =
-        dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
-    final Color subtextColor =
-        dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
+    final Color bgColor = dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.canvasLight;
+    final Color textColor = dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
+    final Color subtextColor = dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -196,9 +204,7 @@ class _AmanahPresenceHistoryScreenState
               title: 'Riwayat Presensi',
               onBack: () => Navigator.of(context).pop(),
             ),
-            Expanded(
-              child: _buildBody(dark, textColor, subtextColor),
-            ),
+            Expanded(child: _buildBody(dark, textColor, subtextColor)),
           ],
         ),
       ),
@@ -207,9 +213,7 @@ class _AmanahPresenceHistoryScreenState
 
   Widget _buildBody(bool dark, Color textColor, Color subtextColor) {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator.adaptive(),
-      );
+      return const Center(child: CircularProgressIndicator.adaptive());
     }
 
     if (_errorMessage != null) {
@@ -219,8 +223,7 @@ class _AmanahPresenceHistoryScreenState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Icon(Icons.error_outline_rounded,
-                  size: 44, color: AmanahColorTokens.dangerDark),
+              Icon(Icons.error_outline_rounded, size: 44, color: AmanahColorTokens.dangerDark),
               const SizedBox(height: 12),
               Text(
                 _errorMessage!,
@@ -255,9 +258,7 @@ class _AmanahPresenceHistoryScreenState
     return RefreshIndicator(
       onRefresh: _loadHistory,
       child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        ),
+        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,6 +282,7 @@ class _AmanahPresenceHistoryScreenState
                 statusFilter: _statusFilter,
                 unitFilter: _unitFilter,
                 selectedDayFilter: _selectedDayFilter,
+                selectedDateFilter: _selectedDateFilter,
                 onReset: _resetFilters,
                 dark: dark,
                 subtextColor: subtextColor,
@@ -291,6 +293,7 @@ class _AmanahPresenceHistoryScreenState
             // Summary Metrics Bar
             PresenceHistorySummaryBar(
               records: records,
+              summary: _summary,
               dark: dark,
               textColor: textColor,
               subtextColor: subtextColor,
@@ -322,21 +325,17 @@ class _AmanahPresenceHistoryScreenState
 
   Widget _buildEmptyState(bool dark, Color textColor, Color subtextColor) {
     return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(
-        parent: BouncingScrollPhysics(),
-      ),
+      physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
       child: AmanahEmptyState.box(
         title: 'Tidak Ada Data Presensi',
         message:
             'Tidak ditemukan riwayat presensi yang sesuai dengan filter tanggal atau status yang diterapkan.',
         actionText: _hasActiveFilters ? 'Ubah Filter' : 'Perbarui Data',
-        actionLeadingIcon:
-            _hasActiveFilters ? Icons.tune_rounded : Icons.refresh_rounded,
+        actionLeadingIcon: _hasActiveFilters ? Icons.tune_rounded : Icons.refresh_rounded,
         onAction: _hasActiveFilters ? _openFilterDrawer : _loadHistory,
         secondaryActionText: _hasActiveFilters ? 'Reset Filter' : null,
-        secondaryActionLeadingIcon:
-            _hasActiveFilters ? Icons.restart_alt_rounded : null,
+        secondaryActionLeadingIcon: _hasActiveFilters ? Icons.restart_alt_rounded : null,
         onSecondaryAction: _hasActiveFilters ? _resetFilters : null,
       ),
     );

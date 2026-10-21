@@ -19,7 +19,7 @@ abstract interface class AttendanceRemoteDataSource {
     String? notes,
   });
 
-  Future<List<dynamic>> getMyHistory();
+  Future<dynamic> getMyHistory();
 }
 
 class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
@@ -89,15 +89,11 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
   }
 
   @override
-  Future<List<dynamic>> getMyHistory() async {
+  Future<dynamic> getMyHistory() async {
     final ApiResponse<dynamic> res = await _apiClient.request(
       AttendanceEndpoints.myHistoryEndpoint,
     );
 
-    final dynamic data = _extractData(res.data);
-    if (data is List) {
-      return data;
-    }
-    return <dynamic>[];
+    return _extractData(res.data);
   }
 }

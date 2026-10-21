@@ -7,7 +7,6 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/session_patient.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_doc_schedule_calendar_drawer.dart';
-import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_action_drawer.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_cards_and_drawers.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/organisms/doctor_schedule_roster_sheet.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/organisms/schedule_calendar_detail_sheet.dart';
@@ -113,31 +112,26 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
                   title: screenTitle,
                   subtitle: screenSubtitle,
                   onBack: backAction,
+                  onTitleTap: () {
+                    AmanahDocScheduleCalendarDrawer.show(
+                      context,
+                      selectedDate: selectedDate,
+                      baseToday: DateTime.now(),
+                      onSelectDate: (DateTime d) {
+                        _controller.selectDate(d);
+                        ScheduleCalendarDetailSheet.show(context, selectedDate: d);
+                      },
+                    );
+                  },
                   trailing: _viewMode != AmanahScheduleViewMode.sessionPatients
                       ? AmanahScreenHeaderIconAction(
-                          icon: Icons.more_vert_rounded,
-                          semanticsLabel: 'Menu tindakan jadwal',
+                          icon: Icons.tune_rounded,
+                          semanticsLabel: 'Pengaturan Jadwal Shift',
                           foregroundColor: dark
                               ? AmanahColorTokens.tabActiveDark
                               : AmanahColorTokens.brand,
                           onPressed: () {
-                            AmanahScheduleActionDrawer.show(
-                              context,
-                              onSelectCalendar: () {
-                                AmanahDocScheduleCalendarDrawer.show(
-                                  context,
-                                  selectedDate: selectedDate,
-                                  baseToday: DateTime.now(),
-                                  onSelectDate: (DateTime d) {
-                                    _controller.selectDate(d);
-                                    ScheduleCalendarDetailSheet.show(context, selectedDate: d);
-                                  },
-                                );
-                              },
-                              onOpenSettings: () {
-                                DoctorScheduleRosterSheet.show(context);
-                              },
-                            );
+                            DoctorScheduleRosterSheet.show(context);
                           },
                         )
                       : null,
@@ -194,7 +188,6 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
             _controller.selectDate(d);
             ScheduleCalendarDetailSheet.show(context, selectedDate: d);
           },
-          onReopenSchedule: () => _controller.reopenSchedule(context, selectedDate),
           onOpenSettings: () {
             DoctorScheduleRosterSheet.show(context);
           },

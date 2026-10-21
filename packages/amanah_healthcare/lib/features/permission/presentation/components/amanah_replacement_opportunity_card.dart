@@ -27,13 +27,13 @@ class AmanahReplacementOpportunityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = AmanahThemeTokens.isDark(context);
-    final bool claimedByMe = (currentStaffProfileId.isNotEmpty &&
+    final bool claimedByMe =
+        (currentStaffProfileId.isNotEmpty &&
             item.claimedByStaffProfileId == currentStaffProfileId) ||
         (currentUserName.isNotEmpty && item.claimedByName == currentUserName);
     final bool isOpen = item.isOpen;
 
-    final String sessionDisplay =
-        item.sessionLabel ?? item.sessionCode ?? item.sessionId;
+    final String sessionDisplay = item.sessionLabel ?? item.sessionCode ?? item.sessionId;
 
     return Material(
       color: Colors.transparent,
@@ -43,9 +43,7 @@ class AmanahReplacementOpportunityCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: dark
-                ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
-                : Colors.white,
+            color: dark ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05) : Colors.white,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
               color: dark
@@ -64,6 +62,10 @@ class AmanahReplacementOpportunityCard extends StatelessWidget {
                     avatarUrl: item.originalStaffAvatarUrl,
                     name: item.originalStaffName ?? 'Rekan Staf',
                     size: 40,
+                    backgroundColor: dark
+                        ? AmanahColorTokens.tabActiveDark
+                        : AmanahColorTokens.brand,
+                    initialsColor: dark ? AmanahColorTokens.neutral950 : Colors.white,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -131,18 +133,20 @@ class AmanahReplacementOpportunityCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: AmanahColorTokens.brand.withValues(alpha: 0.08),
+                    color: (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
+                        .withValues(alpha: dark ? 0.12 : 0.08),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: AmanahColorTokens.brand.withValues(alpha: 0.18),
+                      color: (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
+                          .withValues(alpha: dark ? 0.28 : 0.18),
                     ),
                   ),
                   child: Row(
                     children: <Widget>[
-                      const Icon(
+                      Icon(
                         Icons.qr_code_scanner_rounded,
                         size: 15,
-                        color: AmanahColorTokens.brand,
+                        color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -173,9 +177,7 @@ class AmanahReplacementOpportunityCard extends StatelessWidget {
                       Icon(
                         Icons.check_circle_outline_rounded,
                         size: 15,
-                        color: dark
-                            ? AmanahColorTokens.neutral400
-                            : AmanahColorTokens.neutral600,
+                        color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral600,
                       ),
                       const SizedBox(width: 8),
                       Expanded(

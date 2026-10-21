@@ -6,28 +6,19 @@ import 'package:amanah_healthcare/features/schedule/presentation/components/week
 import 'package:amanah_healthcare/features/schedule/presentation/state/schedule_roster_controller.dart';
 
 class DoctorScheduleRosterSheet extends StatefulWidget {
-  const DoctorScheduleRosterSheet({
-    this.controller,
-    super.key,
-  });
+  const DoctorScheduleRosterSheet({this.controller, super.key});
 
   final ScheduleRosterController? controller;
 
-  static Future<void> show(
-    BuildContext context, {
-    ScheduleRosterController? controller,
-  }) {
+  static Future<void> show(BuildContext context, {ScheduleRosterController? controller}) {
     return showAmanahBottomSheet<void>(
       context: context,
-      builder: (BuildContext ctx) => DoctorScheduleRosterSheet(
-        controller: controller,
-      ),
+      builder: (BuildContext ctx) => DoctorScheduleRosterSheet(controller: controller),
     );
   }
 
   @override
-  State<DoctorScheduleRosterSheet> createState() =>
-      _DoctorScheduleRosterSheetState();
+  State<DoctorScheduleRosterSheet> createState() => _DoctorScheduleRosterSheetState();
 }
 
 class _DoctorScheduleRosterSheetState extends State<DoctorScheduleRosterSheet> {
@@ -80,9 +71,7 @@ class _DoctorScheduleRosterSheetState extends State<DoctorScheduleRosterSheet> {
                   return Theme(
                     data: Theme.of(context).copyWith(
                       colorScheme: ColorScheme.fromSeed(
-                        seedColor: dark
-                            ? AmanahColorTokens.tabActiveDark
-                            : AmanahColorTokens.brand,
+                        seedColor: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
                         brightness: dark ? Brightness.dark : Brightness.light,
                       ),
                     ),
@@ -101,32 +90,24 @@ class _DoctorScheduleRosterSheetState extends State<DoctorScheduleRosterSheet> {
               decoration: BoxDecoration(
                 color: _focusedDate != null
                     ? (dark
-                        ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.15)
-                        : AmanahColorTokens.brand.withValues(alpha: 0.12))
-                    : (dark
-                        ? AmanahColorTokens.neutral800
-                        : AmanahColorTokens.neutral100),
+                          ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.15)
+                          : AmanahColorTokens.brand.withValues(alpha: 0.12))
+                    : (dark ? AmanahColorTokens.neutral800 : AmanahColorTokens.neutral100),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: _focusedDate != null
                       ? (dark
-                          ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.4)
-                          : AmanahColorTokens.brand.withValues(alpha: 0.35))
-                      : (dark
-                          ? AmanahColorTokens.neutral700
-                          : AmanahColorTokens.neutral200),
+                            ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.4)
+                            : AmanahColorTokens.brand.withValues(alpha: 0.35))
+                      : (dark ? AmanahColorTokens.neutral700 : AmanahColorTokens.neutral200),
                 ),
               ),
               child: Icon(
                 Icons.calendar_month_outlined,
                 size: 19,
                 color: _focusedDate != null
-                    ? (dark
-                        ? AmanahColorTokens.tabActiveDark
-                        : AmanahColorTokens.brand)
-                    : (dark
-                        ? AmanahColorTokens.neutral300
-                        : AmanahColorTokens.neutral700),
+                    ? (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
+                    : (dark ? AmanahColorTokens.neutral300 : AmanahColorTokens.neutral700),
               ),
             ),
           ),
@@ -138,127 +119,101 @@ class _DoctorScheduleRosterSheetState extends State<DoctorScheduleRosterSheet> {
                   ),
                 )
               : _controller.errorMessage != null
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 40,
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        const Icon(
+                          Icons.error_outline_rounded,
+                          size: 40,
+                          color: AmanahColorTokens.danger,
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            const Icon(
-                              Icons.error_outline_rounded,
-                              size: 40,
-                              color: AmanahColorTokens.danger,
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              _controller.errorMessage!,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: AmanahColorTokens.danger,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            AmanahButton.secondary(
-                              text: 'Coba Lagi',
-                              size: AmanahButtonSize.small,
-                              onPressed: _controller.loadRoster,
-                            ),
-                          ],
+                        const SizedBox(height: 12),
+                        Text(
+                          _controller.errorMessage!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 13, color: AmanahColorTokens.danger),
                         ),
-                      ),
-                    )
-                  : SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.only(bottom: 24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          if (_controller.roster != null) ...<Widget>[
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: Text(
-                                '${_controller.roster!.doctorName} • ${_controller.roster!.specialization}',
-                                style: TextStyle(
-                                  color: dark
-                                      ? AmanahColorTokens.neutral400
-                                      : AmanahColorTokens.neutral600,
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                          WeeklyScheduleAccordion(
-                            controller: _controller,
-                            focusedDate: _focusedDate,
-                            onClearFocusedDate: () {
-                              setState(() {
-                                _focusedDate = null;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
+                        const SizedBox(height: 16),
+                        AmanahButton.secondary(
+                          text: 'Coba Lagi',
+                          size: AmanahButtonSize.small,
+                          onPressed: _controller.loadRoster,
+                        ),
+                      ],
                     ),
+                  ),
+                )
+              : SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      if (_controller.roster != null) ...<Widget>[
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Text(
+                            '${_controller.roster!.doctorName} • ${_controller.roster!.specialization}',
+                            style: TextStyle(
+                              color: dark
+                                  ? AmanahColorTokens.neutral400
+                                  : AmanahColorTokens.neutral600,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                      WeeklyScheduleAccordion(
+                        controller: _controller,
+                        focusedDate: _focusedDate,
+                        onClearFocusedDate: () {
+                          setState(() {
+                            _focusedDate = null;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
           footer: _controller.isLoading || _controller.errorMessage != null
               ? null
-              : Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: dark
-                        ? AmanahColorTokens.canvasDark
-                        : AmanahColorTokens.surfaceLight,
-                    border: Border(
-                      top: BorderSide(
-                        color: dark
-                            ? AmanahColorTokens.neutral800
-                            : AmanahColorTokens.neutral200,
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    children: <Widget>[
-                      if (_controller.isOverride) ...<Widget>[
-                        Expanded(
-                          child: AmanahButton.secondary(
-                            text: 'Reset Template',
-                            isLoading: _controller.isResetting,
-                            size: AmanahButtonSize.medium,
-                            onPressed: () async {
-                              final bool ok =
-                                  await _controller.resetAllToTemplate(context);
-                              if (ok && context.mounted) {
-                                Navigator.of(context).pop();
-                              }
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                      ],
+              : Row(
+                  children: <Widget>[
+                    if (_controller.isOverride) ...<Widget>[
                       Expanded(
-                        child: AmanahButton.primary(
-                          text: 'Simpan',
-                          isLoading: _controller.isSaving,
-                          isDisabled: !_controller.hasUnsavedChanges,
+                        child: AmanahButton.secondary(
+                          text: 'Reset Template',
+                          isLoading: _controller.isResetting,
                           size: AmanahButtonSize.medium,
                           onPressed: () async {
-                            final bool ok =
-                                await _controller.saveOverrides(context);
+                            final bool ok = await _controller.resetAllToTemplate(context);
                             if (ok && context.mounted) {
                               Navigator.of(context).pop();
                             }
                           },
                         ),
                       ),
+                      const SizedBox(width: 12),
                     ],
-                  ),
+                    Expanded(
+                      child: AmanahButton.primary(
+                        text: 'Simpan',
+                        isLoading: _controller.isSaving,
+                        isDisabled: !_controller.hasUnsavedChanges,
+                        size: AmanahButtonSize.medium,
+                        onPressed: () async {
+                          final bool ok = await _controller.saveOverrides(context);
+                          if (ok && context.mounted) {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                      ),
+                    ),
+                  ],
                 ),
         );
       },

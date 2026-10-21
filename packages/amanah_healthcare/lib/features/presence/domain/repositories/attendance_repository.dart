@@ -15,4 +15,6 @@ abstract interface class AttendanceRepository {
   });
 
   Future<List<AttendanceRecord>> getMyHistory();
+
+  Future<AttendanceHistoryResult> getMyHistoryResult();
 }

@@ -1,7 +1,9 @@
+import 'package:amanah_healthcare/core/time/functions/format_localized_time.dart';
 import 'package:amanah_healthcare/features/presence/data/datasources/attendance_remote_data_source.dart';
 import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model.dart';
 import 'package:amanah_healthcare/features/presence/domain/entities/attendance_check_in_result.dart';
 import 'package:amanah_healthcare/features/presence/domain/repositories/attendance_repository.dart';
+import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
 
 class AttendanceRepositoryImpl implements AttendanceRepository {
   AttendanceRepositoryImpl({AttendanceRemoteDataSource? remoteDataSource})
@@ -85,7 +87,48 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
 
   @override
   Future<List<AttendanceRecord>> getMyHistory() async {
-    final List<dynamic> list = await _remoteDataSource.getMyHistory();
+    final AttendanceHistoryResult result = await getMyHistoryResult();
+    return result.records;
+  }
+
+  @override
+  Future<AttendanceHistoryResult> getMyHistoryResult() async {
+    final dynamic rawData = await _remoteDataSource.getMyHistory();
+
+    List<dynamic> list = <dynamic>[];
+    AttendanceHistorySummary? summary;
+
+    if (rawData is Map<String, dynamic>) {
+      if (rawData['records'] is List) {
+        list = rawData['records'] as List<dynamic>;
+      }
+      if (rawData['summary'] is Map<String, dynamic>) {
+        final Map<String, dynamic> sumMap = rawData['summary'] as Map<String, dynamic>;
+        final List<AttendanceStatusFacet> facets = <AttendanceStatusFacet>[];
+        if (sumMap['facets'] is List) {
+          for (final dynamic f in sumMap['facets']) {
+            if (f is Map<String, dynamic>) {
+              facets.add(
+                AttendanceStatusFacet(
+                  status: f['status']?.toString() ?? '',
+                  label: f['label']?.toString() ?? '',
+                  count: (f['count'] as num?)?.toInt() ?? 0,
+                  colorHex: f['color']?.toString() ?? '#10B981',
+                ),
+              );
+            }
+          }
+        }
+        summary = AttendanceHistorySummary(
+          totalWorkHours: (sumMap['totalWorkHours'] as num?)?.toDouble() ?? 0.0,
+          totalDays: (sumMap['totalDays'] as num?)?.toInt() ?? 0,
+          periodLabel: sumMap['periodLabel']?.toString() ?? 'Periode Ini',
+          facets: facets,
+        );
+      }
+    } else if (rawData is List) {
+      list = rawData;
+    }
 
     final List<AttendanceRecord> records = <AttendanceRecord>[];
     for (int i = 0; i < list.length; i++) {
@@ -102,13 +145,13 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
           : AttendanceStatus.hadir;
 
       final String checkInStr = item['checkInAt']?.toString() ?? '';
-      final DateTime? checkInAt = DateTime.tryParse(checkInStr);
+      final DateTime? checkInAt = DateTime.tryParse(checkInStr)?.toLocal();
       final String timeFormatted = checkInAt != null
-          ? '${checkInAt.hour.toString().padLeft(2, '0')}:${checkInAt.minute.toString().padLeft(2, '0')} WIB'
+          ? '${formatLocalizedTime(checkInAt)} WIB'
           : '-';
 
       final String checkOutStr = item['checkOutAt']?.toString() ?? '';
-      final DateTime? checkOutAt = DateTime.tryParse(checkOutStr);
+      final DateTime? checkOutAt = DateTime.tryParse(checkOutStr)?.toLocal();
 
       final String rawDate = item['attendanceDate']?.toString() ?? '';
       final DateTime? parsedDate = DateTime.tryParse(rawDate) ?? checkInAt;
@@ -117,8 +160,16 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
           ? '${parsedDate.day} ${_monthName(parsedDate.month)}'
           : rawDate;
 
-      final String shiftStr = item['shift']?.toString() ?? 'Pagi';
+      final String shiftRaw = item['shift']?.toString() ?? 'morning';
+      final String shiftName = ClinicalSessionResolver.resolveShiftName(sessionShift: shiftRaw);
       final bool isReplacement = item['isReplacement'] == true;
+      final String title = isReplacement ? 'Shift $shiftName (Pengganti)' : 'Shift $shiftName';
+
+      final String? locationLabel = item['locationLabel']?.toString();
+      final double? validatedHours = item['validatedDurationHours'] != null
+          ? double.tryParse(item['validatedDurationHours'].toString())
+          : null;
+      final String? notes = item['notes']?.toString();
 
       records.add(
         AttendanceRecord(
@@ -126,18 +177,20 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
           date: dateFormatted,
           dayNumber: dayNumber,
           time: timeFormatted,
-          title: isReplacement ? 'Dinas Shift $shiftStr (Pengganti)' : 'Dinas Shift $shiftStr',
-          location: item['locationLabel']?.toString() ?? 'Klinik Pratama Amanah',
+          title: title,
+          location: locationLabel ?? '',
           status: status,
           isLatest: i == 0,
           attendanceDate: parsedDate,
           checkInAt: checkInAt,
           checkOutAt: checkOutAt,
+          validatedDurationHours: validatedHours,
+          notes: notes,
         ),
       );
     }
 
-    return records;
+    return AttendanceHistoryResult(records: records, summary: summary);
   }
 
   static String _monthName(int month) {

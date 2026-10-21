@@ -8,8 +8,7 @@ enum AmanahScreenHeaderLeading { auto, back, none }
 
 enum AmanahScreenHeaderTitleAlignment { center, start }
 
-class AmanahScreenHeader extends StatelessWidget
-    implements PreferredSizeWidget {
+class AmanahScreenHeader extends StatelessWidget implements PreferredSizeWidget {
   const AmanahScreenHeader({
     this.title,
     super.key,
@@ -21,12 +20,11 @@ class AmanahScreenHeader extends StatelessWidget
     this.rightAction,
     this.backgroundColor,
     this.titleWidget,
+    this.onTitleTap,
     this.titleAlignment = AmanahScreenHeaderTitleAlignment.center,
     this.showDivider = false,
     this.includeTopSafeArea = false,
-    this.contentPadding = const EdgeInsets.symmetric(
-      horizontal: AmanahSpacing.lg,
-    ),
+    this.contentPadding = const EdgeInsets.symmetric(horizontal: AmanahSpacing.lg),
   });
 
   /// Variant: Standard Centered Title Header with back button
@@ -35,6 +33,7 @@ class AmanahScreenHeader extends StatelessWidget
     Key? key,
     String? subtitle,
     VoidCallback? onBack,
+    VoidCallback? onTitleTap,
     Widget? trailing,
     bool showDivider = false,
   }) : this(
@@ -42,6 +41,7 @@ class AmanahScreenHeader extends StatelessWidget
          title: title,
          subtitle: subtitle,
          onBack: onBack,
+         onTitleTap: onTitleTap,
          leading: AmanahScreenHeaderLeading.back,
          trailing: trailing,
          showDivider: showDivider,
@@ -54,6 +54,7 @@ class AmanahScreenHeader extends StatelessWidget
     Key? key,
     String? subtitle,
     VoidCallback? onBack,
+    VoidCallback? onTitleTap,
     AmanahScreenHeaderLeading leading = AmanahScreenHeaderLeading.auto,
     Widget? leadingAction,
     Widget? trailing,
@@ -63,6 +64,7 @@ class AmanahScreenHeader extends StatelessWidget
          title: title,
          subtitle: subtitle,
          onBack: onBack,
+         onTitleTap: onTitleTap,
          leading: leading,
          leadingAction: leadingAction,
          trailing: trailing,
@@ -88,6 +90,7 @@ class AmanahScreenHeader extends StatelessWidget
   final String? title;
   final String? subtitle;
   final VoidCallback? onBack;
+  final VoidCallback? onTitleTap;
   final AmanahScreenHeaderLeading leading;
   final Widget? leadingAction;
   final Widget? trailing;
@@ -100,8 +103,7 @@ class AmanahScreenHeader extends StatelessWidget
   final EdgeInsetsGeometry contentPadding;
 
   @override
-  Size get preferredSize =>
-      const Size.fromHeight(AmanahComponentSize.topAppBar);
+  Size get preferredSize => const Size.fromHeight(AmanahComponentSize.topAppBar);
 
   @override
   Widget build(BuildContext context) {
@@ -114,8 +116,7 @@ class AmanahScreenHeader extends StatelessWidget
 
     final Widget? leadingWidget = _buildLeadingSlot(context);
     final Widget? trailingWidget = _buildTrailingSlot(context);
-    final bool isCentered =
-        titleAlignment == AmanahScreenHeaderTitleAlignment.center;
+    final bool isCentered = titleAlignment == AmanahScreenHeaderTitleAlignment.center;
     final Widget middleWidget = _buildTitleBlock(
       context,
       isCentered ? TextAlign.center : TextAlign.start,
@@ -128,9 +129,7 @@ class AmanahScreenHeader extends StatelessWidget
         decoration: BoxDecoration(
           color: backgroundColor ?? defaultBg,
           border: showDivider
-              ? Border(
-                  bottom: BorderSide(color: AmanahThemeTokens.outline(context)),
-                )
+              ? Border(bottom: BorderSide(color: AmanahThemeTokens.outline(context)))
               : null,
         ),
         child: Padding(
@@ -206,6 +205,14 @@ class AmanahScreenHeader extends StatelessWidget
       ),
     );
 
+    if (onTitleTap != null) {
+      return GestureDetector(
+        onTap: onTitleTap,
+        behavior: HitTestBehavior.opaque,
+        child: MouseRegion(cursor: SystemMouseCursors.click, child: content),
+      );
+    }
+
     return content;
   }
 
@@ -237,8 +244,7 @@ class AmanahScreenHeader extends StatelessWidget
     return switch (leading) {
       AmanahScreenHeaderLeading.none => false,
       AmanahScreenHeaderLeading.back => true,
-      AmanahScreenHeaderLeading.auto =>
-        onBack != null || Navigator.canPop(context),
+      AmanahScreenHeaderLeading.auto => onBack != null || Navigator.canPop(context),
     };
   }
 }
@@ -264,8 +270,7 @@ class AmanahScreenHeaderIconAction extends StatelessWidget {
       customSize: AmanahComponentSize.iconButton,
       customBackgroundColor: Colors.transparent,
       customBorder: Border.all(color: Colors.transparent),
-      customForegroundColor:
-          foregroundColor ?? AmanahThemeTokens.textSecondary(context),
+      customForegroundColor: foregroundColor ?? AmanahThemeTokens.textSecondary(context),
       semanticsLabel: semanticsLabel,
       onPressed: onPressed,
     );
@@ -285,11 +290,7 @@ class _AmanahHeaderSlot extends StatelessWidget {
         minHeight: AmanahComponentSize.iconButton,
         maxHeight: AmanahComponentSize.iconButton,
       ),
-      child: Center(
-        widthFactor: 1.0,
-        heightFactor: 1.0,
-        child: child,
-      ),
+      child: Center(widthFactor: 1.0, heightFactor: 1.0, child: child),
     );
   }
 }

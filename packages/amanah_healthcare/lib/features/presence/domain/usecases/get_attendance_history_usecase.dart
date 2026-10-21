@@ -9,4 +9,8 @@ class GetAttendanceHistoryUseCase {
   Future<List<AttendanceRecord>> call() {
     return _repository.getMyHistory();
   }
+
+  Future<AttendanceHistoryResult> getResult() {
+    return _repository.getMyHistoryResult();
+  }
 }

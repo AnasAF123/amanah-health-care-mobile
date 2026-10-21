@@ -11,22 +11,30 @@ class AmanahPresenceFilterDrawer extends StatefulWidget {
     required this.initialStatus,
     required this.initialUnit,
     required this.initialDay,
+    this.initialDate,
     this.unitOptions = const <AttendanceFilterOption<String>>[],
+    this.focusedDate,
+    this.eventDays = const <int>{},
     super.key,
   });
 
   final AttendanceStatus? initialStatus;
   final String initialUnit;
   final int? initialDay;
+  final DateTime? initialDate;
   final List<AttendanceFilterOption<String>> unitOptions;
+  final DateTime? focusedDate;
+  final Set<int> eventDays;
 
   static Future<Map<String, dynamic>?> show(
     BuildContext context, {
     required AttendanceStatus? currentStatus,
     required String currentUnit,
     required int? currentDay,
-    List<AttendanceFilterOption<String>> unitOptions =
-        const <AttendanceFilterOption<String>>[],
+    DateTime? currentDate,
+    List<AttendanceFilterOption<String>> unitOptions = const <AttendanceFilterOption<String>>[],
+    DateTime? focusedDate,
+    Set<int> eventDays = const <int>{},
   }) {
     return showAmanahBottomSheet<Map<String, dynamic>>(
       context: context,
@@ -34,21 +42,23 @@ class AmanahPresenceFilterDrawer extends StatefulWidget {
         initialStatus: currentStatus,
         initialUnit: currentUnit,
         initialDay: currentDay,
+        initialDate: currentDate,
         unitOptions: unitOptions,
+        focusedDate: focusedDate,
+        eventDays: eventDays,
       ),
     );
   }
 
   @override
-  State<AmanahPresenceFilterDrawer> createState() =>
-      _AmanahPresenceFilterDrawerState();
+  State<AmanahPresenceFilterDrawer> createState() => _AmanahPresenceFilterDrawerState();
 }
 
-class _AmanahPresenceFilterDrawerState
-    extends State<AmanahPresenceFilterDrawer> {
+class _AmanahPresenceFilterDrawerState extends State<AmanahPresenceFilterDrawer> {
   late AttendanceStatus? _draftStatus;
   late String _draftUnit;
   late int? _draftDay;
+  late DateTime? _draftDate;
 
   @override
   void initState() {
@@ -56,6 +66,7 @@ class _AmanahPresenceFilterDrawerState
     _draftStatus = widget.initialStatus;
     _draftUnit = widget.initialUnit;
     _draftDay = widget.initialDay;
+    _draftDate = widget.initialDate;
   }
 
   void _reset() {
@@ -63,6 +74,7 @@ class _AmanahPresenceFilterDrawerState
       _draftStatus = null;
       _draftUnit = 'all';
       _draftDay = null;
+      _draftDate = null;
     });
   }
 
@@ -71,6 +83,7 @@ class _AmanahPresenceFilterDrawerState
       'status': _draftStatus,
       'unit': _draftUnit,
       'day': _draftDay,
+      'date': _draftDate,
     });
   }
 
@@ -79,13 +92,8 @@ class _AmanahPresenceFilterDrawerState
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color textColor =
-        dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
-    final Color subtextColor =
-        dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
-    final Color selectedAccent = dark
-        ? AmanahColorTokens.tabActiveDark
-        : AmanahColorTokens.brand;
+    final Color subtextColor = dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
+    final Color selectedAccent = dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand;
     final Color selectedForeground = dark
         ? AmanahColorTokens.canvasDark
         : AmanahColorTokens.surfaceLight;
@@ -93,7 +101,58 @@ class _AmanahPresenceFilterDrawerState
     return AmanahBottomSheetScaffold(
       title: 'Filter Presensi',
       subtitle: 'Sesuaikan status, unit, atau tanggal',
-      fixedHeightFactor: 0.85,
+      hugContent: true,
+      trailing: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: () async {
+          final DateTime now = DateTime.now();
+          final DateTime initial = _draftDate ?? widget.focusedDate ?? now;
+          final DateTime? picked = await showDatePicker(
+            context: context,
+            initialDate: initial,
+            firstDate: now.subtract(const Duration(days: 365)),
+            lastDate: now.add(const Duration(days: 365)),
+            builder: (BuildContext ctx, Widget? child) {
+              return Theme(
+                data: Theme.of(context).copyWith(
+                  colorScheme: ColorScheme.fromSeed(
+                    seedColor: selectedAccent,
+                    brightness: dark ? Brightness.dark : Brightness.light,
+                  ),
+                ),
+                child: child!,
+              );
+            },
+          );
+          if (picked != null && mounted) {
+            setState(() {
+              _draftDate = picked;
+              _draftDay = picked.day;
+            });
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: _draftDate != null || _draftDay != null
+                ? selectedAccent.withValues(alpha: 0.15)
+                : (dark ? AmanahColorTokens.neutral800 : AmanahColorTokens.neutral100),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: _draftDate != null || _draftDay != null
+                  ? selectedAccent.withValues(alpha: 0.4)
+                  : (dark ? AmanahColorTokens.neutral700 : AmanahColorTokens.neutral200),
+            ),
+          ),
+          child: Icon(
+            Icons.calendar_month_outlined,
+            size: 19,
+            color: _draftDate != null || _draftDay != null
+                ? selectedAccent
+                : (dark ? AmanahColorTokens.neutral300 : AmanahColorTokens.neutral700),
+          ),
+        ),
+      ),
       bodyPadding: const EdgeInsets.fromLTRB(
         AmanahSpacing.xxl,
         AmanahSpacing.lg,
@@ -118,124 +177,98 @@ class _AmanahPresenceFilterDrawerState
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // 1. Status Filter Pills
+          // Active Date Filter Chip if selected
+          if (_draftDate != null || _draftDay != null) ...<Widget>[
+            Row(
+              children: <Widget>[
+                Text(
+                  'Tanggal Filter:',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: subtextColor),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: selectedAccent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: selectedAccent.withValues(alpha: 0.35)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        _draftDate != null
+                            ? '${_draftDate!.day} ${_monthNameShort(_draftDate!.month)} ${_draftDate!.year}'
+                            : 'Tanggal $_draftDay',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: selectedAccent,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      GestureDetector(
+                        onTap: () => setState(() {
+                          _draftDate = null;
+                          _draftDay = null;
+                        }),
+                        child: Icon(Icons.close_rounded, size: 14, color: selectedAccent),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+
+          // 1. Status Filter Horizontal Scrollable Row
           Text(
             'Status Presensi',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: subtextColor,
-            ),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: subtextColor),
           ),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: kStatusOptions
-                .map((AttendanceFilterOption<AttendanceStatus?> opt) {
-                  final bool isSelected = _draftStatus == opt.value;
-                  return InkWell(
-                    onTap: () => setState(() => _draftStatus = opt.value),
-                    borderRadius: BorderRadius.circular(12),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? selectedAccent
-                            : (dark
-                                  ? AmanahColorTokens.surfaceLight
-                                        .withValues(alpha: 0.05)
-                                  : AmanahColorTokens.canvasLight),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: kStatusOptions
+                  .map((AttendanceFilterOption<AttendanceStatus?> opt) {
+                    final bool isSelected = _draftStatus == opt.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: InkWell(
+                        onTap: () => setState(() => _draftStatus = opt.value),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isSelected
-                              ? selectedAccent
-                              : (dark
-                                    ? AmanahColorTokens.surfaceLight
-                                          .withValues(alpha: 0.10)
-                                    : AmanahColorTokens.neutral200),
-                        ),
-                      ),
-                      child: Text(
-                        opt.label,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                          color: isSelected
-                              ? selectedForeground
-                              : (dark
-                                    ? AmanahColorTokens.neutral300
-                                    : AmanahColorTokens.neutral700),
-                        ),
-                      ),
-                    ),
-                  );
-                })
-                .toList(growable: false),
-          ),
-          const SizedBox(height: 20),
-
-          // 2. Unit Penugasan Filter Pills
-          if (widget.unitOptions.isNotEmpty) ...<Widget>[
-            Text(
-              'Unit Penugasan',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: subtextColor,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: widget.unitOptions
-                  .map((AttendanceFilterOption<String> opt) {
-                    final bool isSelected = _draftUnit == opt.value;
-                    return InkWell(
-                      onTap: () => setState(() => _draftUnit = opt.value),
-                      borderRadius: BorderRadius.circular(12),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? selectedAccent
-                              : (dark
-                                    ? AmanahColorTokens.surfaceLight
-                                          .withValues(alpha: 0.05)
-                                    : AmanahColorTokens.canvasLight),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                          decoration: BoxDecoration(
                             color: isSelected
                                 ? selectedAccent
                                 : (dark
-                                      ? AmanahColorTokens.surfaceLight
-                                            .withValues(alpha: 0.10)
-                                      : AmanahColorTokens.neutral200),
+                                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                                      : AmanahColorTokens.canvasLight),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected
+                                  ? selectedAccent
+                                  : (dark
+                                        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                                        : AmanahColorTokens.neutral200),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          opt.label,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: isSelected
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                            color: isSelected
-                                ? selectedForeground
-                                : (dark
-                                      ? AmanahColorTokens.neutral300
-                                      : AmanahColorTokens.neutral700),
+                          child: Text(
+                            opt.label,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                              color: isSelected
+                                  ? selectedForeground
+                                  : (dark
+                                        ? AmanahColorTokens.neutral300
+                                        : AmanahColorTokens.neutral700),
+                            ),
                           ),
                         ),
                       ),
@@ -243,219 +276,91 @@ class _AmanahPresenceFilterDrawerState
                   })
                   .toList(growable: false),
             ),
-            const SizedBox(height: 20),
+          ),
+          const SizedBox(height: 20),
+
+          // 2. Unit Penugasan Horizontal Scrollable Row
+          if (widget.unitOptions.isNotEmpty) ...<Widget>[
+            Text(
+              'Unit Penugasan',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: subtextColor),
+            ),
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: widget.unitOptions
+                    .map((AttendanceFilterOption<String> opt) {
+                      final bool isSelected = _draftUnit == opt.value;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: InkWell(
+                          onTap: () => setState(() => _draftUnit = opt.value),
+                          borderRadius: BorderRadius.circular(12),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? selectedAccent
+                                  : (dark
+                                        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
+                                        : AmanahColorTokens.canvasLight),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isSelected
+                                    ? selectedAccent
+                                    : (dark
+                                          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
+                                          : AmanahColorTokens.neutral200),
+                              ),
+                            ),
+                            child: Text(
+                              opt.label,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                color: isSelected
+                                    ? selectedForeground
+                                    : (dark
+                                          ? AmanahColorTokens.neutral300
+                                          : AmanahColorTokens.neutral700),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    })
+                    .toList(growable: false),
+              ),
+            ),
+            const SizedBox(height: 12),
           ],
-
-          // 3. Calendar Grid (Agustus 2026)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(
-                'Pilih Tanggal',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: subtextColor,
-                ),
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(
-                    'Agustus 2026',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: textColor,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.chevron_left_rounded,
-                    size: 16,
-                    color: subtextColor.withValues(alpha: 0.40),
-                  ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    size: 16,
-                    color: subtextColor.withValues(alpha: 0.40),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          // Calendar Grid Box
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: dark
-                  ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
-                  : AmanahColorTokens.canvasLight,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: dark
-                    ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
-                    : AmanahColorTokens.neutral200,
-              ),
-            ),
-            child: Column(
-              children: <Widget>[
-                // Days Header: Sen Sel Rab Kam Jum Sab Min
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    _CalendarHeaderDay('Sen'),
-                    _CalendarHeaderDay('Sel'),
-                    _CalendarHeaderDay('Rab'),
-                    _CalendarHeaderDay('Kam'),
-                    _CalendarHeaderDay('Jum'),
-                    _CalendarHeaderDay('Sab'),
-                    _CalendarHeaderDay('Min'),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // Day Cells Grid (Offset 5 for Saturday Aug 1, 2026)
-                _buildAugustCalendarGrid(dark),
-              ],
-            ),
-          ),
-          const SizedBox(height: AmanahSpacing.xxl),
         ],
       ),
     );
   }
 
-  Widget _buildAugustCalendarGrid(bool dark) {
-    const int leadingOffset = 5;
-    const int totalDays = 31;
-    const List<int> eventDays = <int>[25, 24, 23, 22, 20, 19, 18];
-
-    final List<Widget> cells = <Widget>[];
-
-    // Leading empty cells
-    for (int i = 0; i < leadingOffset; i++) {
-      cells.add(const SizedBox(width: 28, height: 28));
+  static String _monthNameShort(int month) {
+    const List<String> months = <String>[
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Ags',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
+    if (month >= 1 && month <= 12) {
+      return months[month - 1];
     }
-
-    // Day cells 1 to 31
-    for (int day = 1; day <= totalDays; day++) {
-      final bool isSelected = _draftDay == day;
-      final bool hasEvent = eventDays.contains(day);
-
-      cells.add(
-        InkWell(
-          onTap: () {
-            setState(() {
-              _draftDay = _draftDay == day ? null : day;
-            });
-          },
-          borderRadius: BorderRadius.circular(8),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? (dark
-                        ? AmanahColorTokens.tabActiveDark
-                        : AmanahColorTokens.brand)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: isSelected
-                  ? <BoxShadow>[
-                      BoxShadow(
-                        color:
-                            (dark
-                                    ? AmanahColorTokens.tabActiveDark
-                                    : AmanahColorTokens.brand)
-                                .withValues(alpha: 0.35),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                Text(
-                  '$day',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected
-                        ? (dark
-                              ? AmanahColorTokens.canvasDark
-                              : AmanahColorTokens.surfaceLight)
-                        : (dark
-                              ? AmanahColorTokens.neutral200
-                              : AmanahColorTokens.neutral700),
-                  ),
-                ),
-                if (hasEvent && !isSelected)
-                  Positioned(
-                    bottom: 2,
-                    child: Container(
-                      width: 4,
-                      height: 4,
-                      decoration: const BoxDecoration(
-                        color: AmanahColorTokens.brandAccent,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    // Wrap in rows of 7
-    final List<Widget> rowWidgets = <Widget>[];
-    for (int i = 0; i < cells.length; i += 7) {
-      final int end = (i + 7 < cells.length) ? i + 7 : cells.length;
-      final List<Widget> chunk = cells.sublist(i, end);
-      while (chunk.length < 7) {
-        chunk.add(const SizedBox(width: 28, height: 28));
-      }
-      rowWidgets.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: chunk,
-          ),
-        ),
-      );
-    }
-
-    return Column(children: rowWidgets);
-  }
-}
-
-class _CalendarHeaderDay extends StatelessWidget {
-  const _CalendarHeaderDay(this.day);
-
-  final String day;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 28,
-      child: Text(
-        day,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: AmanahColorTokens.neutral400,
-        ),
-      ),
-    );
+    return '';
   }
 }
 
@@ -468,8 +373,7 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
   static void show(BuildContext context, {required AttendanceRecord record}) {
     showAmanahBottomSheet<void>(
       context: context,
-      builder: (BuildContext ctx) =>
-          AmanahPresenceLeaveReasonDrawer(record: record),
+      builder: (BuildContext ctx) => AmanahPresenceLeaveReasonDrawer(record: record),
     );
   }
 
@@ -478,10 +382,8 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color textColor =
-        dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
-    final Color subtextColor =
-        dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
+    final Color textColor = dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900;
+    final Color subtextColor = dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
 
     return AmanahBottomSheetScaffold(
       title: 'Alasan Cuti Dokter',
@@ -502,17 +404,10 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
             children: <Widget>[
               Text(
                 'Keterangan Alasan',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: subtextColor,
-                ),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: subtextColor),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 3,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                 decoration: BoxDecoration(
                   color: dark
                       ? AmanahColorTokens.violet.withValues(alpha: 0.20)
@@ -546,8 +441,7 @@ class AmanahPresenceLeaveReasonDrawer extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            record.reason ??
-                'Izin cuti resmi terjadwal yang telah disetujui manajemen RS Amanah.',
+            record.reason ?? 'Izin cuti resmi terjadwal yang telah disetujui manajemen RS Amanah.',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -578,8 +472,7 @@ class AmanahPresenceInfoDrawer extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
 
-    final Color subtextColor =
-        dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
+    final Color subtextColor = dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500;
 
     return AmanahBottomSheetScaffold(
       title: 'Keterangan Timeline Presensi',
@@ -672,10 +565,7 @@ class _InfoStatusRow extends StatelessWidget {
               Container(
                 width: 8,
                 height: 8,
-                decoration: BoxDecoration(
-                  color: dotColor,
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
               ),
               const SizedBox(width: 8),
               Text(
@@ -683,9 +573,7 @@ class _InfoStatusRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: dark
-                      ? AmanahColorTokens.surfaceLight
-                      : AmanahColorTokens.neutral900,
+                  color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
                 ),
               ),
             ],
@@ -698,9 +586,7 @@ class _InfoStatusRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: dark
-                    ? AmanahColorTokens.neutral400
-                    : AmanahColorTokens.neutral500,
+                color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
               ),
             ),
           ),

@@ -5,6 +5,7 @@ import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model
 class PresenceHistorySummaryBar extends StatelessWidget {
   const PresenceHistorySummaryBar({
     required this.records,
+    this.summary,
     required this.dark,
     required this.textColor,
     required this.subtextColor,
@@ -12,26 +13,49 @@ class PresenceHistorySummaryBar extends StatelessWidget {
   });
 
   final List<AttendanceRecord> records;
+  final AttendanceHistorySummary? summary;
   final bool dark;
   final Color textColor;
   final Color subtextColor;
 
   @override
   Widget build(BuildContext context) {
-    final int hadirCount = records
-        .where((AttendanceRecord r) => r.status == AttendanceStatus.hadir)
-        .length;
-    final int telatCount = records
-        .where((AttendanceRecord r) => r.status == AttendanceStatus.telat)
-        .length;
-    final int missedCount = records
-        .where((AttendanceRecord r) => r.status == AttendanceStatus.missed)
-        .length;
-    final int cutiCount = records
-        .where((AttendanceRecord r) => r.status == AttendanceStatus.cuti)
-        .length;
-    final int total = records.length;
-    final int totalHours = (hadirCount + telatCount) * 8;
+    int hadirCount = 0;
+    int telatCount = 0;
+    int missedCount = 0;
+    int cutiCount = 0;
+
+    if (summary != null && summary!.facets.isNotEmpty) {
+      for (final AttendanceStatusFacet f in summary!.facets) {
+        if (f.status == 'hadir') hadirCount = f.count;
+        if (f.status == 'telat') telatCount = f.count;
+        if (f.status == 'missed') missedCount = f.count;
+        if (f.status == 'cuti') cutiCount = f.count;
+      }
+    } else {
+      hadirCount = records.where((AttendanceRecord r) => r.status == AttendanceStatus.hadir).length;
+      telatCount = records.where((AttendanceRecord r) => r.status == AttendanceStatus.telat).length;
+      missedCount = records
+          .where((AttendanceRecord r) => r.status == AttendanceStatus.missed)
+          .length;
+      cutiCount = records.where((AttendanceRecord r) => r.status == AttendanceStatus.cuti).length;
+    }
+
+    final int totalDays = summary?.totalDays ?? records.length;
+
+    double validatedSum = 0;
+    for (final AttendanceRecord r in records) {
+      if (r.validatedDurationHours != null && r.validatedDurationHours! > 0) {
+        validatedSum += r.validatedDurationHours!;
+      }
+    }
+
+    final double totalHours = summary != null ? summary!.totalWorkHours : validatedSum;
+    final String formattedHours = totalHours % 1 == 0
+        ? '${totalHours.toInt()} hr'
+        : '${totalHours.toStringAsFixed(1)} hr';
+
+    final String periodLabel = summary?.periodLabel ?? 'Periode ini';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,12 +127,8 @@ class PresenceHistorySummaryBar extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Text(
-                  'Total jam kerja · Periode ini',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: subtextColor,
-                  ),
+                  'Total jam kerja · $periodLabel',
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: subtextColor),
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -117,7 +137,7 @@ class PresenceHistorySummaryBar extends StatelessWidget {
                   textBaseline: TextBaseline.alphabetic,
                   children: <Widget>[
                     Text(
-                      '$totalHours hr',
+                      formattedHours,
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
@@ -127,7 +147,7 @@ class PresenceHistorySummaryBar extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      '($total hari)',
+                      '($totalDays hari)',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -138,27 +158,28 @@ class PresenceHistorySummaryBar extends StatelessWidget {
                 ),
               ],
             ),
-            const Wrap(
+            Wrap(
               spacing: 8,
               runSpacing: 4,
-              children: <Widget>[
-                _LegendIndicator(
-                  color: AmanahColorTokens.success,
-                  label: 'Hadir',
-                ),
-                _LegendIndicator(
-                  color: AmanahColorTokens.amberLight,
-                  label: 'Telat',
-                ),
-                _LegendIndicator(
-                  color: AmanahColorTokens.danger,
-                  label: 'Missed',
-                ),
-                _LegendIndicator(
-                  color: AmanahColorTokens.violet,
-                  label: 'Cuti',
-                ),
-              ],
+              children: summary != null && summary!.facets.isNotEmpty
+                  ? summary!.facets
+                        .map((AttendanceStatusFacet f) {
+                          final Color col = switch (f.status) {
+                            'hadir' => AmanahColorTokens.success,
+                            'telat' => AmanahColorTokens.amberLight,
+                            'missed' => AmanahColorTokens.danger,
+                            'cuti' => AmanahColorTokens.violet,
+                            _ => AmanahColorTokens.neutral400,
+                          };
+                          return _LegendIndicator(color: col, label: f.label);
+                        })
+                        .toList(growable: false)
+                  : const <Widget>[
+                      _LegendIndicator(color: AmanahColorTokens.success, label: 'Hadir'),
+                      _LegendIndicator(color: AmanahColorTokens.amberLight, label: 'Telat'),
+                      _LegendIndicator(color: AmanahColorTokens.danger, label: 'Missed'),
+                      _LegendIndicator(color: AmanahColorTokens.violet, label: 'Cuti'),
+                    ],
             ),
           ],
         ),

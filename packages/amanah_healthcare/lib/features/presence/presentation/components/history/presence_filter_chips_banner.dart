@@ -7,6 +7,7 @@ class PresenceFilterChipsBanner extends StatelessWidget {
     required this.statusFilter,
     required this.unitFilter,
     required this.selectedDayFilter,
+    this.selectedDateFilter,
     required this.onReset,
     required this.dark,
     required this.subtextColor,
@@ -16,6 +17,7 @@ class PresenceFilterChipsBanner extends StatelessWidget {
   final AttendanceStatus? statusFilter;
   final String unitFilter;
   final int? selectedDayFilter;
+  final DateTime? selectedDateFilter;
   final VoidCallback onReset;
   final bool dark;
   final Color subtextColor;
@@ -39,9 +41,7 @@ class PresenceFilterChipsBanner extends StatelessWidget {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: dark
-              ? AmanahColorTokens.tabActiveDark
-              : AmanahColorTokens.neutral900,
+          color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.neutral900,
         ),
       ),
     );
@@ -66,11 +66,7 @@ class PresenceFilterChipsBanner extends StatelessWidget {
         children: <Widget>[
           Text(
             'Filter: ',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: subtextColor,
-            ),
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: subtextColor),
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -86,7 +82,11 @@ class PresenceFilterChipsBanner extends StatelessWidget {
                     _buildFilterChip(unitFilter),
                     const SizedBox(width: 4),
                   ],
-                  if (selectedDayFilter != null) ...<Widget>[
+                  if (selectedDateFilter != null) ...<Widget>[
+                    _buildFilterChip(
+                      '${selectedDateFilter!.day}/${selectedDateFilter!.month}/${selectedDateFilter!.year}',
+                    ),
+                  ] else if (selectedDayFilter != null) ...<Widget>[
                     _buildFilterChip('Tgl $selectedDayFilter'),
                   ],
                 ],
@@ -102,9 +102,7 @@ class PresenceFilterChipsBanner extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: dark
-                      ? AmanahColorTokens.tabActiveDark
-                      : AmanahColorTokens.brandAccent,
+                  color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brandAccent,
                   decoration: TextDecoration.underline,
                 ),
               ),
