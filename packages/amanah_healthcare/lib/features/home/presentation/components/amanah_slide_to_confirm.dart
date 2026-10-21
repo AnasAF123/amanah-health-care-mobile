@@ -4,11 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 /// Style variants for [AmanahSlideToConfirm]
-enum AmanahSlideVariant {
-  brandGradient,
-  outline,
-  surface,
-}
+enum AmanahSlideVariant { brandGradient, outline, surface }
 
 /// An agnostic, token-driven "Slide To Action" confirmation widget.
 /// Inspired by the 1:1 Aero Glass design specification in docs/my-taste/slider/index.html.
@@ -16,6 +12,7 @@ class AmanahSlideToConfirm extends StatefulWidget {
   const AmanahSlideToConfirm({
     required this.onConfirmed,
     this.text = 'Geser untuk Konfirmasi',
+    this.targetText,
     this.completedText = 'Terkonfirmasi!',
     this.variant = AmanahSlideVariant.brandGradient,
     this.height = 52.0,
@@ -29,6 +26,7 @@ class AmanahSlideToConfirm extends StatefulWidget {
 
   final Future<dynamic> Function() onConfirmed;
   final String text;
+  final String? targetText;
   final String completedText;
   final AmanahSlideVariant variant;
   final double height;
@@ -42,8 +40,7 @@ class AmanahSlideToConfirm extends StatefulWidget {
   State<AmanahSlideToConfirm> createState() => _AmanahSlideToConfirmState();
 }
 
-class _AmanahSlideToConfirmState extends State<AmanahSlideToConfirm>
-    with TickerProviderStateMixin {
+class _AmanahSlideToConfirmState extends State<AmanahSlideToConfirm> with TickerProviderStateMixin {
   late final AnimationController _resetController;
   late final AnimationController _chevronController;
   late Animation<double> _resetAnimation;
@@ -88,17 +85,14 @@ class _AmanahSlideToConfirmState extends State<AmanahSlideToConfirm>
 
   void _resetSlider() {
     if (!mounted) return;
-    _resetAnimation = Tween<double>(
-      begin: _dragPosition,
-      end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _resetController,
-      curve: Curves.easeOutCubic,
-    ))..addListener(() {
-        setState(() {
-          _dragPosition = _resetAnimation.value;
+    _resetAnimation =
+        Tween<double>(begin: _dragPosition, end: 0.0).animate(
+          CurvedAnimation(parent: _resetController, curve: Curves.easeOutCubic),
+        )..addListener(() {
+          setState(() {
+            _dragPosition = _resetAnimation.value;
+          });
         });
-      });
 
     _resetController.forward(from: 0.0).then((_) {
       if (mounted) {
@@ -111,10 +105,7 @@ class _AmanahSlideToConfirmState extends State<AmanahSlideToConfirm>
   }
 
   void _onDragStart(DragStartDetails details) {
-    if (widget.isDisabled ||
-        widget.isLoading ||
-        widget.isCompleted ||
-        _internalCompleted) {
+    if (widget.isDisabled || widget.isLoading || widget.isCompleted || _internalCompleted) {
       return;
     }
     _resetController.stop();
@@ -137,7 +128,8 @@ class _AmanahSlideToConfirmState extends State<AmanahSlideToConfirm>
       _dragPosition = (_dragPosition + details.delta.dx).clamp(0.0, maxDrag);
     });
 
-    if (_dragPosition >= maxDrag * _completeThreshold && !_internalCompleted) {
+    // Pure logic: triggers completion when knob reaches the 100% right edge
+    if (_dragPosition >= maxDrag && !_internalCompleted) {
       _triggerCompletion(maxDrag);
     }
   }
@@ -164,6 +156,10 @@ class _AmanahSlideToConfirmState extends State<AmanahSlideToConfirm>
       HapticFeedback.heavyImpact();
     }
 
+    // Momentary pause so the user can perceive the knob at the right edge and full target text opacity
+    await Future<void>.delayed(const Duration(milliseconds: 160));
+    if (!mounted) return;
+
     try {
       final dynamic result = await widget.onConfirmed();
       if (result == false && mounted) {
@@ -180,15 +176,16 @@ class _AmanahSlideToConfirmState extends State<AmanahSlideToConfirm>
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     final double knobSize = widget.height - 2.0 - (_knobPadding * 2);
-    final BorderRadius effectiveRadius = widget.borderRadius ??
-        BorderRadius.circular(widget.height / 2);
+    final BorderRadius effectiveRadius =
+        widget.borderRadius ?? BorderRadius.circular(widget.height / 2);
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final double maxWidth = constraints.maxWidth;
         final double maxDrag = math.max(0.0, maxWidth - knobSize - (_knobPadding * 2));
         final double progress = maxDrag > 0 ? (_dragPosition / maxDrag).clamp(0.0, 1.0) : 0.0;
-        final double textOpacity = math.max(0.0, 1.0 - (progress * 1.5));
+        final double promptOpacity = math.max(0.0, 1.0 - (progress * 1.5));
+        final double targetOpacity = Curves.easeIn.transform(progress);
 
         // Resolved styling based on variant and theme
         final BoxDecoration trackDecoration = _resolveTrackDecoration(dark, effectiveRadius);
@@ -222,53 +219,82 @@ class _AmanahSlideToConfirmState extends State<AmanahSlideToConfirm>
                     ),
                   ),
 
-                  // 2. Center Content: Chevrons + Text
+                  // 2. Center Content: Chevrons + Text with Crossfade
                   Center(
-                    child: AnimatedOpacity(
-                      opacity: _internalCompleted ? 0.0 : textOpacity,
-                      duration: const Duration(milliseconds: 100),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          // Left offset spacer to prevent text being hidden under the initial knob
-                          SizedBox(width: knobSize / 1.5),
-                          AnimatedBuilder(
-                            animation: _chevronController,
-                            builder: (BuildContext context, Widget? child) {
-                              return Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: List<Widget>.generate(3, (int i) {
-                                  final double animVal = (_chevronController.value - (i * 0.2)) % 1.0;
-                                  final double opacity = (math.sin(animVal * math.pi)).clamp(0.25, 1.0);
-                                  return Opacity(
-                                    opacity: opacity,
-                                    child: Icon(
-                                      Icons.chevron_right_rounded,
-                                      size: 16,
-                                      color: _resolveTextColor(dark),
-                                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: <Widget>[
+                        // (a) Initial Prompt Text (Fades out 1.0 -> 0.0)
+                        AnimatedOpacity(
+                          opacity: _internalCompleted ? 0.0 : promptOpacity,
+                          duration: const Duration(milliseconds: 60),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              SizedBox(width: knobSize / 1.5),
+                              AnimatedBuilder(
+                                animation: _chevronController,
+                                builder: (BuildContext context, Widget? child) {
+                                  return Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: List<Widget>.generate(3, (int i) {
+                                      final double animVal =
+                                          (_chevronController.value - (i * 0.2)) % 1.0;
+                                      final double opacity = (math.sin(
+                                        animVal * math.pi,
+                                      )).clamp(0.25, 1.0);
+                                      return Opacity(
+                                        opacity: opacity,
+                                        child: Icon(
+                                          Icons.chevron_right_rounded,
+                                          size: 16,
+                                          color: _resolveTextColor(dark),
+                                        ),
+                                      );
+                                    }),
                                   );
-                                }),
-                              );
-                            },
+                                },
+                              ),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  widget.text,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: -0.1,
+                                    color: _resolveTextColor(dark),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
                           ),
-                          const SizedBox(width: 4),
-                          Flexible(
-                            child: Text(
-                              widget.text,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.1,
-                                color: _resolveTextColor(dark),
+                        ),
+
+                        // (b) Target Text (Fades in 0.0 -> 1.0, reaching 100% full opacity at right edge)
+                        if (widget.targetText != null)
+                          AnimatedOpacity(
+                            opacity: _internalCompleted ? 0.0 : targetOpacity,
+                            duration: const Duration(milliseconds: 60),
+                            child: Padding(
+                              padding: EdgeInsets.only(right: knobSize / 1.5),
+                              child: Text(
+                                widget.targetText!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.1,
+                                  color: _resolveTextColor(dark),
+                                ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                        ],
-                      ),
+                      ],
                     ),
                   ),
 
@@ -278,11 +304,7 @@ class _AmanahSlideToConfirmState extends State<AmanahSlideToConfirm>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          const Icon(
-                            Icons.check_circle_rounded,
-                            size: 18,
-                            color: Colors.white,
-                          ),
+                          const Icon(Icons.check_circle_rounded, size: 18, color: Colors.white),
                           const SizedBox(width: 6),
                           Text(
                             widget.completedText,
@@ -334,10 +356,7 @@ class _AmanahSlideToConfirmState extends State<AmanahSlideToConfirm>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: completed
-              ? <Color>[
-                  AmanahColorTokens.brand,
-                  AmanahColorTokens.brandNavy,
-                ]
+              ? <Color>[AmanahColorTokens.brand, AmanahColorTokens.brandNavy]
               : <Color>[
                   Colors.white,
                   dark ? const Color(0xFFF1F6FD) : const Color(0xFFF8FAFC),
@@ -370,9 +389,7 @@ class _AmanahSlideToConfirmState extends State<AmanahSlideToConfirm>
                 height: 18,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AmanahColorTokens.brand,
-                  ),
+                  valueColor: AlwaysStoppedAnimation<Color>(AmanahColorTokens.brand),
                 ),
               )
             : AnimatedSwitcher(
@@ -427,9 +444,7 @@ class _AmanahSlideToConfirmState extends State<AmanahSlideToConfirm>
       case AmanahSlideVariant.outline:
         return BoxDecoration(
           borderRadius: radius,
-          color: dark
-              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05)
-              : Colors.white,
+          color: dark ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.05) : Colors.white,
           border: Border.all(
             color: dark
                 ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/network/api_exception.dart';
 import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model.dart';
 import 'package:amanah_healthcare/features/presence/domain/entities/attendance_check_in_result.dart';
 import 'package:amanah_healthcare/features/presence/domain/services/qr_token_parser.dart';
@@ -15,17 +16,17 @@ enum AttendanceFlowState { idle, detecting, processing, success, error }
 enum AttendanceScanMode { checkIn, checkOut }
 
 /// Authoritative Orchestrator for QR Scanning, Camera State, and Attendance Submission.
-/// Enforces single-source-of-truth state machine and prevents concurrency deadlocks.
+/// Enforces single-source-of-truth state machine and respects backend error codes.
 class PresenceScannerController extends ChangeNotifier {
   PresenceScannerController({
     required RecordAttendanceUseCase recordAttendanceUseCase,
     required CheckoutAttendanceUseCase checkoutAttendanceUseCase,
     GetAttendanceHistoryUseCase? getAttendanceHistoryUseCase,
     IScannerFeedbackService? feedbackService,
-  })  : _recordAttendanceUseCase = recordAttendanceUseCase,
-        _checkoutAttendanceUseCase = checkoutAttendanceUseCase,
-        _getAttendanceHistoryUseCase = getAttendanceHistoryUseCase,
-        _feedbackService = feedbackService ?? ScannerFeedbackService();
+  }) : _recordAttendanceUseCase = recordAttendanceUseCase,
+       _checkoutAttendanceUseCase = checkoutAttendanceUseCase,
+       _getAttendanceHistoryUseCase = getAttendanceHistoryUseCase,
+       _feedbackService = feedbackService ?? ScannerFeedbackService();
 
   final RecordAttendanceUseCase _recordAttendanceUseCase;
   final CheckoutAttendanceUseCase _checkoutAttendanceUseCase;
@@ -43,9 +44,11 @@ class PresenceScannerController extends ChangeNotifier {
   String _manualPin = '';
   String? _pinError;
   String? _errorMessage;
+  Object? _lastException;
   AttendanceCheckInResult? _lastResult;
   int _sessionGeneration = 0;
   String? _pendingCheckoutToken;
+  String? _pendingCheckoutTicket;
   bool _requiresEarlyDepartureNotes = false;
 
   AttendanceFlowState get flowState => _flowState;
@@ -59,21 +62,22 @@ class PresenceScannerController extends ChangeNotifier {
   String get manualPin => _manualPin;
   String? get pinError => _pinError;
   String? get errorMessage => _errorMessage;
+  Object? get lastException => _lastException;
   AttendanceCheckInResult? get lastResult => _lastResult;
   String? get pendingCheckoutToken => _pendingCheckoutToken;
+  String? get pendingCheckoutTicket => _pendingCheckoutTicket;
   bool get requiresEarlyDepartureNotes => _requiresEarlyDepartureNotes;
 
   void clearPendingEarlyDeparture() {
     _requiresEarlyDepartureNotes = false;
     _pendingCheckoutToken = null;
+    _pendingCheckoutTicket = null;
     notifyListeners();
   }
 
   /// Deterministic gate: Only allow processing new QR candidate when completely idle.
   bool get isScanningAllowed =>
-      _flowState == AttendanceFlowState.idle &&
-      !_isDrawerOpen &&
-      !_isHelpOpen;
+      _flowState == AttendanceFlowState.idle && !_isDrawerOpen && !_isHelpOpen;
 
   bool get isFlowActive => _flowState != AttendanceFlowState.idle;
   bool get isLastResultCheckout => _lastResult?.checkOutAt != null;
@@ -84,6 +88,7 @@ class PresenceScannerController extends ChangeNotifier {
     _sessionGeneration++;
     _scanMode = mode;
     _errorMessage = null;
+    _lastException = null;
     if (_flowState != AttendanceFlowState.success) {
       _flowState = AttendanceFlowState.idle;
     }
@@ -93,13 +98,24 @@ class PresenceScannerController extends ChangeNotifier {
   Future<void> initTodayStatus() async {
     if (_getAttendanceHistoryUseCase == null) return;
     try {
-      final List<AttendanceRecord> records =
-          await _getAttendanceHistoryUseCase();
+      final List<AttendanceRecord> records = await _getAttendanceHistoryUseCase();
       if (records.isNotEmpty) {
         final AttendanceRecord latest = records.first;
         final DateTime now = DateTime.now();
-        if (latest.dayNumber == now.day) {
+        final DateTime? recordDate = latest.attendanceDate ?? latest.checkInAt;
+
+        final bool isToday = recordDate != null
+            ? (recordDate.year == now.year &&
+                  recordDate.month == now.month &&
+                  recordDate.day == now.day)
+            : (latest.dayNumber == now.day);
+
+        // Smart deterministic default: If user checked in today and has not yet checked out
+        if (isToday && latest.checkInAt != null && latest.checkOutAt == null) {
           _scanMode = AttendanceScanMode.checkOut;
+          notifyListeners();
+        } else {
+          _scanMode = AttendanceScanMode.checkIn;
           notifyListeners();
         }
       }
@@ -184,7 +200,11 @@ class PresenceScannerController extends ChangeNotifier {
     _pinError = null;
     _manualPin = '';
     _errorMessage = null;
+    _lastException = null;
     _lastResult = null;
+    _pendingCheckoutTicket = null;
+    _pendingCheckoutToken = null;
+    _requiresEarlyDepartureNotes = false;
     notifyListeners();
   }
 
@@ -198,6 +218,7 @@ class PresenceScannerController extends ChangeNotifier {
     _flowState = AttendanceFlowState.detecting;
     _isDrawerOpen = false;
     _errorMessage = null;
+    _lastException = null;
     notifyListeners();
 
     if (_sessionGeneration != generation) {
@@ -233,6 +254,7 @@ class PresenceScannerController extends ChangeNotifier {
     _flowState = AttendanceFlowState.processing;
     _isDrawerOpen = false;
     _errorMessage = null;
+    _lastException = null;
     notifyListeners();
 
     return _executeAttendanceSubmission(token, generation);
@@ -268,16 +290,18 @@ class PresenceScannerController extends ChangeNotifier {
         return null;
       }
 
-      final String errStr = err.toString();
-      if (_scanMode == AttendanceScanMode.checkOut &&
-          (errStr.contains('alasan kepulangan lebih awal') ||
-              errStr.contains('early departure') ||
-              errStr.contains('EarlyDepartureNotesRequired'))) {
-        _requiresEarlyDepartureNotes = true;
-        _pendingCheckoutToken = token;
+      _lastException = err;
+      if (err is ApiException) {
+        final dynamic errData = err.data;
+        if (err.code == 'EARLY_DEPARTURE_NOTES_REQUIRED' ||
+            (errData is Map && errData['checkoutTicket'] != null)) {
+          _requiresEarlyDepartureNotes = true;
+          _pendingCheckoutTicket = (errData as Map?)?['checkoutTicket']?.toString();
+          _pendingCheckoutToken = token;
+        }
       }
 
-      _errorMessage = _formatError(err);
+      _errorMessage = err is ApiException ? err.message : err.toString();
       _flowState = AttendanceFlowState.error;
       _isDrawerOpen = true;
       notifyListeners();
@@ -296,9 +320,11 @@ class PresenceScannerController extends ChangeNotifier {
     _isDrawerOpen = false;
     _flowState = AttendanceFlowState.idle;
     _errorMessage = null;
+    _lastException = null;
     _lastResult = null;
     _requiresEarlyDepartureNotes = false;
     _pendingCheckoutToken = null;
+    _pendingCheckoutTicket = null;
     notifyListeners();
   }
 
@@ -321,6 +347,7 @@ class PresenceScannerController extends ChangeNotifier {
 
   Future<AttendanceCheckInResult?> submitCheckout({
     String? qrToken,
+    String? checkoutTicket,
     String? notes,
   }) async {
     final int generation = ++_sessionGeneration;
@@ -329,7 +356,8 @@ class PresenceScannerController extends ChangeNotifier {
 
     try {
       final AttendanceCheckInResult result = await _checkoutAttendanceUseCase(
-        qrToken: qrToken,
+        qrToken: qrToken ?? _pendingCheckoutToken,
+        checkoutTicket: checkoutTicket ?? _pendingCheckoutTicket,
         notes: notes,
       );
       if (_sessionGeneration != generation) return null;
@@ -337,59 +365,30 @@ class PresenceScannerController extends ChangeNotifier {
       _flowState = AttendanceFlowState.success;
       _requiresEarlyDepartureNotes = false;
       _pendingCheckoutToken = null;
+      _pendingCheckoutTicket = null;
+      _lastException = null;
       _isDrawerOpen = true;
       notifyListeners();
       await _feedbackService.onScanSuccess();
       return result;
     } catch (err) {
       if (_sessionGeneration != generation) return null;
-      final String errStr = err.toString();
-      if (errStr.contains('alasan kepulangan lebih awal') ||
-          errStr.contains('early departure') ||
-          errStr.contains('EarlyDepartureNotesRequired')) {
-        _requiresEarlyDepartureNotes = true;
-        _pendingCheckoutToken = qrToken;
+      _lastException = err;
+      if (err is ApiException) {
+        final dynamic errData = err.data;
+        if (err.code == 'EARLY_DEPARTURE_NOTES_REQUIRED' ||
+            (errData is Map && errData['checkoutTicket'] != null)) {
+          _requiresEarlyDepartureNotes = true;
+          _pendingCheckoutTicket = (errData as Map?)?['checkoutTicket']?.toString();
+          _pendingCheckoutToken = qrToken ?? _pendingCheckoutToken;
+        }
       }
-      _errorMessage = _formatError(err);
+      _errorMessage = err is ApiException ? err.message : err.toString();
       _flowState = AttendanceFlowState.error;
       _isDrawerOpen = false;
       notifyListeners();
       await _feedbackService.onScanError();
       return null;
     }
-  }
-
-  String _formatError(dynamic err) {
-    final String str = err.toString();
-    if (str.contains('alasan kepulangan lebih awal') ||
-        str.contains('early departure') ||
-        str.contains('EarlyDepartureNotesRequired')) {
-      return 'Catatan alasan kepulangan lebih awal wajib diisi.';
-    }
-    if (str.contains('sudah melakukan presensi masuk') ||
-        (str.contains('409') && _scanMode == AttendanceScanMode.checkIn)) {
-      return 'Anda sudah melakukan presensi masuk hari ini.';
-    }
-    if (str.contains('sudah tercatat sebelumnya') ||
-        (str.contains('409') && _scanMode == AttendanceScanMode.checkOut)) {
-      return 'Presensi pulang sudah tercatat sebelumnya untuk hari ini.';
-    }
-    if (str.contains('tidak ditemukan') || str.contains('404')) {
-      return 'Belum ada catatan presensi masuk hari ini. Silakan presensi masuk terlebih dahulu.';
-    }
-    if (str.contains('Token QR') ||
-        str.contains('kedaluwarsa') ||
-        str.contains('400')) {
-      return 'Token QR tidak valid atau sudah kedaluwarsa. Silakan scan token terbaru di terminal klinik.';
-    }
-    if (str.contains('cuti') || str.contains('izin resmi')) {
-      return 'Anda sedang dalam masa cuti/izin resmi yang disetujui pada hari ini.';
-    }
-    if (str.contains('jadwal dinas') ||
-        str.contains('roster') ||
-        str.contains('403')) {
-      return 'Anda tidak memiliki jadwal dinas aktif pada sesi waktu ini.';
-    }
-    return str.replaceAll('Exception: ', '').replaceAll('FormatException: ', '');
   }
 }

@@ -1,9 +1,12 @@
+import 'package:amanah_healthcare/core/network/api_exception.dart';
+
 /// Categorical outcome types for the Presence Scanner flow.
 enum PresenceStatusType {
   successCheckIn,
   successCheckOut,
   conflictAlreadyCheckedIn,
   conflictAlreadyCheckedOut,
+  notCheckedIn,
   outOfSchedule,
   invalidOrExpiredToken,
   onOfficialLeave,
@@ -16,7 +19,6 @@ class PresenceStatusPayload {
     required this.type,
     required this.title,
     required this.message,
-    required this.badgeLabel,
     this.timeFormatted,
     this.durationHours,
     this.actionLabel = 'Saya Mengerti',
@@ -25,14 +27,12 @@ class PresenceStatusPayload {
   final PresenceStatusType type;
   final String title;
   final String message;
-  final String badgeLabel;
   final String? timeFormatted;
   final double? durationHours;
   final String actionLabel;
 
   bool get isSuccess =>
-      type == PresenceStatusType.successCheckIn ||
-      type == PresenceStatusType.successCheckOut;
+      type == PresenceStatusType.successCheckIn || type == PresenceStatusType.successCheckOut;
 
   bool get isCheckOut =>
       type == PresenceStatusType.successCheckOut ||
@@ -49,7 +49,6 @@ class PresenceStatusPayload {
         type: PresenceStatusType.successCheckOut,
         title: 'Presensi Pulang Berhasil',
         message: 'Presensi pulang dinas Anda telah berhasil diverifikasi dan tersimpan.',
-        badgeLabel: 'BERHASIL PULANG',
         timeFormatted: timeFormatted,
         durationHours: validatedDurationHours,
         actionLabel: 'Selesai',
@@ -59,73 +58,130 @@ class PresenceStatusPayload {
       type: PresenceStatusType.successCheckIn,
       title: 'Presensi Masuk Berhasil',
       message: 'Presensi masuk dinas Anda telah berhasil diverifikasi dan tersimpan.',
-      badgeLabel: 'BERHASIL MASUK',
       timeFormatted: timeFormatted,
       durationHours: validatedDurationHours,
       actionLabel: 'Selesai',
     );
   }
 
-  /// Maps an error message to a structured, typed presence payload.
-  factory PresenceStatusPayload.fromError(String rawError) {
-    final String str = rawError.toLowerCase();
+  /// Maps an exception directly from the backend machine-readable contract.
+  factory PresenceStatusPayload.fromException(Object error) {
+    if (error is ApiException) {
+      switch (error.code) {
+        case 'ATTENDANCE_NOT_FOUND':
+          return const PresenceStatusPayload(
+            type: PresenceStatusType.notCheckedIn,
+            title: 'Belum Presensi Masuk',
+            message:
+                'Data presensi masuk untuk hari ini tidak ditemukan. Silakan lakukan presensi masuk terlebih dahulu sebelum presensi pulang.',
+            actionLabel: 'Ubah ke Presensi Masuk',
+          );
 
-    if (str.contains('sudah melakukan presensi masuk') || str.contains('masuk hari ini')) {
-      return PresenceStatusPayload(
+        case 'DUPLICATE_CHECK_IN':
+          return const PresenceStatusPayload(
+            type: PresenceStatusType.conflictAlreadyCheckedIn,
+            title: 'Sudah Presensi Masuk',
+            message:
+                'Anda sudah melakukan presensi masuk hari ini. Silakan gunakan mode Presensi Pulang jika dinas Anda telah selesai.',
+            actionLabel: 'Saya Mengerti',
+          );
+
+        case 'ALREADY_CHECKED_OUT':
+          return const PresenceStatusPayload(
+            type: PresenceStatusType.conflictAlreadyCheckedOut,
+            title: 'Sudah Presensi Pulang',
+            message:
+                'Presensi pulang sudah tercatat sebelumnya untuk hari ini. Tidak ada sesi dinas aktif yang perlu ditutup.',
+            actionLabel: 'Saya Mengerti',
+          );
+
+        case 'STAFF_NOT_ROSTERED':
+        case 'SESSION_MISMATCH':
+          return const PresenceStatusPayload(
+            type: PresenceStatusType.outOfSchedule,
+            title: 'Di Luar Jadwal Dinas',
+            message:
+                'Anda tidak memiliki jadwal dinas aktif pada sesi waktu saat ini. Hubungi koordinator staf jika terdapat kekeliruan.',
+            actionLabel: 'Saya Mengerti',
+          );
+
+        case 'STAFF_ON_LEAVE':
+          return const PresenceStatusPayload(
+            type: PresenceStatusType.onOfficialLeave,
+            title: 'Status Izin / Cuti Aktif',
+            message:
+                'Sistem mendeteksi izin resmi atau cuti dinas yang telah disetujui untuk hari ini.',
+            actionLabel: 'Saya Mengerti',
+          );
+
+        case 'INVALID_QR_TOKEN':
+          return const PresenceStatusPayload(
+            type: PresenceStatusType.invalidOrExpiredToken,
+            title: 'Token QR Tidak Valid',
+            message:
+                'Token QR tidak dikenali atau sudah kedaluwarsa. Silakan scan QR code dinamis terbaru di terminal kehadiran.',
+            actionLabel: 'Scan Ulang',
+          );
+      }
+
+      // Secondary fallback based strictly on HTTP status code
+      switch (error.statusCode) {
+        case 404:
+          return const PresenceStatusPayload(
+            type: PresenceStatusType.notCheckedIn,
+            title: 'Belum Presensi Masuk',
+            message:
+                'Data presensi masuk untuk hari ini tidak ditemukan. Silakan lakukan presensi masuk terlebih dahulu sebelum presensi pulang.',
+            actionLabel: 'Ubah ke Presensi Masuk',
+          );
+        case 409:
+          return PresenceStatusPayload(
+            type: PresenceStatusType.conflictAlreadyCheckedOut,
+            title: 'Konflik Presensi',
+            message: error.message,
+            actionLabel: 'Saya Mengerti',
+          );
+        case 403:
+          return const PresenceStatusPayload(
+            type: PresenceStatusType.outOfSchedule,
+            title: 'Di Luar Jadwal Dinas',
+            message: 'Anda tidak memiliki jadwal dinas aktif pada sesi waktu saat ini.',
+            actionLabel: 'Saya Mengerti',
+          );
+      }
+    }
+
+    final String str = error.toString();
+    if (str.contains('sudah melakukan presensi masuk')) {
+      return const PresenceStatusPayload(
         type: PresenceStatusType.conflictAlreadyCheckedIn,
         title: 'Sudah Presensi Masuk',
-        message: 'Anda sudah melakukan presensi masuk hari ini. Silakan gunakan mode Presensi Pulang jika dinas Anda telah selesai.',
-        badgeLabel: 'SUDAH TERDATA',
+        message:
+            'Anda sudah melakukan presensi masuk hari ini. Silakan gunakan mode Presensi Pulang jika dinas Anda telah selesai.',
         actionLabel: 'Saya Mengerti',
       );
     }
-
-    if (str.contains('sudah tercatat sebelumnya') || str.contains('pulang hari ini')) {
-      return PresenceStatusPayload(
+    if (str.contains('sudah tercatat sebelumnya')) {
+      return const PresenceStatusPayload(
         type: PresenceStatusType.conflictAlreadyCheckedOut,
         title: 'Sudah Presensi Pulang',
-        message: 'Presensi pulang sudah tercatat sebelumnya untuk hari ini. Tidak ada sesi dinas aktif yang perlu ditutup.',
-        badgeLabel: 'SUDAH SELESAI',
+        message:
+            'Presensi pulang sudah tercatat sebelumnya untuk hari ini. Tidak ada sesi dinas aktif yang perlu ditutup.',
         actionLabel: 'Saya Mengerti',
-      );
-    }
-
-    if (str.contains('jadwal dinas') || str.contains('roster') || str.contains('403')) {
-      return PresenceStatusPayload(
-        type: PresenceStatusType.outOfSchedule,
-        title: 'Di Luar Jadwal Dinas',
-        message: 'Anda tidak memiliki jadwal dinas aktif pada sesi waktu saat ini. Hubungi koordinator staf jika terdapat kekeliruan.',
-        badgeLabel: 'DILUAR JADWAL',
-        actionLabel: 'Saya Mengerti',
-      );
-    }
-
-    if (str.contains('cuti') || str.contains('izin resmi')) {
-      return PresenceStatusPayload(
-        type: PresenceStatusType.onOfficialLeave,
-        title: 'Status Izin / Cuti Aktif',
-        message: 'Sistem mendeteksi izin resmi atau cuti dinas yang telah disetujui untuk hari ini.',
-        badgeLabel: 'CUTI RESMI',
-        actionLabel: 'Saya Mengerti',
-      );
-    }
-
-    if (str.contains('token qr') || str.contains('kedaluwarsa') || str.contains('format qr') || str.contains('400')) {
-      return PresenceStatusPayload(
-        type: PresenceStatusType.invalidOrExpiredToken,
-        title: 'Token QR Tidak Valid',
-        message: 'Token QR tidak dikenali atau sudah kedaluwarsa. Silakan scan QR code dinamis terbaru di terminal kehadiran.',
-        badgeLabel: 'KEDALUWARSA',
-        actionLabel: 'Scan Ulang',
       );
     }
 
     return PresenceStatusPayload(
       type: PresenceStatusType.genericError,
       title: 'Gagal Memproses Presensi',
-      message: rawError.replaceAll('Exception: ', '').replaceAll('FormatException: ', ''),
-      badgeLabel: 'PERIKSA KEMBALI',
+      message: error is ApiException
+          ? error.message
+          : str.replaceAll('Exception: ', '').replaceAll('FormatException: ', ''),
       actionLabel: 'Saya Mengerti',
     );
   }
+
+  /// Backward-compatible bridge for legacy callers passing raw string error.
+  factory PresenceStatusPayload.fromError(String rawError) =>
+      PresenceStatusPayload.fromException(rawError);
 }

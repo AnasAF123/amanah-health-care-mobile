@@ -19,6 +19,7 @@ class _MockFailingAttendanceRepository implements AttendanceRepository {
   @override
   Future<AttendanceCheckInResult> recordCheckout({
     String? qrToken,
+    String? checkoutTicket,
     String? notes,
   }) async {
     if (notes == 'EARLY_ERROR') {
@@ -26,7 +27,6 @@ class _MockFailingAttendanceRepository implements AttendanceRepository {
     }
     throw Exception('Presensi pulang sudah tercatat sebelumnya untuk hari ini.');
   }
-
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -58,39 +58,33 @@ void main() {
       );
     });
 
-    test('preserves errorMessage upon submission error and formats duplicate error clearly', () async {
-      expect(controller.errorMessage, isNull);
-      expect(controller.isFlowActive, isFalse);
+    test(
+      'preserves errorMessage upon submission error and formats duplicate error clearly',
+      () async {
+        expect(controller.errorMessage, isNull);
+        expect(controller.isFlowActive, isFalse);
 
-      final result = await controller.submitAttendance('TEST-TOKEN');
+        final result = await controller.submitAttendance('TEST-TOKEN');
 
-      expect(result, isNull);
-      expect(controller.flowState, equals(AttendanceFlowState.error));
-      expect(controller.errorMessage, isNotNull);
-      expect(
-        controller.errorMessage,
-        equals('Anda sudah melakukan presensi masuk hari ini.'),
-      );
+        expect(result, isNull);
+        expect(controller.flowState, equals(AttendanceFlowState.error));
+        expect(controller.errorMessage, isNotNull);
+        expect(controller.errorMessage, equals('Anda sudah melakukan presensi masuk hari ini.'));
 
-      controller.clearError();
-      expect(controller.errorMessage, isNull);
-      expect(controller.isFlowActive, isFalse);
-    });
+        controller.clearError();
+        expect(controller.errorMessage, isNull);
+        expect(controller.isFlowActive, isFalse);
+      },
+    );
 
     test('detects early departure notes requirement upon checkout error', () async {
       controller.setScanMode(AttendanceScanMode.checkOut);
-      final result = await controller.submitCheckout(
-        qrToken: 'TOKEN_123',
-        notes: 'EARLY_ERROR',
-      );
+      final result = await controller.submitCheckout(qrToken: 'TOKEN_123', notes: 'EARLY_ERROR');
 
       expect(result, isNull);
       expect(controller.requiresEarlyDepartureNotes, isTrue);
       expect(controller.pendingCheckoutToken, equals('TOKEN_123'));
-      expect(
-        controller.errorMessage,
-        equals('Catatan alasan kepulangan lebih awal wajib diisi.'),
-      );
+      expect(controller.errorMessage, equals('Catatan alasan kepulangan lebih awal wajib diisi.'));
 
       controller.clearPendingEarlyDeparture();
       expect(controller.requiresEarlyDepartureNotes, isFalse);

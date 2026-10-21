@@ -22,6 +22,7 @@ class AmanahPresenceResultDrawer extends StatefulWidget {
     this.bottomPadding = 24,
     this.onGoHome,
     this.onViewHistory,
+    this.onSwitchToCheckIn,
   });
 
   final PresenceStatusPayload payload;
@@ -30,15 +31,16 @@ class AmanahPresenceResultDrawer extends StatefulWidget {
   final double bottomPadding;
   final VoidCallback? onGoHome;
   final VoidCallback? onViewHistory;
+  final VoidCallback? onSwitchToCheckIn;
 
   static Future<void> show(
     BuildContext context, {
     required PresenceStatusPayload payload,
-    AmanahPresenceResultDrawerStyle style =
-        AmanahPresenceResultDrawerStyle.badgeStage,
+    AmanahPresenceResultDrawerStyle style = AmanahPresenceResultDrawerStyle.badgeStage,
     double bottomPadding = 24,
     VoidCallback? onGoHome,
     VoidCallback? onViewHistory,
+    VoidCallback? onSwitchToCheckIn,
   }) {
     return showAmanahBottomSheet<void>(
       context: context,
@@ -55,17 +57,19 @@ class AmanahPresenceResultDrawer extends StatefulWidget {
           Navigator.of(ctx).pop();
           onViewHistory?.call();
         },
+        onSwitchToCheckIn: () {
+          Navigator.of(ctx).pop();
+          onSwitchToCheckIn?.call();
+        },
       ),
     );
   }
 
   @override
-  State<AmanahPresenceResultDrawer> createState() =>
-      _AmanahPresenceResultDrawerState();
+  State<AmanahPresenceResultDrawer> createState() => _AmanahPresenceResultDrawerState();
 }
 
-class _AmanahPresenceResultDrawerState
-    extends State<AmanahPresenceResultDrawer>
+class _AmanahPresenceResultDrawerState extends State<AmanahPresenceResultDrawer>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   List<ResultConfettiParticle> _particles = const <ResultConfettiParticle>[];
@@ -73,10 +77,8 @@ class _AmanahPresenceResultDrawerState
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2800),
-    )..forward();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 2800))
+      ..forward();
 
     if (widget.payload.isSuccess) {
       _particles = _generateConfetti();
@@ -141,9 +143,7 @@ class _AmanahPresenceResultDrawerState
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: AmanahColorTokens.pureBlack.withValues(
-                  alpha: dark ? 0.45 : 0.16,
-                ),
+                color: AmanahColorTokens.pureBlack.withValues(alpha: dark ? 0.45 : 0.16),
                 blurRadius: 36,
                 offset: const Offset(0, -12),
               ),
@@ -164,18 +164,14 @@ class _AmanahPresenceResultDrawerState
                 final double buildProgress = (progress / 0.45).clamp(0.0, 1.0);
 
                 // Phase 2: Half-circle pushes badge from center up to resting top position (0.48 -> 0.72)
-                final double pushProgress =
-                    ((progress - 0.48) / 0.24).clamp(0.0, 1.0);
+                final double pushProgress = ((progress - 0.48) / 0.24).clamp(0.0, 1.0);
 
                 // Phase 3: Badge reaches the top -> confetti explodes immediately (0.72 -> 1.0)
-                final double confettiProgress =
-                    ((progress - 0.72) / 0.28).clamp(0.0, 1.0);
+                final double confettiProgress = ((progress - 0.72) / 0.28).clamp(0.0, 1.0);
 
                 // Phase 3: Content reveals below the badge (0.74 -> 1.0)
-                final double contentProgress =
-                    ((progress - 0.74) / 0.26).clamp(0.0, 1.0);
-                final double contentEased =
-                    Curves.easeOutCubic.transform(contentProgress);
+                final double contentProgress = ((progress - 0.74) / 0.26).clamp(0.0, 1.0);
+                final double contentEased = Curves.easeOutCubic.transform(contentProgress);
 
                 if (widget.style == AmanahPresenceResultDrawerStyle.badgeStage) {
                   return AmanahBadgeDrawerView(
@@ -265,10 +261,7 @@ class _AmanahPresenceResultDrawerState
                             const SizedBox(height: 18),
 
                             // Top Animated Status Emblem
-                            _ResultEmblem(
-                              palette: palette,
-                              iconProgress: iconProgress,
-                            ),
+                            _ResultEmblem(palette: palette, iconProgress: iconProgress),
                             const SizedBox(height: 20),
 
                             // Content and Actions
@@ -284,7 +277,8 @@ class _AmanahPresenceResultDrawerState
                                     Text(
                                       widget.payload.title,
                                       textAlign: TextAlign.center,
-                                      style: theme.textTheme.titleLarge?.copyWith(
+                                      style:
+                                          theme.textTheme.titleLarge?.copyWith(
                                             fontWeight: FontWeight.w800,
                                             color: palette.title,
                                             height: 1.25,
@@ -320,10 +314,7 @@ class _AmanahPresenceResultDrawerState
                                         decoration: BoxDecoration(
                                           color: palette.mutedSurface,
                                           borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(
-                                            color: palette.border,
-                                            width: 1,
-                                          ),
+                                          border: Border.all(color: palette.border, width: 1),
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
@@ -380,6 +371,7 @@ class _AmanahPresenceResultDrawerState
                                       onClose: widget.onClose,
                                       onGoHome: widget.onGoHome,
                                       onViewHistory: widget.onViewHistory,
+                                      onSwitchToCheckIn: widget.onSwitchToCheckIn,
                                     ),
                                   ],
                                 ),
@@ -401,10 +393,7 @@ class _AmanahPresenceResultDrawerState
 }
 
 class _ResultEmblem extends StatelessWidget {
-  const _ResultEmblem({
-    required this.palette,
-    required this.iconProgress,
-  });
+  const _ResultEmblem({required this.palette, required this.iconProgress});
 
   final PresenceResultPalette palette;
   final double iconProgress;
@@ -443,11 +432,7 @@ class _ResultEmblem extends StatelessWidget {
             Center(
               child: Transform.scale(
                 scale: Curves.easeOutBack.transform(iconScale),
-                child: Icon(
-                  palette.iconData,
-                  size: 38,
-                  color: palette.onPrimary,
-                ),
+                child: Icon(palette.iconData, size: 38, color: palette.onPrimary),
               ),
             ),
         ],
@@ -463,6 +448,7 @@ class _ResultActions extends StatelessWidget {
     required this.onClose,
     this.onGoHome,
     this.onViewHistory,
+    this.onSwitchToCheckIn,
   });
 
   final PresenceStatusPayload payload;
@@ -470,6 +456,7 @@ class _ResultActions extends StatelessWidget {
   final VoidCallback onClose;
   final VoidCallback? onGoHome;
   final VoidCallback? onViewHistory;
+  final VoidCallback? onSwitchToCheckIn;
 
   @override
   Widget build(BuildContext context) {
@@ -494,6 +481,14 @@ class _ResultActions extends StatelessWidget {
       );
     }
 
+    final VoidCallback actionPressed =
+        (payload.type == PresenceStatusType.notCheckedIn && onSwitchToCheckIn != null)
+        ? () {
+            onClose();
+            onSwitchToCheckIn!();
+          }
+        : onClose;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -502,7 +497,7 @@ class _ResultActions extends StatelessWidget {
           text: payload.actionLabel,
           isFullWidth: true,
           size: AmanahButtonSize.medium,
-          onPressed: onClose,
+          onPressed: actionPressed,
         ),
       ],
     );

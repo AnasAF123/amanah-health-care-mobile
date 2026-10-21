@@ -46,8 +46,7 @@ class AmanahQrScannerTabScreen extends StatefulWidget {
   final double bottomNavigationClearance;
 
   @override
-  State<AmanahQrScannerTabScreen> createState() =>
-      AmanahQrScannerTabScreenState();
+  State<AmanahQrScannerTabScreen> createState() => AmanahQrScannerTabScreenState();
 }
 
 class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
@@ -124,9 +123,10 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
       }
     });
 
-    _laserAnimation = Tween<double>(begin: 0.10, end: 0.90).animate(
-      CurvedAnimation(parent: _laserController, curve: Curves.easeInOut),
-    );
+    _laserAnimation = Tween<double>(
+      begin: 0.10,
+      end: 0.90,
+    ).animate(CurvedAnimation(parent: _laserController, curve: Curves.easeInOut));
 
     _mlDiagnosticTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
       if (!mounted) return;
@@ -157,9 +157,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     _controller.openDrawer(view);
     widget.onDrawerStateChanged?.call(true);
     _drawerAnimationController.forward(
-      from: _drawerAnimationController.value == 1.0
-          ? 0.0
-          : _drawerAnimationController.value,
+      from: _drawerAnimationController.value == 1.0 ? 0.0 : _drawerAnimationController.value,
     );
   }
 
@@ -218,8 +216,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     }
 
     // Submit to authoritative orchestrator (camera stream stays uninterrupted)
-    final AttendanceCheckInResult? result =
-        await _controller.handleDetectedBarcode(value);
+    final AttendanceCheckInResult? result = await _controller.handleDetectedBarcode(value);
 
     if (!mounted) return;
 
@@ -237,14 +234,18 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
 
     // Intercept early departure requiring reason notes
     if (_controller.requiresEarlyDepartureNotes &&
-        _controller.pendingCheckoutToken != null) {
-      final String token = _controller.pendingCheckoutToken!;
+        (_controller.pendingCheckoutTicket != null || _controller.pendingCheckoutToken != null)) {
+      final String? ticket = _controller.pendingCheckoutTicket;
+      final String? token = _controller.pendingCheckoutToken;
       _controller.clearPendingEarlyDeparture();
       final String? reason = await EarlyCheckoutReasonModal.show(context);
       if (!mounted) return;
       if (reason != null && reason.trim().isNotEmpty) {
-        final AttendanceCheckInResult? earlyResult =
-            await _controller.submitCheckout(qrToken: token, notes: reason);
+        final AttendanceCheckInResult? earlyResult = await _controller.submitCheckout(
+          qrToken: ticket == null ? token : null,
+          checkoutTicket: ticket,
+          notes: reason,
+        );
         if (!mounted) return;
         if (earlyResult != null) {
           _showResultDrawer(
@@ -259,10 +260,10 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
       }
     }
 
-    if (_controller.errorMessage != null) {
-      _showResultDrawer(
-        PresenceStatusPayload.fromError(_controller.errorMessage!),
-      );
+    if (_controller.lastException != null) {
+      _showResultDrawer(PresenceStatusPayload.fromException(_controller.lastException!));
+    } else if (_controller.errorMessage != null) {
+      _showResultDrawer(PresenceStatusPayload.fromError(_controller.errorMessage!));
     }
   }
 
@@ -272,8 +273,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     _drawerAnimationController.reset();
     widget.onDrawerStateChanged?.call(true);
 
-    final AttendanceCheckInResult? result =
-        await _controller.submitManualPin();
+    final AttendanceCheckInResult? result = await _controller.submitManualPin();
 
     if (!mounted) return;
 
@@ -290,14 +290,18 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
 
     // Intercept early departure requiring reason notes for manual PIN
     if (_controller.requiresEarlyDepartureNotes &&
-        _controller.pendingCheckoutToken != null) {
-      final String token = _controller.pendingCheckoutToken!;
+        (_controller.pendingCheckoutTicket != null || _controller.pendingCheckoutToken != null)) {
+      final String? ticket = _controller.pendingCheckoutTicket;
+      final String? token = _controller.pendingCheckoutToken;
       _controller.clearPendingEarlyDeparture();
       final String? reason = await EarlyCheckoutReasonModal.show(context);
       if (!mounted) return;
       if (reason != null && reason.trim().isNotEmpty) {
-        final AttendanceCheckInResult? earlyResult =
-            await _controller.submitCheckout(qrToken: token, notes: reason);
+        final AttendanceCheckInResult? earlyResult = await _controller.submitCheckout(
+          qrToken: ticket == null ? token : null,
+          checkoutTicket: ticket,
+          notes: reason,
+        );
         if (!mounted) return;
         if (earlyResult != null) {
           _showResultDrawer(
@@ -312,10 +316,10 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
       }
     }
 
-    if (_controller.errorMessage != null) {
-      _showResultDrawer(
-        PresenceStatusPayload.fromError(_controller.errorMessage!),
-      );
+    if (_controller.lastException != null) {
+      _showResultDrawer(PresenceStatusPayload.fromException(_controller.lastException!));
+    } else if (_controller.errorMessage != null) {
+      _showResultDrawer(PresenceStatusPayload.fromError(_controller.errorMessage!));
     }
   }
 
@@ -334,6 +338,9 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
       onGoHome: widget.onBack,
       onViewHistory: () {
         Navigator.of(context).push(AmanahPresenceHistoryScreen.route());
+      },
+      onSwitchToCheckIn: () {
+        _controller.setScanMode(AttendanceScanMode.checkIn);
       },
     ).whenComplete(() {
       if (mounted) {
@@ -354,15 +361,10 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
   void _handleDownloadQr() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text(
-          'QR Code berhasil disimpan ke galeri.',
-          style: TextStyle(fontSize: 12),
-        ),
+        content: const Text('QR Code berhasil disimpan ke galeri.', style: TextStyle(fontSize: 12)),
         backgroundColor: AmanahColorTokens.neutral900,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -437,9 +439,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                       onTap: _closeDrawer,
                       behavior: HitTestBehavior.opaque,
                       child: ColoredBox(
-                        color: AmanahColorTokens.pureBlack.withValues(
-                          alpha: 0.50 * progress,
-                        ),
+                        color: AmanahColorTokens.pureBlack.withValues(alpha: 0.50 * progress),
                       ),
                     );
                   },
@@ -448,22 +448,19 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
 
               // 3. Top Floating Navigation Bar
               PresenceScannerTopBar(
-                onBack: widget.onBack ??
-                    () => Navigator.of(context).maybePop(),
+                onBack: widget.onBack ?? () => Navigator.of(context).maybePop(),
                 onShowHelp: _showHelpDialog,
                 onToggleDrawer: _toggleDrawer,
                 isHelpOpen: _controller.isHelpOpen,
                 isDrawerOpen: _controller.isDrawerOpen,
                 drawerView: _controller.drawerView,
                 hasCamera: PresenceScannerCameraViewport.safeHasACamera(),
-                hasMoreThanOneCamera:
-                    PresenceScannerCameraViewport.safeHasMoreThanOneCamera(),
+                hasMoreThanOneCamera: PresenceScannerCameraViewport.safeHasMoreThanOneCamera(),
                 hardwareNotifier: _scannerHardwareNotifier,
                 onSwitchCamera: () async {
                   await _scannerHardwareNotifier.value?.switchCamera();
                   final bool isFront =
-                      _scannerHardwareNotifier.value?.isFrontCamera ??
-                          !_controller.isFrontCamera;
+                      _scannerHardwareNotifier.value?.isFrontCamera ?? !_controller.isFrontCamera;
                   _controller.syncCameraFacing(isFront);
                   AppLog.scanner(
                     '[QR SCANNER] 🔄 Switched camera facing: ${isFront ? "FRONT" : "BACK"}',
@@ -472,17 +469,13 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                 onToggleFlash: () async {
                   await _scannerHardwareNotifier.value?.toggleTorch();
                   final bool isTorch =
-                      _scannerHardwareNotifier.value?.isTorchOn ??
-                          !_controller.isFlashOn;
+                      _scannerHardwareNotifier.value?.isTorchOn ?? !_controller.isFlashOn;
                   _controller.syncFlash(isTorch);
-                  AppLog.scanner(
-                    '[QR SCANNER] 💡 Toggled torch: ${isTorch ? "ON" : "OFF"}',
-                  );
+                  AppLog.scanner('[QR SCANNER] 💡 Toggled torch: ${isTorch ? "ON" : "OFF"}');
                 },
-                isFrontCamera: _scannerHardwareNotifier.value?.isFrontCamera ??
-                    _controller.isFrontCamera,
-                isFlashOn: _scannerHardwareNotifier.value?.isTorchOn ??
-                    _controller.isFlashOn,
+                isFrontCamera:
+                    _scannerHardwareNotifier.value?.isFrontCamera ?? _controller.isFrontCamera,
+                isFlashOn: _scannerHardwareNotifier.value?.isTorchOn ?? _controller.isFlashOn,
                 dark: dark,
               ),
 

@@ -10,6 +10,7 @@ abstract interface class AttendanceRepository {
 
   Future<AttendanceCheckInResult> recordCheckout({
     String? qrToken,
+    String? checkoutTicket,
     String? notes,
   });
 

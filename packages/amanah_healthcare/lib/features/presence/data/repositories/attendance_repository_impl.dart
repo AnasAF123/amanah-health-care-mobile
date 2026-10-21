@@ -4,9 +4,8 @@ import 'package:amanah_healthcare/features/presence/domain/entities/attendance_c
 import 'package:amanah_healthcare/features/presence/domain/repositories/attendance_repository.dart';
 
 class AttendanceRepositoryImpl implements AttendanceRepository {
-  AttendanceRepositoryImpl({
-    AttendanceRemoteDataSource? remoteDataSource,
-  }) : _remoteDataSource = remoteDataSource ?? AttendanceRemoteDataSourceImpl();
+  AttendanceRepositoryImpl({AttendanceRemoteDataSource? remoteDataSource})
+    : _remoteDataSource = remoteDataSource ?? AttendanceRemoteDataSourceImpl();
 
   final AttendanceRemoteDataSource _remoteDataSource;
 
@@ -48,10 +47,12 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
   @override
   Future<AttendanceCheckInResult> recordCheckout({
     String? qrToken,
+    String? checkoutTicket,
     String? notes,
   }) async {
     final Map<String, dynamic> json = await _remoteDataSource.submitCheckout(
       qrToken: qrToken,
+      checkoutTicket: checkoutTicket,
       notes: notes,
     );
 
@@ -95,16 +96,19 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       final AttendanceStatus status = statusStr == 'late' || statusStr == 'telat'
           ? AttendanceStatus.telat
           : statusStr == 'leave' || statusStr == 'cuti'
-              ? AttendanceStatus.cuti
-              : statusStr == 'absent' || statusStr == 'missed'
-                  ? AttendanceStatus.missed
-                  : AttendanceStatus.hadir;
+          ? AttendanceStatus.cuti
+          : statusStr == 'absent' || statusStr == 'missed'
+          ? AttendanceStatus.missed
+          : AttendanceStatus.hadir;
 
       final String checkInStr = item['checkInAt']?.toString() ?? '';
       final DateTime? checkInAt = DateTime.tryParse(checkInStr);
       final String timeFormatted = checkInAt != null
           ? '${checkInAt.hour.toString().padLeft(2, '0')}:${checkInAt.minute.toString().padLeft(2, '0')} WIB'
           : '-';
+
+      final String checkOutStr = item['checkOutAt']?.toString() ?? '';
+      final DateTime? checkOutAt = DateTime.tryParse(checkOutStr);
 
       final String rawDate = item['attendanceDate']?.toString() ?? '';
       final DateTime? parsedDate = DateTime.tryParse(rawDate) ?? checkInAt;
@@ -122,13 +126,13 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
           date: dateFormatted,
           dayNumber: dayNumber,
           time: timeFormatted,
-          title: isReplacement
-              ? 'Dinas Shift $shiftStr (Pengganti)'
-              : 'Dinas Shift $shiftStr',
-          location:
-              item['locationLabel']?.toString() ?? 'Klinik Pratama Amanah',
+          title: isReplacement ? 'Dinas Shift $shiftStr (Pengganti)' : 'Dinas Shift $shiftStr',
+          location: item['locationLabel']?.toString() ?? 'Klinik Pratama Amanah',
           status: status,
           isLatest: i == 0,
+          attendanceDate: parsedDate,
+          checkInAt: checkInAt,
+          checkOutAt: checkOutAt,
         ),
       );
     }
@@ -138,8 +142,18 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
 
   static String _monthName(int month) {
     const List<String> months = <String>[
-      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Ags',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
     ];
     if (month >= 1 && month <= 12) {
       return months[month - 1];

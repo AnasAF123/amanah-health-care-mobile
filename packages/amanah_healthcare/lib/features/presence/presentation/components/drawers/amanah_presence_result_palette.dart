@@ -42,8 +42,7 @@ class PresenceResultPalette {
     required PresenceStatusType type,
   }) {
     final bool dark = theme.brightness == Brightness.dark;
-    final Color surface =
-        dark ? theme.colorScheme.surface : AmanahColorTokens.surfaceLight;
+    final Color surface = dark ? theme.colorScheme.surface : AmanahColorTokens.surfaceLight;
 
     Color primary;
     Color primarySoft;
@@ -56,9 +55,7 @@ class PresenceResultPalette {
         primary = dark
             ? const Color(0xFF0284C7) // btnCrispBlueDarkGradient base
             : AmanahColorTokens.brand; // btnCrispBlueGradient base
-        primarySoft = dark
-            ? primary.withValues(alpha: 0.16)
-            : AmanahColorTokens.brandSurface;
+        primarySoft = dark ? primary.withValues(alpha: 0.16) : AmanahColorTokens.brandSurface;
         iconData = Icons.check_rounded;
         showConfetti = true;
         badgeTheme = BadgeStageTheme(
@@ -77,12 +74,8 @@ class PresenceResultPalette {
         break;
 
       case PresenceStatusType.successCheckOut:
-        primary = dark
-            ? const Color(0xFF0284C7)
-            : AmanahColorTokens.brandNavyBold;
-        primarySoft = dark
-            ? primary.withValues(alpha: 0.16)
-            : AmanahColorTokens.brandSurface;
+        primary = dark ? const Color(0xFF0284C7) : AmanahColorTokens.brandNavyBold;
+        primarySoft = dark ? primary.withValues(alpha: 0.16) : AmanahColorTokens.brandSurface;
         iconData = Icons.logout_rounded;
         showConfetti = true;
         badgeTheme = BadgeStageTheme(
@@ -101,13 +94,29 @@ class PresenceResultPalette {
 
       case PresenceStatusType.conflictAlreadyCheckedIn:
       case PresenceStatusType.conflictAlreadyCheckedOut:
-        primary = dark
-            ? AmanahColorTokens.warningLight
-            : AmanahColorTokens.warning;
-        primarySoft = dark
-            ? primary.withValues(alpha: 0.18)
-            : AmanahColorTokens.amberSurfaceSoft;
+        primary = dark ? AmanahColorTokens.warningLight : AmanahColorTokens.warning;
+        primarySoft = dark ? primary.withValues(alpha: 0.18) : AmanahColorTokens.amberSurfaceSoft;
         iconData = Icons.history_toggle_off_rounded;
+        badgeTheme = BadgeStageTheme(
+          auraMid: dark ? const Color(0xFF33240D) : const Color(0xFFFFF4E0),
+          auraEdge: dark ? const Color(0xFF211606) : const Color(0xFFFDE7BE),
+          badgeShadow: const Color(0x5CF5A623),
+          outerTop: const Color(0xFFFFCC66),
+          outerBottom: const Color(0xFFF5981C),
+          innerRecess: const Color(0xFFDE820E),
+          innerRim: const Color(0xFFFCB84E),
+          ribbonTop: const Color(0xFFFFF3DB),
+          ribbonBottom: const Color(0xFFFAB652),
+          glyphColor: const Color(0xFFB36204),
+        );
+        break;
+
+      case PresenceStatusType.notCheckedIn:
+        primary = dark
+            ? const Color(0xFFFBBF24) // Amber 400
+            : const Color(0xFFD97706); // Amber 600
+        primarySoft = dark ? primary.withValues(alpha: 0.18) : AmanahColorTokens.amberSurfaceSoft;
+        iconData = Icons.login_rounded;
         badgeTheme = BadgeStageTheme(
           auraMid: dark ? const Color(0xFF33240D) : const Color(0xFFFFF4E0),
           auraEdge: dark ? const Color(0xFF211606) : const Color(0xFFFDE7BE),
@@ -126,9 +135,7 @@ class PresenceResultPalette {
         primary = dark
             ? const Color(0xFFA78BFA) // Violet light
             : const Color(0xFF7C3AED); // Deep Violet
-        primarySoft = dark
-            ? primary.withValues(alpha: 0.18)
-            : const Color(0xFFF3E8FF);
+        primarySoft = dark ? primary.withValues(alpha: 0.18) : const Color(0xFFF3E8FF);
         iconData = Icons.event_busy_rounded;
         badgeTheme = BadgeStageTheme(
           auraMid: dark ? const Color(0xFF231638) : const Color(0xFFF5EEFD),
@@ -148,9 +155,7 @@ class PresenceResultPalette {
         primary = dark
             ? const Color(0xFF2DD4BF) // Teal light
             : const Color(0xFF0D9488); // Deep Teal
-        primarySoft = dark
-            ? primary.withValues(alpha: 0.18)
-            : const Color(0xFFCCFBF1);
+        primarySoft = dark ? primary.withValues(alpha: 0.18) : const Color(0xFFCCFBF1);
         iconData = Icons.beach_access_rounded;
         badgeTheme = BadgeStageTheme(
           auraMid: dark ? const Color(0xFF112638) : const Color(0xFFE6F4FE),
@@ -167,12 +172,8 @@ class PresenceResultPalette {
         break;
 
       case PresenceStatusType.invalidOrExpiredToken:
-        primary = dark
-            ? AmanahColorTokens.roseLight
-            : const Color(0xFFE11D48); // Rose 600
-        primarySoft = dark
-            ? primary.withValues(alpha: 0.18)
-            : const Color(0xFFFFE4E6);
+        primary = dark ? AmanahColorTokens.roseLight : const Color(0xFFE11D48); // Rose 600
+        primarySoft = dark ? primary.withValues(alpha: 0.18) : const Color(0xFFFFE4E6);
         iconData = Icons.qr_code_2_rounded;
         badgeTheme = BadgeStageTheme(
           auraMid: dark ? const Color(0xFF351216) : const Color(0xFFFEE9EA),
@@ -192,9 +193,7 @@ class PresenceResultPalette {
         primary = dark
             ? const Color(0xFFF87171) // Red light
             : AmanahColorTokens.danger;
-        primarySoft = dark
-            ? primary.withValues(alpha: 0.18)
-            : AmanahColorTokens.dangerSurface;
+        primarySoft = dark ? primary.withValues(alpha: 0.18) : AmanahColorTokens.dangerSurface;
         iconData = Icons.error_outline_rounded;
         badgeTheme = BadgeStageTheme(
           auraMid: dark ? const Color(0xFF351216) : const Color(0xFFFEE9EA),
@@ -217,12 +216,8 @@ class PresenceResultPalette {
           ? theme.colorScheme.onSurface.withValues(alpha: 0.06)
           : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.48),
       title: dark ? theme.colorScheme.onSurface : AmanahColorTokens.heading,
-      subtitle: dark
-          ? theme.colorScheme.onSurfaceVariant
-          : AmanahColorTokens.muted,
-      metaText: dark
-          ? theme.colorScheme.onSurface
-          : theme.colorScheme.onSurfaceVariant,
+      subtitle: dark ? theme.colorScheme.onSurfaceVariant : AmanahColorTokens.muted,
+      metaText: dark ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
       border: dark
           ? theme.colorScheme.outlineVariant.withValues(alpha: 0.34)
           : primary.withValues(alpha: 0.20),

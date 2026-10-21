@@ -15,6 +15,7 @@ abstract interface class AttendanceRemoteDataSource {
 
   Future<Map<String, dynamic>> submitCheckout({
     String? qrToken,
+    String? checkoutTicket,
     String? notes,
   });
 
@@ -22,15 +23,13 @@ abstract interface class AttendanceRemoteDataSource {
 }
 
 class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
-  AttendanceRemoteDataSourceImpl({
-    ApiClient? apiClient,
-  }) : _apiClient = apiClient ??
-            AuthorizedApiClient(
-              innerClient: HttpApiClient(
-                baseUrl: AmanahAuthEnvironment.authBaseUrl,
-              ),
-              tokenProvider: const AmanahAuthTokenStorage(),
-            );
+  AttendanceRemoteDataSourceImpl({ApiClient? apiClient})
+    : _apiClient =
+          apiClient ??
+          AuthorizedApiClient(
+            innerClient: HttpApiClient(baseUrl: AmanahAuthEnvironment.authBaseUrl),
+            tokenProvider: const AmanahAuthTokenStorage(),
+          );
 
   final ApiClient _apiClient;
 
@@ -67,10 +66,13 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
   @override
   Future<Map<String, dynamic>> submitCheckout({
     String? qrToken,
+    String? checkoutTicket,
     String? notes,
   }) async {
     final Map<String, dynamic> body = <String, dynamic>{};
-    if (qrToken != null && qrToken.isNotEmpty) {
+    if (checkoutTicket != null && checkoutTicket.isNotEmpty) {
+      body['checkoutTicket'] = checkoutTicket;
+    } else if (qrToken != null && qrToken.isNotEmpty) {
       body['qrToken'] = qrToken;
     }
     if (notes != null && notes.trim().isNotEmpty) {

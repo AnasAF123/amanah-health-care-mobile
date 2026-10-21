@@ -11,24 +11,19 @@ import 'package:amanah_healthcare/core/network/client/amanah_http_client.dart';
 import 'package:amanah_healthcare/core/network/client/observable_http_client.dart';
 
 class HttpApiClient implements ApiClient {
-  const HttpApiClient({
-    String? baseUrl,
-    http.Client? httpClient,
-  })  : _customBaseUrl = baseUrl,
-        _customClient = httpClient;
+  const HttpApiClient({String? baseUrl, http.Client? httpClient})
+    : _customBaseUrl = baseUrl,
+      _customClient = httpClient;
 
   final String? _customBaseUrl;
   final http.Client? _customClient;
 
-  String get baseUrl =>
-      _customBaseUrl ?? AmanahAuthEnvironment.authBaseUrl;
+  String get baseUrl => _customBaseUrl ?? AmanahAuthEnvironment.authBaseUrl;
 
   http.Client get _httpClient {
     final http.Client? custom = _customClient;
     if (custom != null) {
-      return custom is ObservableHttpClient
-          ? custom
-          : ObservableHttpClient(innerClient: custom);
+      return custom is ObservableHttpClient ? custom : ObservableHttpClient(innerClient: custom);
     }
     return AmanahHttpClient.instance;
   }
@@ -40,10 +35,7 @@ class HttpApiClient implements ApiClient {
       return uri;
     }
     return uri.replace(
-      queryParameters: <String, String>{
-        ...uri.queryParameters,
-        ...queryParameters,
-      },
+      queryParameters: <String, String>{...uri.queryParameters, ...queryParameters},
     );
   }
 
@@ -135,8 +127,7 @@ class HttpApiClient implements ApiClient {
       _ => 'POST',
     };
 
-    final http.MultipartRequest request =
-        http.MultipartRequest(methodStr, uri);
+    final http.MultipartRequest request = http.MultipartRequest(methodStr, uri);
     request.headers.addAll(headers);
 
     if (body != null) {
@@ -146,13 +137,9 @@ class HttpApiClient implements ApiClient {
     }
 
     if (fileBytes != null) {
-      request.files.add(
-        http.MultipartFile.fromBytes(fileField, fileBytes, filename: fileName),
-      );
+      request.files.add(http.MultipartFile.fromBytes(fileField, fileBytes, filename: fileName));
     } else if (filePath != null) {
-      request.files.add(
-        await http.MultipartFile.fromPath(fileField, filePath, filename: fileName),
-      );
+      request.files.add(await http.MultipartFile.fromPath(fileField, filePath, filename: fileName));
     }
 
     final http.StreamedResponse streamed = await _httpClient.send(request);
@@ -182,7 +169,8 @@ class HttpApiClient implements ApiClient {
     String? message;
     if (decoded is Map<String, dynamic>) {
       code = decoded['code'] as String?;
-      message = decoded['detail'] as String? ??
+      message =
+          decoded['detail'] as String? ??
           decoded['message'] as String? ??
           (decoded['error'] is Map
               ? decoded['error']['message'] as String?
@@ -190,26 +178,25 @@ class HttpApiClient implements ApiClient {
     }
 
     switch (response.statusCode) {
+      case 400:
+        throw BadRequestException(message ?? 'Permintaan tidak valid.', code, decoded);
       case 401:
         throw UnauthorizedException(
           message ?? 'Kredensial salah atau sesi telah kedaluwarsa.',
           code,
         );
       case 403:
-        throw ForbiddenException(
-          message ?? 'Akses ditolak oleh server.',
-          code: code,
-        );
+        throw ForbiddenException(message ?? 'Akses ditolak oleh server.', code: code);
       case 404:
-        throw NotFoundException(
-          message ?? 'Layanan tidak ditemukan.',
-          code: code,
-        );
+        throw NotFoundException(message ?? 'Layanan tidak ditemukan.', code: code);
+      case 409:
+        throw ConflictException(message ?? 'Terjadi konflik data pada server.', code: code);
       default:
         throw ServerException(
           message ?? 'Terjadi kesalahan pada server (Status: ${response.statusCode}).',
           code,
           response.statusCode,
+          decoded,
         );
     }
   }

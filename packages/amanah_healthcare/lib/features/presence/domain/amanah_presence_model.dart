@@ -12,6 +12,9 @@ class AttendanceRecord {
     this.isLatest = false,
     this.reason,
     this.lateDuration,
+    this.attendanceDate,
+    this.checkInAt,
+    this.checkOutAt,
   });
 
   final String id;
@@ -24,13 +27,13 @@ class AttendanceRecord {
   final bool isLatest;
   final String? reason;
   final String? lateDuration;
+  final DateTime? attendanceDate;
+  final DateTime? checkInAt;
+  final DateTime? checkOutAt;
 }
 
 class AttendanceFilterOption<T> {
-  const AttendanceFilterOption({
-    required this.label,
-    required this.value,
-  });
+  const AttendanceFilterOption({required this.label, required this.value});
 
   final String label;
   final T value;

@@ -146,10 +146,7 @@ class AmanahHexagonBadgePainter extends CustomPainter {
     canvas.restore();
   }
 
-  Path _createRoundedHexagon({
-    required double radius,
-    required double cornerRadius,
-  }) {
+  Path _createRoundedHexagon({required double radius, required double cornerRadius}) {
     const List<double> angles = <double>[
       -90 * math.pi / 180,
       -30 * math.pi / 180,
@@ -240,6 +237,7 @@ class AmanahHexagonBadgePainter extends CustomPainter {
 
       case PresenceStatusType.conflictAlreadyCheckedIn:
       case PresenceStatusType.conflictAlreadyCheckedOut:
+      case PresenceStatusType.notCheckedIn:
         // Exclamation / Conflict: Bar draws down then dot pops
         final Path bar = Path()
           ..moveTo(0, -24)
@@ -279,12 +277,7 @@ class AmanahHexagonBadgePainter extends CustomPainter {
     }
   }
 
-  void _renderTrimmedPath(
-    Canvas canvas,
-    Path path,
-    Paint paint,
-    double progress,
-  ) {
+  void _renderTrimmedPath(Canvas canvas, Path path, Paint paint, double progress) {
     if (progress >= 1.0) {
       canvas.drawPath(path, paint);
       return;

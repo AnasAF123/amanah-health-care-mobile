@@ -170,6 +170,9 @@ class PresenceScannerCameraViewport extends StatelessWidget {
                     text: scanMode == AttendanceScanMode.checkIn
                         ? 'Geser ke Presensi Pulang'
                         : 'Geser ke Presensi Masuk',
+                    targetText: scanMode == AttendanceScanMode.checkIn
+                        ? 'Presensi Pulang'
+                        : 'Presensi Masuk',
                     completedText: scanMode == AttendanceScanMode.checkIn
                         ? 'Beralih ke Pulang...'
                         : 'Beralih ke Masuk...',
