@@ -27,10 +27,12 @@ class PermissionScopeStage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
-    final Color textColor =
-        dark ? AmanahPermissionTokens.textTitleDark : AmanahPermissionTokens.textTitleLight;
-    final Color subtextColor =
-        dark ? AmanahPermissionTokens.textMutedDark : AmanahPermissionTokens.textMutedLight;
+    final Color textColor = dark
+        ? AmanahPermissionTokens.textTitleDark
+        : AmanahPermissionTokens.textTitleLight;
+    final Color subtextColor = dark
+        ? AmanahPermissionTokens.textMutedDark
+        : AmanahPermissionTokens.textMutedLight;
     final Color borderColor = dark
         ? AmanahPermissionTokens.cardBorderDark
         : AmanahPermissionTokens.cardBorderLight;
@@ -43,10 +45,7 @@ class PermissionScopeStage extends StatelessWidget {
       children: <Widget>[
         Text(
           'Tentukan apakah izin berlaku sepanjang hari atau pada sesi dinas spesifik.',
-          style: TextStyle(
-            fontSize: 13,
-            color: subtextColor,
-          ),
+          style: TextStyle(fontSize: 13, color: subtextColor),
         ),
         const SizedBox(height: 16),
 
@@ -88,11 +87,7 @@ class PermissionScopeStage extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             'Pilih Sesi Roster yang Dimaksud *',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: textColor,
-            ),
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textColor),
           ),
           const SizedBox(height: 8),
           if (isLoadingSessions) ...<Widget>[
@@ -107,19 +102,13 @@ class PermissionScopeStage extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: dark
-                    ? AmanahColorTokens.surfaceDark
-                    : AmanahColorTokens.neutral50,
+                color: dark ? AmanahColorTokens.surfaceDark : AmanahColorTokens.neutral50,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: borderColor),
               ),
               child: Column(
                 children: <Widget>[
-                  Icon(
-                    Icons.event_busy_rounded,
-                    size: 32,
-                    color: subtextColor,
-                  ),
+                  Icon(Icons.event_busy_rounded, size: 32, color: subtextColor),
                   const SizedBox(height: 8),
                   Text(
                     'Tidak ditemukan jadwal shift aktif pada tanggal yang dipilih.',
@@ -135,8 +124,12 @@ class PermissionScopeStage extends StatelessWidget {
             ),
           ] else ...<Widget>[
             ...eligibleSessions.map((EligibleSession session) {
-              final bool isSelected = selectedSessions
-                  .any((EligibleSession s) => s.sessionId == session.sessionId);
+              final bool isSelected = selectedSessions.any(
+                (EligibleSession s) => s.sessionId == session.sessionId,
+              );
+              final Color activeBrand = dark
+                  ? AmanahColorTokens.tabActiveDark
+                  : AmanahColorTokens.brand;
 
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
@@ -145,23 +138,14 @@ class PermissionScopeStage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 12,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AmanahColorTokens.brand.withValues(
-                              alpha: dark ? 0.15 : 0.08,
-                            )
-                          : (dark
-                              ? AmanahColorTokens.surfaceDark
-                              : AmanahColorTokens.surfaceLight),
+                          ? activeBrand.withValues(alpha: dark ? 0.15 : 0.08)
+                          : (dark ? AmanahColorTokens.surfaceDark : AmanahColorTokens.surfaceLight),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: isSelected
-                            ? AmanahColorTokens.brand
-                            : borderColor,
+                        color: isSelected ? activeBrand : borderColor,
                         width: isSelected ? 1.6 : 1.0,
                       ),
                     ),
@@ -172,9 +156,7 @@ class PermissionScopeStage extends StatelessWidget {
                               ? Icons.check_box_rounded
                               : Icons.check_box_outline_blank_rounded,
                           size: 20,
-                          color: isSelected
-                              ? AmanahColorTokens.brand
-                              : subtextColor,
+                          color: isSelected ? activeBrand : subtextColor,
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -213,19 +195,14 @@ class PermissionScopeStage extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: selectedSessions.isNotEmpty ? onContinue : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AmanahColorTokens.brand,
-                  foregroundColor: Colors.white,
+                  backgroundColor: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
+                  foregroundColor: dark ? AmanahColorTokens.neutral950 : Colors.white,
                   elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 child: const Text(
                   'Lanjutkan ke Alasan',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                 ),
               ),
             ),
@@ -245,10 +222,13 @@ class PermissionScopeStage extends StatelessWidget {
     required bool dark,
     required Color borderColor,
   }) {
-    final Color textColor =
-        dark ? AmanahPermissionTokens.textTitleDark : AmanahPermissionTokens.textTitleLight;
-    final Color subtextColor =
-        dark ? AmanahPermissionTokens.textMutedDark : AmanahPermissionTokens.textMutedLight;
+    final Color textColor = dark
+        ? AmanahPermissionTokens.textTitleDark
+        : AmanahPermissionTokens.textTitleLight;
+    final Color subtextColor = dark
+        ? AmanahPermissionTokens.textMutedDark
+        : AmanahPermissionTokens.textMutedLight;
+    final Color activeBrand = dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand;
 
     return InkWell(
       onTap: onTap,
@@ -258,19 +238,17 @@ class PermissionScopeStage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? AmanahColorTokens.brand.withValues(alpha: dark ? 0.15 : 0.08)
-              : (dark
-                  ? AmanahColorTokens.surfaceDark
-                  : AmanahColorTokens.surfaceLight),
+              ? activeBrand.withValues(alpha: dark ? 0.15 : 0.08)
+              : (dark ? AmanahColorTokens.surfaceDark : AmanahColorTokens.surfaceLight),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AmanahColorTokens.brand : borderColor,
+            color: isSelected ? activeBrand : borderColor,
             width: isSelected ? 1.8 : 1.0,
           ),
           boxShadow: isSelected
               ? <BoxShadow>[
                   BoxShadow(
-                    color: AmanahColorTokens.brand.withValues(alpha: 0.1),
+                    color: activeBrand.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
@@ -285,16 +263,18 @@ class PermissionScopeStage extends StatelessWidget {
               height: 36,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AmanahColorTokens.brand
+                    ? activeBrand
                     : (dark
-                        ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.08)
-                        : AmanahColorTokens.neutral50),
+                          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.08)
+                          : AmanahColorTokens.neutral50),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 icon,
                 size: 20,
-                color: isSelected ? Colors.white : textColor,
+                color: isSelected
+                    ? (dark ? AmanahColorTokens.neutral950 : Colors.white)
+                    : textColor,
               ),
             ),
             const SizedBox(height: 12),
@@ -309,11 +289,7 @@ class PermissionScopeStage extends StatelessWidget {
             const SizedBox(height: 3),
             Text(
               subtitle,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w400,
-                color: subtextColor,
-              ),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w400, color: subtextColor),
             ),
           ],
         ),

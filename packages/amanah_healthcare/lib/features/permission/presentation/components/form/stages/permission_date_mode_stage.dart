@@ -25,10 +25,12 @@ class PermissionDateModeStage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
-    final Color textColor =
-        dark ? AmanahPermissionTokens.textTitleDark : AmanahPermissionTokens.textTitleLight;
-    final Color subtextColor =
-        dark ? AmanahPermissionTokens.textMutedDark : AmanahPermissionTokens.textMutedLight;
+    final Color textColor = dark
+        ? AmanahPermissionTokens.textTitleDark
+        : AmanahPermissionTokens.textTitleLight;
+    final Color subtextColor = dark
+        ? AmanahPermissionTokens.textMutedDark
+        : AmanahPermissionTokens.textMutedLight;
     final Color borderColor = dark
         ? AmanahPermissionTokens.cardBorderDark
         : AmanahPermissionTokens.cardBorderLight;
@@ -44,10 +46,7 @@ class PermissionDateModeStage extends StatelessWidget {
       children: <Widget>[
         Text(
           'Pilih pengajuan untuk hari ini atau tentukan rentang tanggal izin.',
-          style: TextStyle(
-            fontSize: 13,
-            color: subtextColor,
-          ),
+          style: TextStyle(fontSize: 13, color: subtextColor),
         ),
         const SizedBox(height: 18),
         IntrinsicHeight(
@@ -63,9 +62,7 @@ class PermissionDateModeStage extends StatelessWidget {
                       ? todayFormatted
                       : (todayDisabledReason ?? 'Jadwal hari ini telah selesai'),
                   pillText: isTodayEligible ? '1 Hari' : 'Selesai',
-                  icon: isTodayEligible
-                      ? Icons.today_rounded
-                      : Icons.event_busy_rounded,
+                  icon: isTodayEligible ? Icons.today_rounded : Icons.event_busy_rounded,
                   isSelected: isTodayEligible && !isCustomDateRange,
                   isEnabled: isTodayEligible,
                   onTap: isTodayEligible
@@ -130,9 +127,10 @@ class PermissionDateModeStage extends StatelessWidget {
     required Color borderColor,
     bool isEnabled = true,
   }) {
-    final Color activeBorder = isSelected ? AmanahColorTokens.brand : borderColor;
+    final Color activeBrand = dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand;
+    final Color activeBorder = isSelected ? activeBrand : borderColor;
     final Color activeBg = isSelected
-        ? AmanahColorTokens.brand.withValues(alpha: dark ? 0.15 : 0.08)
+        ? activeBrand.withValues(alpha: dark ? 0.15 : 0.08)
         : (dark ? AmanahColorTokens.surfaceDark : AmanahColorTokens.surfaceLight);
 
     final Widget card = InkWell(
@@ -144,14 +142,11 @@ class PermissionDateModeStage extends StatelessWidget {
         decoration: BoxDecoration(
           color: activeBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: activeBorder,
-            width: isSelected ? 1.8 : 1.0,
-          ),
+          border: Border.all(color: activeBorder, width: isSelected ? 1.8 : 1.0),
           boxShadow: isSelected
               ? <BoxShadow>[
                   BoxShadow(
-                    color: AmanahColorTokens.brand.withValues(alpha: 0.12),
+                    color: activeBrand.withValues(alpha: 0.12),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -169,26 +164,28 @@ class PermissionDateModeStage extends StatelessWidget {
                   height: 36,
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? AmanahColorTokens.brand
+                        ? activeBrand
                         : (dark
-                            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.08)
-                            : AmanahColorTokens.neutral50),
+                              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.08)
+                              : AmanahColorTokens.neutral50),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
                     icon,
                     size: 20,
-                    color: isSelected ? Colors.white : textColor,
+                    color: isSelected
+                        ? (dark ? AmanahColorTokens.neutral950 : Colors.white)
+                        : textColor,
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? AmanahColorTokens.brand.withValues(alpha: 0.14)
+                        ? activeBrand.withValues(alpha: dark ? 0.20 : 0.14)
                         : (dark
-                            ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.06)
-                            : AmanahColorTokens.neutral100),
+                              ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.06)
+                              : AmanahColorTokens.neutral100),
                     borderRadius: BorderRadius.circular(100),
                   ),
                   child: Text(
@@ -196,7 +193,7 @@ class PermissionDateModeStage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10.5,
                       fontWeight: FontWeight.w700,
-                      color: isSelected ? AmanahColorTokens.brand : subtextColor,
+                      color: isSelected ? activeBrand : subtextColor,
                     ),
                   ),
                 ),
@@ -229,10 +226,7 @@ class PermissionDateModeStage extends StatelessWidget {
     );
 
     if (!isEnabled) {
-      return Opacity(
-        opacity: 0.55,
-        child: card,
-      );
+      return Opacity(opacity: 0.55, child: card);
     }
     return card;
   }

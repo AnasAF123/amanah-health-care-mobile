@@ -8,10 +8,7 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 
 class OnboardingClinicalSection extends StatelessWidget {
-  const OnboardingClinicalSection({
-    required this.controller,
-    super.key,
-  });
+  const OnboardingClinicalSection({required this.controller, super.key});
 
   final StaffOnboardingController controller;
 
@@ -23,6 +20,7 @@ class OnboardingClinicalSection extends StatelessWidget {
 
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
+    final Color activeBrand = isDark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand;
     final bool isDoctor = controller.user.isDoctor;
     final bool isPoliAssignedByAdmin =
         controller.user.staff?.poliklinikId != null &&
@@ -62,12 +60,11 @@ class OnboardingClinicalSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: isPoliAssignedByAdmin
                 ? (isDark
-                    ? AmanahThemeTokens.surfaceSecondary(context)
-                        .withValues(alpha: 0.50)
-                    : AmanahColorTokens.neutral100.withValues(alpha: 0.70))
+                      ? AmanahThemeTokens.surfaceSecondary(context).withValues(alpha: 0.50)
+                      : AmanahColorTokens.neutral100.withValues(alpha: 0.70))
                 : (isDark
-                    ? AmanahThemeTokens.surfaceSecondary(context)
-                    : AmanahColorTokens.neutral50.withValues(alpha: 0.72)),
+                      ? AmanahThemeTokens.surfaceSecondary(context)
+                      : AmanahColorTokens.neutral50.withValues(alpha: 0.72)),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isDark
@@ -77,7 +74,7 @@ class OnboardingClinicalSection extends StatelessWidget {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButtonFormField<StaffOnboardingPoliOption>(
-              value: controller.selectedPoliklinik,
+              initialValue: controller.selectedPoliklinik,
               isExpanded: true,
               icon: isPoliAssignedByAdmin
                   ? Icon(
@@ -89,13 +86,10 @@ class OnboardingClinicalSection extends StatelessWidget {
               hint: Row(
                 children: <Widget>[
                   if (controller.isLoadingPolikliniks) ...<Widget>[
-                    const SizedBox(
+                    SizedBox(
                       width: 14,
                       height: 14,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AmanahColorTokens.brand,
-                      ),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: activeBrand),
                     ),
                     const SizedBox(width: 10),
                   ],
@@ -113,8 +107,7 @@ class OnboardingClinicalSection extends StatelessWidget {
                   ),
                 ],
               ),
-              items: controller.poliklinikOptions
-                  .map((StaffOnboardingPoliOption poli) {
+              items: controller.poliklinikOptions.map((StaffOnboardingPoliOption poli) {
                 return DropdownMenuItem<StaffOnboardingPoliOption>(
                   value: poli,
                   child: Text(
@@ -123,12 +116,9 @@ class OnboardingClinicalSection extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       color: isPoliAssignedByAdmin
-                          ? AmanahThemeTokens.textPrimary(context)
-                              .withValues(alpha: 0.85)
+                          ? AmanahThemeTokens.textPrimary(context).withValues(alpha: 0.85)
                           : AmanahThemeTokens.textPrimary(context),
-                      fontWeight: isPoliAssignedByAdmin
-                          ? FontWeight.w700
-                          : FontWeight.w500,
+                      fontWeight: isPoliAssignedByAdmin ? FontWeight.w700 : FontWeight.w500,
                     ),
                   ),
                 );
@@ -151,12 +141,12 @@ class OnboardingClinicalSection extends StatelessWidget {
           const SizedBox(height: 6),
           Row(
             children: <Widget>[
-              const Icon(Icons.lock_rounded, size: 14, color: AmanahColorTokens.brand),
+              Icon(Icons.lock_rounded, size: 14, color: activeBrand),
               const SizedBox(width: 6),
               Text(
                 'Unit poliklinik dikunci sesuai penugasan Administrator Klinik',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: AmanahColorTokens.brand,
+                  color: activeBrand,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -165,9 +155,7 @@ class OnboardingClinicalSection extends StatelessWidget {
         ],
         if (controller.poliklinikErrorMessage != null) ...<Widget>[
           const SizedBox(height: SMALL_SPACE),
-          AuthInlineValidationMessage(
-            message: controller.poliklinikErrorMessage!,
-          ),
+          AuthInlineValidationMessage(message: controller.poliklinikErrorMessage!),
         ],
         const SizedBox(height: LARGE_SPACE),
 
@@ -179,9 +167,7 @@ class OnboardingClinicalSection extends StatelessWidget {
           leadingIcon: Icons.verified_outlined,
           textInputAction: TextInputAction.done,
           maxLength: 35,
-          inputFormatters: <TextInputFormatter>[
-            LengthLimitingTextInputFormatter(35),
-          ],
+          inputFormatters: <TextInputFormatter>[LengthLimitingTextInputFormatter(35)],
           validator: (String? val) {
             final String input = val?.trim() ?? '';
             if (input.isNotEmpty && input.length < 5) {

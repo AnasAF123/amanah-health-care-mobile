@@ -7,10 +7,7 @@ import 'package:amanah_healthcare/core/constants/gender_constants.dart';
 import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 
 class OnboardingPersonalSection extends StatelessWidget {
-  const OnboardingPersonalSection({
-    required this.controller,
-    super.key,
-  });
+  const OnboardingPersonalSection({required this.controller, super.key});
 
   final StaffOnboardingController controller;
 
@@ -149,16 +146,11 @@ class OnboardingPersonalSection extends StatelessWidget {
                       color: controller.birthDate != null
                           ? AmanahThemeTokens.textPrimary(context)
                           : AmanahThemeTokens.textSecondary(context),
-                      fontWeight: controller.birthDate != null
-                          ? FontWeight.w600
-                          : FontWeight.w400,
+                      fontWeight: controller.birthDate != null ? FontWeight.w600 : FontWeight.w400,
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.arrow_drop_down,
-                  color: AmanahThemeTokens.textSecondary(context),
-                ),
+                Icon(Icons.arrow_drop_down, color: AmanahThemeTokens.textSecondary(context)),
               ],
             ),
           ),
@@ -217,6 +209,7 @@ class _GenderChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
+    final Color activeBrand = isDark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand;
 
     return InkWell(
       onTap: onTap,
@@ -225,17 +218,15 @@ class _GenderChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
         decoration: BoxDecoration(
           color: isSelected
-              ? AmanahColorTokens.brand.withValues(alpha: isDark ? 0.20 : 0.08)
-              : (isDark
-                  ? AmanahThemeTokens.surfaceSecondary(context)
-                  : Colors.white),
+              ? activeBrand.withValues(alpha: isDark ? 0.20 : 0.08)
+              : (isDark ? AmanahThemeTokens.surfaceSecondary(context) : Colors.white),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected
-                ? AmanahColorTokens.brand
+                ? activeBrand
                 : (isDark
-                    ? AmanahThemeTokens.outline(context)
-                    : theme.colorScheme.outline.withValues(alpha: 0.25)),
+                      ? AmanahThemeTokens.outline(context)
+                      : theme.colorScheme.outline.withValues(alpha: 0.25)),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -245,9 +236,7 @@ class _GenderChip extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: isSelected
-                  ? AmanahColorTokens.brand
-                  : AmanahThemeTokens.textSecondary(context),
+              color: isSelected ? activeBrand : AmanahThemeTokens.textSecondary(context),
             ),
             const SizedBox(width: 8),
             Text(
@@ -255,9 +244,7 @@ class _GenderChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                color: isSelected
-                    ? AmanahColorTokens.brand
-                    : AmanahThemeTokens.textPrimary(context),
+                color: isSelected ? activeBrand : AmanahThemeTokens.textPrimary(context),
               ),
             ),
           ],

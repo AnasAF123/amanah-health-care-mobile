@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/time/time.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_notification_model.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_visual_role.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
@@ -9,48 +10,32 @@ import 'package:amanah_healthcare/features/permission/presentation/screen/amanah
 import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_presence_history_screen.dart';
 
 class AmanahNotificationDetailModal extends StatelessWidget {
-  const AmanahNotificationDetailModal({
-    super.key,
-    required this.item,
-  });
+  const AmanahNotificationDetailModal({super.key, required this.item});
 
   final AmanahNotificationItem item;
 
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
+    final DateTime? dt = DateTime.tryParse(item.timestamp)?.toLocal();
+    final String formattedSubtitle = dt != null
+        ? '${formatLocalizedDate(dt, style: 'human_full')} • ${formatLocalizedTime(dt)} WIB'
+        : item.timestamp;
 
     return AmanahBottomSheetScaffold(
       title: 'Detail notifikasi',
-      subtitle: '${item.timestamp} WIB',
-      maxHeightFactor: 0.58,
-      minHeight: 320,
-      trailing: AmanahClayIcon(
-        size: 36,
-        tone: item.visual.tone,
-        icon: item.visual.icon,
-      ),
+      subtitle: formattedSubtitle,
+      hugContent: true,
+      trailing: AmanahClayIcon(size: 36, tone: item.visual.tone, icon: item.visual.icon),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            item.category.label.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: AmanahColorTokens.brandAccent,
-              letterSpacing: 0.5,
-            ),
-          ),
-          const SizedBox(height: 8),
           Text(
             item.title,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w800,
-              color: dark
-                  ? AmanahColorTokens.surfaceLight
-                  : AmanahColorTokens.neutral900,
+              color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
               height: 1.25,
             ),
           ),
@@ -60,9 +45,7 @@ class AmanahNotificationDetailModal extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: dark
-                  ? AmanahColorTokens.neutral400
-                  : AmanahColorTokens.neutral600,
+              color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral600,
               height: 1.45,
             ),
           ),
@@ -76,9 +59,7 @@ class AmanahNotificationDetailModal extends StatelessWidget {
               isFullWidth: true,
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  AmanahLeavePermissionTabScreen.route(),
-                );
+                Navigator.of(context).push(AmanahLeavePermissionTabScreen.route());
               },
             ),
           ] else if (item.sourceType == 'attendance') ...<Widget>[
@@ -89,9 +70,7 @@ class AmanahNotificationDetailModal extends StatelessWidget {
               isFullWidth: true,
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  AmanahPresenceHistoryScreen.route(),
-                );
+                Navigator.of(context).push(AmanahPresenceHistoryScreen.route());
               },
             ),
           ],

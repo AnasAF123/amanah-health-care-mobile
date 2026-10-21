@@ -44,13 +44,13 @@ class AmanahReplacementDetailDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = AmanahThemeTokens.isDark(context);
-    final bool claimedByMe = (currentStaffProfileId.isNotEmpty &&
+    final bool claimedByMe =
+        (currentStaffProfileId.isNotEmpty &&
             item.claimedByStaffProfileId == currentStaffProfileId) ||
         (currentUserName.isNotEmpty && item.claimedByName == currentUserName);
     final bool isOpen = item.isOpen;
 
-    final String sessionDisplay =
-        item.sessionLabel ?? item.sessionCode ?? item.sessionId;
+    final String sessionDisplay = item.sessionLabel ?? item.sessionCode ?? item.sessionId;
 
     return AmanahBottomSheetScaffold(
       title: 'Detail Jadwal Pengganti',
@@ -112,6 +112,8 @@ class AmanahReplacementDetailDrawer extends StatelessWidget {
                   avatarUrl: item.originalStaffAvatarUrl,
                   name: item.originalStaffName ?? 'Rekan Staf',
                   size: 42,
+                  backgroundColor: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
+                  initialsColor: dark ? AmanahColorTokens.neutral950 : Colors.white,
                 ),
                 const SizedBox(width: AmanahSpacing.md),
                 Expanded(
@@ -137,8 +139,7 @@ class AmanahReplacementDetailDrawer extends StatelessWidget {
                           color: AmanahThemeTokens.textPrimary(context),
                         ),
                       ),
-                      if (item.originalStaffRole != null &&
-                          item.originalStaffRole!.isNotEmpty)
+                      if (item.originalStaffRole != null && item.originalStaffRole!.isNotEmpty)
                         Text(
                           item.originalStaffRole!,
                           maxLines: 1,
@@ -205,9 +206,7 @@ class AmanahReplacementDetailDrawer extends StatelessWidget {
             const _DrawerDivider(),
             _DrawerInfoRow(
               label: 'Diambil Oleh',
-              value: claimedByMe
-                  ? 'Anda (${item.claimedByName})'
-                  : item.claimedByName!,
+              value: claimedByMe ? 'Anda (${item.claimedByName})' : item.claimedByName!,
             ),
             if (item.claimedAt != null)
               _DrawerInfoRow(
@@ -237,10 +236,12 @@ class AmanahReplacementDetailDrawer extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AmanahColorTokens.brand.withValues(alpha: 0.08),
+                color: (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
+                    .withValues(alpha: dark ? 0.12 : 0.08),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AmanahColorTokens.brand.withValues(alpha: 0.20),
+                  color: (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
+                      .withValues(alpha: dark ? 0.28 : 0.18),
                 ),
               ),
               child: Column(
@@ -248,10 +249,10 @@ class AmanahReplacementDetailDrawer extends StatelessWidget {
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      const Icon(
+                      Icon(
                         Icons.qr_code_scanner_rounded,
                         size: 16,
-                        color: AmanahColorTokens.brand,
+                        color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -259,9 +260,7 @@ class AmanahReplacementDetailDrawer extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 11.5,
                           fontWeight: FontWeight.w700,
-                          color: dark
-                              ? Colors.white
-                              : AmanahColorTokens.brandNavy,
+                          color: dark ? Colors.white : AmanahColorTokens.brandNavy,
                         ),
                       ),
                     ],
@@ -271,9 +270,7 @@ class AmanahReplacementDetailDrawer extends StatelessWidget {
                     'Silakan hadir di klinik pada tanggal dinas dan lakukan scan QR Presensi Masuk di meja admin/resepsionis. Sistem backend otomatis memvalidasi jadwal pengganti ini.',
                     style: TextStyle(
                       fontSize: 11,
-                      color: dark
-                          ? AmanahColorTokens.neutral300
-                          : AmanahColorTokens.neutral700,
+                      color: dark ? AmanahColorTokens.neutral300 : AmanahColorTokens.neutral700,
                       height: 1.35,
                     ),
                   ),
@@ -288,10 +285,7 @@ class AmanahReplacementDetailDrawer extends StatelessWidget {
 }
 
 class _DrawerInfoRow extends StatelessWidget {
-  const _DrawerInfoRow({
-    required this.label,
-    required this.value,
-  });
+  const _DrawerInfoRow({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -335,10 +329,6 @@ class _DrawerDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Divider(
-      height: 1,
-      thickness: 1,
-      color: AmanahThemeTokens.outline(context),
-    );
+    return Divider(height: 1, thickness: 1, color: AmanahThemeTokens.outline(context));
   }
 }

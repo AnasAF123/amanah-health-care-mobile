@@ -21,23 +21,20 @@ class PermissionDatePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
-    final Color textColor =
-        dark ? AmanahPermissionTokens.textTitleDark : AmanahPermissionTokens.textTitleLight;
-    final Color subtextColor =
-        dark ? AmanahPermissionTokens.textMutedDark : AmanahPermissionTokens.textMutedLight;
+    final Color textColor = dark
+        ? AmanahPermissionTokens.textTitleDark
+        : AmanahPermissionTokens.textTitleLight;
+    final Color subtextColor = dark
+        ? AmanahPermissionTokens.textMutedDark
+        : AmanahPermissionTokens.textMutedLight;
     final Color borderColor = hasError
         ? AmanahColorTokens.danger
-        : (dark
-            ? AmanahPermissionTokens.cardBorderDark
-            : AmanahPermissionTokens.cardBorderLight);
+        : (dark ? AmanahPermissionTokens.cardBorderDark : AmanahPermissionTokens.cardBorderLight);
 
-    final Color panelBg = dark
-        ? AmanahColorTokens.surfaceDark
-        : AmanahColorTokens.surfaceLight;
+    final Color panelBg = dark ? AmanahColorTokens.surfaceDark : AmanahColorTokens.surfaceLight;
 
     final String dayName = formatLocalizedDate(date, style: 'day_name');
-    final String formattedDate =
-        formatLocalizedDate(date, style: 'human_short');
+    final String formattedDate = formatLocalizedDate(date, style: 'human_short');
 
     return InkWell(
       onTap: onTap,
@@ -47,10 +44,7 @@ class PermissionDatePanel extends StatelessWidget {
         decoration: BoxDecoration(
           color: panelBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: borderColor,
-            width: hasError ? 1.5 : 1.0,
-          ),
+          border: Border.all(color: borderColor, width: hasError ? 1.5 : 1.0),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,30 +61,26 @@ class PermissionDatePanel extends StatelessWidget {
                     letterSpacing: 0.3,
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.calendar_today_rounded,
                   size: 14,
-                  color: AmanahColorTokens.brand,
+                  color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
                 ),
               ],
             ),
             const SizedBox(height: 6),
             Text(
               dayName,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: AmanahColorTokens.brand,
+                color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
               ),
             ),
             const SizedBox(height: 2),
             Text(
               formattedDate,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: textColor,
-              ),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textColor),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_repository.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/components/auth_inline_validation_message.dart';
-import 'package:amanah_healthcare/features/authentication/presentation/components/onboarding/onboarding_avatar_section.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/components/onboarding/onboarding_clinical_section.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/components/onboarding/onboarding_contact_section.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/components/onboarding/onboarding_domicile_section.dart';
@@ -42,16 +41,14 @@ class _StaffOnboardingScreenState extends State<StaffOnboardingScreen> {
   late final StaffOnboardingController _controller;
   int _currentStep = 0;
 
-  static const int _totalSteps = 3;
+  int get _totalSteps => _controller.isClinical ? 3 : 2;
 
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ??
-        StaffOnboardingController(
-          user: widget.user,
-          repository: widget.repository,
-        );
+    _controller =
+        widget.controller ??
+        StaffOnboardingController(user: widget.user, repository: widget.repository);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller.init();
     });
@@ -90,7 +87,11 @@ class _StaffOnboardingScreenState extends State<StaffOnboardingScreen> {
         return;
       }
       if (!(_controller.formKey.currentState?.validate() ?? false)) return;
-      setState(() => _currentStep = 2);
+      if (_controller.isClinical) {
+        setState(() => _currentStep = 2);
+      } else {
+        _handleSubmit();
+      }
     } else {
       _handleSubmit();
     }
@@ -122,52 +123,18 @@ class _StaffOnboardingScreenState extends State<StaffOnboardingScreen> {
     }
   }
 
-  Widget _buildStepIndicator() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      child: Row(
-        children: List<Widget>.generate(_totalSteps, (int index) {
-          final bool isPassed = index <= _currentStep;
-          return Expanded(
-            child: Container(
-              height: 4,
-              margin: EdgeInsets.only(
-                right: index < _totalSteps - 1 ? 8 : 0,
-              ),
-              decoration: BoxDecoration(
-                color: isPassed
-                    ? AmanahColorTokens.brand
-                    : AmanahColorTokens.neutral200,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
   Widget _buildStepContent() {
     return switch (_currentStep) {
       0 => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            OnboardingPersonalSection(controller: _controller),
-            const SizedBox(height: VERY_LARGE_SPACE),
-            OnboardingContactSection(controller: _controller),
-          ],
-        ),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          OnboardingPersonalSection(controller: _controller),
+          const SizedBox(height: VERY_LARGE_SPACE),
+          OnboardingContactSection(controller: _controller),
+        ],
+      ),
       1 => OnboardingDomicileSection(controller: _controller),
-      _ => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            if (_controller.isClinical) ...<Widget>[
-              OnboardingClinicalSection(controller: _controller),
-              const SizedBox(height: VERY_LARGE_SPACE),
-            ],
-            OnboardingAvatarSection(controller: _controller),
-          ],
-        ),
+      _ => OnboardingClinicalSection(controller: _controller),
     };
   }
 
@@ -177,11 +144,9 @@ class _StaffOnboardingScreenState extends State<StaffOnboardingScreen> {
       animation: _controller,
       builder: (BuildContext context, _) {
         final String stepTitle = switch (_currentStep) {
-          0 => 'Langkah 1/3: Data Pribadi',
-          1 => 'Langkah 2/3: Alamat Domisili',
-          _ => _controller.isClinical
-              ? 'Langkah 3/3: Kredensial Medis & Foto'
-              : 'Langkah 3/3: Foto Profil Staf',
+          0 => 'Data Pribadi Staf',
+          1 => 'Alamat Domisili Kependudukan',
+          _ => 'Kredensial Medis & Penugasan',
         };
 
         return PopScope(
@@ -223,18 +188,11 @@ class _StaffOnboardingScreenState extends State<StaffOnboardingScreen> {
                       onPressed: widget.onLogout,
                     ),
                   ),
-                  _buildStepIndicator(),
                   Expanded(
                     child: SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      child: Form(
-                        key: _controller.formKey,
-                        child: _buildStepContent(),
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      child: Form(key: _controller.formKey, child: _buildStepContent()),
                     ),
                   ),
                   _buildStickyFooter(context),
@@ -265,19 +223,12 @@ class _StaffOnboardingScreenState extends State<StaffOnboardingScreen> {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            24,
-            12,
-            24,
-            math.max(12, safeBottom),
-          ),
+          padding: EdgeInsets.fromLTRB(24, 12, 24, math.max(12, safeBottom)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               if (_controller.submitErrorMessage != null) ...<Widget>[
-                AuthInlineValidationMessage(
-                  message: _controller.submitErrorMessage!,
-                ),
+                AuthInlineValidationMessage(message: _controller.submitErrorMessage!),
                 const SizedBox(height: 10),
               ],
               AmanahButton.primary(
@@ -285,9 +236,7 @@ class _StaffOnboardingScreenState extends State<StaffOnboardingScreen> {
                 isFullWidth: true,
                 size: AmanahButtonSize.large,
                 isLoading: _controller.isSubmitting,
-                trailingIcon: isLastStep
-                    ? Icons.check_circle_rounded
-                    : Icons.arrow_forward_rounded,
+                trailingIcon: isLastStep ? Icons.check_circle_rounded : Icons.arrow_forward_rounded,
                 onPressed: _controller.isSubmitting ? null : _onNext,
               ),
               if (_currentStep > 0) ...<Widget>[
@@ -296,9 +245,7 @@ class _StaffOnboardingScreenState extends State<StaffOnboardingScreen> {
                   text: 'Sebelumnya',
                   size: AmanahButtonSize.large,
                   isFullWidth: true,
-                  onPressed: _controller.isSubmitting
-                      ? null
-                      : () => setState(() => _currentStep--),
+                  onPressed: _controller.isSubmitting ? null : () => setState(() => _currentStep--),
                 ),
               ],
             ],
