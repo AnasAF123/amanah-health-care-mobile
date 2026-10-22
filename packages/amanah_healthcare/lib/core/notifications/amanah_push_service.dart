@@ -1,10 +1,11 @@
 // ignore_for_file: deprecated_member_use
 import 'dart:async';
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, File;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:amanah_healthcare/core/config/amanah_auth_environment.dart';
 import 'package:amanah_healthcare/core/logging/app_log.dart';
 import 'package:amanah_healthcare/core/network/api_client.dart';
@@ -27,9 +28,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
       if (Firebase.apps.isEmpty) {
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
+        await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
       }
     }
   } catch (e) {
@@ -46,12 +45,11 @@ class AmanahPushService implements AmanahPushNotificationService {
     AmanahAuthTokenStorage authTokenStorage = const AmanahAuthTokenStorage(),
     FlutterLocalNotificationsPlugin? localNotifications,
     FeedbackService? feedbackService,
-  })  : _customApiClient = apiClient,
-        _tokenStorage = tokenStorage,
-        _authTokenStorage = authTokenStorage,
-        _localNotifications =
-            localNotifications ?? FlutterLocalNotificationsPlugin(),
-        _feedbackService = feedbackService;
+  }) : _customApiClient = apiClient,
+       _tokenStorage = tokenStorage,
+       _authTokenStorage = authTokenStorage,
+       _localNotifications = localNotifications ?? FlutterLocalNotificationsPlugin(),
+       _feedbackService = feedbackService;
 
   static final AmanahPushService instance = AmanahPushService();
 
@@ -66,8 +64,7 @@ class AmanahPushService implements AmanahPushNotificationService {
   final ApiClient? _customApiClient;
   final FeedbackService? _feedbackService;
 
-  FeedbackService get _activeFeedbackService =>
-      _feedbackService ?? DefaultFeedbackService.instance;
+  FeedbackService get _activeFeedbackService => _feedbackService ?? DefaultFeedbackService.instance;
 
   ApiClient? _apiClient;
   String? _lastKnownFcmToken;
@@ -104,8 +101,7 @@ class AmanahPushService implements AmanahPushNotificationService {
   ApiClient get apiClient {
     return _customApiClient ??
         (_apiClient ??= AuthorizedApiClient(
-          innerClient:
-              HttpApiClient(baseUrl: AmanahAuthEnvironment.authBaseUrl),
+          innerClient: HttpApiClient(baseUrl: AmanahAuthEnvironment.authBaseUrl),
           tokenProvider: _authTokenStorage,
         ));
   }
@@ -115,30 +111,24 @@ class AmanahPushService implements AmanahPushNotificationService {
     if (_isInitialized) return;
 
     if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
-      AppLog.info(
-        '[AmanahPushService] Push notifications skipped on non-mobile platform',
-      );
+      AppLog.info('[AmanahPushService] Push notifications skipped on non-mobile platform');
       return;
     }
 
     try {
       // 1. Gracefully initialize Firebase Core
       if (Firebase.apps.isEmpty) {
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
+        await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
       }
 
       // 2. Register background handler
-      FirebaseMessaging.onBackgroundMessage(
-        firebaseMessagingBackgroundHandler,
-      );
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
       // 3. Initialize Flutter Local Notifications
-      const AndroidInitializationSettings androidSettings =
-          AndroidInitializationSettings('@mipmap/ic_launcher');
-      const DarwinInitializationSettings iosSettings =
-          DarwinInitializationSettings(
+      const AndroidInitializationSettings androidSettings = AndroidInitializationSettings(
+        '@mipmap/ic_launcher',
+      );
+      const DarwinInitializationSettings iosSettings = DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
         requestSoundPermission: true,
@@ -152,16 +142,24 @@ class AmanahPushService implements AmanahPushNotificationService {
       await _localNotifications.initialize(
         settings: initSettings,
         onDidReceiveNotificationResponse: (NotificationResponse response) {
-          AppLog.info(
-            '[AmanahPushService] Local notification tapped: ${response.payload}',
-          );
+          final String? payload = response.payload;
+          AppLog.info('[AmanahPushService] Local notification tapped: $payload');
+          if (payload != null && payload.isNotEmpty) {
+            try {
+              final File file = File(payload);
+              if (file.existsSync()) {
+                OpenFilex.open(payload);
+              }
+            } catch (e) {
+              AppLog.warning('[AmanahPushService] Failed to open payload file: $e');
+            }
+          }
         },
       );
 
       // 4. Create High Importance Notification Channel on Android
-      final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-          _localNotifications.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
+      final AndroidFlutterLocalNotificationsPlugin? androidImplementation = _localNotifications
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
 
       if (androidImplementation != null) {
         await androidImplementation.createNotificationChannel(
@@ -179,8 +177,7 @@ class AmanahPushService implements AmanahPushNotificationService {
       }
 
       // 5. Request FCM notification permissions
-      final NotificationSettings settings =
-          await FirebaseMessaging.instance.requestPermission(
+      final NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
         alert: true,
         badge: true,
         sound: true,
@@ -202,8 +199,7 @@ class AmanahPushService implements AmanahPushNotificationService {
       });
 
       // 8. Handle cold launch from terminated state via push notification
-      final RemoteMessage? initialMessage =
-          await FirebaseMessaging.instance.getInitialMessage();
+      final RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
       if (initialMessage != null) {
         _handleNotificationTapped(initialMessage);
       }
@@ -212,9 +208,7 @@ class AmanahPushService implements AmanahPushNotificationService {
       _lastKnownFcmToken = await FirebaseMessaging.instance.getToken();
       if (_lastKnownFcmToken != null) {
         await _tokenStorage.cacheDeviceToken(_lastKnownFcmToken!);
-        AppLog.info(
-          '[AmanahPushService] FCM Device Token obtained successfully',
-        );
+        AppLog.info('[AmanahPushService] FCM Device Token obtained successfully');
       }
 
       FirebaseMessaging.instance.onTokenRefresh.listen((String newToken) {
@@ -265,24 +259,18 @@ class AmanahPushService implements AmanahPushNotificationService {
   Future<bool> registerDeviceWithBackend({String? customToken}) async {
     final bool hasAuth = await _authTokenStorage.hasToken();
     if (!hasAuth) {
-      AppLog.info(
-        '[AmanahPushService] Device registration deferred: no active auth session',
-      );
+      AppLog.info('[AmanahPushService] Device registration deferred: no active auth session');
       return false;
     }
 
     final String? token = customToken ?? await getDeviceToken();
     if (token == null || token.isEmpty) {
-      AppLog.warning(
-        '[AmanahPushService] Device registration aborted: FCM token unavailable',
-      );
+      AppLog.warning('[AmanahPushService] Device registration aborted: FCM token unavailable');
       return false;
     }
 
     try {
-      final String platform = Platform.isAndroid
-          ? 'android'
-          : (Platform.isIOS ? 'ios' : 'web');
+      final String platform = Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'web');
 
       final ApiEndpoint endpoint = ApiEndpoint(
         path: '/api/v1/notifications/push/device',
@@ -303,13 +291,8 @@ class AmanahPushService implements AmanahPushNotificationService {
 
       final bool success = response.isSuccessful;
       if (success) {
-        await _tokenStorage.markTokenSynced(
-          token: token,
-          userId: 'current_authenticated_user',
-        );
-        AppLog.info(
-          '[AmanahPushService] Device token registered with backend successfully',
-        );
+        await _tokenStorage.markTokenSynced(token: token, userId: 'current_authenticated_user');
+        AppLog.info('[AmanahPushService] Device token registered with backend successfully');
       } else {
         AppLog.warning(
           '[AmanahPushService] Backend rejected device registration with code ${response.statusCode}',
@@ -317,9 +300,7 @@ class AmanahPushService implements AmanahPushNotificationService {
       }
       return success;
     } catch (e) {
-      AppLog.warning(
-        '[AmanahPushService] Network failure during device registration: $e',
-      );
+      AppLog.warning('[AmanahPushService] Network failure during device registration: $e');
       return false;
     }
   }
@@ -338,9 +319,7 @@ class AmanahPushService implements AmanahPushNotificationService {
 
       final response = await apiClient.request(
         endpoint,
-        body: <String, dynamic>{
-          'pushToken': token,
-        },
+        body: <String, dynamic>{'pushToken': token},
       );
 
       await _tokenStorage.clearSyncedState();
@@ -349,9 +328,7 @@ class AmanahPushService implements AmanahPushNotificationService {
       );
       return response.isSuccessful;
     } catch (e) {
-      AppLog.warning(
-        '[AmanahPushService] Failed to unregister device token with backend: $e',
-      );
+      AppLog.warning('[AmanahPushService] Failed to unregister device token with backend: $e');
       return false;
     }
   }
@@ -362,13 +339,12 @@ class AmanahPushService implements AmanahPushNotificationService {
     );
 
     // Dynamic sensory feedback dispatch (defaults to system variant + vibration)
-    final String? variantStr = message.data['soundVariant']?.toString() ??
-        message.data['variant']?.toString();
-    final dynamic rawVibration =
-        message.data['needVibration'] ?? message.data['vibrate'];
-    final bool needVibration = rawVibration == null ||
-        (rawVibration.toString().toLowerCase() != 'false' &&
-            rawVibration != false);
+    final String? variantStr =
+        message.data['soundVariant']?.toString() ?? message.data['variant']?.toString();
+    final dynamic rawVibration = message.data['needVibration'] ?? message.data['vibrate'];
+    final bool needVibration =
+        rawVibration == null ||
+        (rawVibration.toString().toLowerCase() != 'false' && rawVibration != false);
 
     if (variantStr == 'success') {
       unawaited(_activeFeedbackService.notifySuccess(needVibration: needVibration));
@@ -389,10 +365,12 @@ class AmanahPushService implements AmanahPushNotificationService {
     // Refresh in-app notification store from backend SSOT
     unawaited(AmanahNotificationStore.instance.fetchMyNotifications());
 
-    final String title = message.notification?.title ??
+    final String title =
+        message.notification?.title ??
         message.data['title']?.toString() ??
         'Pembaruan Antrean Pasien';
-    final String body = message.notification?.body ??
+    final String body =
+        message.notification?.body ??
         message.data['body']?.toString() ??
         message.data['message']?.toString() ??
         '';
@@ -419,22 +397,54 @@ class AmanahPushService implements AmanahPushNotificationService {
             presentSound: true,
           ),
         ),
-        payload: message.data['actionUrl']?.toString() ??
-            message.data['commandId']?.toString(),
+        payload: message.data['actionUrl']?.toString() ?? message.data['commandId']?.toString(),
       );
     }
   }
 
   void _handleNotificationTapped(RemoteMessage message) {
-    AppLog.info(
-      '[AmanahPushService] Notification tapped by user: data=${message.data}',
-    );
+    AppLog.info('[AmanahPushService] Notification tapped by user: data=${message.data}');
     for (final listener in _tapListeners) {
       try {
         listener(message);
       } catch (e) {
         debugPrint('[AmanahPushService] Tap listener error: $e');
       }
+    }
+  }
+
+  /// Displays an instant heads-up status bar notification for downloaded export files.
+  Future<void> showDownloadCompleteNotification({
+    required String title,
+    required String body,
+    required String filePath,
+  }) async {
+    try {
+      await _localNotifications.show(
+        id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        title: title,
+        body: body,
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            channelId,
+            channelName,
+            channelDescription: channelDescription,
+            importance: Importance.max,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+            playSound: true,
+            enableVibration: true,
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        payload: filePath,
+      );
+    } catch (e) {
+      AppLog.warning('[AmanahPushService] Failed to show download notification: $e');
     }
   }
 }

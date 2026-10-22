@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
-
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_success_drawer.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import '../../domain/entities/export_format.dart';
 import '../state/export_controller.dart';
@@ -59,35 +58,57 @@ class _AmanahExportSheetState extends State<AmanahExportSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final bool dark = Theme.of(context).brightness == Brightness.dark;
-
     return ListenableBuilder(
       listenable: _controller,
       builder: (BuildContext ctx, _) {
+        if (_controller.isDone && _controller.downloadedFile != null) {
+          final file = _controller.downloadedFile!;
+          final int fileSizeKb = file.lengthSync() ~/ 1024;
+          final String fileName = file.path.split(RegExp(r'[/\\]')).last;
+
+          return AmanahSuccessDrawer(
+            variant: AmanahDrawerVariant.success,
+            title: 'Laporan Berhasil Diunduh!',
+            subtitle: 'Berkas laporan telah tersimpan di perangkat Anda.',
+            infoTitle: 'Ukuran Berkas',
+            infoSubtitle: '$fileSizeKb KB — $fileName',
+            infoIcon: Icons.description_rounded,
+            primaryButtonText: 'Buka',
+            primaryIcon: Icons.file_open_rounded,
+            secondaryButtonText: 'Bagikan',
+            secondaryIcon: Icons.share_rounded,
+            sideBySideActions: true,
+            showCloseButton: true,
+            onClose: () => Navigator.of(context).pop(),
+            onPrimaryAction: () => _controller.openFile(),
+            onSecondaryAction: () => _controller.shareFile(),
+          );
+        }
+
+        if (_controller.errorMessage != null && !_controller.isLoading) {
+          return AmanahSuccessDrawer(
+            variant: AmanahDrawerVariant.error,
+            title: 'Gagal Mengunduh Laporan',
+            subtitle: _controller.errorMessage!,
+            primaryButtonText: 'Tutup',
+            showCloseButton: true,
+            onClose: () => Navigator.of(context).pop(),
+            onPrimaryAction: () => Navigator.of(context).pop(),
+          );
+        }
+
+        final bool dark = Theme.of(context).brightness == Brightness.dark;
+
         return AmanahBottomSheetScaffold(
-          title: widget.sheetTitle,
+          title: widget.sheetTitle.isNotEmpty ? widget.sheetTitle : 'Format Dokumen',
           subtitle: widget.sheetSubtitle ?? 'Pilih format dokumen laporan resmi',
           hugContent: true,
-          body: _buildContent(context, dark),
+          body: _controller.isLoading
+              ? _buildProgressState(context, dark)
+              : _buildFormatSelection(context, dark),
         );
       },
     );
-  }
-
-  Widget _buildContent(BuildContext context, bool dark) {
-    if (_controller.errorMessage != null && !_controller.isLoading) {
-      return _buildErrorState(context, dark);
-    }
-
-    if (_controller.isLoading) {
-      return _buildProgressState(context, dark);
-    }
-
-    if (_controller.isDone) {
-      return _buildSuccessState(context, dark);
-    }
-
-    return _buildFormatSelection(context, dark);
   }
 
   Widget _buildFormatSelection(BuildContext context, bool dark) {
@@ -95,16 +116,6 @@ class _AmanahExportSheetState extends State<AmanahExportSheet> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text(
-          'PILIHAN FORMAT BERKAS',
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.8,
-            color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
-          ),
-        ),
-        const SizedBox(height: 12),
         ...ExportFormat.values.map((ExportFormat format) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),
@@ -133,9 +144,7 @@ class _AmanahExportSheetState extends State<AmanahExportSheet> {
               : AmanahColorTokens.surfaceLight,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: dark
-                ? AmanahThemeTokens.outline(context)
-                : AmanahColorTokens.neutral200,
+            color: dark ? AmanahThemeTokens.outline(context) : AmanahColorTokens.neutral200,
             width: 1.0,
           ),
         ),
@@ -160,9 +169,7 @@ class _AmanahExportSheetState extends State<AmanahExportSheet> {
                     style: TextStyle(
                       fontSize: 13.5,
                       fontWeight: FontWeight.w700,
-                      color: dark
-                          ? AmanahColorTokens.surfaceLight
-                          : AmanahColorTokens.neutral900,
+                      color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -170,9 +177,7 @@ class _AmanahExportSheetState extends State<AmanahExportSheet> {
                     format.description,
                     style: TextStyle(
                       fontSize: 11,
-                      color: dark
-                          ? AmanahColorTokens.neutral400
-                          : AmanahColorTokens.neutral600,
+                      color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral600,
                     ),
                   ),
                 ],
@@ -206,9 +211,7 @@ class _AmanahExportSheetState extends State<AmanahExportSheet> {
                       ? _controller.progressPercent / 100.0
                       : null,
                   strokeWidth: 3.5,
-                  valueColor: const AlwaysStoppedAnimation<Color>(
-                    AmanahColorTokens.brandPrimary,
-                  ),
+                  valueColor: const AlwaysStoppedAnimation<Color>(AmanahColorTokens.brandPrimary),
                   backgroundColor: dark
                       ? AmanahColorTokens.neutral800
                       : AmanahColorTokens.neutral200,
@@ -232,9 +235,7 @@ class _AmanahExportSheetState extends State<AmanahExportSheet> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: dark
-                ? AmanahColorTokens.surfaceLight
-                : AmanahColorTokens.neutral900,
+            color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
           ),
         ),
         const SizedBox(height: 6),
@@ -247,100 +248,6 @@ class _AmanahExportSheetState extends State<AmanahExportSheet> {
           ),
         ),
         const SizedBox(height: 20),
-      ],
-    );
-  }
-
-  Widget _buildSuccessState(BuildContext context, bool dark) {
-    final int fileSizeKb = (_controller.downloadedFile?.lengthSync() ?? 0) ~/ 1024;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        const SizedBox(height: 8),
-        Container(
-          width: 52,
-          height: 52,
-          decoration: BoxDecoration(
-            color: AmanahColorTokens.success.withValues(alpha: 0.12),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.check_circle_rounded,
-            color: AmanahColorTokens.success,
-            size: 32,
-          ),
-        ),
-        const SizedBox(height: 14),
-        Text(
-          'Laporan Berhasil Diunduh!',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w800,
-            color: dark
-                ? AmanahColorTokens.surfaceLight
-                : AmanahColorTokens.neutral900,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Ukuran berkas: $fileSizeKb KB — Tersimpan di perangkat',
-          style: TextStyle(
-            fontSize: 11.5,
-            color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral600,
-          ),
-        ),
-        const SizedBox(height: 20),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: AmanahButton.secondary(
-                text: 'Tutup',
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: AmanahButton.primary(
-                text: 'Bagikan',
-                leadingIcon: Icons.share_rounded,
-                onPressed: () => _controller.shareFile(),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildErrorState(BuildContext context, bool dark) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        const Icon(Icons.error_outline_rounded, color: AmanahColorTokens.danger, size: 42),
-        const SizedBox(height: 12),
-        Text(
-          'Gagal Mengunduh Laporan',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          _controller.errorMessage ?? 'Terjadi kesalahan sistem saat mengekspor.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 11.5,
-            color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral600,
-          ),
-        ),
-        const SizedBox(height: 18),
-        AmanahButton.primary(
-          text: 'Tutup',
-          onPressed: () => Navigator.of(context).pop(),
-        ),
       ],
     );
   }

@@ -6,29 +6,41 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_b
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
+enum AmanahDrawerVariant { success, error }
+
 class AmanahSuccessDrawer extends StatefulWidget {
   const AmanahSuccessDrawer({
     required this.title,
     required this.subtitle,
     required this.onClose,
     super.key,
+    this.variant = AmanahDrawerVariant.success,
     this.infoTitle,
     this.infoSubtitle,
     this.infoIcon = Icons.shield_rounded,
     this.primaryButtonText = 'Selesai',
+    this.primaryIcon,
     this.secondaryButtonText,
+    this.secondaryIcon,
+    this.sideBySideActions = false,
+    this.showCloseButton = true,
     this.onPrimaryAction,
     this.onSecondaryAction,
     this.bottomPadding = 24,
   });
 
+  final AmanahDrawerVariant variant;
   final String title;
   final String subtitle;
   final String? infoTitle;
   final String? infoSubtitle;
   final IconData infoIcon;
   final String primaryButtonText;
+  final IconData? primaryIcon;
   final String? secondaryButtonText;
+  final IconData? secondaryIcon;
+  final bool sideBySideActions;
+  final bool showCloseButton;
   final VoidCallback onClose;
   final VoidCallback? onPrimaryAction;
   final VoidCallback? onSecondaryAction;
@@ -38,11 +50,16 @@ class AmanahSuccessDrawer extends StatefulWidget {
     BuildContext context, {
     required String title,
     required String subtitle,
+    AmanahDrawerVariant variant = AmanahDrawerVariant.success,
     String? infoTitle,
     String? infoSubtitle,
     IconData infoIcon = Icons.shield_rounded,
     String primaryButtonText = 'Selesai',
+    IconData? primaryIcon,
     String? secondaryButtonText,
+    IconData? secondaryIcon,
+    bool sideBySideActions = false,
+    bool showCloseButton = true,
     VoidCallback? onPrimaryAction,
     VoidCallback? onSecondaryAction,
     double bottomPadding = 24,
@@ -50,13 +67,18 @@ class AmanahSuccessDrawer extends StatefulWidget {
     return showAmanahBottomSheet<void>(
       context: context,
       builder: (BuildContext ctx) => AmanahSuccessDrawer(
+        variant: variant,
         title: title,
         subtitle: subtitle,
         infoTitle: infoTitle,
         infoSubtitle: infoSubtitle,
         infoIcon: infoIcon,
         primaryButtonText: primaryButtonText,
+        primaryIcon: primaryIcon,
         secondaryButtonText: secondaryButtonText,
+        secondaryIcon: secondaryIcon,
+        sideBySideActions: sideBySideActions,
+        showCloseButton: showCloseButton,
         onClose: () => Navigator.of(ctx).pop(),
         onPrimaryAction: () {
           Navigator.of(ctx).pop();
@@ -68,6 +90,31 @@ class AmanahSuccessDrawer extends StatefulWidget {
         },
         bottomPadding: bottomPadding,
       ),
+    );
+  }
+
+  static Future<void> showError(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    String? infoTitle,
+    String? infoSubtitle,
+    IconData infoIcon = Icons.error_outline_rounded,
+    String primaryButtonText = 'Tutup',
+    VoidCallback? onPrimaryAction,
+    double bottomPadding = 24,
+  }) {
+    return show(
+      context,
+      variant: AmanahDrawerVariant.error,
+      title: title,
+      subtitle: subtitle,
+      infoTitle: infoTitle,
+      infoSubtitle: infoSubtitle,
+      infoIcon: infoIcon,
+      primaryButtonText: primaryButtonText,
+      onPrimaryAction: onPrimaryAction,
+      bottomPadding: bottomPadding,
     );
   }
 
@@ -83,10 +130,8 @@ class _AmanahSuccessDrawerState extends State<AmanahSuccessDrawer>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1800),
-    )..forward();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1800))
+      ..forward();
     _particles = _generateParticles();
   }
 
@@ -125,23 +170,19 @@ class _AmanahSuccessDrawerState extends State<AmanahSuccessDrawer>
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
-    final _SuccessPalette palette = _SuccessPalette.resolve(theme);
+    final _SuccessPalette palette = _SuccessPalette.resolve(theme, variant: widget.variant);
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final double screenHeight = mediaQuery.size.height;
     final double topSafe = mediaQuery.padding.top;
     final double safeBottom = mediaQuery.viewPadding.bottom;
     final double bottomInset = mediaQuery.viewInsets.bottom;
     final double maxSheetHeight = math.max(320, screenHeight - topSafe - 12);
-    final double targetSheetHeight = screenHeight < 700
-        ? screenHeight * 0.82
-        : screenHeight * 0.70;
+    final double targetSheetHeight = screenHeight < 700 ? screenHeight * 0.82 : screenHeight * 0.70;
     final double sheetHeight = math.min(targetSheetHeight, maxSheetHeight);
     final double footerBottomPadding = bottomInset > 0
         ? 16
         : math.max(widget.bottomPadding, 28 + safeBottom);
-    final double headerExtent = (sheetHeight.clamp(320, 720) * 0.34)
-        .clamp(136, 206)
-        .toDouble();
+    final double headerExtent = (sheetHeight.clamp(320, 720) * 0.34).clamp(136, 206).toDouble();
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomInset),
@@ -154,9 +195,7 @@ class _AmanahSuccessDrawerState extends State<AmanahSuccessDrawer>
             borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: AmanahColorTokens.pureBlack.withValues(
-                  alpha: dark ? 0.46 : 0.18,
-                ),
+                color: AmanahColorTokens.pureBlack.withValues(alpha: dark ? 0.46 : 0.18),
                 blurRadius: 40,
                 offset: const Offset(0, -14),
               ),
@@ -170,25 +209,13 @@ class _AmanahSuccessDrawerState extends State<AmanahSuccessDrawer>
                 final double progress = _controller.value;
                 final double iconProgress = (progress / 0.36).clamp(0.0, 1.0);
                 final double rippleProgress = (progress / 0.50).clamp(0.0, 1.0);
-                final double settleProgress = ((progress - 0.46) / 0.34).clamp(
-                  0.0,
-                  1.0,
-                );
-                final double headerSettle = Curves.easeInOutCubic.transform(
-                  settleProgress,
-                );
-                final double contentProgress = ((progress - 0.62) / 0.28).clamp(
-                  0.0,
-                  1.0,
-                );
-                final double contentEased = Curves.easeOutCubic.transform(
-                  contentProgress,
-                );
-                final double confettiProgress = ((progress - 0.54) / 0.42)
-                    .clamp(0.0, 1.0);
+                final double settleProgress = ((progress - 0.46) / 0.34).clamp(0.0, 1.0);
+                final double headerSettle = Curves.easeInOutCubic.transform(settleProgress);
+                final double contentProgress = ((progress - 0.62) / 0.28).clamp(0.0, 1.0);
+                final double contentEased = Curves.easeOutCubic.transform(contentProgress);
+                final double confettiProgress = ((progress - 0.54) / 0.42).clamp(0.0, 1.0);
                 final double graphicHeight =
-                    headerExtent +
-                    (sheetHeight - headerExtent) * (1 - headerSettle);
+                    headerExtent + (sheetHeight - headerExtent) * (1 - headerSettle);
 
                 return Stack(
                   children: <Widget>[
@@ -204,12 +231,7 @@ class _AmanahSuccessDrawerState extends State<AmanahSuccessDrawer>
                                 offset: Offset(0, 18 * (1 - contentEased)),
                                 child: SingleChildScrollView(
                                   physics: const BouncingScrollPhysics(),
-                                  padding: const EdgeInsets.fromLTRB(
-                                    24,
-                                    14,
-                                    24,
-                                    12,
-                                  ),
+                                  padding: const EdgeInsets.fromLTRB(24, 14, 24, 12),
                                   child: _SuccessBodyContent(
                                     palette: palette,
                                     title: widget.title,
@@ -231,9 +253,11 @@ class _AmanahSuccessDrawerState extends State<AmanahSuccessDrawer>
                               palette: palette,
                               bottomPadding: footerBottomPadding,
                               primaryButtonText: widget.primaryButtonText,
+                              primaryIcon: widget.primaryIcon,
                               secondaryButtonText: widget.secondaryButtonText,
-                              onPrimaryAction:
-                                  widget.onPrimaryAction ?? widget.onClose,
+                              secondaryIcon: widget.secondaryIcon,
+                              sideBySideActions: widget.sideBySideActions,
+                              onPrimaryAction: widget.onPrimaryAction ?? widget.onClose,
                               onSecondaryAction: widget.onSecondaryAction,
                             ),
                           ),
@@ -247,12 +271,13 @@ class _AmanahSuccessDrawerState extends State<AmanahSuccessDrawer>
                       height: graphicHeight,
                       child: _SuccessGraphicHeader(
                         palette: palette,
+                        variant: widget.variant,
                         rippleProgress: rippleProgress,
                         iconProgress: iconProgress,
                         bottomRadius: 24 * headerSettle,
                       ),
                     ),
-                    if (confettiProgress > 0.01)
+                    if (widget.variant == AmanahDrawerVariant.success && confettiProgress > 0.01)
                       Positioned.fill(
                         child: IgnorePointer(
                           child: CustomPaint(
@@ -278,6 +303,17 @@ class _AmanahSuccessDrawerState extends State<AmanahSuccessDrawer>
                         ),
                       ),
                     ),
+                    if (widget.showCloseButton)
+                      Positioned(
+                        top: 10,
+                        right: 14,
+                        child: IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 22),
+                          color: palette.subtitle,
+                          tooltip: 'Tutup',
+                          onPressed: widget.onClose,
+                        ),
+                      ),
                   ],
                 );
               },
@@ -292,12 +328,14 @@ class _AmanahSuccessDrawerState extends State<AmanahSuccessDrawer>
 class _SuccessGraphicHeader extends StatelessWidget {
   const _SuccessGraphicHeader({
     required this.palette,
+    required this.variant,
     required this.rippleProgress,
     required this.iconProgress,
     required this.bottomRadius,
   });
 
   final _SuccessPalette palette;
+  final AmanahDrawerVariant variant;
   final double rippleProgress;
   final double iconProgress;
   final double bottomRadius;
@@ -305,9 +343,7 @@ class _SuccessGraphicHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.vertical(
-        bottom: Radius.circular(bottomRadius),
-      ),
+      borderRadius: BorderRadius.vertical(bottom: Radius.circular(bottomRadius)),
       child: ColoredBox(
         color: palette.surface,
         child: Stack(
@@ -315,9 +351,7 @@ class _SuccessGraphicHeader extends StatelessWidget {
             Positioned.fill(
               child: Transform.scale(
                 scale: Curves.easeOutCubic.transform(rippleProgress),
-                child: CustomPaint(
-                  painter: _SoftRipplePainter(palette: palette),
-                ),
+                child: CustomPaint(painter: _SoftRipplePainter(palette: palette)),
               ),
             ),
             Positioned.fill(
@@ -354,11 +388,12 @@ class _SuccessGraphicHeader extends StatelessWidget {
             ),
             Center(
               child: Semantics(
-                label: 'Aksi Berhasil',
+                label: variant == AmanahDrawerVariant.error ? 'Aksi Gagal' : 'Aksi Berhasil',
                 image: true,
                 child: _SuccessBadgeEmblem(
                   progress: iconProgress,
                   palette: palette,
+                  variant: variant,
                 ),
               ),
             ),
@@ -433,10 +468,7 @@ class _SuccessBodyContent extends StatelessWidget {
               children: <Widget>[
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: palette.primarySoft,
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: BoxDecoration(color: palette.primarySoft, shape: BoxShape.circle),
                   child: Icon(infoIcon, size: 18, color: palette.primary),
                 ),
                 const SizedBox(width: 12),
@@ -479,72 +511,99 @@ class _SuccessDrawerFooter extends StatelessWidget {
     required this.bottomPadding,
     required this.primaryButtonText,
     required this.onPrimaryAction,
+    this.primaryIcon,
     this.secondaryButtonText,
+    this.secondaryIcon,
+    this.sideBySideActions = false,
     this.onSecondaryAction,
   });
 
   final _SuccessPalette palette;
   final double bottomPadding;
   final String primaryButtonText;
+  final IconData? primaryIcon;
   final VoidCallback onPrimaryAction;
   final String? secondaryButtonText;
+  final IconData? secondaryIcon;
+  final bool sideBySideActions;
   final VoidCallback? onSecondaryAction;
 
   @override
   Widget build(BuildContext context) {
     final double safeBottom = MediaQuery.viewPaddingOf(context).bottom;
     final double actionBottomPadding = math.max(18, safeBottom + 14);
-    final double actionTopPadding =
-        12 + math.max(0, bottomPadding - actionBottomPadding);
+    final double actionTopPadding = 12 + math.max(0, bottomPadding - actionBottomPadding);
+
+    Widget content;
+    if (sideBySideActions && secondaryButtonText != null && onSecondaryAction != null) {
+      content = Row(
+        children: <Widget>[
+          Expanded(
+            child: AmanahButton.primary(
+              text: primaryButtonText,
+              leadingIcon: primaryIcon,
+              size: AmanahButtonSize.medium,
+              onPressed: onPrimaryAction,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: AmanahButton.secondary(
+              text: secondaryButtonText!,
+              leadingIcon: secondaryIcon,
+              size: AmanahButtonSize.medium,
+              onPressed: onSecondaryAction,
+            ),
+          ),
+        ],
+      );
+    } else {
+      content = Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          AmanahButton.primary(
+            text: primaryButtonText,
+            leadingIcon: primaryIcon,
+            isFullWidth: true,
+            size: AmanahButtonSize.medium,
+            onPressed: onPrimaryAction,
+          ),
+          if (secondaryButtonText != null && onSecondaryAction != null) ...<Widget>[
+            const SizedBox(height: 12),
+            AmanahButton.text(
+              text: secondaryButtonText!,
+              leadingIcon: secondaryIcon,
+              customForegroundColor: palette.subtitle,
+              onPressed: onSecondaryAction,
+            ),
+          ],
+        ],
+      );
+    }
 
     return DecoratedBox(
       decoration: BoxDecoration(color: palette.surface),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          24,
-          actionTopPadding,
-          24,
-          actionBottomPadding,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            AmanahButton.primary(
-              text: primaryButtonText,
-              isFullWidth: true,
-              size: AmanahButtonSize.medium,
-              onPressed: onPrimaryAction,
-            ),
-            if (secondaryButtonText != null &&
-                onSecondaryAction != null) ...<Widget>[
-              const SizedBox(height: 12),
-              AmanahButton.text(
-                text: secondaryButtonText!,
-                customForegroundColor: palette.subtitle,
-                onPressed: onSecondaryAction,
-              ),
-            ],
-          ],
-        ),
+        padding: EdgeInsets.fromLTRB(24, actionTopPadding, 24, actionBottomPadding),
+        child: content,
       ),
     );
   }
 }
 
 class _SuccessBadgeEmblem extends StatelessWidget {
-  const _SuccessBadgeEmblem({required this.progress, required this.palette});
+  const _SuccessBadgeEmblem({required this.progress, required this.palette, required this.variant});
 
   final double progress;
   final _SuccessPalette palette;
+  final AmanahDrawerVariant variant;
 
   @override
   Widget build(BuildContext context) {
     final double outlineProgress = (progress / 0.42).clamp(0.0, 1.0);
     final double fillProgress = ((progress - 0.34) / 0.44).clamp(0.0, 1.0);
-    final double fillScale = Curves.easeOutBack
-        .transform(fillProgress)
-        .clamp(0.0, 1.0);
+    final double fillScale = Curves.easeOutBack.transform(fillProgress).clamp(0.0, 1.0);
     final double pathProgress = ((progress - 0.58) / 0.42).clamp(0.0, 1.0);
 
     return Container(
@@ -564,6 +623,7 @@ class _SuccessBadgeEmblem extends StatelessWidget {
       child: CustomPaint(
         painter: _SuccessBadgeEmblemPainter(
           palette: palette,
+          variant: variant,
           outlineProgress: outlineProgress,
           fillScale: fillScale,
           pathProgress: Curves.easeOutCubic.transform(pathProgress),
@@ -576,12 +636,14 @@ class _SuccessBadgeEmblem extends StatelessWidget {
 class _SuccessBadgeEmblemPainter extends CustomPainter {
   const _SuccessBadgeEmblemPainter({
     required this.palette,
+    required this.variant,
     required this.outlineProgress,
     required this.fillScale,
     required this.pathProgress,
   });
 
   final _SuccessPalette palette;
+  final AmanahDrawerVariant variant;
   final double outlineProgress;
   final double fillScale;
   final double pathProgress;
@@ -626,27 +688,47 @@ class _SuccessBadgeEmblemPainter extends CustomPainter {
     }
 
     if (pathProgress > 0) {
-      final Path path = Path()
-        ..moveTo(size.width * 0.30, size.height * 0.52)
-        ..lineTo(size.width * 0.44, size.height * 0.65)
-        ..lineTo(size.width * 0.70, size.height * 0.38);
-      final PathMetric metric = path.computeMetrics().first;
+      final Paint strokePaint = Paint()
+        ..color = palette.onPrimary
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5.5
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round;
 
-      canvas.drawPath(
-        metric.extractPath(0, metric.length * pathProgress),
-        Paint()
-          ..color = palette.onPrimary
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 5.5
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round,
-      );
+      if (variant == AmanahDrawerVariant.error) {
+        final double left = size.width * 0.35;
+        final double right = size.width * 0.65;
+        final double top = size.height * 0.35;
+        final double bottom = size.height * 0.65;
+
+        final Path path1 = Path()
+          ..moveTo(left, top)
+          ..lineTo(right, bottom);
+        final Path path2 = Path()
+          ..moveTo(right, top)
+          ..lineTo(left, bottom);
+
+        final PathMetric m1 = path1.computeMetrics().first;
+        final PathMetric m2 = path2.computeMetrics().first;
+
+        canvas.drawPath(m1.extractPath(0, m1.length * pathProgress), strokePaint);
+        canvas.drawPath(m2.extractPath(0, m2.length * pathProgress), strokePaint);
+      } else {
+        final Path path = Path()
+          ..moveTo(size.width * 0.30, size.height * 0.52)
+          ..lineTo(size.width * 0.44, size.height * 0.65)
+          ..lineTo(size.width * 0.70, size.height * 0.38);
+        final PathMetric metric = path.computeMetrics().first;
+
+        canvas.drawPath(metric.extractPath(0, metric.length * pathProgress), strokePaint);
+      }
     }
   }
 
   @override
   bool shouldRepaint(covariant _SuccessBadgeEmblemPainter oldDelegate) {
     return oldDelegate.palette != palette ||
+        oldDelegate.variant != variant ||
         oldDelegate.outlineProgress != outlineProgress ||
         oldDelegate.fillScale != fillScale ||
         oldDelegate.pathProgress != pathProgress;
@@ -699,10 +781,7 @@ class _SuccessConfettiParticle {
 }
 
 class _ConfettiCanvasPainter extends CustomPainter {
-  const _ConfettiCanvasPainter({
-    required this.progress,
-    required this.particles,
-  });
+  const _ConfettiCanvasPainter({required this.progress, required this.particles});
 
   final double progress;
   final List<_SuccessConfettiParticle> particles;
@@ -714,10 +793,7 @@ class _ConfettiCanvasPainter extends CustomPainter {
 
     for (final _SuccessConfettiParticle particle in particles) {
       final double x = origin.dx + particle.vx * progress;
-      final double y =
-          origin.dy +
-          particle.vy * progress +
-          0.5 * gravity * progress * progress;
+      final double y = origin.dy + particle.vy * progress + 0.5 * gravity * progress * progress;
       final double opacity = (1 - progress).clamp(0.0, 1.0);
 
       if (opacity <= 0) {
@@ -735,11 +811,7 @@ class _ConfettiCanvasPainter extends CustomPainter {
 
       canvas.drawRRect(
         RRect.fromRectAndRadius(
-          Rect.fromCenter(
-            center: Offset.zero,
-            width: particle.size,
-            height: particle.size * 0.58,
-          ),
+          Rect.fromCenter(center: Offset.zero, width: particle.size, height: particle.size * 0.58),
           const Radius.circular(1.5),
         ),
         paint,
@@ -750,8 +822,7 @@ class _ConfettiCanvasPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _ConfettiCanvasPainter oldDelegate) {
-    return oldDelegate.progress != progress ||
-        oldDelegate.particles != particles;
+    return oldDelegate.progress != progress || oldDelegate.particles != particles;
   }
 }
 
@@ -788,25 +859,45 @@ class _SuccessPalette {
   final Color primarySoft;
   final Color onPrimary;
 
-  static _SuccessPalette resolve(ThemeData theme) {
+  static _SuccessPalette resolve(
+    ThemeData theme, {
+    AmanahDrawerVariant variant = AmanahDrawerVariant.success,
+  }) {
     final bool dark = theme.brightness == Brightness.dark;
-    final Color surface =
-        dark ? theme.colorScheme.surface : AmanahColorTokens.surfaceLight;
-    final LinearGradient primaryGradient = dark
-        ? AmanahColorTokens.btnCrispBlueDarkGradient
-        : AmanahColorTokens.btnCrispBlueGradient;
-    final Color primary = dark
-        ? AmanahColorTokens.skyMedium
-        : AmanahColorTokens.brand;
-    final Color primaryBorder = dark
-        ? AmanahColorTokens.btnCrispBlueDarkBorder
-        : AmanahColorTokens.btnCrispBlueBorder;
-    final BoxShadow primaryShadow = dark
-        ? AmanahColorTokens.btnCrispBlueDarkShadow
-        : AmanahColorTokens.btnCrispBlueShadow;
-    final Color primarySoft = dark
-        ? AmanahColorTokens.brand.withValues(alpha: 0.16)
-        : AmanahColorTokens.brandSurface;
+    final bool isError = variant == AmanahDrawerVariant.error;
+    final Color surface = dark ? theme.colorScheme.surface : AmanahColorTokens.surfaceLight;
+
+    final LinearGradient primaryGradient = isError
+        ? const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: <Color>[AmanahColorTokens.danger, AmanahColorTokens.dangerDark],
+          )
+        : (dark
+              ? AmanahColorTokens.btnCrispBlueDarkGradient
+              : AmanahColorTokens.btnCrispBlueGradient);
+
+    final Color primary = isError
+        ? (dark ? AmanahColorTokens.dangerStrong : AmanahColorTokens.danger)
+        : (dark ? AmanahColorTokens.skyMedium : AmanahColorTokens.brand);
+
+    final Color primaryBorder = isError
+        ? (dark ? AmanahColorTokens.dangerDark : AmanahColorTokens.dangerBorder)
+        : (dark ? AmanahColorTokens.btnCrispBlueDarkBorder : AmanahColorTokens.btnCrispBlueBorder);
+
+    final BoxShadow primaryShadow = isError
+        ? BoxShadow(
+            color: AmanahColorTokens.danger.withValues(alpha: dark ? 0.35 : 0.22),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          )
+        : (dark ? AmanahColorTokens.btnCrispBlueDarkShadow : AmanahColorTokens.btnCrispBlueShadow);
+
+    final Color primarySoft = isError
+        ? (dark
+              ? AmanahColorTokens.danger.withValues(alpha: 0.16)
+              : AmanahColorTokens.dangerSurface)
+        : (dark ? AmanahColorTokens.brand.withValues(alpha: 0.16) : AmanahColorTokens.brandSurface);
 
     return _SuccessPalette(
       surface: surface,
@@ -814,12 +905,8 @@ class _SuccessPalette {
           ? theme.colorScheme.onSurface.withValues(alpha: 0.06)
           : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.48),
       title: dark ? theme.colorScheme.onSurface : AmanahColorTokens.heading,
-      subtitle: dark
-          ? theme.colorScheme.onSurfaceVariant
-          : AmanahColorTokens.muted,
-      metaText: dark
-          ? theme.colorScheme.onSurface
-          : theme.colorScheme.onSurfaceVariant,
+      subtitle: dark ? theme.colorScheme.onSurfaceVariant : AmanahColorTokens.muted,
+      metaText: dark ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
       border: dark
           ? theme.colorScheme.outlineVariant.withValues(alpha: 0.34)
           : AmanahColorTokens.brandMuted,
@@ -830,9 +917,7 @@ class _SuccessPalette {
       primaryGradient: primaryGradient,
       primaryBorder: primaryBorder,
       primaryShadow: primaryShadow,
-      primaryText: dark
-          ? AmanahColorTokens.btnCrispSoftDarkText
-          : AmanahColorTokens.brand,
+      primaryText: dark ? AmanahColorTokens.btnCrispSoftDarkText : AmanahColorTokens.brand,
       primarySoft: primarySoft,
       onPrimary: AmanahColorTokens.pureWhite,
     );

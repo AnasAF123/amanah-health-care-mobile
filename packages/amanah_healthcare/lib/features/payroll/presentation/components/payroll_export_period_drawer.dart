@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/time/time.dart';
 import 'package:amanah_healthcare/features/export/presentation/components/amanah_export_sheet.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
@@ -7,17 +8,11 @@ import 'package:amanah_healthcare/features/payroll/domain/entities/payroll_perio
 import 'package:amanah_healthcare/features/payroll/presentation/utils/payroll_formatters.dart';
 
 class PayrollExportPeriodDrawer extends StatelessWidget {
-  const PayrollExportPeriodDrawer({
-    required this.periods,
-    super.key,
-  });
+  const PayrollExportPeriodDrawer({required this.periods, super.key});
 
   final List<PayrollPeriod> periods;
 
-  static Future<void> show({
-    required BuildContext context,
-    required List<PayrollPeriod> periods,
-  }) {
+  static Future<void> show({required BuildContext context, required List<PayrollPeriod> periods}) {
     return showAmanahBottomSheet<void>(
       context: context,
       builder: (BuildContext ctx) => PayrollExportPeriodDrawer(periods: periods),
@@ -43,11 +38,7 @@ class PayrollExportPeriodDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildList(
-    BuildContext context,
-    bool dark,
-    List<PayrollPeriod> exportablePeriods,
-  ) {
+  Widget _buildList(BuildContext context, bool dark, List<PayrollPeriod> exportablePeriods) {
     if (exportablePeriods.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 24),
@@ -71,6 +62,10 @@ class PayrollExportPeriodDrawer extends StatelessWidget {
       itemBuilder: (BuildContext ctx, int index) {
         final PayrollPeriod period = exportablePeriods[index];
         final bool isFinalized = period.status.toLowerCase() == 'finalized';
+        final DateTime? startDate = parseIsoDateString(period.periodStart);
+        final String monthTitle = startDate != null
+            ? formatLocalizedDate(startDate, style: 'month_name')
+            : period.periodName;
 
         return InkWell(
           borderRadius: BorderRadius.circular(14),
@@ -79,12 +74,9 @@ class PayrollExportPeriodDrawer extends StatelessWidget {
             AmanahExportSheet.show(
               context: context,
               exportType: 'payroll',
-              sheetTitle: 'Unduh Rekap Penggajian',
-              sheetSubtitle: period.periodName,
-              parameters: <String, dynamic>{
-                'periodId': period.id,
-                'periodName': period.periodName,
-              },
+              sheetTitle: 'Format Dokumen',
+              sheetSubtitle: monthTitle,
+              parameters: <String, dynamic>{'periodId': period.id, 'periodName': period.periodName},
             );
           },
           child: Container(
@@ -112,7 +104,7 @@ class PayrollExportPeriodDrawer extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        period.periodName,
+                        monthTitle,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -123,15 +115,10 @@ class PayrollExportPeriodDrawer extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        PayrollFormatters.periodDateRange(
-                          period.periodStart,
-                          period.periodEnd,
-                        ),
+                        PayrollFormatters.periodDateRange(period.periodStart, period.periodEnd),
                         style: TextStyle(
                           fontSize: 10.5,
-                          color: dark
-                              ? AmanahColorTokens.neutral400
-                              : AmanahColorTokens.neutral600,
+                          color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral600,
                         ),
                       ),
                     ],
@@ -140,6 +127,9 @@ class PayrollExportPeriodDrawer extends StatelessWidget {
                 AmanahStatusBadge(
                   text: isFinalized ? 'Tutup buku' : 'Terkalkulasi',
                   variant: isFinalized ? AmanahBadgeVariant.success : AmanahBadgeVariant.primary,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                  fontSize: 10.5,
+                  enableBlur: false,
                 ),
               ],
             ),

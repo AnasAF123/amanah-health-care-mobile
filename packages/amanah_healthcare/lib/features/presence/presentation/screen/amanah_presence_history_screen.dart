@@ -182,7 +182,7 @@ class _AmanahPresenceHistoryScreenState extends State<AmanahPresenceHistoryScree
     AmanahExportSheet.show(
       context: context,
       exportType: 'attendance',
-      sheetTitle: 'Unduh Rekap Presensi',
+      sheetTitle: 'Format Dokumen',
       sheetSubtitle: 'Ekspor riwayat presensi tabular resmi',
       parameters: exportParams,
     );

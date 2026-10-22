@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:amanah_healthcare/core/notifications/amanah_push_service.dart';
 import '../../domain/entities/export_format.dart';
 import '../../domain/entities/export_job.dart';
 import '../../domain/repositories/export_repository.dart';
@@ -8,7 +11,7 @@ import '../../data/repositories/export_repository_impl.dart';
 
 class ExportController extends ChangeNotifier {
   ExportController({ExportRepository? repository})
-      : _repository = repository ?? ExportRepositoryImpl();
+    : _repository = repository ?? ExportRepositoryImpl();
 
   final ExportRepository _repository;
 
@@ -69,9 +72,7 @@ class ExportController extends ChangeNotifier {
     const int maxAttempts = 30;
 
     while (attempts < maxAttempts) {
-      await Future<void>.delayed(
-        Duration(milliseconds: attempts < 3 ? 1000 : 2000),
-      );
+      await Future<void>.delayed(Duration(milliseconds: attempts < 3 ? 1000 : 2000));
       attempts++;
 
       try {
@@ -96,6 +97,15 @@ class ExportController extends ChangeNotifier {
               fileName: fileName,
             );
             _downloadedFile = file;
+
+            // Trigger instant status bar notification (tap to open)
+            unawaited(
+              AmanahPushService.instance.showDownloadCompleteNotification(
+                title: 'Laporan Berhasil Diunduh',
+                body: 'Ketuk untuk langsung membuka berkas $fileName',
+                filePath: file.path,
+              ),
+            );
           }
 
           _progressPercent = 100;
@@ -142,13 +152,22 @@ class ExportController extends ChangeNotifier {
     if (_downloadedFile == null) return;
     try {
       await SharePlus.instance.share(
-        ShareParams(
-          title: 'Bagikan Laporan',
-          files: <XFile>[XFile(_downloadedFile!.path)],
-        ),
+        ShareParams(title: 'Bagikan Laporan', files: <XFile>[XFile(_downloadedFile!.path)]),
       );
     } catch (e) {
       debugPrint('Error sharing export file: $e');
+    }
+  }
+
+  Future<void> openFile() async {
+    if (_downloadedFile == null) return;
+    try {
+      final OpenResult result = await OpenFilex.open(_downloadedFile!.path);
+      if (result.type != ResultType.done) {
+        debugPrint('[ExportController] OpenFilex result: ${result.message}');
+      }
+    } catch (e) {
+      debugPrint('[ExportController] Error opening export file: $e');
     }
   }
 }
