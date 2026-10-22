@@ -32,6 +32,18 @@ class ExportController extends ChangeNotifier {
   int get progressPercent => _progressPercent;
   String get currentPhase => _currentPhase;
 
+  Future<bool> checkAvailability({
+    required String exportType,
+    Map<String, dynamic>? parameters,
+  }) async {
+    try {
+      return await _repository.checkAvailability(exportType: exportType, parameters: parameters);
+    } catch (e) {
+      debugPrint('[ExportController] Error checking availability: $e');
+      return true;
+    }
+  }
+
   Future<void> startExport({
     required String exportType,
     required ExportFormat format,

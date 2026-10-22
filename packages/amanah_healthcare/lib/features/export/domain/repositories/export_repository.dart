@@ -9,10 +9,9 @@ abstract interface class ExportRepository {
     Map<String, dynamic>? parameters,
   });
 
+  Future<bool> checkAvailability({required String exportType, Map<String, dynamic>? parameters});
+
   Future<ExportJob> getJobStatus(String jobId);
 
-  Future<File> downloadExport({
-    required String downloadUrl,
-    required String fileName,
-  });
+  Future<File> downloadExport({required String downloadUrl, required String fileName});
 }

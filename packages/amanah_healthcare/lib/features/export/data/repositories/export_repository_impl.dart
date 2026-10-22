@@ -7,7 +7,7 @@ import '../datasources/export_remote_data_source.dart';
 
 class ExportRepositoryImpl implements ExportRepository {
   ExportRepositoryImpl({ExportRemoteDataSource? remoteDataSource})
-      : _remoteDataSource = remoteDataSource ?? ExportRemoteDataSourceImpl();
+    : _remoteDataSource = remoteDataSource ?? ExportRemoteDataSourceImpl();
 
   final ExportRemoteDataSource _remoteDataSource;
 
@@ -25,20 +25,19 @@ class ExportRepositoryImpl implements ExportRepository {
   }
 
   @override
+  Future<bool> checkAvailability({required String exportType, Map<String, dynamic>? parameters}) {
+    return _remoteDataSource.checkAvailability(exportType: exportType, parameters: parameters);
+  }
+
+  @override
   Future<ExportJob> getJobStatus(String jobId) {
     return _remoteDataSource.getJobStatus(jobId);
   }
 
   @override
-  Future<File> downloadExport({
-    required String downloadUrl,
-    required String fileName,
-  }) async {
+  Future<File> downloadExport({required String downloadUrl, required String fileName}) async {
     final Directory directory = await getApplicationDocumentsDirectory();
     final String savePath = '${directory.path}/$fileName';
-    return _remoteDataSource.downloadFile(
-      downloadUrl: downloadUrl,
-      savePath: savePath,
-    );
+    return _remoteDataSource.downloadFile(downloadUrl: downloadUrl, savePath: savePath);
   }
 }

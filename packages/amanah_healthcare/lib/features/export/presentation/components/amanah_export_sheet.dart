@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_success_drawer.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/features/presence/presentation/components/amanah_month_picker_dialog.dart';
 import '../../domain/entities/export_format.dart';
 import '../state/export_controller.dart';
 
@@ -12,12 +14,14 @@ class AmanahExportSheet extends StatefulWidget {
     required this.sheetTitle,
     this.sheetSubtitle,
     this.parameters,
+    this.initialMonth,
   });
 
   final String exportType;
   final String sheetTitle;
   final String? sheetSubtitle;
   final Map<String, dynamic>? parameters;
+  final DateTime? initialMonth;
 
   static Future<void> show({
     required BuildContext context,
@@ -25,6 +29,7 @@ class AmanahExportSheet extends StatefulWidget {
     required String sheetTitle,
     String? sheetSubtitle,
     Map<String, dynamic>? parameters,
+    DateTime? initialMonth,
   }) {
     return showAmanahBottomSheet<void>(
       context: context,
@@ -33,6 +38,7 @@ class AmanahExportSheet extends StatefulWidget {
         sheetTitle: sheetTitle,
         sheetSubtitle: sheetSubtitle,
         parameters: parameters,
+        initialMonth: initialMonth,
       ),
     );
   }
@@ -43,17 +49,65 @@ class AmanahExportSheet extends StatefulWidget {
 
 class _AmanahExportSheetState extends State<AmanahExportSheet> {
   late final ExportController _controller;
+  late DateTime _selectedMonth;
+  bool _isCheckingAvailability = false;
+  bool _hasData = true;
 
   @override
   void initState() {
     super.initState();
     _controller = ExportController();
+    _selectedMonth = widget.initialMonth ?? DateTime.now();
+
+    if (widget.exportType == 'attendance') {
+      _checkDataAvailability(_selectedMonth);
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkDataAvailability(DateTime month) async {
+    if (widget.exportType != 'attendance') return;
+
+    setState(() {
+      _isCheckingAvailability = true;
+    });
+
+    final int lastDay = DateTime(month.year, month.month + 1, 0).day;
+    final String mm = month.month.toString().padLeft(2, '0');
+    final Map<String, dynamic> checkParams = Map<String, dynamic>.from(
+      widget.parameters ?? <String, dynamic>{},
+    );
+    checkParams['startDate'] = '${month.year}-$mm-01';
+    checkParams['endDate'] = '${month.year}-$mm-${lastDay.toString().padLeft(2, '0')}';
+
+    final bool available = await _controller.checkAvailability(
+      exportType: widget.exportType,
+      parameters: checkParams,
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _hasData = available;
+      _isCheckingAvailability = false;
+    });
+  }
+
+  Future<void> _openMonthPicker(BuildContext context) async {
+    final DateTime? picked = await AmanahMonthPickerDialog.show(
+      context: context,
+      initialMonth: _selectedMonth,
+    );
+    if (picked != null && mounted) {
+      setState(() {
+        _selectedMonth = picked;
+      });
+      _checkDataAvailability(picked);
+    }
   }
 
   @override
@@ -98,16 +152,92 @@ class _AmanahExportSheetState extends State<AmanahExportSheet> {
         }
 
         final bool dark = Theme.of(context).brightness == Brightness.dark;
+        final bool isAttendance = widget.exportType == 'attendance';
+
+        final String subtitle = isAttendance
+            ? 'Periode: ${AmanahMonthPickerDialog.formatMonthYear(_selectedMonth)}'
+            : (widget.sheetSubtitle ?? 'Pilih format dokumen laporan resmi');
 
         return AmanahBottomSheetScaffold(
           title: widget.sheetTitle.isNotEmpty ? widget.sheetTitle : 'Format Dokumen',
-          subtitle: widget.sheetSubtitle ?? 'Pilih format dokumen laporan resmi',
+          subtitle: subtitle,
           hugContent: true,
+          trailing: isAttendance ? _buildAttendanceCalendarButton(context, dark) : null,
           body: _controller.isLoading
               ? _buildProgressState(context, dark)
-              : _buildFormatSelection(context, dark),
+              : (_isCheckingAvailability
+                    ? _buildCheckingState(context, dark)
+                    : (!_hasData
+                          ? _buildEmptyState(context, dark)
+                          : _buildFormatSelection(context, dark))),
         );
       },
+    );
+  }
+
+  Widget _buildAttendanceCalendarButton(BuildContext context, bool dark) {
+    final Color activeAccent = dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: () => _openMonthPicker(context),
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: dark ? AmanahColorTokens.neutral800 : AmanahColorTokens.neutral100,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: dark ? AmanahColorTokens.neutral700 : AmanahColorTokens.neutral200,
+          ),
+        ),
+        child: Icon(Icons.calendar_month_outlined, size: 19, color: activeAccent),
+      ),
+    );
+  }
+
+  Widget _buildCheckingState(BuildContext context, bool dark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 36),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(AmanahColorTokens.brandPrimary),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Memeriksa data presensi...',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, bool dark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: AmanahEmptyState.box(
+        title: 'Data Tidak Tersedia',
+        message:
+            'Tidak ada rekaman presensi pada bulan ${AmanahMonthPickerDialog.formatMonthYear(_selectedMonth)}.',
+        variant: AmanahEmptyStateVariant.compact,
+        boxSize: 76,
+        actionText: 'Pilih Bulan Lain',
+        actionLeadingIcon: Icons.calendar_month_outlined,
+        onAction: () => _openMonthPicker(context),
+      ),
     );
   }
 
@@ -130,10 +260,23 @@ class _AmanahExportSheetState extends State<AmanahExportSheet> {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: () {
+        final Map<String, dynamic> resolvedParams = Map<String, dynamic>.from(
+          widget.parameters ?? <String, dynamic>{},
+        );
+
+        if (widget.exportType == 'attendance') {
+          final int lastDay = DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0).day;
+          final String mm = _selectedMonth.month.toString().padLeft(2, '0');
+          resolvedParams['startDate'] = '${_selectedMonth.year}-$mm-01';
+          resolvedParams['endDate'] =
+              '${_selectedMonth.year}-$mm-${lastDay.toString().padLeft(2, '0')}';
+          resolvedParams['periodLabel'] = AmanahMonthPickerDialog.formatMonthYear(_selectedMonth);
+        }
+
         _controller.startExport(
           exportType: widget.exportType,
           format: format,
-          parameters: widget.parameters,
+          parameters: resolvedParams,
         );
       },
       child: Container(

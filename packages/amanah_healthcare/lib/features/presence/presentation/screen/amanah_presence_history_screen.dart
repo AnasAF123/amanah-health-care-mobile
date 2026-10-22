@@ -173,11 +173,12 @@ class _AmanahPresenceHistoryScreenState extends State<AmanahPresenceHistoryScree
     if (_unitFilter != 'all') {
       exportParams['unit'] = _unitFilter;
     }
-    if (_selectedDateFilter != null) {
-      final String yyyymmdd = _selectedDateFilter!.toIso8601String().substring(0, 10);
-      exportParams['startDate'] = yyyymmdd;
-      exportParams['endDate'] = yyyymmdd;
-    }
+
+    final DateTime initialMonth =
+        _selectedDateFilter ??
+        (_records.isNotEmpty && _records.first.attendanceDate != null
+            ? _records.first.attendanceDate!
+            : DateTime.now());
 
     AmanahExportSheet.show(
       context: context,
@@ -185,6 +186,7 @@ class _AmanahPresenceHistoryScreenState extends State<AmanahPresenceHistoryScree
       sheetTitle: 'Format Dokumen',
       sheetSubtitle: 'Ekspor riwayat presensi tabular resmi',
       parameters: exportParams,
+      initialMonth: initialMonth,
     );
   }
 

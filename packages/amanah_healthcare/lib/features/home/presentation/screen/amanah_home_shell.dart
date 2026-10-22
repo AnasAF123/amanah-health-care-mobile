@@ -51,8 +51,7 @@ class AmanahHomeShell extends StatefulWidget {
 class _AmanahHomeShellState extends State<AmanahHomeShell> {
   AmanahAuthUser get _currentUser => widget.user ?? AmanahHomeShell._emptyUser;
   final AmanahScheduleStore _scheduleStore = AmanahScheduleStore.instance;
-  final AmanahNotificationStore _notificationStore =
-      AmanahNotificationStore.instance;
+  final AmanahNotificationStore _notificationStore = AmanahNotificationStore.instance;
   final AmanahPermissionStore _permissionStore = AmanahPermissionStore.instance;
   AmanahHomeTab _selectedTab = AmanahHomeTab.home;
   String? _toastMessage;
@@ -176,8 +175,9 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
               ? AmanahColorTokens.canvasLight
               : AmanahColorTokens.surfaceLight);
 
-    final List<DoctorSchedule> todaySchedules =
-        _scheduleStore.getSchedulesForDate(AmanahScheduleStore.baseToday);
+    final List<DoctorSchedule> todaySchedules = _scheduleStore.getSchedulesForDate(
+      AmanahScheduleStore.baseToday,
+    );
 
     return PopScope(
       canPop: _selectedTab == AmanahHomeTab.home && !_isScanDrawerOpen,
@@ -199,150 +199,140 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
         }
       },
       child: Scaffold(
-      backgroundColor: bgColor,
-      extendBody: true,
-      body: Stack(
-        children: <Widget>[
-          // Dynamic Aurora Ambient Glow
-          if (_selectedTab == AmanahHomeTab.home)
-            const Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 480,
-              child: AmanahAuroraBackground(height: 480),
+        backgroundColor: bgColor,
+        extendBody: true,
+        body: Stack(
+          children: <Widget>[
+            // Dynamic Aurora Ambient Glow
+            if (_selectedTab == AmanahHomeTab.home)
+              const Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 480,
+                child: AmanahAuroraBackground(height: 480),
+              ),
+
+            // Main Viewport Container
+            SafeArea(
+              top: _selectedTab != AmanahHomeTab.scan,
+              bottom: false,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 100),
+                child: switch (_selectedTab) {
+                  AmanahHomeTab.home => _AmanahHomeScreenContent(
+                    key: const ValueKey<String>('home_content'),
+                    user: _currentUser,
+                    todaySchedules: todaySchedules,
+                    quickActions: kDefaultQuickActions,
+                    activities: const <AmanahActivityMetric>[],
+                    unreadNotifications: _notificationStore.unreadCount,
+                    onRefresh: _loadHomeSchedules,
+                    onNotificationTap: () {
+                      Navigator.of(context).push(AmanahNotificationTabScreen.route());
+                    },
+                    onProfileTap: () {
+                      setState(() => _selectedTab = AmanahHomeTab.account);
+                    },
+                    onQuickActionTap: (AmanahQuickAction action) {
+                      _handleQuickAction(action.id);
+                    },
+                    onScheduleCardTap: _navigateToScheduleWithSession,
+                    onCreateScheduleTap: () => DoctorScheduleRosterSheet.show(context),
+                    onDetailActivityTap: () {
+                      _handleQuickAction('queue');
+                    },
+                    onActivityTap: (AmanahActivityMetric activity) {
+                      _showToast('Membuka rincian aktivitas');
+                    },
+                    onSlideAction: (String slideId) {
+                      _showToast('Membuka program promo: $slideId');
+                    },
+                  ),
+                  AmanahHomeTab.schedule => AmanahScheduleTabScreen(
+                    key: const ValueKey<String>('schedule_content'),
+                    initialSessionId: _scheduleInitialSessionId,
+                    initialViewMode: _scheduleInitialViewMode,
+                    openDetailOnLaunch: _scheduleOpenDetailOnLaunch,
+                    onBack: () {
+                      setState(() {
+                        _scheduleInitialSessionId = null;
+                        _scheduleInitialViewMode = null;
+                        _scheduleOpenDetailOnLaunch = false;
+                        _selectedTab = AmanahHomeTab.home;
+                      });
+                    },
+                  ),
+                  AmanahHomeTab.scan => AmanahQrScannerTabScreen(
+                    key: _scannerKey,
+                    user: _currentUser,
+                    bottomNavigationClearance: 96 + MediaQuery.viewPaddingOf(context).bottom,
+                    onDrawerStateChanged: (bool isOpen) {
+                      if (_isScanDrawerOpen != isOpen) {
+                        setState(() => _isScanDrawerOpen = isOpen);
+                      }
+                    },
+                    onBack: () {
+                      setState(() {
+                        _isScanDrawerOpen = false;
+                        _selectedTab = AmanahHomeTab.home;
+                      });
+                    },
+                  ),
+                  AmanahHomeTab.notifications => AmanahLeavePermissionTabScreen(
+                    key: const ValueKey<String>('permissions_content'),
+                    doctorName: _currentUser.fullName,
+                    doctorRole: _currentUser.isDoctor ? 'Dokter Spesialis' : 'Tenaga Medis',
+                    staffProfileId: _currentUser.staff?.id ?? '',
+                    onBack: () {
+                      setState(() => _selectedTab = AmanahHomeTab.home);
+                    },
+                  ),
+                  AmanahHomeTab.account => AmanahAccountTabScreen(
+                    key: const ValueKey<String>('account_content'),
+                    user: _currentUser,
+                    onBack: () {
+                      setState(() => _selectedTab = AmanahHomeTab.home);
+                    },
+                    onMenuItemTap: (String id) {
+                      _showToast('Membuka menu $id');
+                    },
+                    onLogout: _handleLogout,
+                  ),
+                },
+              ),
             ),
 
-          // Main Viewport Container
-          SafeArea(
-            top: _selectedTab != AmanahHomeTab.scan,
-            bottom: false,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 100),
-              child: switch (_selectedTab) {
-                AmanahHomeTab.home => _AmanahHomeScreenContent(
-                  key: const ValueKey<String>('home_content'),
-                  user: _currentUser,
-                  todaySchedules: todaySchedules,
-                  quickActions: kDefaultQuickActions,
-                  activities: const <AmanahActivityMetric>[],
-                  unreadNotifications: _notificationStore.unreadCount,
-                  onRefresh: _loadHomeSchedules,
-                  onNotificationTap: () {
-                    Navigator.of(
-                      context,
-                    ).push(AmanahNotificationTabScreen.route());
-                  },
-                  onProfileTap: () {
-                    setState(() => _selectedTab = AmanahHomeTab.account);
-                  },
-                  onQuickActionTap: (AmanahQuickAction action) {
-                    _handleQuickAction(action.id);
-                  },
-                  onScheduleCardTap: _navigateToScheduleWithSession,
-                  onCreateScheduleTap: () =>
-                      DoctorScheduleRosterSheet.show(context),
-                  onDetailActivityTap: () {
-                    _handleQuickAction('queue');
-                  },
-                  onActivityTap: (AmanahActivityMetric activity) {
-                    _showToast('Membuka rincian aktivitas');
-                  },
-                  onSlideAction: (String slideId) {
-                    _showToast('Membuka program promo: $slideId');
-                  },
-                ),
-                AmanahHomeTab.schedule => AmanahScheduleTabScreen(
-                  key: const ValueKey<String>('schedule_content'),
-                  initialSessionId: _scheduleInitialSessionId,
-                  initialViewMode: _scheduleInitialViewMode,
-                  openDetailOnLaunch: _scheduleOpenDetailOnLaunch,
-                  onBack: () {
-                    setState(() {
+            // Ephemeral Toast Banner
+            if (_toastMessage != null)
+              Positioned(
+                top: 60,
+                left: 24,
+                right: 24,
+                child: Center(child: _AmanahEphemeralToast(message: _toastMessage!)),
+              ),
+          ],
+        ),
+        bottomNavigationBar: (_selectedTab == AmanahHomeTab.scan && _isScanDrawerOpen)
+            ? null
+            : AmanahBottomNavigationBar(
+                selectedTab: _selectedTab,
+                unreadNotifications: _permissionStore.pendingCount,
+                onTabSelected: (AmanahHomeTab tab) {
+                  setState(() {
+                    if (tab == AmanahHomeTab.schedule) {
                       _scheduleInitialSessionId = null;
                       _scheduleInitialViewMode = null;
                       _scheduleOpenDetailOnLaunch = false;
-                      _selectedTab = AmanahHomeTab.home;
-                    });
-                  },
-                ),
-                AmanahHomeTab.scan => AmanahQrScannerTabScreen(
-                  key: _scannerKey,
-                  user: _currentUser,
-                  bottomNavigationClearance:
-                      96 + MediaQuery.viewPaddingOf(context).bottom,
-                  onDrawerStateChanged: (bool isOpen) {
-                    if (_isScanDrawerOpen != isOpen) {
-                      setState(() => _isScanDrawerOpen = isOpen);
                     }
-                  },
-                  onBack: () {
-                    setState(() {
-                      _isScanDrawerOpen = false;
-                      _selectedTab = AmanahHomeTab.home;
-                    });
-                  },
-                ),
-                AmanahHomeTab.notifications => AmanahLeavePermissionTabScreen(
-                  key: const ValueKey<String>('permissions_content'),
-                  doctorName: _currentUser.fullName,
-                  doctorRole: _currentUser.isDoctor
-                      ? 'Dokter Spesialis'
-                      : 'Tenaga Medis',
-                  staffProfileId: _currentUser.staff?.id ?? '',
-                  onBack: () {
-                    setState(() => _selectedTab = AmanahHomeTab.home);
-                  },
-                ),
-                AmanahHomeTab.account => AmanahAccountTabScreen(
-                  key: const ValueKey<String>('account_content'),
-                  user: _currentUser,
-                  onBack: () {
-                    setState(() => _selectedTab = AmanahHomeTab.home);
-                  },
-                  onMenuItemTap: (String id) {
-                    _showToast('Membuka menu $id');
-                  },
-                  onLogout: _handleLogout,
-                ),
-              },
-            ),
-          ),
-
-          // Ephemeral Toast Banner
-          if (_toastMessage != null)
-            Positioned(
-              top: 60,
-              left: 24,
-              right: 24,
-              child: Center(
-                child: _AmanahEphemeralToast(message: _toastMessage!),
+                    _selectedTab = tab;
+                  });
+                },
               ),
-            ),
-        ],
-      ),
-      bottomNavigationBar:
-          (_selectedTab == AmanahHomeTab.scan && _isScanDrawerOpen)
-          ? null
-          : AmanahBottomNavigationBar(
-              selectedTab: _selectedTab,
-              unreadNotifications: _permissionStore.pendingCount,
-              onTabSelected: (AmanahHomeTab tab) {
-                setState(() {
-                  if (tab == AmanahHomeTab.schedule) {
-                    _scheduleInitialSessionId = null;
-                    _scheduleInitialViewMode = null;
-                    _scheduleOpenDetailOnLaunch = false;
-                  }
-                  _selectedTab = tab;
-                });
-              },
-            ),
       ),
     );
   }
 }
-
 
 class _AmanahHomeScreenContent extends StatelessWidget {
   const _AmanahHomeScreenContent({
@@ -402,10 +392,9 @@ class _AmanahHomeScreenContent extends StatelessWidget {
               }
             },
             child: ListView(
-              physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics(),
-              ),
+              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+              clipBehavior: Clip.none,
               children: <Widget>[
                 // 2. 3D Stack of Schedule Cards
                 AmanahScheduleCardStack(
@@ -416,10 +405,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // 3. Quick Access Menu Grid
-                AmanahQuickAccessSection(
-                  actions: quickActions,
-                  onActionTap: onQuickActionTap,
-                ),
+                AmanahQuickAccessSection(actions: quickActions, onActionTap: onQuickActionTap),
                 const SizedBox(height: 16),
 
                 // 4. Master 3D Deck Carousel (Promotions & Clinical Programs) - Preserved exception

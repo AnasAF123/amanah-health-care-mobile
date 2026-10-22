@@ -11,21 +11,21 @@ abstract final class ExportEndpoints {
     requiresAuth: true,
   );
 
+  static const ApiEndpoint checkAvailabilityEndpoint = ApiEndpoint(
+    path: '$pathExports/check-availability',
+    method: HttpMethod.post,
+    requiresAuth: true,
+  );
+
   static const ApiEndpoint myHistoryEndpoint = ApiEndpoint(
     path: pathMyHistory,
     method: HttpMethod.get,
     requiresAuth: true,
   );
 
-  static ApiEndpoint statusEndpoint(String jobId) => ApiEndpoint(
-    path: '$pathExports/$jobId',
-    method: HttpMethod.get,
-    requiresAuth: true,
-  );
+  static ApiEndpoint statusEndpoint(String jobId) =>
+      ApiEndpoint(path: '$pathExports/$jobId', method: HttpMethod.get, requiresAuth: true);
 
-  static ApiEndpoint downloadEndpoint(String jobId) => ApiEndpoint(
-    path: '$pathExports/$jobId/download',
-    method: HttpMethod.get,
-    requiresAuth: true,
-  );
+  static ApiEndpoint downloadEndpoint(String jobId) =>
+      ApiEndpoint(path: '$pathExports/$jobId/download', method: HttpMethod.get, requiresAuth: true);
 }

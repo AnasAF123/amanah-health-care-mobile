@@ -16,23 +16,22 @@ abstract interface class ExportRemoteDataSource {
     Map<String, dynamic>? parameters,
   });
 
+  Future<bool> checkAvailability({required String exportType, Map<String, dynamic>? parameters});
+
   Future<ExportJob> getJobStatus(String jobId);
 
-  Future<File> downloadFile({
-    required String downloadUrl,
-    required String savePath,
-  });
+  Future<File> downloadFile({required String downloadUrl, required String savePath});
 }
 
 class ExportRemoteDataSourceImpl implements ExportRemoteDataSource {
   ExportRemoteDataSourceImpl({ApiClient? apiClient})
-      : _apiClient = apiClient ??
-            AuthorizedApiClient(
-              innerClient:
-                  HttpApiClient(baseUrl: AmanahAuthEnvironment.authBaseUrl),
-              tokenProvider: const AmanahAuthTokenStorage(),
-            ),
-        _tokenStorage = const AmanahAuthTokenStorage();
+    : _apiClient =
+          apiClient ??
+          AuthorizedApiClient(
+            innerClient: HttpApiClient(baseUrl: AmanahAuthEnvironment.authBaseUrl),
+            tokenProvider: const AmanahAuthTokenStorage(),
+          ),
+      _tokenStorage = const AmanahAuthTokenStorage();
 
   final ApiClient _apiClient;
   final AmanahAuthTokenStorage _tokenStorage;
@@ -64,9 +63,29 @@ class ExportRemoteDataSourceImpl implements ExportRemoteDataSource {
     );
 
     final dynamic data = _extractData(res.data);
-    return ExportJob.fromJson(
-      data is Map<String, dynamic> ? data : <String, dynamic>{},
+    return ExportJob.fromJson(data is Map<String, dynamic> ? data : <String, dynamic>{});
+  }
+
+  @override
+  Future<bool> checkAvailability({
+    required String exportType,
+    Map<String, dynamic>? parameters,
+  }) async {
+    final Map<String, dynamic> body = <String, dynamic>{
+      'exportType': exportType,
+      'parameters': parameters ?? <String, dynamic>{},
+    };
+
+    final ApiResponse<dynamic> res = await _apiClient.request(
+      ExportEndpoints.checkAvailabilityEndpoint,
+      body: body,
     );
+
+    final dynamic data = _extractData(res.data);
+    if (data is Map<String, dynamic>) {
+      return (data['available'] as bool?) ?? false;
+    }
+    return false;
   }
 
   @override
@@ -76,16 +95,11 @@ class ExportRemoteDataSourceImpl implements ExportRemoteDataSource {
     );
 
     final dynamic data = _extractData(res.data);
-    return ExportJob.fromJson(
-      data is Map<String, dynamic> ? data : <String, dynamic>{},
-    );
+    return ExportJob.fromJson(data is Map<String, dynamic> ? data : <String, dynamic>{});
   }
 
   @override
-  Future<File> downloadFile({
-    required String downloadUrl,
-    required String savePath,
-  }) async {
+  Future<File> downloadFile({required String downloadUrl, required String savePath}) async {
     final String fullUrl = downloadUrl.startsWith('http')
         ? downloadUrl
         : '${AmanahAuthEnvironment.authBaseUrl}$downloadUrl';
@@ -95,15 +109,10 @@ class ExportRemoteDataSourceImpl implements ExportRemoteDataSource {
       if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
     };
 
-    final http.Response response = await http.get(
-      Uri.parse(fullUrl),
-      headers: headers,
-    );
+    final http.Response response = await http.get(Uri.parse(fullUrl), headers: headers);
 
     if (response.statusCode != 200) {
-      throw Exception(
-        'Gagal mengunduh berkas laporan (HTTP ${response.statusCode})',
-      );
+      throw Exception('Gagal mengunduh berkas laporan (HTTP ${response.statusCode})');
     }
 
     final File file = File(savePath);
