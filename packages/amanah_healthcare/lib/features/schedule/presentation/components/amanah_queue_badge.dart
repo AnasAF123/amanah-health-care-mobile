@@ -4,12 +4,7 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 /// 3D Game-Style Hex Shield & Ribbon Medal Badge for Patient Queue Number.
 /// Matching 1:1 with QueueBadge.tsx in .web
 class AmanahQueueBadge extends StatelessWidget {
-  const AmanahQueueBadge({
-    required this.queueNumber,
-    super.key,
-    this.size = 68,
-    this.onTap,
-  });
+  const AmanahQueueBadge({required this.queueNumber, super.key, this.size = 68, this.onTap});
 
   final String queueNumber;
   final double size;
@@ -33,10 +28,7 @@ class AmanahQueueBadge extends StatelessWidget {
           height: size,
           child: CustomPaint(
             size: Size(size, size),
-            painter: _QueueBadgePainter(
-              displayValue: displayValue,
-              dark: dark,
-            ),
+            painter: _QueueBadgePainter(displayValue: displayValue, dark: dark),
           ),
         ),
       ),
@@ -69,7 +61,7 @@ class _QueueBadgePainter extends CustomPainter {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: dark
-            ? const <Color>[AmanahColorTokens.brandLight, AmanahColorTokens.brandAccent]
+            ? const <Color>[AmanahColorTokens.tabActiveDark, AmanahColorTokens.brandLight]
             : const <Color>[AmanahColorTokens.brand, AmanahColorTokens.btnCrispBlueBorder],
       ).createShader(const Rect.fromLTWH(34, 46, 16, 39));
     canvas.drawPath(ribbonLeft, ribbonLeftPaint);
@@ -86,8 +78,11 @@ class _QueueBadgePainter extends CustomPainter {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: dark
-            ? const <Color>[AmanahColorTokens.brandAccent, AmanahColorTokens.auroraAccentDark]
-            : const <Color>[AmanahColorTokens.btnCrispBlueBorder, AmanahColorTokens.brandIndigoNavy],
+            ? const <Color>[AmanahColorTokens.brandLight, AmanahColorTokens.skyDark]
+            : const <Color>[
+                AmanahColorTokens.btnCrispBlueBorder,
+                AmanahColorTokens.brandIndigoNavy,
+              ],
       ).createShader(const Rect.fromLTWH(50, 46, 16, 39));
     canvas.drawPath(ribbonRight, ribbonRightPaint);
 
@@ -99,8 +94,16 @@ class _QueueBadgePainter extends CustomPainter {
     final Paint ribbonTrimPaint = Paint()
       ..shader = LinearGradient(
         colors: dark
-            ? const <Color>[AmanahColorTokens.brandMuted, AmanahColorTokens.brandLight, AmanahColorTokens.brandNavyBold]
-            : const <Color>[AmanahColorTokens.pureWhite, AmanahColorTokens.brandSubtle, AmanahColorTokens.brandAccent],
+            ? const <Color>[
+                AmanahColorTokens.pureWhite,
+                AmanahColorTokens.tabActiveDark,
+                AmanahColorTokens.skyDark,
+              ]
+            : const <Color>[
+                AmanahColorTokens.pureWhite,
+                AmanahColorTokens.brandSubtle,
+                AmanahColorTokens.brandAccent,
+              ],
       ).createShader(const Rect.fromLTWH(34, 74, 32, 11))
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
@@ -123,8 +126,17 @@ class _QueueBadgePainter extends CustomPainter {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: dark
-            ? const <Color>[AmanahColorTokens.brandMuted, AmanahColorTokens.brandSubtle, AmanahColorTokens.brandLight, AmanahColorTokens.brandAccent]
-            : const <Color>[AmanahColorTokens.pureWhite, AmanahColorTokens.brandPale, AmanahColorTokens.brandSoft, AmanahColorTokens.brand],
+            ? const <Color>[
+                AmanahColorTokens.pureWhite,
+                AmanahColorTokens.tabActiveDark,
+                AmanahColorTokens.brandLight,
+              ]
+            : const <Color>[
+                AmanahColorTokens.pureWhite,
+                AmanahColorTokens.brandPale,
+                AmanahColorTokens.brandSoft,
+                AmanahColorTokens.brand,
+              ],
       ).createShader(const Rect.fromLTWH(3, 8, 31, 30));
     canvas.drawPath(leftWing, leftWingPaint);
 
@@ -138,8 +150,16 @@ class _QueueBadgePainter extends CustomPainter {
     final Paint wingTrimPaint = Paint()
       ..shader = LinearGradient(
         colors: dark
-            ? const <Color>[AmanahColorTokens.brandMuted, AmanahColorTokens.brandLight, AmanahColorTokens.brandNavyBold]
-            : const <Color>[AmanahColorTokens.pureWhite, AmanahColorTokens.brandSubtle, AmanahColorTokens.brandAccent],
+            ? const <Color>[
+                AmanahColorTokens.pureWhite,
+                AmanahColorTokens.tabActiveDark,
+                AmanahColorTokens.skyDark,
+              ]
+            : const <Color>[
+                AmanahColorTokens.pureWhite,
+                AmanahColorTokens.brandSubtle,
+                AmanahColorTokens.brandAccent,
+              ],
       ).createShader(const Rect.fromLTWH(0, 0, 100, 50))
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.6
@@ -161,8 +181,17 @@ class _QueueBadgePainter extends CustomPainter {
         begin: Alignment.topRight,
         end: Alignment.bottomLeft,
         colors: dark
-            ? const <Color>[AmanahColorTokens.brandMuted, AmanahColorTokens.brandSubtle, AmanahColorTokens.brandLight, AmanahColorTokens.brandAccent]
-            : const <Color>[AmanahColorTokens.pureWhite, AmanahColorTokens.brandPale, AmanahColorTokens.brandSoft, AmanahColorTokens.brand],
+            ? const <Color>[
+                AmanahColorTokens.pureWhite,
+                AmanahColorTokens.tabActiveDark,
+                AmanahColorTokens.brandLight,
+              ]
+            : const <Color>[
+                AmanahColorTokens.pureWhite,
+                AmanahColorTokens.brandPale,
+                AmanahColorTokens.brandSoft,
+                AmanahColorTokens.brand,
+              ],
       ).createShader(const Rect.fromLTWH(66, 8, 31, 30));
     canvas.drawPath(rightWing, rightWingPaint);
 
@@ -209,11 +238,11 @@ class _QueueBadgePainter extends CustomPainter {
         end: Alignment.bottomRight,
         colors: dark
             ? const <Color>[
-                AmanahColorTokens.brandMuted,
+                AmanahColorTokens.pureWhite,
+                AmanahColorTokens.tabActiveDark,
                 AmanahColorTokens.brandLight,
-                AmanahColorTokens.brandAccent,
-                AmanahColorTokens.auroraAccentDark,
-                AmanahColorTokens.brandDarkNavy,
+                AmanahColorTokens.skyDark,
+                AmanahColorTokens.brandNavy,
               ]
             : const <Color>[
                 AmanahColorTokens.pureWhite,
@@ -240,8 +269,16 @@ class _QueueBadgePainter extends CustomPainter {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: dark
-            ? const <Color>[AmanahColorTokens.brandSubtle, AmanahColorTokens.brandLight, AmanahColorTokens.brandAccent]
-            : const <Color>[AmanahColorTokens.brandPale, AmanahColorTokens.brandSoft, AmanahColorTokens.btnCrispBlueBorder],
+            ? const <Color>[
+                AmanahColorTokens.pureWhite,
+                AmanahColorTokens.tabActiveDark,
+                AmanahColorTokens.skyDark,
+              ]
+            : const <Color>[
+                AmanahColorTokens.brandPale,
+                AmanahColorTokens.brandSoft,
+                AmanahColorTokens.btnCrispBlueBorder,
+              ],
       ).createShader(const Rect.fromLTWH(27, 11, 46, 54));
     canvas.drawPath(hexChamfer, hexChamferPaint);
 
@@ -257,8 +294,16 @@ class _QueueBadgePainter extends CustomPainter {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: dark
-            ? const <Color>[AmanahColorTokens.brandLight, AmanahColorTokens.brandAccent, AmanahColorTokens.auroraAccentDark]
-            : const <Color>[AmanahColorTokens.brandSoft, AmanahColorTokens.brand, AmanahColorTokens.btnCrispBlueBorder],
+            ? const <Color>[
+                AmanahColorTokens.tabActiveDark,
+                AmanahColorTokens.skyDark,
+                AmanahColorTokens.brandNavy,
+              ]
+            : const <Color>[
+                AmanahColorTokens.brandSoft,
+                AmanahColorTokens.brand,
+                AmanahColorTokens.btnCrispBlueBorder,
+              ],
       ).createShader(const Rect.fromLTWH(32, 15, 18, 46));
     canvas.drawPath(gemLeft, gemLeftPaint);
 
@@ -273,8 +318,16 @@ class _QueueBadgePainter extends CustomPainter {
         begin: Alignment.topRight,
         end: Alignment.bottomLeft,
         colors: dark
-            ? const <Color>[AmanahColorTokens.brandAccent, AmanahColorTokens.auroraAccentDark, AmanahColorTokens.brandDarkNavy]
-            : const <Color>[AmanahColorTokens.btnCrispBlueBorder, AmanahColorTokens.btnCrispBlueBorder, AmanahColorTokens.brandIndigoNavy],
+            ? const <Color>[
+                AmanahColorTokens.skyDark,
+                AmanahColorTokens.brandNavy,
+                AmanahColorTokens.darkNavy,
+              ]
+            : const <Color>[
+                AmanahColorTokens.btnCrispBlueBorder,
+                AmanahColorTokens.btnCrispBlueBorder,
+                AmanahColorTokens.brandIndigoNavy,
+              ],
       ).createShader(const Rect.fromLTWH(50, 15, 18, 46));
     canvas.drawPath(gemRight, gemRightPaint);
 
@@ -315,10 +368,7 @@ class _QueueBadgePainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    depthPainter.paint(
-      canvas,
-      Offset(50 - depthPainter.width / 2, 40.5 - depthPainter.height / 2),
-    );
+    depthPainter.paint(canvas, Offset(50 - depthPainter.width / 2, 40.5 - depthPainter.height / 2));
 
     // Front Bright Face
     final TextPainter frontPainter = TextPainter(
@@ -336,10 +386,7 @@ class _QueueBadgePainter extends CustomPainter {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    frontPainter.paint(
-      canvas,
-      Offset(50 - frontPainter.width / 2, 39.0 - frontPainter.height / 2),
-    );
+    frontPainter.paint(canvas, Offset(50 - frontPainter.width / 2, 39.0 - frontPainter.height / 2));
 
     canvas.restore();
   }

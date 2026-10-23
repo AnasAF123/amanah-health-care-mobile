@@ -394,7 +394,6 @@ class _AmanahHomeScreenContent extends StatelessWidget {
             child: ListView(
               physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-              clipBehavior: Clip.none,
               children: <Widget>[
                 // 2. 3D Stack of Schedule Cards
                 AmanahScheduleCardStack(

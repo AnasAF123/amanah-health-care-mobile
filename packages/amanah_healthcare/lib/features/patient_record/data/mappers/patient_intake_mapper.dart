@@ -3,7 +3,7 @@ import 'package:amanah_healthcare/features/patient_record/domain/entities/patien
 class PatientIntakeMapper {
   PatientIntakeMapper._();
 
-  static int? _parseInt(dynamic value) {
+  static int? parseInt(dynamic value) {
     if (value == null) return null;
     if (value is int) return value;
     if (value is num) return value.toInt();
@@ -17,7 +17,7 @@ class PatientIntakeMapper {
     return null;
   }
 
-  static double? _parseDouble(dynamic value) {
+  static double? parseDouble(dynamic value) {
     if (value == null) return null;
     if (value is double) return value;
     if (value is num) return value.toDouble();
@@ -27,6 +27,9 @@ class PatientIntakeMapper {
     return null;
   }
 
+  static int? _parseInt(dynamic value) => parseInt(value);
+  static double? _parseDouble(dynamic value) => parseDouble(value);
+
   static PatientIntakeRecord fromJson(Map<String, dynamic> json, String appointmentId) {
     final String flow = json['flow'] as String? ?? 'regular';
     final String type = json['type'] as String? ?? flow;
@@ -35,16 +38,22 @@ class PatientIntakeMapper {
         ? rawData
         : <String, dynamic>{};
 
-    MaternalIntakeData? maternal;
-    ImmunizationIntakeData? immunization;
-    RegularIntakeData? regular;
+    // Always map regular demographic & appointment intake data so no patient lacks core data
+    final RegularIntakeData regular = _mapRegularData(data);
 
-    if (type == 'maternal' || flow == 'pregnancy') {
+    MaternalIntakeData? maternal;
+    if (type == 'maternal' ||
+        flow == 'pregnancy' ||
+        data.containsKey('hpht') ||
+        data.containsKey('gestationalAgeFormatted')) {
       maternal = _mapMaternalData(data);
-    } else if (type == 'immunization' || flow == 'immunization') {
+    }
+
+    ImmunizationIntakeData? immunization;
+    if (type == 'immunization' ||
+        flow == 'immunization' ||
+        (data.containsKey('childName') && data['childName'] != null)) {
       immunization = _mapImmunizationData(data);
-    } else {
-      regular = _mapRegularData(data);
     }
 
     return PatientIntakeRecord(
@@ -55,6 +64,119 @@ class PatientIntakeMapper {
       immunization: immunization,
       regular: regular,
     );
+  }
+
+  static List<MaternalDiseaseHistoryItem> _mapDiseaseHistory(dynamic rawHistory) {
+    if (rawHistory is! Map<String, dynamic>) return const <MaternalDiseaseHistoryItem>[];
+
+    final List<Map<String, String>> definitions = <Map<String, String>>[
+      <String, String>{
+        'has': 'hasDiabetesHistory',
+        'notes': 'diabetesHistoryNotes',
+        'label': 'Diabetes Melitus',
+      },
+      <String, String>{
+        'has': 'hasHypertensionHistory',
+        'notes': 'hypertensionHistoryNotes',
+        'label': 'Hipertensi / Tekanan Darah Tinggi',
+      },
+      <String, String>{
+        'has': 'hasHepatitisBHistory',
+        'notes': 'hepatitisBHistoryNotes',
+        'label': 'Hepatitis B',
+      },
+      <String, String>{
+        'has': 'hasThyroidDiseaseHistory',
+        'notes': 'thyroidDiseaseHistoryNotes',
+        'label': 'Penyakit Tiroid',
+      },
+      <String, String>{
+        'has': 'hasSurgeryHistory',
+        'notes': 'surgeryHistoryNotes',
+        'label': 'Riwayat Operasi',
+      },
+      <String, String>{
+        'has': 'hasTwinPregnancyHistory',
+        'notes': 'twinPregnancyHistoryNotes',
+        'label': 'Riwayat Kehamilan Kembar',
+      },
+      <String, String>{'has': 'hasAsthmaHistory', 'notes': 'asthmaHistoryNotes', 'label': 'Asma'},
+      <String, String>{
+        'has': 'hasHeartDiseaseHistory',
+        'notes': 'heartDiseaseHistoryNotes',
+        'label': 'Penyakit Jantung',
+      },
+      <String, String>{
+        'has': 'hasAutoimmuneHistory',
+        'notes': 'autoimmuneHistoryNotes',
+        'label': 'Autoimun (SLE/Lupus)',
+      },
+      <String, String>{
+        'has': 'hasTuberculosisHistory',
+        'notes': 'tuberculosisHistoryNotes',
+        'label': 'Tuberkulosis (TBC)',
+      },
+      <String, String>{
+        'has': 'hasHivOrSyphilisHistory',
+        'notes': 'hivOrSyphilisHistoryNotes',
+        'label': 'HIV / Sifilis',
+      },
+      <String, String>{
+        'has': 'hasCystMyomaTumorHistory',
+        'notes': 'cystMyomaTumorHistoryNotes',
+        'label': 'Kista / Miom / Tumor',
+      },
+      <String, String>{
+        'has': 'hasMentalHealthHistory',
+        'notes': 'mentalHealthHistoryNotes',
+        'label': 'Kesehatan Mental',
+      },
+      <String, String>{
+        'has': 'hasOtherDiseaseHistory',
+        'notes': 'otherDiseaseHistoryNotes',
+        'label': 'Penyakit Lainnya',
+      },
+    ];
+
+    final List<MaternalDiseaseHistoryItem> result = <MaternalDiseaseHistoryItem>[];
+    for (final Map<String, String> def in definitions) {
+      final dynamic rawHas = rawHistory[def['has']];
+      final bool has =
+          rawHas == true ||
+          (rawHas is String &&
+              (rawHas.trim().toLowerCase() == 'ya' ||
+                  rawHas.trim().toLowerCase() == 'ada' ||
+                  rawHas.trim().toLowerCase() == 'true'));
+      final dynamic rawNotes = rawHistory[def['notes']];
+      final String? notes = rawNotes?.toString().trim();
+
+      result.add(
+        MaternalDiseaseHistoryItem(
+          diseaseName: def['label']!,
+          hasDisease: has,
+          yearOrNotes: (notes != null && notes.isNotEmpty) ? notes : null,
+        ),
+      );
+    }
+    return result;
+  }
+
+  static List<VaccineEntryItem> _mapVaccineEntries(dynamic entriesRaw) {
+    if (entriesRaw is! List<dynamic>) return const <VaccineEntryItem>[];
+    final List<VaccineEntryItem> list = <VaccineEntryItem>[];
+    for (final dynamic item in entriesRaw) {
+      if (item is Map<String, dynamic>) {
+        final String code =
+            item['vaccineCode'] as String? ?? item['vaccine_code'] as String? ?? '-';
+        final String status = item['status'] as String? ?? 'NOT_GIVEN';
+        final String? givenDate = item['givenDate'] as String? ?? item['given_date'] as String?;
+        final String? notes = item['notes'] as String?;
+        list.add(
+          VaccineEntryItem(vaccineCode: code, status: status, givenDate: givenDate, notes: notes),
+        );
+      }
+    }
+    return list;
   }
 
   static MaternalIntakeData _mapMaternalData(Map<String, dynamic> data) {
@@ -105,6 +227,23 @@ class PatientIntakeMapper {
       }
     }
 
+    final String? husbandName = (data['partnerName'] ?? data['husbandName']) as String?;
+    MaternalHusbandData? husband;
+    if (husbandName != null && husbandName.trim().isNotEmpty) {
+      husband = MaternalHusbandData(
+        name: husbandName.trim(),
+        nik: (data['partnerNik'] ?? data['husbandNik'])?.toString(),
+        birthDate: (data['partnerBirthDate'] ?? data['husbandBirthDate']) as String?,
+        age: _parseInt(data['partnerAge'] ?? data['husbandAge']),
+        job: (data['partnerJob'] ?? data['husbandJob']) as String?,
+        education: (data['partnerEducation'] ?? data['husbandEducation']) as String?,
+        bloodType: (data['partnerBloodType'] ?? data['husbandBloodType']) as String?,
+      );
+    }
+
+    final dynamic rawDisease = data['diseaseHistory'] ?? data['answers'];
+    final List<MaternalDiseaseHistoryItem> diseaseHistoryList = _mapDiseaseHistory(rawDisease);
+
     return MaternalIntakeData(
       gpa: gpa,
       hpht: data['hpht'] as String?,
@@ -116,7 +255,15 @@ class PatientIntakeMapper {
       initialBmi: _parseDouble(data['initialBmi']),
       motherBloodType: data['motherBloodType'] as String?,
       tetanusStatus: data['tetanusStatus'] as String?,
-      partnerName: data['partnerName'] as String?,
+      partnerName: husbandName,
+      husband: husband,
+      diseaseHistoryList: diseaseHistoryList,
+      puskesmas: data['puskesmas'] as String?,
+      posyandu: data['posyandu'] as String?,
+      dasawisma: data['dasawisma'] as String?,
+      concerningEnvironmentNotes: data['concerningEnvironmentNotes'] as String?,
+      allergyInfo: data['allergyInfo'] as String?,
+      otherNotes: data['otherNotes'] as String?,
       previousPregnancies: previousPregnancies,
       contraceptiveHistories: contraceptiveHistories,
     );
@@ -133,6 +280,7 @@ class PatientIntakeMapper {
       motherName: data['motherName'] as String?,
       previousVaccineHistory: data['previousVaccineHistory'] as String?,
       childAllergyHistory: data['childAllergyHistory'] as String?,
+      vaccineEntries: _mapVaccineEntries(data['entries']),
     );
   }
 
@@ -141,6 +289,7 @@ class PatientIntakeMapper {
     final Map<String, dynamic> p = patientRaw is Map<String, dynamic> ? patientRaw : data;
 
     return RegularIntakeData(
+      patientId: p['id'] as String? ?? data['patientId'] as String?,
       fullName: p['fullName'] as String? ?? p['name'] as String?,
       medicalRecordNumber: p['medicalRecordNumber'] as String? ?? p['patientRm'] as String?,
       nik: p['nik'] as String?,

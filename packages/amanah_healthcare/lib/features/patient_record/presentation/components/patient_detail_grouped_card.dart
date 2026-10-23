@@ -48,9 +48,7 @@ class PatientDetailGroupSection extends StatelessWidget {
             child: Text(
               title,
               style: TextStyle(
-                color: isDark
-                    ? AmanahColorTokens.neutral400
-                    : AmanahColorTokens.neutral500,
+                color: isDark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
                 letterSpacing: -0.1,
@@ -65,16 +63,11 @@ class PatientDetailGroupSection extends StatelessWidget {
                   : AmanahColorTokens.surfaceLight,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isDark
-                    ? AmanahColorTokens.neutral800
-                    : AmanahColorTokens.neutral200,
+                color: isDark ? AmanahColorTokens.neutral800 : AmanahColorTokens.neutral200,
                 width: 1,
               ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: children,
-            ),
+            child: Column(mainAxisSize: MainAxisSize.min, children: children),
           ),
         ],
       ),
@@ -115,9 +108,7 @@ class PatientDetailTile extends StatelessWidget {
               Icon(
                 icon,
                 size: 20,
-                color: isDark
-                    ? AmanahColorTokens.neutral400
-                    : AmanahColorTokens.neutral600,
+                color: isDark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral600,
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -141,9 +132,7 @@ class PatientDetailTile extends StatelessWidget {
                     Text(
                       label,
                       style: TextStyle(
-                        color: isDark
-                            ? AmanahColorTokens.neutral400
-                            : AmanahColorTokens.neutral500,
+                        color: isDark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
                         fontSize: 11.5,
                         fontWeight: FontWeight.w500,
                       ),
@@ -152,6 +141,139 @@ class PatientDetailTile extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+        if (showDivider)
+          Padding(
+            padding: const EdgeInsets.only(left: 50),
+            child: Divider(
+              height: 1,
+              thickness: 1,
+              color: isDark
+                  ? AmanahColorTokens.neutral800.withValues(alpha: 0.6)
+                  : AmanahColorTokens.neutral100,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Interactive Action list tile inside [PatientDetailGroupSection].
+/// Displays a chevron right icon, optional badge count chip, and triggers [onTap].
+class PatientDetailActionTile extends StatelessWidget {
+  const PatientDetailActionTile({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onTap,
+    required this.isDark,
+    this.badgeText,
+    this.showDivider = true,
+    this.maxLines = 2,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+  final bool isDark;
+  final String? badgeText;
+  final bool showDivider;
+  final int maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    icon,
+                    size: 20,
+                    color: isDark
+                        ? AmanahColorTokens.tabActiveDark
+                        : AmanahColorTokens.brandPrimary,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          value.isNotEmpty ? value : '-',
+                          maxLines: maxLines,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: isDark
+                                ? AmanahColorTokens.surfaceLight
+                                : AmanahColorTokens.neutral900,
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w700,
+                            height: 1.25,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          label,
+                          style: TextStyle(
+                            color: isDark
+                                ? AmanahColorTokens.neutral400
+                                : AmanahColorTokens.neutral500,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (badgeText != null && badgeText!.trim().isNotEmpty) ...<Widget>[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.16)
+                            : AmanahColorTokens.brand.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isDark
+                              ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.32)
+                              : AmanahColorTokens.brand.withValues(alpha: 0.20),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        badgeText!,
+                        style: TextStyle(
+                          color: isDark
+                              ? AmanahColorTokens.tabActiveDark
+                              : AmanahColorTokens.brandPrimary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(width: 6),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 20,
+                    color: isDark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
         if (showDivider)

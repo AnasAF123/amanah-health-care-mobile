@@ -3,11 +3,7 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 
 /// Clean presentation view rendered when an appointment has no intake submission yet (404/Empty).
 class EmptyIntakeView extends StatelessWidget {
-  const EmptyIntakeView({
-    super.key,
-    this.complaint,
-    required this.isDark,
-  });
+  const EmptyIntakeView({super.key, this.complaint, required this.isDark});
 
   final String? complaint;
   final bool isDark;
@@ -18,14 +14,10 @@ class EmptyIntakeView extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       decoration: BoxDecoration(
-        color: isDark
-            ? AmanahColorTokens.surfaceSecondaryDark
-            : AmanahColorTokens.surfaceLight,
+        color: isDark ? AmanahColorTokens.surfaceSecondaryDark : AmanahColorTokens.surfaceLight,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark
-              ? AmanahColorTokens.neutral800
-              : AmanahColorTokens.neutral200,
+          color: isDark ? AmanahColorTokens.neutral800 : AmanahColorTokens.neutral200,
         ),
       ),
       child: Column(
@@ -34,16 +26,12 @@ class EmptyIntakeView extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isDark
-                  ? AmanahColorTokens.neutral800
-                  : AmanahColorTokens.neutral100,
+              color: isDark ? AmanahColorTokens.neutral800 : AmanahColorTokens.neutral100,
             ),
             child: Icon(
               Icons.assignment_late_outlined,
               size: 32,
-              color: isDark
-                  ? AmanahColorTokens.neutral400
-                  : AmanahColorTokens.neutral500,
+              color: isDark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
             ),
           ),
           const SizedBox(height: 12),
@@ -52,9 +40,7 @@ class EmptyIntakeView extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: isDark
-                  ? AmanahColorTokens.surfaceLight
-                  : AmanahColorTokens.neutral900,
+              color: isDark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
             ),
           ),
           const SizedBox(height: 6),
@@ -63,9 +49,7 @@ class EmptyIntakeView extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12,
-              color: isDark
-                  ? AmanahColorTokens.neutral400
-                  : AmanahColorTokens.neutral600,
+              color: isDark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral600,
             ),
           ),
           if (complaint != null && complaint!.isNotEmpty) ...<Widget>[
@@ -74,9 +58,7 @@ class EmptyIntakeView extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isDark
-                    ? AmanahColorTokens.neutral800
-                    : AmanahColorTokens.neutral100,
+                color: isDark ? AmanahColorTokens.neutral800 : AmanahColorTokens.neutral100,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
@@ -85,7 +67,7 @@ class EmptyIntakeView extends StatelessWidget {
                     Icons.notes_rounded,
                     size: 16,
                     color: isDark
-                        ? AmanahColorTokens.brandLight
+                        ? AmanahColorTokens.tabActiveDark
                         : AmanahColorTokens.brandPrimary,
                   ),
                   const SizedBox(width: 8),

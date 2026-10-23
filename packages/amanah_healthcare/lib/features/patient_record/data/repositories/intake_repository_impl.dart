@@ -6,19 +6,15 @@ import 'package:amanah_healthcare/features/patient_record/domain/failures/intake
 import 'package:amanah_healthcare/features/patient_record/domain/repositories/intake_repository.dart';
 
 class IntakeRepositoryImpl implements IntakeRepository {
-  IntakeRepositoryImpl({
-    IntakeRemoteDataSource? remoteDataSource,
-  }) : _remoteDataSource = remoteDataSource ?? IntakeRemoteDataSourceImpl();
+  IntakeRepositoryImpl({IntakeRemoteDataSource? remoteDataSource})
+    : _remoteDataSource = remoteDataSource ?? IntakeRemoteDataSourceImpl();
 
   final IntakeRemoteDataSource _remoteDataSource;
 
   @override
-  Future<PatientIntakeRecord> getIntakeByAppointmentId(
-    String appointmentId,
-  ) async {
+  Future<PatientIntakeRecord> getIntakeByAppointmentId(String appointmentId) async {
     try {
-      final dynamic raw =
-          await _remoteDataSource.getIntakeByAppointmentId(appointmentId);
+      final dynamic raw = await _remoteDataSource.getIntakeByAppointmentId(appointmentId);
       if (raw is Map<String, dynamic>) {
         return PatientIntakeMapper.fromJson(raw, appointmentId);
       }
@@ -34,6 +30,36 @@ class IntakeRepositoryImpl implements IntakeRepository {
       rethrow;
     } catch (e) {
       throw IntakeFailure('Gagal memuat data formulir pasien: $e');
+    }
+  }
+
+  @override
+  Future<List<MaternalTimelineItem>> getMaternalHistory(String patientId) async {
+    try {
+      final dynamic raw = await _remoteDataSource.getMaternalHistory(patientId);
+      if (raw is List) {
+        return raw.map((dynamic item) {
+          final Map<String, dynamic> m = item is Map<String, dynamic> ? item : <String, dynamic>{};
+          return MaternalTimelineItem(
+            id: m['id']?.toString() ?? '',
+            appointmentId: m['appointmentId']?.toString(),
+            gestationalAgeFormatted: m['gestationalAgeFormatted'] as String?,
+            hpht: m['hpht'] as String?,
+            estimatedDueDate: m['estimatedDueDate'] as String?,
+            partnerName: m['partnerName'] as String?,
+            gravidaCount: PatientIntakeMapper.parseInt(m['gravidaCount']),
+            parityCount: PatientIntakeMapper.parseInt(m['parityCount']),
+            abortionCount: PatientIntakeMapper.parseInt(m['abortionCount']),
+            livingChildrenCount: PatientIntakeMapper.parseInt(m['livingChildrenCount']),
+            createdAt: m['createdAt'] as String?,
+          );
+        }).toList();
+      }
+      return const <MaternalTimelineItem>[];
+    } on ApiException catch (e) {
+      throw IntakeFailure(e.message, code: e.code);
+    } catch (e) {
+      throw IntakeFailure('Gagal memuat riwayat asuhan kehamilan: $e');
     }
   }
 }

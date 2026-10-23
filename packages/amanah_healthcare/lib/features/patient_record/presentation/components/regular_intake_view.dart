@@ -1,56 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/time/contracts/time_service.dart';
+import 'package:amanah_healthcare/core/time/services/default_time_service.dart';
 import 'package:amanah_healthcare/features/patient_record/domain/entities/patient_intake_record.dart';
 import 'package:amanah_healthcare/features/patient_record/presentation/components/patient_detail_grouped_card.dart';
 
 /// Minimalist presentation view for General / Regular Consultation Intake Form.
 /// Built with grouped inset card design matching modern minimalist styling.
 class RegularIntakeView extends StatelessWidget {
-  const RegularIntakeView({
+  RegularIntakeView({
     super.key,
     required this.regular,
     required this.fallbackComplaint,
     required this.isDark,
-  });
+    TimeService? timeService,
+  }) : timeService = timeService ?? DefaultTimeService();
 
   final RegularIntakeData? regular;
   final String? fallbackComplaint;
   final bool isDark;
+  final TimeService timeService;
 
   String _formatIsoTime(String? isoString) {
     if (isoString == null || isoString.trim().isEmpty) return '-';
     try {
-      final DateTime dt = DateTime.parse(isoString).toLocal();
-      final String hour = dt.hour.toString().padLeft(2, '0');
-      final String minute = dt.minute.toString().padLeft(2, '0');
-      return '$hour:$minute WIB';
+      final DateTime dt = DateTime.parse(isoString.trim()).toLocal();
+      final String timeStr = timeService.formatTime(dt);
+      return '$timeStr WIB';
     } catch (_) {
       return isoString;
     }
   }
 
+  String _formatDate(String? dateStr, {String style = 'human_medium'}) {
+    if (dateStr == null || dateStr.trim().isEmpty) return '-';
+    try {
+      final DateTime dt = DateTime.parse(dateStr.trim()).toLocal();
+      return timeService.formatDate(dt, style: style);
+    } catch (_) {
+      return dateStr;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final String complaint = regular?.complaint ??
-        fallbackComplaint ??
-        'Tidak ada catatan keluhan khusus.';
+    final String complaint =
+        regular?.complaint ?? fallbackComplaint ?? 'Tidak ada catatan keluhan khusus.';
 
-    final bool hasEmergency = regular?.emergencyContactName != null &&
-        regular!.emergencyContactName!.trim().isNotEmpty;
+    final bool hasEmergency =
+        regular?.emergencyContactName != null && regular!.emergencyContactName!.trim().isNotEmpty;
 
-    final bool hasVillage = regular?.villageName != null &&
-        regular!.villageName!.trim().isNotEmpty;
-    final bool hasDistrict = regular?.districtName != null &&
-        regular!.districtName!.trim().isNotEmpty;
-    final bool hasRegency = regular?.regencyName != null &&
-        regular!.regencyName!.trim().isNotEmpty;
-    final bool hasProvince = regular?.provinceName != null &&
-        regular!.provinceName!.trim().isNotEmpty;
+    final bool hasVillage = regular?.villageName != null && regular!.villageName!.trim().isNotEmpty;
+    final bool hasDistrict =
+        regular?.districtName != null && regular!.districtName!.trim().isNotEmpty;
+    final bool hasRegency = regular?.regencyName != null && regular!.regencyName!.trim().isNotEmpty;
+    final bool hasProvince =
+        regular?.provinceName != null && regular!.provinceName!.trim().isNotEmpty;
 
-    final bool hasActualStarted = regular?.actualStartedAt != null &&
-        regular!.actualStartedAt!.trim().isNotEmpty;
-    final bool hasActualCompleted = regular?.actualCompletedAt != null &&
-        regular!.actualCompletedAt!.trim().isNotEmpty;
-    final bool hasDuration = regular?.consultationDurationFormatted != null &&
+    final bool hasActualStarted =
+        regular?.actualStartedAt != null && regular!.actualStartedAt!.trim().isNotEmpty;
+    final bool hasActualCompleted =
+        regular?.actualCompletedAt != null && regular!.actualCompletedAt!.trim().isNotEmpty;
+    final bool hasDuration =
+        regular?.consultationDurationFormatted != null &&
         regular!.consultationDurationFormatted!.trim().isNotEmpty;
 
     return Column(
@@ -82,7 +93,7 @@ class RegularIntakeView extends StatelessWidget {
             PatientDetailTile(
               icon: Icons.cake_outlined,
               label: 'Tanggal Lahir',
-              value: regular?.birthDate ?? '-',
+              value: _formatDate(regular?.birthDate),
               isDark: isDark,
             ),
             PatientDetailTile(
@@ -194,8 +205,7 @@ class RegularIntakeView extends StatelessWidget {
           title: 'Kunjungan & Layanan',
           isDark: isDark,
           children: <Widget>[
-            if (regular?.queueNumber != null &&
-                regular!.queueNumber!.trim().isNotEmpty)
+            if (regular?.queueNumber != null && regular!.queueNumber!.trim().isNotEmpty)
               PatientDetailTile(
                 icon: Icons.confirmation_number_outlined,
                 label: 'Nomor Antrean',
@@ -208,8 +218,7 @@ class RegularIntakeView extends StatelessWidget {
               value: regular?.bookingCode ?? '-',
               isDark: isDark,
             ),
-            if (regular?.poliklinikName != null &&
-                regular!.poliklinikName!.trim().isNotEmpty)
+            if (regular?.poliklinikName != null && regular!.poliklinikName!.trim().isNotEmpty)
               PatientDetailTile(
                 icon: Icons.local_hospital_outlined,
                 label: 'Poliklinik',
@@ -225,8 +234,7 @@ class RegularIntakeView extends StatelessWidget {
             PatientDetailTile(
               icon: Icons.person_pin_outlined,
               label: 'Dokter Penanggung Jawab',
-              value: (regular?.doctorName != null &&
-                      regular!.doctorName!.trim().isNotEmpty)
+              value: (regular?.doctorName != null && regular!.doctorName!.trim().isNotEmpty)
                   ? regular!.doctorName!
                   : 'Belum di-assign',
               isDark: isDark,
@@ -234,8 +242,7 @@ class RegularIntakeView extends StatelessWidget {
             PatientDetailTile(
               icon: Icons.meeting_room_outlined,
               label: 'Ruangan Praktik',
-              value: (regular?.roomName != null &&
-                      regular!.roomName!.trim().isNotEmpty)
+              value: (regular?.roomName != null && regular!.roomName!.trim().isNotEmpty)
                   ? regular!.roomName!
                   : 'Belum di-assign',
               isDark: isDark,
@@ -243,11 +250,10 @@ class RegularIntakeView extends StatelessWidget {
             PatientDetailTile(
               icon: Icons.calendar_today_outlined,
               label: 'Tanggal Kunjungan',
-              value: regular?.scheduledDate ?? '-',
+              value: _formatDate(regular?.scheduledDate, style: 'human_full'),
               isDark: isDark,
             ),
-            if (regular?.sessionName != null &&
-                regular!.sessionName!.trim().isNotEmpty)
+            if (regular?.sessionName != null && regular!.sessionName!.trim().isNotEmpty)
               PatientDetailTile(
                 icon: Icons.timelapse_rounded,
                 label: 'Sesi Praktik',
@@ -259,8 +265,7 @@ class RegularIntakeView extends StatelessWidget {
               label: 'Estimasi Jam Layanan',
               value: regular?.practiceTimeFormatted ?? '-',
               isDark: isDark,
-              showDivider:
-                  hasActualStarted || hasActualCompleted || hasDuration,
+              showDivider: hasActualStarted || hasActualCompleted || hasDuration,
             ),
             if (hasActualStarted)
               PatientDetailTile(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
@@ -31,29 +30,21 @@ class PatientIntakeHeaderCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: isDark
-            ? AmanahColorTokens.surfaceSecondaryDark
-            : AmanahColorTokens.surfaceLight,
+        color: isDark ? AmanahColorTokens.surfaceSecondaryDark : AmanahColorTokens.surfaceLight,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark
-              ? AmanahColorTokens.neutral800
-              : AmanahColorTokens.neutral200,
+          color: isDark ? AmanahColorTokens.neutral800 : AmanahColorTokens.neutral200,
         ),
       ),
       child: Row(
         children: <Widget>[
           CircleAvatar(
             radius: 22,
-            backgroundColor: isDark
-                ? AmanahColorTokens.neutral800
-                : AmanahColorTokens.neutral100,
+            backgroundColor: isDark ? AmanahColorTokens.neutral800 : AmanahColorTokens.neutral100,
             child: Text(
               patientName.isNotEmpty ? patientName.substring(0, 1).toUpperCase() : 'P',
               style: TextStyle(
-                color: isDark
-                    ? AmanahColorTokens.surfaceLight
-                    : AmanahColorTokens.neutral900,
+                color: isDark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
                 fontSize: 17,
                 fontWeight: FontWeight.w800,
               ),
@@ -66,9 +57,7 @@ class PatientIntakeHeaderCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: isDark
-                    ? AmanahColorTokens.surfaceLight
-                    : AmanahColorTokens.neutral900,
+                color: isDark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
                 fontSize: 16.5,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.2,
@@ -77,10 +66,7 @@ class PatientIntakeHeaderCard extends StatelessWidget {
           ),
           if (statusText != null && statusText!.isNotEmpty) ...<Widget>[
             const SizedBox(width: 8),
-            AmanahStatusBadge(
-              variant: statusVariant ?? AmanahBadgeVariant.live,
-              text: statusText!,
-            ),
+            AmanahStatusBadge(variant: statusVariant ?? AmanahBadgeVariant.live, text: statusText!),
           ],
         ],
       ),

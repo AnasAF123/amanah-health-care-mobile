@@ -25,25 +25,15 @@ class AmanahPillStyle {
 /// Abstract style service providing single source of truth for all pill badges.
 abstract final class AmanahPillStyleService {
   /// Resolves the primary indicator color for a badge variant.
-  static Color dotColorFor(
-    AmanahBadgeVariant variant, {
-    BuildContext? context,
-    bool? isDark,
-  }) {
+  static Color dotColorFor(AmanahBadgeVariant variant, {BuildContext? context, bool? isDark}) {
     final AmanahStatusTone tone = switch (variant) {
       AmanahBadgeVariant.success => AmanahStatusTone.success,
-      AmanahBadgeVariant.primary ||
-      AmanahBadgeVariant.live =>
-        AmanahStatusTone.brand,
+      AmanahBadgeVariant.primary || AmanahBadgeVariant.live => AmanahStatusTone.brand,
       AmanahBadgeVariant.warning => AmanahStatusTone.warning,
       AmanahBadgeVariant.trend => AmanahStatusTone.violet,
     };
 
-    return AmanahThemeTokens.status(
-      tone,
-      context: context,
-      isDark: isDark,
-    ).primary;
+    return AmanahThemeTokens.status(tone, context: context, isDark: isDark).primary;
   }
 
   /// Resolves the comprehensive styling bundle for a pill component.
@@ -53,23 +43,23 @@ abstract final class AmanahPillStyleService {
     bool? isDark,
     Color? customDotColor,
   }) {
-    final bool dark = isDark ??
-        (context != null
-            ? Theme.of(context).brightness == Brightness.dark
-            : false);
+    final bool dark =
+        isDark ?? (context != null ? Theme.of(context).brightness == Brightness.dark : false);
+
+    final AmanahStatusTone tone = switch (variant) {
+      AmanahBadgeVariant.success => AmanahStatusTone.success,
+      AmanahBadgeVariant.primary || AmanahBadgeVariant.live => AmanahStatusTone.brand,
+      AmanahBadgeVariant.warning => AmanahStatusTone.warning,
+      AmanahBadgeVariant.trend => AmanahStatusTone.violet,
+    };
+
+    final AmanahTone resolvedTone = AmanahThemeTokens.status(tone, context: context, isDark: dark);
 
     return AmanahPillStyle(
-      dotColor: customDotColor ??
-          dotColorFor(variant, context: context, isDark: dark),
-      backgroundColor: dark
-          ? AmanahColorTokens.canvasDark.withValues(alpha: 0.70)
-          : AmanahColorTokens.surfaceLight.withValues(alpha: 0.90),
-      borderColor: dark
-          ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.10)
-          : AmanahColorTokens.neutral200,
-      textColor: dark
-          ? AmanahColorTokens.surfaceLight
-          : AmanahColorTokens.neutral900,
+      dotColor: customDotColor ?? resolvedTone.primary,
+      backgroundColor: dark ? resolvedTone.dark.withValues(alpha: 0.25) : resolvedTone.surface,
+      borderColor: dark ? resolvedTone.primary.withValues(alpha: 0.32) : resolvedTone.border,
+      textColor: dark ? resolvedTone.primary : resolvedTone.onSurface,
       shadowColor: AmanahColorTokens.pureBlack.withValues(alpha: 0.05),
     );
   }
@@ -104,31 +94,20 @@ class AmanahStatusBadge extends StatelessWidget {
     );
 
     final Widget pillBody = Container(
-      padding: padding ??
-          const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 6,
-          ),
+      padding: padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: style.backgroundColor,
         borderRadius: BorderRadius.circular(AmanahRadius.pill),
         border: Border.all(color: style.borderColor),
         boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: style.shadowColor,
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
+          BoxShadow(color: style.shadowColor, blurRadius: 6, offset: const Offset(0, 2)),
         ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           DecoratedBox(
-            decoration: BoxDecoration(
-              color: style.dotColor,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: style.dotColor, shape: BoxShape.circle),
             child: const SizedBox(width: 8, height: 8),
           ),
           const SizedBox(width: 6),
@@ -150,10 +129,7 @@ class AmanahStatusBadge extends StatelessWidget {
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(AmanahRadius.pill),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: pillBody,
-      ),
+      child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12), child: pillBody),
     );
   }
 }

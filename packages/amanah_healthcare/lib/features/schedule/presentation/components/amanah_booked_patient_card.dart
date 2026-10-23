@@ -47,17 +47,15 @@ class AmanahBookedPatientCard extends StatelessWidget {
     final String startTime = patient.actualStartedAt != null
         ? formatTimeOnly(patient.actualStartedAt)
         : (patient.scheduledStartTime != null
-            ? formatTimeOnly(patient.scheduledStartTime)
-            : (rawSlot.contains(' - ')
-                ? rawSlot.split(' - ').first.trim()
-                : '08:00'));
+              ? formatTimeOnly(patient.scheduledStartTime)
+              : (rawSlot.contains(' - ') ? rawSlot.split(' - ').first.trim() : '08:00'));
     final String endTime = patient.actualCompletedAt != null
         ? formatTimeOnly(patient.actualCompletedAt)
         : (patient.scheduledEndTime != null
-            ? formatTimeOnly(patient.scheduledEndTime)
-            : (rawSlot.contains(' - ')
-                ? rawSlot.split(' - ').last.replaceAll(' WIB', '').trim()
-                : '09:30'));
+              ? formatTimeOnly(patient.scheduledEndTime)
+              : (rawSlot.contains(' - ')
+                    ? rawSlot.split(' - ').last.replaceAll(' WIB', '').trim()
+                    : '09:30'));
 
     return Semantics(
       button: true,
@@ -65,15 +63,12 @@ class AmanahBookedPatientCard extends StatelessWidget {
       child: GestureDetector(
         onTap: onTapDetail,
         child: Container(
-          height: 335,
+          height: 355,
           width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(32),
             color: AmanahThemeTokens.surface(context),
-            border: Border.all(
-              color: AmanahThemeTokens.outline(context),
-              width: 1,
-            ),
+            border: Border.all(color: AmanahThemeTokens.outline(context), width: 1),
             boxShadow: <BoxShadow>[AmanahElevation.soft(dark: dark)],
           ),
           clipBehavior: Clip.antiAlias,
@@ -85,12 +80,8 @@ class AmanahBookedPatientCard extends StatelessWidget {
                   cardBgAsset,
                   fit: BoxFit.cover,
                   alignment: Alignment.centerRight,
-                  errorBuilder:
-                      (
-                        BuildContext context,
-                        Object error,
-                        StackTrace? stackTrace,
-                      ) => Container(
+                  errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) =>
+                      Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
@@ -120,20 +111,14 @@ class AmanahBookedPatientCard extends StatelessWidget {
               Positioned(
                 top: 14,
                 left: 14,
-                child: AmanahStatusBadge(
-                  text: patient.badge,
-                  variant: patient.badgeVariant,
-                ),
+                child: AmanahStatusBadge(text: patient.badge, variant: patient.badgeVariant),
               ),
 
               // Top-Right: 3D Crystal Queue Badge Medal
               Positioned(
                 top: 8,
                 right: 8,
-                child: AmanahQueueBadge(
-                  queueNumber: patient.queueNumber,
-                  size: 68,
-                ),
+                child: AmanahQueueBadge(queueNumber: patient.queueNumber, size: 68),
               ),
 
               // Layer 5: Text Content Overlay at Bottom
@@ -156,10 +141,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: AmanahColorTokens.neutral800,
-                              border: Border.all(
-                                color: AmanahColorTokens.surfaceLight,
-                                width: 2,
-                              ),
+                              border: Border.all(color: AmanahColorTokens.surfaceLight, width: 2),
                               boxShadow: <BoxShadow>[
                                 BoxShadow(
                                   color: AmanahColorTokens.pureBlack.withValues(alpha: 0.15),
@@ -174,28 +156,22 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
                                 fit: BoxFit.cover,
                                 errorBuilder:
-                                    (
-                                      BuildContext context,
-                                      Object error,
-                                      StackTrace? stack,
-                                    ) => ColoredBox(
-                                      color: AmanahColorTokens.neutral700,
-                                      child: Center(
-                                        child: Text(
-                                          patient.patientName.isNotEmpty
-                                              ? patient.patientName.substring(
-                                                  0,
-                                                  1,
-                                                )
-                                              : 'P',
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w700,
-                                            color: AmanahColorTokens.surfaceLight,
+                                    (BuildContext context, Object error, StackTrace? stack) =>
+                                        ColoredBox(
+                                          color: AmanahColorTokens.neutral700,
+                                          child: Center(
+                                            child: Text(
+                                              patient.patientName.isNotEmpty
+                                                  ? patient.patientName.substring(0, 1)
+                                                  : 'P',
+                                              style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w700,
+                                                color: AmanahColorTokens.surfaceLight,
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ),
                               ),
                             ),
                           ),
@@ -209,9 +185,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    color: AmanahThemeTokens.textPrimary(
-                                      context,
-                                    ),
+                                    color: AmanahThemeTokens.textPrimary(context),
                                     fontSize: 20,
                                     fontWeight: FontWeight.w900,
                                     letterSpacing: -0.2,
@@ -221,9 +195,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                 Text(
                                   patient.patientRm,
                                   style: TextStyle(
-                                    color: AmanahThemeTokens.textSecondary(
-                                      context,
-                                    ),
+                                    color: AmanahThemeTokens.textSecondary(context),
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -233,7 +205,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 22),
 
                       // Specifications Row: Conditional (Estimasi Giliran vs Mulai & Selesai)
                       Row(
@@ -252,9 +224,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      color: AmanahThemeTokens.textPrimary(
-                                        context,
-                                      ),
+                                      color: AmanahThemeTokens.textPrimary(context),
                                       fontSize: 13,
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -269,9 +239,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      color: AmanahThemeTokens.textTertiary(
-                                        context,
-                                      ),
+                                      color: AmanahThemeTokens.textTertiary(context),
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -300,9 +268,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                       Icon(
                                         Icons.schedule_rounded,
                                         size: 13,
-                                        color: AmanahThemeTokens.textPrimary(
-                                          context,
-                                        ),
+                                        color: AmanahThemeTokens.textPrimary(context),
                                       ),
                                       const SizedBox(width: 4),
                                       Flexible(
@@ -311,9 +277,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
-                                            color: AmanahThemeTokens.textPrimary(
-                                              context,
-                                            ),
+                                            color: AmanahThemeTokens.textPrimary(context),
                                             fontSize: 13,
                                             fontWeight: FontWeight.w800,
                                           ),
@@ -325,9 +289,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                   Text(
                                     'Estimasi Giliran',
                                     style: TextStyle(
-                                      color: AmanahThemeTokens.textTertiary(
-                                        context,
-                                      ),
+                                      color: AmanahThemeTokens.textTertiary(context),
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -347,17 +309,13 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                       Icon(
                                         Icons.access_time_rounded,
                                         size: 13,
-                                        color: AmanahThemeTokens.textPrimary(
-                                          context,
-                                        ),
+                                        color: AmanahThemeTokens.textPrimary(context),
                                       ),
                                       const SizedBox(width: 3),
                                       Text(
                                         startTime,
                                         style: TextStyle(
-                                          color: AmanahThemeTokens.textPrimary(
-                                            context,
-                                          ),
+                                          color: AmanahThemeTokens.textPrimary(context),
                                           fontSize: 13,
                                           fontWeight: FontWeight.w800,
                                         ),
@@ -368,9 +326,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                   Text(
                                     'Mulai',
                                     style: TextStyle(
-                                      color: AmanahThemeTokens.textTertiary(
-                                        context,
-                                      ),
+                                      color: AmanahThemeTokens.textTertiary(context),
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -397,17 +353,13 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                       Icon(
                                         Icons.check_circle_outline_rounded,
                                         size: 13,
-                                        color: AmanahThemeTokens.textPrimary(
-                                          context,
-                                        ),
+                                        color: AmanahThemeTokens.textPrimary(context),
                                       ),
                                       const SizedBox(width: 3),
                                       Text(
                                         endTime,
                                         style: TextStyle(
-                                          color: AmanahThemeTokens.textPrimary(
-                                            context,
-                                          ),
+                                          color: AmanahThemeTokens.textPrimary(context),
                                           fontSize: 13,
                                           fontWeight: FontWeight.w800,
                                         ),
@@ -418,9 +370,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                                   Text(
                                     'Selesai',
                                     style: TextStyle(
-                                      color: AmanahThemeTokens.textTertiary(
-                                        context,
-                                      ),
+                                      color: AmanahThemeTokens.textTertiary(context),
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -431,7 +381,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                           ],
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
 
                       Container(
                         width: double.infinity,
@@ -440,7 +390,7 @@ class AmanahBookedPatientCard extends StatelessWidget {
                             ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.15)
                             : AmanahColorTokens.neutral200,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
 
                       Container(
                         width: double.infinity,

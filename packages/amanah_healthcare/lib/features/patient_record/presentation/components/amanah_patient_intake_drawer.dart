@@ -61,8 +61,7 @@ class AmanahPatientIntakeDrawer extends StatefulWidget {
   }
 
   @override
-  State<AmanahPatientIntakeDrawer> createState() =>
-      _AmanahPatientIntakeDrawerState();
+  State<AmanahPatientIntakeDrawer> createState() => _AmanahPatientIntakeDrawerState();
 }
 
 class _AmanahPatientIntakeDrawerState extends State<AmanahPatientIntakeDrawer> {
@@ -101,28 +100,20 @@ class _AmanahPatientIntakeDrawerState extends State<AmanahPatientIntakeDrawer> {
     );
   }
 
-  Widget _buildContent(
-    BuildContext context,
-    bool isDark,
-    PatientIntakeRecord? intake,
-  ) {
+  Widget _buildContent(BuildContext context, bool isDark, PatientIntakeRecord? intake) {
     if (_controller.isLoading) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             CircularProgressIndicator(
-              color: isDark
-                  ? AmanahColorTokens.brandLight
-                  : AmanahColorTokens.brandPrimary,
+              color: isDark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brandPrimary,
             ),
             const SizedBox(height: 16),
             Text(
               'Memuat formulir klinis pasien...',
               style: TextStyle(
-                color: isDark
-                    ? AmanahColorTokens.neutral400
-                    : AmanahColorTokens.neutral600,
+                color: isDark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral600,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
@@ -139,18 +130,12 @@ class _AmanahPatientIntakeDrawerState extends State<AmanahPatientIntakeDrawer> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Icon(
-                Icons.error_outline_rounded,
-                size: 48,
-                color: AmanahColorTokens.danger,
-              ),
+              Icon(Icons.error_outline_rounded, size: 48, color: AmanahColorTokens.danger),
               const SizedBox(height: 12),
               Text(
                 'Gagal Memuat Formulir',
                 style: TextStyle(
-                  color: isDark
-                      ? AmanahColorTokens.surfaceLight
-                      : AmanahColorTokens.neutral900,
+                  color: isDark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -160,9 +145,7 @@ class _AmanahPatientIntakeDrawerState extends State<AmanahPatientIntakeDrawer> {
                 _controller.errorMessage ?? 'Terjadi kesalahan pada server.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: isDark
-                      ? AmanahColorTokens.neutral400
-                      : AmanahColorTokens.neutral600,
+                  color: isDark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral600,
                   fontSize: 12,
                 ),
               ),
@@ -183,18 +166,18 @@ class _AmanahPatientIntakeDrawerState extends State<AmanahPatientIntakeDrawer> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           PatientIntakeHeaderCard(
-            patientName: intake?.regular?.fullName ??
+            patientName:
+                intake?.regular?.fullName ??
                 intake?.immunization?.childName ??
                 widget.initialPatientName ??
                 'Pasien Klinik',
-            mrn: intake?.regular?.medicalRecordNumber ??
+            mrn:
+                intake?.regular?.medicalRecordNumber ??
                 intake?.immunization?.childNik ??
                 widget.initialMrn ??
                 '-',
-            age: intake?.immunization?.childAgeFormatted ??
-                widget.initialAge ??
-                '-',
-            queueNumber: widget.initialQueueNumber ?? '-',
+            age: intake?.immunization?.childAgeFormatted ?? widget.initialAge ?? '-',
+            queueNumber: intake?.regular?.queueNumber ?? widget.initialQueueNumber ?? '-',
             flow: intake?.flow ?? 'regular',
             isDark: isDark,
             statusText: widget.initialStatusText,
@@ -202,28 +185,32 @@ class _AmanahPatientIntakeDrawerState extends State<AmanahPatientIntakeDrawer> {
           ),
           const SizedBox(height: 16),
           if (_controller.isEmpty)
-            EmptyIntakeView(
-              complaint: widget.initialComplaint,
-              isDark: isDark,
-            )
-          else if (intake != null && intake.isMaternal && intake.maternal != null)
-            MaternalIntakeView(
-              maternal: intake.maternal!,
-              isDark: isDark,
-            )
-          else if (intake != null &&
-              intake.isImmunization &&
-              intake.immunization != null)
-            ImmunizationIntakeView(
-              immunization: intake.immunization!,
-              isDark: isDark,
-            )
-          else
+            EmptyIntakeView(complaint: widget.initialComplaint, isDark: isDark)
+          else ...<Widget>[
+            // 1. Data Esensial Pasien & Reservasi Kunjungan (selalu tampil konsisten untuk seluruh poli)
             RegularIntakeView(
               regular: intake?.regular,
               fallbackComplaint: widget.initialComplaint,
               isDark: isDark,
             ),
+
+            // 2. Data Klinis Tambahan: Pemeriksaan Kehamilan & Kebidanan (KIA / ANC / Persalinan)
+            if (intake != null && intake.maternal != null) ...<Widget>[
+              const SizedBox(height: 8),
+              MaternalIntakeView(
+                maternal: intake.maternal!,
+                isDark: isDark,
+                patientId: intake.regular?.patientId,
+                patientName: intake.regular?.fullName ?? widget.initialPatientName,
+              ),
+            ],
+
+            // 3. Data Klinis Tambahan: Imunisasi & Tumbuh Kembang Anak
+            if (intake?.immunization != null) ...<Widget>[
+              const SizedBox(height: 8),
+              ImmunizationIntakeView(immunization: intake!.immunization!, isDark: isDark),
+            ],
+          ],
           const SizedBox(height: 32),
         ],
       ),

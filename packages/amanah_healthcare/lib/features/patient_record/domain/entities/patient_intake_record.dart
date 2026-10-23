@@ -19,6 +19,9 @@ class PatientIntakeRecord {
   bool get isMaternal => type == 'maternal' || flow == 'pregnancy';
   bool get isImmunization => type == 'immunization' || flow == 'immunization';
   bool get isRegular => !isMaternal && !isImmunization;
+  bool get hasMaternal => maternal != null;
+  bool get hasImmunization => immunization != null;
+  bool get hasRegular => regular != null;
 }
 
 /// Clinical intake data for Maternal / Pregnancy (ANC) patients.
@@ -35,6 +38,14 @@ class MaternalIntakeData {
     this.motherBloodType,
     this.tetanusStatus,
     this.partnerName,
+    this.husband,
+    this.diseaseHistoryList = const <MaternalDiseaseHistoryItem>[],
+    this.puskesmas,
+    this.posyandu,
+    this.dasawisma,
+    this.concerningEnvironmentNotes,
+    this.allergyInfo,
+    this.otherNotes,
     this.previousPregnancies = const <PreviousPregnancyItem>[],
     this.contraceptiveHistories = const <ContraceptiveHistoryItem>[],
   });
@@ -50,8 +61,48 @@ class MaternalIntakeData {
   final String? motherBloodType;
   final String? tetanusStatus;
   final String? partnerName;
+  final MaternalHusbandData? husband;
+  final List<MaternalDiseaseHistoryItem> diseaseHistoryList;
+  final String? puskesmas;
+  final String? posyandu;
+  final String? dasawisma;
+  final String? concerningEnvironmentNotes;
+  final String? allergyInfo;
+  final String? otherNotes;
   final List<PreviousPregnancyItem> previousPregnancies;
   final List<ContraceptiveHistoryItem> contraceptiveHistories;
+}
+
+class MaternalHusbandData {
+  const MaternalHusbandData({
+    this.name,
+    this.nik,
+    this.birthDate,
+    this.age,
+    this.job,
+    this.education,
+    this.bloodType,
+  });
+
+  final String? name;
+  final String? nik;
+  final String? birthDate;
+  final int? age;
+  final String? job;
+  final String? education;
+  final String? bloodType;
+}
+
+class MaternalDiseaseHistoryItem {
+  const MaternalDiseaseHistoryItem({
+    required this.diseaseName,
+    required this.hasDisease,
+    this.yearOrNotes,
+  });
+
+  final String diseaseName;
+  final bool hasDisease;
+  final String? yearOrNotes;
 }
 
 class PreviousPregnancyItem {
@@ -100,6 +151,7 @@ class ImmunizationIntakeData {
     this.motherName,
     this.previousVaccineHistory,
     this.childAllergyHistory,
+    this.vaccineEntries = const <VaccineEntryItem>[],
   });
 
   final String childName;
@@ -111,11 +163,27 @@ class ImmunizationIntakeData {
   final String? motherName;
   final String? previousVaccineHistory;
   final String? childAllergyHistory;
+  final List<VaccineEntryItem> vaccineEntries;
+}
+
+class VaccineEntryItem {
+  const VaccineEntryItem({
+    required this.vaccineCode,
+    required this.status,
+    this.givenDate,
+    this.notes,
+  });
+
+  final String vaccineCode;
+  final String status;
+  final String? givenDate;
+  final String? notes;
 }
 
 /// Clinical intake data for Regular / Generic general poly appointments.
 class RegularIntakeData {
   const RegularIntakeData({
+    this.patientId,
     this.fullName,
     this.medicalRecordNumber,
     this.nik,
@@ -157,6 +225,7 @@ class RegularIntakeData {
     this.bookingCode,
   });
 
+  final String? patientId;
   final String? fullName;
   final String? medicalRecordNumber;
   final String? nik;
@@ -287,5 +356,39 @@ class RegularIntakeData {
       return '${birthPlace!}, ${birthDate!}';
     }
     return birthDate ?? birthPlace ?? '-';
+  }
+}
+
+/// Clinical timeline item for historical maternal intake consultations across appointments.
+class MaternalTimelineItem {
+  const MaternalTimelineItem({
+    required this.id,
+    this.appointmentId,
+    this.gestationalAgeFormatted,
+    this.hpht,
+    this.estimatedDueDate,
+    this.partnerName,
+    this.gravidaCount,
+    this.parityCount,
+    this.abortionCount,
+    this.livingChildrenCount,
+    this.createdAt,
+  });
+
+  final String id;
+  final String? appointmentId;
+  final String? gestationalAgeFormatted;
+  final String? hpht;
+  final String? estimatedDueDate;
+  final String? partnerName;
+  final int? gravidaCount;
+  final int? parityCount;
+  final int? abortionCount;
+  final int? livingChildrenCount;
+  final String? createdAt;
+
+  String? get gpa {
+    if (gravidaCount == null) return null;
+    return 'G$gravidaCount P${parityCount ?? 0} A${abortionCount ?? 0} Ah${livingChildrenCount ?? 0}';
   }
 }

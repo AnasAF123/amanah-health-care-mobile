@@ -6,13 +6,11 @@ import 'package:amanah_healthcare/features/patient_record/domain/usecases/get_ap
 import 'package:amanah_healthcare/features/patient_record/presentation/state/patient_intake_controller.dart';
 
 class MockIntakeRepository implements IntakeRepository {
-  MockIntakeRepository({
-    this.recordToReturn,
-    this.failureToThrow,
-  });
+  MockIntakeRepository({this.recordToReturn, this.failureToThrow});
 
   PatientIntakeRecord? recordToReturn;
   Exception? failureToThrow;
+  List<MaternalTimelineItem>? timelineToReturn;
 
   @override
   Future<PatientIntakeRecord> getIntakeByAppointmentId(String appointmentId) async {
@@ -20,11 +18,15 @@ class MockIntakeRepository implements IntakeRepository {
       throw failureToThrow!;
     }
     return recordToReturn ??
-        const PatientIntakeRecord(
-          appointmentId: 'apt-1',
-          flow: 'regular',
-          type: 'regular',
-        );
+        const PatientIntakeRecord(appointmentId: 'apt-1', flow: 'regular', type: 'regular');
+  }
+
+  @override
+  Future<List<MaternalTimelineItem>> getMaternalHistory(String patientId) async {
+    if (failureToThrow != null) {
+      throw failureToThrow!;
+    }
+    return timelineToReturn ?? const <MaternalTimelineItem>[];
   }
 }
 
@@ -47,10 +49,7 @@ void main() {
         appointmentId: 'apt-test-123',
         flow: 'regular',
         type: 'regular',
-        regular: RegularIntakeData(
-          fullName: 'Budi Santoso',
-          complaint: 'Sakit Kepala',
-        ),
+        regular: RegularIntakeData(fullName: 'Budi Santoso', complaint: 'Sakit Kepala'),
       );
       final repo = MockIntakeRepository(recordToReturn: record);
       final useCase = GetAppointmentIntakeUseCase(repo);
@@ -67,21 +66,24 @@ void main() {
       expect(controller.errorMessage, isNull);
     });
 
-    test('loadIntake with 404 IntakeNotFoundFailure transitions to empty state gracefully', () async {
-      final repo = MockIntakeRepository(
-        failureToThrow: const IntakeNotFoundFailure('Formulir belum tersedia'),
-      );
-      final useCase = GetAppointmentIntakeUseCase(repo);
-      final controller = PatientIntakeController(getIntakeUseCase: useCase);
+    test(
+      'loadIntake with 404 IntakeNotFoundFailure transitions to empty state gracefully',
+      () async {
+        final repo = MockIntakeRepository(
+          failureToThrow: const IntakeNotFoundFailure('Formulir belum tersedia'),
+        );
+        final useCase = GetAppointmentIntakeUseCase(repo);
+        final controller = PatientIntakeController(getIntakeUseCase: useCase);
 
-      await controller.loadIntake('apt-not-found');
+        await controller.loadIntake('apt-not-found');
 
-      expect(controller.status, IntakeStateStatus.empty);
-      expect(controller.isLoading, isFalse);
-      expect(controller.isEmpty, isTrue);
-      expect(controller.intake, isNull);
-      expect(controller.errorMessage, isNull);
-    });
+        expect(controller.status, IntakeStateStatus.empty);
+        expect(controller.isLoading, isFalse);
+        expect(controller.isEmpty, isTrue);
+        expect(controller.intake, isNull);
+        expect(controller.errorMessage, isNull);
+      },
+    );
 
     test('loadIntake with unexpected server error transitions to error state', () async {
       final repo = MockIntakeRepository(
@@ -118,9 +120,7 @@ void main() {
       );
       expect(dataSpouse.relationshipDisplay, 'Pasangan dari Lexguard Didier');
 
-      const dataSelf = RegularIntakeData(
-        relationshipType: 'self',
-      );
+      const dataSelf = RegularIntakeData(relationshipType: 'self');
       expect(dataSelf.relationshipDisplay, 'Akun Utama (Diri Sendiri)');
     });
   });

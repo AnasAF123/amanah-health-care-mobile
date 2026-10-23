@@ -8,18 +8,17 @@ import 'package:amanah_healthcare/features/patient_record/data/endpoints/intake_
 
 abstract interface class IntakeRemoteDataSource {
   Future<dynamic> getIntakeByAppointmentId(String appointmentId);
+  Future<dynamic> getMaternalHistory(String patientId);
 }
 
 class IntakeRemoteDataSourceImpl implements IntakeRemoteDataSource {
-  IntakeRemoteDataSourceImpl({
-    ApiClient? apiClient,
-  }) : _apiClient = apiClient ??
-            AuthorizedApiClient(
-              innerClient: HttpApiClient(
-                baseUrl: AmanahAuthEnvironment.authBaseUrl,
-              ),
-              tokenProvider: const AmanahAuthTokenStorage(),
-            );
+  IntakeRemoteDataSourceImpl({ApiClient? apiClient})
+    : _apiClient =
+          apiClient ??
+          AuthorizedApiClient(
+            innerClient: HttpApiClient(baseUrl: AmanahAuthEnvironment.authBaseUrl),
+            tokenProvider: const AmanahAuthTokenStorage(),
+          );
 
   final ApiClient _apiClient;
 
@@ -34,6 +33,20 @@ class IntakeRemoteDataSourceImpl implements IntakeRemoteDataSource {
         if (map.containsKey('flow') || map['data'].containsKey('flow')) {
           return map;
         }
+        return map['data'];
+      }
+    }
+    return res.data;
+  }
+
+  @override
+  Future<dynamic> getMaternalHistory(String patientId) async {
+    final ApiResponse<dynamic> res = await _apiClient.request(
+      IntakeEndpoints.maternalHistory(patientId: patientId),
+    );
+    if (res.data is Map<String, dynamic>) {
+      final Map<String, dynamic> map = res.data as Map<String, dynamic>;
+      if (map.containsKey('data')) {
         return map['data'];
       }
     }
