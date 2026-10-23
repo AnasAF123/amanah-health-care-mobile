@@ -98,3 +98,16 @@ lib/features/<nama_fitur>/
    - Setiap kali `git commit` dijalankan, hook otomatis memformat semua file `.dart` yang di-stage dan me-re-stage sebelum commit dibuat.
 3. **Pemeriksaan Mandiri Sebelum Lapor Selesai**:
    - Jalankan `dart format` pada file yang dimodifikasi dan pastikan `flutter analyze` tidak memiliki error.
+
+---
+
+## 6. Searching Code with Ripgrep (rg)
+
+- ALWAYS pass an explicit path to rg. Never run `rg pattern` without a path.
+- Search the owning package first (e.g. `packages/amanah_healthcare`). Widen only on zero hits.
+- Filter by file type or glob (`-t dart`, `-g '*.dart'`) so you never read files that cannot match.
+- Use `-F` for literals and `-w` for identifiers. Use `-n --no-heading --color never`.
+- Cap output: `-l` first, then `| head -n 50`; use `--max-columns 200` for minified files.
+- Do not use `-u`, `-uu`, `-uuu`, `--no-ignore`, `--hidden`, or `-L` by default. Use them only on a narrow path, and only after a normal search came back empty.
+- Do not use `grep -r` or `find | xargs grep` instead of rg.
+- Respect the repo's `.ignore` / `.rgignore`. Do not edit them to make a search work without asking.
