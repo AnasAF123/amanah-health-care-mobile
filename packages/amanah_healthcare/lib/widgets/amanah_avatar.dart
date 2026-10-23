@@ -99,20 +99,11 @@ class AmanahAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget avatarContent;
 
-    final Color brandBg = backgroundColor ?? AmanahColorTokens.brand;
-    final Color textColor = initialsColor ?? Colors.white;
     final BorderRadius effectiveBorderRadius =
         borderRadius ??
         (shape == BoxShape.circle
             ? BorderRadius.circular(radius)
             : BorderRadius.circular(AmanahRadius.md));
-
-    Widget clipContent(Widget child) {
-      if (shape == BoxShape.circle) {
-        return ClipOval(child: child);
-      }
-      return ClipRRect(borderRadius: effectiveBorderRadius, child: child);
-    }
 
     if (avatar.type == 'initials' || avatar.url.isEmpty) {
       avatarContent = _buildDefaultAvatarWidget(effectiveBorderRadius);
@@ -121,7 +112,7 @@ class AmanahAvatar extends StatelessWidget {
       avatarContent = SizedBox(
         width: radius * 2,
         height: radius * 2,
-        child: clipContent(
+        child: _clipContent(
           Image.network(
             fullUrl,
             fit: BoxFit.cover,
@@ -143,6 +134,7 @@ class AmanahAvatar extends StatelessWidget {
               return _buildDefaultAvatarWidget(effectiveBorderRadius);
             },
           ),
+          effectiveBorderRadius,
         ),
       );
     }
@@ -185,7 +177,7 @@ class AmanahAvatar extends StatelessWidget {
           border: border,
           boxShadow: boxShadow,
         ),
-        child: clipContent(avatarContent),
+        child: _clipContent(avatarContent, effectiveBorderRadius),
       );
     }
 
@@ -200,6 +192,13 @@ class AmanahAvatar extends StatelessWidget {
     return decorated;
   }
 
+  Widget _clipContent(Widget child, BorderRadius effectiveBorderRadius) {
+    if (shape == BoxShape.circle) {
+      return ClipOval(child: child);
+    }
+    return ClipRRect(borderRadius: effectiveBorderRadius, child: child);
+  }
+
   Widget _buildDefaultAvatarWidget(BorderRadius effectiveBorderRadius) {
     final Widget image = Image.asset(
       AmanahAssetPaths.defaultAvatar,
@@ -208,6 +207,10 @@ class AmanahAvatar extends StatelessWidget {
       filterQuality: FilterQuality.high,
     );
 
-    return SizedBox(width: radius * 2, height: radius * 2, child: clipContent(image));
+    return SizedBox(
+      width: radius * 2,
+      height: radius * 2,
+      child: _clipContent(image, effectiveBorderRadius),
+    );
   }
 }
