@@ -9,9 +9,8 @@ import 'package:amanah_healthcare/features/queue/domain/failures/queue_failure.d
 import 'package:amanah_healthcare/features/queue/domain/repositories/queue_repository.dart';
 
 class QueueRepositoryImpl implements QueueRepository {
-  QueueRepositoryImpl({
-    QueueRemoteDataSource? remoteDataSource,
-  }) : _remoteDataSource = remoteDataSource ?? QueueRemoteDataSourceImpl();
+  QueueRepositoryImpl({QueueRemoteDataSource? remoteDataSource})
+    : _remoteDataSource = remoteDataSource ?? QueueRemoteDataSourceImpl();
 
   final QueueRemoteDataSource _remoteDataSource;
 
@@ -38,10 +37,7 @@ class QueueRepositoryImpl implements QueueRepository {
   @override
   Future<List<QueuePatientCard>> getWaitingQueue(String sessionId) async {
     try {
-      final dynamic raw = await _remoteDataSource.getSessionPatients(
-        sessionId,
-        status: 'waiting',
-      );
+      final dynamic raw = await _remoteDataSource.getSessionPatients(sessionId, status: 'waiting');
 
       String? sessionRoom;
       String? sessionPoly;
@@ -62,16 +58,19 @@ class QueueRepositoryImpl implements QueueRepository {
 
       return patientList
           .whereType<Map<String, dynamic>>()
-          .map((item) => QueuePatientMapper.fromJson(
-                item,
-                sessionRoom: sessionRoom,
-                sessionPoly: sessionPoly,
-              ))
-          .where((card) =>
-              card.status == 'waiting' ||
-              card.status == 'checked_in' ||
-              card.status == 'booked' ||
-              card.status == 'in_service')
+          .map(
+            (item) => QueuePatientMapper.fromJson(
+              item,
+              sessionRoom: sessionRoom,
+              sessionPoly: sessionPoly,
+            ),
+          )
+          .where(
+            (card) =>
+                card.status == 'waiting' ||
+                card.status == 'checked_in' ||
+                card.status == 'in_service',
+          )
           .toList();
     } on ApiException catch (e) {
       AppLog.error('[QueueRepository] Failed to get session patients: ${e.message}');
@@ -161,11 +160,9 @@ class QueueRepositoryImpl implements QueueRepository {
   }
 
   @override
-  Future<RescheduleOptionsEntity> getRescheduleOptions(
-      String appointmentId) async {
+  Future<RescheduleOptionsEntity> getRescheduleOptions(String appointmentId) async {
     try {
-      final dynamic raw =
-          await _remoteDataSource.getRescheduleOptions(appointmentId);
+      final dynamic raw = await _remoteDataSource.getRescheduleOptions(appointmentId);
       if (raw is Map<String, dynamic>) {
         return RescheduleOptionsEntity.fromJson(raw);
       }
@@ -206,11 +203,13 @@ class QueueRepositoryImpl implements QueueRepository {
 
       return patientList
           .whereType<Map<String, dynamic>>()
-          .map((item) => QueuePatientMapper.fromJson(
-                item,
-                sessionRoom: sessionRoom,
-                sessionPoly: sessionPoly,
-              ))
+          .map(
+            (item) => QueuePatientMapper.fromJson(
+              item,
+              sessionRoom: sessionRoom,
+              sessionPoly: sessionPoly,
+            ),
+          )
           .toList();
     } on ApiException catch (e) {
       AppLog.error('[QueueRepository] Failed to get completed patients: ${e.message}');
@@ -224,9 +223,7 @@ class QueueRepositoryImpl implements QueueRepository {
   @override
   Future<List<QueuePatientCard>> getDoctorProcessedQueue({String? date}) async {
     try {
-      final dynamic raw = await _remoteDataSource.getDoctorProcessedQueue(
-        date: date,
-      );
+      final dynamic raw = await _remoteDataSource.getDoctorProcessedQueue(date: date);
 
       List<dynamic> patientList = <dynamic>[];
       if (raw is List) {

@@ -8,26 +8,23 @@ abstract final class AuthUserMapper {
     final AmanahUserRole mappedRole = AmanahAuthUser.parseRole(roleStr);
     final bool needsOnboarding = json['needsOnboarding'] as bool? ?? false;
     final String systemRole = json['systemRole'] as String? ?? roleStr;
-    final Map<String, dynamic>? staffJson =
-        json['staff'] as Map<String, dynamic>?;
+    final Map<String, dynamic>? staffJson = json['staff'] as Map<String, dynamic>?;
 
     final String id = json['id'] as String? ?? '';
-    final String fullName =
-        json['name'] as String? ?? json['fullName'] as String? ?? '';
-    final String? imageUrl =
-        json['imageUrl'] as String? ?? json['image'] as String?;
+    final String fullName = json['name'] as String? ?? json['fullName'] as String? ?? '';
+    final String? avatarUrl = json['avatarUrl'] as String? ?? json['avatar_url'] as String?;
 
     final UserAvatar resolvedAvatar = json['avatar'] != null
         ? UserAvatar.fromJson(json['avatar'] as Map<String, dynamic>)
-        : (imageUrl != null && imageUrl.isNotEmpty
-            ? UserAvatar(
-                url: imageUrl,
-                initials: UserAvatar.extractInitials(fullName),
-                type: imageUrl.startsWith('http') ? 'oauth' : 'custom',
-                hasCustomAvatar: true,
-                directUrl: imageUrl,
-              )
-            : UserAvatar.fromFallback(userId: id, name: fullName));
+        : (avatarUrl != null && avatarUrl.isNotEmpty
+              ? UserAvatar(
+                  url: avatarUrl,
+                  initials: UserAvatar.extractInitials(fullName),
+                  type: avatarUrl.startsWith('http') ? 'oauth' : 'custom',
+                  hasCustomAvatar: true,
+                  directUrl: avatarUrl,
+                )
+              : UserAvatar.fromFallback(userId: id, name: fullName));
 
     return AmanahAuthUser(
       id: id,
@@ -35,12 +32,9 @@ abstract final class AuthUserMapper {
       fullName: fullName,
       email: json['email'] as String? ?? '',
       phone: json['phone'] as String? ?? json['phoneNumber'] as String? ?? '',
-      imageUrl: imageUrl,
       avatar: resolvedAvatar,
       password: '',
-      isEmailVerified: json['emailVerified'] as bool? ??
-          json['isEmailVerified'] as bool? ??
-          false,
+      isEmailVerified: json['emailVerified'] as bool? ?? json['isEmailVerified'] as bool? ?? false,
       needsOnboarding: needsOnboarding,
       systemRole: systemRole,
       staff: staffJson != null ? AmanahStaffProfile.fromJson(staffJson) : null,

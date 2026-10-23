@@ -25,7 +25,7 @@ class AmanahLeavePermissionTabScreen extends StatefulWidget {
     this.onBack,
     this.doctorName = '',
     this.doctorRole = '',
-    this.doctorAvatarUrl,
+    this.avatarUrl,
     this.staffProfileId = '',
     this.controller,
     super.key,
@@ -34,7 +34,7 @@ class AmanahLeavePermissionTabScreen extends StatefulWidget {
   final VoidCallback? onBack;
   final String doctorName;
   final String doctorRole;
-  final String? doctorAvatarUrl;
+  final String? avatarUrl;
   final String staffProfileId;
   final PermissionController? controller;
 
@@ -42,7 +42,7 @@ class AmanahLeavePermissionTabScreen extends StatefulWidget {
     VoidCallback? onBack,
     String doctorName = '',
     String doctorRole = '',
-    String? doctorAvatarUrl,
+    String? avatarUrl,
     String staffProfileId = '',
   }) {
     return MaterialPageRoute<void>(
@@ -50,7 +50,7 @@ class AmanahLeavePermissionTabScreen extends StatefulWidget {
         onBack: onBack,
         doctorName: doctorName,
         doctorRole: doctorRole,
-        doctorAvatarUrl: doctorAvatarUrl,
+        avatarUrl: avatarUrl,
         staffProfileId: staffProfileId,
       ),
     );
@@ -104,7 +104,7 @@ class _AmanahLeavePermissionTabScreenState extends State<AmanahLeavePermissionTa
       userId: entity.staffId,
       userName: widget.doctorName.isNotEmpty ? widget.doctorName : 'Staf Amanah',
       userRole: widget.doctorRole.isNotEmpty ? widget.doctorRole : 'Staf Klinik',
-      userAvatarUrl: widget.doctorAvatarUrl ?? '',
+      userAvatarUrl: widget.avatarUrl ?? '',
       startDate: entity.startDate,
       endDate: entity.endDate,
       durationDays: entity.durationDays,
@@ -122,7 +122,7 @@ class _AmanahLeavePermissionTabScreenState extends State<AmanahLeavePermissionTa
       context: context,
       doctorName: widget.doctorName,
       doctorRole: widget.doctorRole,
-      doctorAvatarUrl: widget.doctorAvatarUrl,
+      avatarUrl: widget.avatarUrl,
     );
 
     if (result != null && mounted) {

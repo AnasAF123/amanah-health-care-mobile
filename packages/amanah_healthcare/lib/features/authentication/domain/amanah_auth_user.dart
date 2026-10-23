@@ -28,44 +28,25 @@ class AmanahStaffAddress {
   factory AmanahStaffAddress.fromJson(Map<String, dynamic> json) {
     return AmanahStaffAddress(
       provinceCode: _normalize(
-        json['provinceCode'] ??
-            json['province_code'] ??
-            json['provinsiId'] ??
-            json['provinsi_id'],
+        json['provinceCode'] ?? json['province_code'] ?? json['provinsiId'] ?? json['provinsi_id'],
       ),
-      provinceName: _normalize(
-        json['provinceName'] ?? json['province_name'] ?? json['provinsi'],
-      ),
+      provinceName: _normalize(json['provinceName'] ?? json['province_name'] ?? json['provinsi']),
       regencyCode: _normalize(
-        json['regencyCode'] ??
-            json['regency_code'] ??
-            json['kabupatenId'] ??
-            json['kabupaten_id'],
+        json['regencyCode'] ?? json['regency_code'] ?? json['kabupatenId'] ?? json['kabupaten_id'],
       ),
-      regencyName: _normalize(
-        json['regencyName'] ?? json['regency_name'] ?? json['kabupaten'],
-      ),
+      regencyName: _normalize(json['regencyName'] ?? json['regency_name'] ?? json['kabupaten']),
       districtCode: _normalize(
         json['districtCode'] ??
             json['district_code'] ??
             json['kecamatanId'] ??
             json['kecamatan_id'],
       ),
-      districtName: _normalize(
-        json['districtName'] ?? json['district_name'] ?? json['kecamatan'],
-      ),
+      districtName: _normalize(json['districtName'] ?? json['district_name'] ?? json['kecamatan']),
       villageCode: _normalize(
-        json['villageCode'] ??
-            json['village_code'] ??
-            json['kelurahanId'] ??
-            json['kelurahan_id'],
+        json['villageCode'] ?? json['village_code'] ?? json['kelurahanId'] ?? json['kelurahan_id'],
       ),
-      villageName: _normalize(
-        json['villageName'] ?? json['village_name'] ?? json['kelurahan'],
-      ),
-      line1: _normalize(
-        json['line1'] ?? json['alamatDetail'] ?? json['alamat_detail'],
-      ),
+      villageName: _normalize(json['villageName'] ?? json['village_name'] ?? json['kelurahan']),
+      line1: _normalize(json['line1'] ?? json['alamatDetail'] ?? json['alamat_detail']),
       fullAddress: _normalize(
         json['fullAddress'] ??
             json['full_address'] ??
@@ -132,6 +113,7 @@ class AmanahStaffProfile {
     this.birthDate,
     this.gender,
     this.photoUrl,
+    this.avatarUrl,
     this.phoneNumber,
     this.addressModel,
     String? address,
@@ -143,9 +125,7 @@ class AmanahStaffProfile {
     String? rawAddr;
 
     if (json['address'] is Map) {
-      parsedAddress = AmanahStaffAddress.fromJson(
-        json['address'] as Map<String, dynamic>,
-      );
+      parsedAddress = AmanahStaffAddress.fromJson(json['address'] as Map<String, dynamic>);
       rawAddr = parsedAddress.displayAddress;
     } else {
       if (json.containsKey('provinsi') ||
@@ -167,20 +147,21 @@ class AmanahStaffProfile {
       userId: json['userId'] as String? ?? '',
       practitionerId: json['practitionerId'] as String?,
       poliklinikId: json['poliklinikId'] as String?,
-      poliklinikName: json['poliklinikName'] as String? ??
-          json['poliklinik_name'] as String?,
+      poliklinikName: json['poliklinikName'] as String? ?? json['poliklinik_name'] as String?,
       fullName: json['fullName'] as String?,
       profession: json['profession'] as String?,
       staffCode: json['staffCode'] as String? ?? json['staff_code'] as String?,
       nationalId: json['nationalId'] as String? ?? json['nik'] as String?,
       idCardNumber: json['idCardNumber'] as String?,
-      licenseNumber: json['licenseNumber'] as String? ??
+      licenseNumber:
+          json['licenseNumber'] as String? ??
           json['sipNumber'] as String? ??
           json['sip'] as String?,
       birthPlace: AmanahStaffAddress._normalize(json['birthPlace']),
       birthDate: AmanahStaffAddress._normalize(json['birthDate']),
       gender: AmanahStaffAddress._normalize(json['gender']),
       photoUrl: json['photoUrl'] as String?,
+      avatarUrl: json['avatarUrl'] as String? ?? json['avatar_url'] as String?,
       phoneNumber: json['phoneNumber'] as String?,
       addressModel: parsedAddress,
       address: rawAddr,
@@ -203,6 +184,7 @@ class AmanahStaffProfile {
   final String? birthDate;
   final String? gender;
   final String? photoUrl;
+  final String? avatarUrl;
   final String? phoneNumber;
   final AmanahStaffAddress? addressModel;
   final String? _rawAddress;
@@ -219,7 +201,6 @@ class AmanahAuthUser {
     required this.email,
     required this.phone,
     this.avatar = UserAvatar.empty,
-    this.imageUrl,
     this.password = '',
     this.isEmailVerified = false,
     this.needsOnboarding = false,
@@ -233,22 +214,20 @@ class AmanahAuthUser {
         : (json['role'] as String? ?? '');
 
     final String id = json['id'] as String? ?? '';
-    final String fullName =
-        json['fullName'] as String? ?? json['name'] as String? ?? '';
-    final String? imageUrl =
-        json['imageUrl'] as String? ?? json['image'] as String?;
+    final String fullName = json['fullName'] as String? ?? json['name'] as String? ?? '';
+    final String? avatarUrl = json['avatarUrl'] as String? ?? json['avatar_url'] as String?;
 
     final UserAvatar resolvedAvatar = json['avatar'] != null
         ? UserAvatar.fromJson(json['avatar'] as Map<String, dynamic>)
-        : (imageUrl != null && imageUrl.isNotEmpty
-            ? UserAvatar(
-                url: imageUrl,
-                initials: UserAvatar.extractInitials(fullName),
-                type: imageUrl.startsWith('http') ? 'oauth' : 'custom',
-                hasCustomAvatar: true,
-                directUrl: imageUrl,
-              )
-            : UserAvatar.fromFallback(userId: id, name: fullName));
+        : (avatarUrl != null && avatarUrl.isNotEmpty
+              ? UserAvatar(
+                  url: avatarUrl,
+                  initials: UserAvatar.extractInitials(fullName),
+                  type: avatarUrl.startsWith('http') ? 'oauth' : 'custom',
+                  hasCustomAvatar: true,
+                  directUrl: avatarUrl,
+                )
+              : UserAvatar.fromFallback(userId: id, name: fullName));
 
     return AmanahAuthUser(
       id: id,
@@ -256,12 +235,9 @@ class AmanahAuthUser {
       fullName: fullName,
       email: json['email'] as String? ?? '',
       phone: json['phone'] as String? ?? json['phoneNumber'] as String? ?? '',
-      imageUrl: imageUrl,
       avatar: resolvedAvatar,
       password: json['password'] as String? ?? '',
-      isEmailVerified: json['isEmailVerified'] as bool? ??
-          json['emailVerified'] as bool? ??
-          false,
+      isEmailVerified: json['isEmailVerified'] as bool? ?? json['emailVerified'] as bool? ?? false,
       needsOnboarding: json['needsOnboarding'] as bool? ?? false,
       systemRole: json['systemRole'] as String? ?? roleStr,
       staff: json['staff'] != null
@@ -279,13 +255,15 @@ class AmanahAuthUser {
   final String fullName;
   final String email;
   final String phone;
-  final String? imageUrl;
   final UserAvatar avatar;
   final String password;
   final bool isEmailVerified;
   final bool needsOnboarding;
   final String systemRole;
   final AmanahStaffProfile? staff;
+
+  String? get avatarUrl =>
+      staff?.avatarUrl ?? (avatar.displayUrl.isNotEmpty ? avatar.displayUrl : null);
 
   String get roleLabel => switch (role) {
     AmanahUserRole.doctor => 'Dokter',
@@ -304,8 +282,7 @@ class AmanahAuthUser {
   };
 
   static AmanahUserRole parseRole(String? roleStr) {
-    final String normalized =
-        (roleStr ?? '').toLowerCase().replaceAll('_', '').replaceAll(' ', '');
+    final String normalized = (roleStr ?? '').toLowerCase().replaceAll('_', '').replaceAll(' ', '');
     if (normalized == 'staffdoctor' || normalized == 'doctor') {
       return AmanahUserRole.doctor;
     }
@@ -326,7 +303,6 @@ class AmanahAuthUser {
     String? fullName,
     String? email,
     String? phone,
-    String? imageUrl,
     UserAvatar? avatar,
     String? password,
     bool? isEmailVerified,
@@ -340,7 +316,6 @@ class AmanahAuthUser {
       fullName: fullName ?? this.fullName,
       email: email ?? this.email,
       phone: phone ?? this.phone,
-      imageUrl: imageUrl ?? this.imageUrl,
       avatar: avatar ?? this.avatar,
       password: password ?? this.password,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,

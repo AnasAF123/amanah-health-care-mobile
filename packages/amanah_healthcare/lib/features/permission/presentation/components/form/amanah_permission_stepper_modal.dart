@@ -25,14 +25,14 @@ import 'package:amanah_healthcare/features/permission/presentation/theme/amanah_
 class AmanahPermissionStepperModal extends StatefulWidget {
   final String doctorName;
   final String doctorRole;
-  final String? doctorAvatarUrl;
+  final String? avatarUrl;
   final PermissionRepository? repository;
 
   const AmanahPermissionStepperModal({
     super.key,
     required this.doctorName,
     required this.doctorRole,
-    this.doctorAvatarUrl,
+    this.avatarUrl,
     this.repository,
   });
 
@@ -41,7 +41,7 @@ class AmanahPermissionStepperModal extends StatefulWidget {
     required BuildContext context,
     required String doctorName,
     required String doctorRole,
-    String? doctorAvatarUrl,
+    String? avatarUrl,
     PermissionRepository? repository,
   }) {
     return showAmanahBottomSheet<AmanahPermissionFormData>(
@@ -49,19 +49,17 @@ class AmanahPermissionStepperModal extends StatefulWidget {
       builder: (BuildContext ctx) => AmanahPermissionStepperModal(
         doctorName: doctorName,
         doctorRole: doctorRole,
-        doctorAvatarUrl: doctorAvatarUrl,
+        avatarUrl: avatarUrl,
         repository: repository,
       ),
     );
   }
 
   @override
-  State<AmanahPermissionStepperModal> createState() =>
-      _AmanahPermissionStepperModalState();
+  State<AmanahPermissionStepperModal> createState() => _AmanahPermissionStepperModalState();
 }
 
-class _AmanahPermissionStepperModalState
-    extends State<AmanahPermissionStepperModal> {
+class _AmanahPermissionStepperModalState extends State<AmanahPermissionStepperModal> {
   late final PermissionRepository _repository;
   late final TextEditingController _reasonController;
 
@@ -82,8 +80,7 @@ class _AmanahPermissionStepperModalState
   Future<void> _checkTodayEligibility() async {
     try {
       final String todayIso = formatIsoDateString(DateTime.now());
-      final List<EligibleSession> sessions =
-          await _repository.getEligibleSessions(todayIso);
+      final List<EligibleSession> sessions = await _repository.getEligibleSessions(todayIso);
       if (mounted) {
         setState(() {
           _isTodayEligible = sessions.isNotEmpty;
@@ -107,8 +104,7 @@ class _AmanahPermissionStepperModalState
     setState(() => _draft = _draft.copyWith(isLoadingSessions: true));
     try {
       final String dateIso = formatIsoDateString(_draft.dateRange.startDate);
-      final List<EligibleSession> sessions =
-          await _repository.getEligibleSessions(dateIso);
+      final List<EligibleSession> sessions = await _repository.getEligibleSessions(dateIso);
       if (mounted) {
         setState(() {
           _eligibleSessions = sessions;
@@ -142,10 +138,7 @@ class _AmanahPermissionStepperModalState
 
   void _handleTypeSelected(AmanahPermissionType type) {
     setState(() {
-      _draft = _draft.copyWith(
-        type: type,
-        stage: PermissionFormStage.dateMode,
-      );
+      _draft = _draft.copyWith(type: type, stage: PermissionFormStage.dateMode);
     });
   }
 
@@ -165,10 +158,7 @@ class _AmanahPermissionStepperModalState
 
   void _handleDateCustomSelected() {
     setState(() {
-      _draft = _draft.copyWith(
-        isCustomDateRange: true,
-        stage: PermissionFormStage.dateCustom,
-      );
+      _draft = _draft.copyWith(isCustomDateRange: true, stage: PermissionFormStage.dateCustom);
     });
   }
 
@@ -208,8 +198,7 @@ class _AmanahPermissionStepperModalState
   }
 
   void _handleSessionToggled(EligibleSession session) {
-    final List<EligibleSession> current =
-        List<EligibleSession>.from(_draft.selectedSessions);
+    final List<EligibleSession> current = List<EligibleSession>.from(_draft.selectedSessions);
     final int index = current.indexWhere((EligibleSession s) => s.sessionId == session.sessionId);
     if (index >= 0) {
       current.removeAt(index);
@@ -282,8 +271,9 @@ class _AmanahPermissionStepperModalState
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
-    final Color textColor =
-        dark ? AmanahPermissionTokens.textTitleDark : AmanahPermissionTokens.textTitleLight;
+    final Color textColor = dark
+        ? AmanahPermissionTokens.textTitleDark
+        : AmanahPermissionTokens.textTitleLight;
 
     return PopScope(
       canPop: _draft.stage == PermissionFormStage.type,
@@ -297,20 +287,12 @@ class _AmanahPermissionStepperModalState
         bodyPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         trailing: _draft.stage != PermissionFormStage.type
             ? IconButton(
-                icon: Icon(
-                  Icons.arrow_back_rounded,
-                  size: 20,
-                  color: textColor,
-                ),
+                icon: Icon(Icons.arrow_back_rounded, size: 20, color: textColor),
                 onPressed: _handleStepBack,
                 tooltip: 'Kembali ke tahap sebelumnya',
               )
             : IconButton(
-                icon: Icon(
-                  Icons.close_rounded,
-                  size: 20,
-                  color: textColor,
-                ),
+                icon: Icon(Icons.close_rounded, size: 20, color: textColor),
                 onPressed: () => Navigator.of(context).maybePop(),
                 tooltip: 'Tutup',
               ),
@@ -319,10 +301,7 @@ class _AmanahPermissionStepperModalState
           switchInCurve: Curves.easeOut,
           switchOutCurve: Curves.easeIn,
           transitionBuilder: (Widget child, Animation<double> animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
+            return FadeTransition(opacity: animation, child: child);
           },
           child: KeyedSubtree(
             key: ValueKey<PermissionFormStage>(_draft.stage),
@@ -336,10 +315,7 @@ class _AmanahPermissionStepperModalState
   Widget _buildCurrentStage(BuildContext context) {
     switch (_draft.stage) {
       case PermissionFormStage.type:
-        return PermissionTypeStage(
-          selectedType: _draft.type,
-          onTypeSelected: _handleTypeSelected,
-        );
+        return PermissionTypeStage(selectedType: _draft.type, onTypeSelected: _handleTypeSelected);
       case PermissionFormStage.dateMode:
         return PermissionDateModeStage(
           dateRange: _draft.dateRange,

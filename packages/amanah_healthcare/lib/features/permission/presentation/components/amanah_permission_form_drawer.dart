@@ -13,7 +13,7 @@ export 'package:amanah_healthcare/features/permission/domain/entities/amanah_per
 class AmanahPermissionFormDrawer extends StatelessWidget {
   final String doctorName;
   final String doctorRole;
-  final String? doctorAvatarUrl;
+  final String? avatarUrl;
   final AmanahPermissionRecord? editingRecord;
   final PermissionRepository? repository;
 
@@ -21,7 +21,7 @@ class AmanahPermissionFormDrawer extends StatelessWidget {
     super.key,
     required this.doctorName,
     required this.doctorRole,
-    this.doctorAvatarUrl,
+    this.avatarUrl,
     this.editingRecord,
     this.repository,
   });
@@ -31,7 +31,7 @@ class AmanahPermissionFormDrawer extends StatelessWidget {
     required BuildContext context,
     required String doctorName,
     required String doctorRole,
-    String? doctorAvatarUrl,
+    String? avatarUrl,
     AmanahPermissionRecord? editingRecord,
     PermissionRepository? repository,
   }) {
@@ -39,7 +39,7 @@ class AmanahPermissionFormDrawer extends StatelessWidget {
       context: context,
       doctorName: doctorName,
       doctorRole: doctorRole,
-      doctorAvatarUrl: doctorAvatarUrl,
+      avatarUrl: avatarUrl,
       repository: repository,
     );
   }
@@ -49,7 +49,7 @@ class AmanahPermissionFormDrawer extends StatelessWidget {
     return AmanahPermissionStepperModal(
       doctorName: doctorName,
       doctorRole: doctorRole,
-      doctorAvatarUrl: doctorAvatarUrl,
+      avatarUrl: avatarUrl,
       repository: repository,
     );
   }

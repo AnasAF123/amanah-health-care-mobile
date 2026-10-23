@@ -11,10 +11,7 @@ class AmanahQueueDockAnimator {
   final TickerProvider vsync;
   final VoidCallback onStateChange;
 
-  AmanahQueueDockAnimator({
-    required this.vsync,
-    required this.onStateChange,
-  });
+  AmanahQueueDockAnimator({required this.vsync, required this.onStateChange});
 
   String activationStage = 'idle';
   String ejectionStage = 'idle';
@@ -77,9 +74,15 @@ class AmanahQueueDockAnimator {
     ejectionStage = 'idle';
     onStateChange();
 
-    await onCallBackend();
-
-    await Future<void>.delayed(const Duration(milliseconds: 1800));
+    try {
+      await onCallBackend();
+    } catch (e) {
+      activationStage = 'idle';
+      ejectionStage = 'idle';
+      selectedActiveCard = null;
+      onStateChange();
+      rethrow;
+    }
 
     final ui.Image coverSnapshot = await generateCardCoverSnapshot(
       card: card,

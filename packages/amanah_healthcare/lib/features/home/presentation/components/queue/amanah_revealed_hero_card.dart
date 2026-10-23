@@ -67,9 +67,7 @@ class AmanahRevealedHeroCard extends StatelessWidget {
               left: -24,
               child: AmanahWatermarkLogo(
                 size: 200,
-                color: isDark
-                    ? AmanahColorTokens.cyanAccent
-                    : AmanahColorTokens.brandPrimary,
+                color: isDark ? AmanahColorTokens.cyanAccent : AmanahColorTokens.brandPrimary,
                 opacity: isDark ? 0.18 : 0.25,
               ),
             ),
@@ -81,16 +79,23 @@ class AmanahRevealedHeroCard extends StatelessWidget {
             Positioned(
               top: 16,
               left: 20,
-              child: Text(
-                card.queueNumber,
-                style: TextStyle(
-                  color: isDark
-                      ? AmanahColorTokens.cyanAccent
-                      : AmanahColorTokens.brandPrimary,
-                  fontSize: 38,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -1.5,
-                  height: 1.0,
+              right: width * 0.38,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    card.queueNumber,
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: isDark ? AmanahColorTokens.cyanAccent : AmanahColorTokens.brandPrimary,
+                      fontSize: 38,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1.5,
+                      height: 1.0,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -162,9 +167,7 @@ class AmanahRevealedHeroCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: isDark
-                          ? AmanahColorTokens.neutral400
-                          : AmanahColorTokens.neutral500,
+                      color: isDark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
@@ -178,9 +181,7 @@ class AmanahRevealedHeroCard extends StatelessWidget {
               child: Text(
                 card.poly,
                 style: TextStyle(
-                  color: isDark
-                      ? AmanahColorTokens.cyanAccent
-                      : AmanahColorTokens.brandPrimary,
+                  color: isDark ? AmanahColorTokens.cyanAccent : AmanahColorTokens.brandPrimary,
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                 ),

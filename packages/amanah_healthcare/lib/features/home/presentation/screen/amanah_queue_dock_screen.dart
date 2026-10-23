@@ -8,35 +8,33 @@ import 'package:amanah_healthcare/features/home/presentation/components/queue/am
 import 'package:amanah_healthcare/features/home/presentation/components/queue/amanah_queue_genie_overlay.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/queue/amanah_queue_gesture_controller.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/queue/amanah_queue_guide_drawer.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/queue/modal/amanah_queue_dismiss_modal.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/queue/modal/amanah_queue_session_selector.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/queue/modal/amanah_reschedule_modal.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_queue_history_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/patient_record/patient_record.dart';
+import 'package:amanah_healthcare/features/queue/domain/failures/queue_failure.dart';
 import 'package:amanah_healthcare/features/queue/presentation/state/amanah_queue_store.dart';
 
 /// Master 3D Queue Deck Stack Screen (Pilih Antrean Pasien)
 class AmanahQueueDockScreen extends StatefulWidget {
-  const AmanahQueueDockScreen({
-    super.key,
-    this.cards = const <AmanahQueueCardData>[],
-  });
+  const AmanahQueueDockScreen({super.key, this.cards = const <AmanahQueueCardData>[]});
 
   final List<AmanahQueueCardData> cards;
 
-  static Route<void> route({
-    List<AmanahQueueCardData> cards = const <AmanahQueueCardData>[],
-  }) {
+  static Route<void> route({List<AmanahQueueCardData> cards = const <AmanahQueueCardData>[]}) {
     return PageRouteBuilder<void>(
       pageBuilder: (_, _, _) => AmanahQueueDockScreen(cards: cards),
-      transitionsBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
-        Widget child,
-      ) {
-        return FadeTransition(opacity: animation, child: child);
-      },
+      transitionsBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) {
+            return FadeTransition(opacity: animation, child: child);
+          },
     );
   }
 
@@ -71,10 +69,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
       onRotateComplete: _handleSwipeLeftReschedule,
     );
 
-    _animator = AmanahQueueDockAnimator(
-      vsync: this,
-      onStateChange: () => setState(() {}),
-    );
+    _animator = AmanahQueueDockAnimator(vsync: this, onStateChange: () => setState(() {}));
 
     _entranceController = AnimationController(
       vsync: this,
@@ -87,10 +82,8 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
   }
 
   void _initDotsTimer() {
-    _dotsController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 960),
-    )..addListener(() {
+    _dotsController = AnimationController(vsync: this, duration: const Duration(milliseconds: 960))
+      ..addListener(() {
         if (_animator.activationStage == 'activating') {
           final int next = ((_dotsController!.value * 3).floor() % 3) + 1;
           if (next != _dotCount) {
@@ -114,8 +107,9 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
   void _onQueueStoreChanged() {
     if (!mounted) return;
     if (_queueStore.waitingPatients.isNotEmpty || widget.cards.isEmpty) {
-      final List<AmanahQueueCardData> newCards =
-          _queueStore.waitingPatients.map((p) => p.toUiCard()).toList();
+      final List<AmanahQueueCardData> newCards = _queueStore.waitingPatients
+          .map((p) => p.toUiCard())
+          .toList();
       setState(() {
         _cards = newCards;
       });
@@ -131,13 +125,58 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     });
   }
 
-  void _handleSwipeUpCancel() {
+  Future<void> _handleSwipeUpCancel() async {
     if (_cards.isEmpty) return;
-    final AmanahQueueCardData card = _cards.removeAt(0);
-    _queueStore.reportNoShow(card.id);
-    _showSnack(
-      'Antrean ${card.queueNumber} (${card.patientName}) dibatalkan / no-show.',
+    final AmanahQueueCardData card = _cards.first;
+
+    final AmanahQueueDismissAction? action = await AmanahQueueDismissModal.show(
+      context,
+      patientName: card.patientName,
+      queueNumber: card.queueNumber,
     );
+
+    if (action == null) {
+      if (mounted) {
+        setState(() {
+          _gesture.resetPositions();
+        });
+      }
+      return;
+    }
+
+    setState(() => _isActionLoading = true);
+    try {
+      if (action == AmanahQueueDismissAction.cancel) {
+        await _queueStore.cancelAppointment(card.id, reason: 'Dibatalkan oleh dokter dari antrean');
+        if (!mounted) return;
+        setState(() {
+          _cards.removeWhere((c) => c.id == card.id);
+          _gesture.resetPositions();
+        });
+        _showSnack('Janji temu ${card.queueNumber} (${card.patientName}) berhasil dibatalkan.');
+      } else if (action == AmanahQueueDismissAction.noShow) {
+        await _queueStore.reportNoShow(card.id, notes: 'Pasien tidak hadir saat giliran antrean');
+        if (!mounted) return;
+        setState(() {
+          _cards.removeWhere((c) => c.id == card.id);
+          _gesture.resetPositions();
+        });
+        _showSnack(
+          'Antrean ${card.queueNumber} (${card.patientName}) ditandai tidak hadir (No-Show).',
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      final String msg = e is QueueFailure
+          ? e.message
+          : e.toString().replaceFirst('Exception: ', '');
+      _showSnack('Gagal memproses aksi antrean: $msg', isError: true);
+      setState(() {
+        _gesture.resetPositions();
+      });
+    } finally {
+      if (mounted) setState(() => _isActionLoading = false);
+    }
   }
 
   void _handleSwipeLeftReschedule() {
@@ -153,9 +192,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     try {
       await _queueStore.callPatient(current.id);
       if (!mounted) return;
-      _showSnack(
-        'Nomor antrean ${current.queueNumber} (${current.patientName}) dipanggil.',
-      );
+      _showSnack('Nomor antrean ${current.queueNumber} (${current.patientName}) dipanggil.');
     } catch (e) {
       if (!mounted) return;
       _showSnack('Gagal memanggil pasien: $e', isError: true);
@@ -178,18 +215,22 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     final AmanahQueueCardData chosen = _cards.first;
     _dotsController?.repeat();
 
-    await _animator.triggerPlunge(
-      context: context,
-      card: chosen,
-      onCallBackend: () async {
-        try {
+    try {
+      await _animator.triggerPlunge(
+        context: context,
+        card: chosen,
+        onCallBackend: () async {
           await _queueStore.startService(chosen.id);
-        } catch (e) {
-          debugPrint('[AmanahQueueDockScreen] Error starting service: $e');
-        }
-      },
-    );
-    _dotsController?.stop();
+        },
+      );
+    } catch (e) {
+      final String msg = e is QueueFailure
+          ? e.message
+          : e.toString().replaceFirst('Exception: ', '');
+      _showSnack(msg, isError: true);
+    } finally {
+      _dotsController?.stop();
+    }
   }
 
   Future<void> _handleCompleteAction(AmanahQueueCardData card) async {
@@ -216,37 +257,40 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
   }
 
   void _handleRescheduleAction(AmanahQueueCardData card) {
-    _animator.closeOverlay(
-      context: context,
-      onDismissComplete: _gesture.resetPositions,
-    );
+    _animator.closeOverlay(context: context, onDismissComplete: _gesture.resetPositions);
     AmanahRescheduleModal.show(
       context,
       appointmentId: card.id,
       patientName: card.patientName,
       queueNumber: card.queueNumber,
-      onConfirm: ({
-        required String targetDate,
-        required String session,
-        String? targetSessionId,
-        String? reason,
-      }) async {
-        try {
-          await _queueStore.rescheduleAppointment(
-            card.id,
-            targetDate: targetDate,
-            session: session,
-            targetSessionId: targetSessionId,
-            reason: reason,
-          );
-          _showSnack(
-            'Janji temu ${card.queueNumber} (${card.patientName}) dipindahkan ke $targetDate.',
-          );
-        } catch (err) {
-          _showSnack('Gagal menjadwalkan ulang: $err', isError: true);
-          rethrow;
-        }
-      },
+      onConfirm:
+          ({
+            required String targetDate,
+            required String session,
+            String? targetSessionId,
+            String? reason,
+          }) async {
+            try {
+              await _queueStore.rescheduleAppointment(
+                card.id,
+                targetDate: targetDate,
+                session: session,
+                targetSessionId: targetSessionId,
+                reason: reason,
+              );
+              if (!mounted) return;
+              setState(() {
+                _cards.removeWhere((c) => c.id == card.id);
+                _gesture.resetPositions();
+              });
+              _showSnack(
+                'Janji temu ${card.queueNumber} (${card.patientName}) dipindahkan ke $targetDate.',
+              );
+            } catch (err) {
+              _showSnack('Gagal menjadwalkan ulang: $err', isError: true);
+              rethrow;
+            }
+          },
     );
   }
 
@@ -278,10 +322,8 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
     if (!mounted) return;
     Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => AmanahQueueHistoryScreen(
-          collectedCards: allHistory,
-          onRedraw: () => setState(() {}),
-        ),
+        builder: (_) =>
+            AmanahQueueHistoryScreen(collectedCards: allHistory, onRedraw: () => setState(() {})),
       ),
     );
   }
@@ -316,9 +358,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
       animation: _entranceController,
       builder: (BuildContext context, Widget? child) {
         return Scaffold(
-          backgroundColor: isDark
-              ? AmanahColorTokens.canvasDark
-              : AmanahColorTokens.canvasLight,
+          backgroundColor: isDark ? AmanahColorTokens.canvasDark : AmanahColorTokens.canvasLight,
           body: Stack(
             children: <Widget>[
               Positioned.fill(
@@ -368,26 +408,17 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                 onCardSelect: _bringCardToFront,
                 onCardTap: _openPatientIntake,
                 onResetQueue: _queueStore.loadTodaySessionsAndQueue,
-                onCallPatient:
-                    _cards.isNotEmpty ? _handleCallPatientAction : null,
-                onPanDown: (details) => _gesture.onPanDown(
-                  details,
-                  isIdle: _animator.activationStage == 'idle',
-                ),
-                onPanCancel: () => _gesture.onPanCancel(
-                  isIdle: _animator.activationStage == 'idle',
-                ),
-                onPanUpdate: (details) => _gesture.onPanUpdate(
-                  details,
-                  isIdle: _animator.activationStage == 'idle',
-                ),
-                onPanEnd: (details) => _gesture.onPanEnd(
-                  details,
-                  isIdle: _animator.activationStage == 'idle',
-                ),
+                onCallPatient: _cards.isNotEmpty ? _handleCallPatientAction : null,
+                onPanDown: (details) =>
+                    _gesture.onPanDown(details, isIdle: _animator.activationStage == 'idle'),
+                onPanCancel: () =>
+                    _gesture.onPanCancel(isIdle: _animator.activationStage == 'idle'),
+                onPanUpdate: (details) =>
+                    _gesture.onPanUpdate(details, isIdle: _animator.activationStage == 'idle'),
+                onPanEnd: (details) =>
+                    _gesture.onPanEnd(details, isIdle: _animator.activationStage == 'idle'),
               ),
-              if (_animator.showSuccess &&
-                  _animator.selectedActiveCard != null)
+              if (_animator.showSuccess && _animator.selectedActiveCard != null)
                 ListenableBuilder(
                   listenable: _queueStore,
                   builder: (context, _) {

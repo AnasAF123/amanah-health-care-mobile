@@ -283,6 +283,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                     key: const ValueKey<String>('permissions_content'),
                     doctorName: _currentUser.fullName,
                     doctorRole: _currentUser.isDoctor ? 'Dokter Spesialis' : 'Tenaga Medis',
+                    avatarUrl: _currentUser.staff?.avatarUrl,
                     staffProfileId: _currentUser.staff?.id ?? '',
                     onBack: () {
                       setState(() => _selectedTab = AmanahHomeTab.home);

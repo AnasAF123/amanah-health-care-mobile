@@ -4,12 +4,7 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_w
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class AmanahQueueCardCover extends StatelessWidget {
-  const AmanahQueueCardCover({
-    required this.card,
-    this.width,
-    this.height,
-    super.key,
-  });
+  const AmanahQueueCardCover({required this.card, this.width, this.height, super.key});
 
   final AmanahQueueCardData card;
   final double? width;
@@ -73,17 +68,13 @@ class AmanahQueueCardCover extends StatelessWidget {
                       end: Alignment.topCenter,
                       colors: isDark
                           ? <Color>[
-                              AmanahColorTokens.auroraCyanDark
-                                  .withValues(alpha: 0.35),
-                              AmanahColorTokens.neutral800
-                                  .withValues(alpha: 0.15),
+                              AmanahColorTokens.auroraCyanDark.withValues(alpha: 0.35),
+                              AmanahColorTokens.neutral800.withValues(alpha: 0.15),
                               Colors.transparent,
                             ]
                           : <Color>[
-                              AmanahColorTokens.brandMuted
-                                  .withValues(alpha: 0.50),
-                              AmanahColorTokens.brandSurface
-                                  .withValues(alpha: 0.15),
+                              AmanahColorTokens.brandMuted.withValues(alpha: 0.50),
+                              AmanahColorTokens.brandSurface.withValues(alpha: 0.15),
                               Colors.transparent,
                             ],
                     ),
@@ -117,16 +108,24 @@ class AmanahQueueCardCover extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    card.queueNumber,
-                    style: TextStyle(
-                      color: isDark
-                          ? AmanahColorTokens.cyanAccent
-                          : AmanahColorTokens.brandPrimary,
-                      fontSize: cardW > 250 ? 44 : 38,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1.2,
-                      height: 1.0,
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: cardW * 0.85),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        card.queueNumber,
+                        maxLines: 1,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: isDark
+                              ? AmanahColorTokens.cyanAccent
+                              : AmanahColorTokens.brandPrimary,
+                          fontSize: cardW > 250 ? 44 : 38,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1.2,
+                          height: 1.0,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -138,9 +137,7 @@ class AmanahQueueCardCover extends StatelessWidget {
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
                       colors: <Color>[
-                        AmanahColorTokens.surfaceLight.withValues(
-                          alpha: isDark ? 0.05 : 0.10,
-                        ),
+                        AmanahColorTokens.surfaceLight.withValues(alpha: isDark ? 0.05 : 0.10),
                         Colors.transparent,
                       ],
                       stops: const <double>[0.0, 0.45],

@@ -76,8 +76,7 @@ class AmanahQueueDockBody extends StatelessWidget {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final double dragProgress = (verticalDrag / 80.0).clamp(0.0, 1.0);
     final bool isNearSlot =
-        (verticalDrag >= 20.0 || dragProgress >= 0.25) &&
-            activationStage == 'idle';
+        (verticalDrag >= 20.0 || dragProgress >= 0.25) && activationStage == 'idle';
     final bool isMorphingActive = activationStage == 'activating';
 
     final double headerProgress = Curves.easeOutCubic.transform(
@@ -124,62 +123,6 @@ class AmanahQueueDockBody extends StatelessWidget {
               ),
             ),
           ),
-          Transform.translate(
-            offset: Offset(0, -15.0 * (1.0 - textProgress)),
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 300),
-              opacity: showSuccess ? 0.0 : textProgress,
-              child: RepaintBoundary(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 700),
-                  curve: const Cubic(0.22, 1.0, 0.36, 1.0),
-                  transform: Matrix4.translationValues(
-                    0,
-                    isMorphingActive ? 220.0 : 12.0,
-                    0,
-                  ),
-                  child: AnimatedScale(
-                    scale: isMorphingActive ? 1.05 : 1.0,
-                    duration: const Duration(milliseconds: 700),
-                    curve: const Cubic(0.22, 1.0, 0.36, 1.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        const SizedBox(height: 6),
-                        AnimatedScale(
-                          scale: (isMorphingActive || isNearSlot) ? 1.1 : 1.0,
-                          duration: const Duration(milliseconds: 500),
-                          child: AmanahParamedicToolbox3D(
-                            isOpen: isMorphingActive || isNearSlot,
-                            size: 76,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        BlurryMorphText(
-                          text: headlineText,
-                          isProcessing: isMorphingActive,
-                          dotCount: dotCount,
-                          style: TextStyle(
-                            color: isNearSlot || isMorphingActive
-                                ? (isDark
-                                    ? AmanahColorTokens.tabActiveDark
-                                    : AmanahColorTokens.brandPrimary)
-                                : (isDark
-                                    ? AmanahColorTokens.pureWhite
-                                    : AmanahColorTokens.neutral900),
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.4,
-                            height: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
           if (cards.isEmpty)
             Expanded(
               child: Center(
@@ -188,11 +131,64 @@ class AmanahQueueDockBody extends StatelessWidget {
                   child: AmanahEmptyState.box(
                     title: DoctorQueueCopywriting.emptyQueueTitle,
                     message: DoctorQueueCopywriting.emptyQueueSubtitle,
+                    variant: AmanahEmptyStateVariant.viewport,
                   ),
                 ),
               ),
             )
           else ...<Widget>[
+            Transform.translate(
+              offset: Offset(0, -15.0 * (1.0 - textProgress)),
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: showSuccess ? 0.0 : textProgress,
+                child: RepaintBoundary(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 700),
+                    curve: const Cubic(0.22, 1.0, 0.36, 1.0),
+                    transform: Matrix4.translationValues(0, isMorphingActive ? 220.0 : 12.0, 0),
+                    child: AnimatedScale(
+                      scale: isMorphingActive ? 1.05 : 1.0,
+                      duration: const Duration(milliseconds: 700),
+                      curve: const Cubic(0.22, 1.0, 0.36, 1.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          const SizedBox(height: 6),
+                          AnimatedScale(
+                            scale: (isMorphingActive || isNearSlot) ? 1.1 : 1.0,
+                            duration: const Duration(milliseconds: 500),
+                            child: AmanahParamedicToolbox3D(
+                              isOpen: isMorphingActive || isNearSlot,
+                              size: 76,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          BlurryMorphText(
+                            text: headlineText,
+                            isProcessing: isMorphingActive,
+                            dotCount: dotCount,
+                            style: TextStyle(
+                              color: isNearSlot || isMorphingActive
+                                  ? (isDark
+                                        ? AmanahColorTokens.tabActiveDark
+                                        : AmanahColorTokens.brandPrimary)
+                                  : (isDark
+                                        ? AmanahColorTokens.pureWhite
+                                        : AmanahColorTokens.neutral900),
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.4,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
             Expanded(
               child: Transform.translate(
                 offset: Offset(0, 40.0 * (1.0 - railProgress)),
