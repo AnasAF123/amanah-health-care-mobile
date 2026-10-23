@@ -1,16 +1,21 @@
 #!/bin/sh
-# Amanah Healthcare - Fast Pre-Commit Dart Formatter Hook
+# Amanah Healthcare - Fast Pre-Commit Mobile Hook
 
-# 1. Collect all staged .dart files (Added, Copied, Modified)
+# 1. Secret & Keystore Leak Guard
+STAGED_SECRETS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '(\.env$|key\.properties|google-services\.json|GoogleService-Info\.plist|\.keystore$|\.jks$)')
+if [ -n "$STAGED_SECRETS" ]; then
+  echo "\n❌ [SECRET GUARD] Terdeteksi file kredensial/kunci mobile yang di-stage:"
+  echo "$STAGED_SECRETS"
+  echo "👉 Gunakan .\\pack-vault.ps1 di root monorepo untuk mengemas kredensial secara aman.\n"
+  exit 1
+fi
+
+# 2. Collect all staged .dart files (Added, Copied, Modified)
 STAGED_DART_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.dart$')
 
 if [ -n "$STAGED_DART_FILES" ]; then
   echo "[pre-commit] Formatting staged Dart files with dart format..."
-  
-  # Format staged files
   dart format $STAGED_DART_FILES
-  
-  # Re-stage formatted files so formatting is included in the commit
   git add $STAGED_DART_FILES
   echo "[pre-commit] Staged Dart files formatted and re-staged successfully."
 fi
