@@ -4633,9 +4633,7 @@ class _AmanahWatermarkPainter extends CustomPainter {
 
     final Paint paint = Paint()..style = PaintingStyle.fill;
     if (gradient != null) {
-      paint.shader = gradient!.createShader(
-        const Rect.fromLTWH(0, 0, 188, 188),
-      );
+      paint.shader = gradient!.createShader(const Rect.fromLTWH(0, 0, 188, 188));
     } else if (color != null) {
       paint.color = color!;
     } else {
@@ -4657,17 +4655,18 @@ class AmanahPixelTexture extends StatelessWidget {
     this.isDark,
     this.opacity = 0.35,
     this.maskType = AmanahPixelMaskType.fadeTop,
+    this.positioned = true,
     super.key,
   });
 
   final bool? isDark;
   final double opacity;
   final AmanahPixelMaskType maskType;
+  final bool positioned;
 
   @override
   Widget build(BuildContext context) {
-    final bool dark =
-        isDark ?? (Theme.of(context).brightness == Brightness.dark);
+    final bool dark = isDark ?? (Theme.of(context).brightness == Brightness.dark);
     Widget content = CustomPaint(
       painter: AmanahOrganicPixelPainter(
         isDark: dark,
@@ -4766,7 +4765,10 @@ class AmanahPixelTexture extends StatelessWidget {
       );
     }
 
-    return Positioned.fill(child: content);
+    if (positioned) {
+      return Positioned.fill(child: content);
+    }
+    return content;
   }
 }
 
@@ -4792,8 +4794,7 @@ class AmanahOrganicPixelPainter extends CustomPainter {
   final double opacity;
 
   static double _seededHash(double x, double y, double seed) {
-    final double n =
-        math.sin(x * 12.9898 + y * 78.233 + seed * 37.719) * 43758.5453;
+    final double n = math.sin(x * 12.9898 + y * 78.233 + seed * 37.719) * 43758.5453;
     return n - n.floorToDouble();
   }
 
@@ -4832,9 +4833,7 @@ class AmanahOrganicPixelPainter extends CustomPainter {
     for (int r = 0; r < rows; r++) {
       final double yRatio = r / rows;
       // Progressive bottom-to-top gradual fade matching web maskGradient
-      final double verticalFade = fadeTop
-          ? (yRatio * yRatio * 1.15).clamp(0.0, 1.0)
-          : 1.0;
+      final double verticalFade = fadeTop ? (yRatio * yRatio * 1.15).clamp(0.0, 1.0) : 1.0;
 
       if (fadeTop && verticalFade < 0.04) {
         continue;
@@ -4861,8 +4860,7 @@ class AmanahOrganicPixelPainter extends CustomPainter {
         final double offset = (pixelSize - curSize) / 2.0;
 
         final double colorRand = _seededHash(r.toDouble(), c.toDouble(), 47);
-        final int colorIdx =
-            (colorRand * pixelPalette.length).floor() % pixelPalette.length;
+        final int colorIdx = (colorRand * pixelPalette.length).floor() % pixelPalette.length;
         final Color baseColor = pixelPalette[colorIdx];
 
         paint.color = baseColor.withValues(alpha: cellOpacity);
@@ -4887,13 +4885,7 @@ class AmanahOrganicPixelPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    drawPixelsToCanvas(
-      canvas,
-      size,
-      isDark: isDark,
-      opacity: opacity,
-      fadeTop: fadeTop,
-    );
+    drawPixelsToCanvas(canvas, size, isDark: isDark, opacity: opacity, fadeTop: fadeTop);
   }
 
   @override

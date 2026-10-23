@@ -3,15 +3,37 @@ import 'package:amanah_healthcare/features/patient_record/domain/entities/patien
 class PatientIntakeMapper {
   PatientIntakeMapper._();
 
-  static PatientIntakeRecord fromJson(
-    Map<String, dynamic> json,
-    String appointmentId,
-  ) {
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) {
+      final String trimmed = value.trim();
+      final int? direct = int.tryParse(trimmed);
+      if (direct != null) return direct;
+      final double? d = double.tryParse(trimmed);
+      return d?.toInt();
+    }
+    return null;
+  }
+
+  static double? _parseDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is num) return value.toDouble();
+    if (value is String) {
+      return double.tryParse(value.trim());
+    }
+    return null;
+  }
+
+  static PatientIntakeRecord fromJson(Map<String, dynamic> json, String appointmentId) {
     final String flow = json['flow'] as String? ?? 'regular';
     final String type = json['type'] as String? ?? flow;
     final dynamic rawData = json['data'] ?? json;
-    final Map<String, dynamic> data =
-        rawData is Map<String, dynamic> ? rawData : <String, dynamic>{};
+    final Map<String, dynamic> data = rawData is Map<String, dynamic>
+        ? rawData
+        : <String, dynamic>{};
 
     MaternalIntakeData? maternal;
     ImmunizationIntakeData? immunization;
@@ -36,10 +58,10 @@ class PatientIntakeMapper {
   }
 
   static MaternalIntakeData _mapMaternalData(Map<String, dynamic> data) {
-    final int? g = data['gravidaCount'] as int?;
-    final int? p = data['parityCount'] as int?;
-    final int? a = data['abortionCount'] as int?;
-    final int? ah = data['livingChildrenCount'] as int?;
+    final int? g = _parseInt(data['gravidaCount']);
+    final int? p = _parseInt(data['parityCount']);
+    final int? a = _parseInt(data['abortionCount']);
+    final int? ah = _parseInt(data['livingChildrenCount']);
 
     String? gpa;
     if (g != null) {
@@ -53,10 +75,10 @@ class PatientIntakeMapper {
         if (item is Map<String, dynamic>) {
           previousPregnancies.add(
             PreviousPregnancyItem(
-              orderNumber: item['orderNumber'] as int? ?? 1,
+              orderNumber: _parseInt(item['orderNumber']) ?? 1,
               birthYear: item['birthYear']?.toString(),
               childSex: item['childSex'] as String?,
-              birthWeightGrams: item['birthWeightGrams'] as int?,
+              birthWeightGrams: _parseInt(item['birthWeightGrams']),
               deliveryMethod: item['deliveryMethod'] as String?,
               birthAttendant: item['birthAttendant'] as String?,
               deliveryPlace: item['deliveryPlace'] as String?,
@@ -67,17 +89,14 @@ class PatientIntakeMapper {
       }
     }
 
-    final List<dynamic>? contraRaw =
-        data['contraceptiveHistories'] as List<dynamic>?;
-    final List<ContraceptiveHistoryItem> contraceptiveHistories =
-        <ContraceptiveHistoryItem>[];
+    final List<dynamic>? contraRaw = data['contraceptiveHistories'] as List<dynamic>?;
+    final List<ContraceptiveHistoryItem> contraceptiveHistories = <ContraceptiveHistoryItem>[];
     if (contraRaw != null) {
       for (final dynamic item in contraRaw) {
         if (item is Map<String, dynamic>) {
           contraceptiveHistories.add(
             ContraceptiveHistoryItem(
-              contraceptiveType:
-                  item['contraceptiveType'] as String? ?? 'Tidak diketahui',
+              contraceptiveType: item['contraceptiveType'] as String? ?? 'Tidak diketahui',
               durationText: item['durationText'] as String?,
               startDate: item['startDate'] as String?,
             ),
@@ -91,11 +110,10 @@ class PatientIntakeMapper {
       hpht: data['hpht'] as String?,
       estimatedDueDate: data['estimatedDueDate'] as String?,
       gestationalAgeFormatted: data['gestationalAgeFormatted'] as String?,
-      heightCm: data['heightCm'] as int?,
-      prePregnancyWeightKg: (data['prePregnancyWeightKg'] as num?)?.toDouble(),
-      upperArmCircumferenceCm:
-          (data['upperArmCircumferenceCm'] as num?)?.toDouble(),
-      initialBmi: (data['initialBmi'] as num?)?.toDouble(),
+      heightCm: _parseInt(data['heightCm']),
+      prePregnancyWeightKg: _parseDouble(data['prePregnancyWeightKg']),
+      upperArmCircumferenceCm: _parseDouble(data['upperArmCircumferenceCm']),
+      initialBmi: _parseDouble(data['initialBmi']),
       motherBloodType: data['motherBloodType'] as String?,
       tetanusStatus: data['tetanusStatus'] as String?,
       partnerName: data['partnerName'] as String?,
@@ -107,7 +125,7 @@ class PatientIntakeMapper {
   static ImmunizationIntakeData _mapImmunizationData(Map<String, dynamic> data) {
     return ImmunizationIntakeData(
       childName: data['childName'] as String? ?? 'Pasien Anak',
-      childNik: data['childNik'] as String?,
+      childNik: data['childNik']?.toString(),
       childBirthDate: data['childBirthDate'] as String?,
       childAgeFormatted: data['childAgeFormatted'] as String?,
       childSex: data['childSex'] as String?,
@@ -120,8 +138,7 @@ class PatientIntakeMapper {
 
   static RegularIntakeData _mapRegularData(Map<String, dynamic> data) {
     final dynamic patientRaw = data['patient'];
-    final Map<String, dynamic> p =
-        patientRaw is Map<String, dynamic> ? patientRaw : data;
+    final Map<String, dynamic> p = patientRaw is Map<String, dynamic> ? patientRaw : data;
 
     return RegularIntakeData(
       fullName: p['fullName'] as String? ?? p['name'] as String?,
@@ -150,8 +167,8 @@ class PatientIntakeMapper {
       complaint: data['complaint'] as String?,
       serviceName: data['layananName'] as String? ?? data['serviceName'] as String?,
       poliklinikName: data['poliklinikName'] as String?,
-      scheduledDate: data['appointmentDateFormatted'] as String? ??
-          data['scheduledDate'] as String?,
+      scheduledDate:
+          data['appointmentDateFormatted'] as String? ?? data['scheduledDate'] as String?,
       scheduledStartTime: data['scheduledStartTime'] as String?,
       scheduledEndTime: data['scheduledEndTime'] as String?,
       etaRange: data['etaRange'] as String?,
@@ -161,10 +178,8 @@ class PatientIntakeMapper {
       roomName: data['roomName'] as String?,
       actualStartedAt: data['actualStartedAt'] as String?,
       actualCompletedAt: data['actualCompletedAt'] as String?,
-      consultationDurationFormatted:
-          data['consultationDurationFormatted'] as String?,
-      appointmentStatus:
-          data['status'] as String? ?? data['rawStatus'] as String?,
+      consultationDurationFormatted: data['consultationDurationFormatted'] as String?,
+      appointmentStatus: data['status'] as String? ?? data['rawStatus'] as String?,
       bookingCode: data['bookingCode'] as String?,
     );
   }

@@ -59,10 +59,15 @@ class AmanahDualStackTicketShell extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
-              child: AmanahPixelTexture(
-                isDark: dark,
-                opacity: dark ? 0.28 : 0.22,
-                maskType: AmanahPixelMaskType.horizontalEdges,
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  AmanahPixelTexture(
+                    isDark: dark,
+                    opacity: dark ? 0.28 : 0.22,
+                    maskType: AmanahPixelMaskType.horizontalEdges,
+                  ),
+                ],
               ),
             ),
           ),
