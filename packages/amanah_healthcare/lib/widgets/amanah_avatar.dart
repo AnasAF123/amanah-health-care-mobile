@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/constants/amanah_asset_paths.dart';
 import 'package:amanah_healthcare/features/authentication/domain/user_avatar.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
@@ -100,7 +101,8 @@ class AmanahAvatar extends StatelessWidget {
 
     final Color brandBg = backgroundColor ?? AmanahColorTokens.brand;
     final Color textColor = initialsColor ?? Colors.white;
-    final BorderRadius effectiveBorderRadius = borderRadius ??
+    final BorderRadius effectiveBorderRadius =
+        borderRadius ??
         (shape == BoxShape.circle
             ? BorderRadius.circular(radius)
             : BorderRadius.circular(AmanahRadius.md));
@@ -113,7 +115,7 @@ class AmanahAvatar extends StatelessWidget {
     }
 
     if (avatar.type == 'initials' || avatar.url.isEmpty) {
-      avatarContent = _buildInitialsWidget(brandBg, textColor, effectiveBorderRadius);
+      avatarContent = _buildDefaultAvatarWidget(effectiveBorderRadius);
     } else {
       final String fullUrl = _resolvedFullUrl;
       avatarContent = SizedBox(
@@ -125,11 +127,7 @@ class AmanahAvatar extends StatelessWidget {
             fit: BoxFit.cover,
             alignment: Alignment.topCenter,
             filterQuality: FilterQuality.high,
-            loadingBuilder: (
-              BuildContext ctx,
-              Widget child,
-              ImageChunkEvent? loadingProgress,
-            ) {
+            loadingBuilder: (BuildContext ctx, Widget child, ImageChunkEvent? loadingProgress) {
               if (loadingProgress == null) return child;
               return Container(
                 color: AmanahColorTokens.neutral100,
@@ -141,12 +139,8 @@ class AmanahAvatar extends StatelessWidget {
                 ),
               );
             },
-            errorBuilder: (
-              BuildContext ctx,
-              Object error,
-              StackTrace? stackTrace,
-            ) {
-              return _buildInitialsWidget(brandBg, textColor, effectiveBorderRadius);
+            errorBuilder: (BuildContext ctx, Object error, StackTrace? stackTrace) {
+              return _buildDefaultAvatarWidget(effectiveBorderRadius);
             },
           ),
         ),
@@ -196,58 +190,24 @@ class AmanahAvatar extends StatelessWidget {
     }
 
     if (semanticsLabel != null) {
-      decorated = Semantics(
-        label: semanticsLabel,
-        image: true,
-        child: decorated,
-      );
+      decorated = Semantics(label: semanticsLabel, image: true, child: decorated);
     }
 
     if (onTap != null) {
-      return GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: decorated,
-      );
+      return GestureDetector(onTap: onTap, behavior: HitTestBehavior.opaque, child: decorated);
     }
 
     return decorated;
   }
 
-  Widget _buildInitialsWidget(Color brandBg, Color textColor, BorderRadius effectiveBorderRadius) {
-    if (shape == BoxShape.circle) {
-      return CircleAvatar(
-        radius: radius,
-        backgroundColor: brandBg,
-        child: Text(
-          avatar.initials.isNotEmpty ? avatar.initials : 'AH',
-          style: TextStyle(
-            color: textColor,
-            fontWeight: FontWeight.w800,
-            fontSize: radius * 0.75,
-            letterSpacing: 0.5,
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      width: radius * 2,
-      height: radius * 2,
-      decoration: BoxDecoration(
-        color: brandBg,
-        borderRadius: effectiveBorderRadius,
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        avatar.initials.isNotEmpty ? avatar.initials : 'AH',
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.w800,
-          fontSize: radius * 0.72,
-          letterSpacing: 0.5,
-        ),
-      ),
+  Widget _buildDefaultAvatarWidget(BorderRadius effectiveBorderRadius) {
+    final Widget image = Image.asset(
+      AmanahAssetPaths.defaultAvatar,
+      fit: BoxFit.cover,
+      alignment: Alignment.topCenter,
+      filterQuality: FilterQuality.high,
     );
+
+    return SizedBox(width: radius * 2, height: radius * 2, child: clipContent(image));
   }
 }
