@@ -77,8 +77,7 @@ class PresenceScannerTopBar extends StatelessWidget {
                     label: 'Buka Menu Presensi',
                     dark: dark,
                     size: 40,
-                    isActive: isDrawerOpen &&
-                        drawerView == AmanahQrDrawerView.menu,
+                    isActive: isDrawerOpen && drawerView == AmanahQrDrawerView.menu,
                   ),
                   if (hasCamera) ...<Widget>[
                     if (hardwareNotifier != null)
@@ -86,7 +85,7 @@ class PresenceScannerTopBar extends StatelessWidget {
                         valueListenable: hardwareNotifier!,
                         builder: (_, ScannerHardwareController? hw, _) {
                           final bool front = hw?.isFrontCamera ?? isFrontCamera;
-                          final bool torch = hw?.isTorchOn ?? isFlashOn;
+                          final bool torch = front ? isFlashOn : (hw?.isTorchOn ?? isFlashOn);
 
                           return Row(
                             mainAxisSize: MainAxisSize.min,
@@ -105,10 +104,8 @@ class PresenceScannerTopBar extends StatelessWidget {
                               const SizedBox(width: 8),
                               FloatingCircularButton(
                                 onTap: onToggleFlash,
-                                icon: torch
-                                    ? Icons.flash_on_rounded
-                                    : Icons.flash_off_rounded,
-                                label: 'Senter Flash',
+                                icon: torch ? Icons.flash_on_rounded : Icons.flash_off_rounded,
+                                label: front ? 'Ring Light Layar' : 'Senter Flash',
                                 dark: dark,
                                 size: 40,
                                 isActive: torch,
@@ -132,9 +129,7 @@ class PresenceScannerTopBar extends StatelessWidget {
                       const SizedBox(width: 8),
                       FloatingCircularButton(
                         onTap: onToggleFlash,
-                        icon: isFlashOn
-                            ? Icons.flash_on_rounded
-                            : Icons.flash_off_rounded,
+                        icon: isFlashOn ? Icons.flash_on_rounded : Icons.flash_off_rounded,
                         label: 'Senter Flash',
                         dark: dark,
                         size: 40,

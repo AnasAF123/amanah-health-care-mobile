@@ -80,6 +80,10 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="high_importance_channel"/>
+        <!-- Automatically pre-download Google Play Services Barcode V2 model for high-speed perspective scanning -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode" />
         <!-- Quick tile / setting (only available on Android 24+ / Nougat) -->
         <service
             android:name=".AppMainTile"

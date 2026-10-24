@@ -14,12 +14,7 @@ abstract class Scanner {
     required Future<bool> Function(String) onScan,
     required Future<void> Function() hapticFeedback,
     required Function(BuildContext)? onCameraFlashError,
-    required Function(
-      String msg,
-      String category, {
-      int? eventValue,
-      String? barcode,
-    })
+    required Function(String msg, String category, {int? eventValue, String? barcode})
     trackCustomEvent,
     required bool hasMoreThanOneCamera,
     required Widget barcodeScannerIcon,
@@ -47,6 +42,7 @@ abstract class Scanner {
 /// Abstract contract for controlling hardware camera features (flash, flip & zoom)
 abstract class ScannerHardwareController {
   Future<void> toggleTorch();
+  Future<void> turnTorchOff();
   Future<void> switchCamera();
   Future<void> setZoomScale(double zoomScale);
   Future<void> resetZoomScale();

@@ -54,12 +54,6 @@ class CustomScannerController implements ScannerHardwareController {
       await _controller.start();
       _isStarted = true;
       _onControllerChanged();
-
-      if (isTorchOn) {
-        Future<void>.delayed(const Duration(milliseconds: 250), () {
-          turnTorchOn();
-        });
-      }
     } catch (_) {
       if (_isListening) {
         _controller.removeListener(_onControllerChanged);
@@ -77,7 +71,7 @@ class CustomScannerController implements ScannerHardwareController {
 
   void _onControllerChanged() {
     _availableCamerasState.value = _controller.value.availableCameras ?? 0;
-    _cameraFacingState.value = _controller.facing;
+    _cameraFacingState.value = _controller.value.cameraDirection;
     final double reportedZoom = _controller.value.zoomScale;
     if (reportedZoom >= 0.0 && reportedZoom <= 1.0) {
       if (_currentZoom != reportedZoom) {
@@ -155,7 +149,10 @@ class CustomScannerController implements ScannerHardwareController {
   }
 
   @override
-  Future<void> pauseCamera() => stop();
+  Future<void> pauseCamera() async {
+    await turnTorchOff();
+    await stop();
+  }
 
   @override
   Future<void> resumeCamera() => start();
@@ -167,26 +164,33 @@ class CustomScannerController implements ScannerHardwareController {
   @override
   bool get isTorchOn => _torchState.value == true;
 
-  void turnTorchOff() {
+  @override
+  Future<void> turnTorchOff() async {
     if (isTorchOn) {
-      _controller.toggleTorch();
+      _torchState.value = false;
+      try {
+        await _controller.toggleTorch();
+      } catch (_) {}
+    } else if (_torchState.value == true) {
       _torchState.value = false;
     }
   }
 
-  void turnTorchOn() {
-    if (!isTorchOn) {
-      _controller.toggleTorch();
+  Future<void> turnTorchOn() async {
+    if (!isTorchOn && !isFrontCamera) {
       _torchState.value = true;
+      try {
+        await _controller.toggleTorch();
+      } catch (_) {}
     }
   }
 
   @override
   Future<void> toggleTorch() async {
     if (isTorchOn) {
-      turnTorchOff();
+      await turnTorchOff();
     } else {
-      turnTorchOn();
+      await turnTorchOn();
     }
   }
 
@@ -197,20 +201,17 @@ class CustomScannerController implements ScannerHardwareController {
   ValueNotifier<bool?> get torchState => _torchState;
 
   @override
-  bool get isFrontCamera => _controller.facing == CameraFacing.front;
+  bool get isFrontCamera => _controller.value.cameraDirection == CameraFacing.front;
 
   @override
   Future<void> switchCamera() => toggleCamera();
 
   Future<void> toggleCamera() async {
+    await turnTorchOff();
     await _controller.switchCamera();
-    if (_controller.facing == CameraFacing.front) {
-      _torchState.value = null;
-      _cameraFacingState.value = CameraFacing.front;
-    } else if (_controller.facing == CameraFacing.back) {
-      _torchState.value = false;
-      _cameraFacingState.value = CameraFacing.back;
-    }
+    final CameraFacing currentFacing = _controller.value.cameraDirection;
+    _cameraFacingState.value = currentFacing;
+    _torchState.value = false;
   }
 
   Future<void> _detectTorch() async {

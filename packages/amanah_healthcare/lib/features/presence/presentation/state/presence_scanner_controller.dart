@@ -135,20 +135,22 @@ class PresenceScannerController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void turnOffFlash() {
+    if (!_isFlashOn) return;
+    _isFlashOn = false;
+    notifyListeners();
+  }
+
   void toggleCamera() {
     _isFrontCamera = !_isFrontCamera;
-    if (_isFrontCamera) {
-      _isFlashOn = false;
-    }
+    _isFlashOn = false;
     notifyListeners();
   }
 
   void syncCameraFacing(bool front) {
     if (_isFrontCamera == front) return;
     _isFrontCamera = front;
-    if (_isFrontCamera) {
-      _isFlashOn = false;
-    }
+    _isFlashOn = false;
     notifyListeners();
   }
 
@@ -197,6 +199,7 @@ class PresenceScannerController extends ChangeNotifier {
     _flowState = AttendanceFlowState.idle;
     _isDrawerOpen = false;
     _drawerView = AmanahQrDrawerView.menu;
+    _isFlashOn = false;
     _pinError = null;
     _manualPin = '';
     _errorMessage = null;
@@ -281,6 +284,7 @@ class PresenceScannerController extends ChangeNotifier {
 
       _lastResult = result;
       _flowState = AttendanceFlowState.success;
+      _isFlashOn = false;
       _isDrawerOpen = true;
       notifyListeners();
       await _feedbackService.onScanSuccess();
@@ -303,6 +307,7 @@ class PresenceScannerController extends ChangeNotifier {
 
       _errorMessage = err is ApiException ? err.message : err.toString();
       _flowState = AttendanceFlowState.error;
+      _isFlashOn = false;
       _isDrawerOpen = true;
       notifyListeners();
       await _feedbackService.onScanError();

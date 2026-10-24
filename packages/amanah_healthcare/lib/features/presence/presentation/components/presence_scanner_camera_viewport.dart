@@ -5,7 +5,6 @@ import 'package:scanner_shared/scanner_shared.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_slide_to_confirm.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/camera_permission_viewport.dart';
-import 'package:amanah_healthcare/features/presence/presentation/components/scanner_overlay.dart';
 import 'package:amanah_healthcare/features/presence/presentation/state/presence_scanner_controller.dart';
 import 'package:amanah_healthcare/helpers/camera_helper.dart';
 import 'package:amanah_healthcare/helpers/global_vars.dart';
@@ -13,21 +12,21 @@ import 'package:amanah_healthcare/helpers/permission_helper.dart';
 
 class PresenceScannerCameraViewport extends StatelessWidget {
   const PresenceScannerCameraViewport({
-    required this.laserAnimation,
     required this.isFlashOn,
     required this.isDrawerOpen,
     required this.onBarcodeDetected,
     required this.scanMode,
     required this.onSelectScanMode,
     super.key,
+    this.isFrontCamera = false,
     this.enableCameraScanner = true,
     this.bottomNavigationClearance = 0,
     this.onScannerCreated,
     this.hardwareNotifier,
   });
 
-  final Animation<double> laserAnimation;
   final bool isFlashOn;
+  final bool isFrontCamera;
   final bool isDrawerOpen;
   final ValueChanged<String> onBarcodeDetected;
   final AttendanceScanMode scanMode;
@@ -103,108 +102,69 @@ class PresenceScannerCameraViewport extends StatelessWidget {
   }
 
   Widget _buildViewfinderMask(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext ctx, BoxConstraints constraints) {
-        final double screenWidth = constraints.maxWidth;
-        final double screenHeight = constraints.maxHeight;
-        final double cutoutSize = (screenWidth - 56).clamp(240.0, 360.0);
-        final Rect cutoutRect = Rect.fromCenter(
-          center: Offset(screenWidth / 2, screenHeight * 0.44),
-          width: cutoutSize,
-          height: cutoutSize,
-        );
+    final double safeBottom = MediaQuery.viewPaddingOf(context).bottom;
+    final double effectiveBottomClearance = bottomNavigationClearance > 0
+        ? bottomNavigationClearance
+        : safeBottom;
 
-        return Stack(
-          children: <Widget>[
-            // 1. Semi-transparent dark mask with clear cutout
-            Positioned.fill(
-              child: CustomPaint(
-                painter: _ViewfinderMaskPainter(
-                  cutoutRect: cutoutRect,
-                  maskColor: AmanahColorTokens.pureBlack.withValues(alpha: 0.65),
-                  borderRadius: 24.0,
-                ),
+    final bool effectiveFront = isFrontCamera || (hardwareNotifier?.value?.isFrontCamera ?? false);
+
+    return Stack(
+      children: <Widget>[
+        // 1. Front Camera Ring Light Vignette Overlay (Screen Flash)
+        if (effectiveFront && isFlashOn)
+          const Positioned.fill(child: IgnorePointer(child: _FrontCameraRingLightOverlay())),
+
+        // 2. Floating Continuous Zoom Slider (Clean capsule floating above slide control)
+        if (hardwareNotifier != null)
+          Positioned(
+            left: 28,
+            right: 28,
+            bottom: effectiveBottomClearance + 84,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 260),
+                child: _InKernelZoomSlider(hardwareNotifier: hardwareNotifier!),
               ),
             ),
+          ),
 
-            // 2. Cutout frame with 4 minimalist rounded corner brackets and medical grid
-            Positioned(
-              left: cutoutRect.left,
-              top: cutoutRect.top,
-              width: cutoutRect.width,
-              height: cutoutRect.height,
-              child: Stack(
-                fit: StackFit.expand,
-                children: <Widget>[
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(24.0),
-                    child: const Opacity(
-                      opacity: 0.12,
-                      child: CustomPaint(painter: MedicalGridPainter()),
-                    ),
-                  ),
-                  const CustomPaint(
-                    painter: PresenceScannerFramePainter(color: AmanahColorTokens.brand),
-                  ),
-                  if (hardwareNotifier != null)
-                    Positioned(
-                      left: 18,
-                      right: 18,
-                      bottom: 12,
-                      child: _InKernelZoomSlider(hardwareNotifier: hardwareNotifier!),
-                    ),
-                ],
+        // 3. Attendance Mode Switcher (Direct Slide-To-Confirm)
+        Positioned(
+          left: 28,
+          right: 28,
+          bottom: effectiveBottomClearance + 18,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 320),
+              child: AmanahSlideToConfirm(
+                key: ValueKey<AttendanceScanMode>(scanMode),
+                text: scanMode == AttendanceScanMode.checkIn
+                    ? 'Geser ke Presensi Pulang'
+                    : 'Geser ke Presensi Masuk',
+                targetText: scanMode == AttendanceScanMode.checkIn
+                    ? 'Presensi Pulang'
+                    : 'Presensi Masuk',
+                completedText: scanMode == AttendanceScanMode.checkIn
+                    ? 'Beralih ke Pulang...'
+                    : 'Beralih ke Masuk...',
+                variant: AmanahSlideVariant.brandGradient,
+                height: 52.0,
+                borderRadius: BorderRadius.circular(AmanahRadius.md),
+                onConfirmed: () async {
+                  HapticFeedback.mediumImpact();
+                  onSelectScanMode(
+                    scanMode == AttendanceScanMode.checkIn
+                        ? AttendanceScanMode.checkOut
+                        : AttendanceScanMode.checkIn,
+                  );
+                  return false;
+                },
               ),
             ),
-
-            // 3. Attendance Mode Switcher (Direct Slide-To-Confirm with AmanahRadius.md)
-            Positioned(
-              top: cutoutRect.bottom + 24,
-              left: 28,
-              right: 28,
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 320),
-                  child: AmanahSlideToConfirm(
-                    key: ValueKey<AttendanceScanMode>(scanMode),
-                    text: scanMode == AttendanceScanMode.checkIn
-                        ? 'Geser ke Presensi Pulang'
-                        : 'Geser ke Presensi Masuk',
-                    targetText: scanMode == AttendanceScanMode.checkIn
-                        ? 'Presensi Pulang'
-                        : 'Presensi Masuk',
-                    completedText: scanMode == AttendanceScanMode.checkIn
-                        ? 'Beralih ke Pulang...'
-                        : 'Beralih ke Masuk...',
-                    variant: AmanahSlideVariant.brandGradient,
-                    height: 52.0,
-                    borderRadius: BorderRadius.circular(AmanahRadius.md),
-                    onConfirmed: () async {
-                      HapticFeedback.mediumImpact();
-                      onSelectScanMode(
-                        scanMode == AttendanceScanMode.checkIn
-                            ? AttendanceScanMode.checkOut
-                            : AttendanceScanMode.checkIn,
-                      );
-                      return false;
-                    },
-                  ),
-                ),
-              ),
-            ),
-
-            // 4. Torch glow overlay when flash is on
-            if (isFlashOn)
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: Container(
-                    color: AmanahColorTokens.amberSurfaceSoft.withValues(alpha: 0.18),
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 
@@ -237,40 +197,96 @@ class PresenceScannerCameraViewport extends StatelessWidget {
   }
 }
 
-/// Custom painter for semi-transparent mask with rounded rectangle window.
-class _ViewfinderMaskPainter extends CustomPainter {
-  const _ViewfinderMaskPainter({
-    required this.cutoutRect,
-    required this.maskColor,
-    required this.borderRadius,
-  });
+/// Screen flash ring light vignette for front camera scanning.
+/// Features solid beaming white borders on all edges and a transparent hollow center.
+class _FrontCameraRingLightOverlay extends StatelessWidget {
+  const _FrontCameraRingLightOverlay();
 
-  final Rect cutoutRect;
-  final Color maskColor;
-  final double borderRadius;
+  @override
+  Widget build(BuildContext context) {
+    return const CustomPaint(painter: _RingLightVignettePainter());
+  }
+}
+
+class _RingLightVignettePainter extends CustomPainter {
+  const _RingLightVignettePainter();
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Path backgroundPath = Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    const double solidBorder = 32.0;
+    const double featherDepth = 120.0;
+    const double totalDepth = solidBorder + featherDepth;
 
-    final Path cutoutPath = Path()
-      ..addRRect(RRect.fromRectAndRadius(cutoutRect, Radius.circular(borderRadius)));
-
-    final Path maskPath = Path.combine(PathOperation.difference, backgroundPath, cutoutPath);
-
-    final Paint paint = Paint()
-      ..color = maskColor
+    // 1. Solid pure white outer perimeter frame (lights up device screen edges)
+    final Paint solidPaint = Paint()
+      ..color = Colors.white
       ..style = PaintingStyle.fill;
 
-    canvas.drawPath(maskPath, paint);
+    // Top & Bottom solid edges
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, solidBorder), solidPaint);
+    canvas.drawRect(
+      Rect.fromLTWH(0, size.height - solidBorder, size.width, solidBorder),
+      solidPaint,
+    );
+    // Left & Right solid edges
+    canvas.drawRect(Rect.fromLTWH(0, 0, solidBorder, size.height), solidPaint);
+    canvas.drawRect(
+      Rect.fromLTWH(size.width - solidBorder, 0, solidBorder, size.height),
+      solidPaint,
+    );
+
+    const List<Color> gradientColors = <Color>[
+      Colors.white,
+      Color(0xCCFFFFFF), // 80% white
+      Color(0x66FFFFFF), // 40% white
+      Color(0x00FFFFFF), // 0% hollow transparent
+    ];
+    const List<double> gradientStops = <double>[0.0, 0.30, 0.65, 1.0];
+
+    // 2. Continuous 4-directional inward linear gradients (spanning full width & height so corners blend seamlessly)
+    final Rect topRect = Rect.fromLTWH(0, solidBorder, size.width, featherDepth);
+    final Paint topPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: gradientColors,
+        stops: gradientStops,
+      ).createShader(topRect);
+    canvas.drawRect(topRect, topPaint);
+
+    final Rect bottomRect = Rect.fromLTWH(0, size.height - totalDepth, size.width, featherDepth);
+    final Paint bottomPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+        colors: gradientColors,
+        stops: gradientStops,
+      ).createShader(bottomRect);
+    canvas.drawRect(bottomRect, bottomPaint);
+
+    final Rect leftRect = Rect.fromLTWH(solidBorder, 0, featherDepth, size.height);
+    final Paint leftPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: gradientColors,
+        stops: gradientStops,
+      ).createShader(leftRect);
+    canvas.drawRect(leftRect, leftPaint);
+
+    final Rect rightRect = Rect.fromLTWH(size.width - totalDepth, 0, featherDepth, size.height);
+    final Paint rightPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.centerRight,
+        end: Alignment.centerLeft,
+        colors: gradientColors,
+        stops: gradientStops,
+      ).createShader(rightRect);
+    canvas.drawRect(rightRect, rightPaint);
   }
 
   @override
-  bool shouldRepaint(covariant _ViewfinderMaskPainter oldDelegate) {
-    return oldDelegate.cutoutRect != cutoutRect ||
-        oldDelegate.maskColor != maskColor ||
-        oldDelegate.borderRadius != borderRadius;
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 /// In-Kernel Continuous Zoom Slider embedded inside the bottom edge of the camera cutout.

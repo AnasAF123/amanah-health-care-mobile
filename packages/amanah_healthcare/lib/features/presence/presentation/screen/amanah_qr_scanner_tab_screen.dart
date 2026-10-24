@@ -33,7 +33,6 @@ class AmanahQrScannerTabScreen extends StatefulWidget {
     this.user,
     this.onBack,
     this.onDrawerStateChanged,
-    this.animateLaser = true,
     this.enableCameraScanner = true,
     this.bottomNavigationClearance = 0,
   });
@@ -41,7 +40,6 @@ class AmanahQrScannerTabScreen extends StatefulWidget {
   final AmanahAuthUser? user;
   final VoidCallback? onBack;
   final ValueChanged<bool>? onDrawerStateChanged;
-  final bool animateLaser;
   final bool enableCameraScanner;
   final double bottomNavigationClearance;
 
@@ -50,35 +48,13 @@ class AmanahQrScannerTabScreen extends StatefulWidget {
 }
 
 class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late final PresenceScannerController _controller;
-  late final AnimationController _laserController;
-  late final Animation<double> _laserAnimation;
   late final AnimationController _drawerAnimationController;
   final ValueNotifier<ScannerHardwareController?> _scannerHardwareNotifier =
       ValueNotifier<ScannerHardwareController?>(null);
 
-  Timer? _mlDiagnosticTimer;
-  DateTime _lastDetectionTimestamp = DateTime.fromMillisecondsSinceEpoch(0);
-  DateTime _lastMissTimestamp = DateTime.now();
-  int _consecutiveMissCount = 0;
-  int _consecutiveHitCount = 0;
-
-  static String _formatTime(DateTime dt) {
-    final String h = dt.hour.toString().padLeft(2, '0');
-    final String m = dt.minute.toString().padLeft(2, '0');
-    final String s = dt.second.toString().padLeft(2, '0');
-    final String ms = dt.millisecond.toString().padLeft(3, '0');
-    return '$h:$m:$s.$ms';
-  }
-
   void resetPresence() {
-    _consecutiveHitCount = 0;
-    _consecutiveMissCount = 0;
-    _lastMissTimestamp = DateTime.now();
-    if (widget.animateLaser && !_laserController.isAnimating) {
-      _laserController.repeat(reverse: true);
-    }
     _controller.reset();
     _drawerAnimationController.reset();
     widget.onDrawerStateChanged?.call(false);
@@ -98,21 +74,11 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
       feedbackService: ScannerFeedbackService(),
     );
 
-    _laserController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2400),
-    );
     _drawerAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 360),
       reverseDuration: const Duration(milliseconds: 280),
     );
-
-    if (widget.animateLaser) {
-      _laserController.repeat(reverse: true);
-    } else {
-      _laserController.value = 0.5;
-    }
 
     _drawerAnimationController.value = 0.0;
 
@@ -122,31 +88,10 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
         _controller.initTodayStatus();
       }
     });
-
-    _laserAnimation = Tween<double>(
-      begin: 0.10,
-      end: 0.90,
-    ).animate(CurvedAnimation(parent: _laserController, curve: Curves.easeInOut));
-
-    _mlDiagnosticTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
-      if (!mounted) return;
-      final DateTime now = DateTime.now();
-      final int diff = now.difference(_lastDetectionTimestamp).inMilliseconds;
-      if (diff >= 500) {
-        _consecutiveMissCount++;
-        _consecutiveHitCount = 0;
-        _lastMissTimestamp = now;
-        debugPrint(
-          '[ML TEST] [${_formatTime(now)}] ⚪ Tidak terdeteksi QR (standby #$_consecutiveMissCount, durasi kosong: ${diff}ms)',
-        );
-      }
-    });
   }
 
   @override
   void dispose() {
-    _mlDiagnosticTimer?.cancel();
-    _laserController.dispose();
     _drawerAnimationController.dispose();
     _scannerHardwareNotifier.dispose();
     _controller.dispose();
@@ -197,23 +142,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
       return;
     }
 
-    final DateTime now = DateTime.now();
-    final bool isFirstLockOn = _consecutiveHitCount == 0;
-    final int reactionMs = now.difference(_lastMissTimestamp).inMilliseconds;
-
-    _lastDetectionTimestamp = now;
-    _consecutiveMissCount = 0;
-    _consecutiveHitCount++;
-
-    if (isFirstLockOn) {
-      debugPrint(
-        '[ML TEST] [${_formatTime(now)}] 🚀 LOCK-ON INSTAN! (Reaksi kembali ke QR: ${reactionMs}ms) 🟢 TERDETEKSI QR! Frame #1 | Payload: $value',
-      );
-    } else {
-      debugPrint(
-        '[ML TEST] [${_formatTime(now)}] 🟢 TERDETEKSI QR (Frame #$_consecutiveHitCount) | Payload: $value',
-      );
-    }
+    AppLog.scanner('[QR SCANNER] 🟢 QR detected: $value');
 
     // Submit to authoritative orchestrator (camera stream stays uninterrupted)
     final AttendanceCheckInResult? result = await _controller.handleDetectedBarcode(value);
@@ -324,11 +253,10 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
   }
 
   void _showResultDrawer(PresenceStatusPayload payload) {
+    _controller.turnOffFlash();
+    unawaited(_scannerHardwareNotifier.value?.turnTorchOff());
     _controller.openResultDrawer();
     widget.onDrawerStateChanged?.call(true);
-    if (widget.animateLaser && _laserController.isAnimating) {
-      _laserController.stop();
-    }
     unawaited(_scannerHardwareNotifier.value?.pauseCamera());
 
     AmanahPresenceResultDrawer.show(
@@ -344,9 +272,6 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
       },
     ).whenComplete(() {
       if (mounted) {
-        _consecutiveHitCount = 0;
-        _consecutiveMissCount = 0;
-        _lastMissTimestamp = DateTime.now();
         unawaited(_scannerHardwareNotifier.value?.resumeCamera());
         resetPresence();
       }
@@ -402,17 +327,15 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
               // 1. Camera Viewport Background
               Positioned.fill(
                 child: PresenceScannerCameraViewport(
-                  laserAnimation: _laserAnimation,
                   isFlashOn: _controller.isFlashOn,
+                  isFrontCamera:
+                      _scannerHardwareNotifier.value?.isFrontCamera ?? _controller.isFrontCamera,
                   isDrawerOpen: _controller.isDrawerOpen,
                   enableCameraScanner: widget.enableCameraScanner,
                   bottomNavigationClearance: widget.bottomNavigationClearance,
                   scanMode: _controller.scanMode,
                   onSelectScanMode: (AttendanceScanMode mode) {
                     _controller.setScanMode(mode);
-                    if (widget.animateLaser && !_laserController.isAnimating) {
-                      _laserController.repeat(reverse: true);
-                    }
                   },
                   onBarcodeDetected: _handleBarcodeDetected,
                   hardwareNotifier: _scannerHardwareNotifier,
@@ -462,20 +385,32 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                   final bool isFront =
                       _scannerHardwareNotifier.value?.isFrontCamera ?? !_controller.isFrontCamera;
                   _controller.syncCameraFacing(isFront);
+                  _controller.turnOffFlash();
                   AppLog.scanner(
                     '[QR SCANNER] 🔄 Switched camera facing: ${isFront ? "FRONT" : "BACK"}',
                   );
                 },
                 onToggleFlash: () async {
-                  await _scannerHardwareNotifier.value?.toggleTorch();
-                  final bool isTorch =
-                      _scannerHardwareNotifier.value?.isTorchOn ?? !_controller.isFlashOn;
-                  _controller.syncFlash(isTorch);
-                  AppLog.scanner('[QR SCANNER] 💡 Toggled torch: ${isTorch ? "ON" : "OFF"}');
+                  final bool front =
+                      _scannerHardwareNotifier.value?.isFrontCamera ?? _controller.isFrontCamera;
+                  if (front) {
+                    _controller.toggleFlash();
+                    AppLog.scanner(
+                      '[QR SCANNER] 💡 Toggled front ring light: ${_controller.isFlashOn ? "ON" : "OFF"}',
+                    );
+                  } else {
+                    await _scannerHardwareNotifier.value?.toggleTorch();
+                    final bool isTorch =
+                        _scannerHardwareNotifier.value?.isTorchOn ?? !_controller.isFlashOn;
+                    _controller.syncFlash(isTorch);
+                    AppLog.scanner('[QR SCANNER] 💡 Toggled torch: ${isTorch ? "ON" : "OFF"}');
+                  }
                 },
                 isFrontCamera:
                     _scannerHardwareNotifier.value?.isFrontCamera ?? _controller.isFrontCamera,
-                isFlashOn: _scannerHardwareNotifier.value?.isTorchOn ?? _controller.isFlashOn,
+                isFlashOn: _controller.isFrontCamera
+                    ? _controller.isFlashOn
+                    : (_scannerHardwareNotifier.value?.isTorchOn ?? _controller.isFlashOn),
                 dark: dark,
               ),
 
