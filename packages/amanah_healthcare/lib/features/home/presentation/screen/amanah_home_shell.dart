@@ -24,6 +24,7 @@ import 'package:amanah_healthcare/features/permission/data/amanah_permission_sto
 import 'package:amanah_healthcare/features/permission/presentation/screen/amanah_leave_permission_tab_screen.dart';
 import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_presence_history_screen.dart';
 import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_qr_scanner_tab_screen.dart';
+import 'package:amanah_healthcare/features/queue/presentation/state/amanah_queue_store.dart';
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/organisms/doctor_schedule_roster_sheet.dart';
@@ -70,6 +71,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     _notificationStore.addListener(_onStoreUpdated);
     _permissionStore.addListener(_onStoreUpdated);
     _scheduleStore.syncTodaySchedules();
+    AmanahQueueStore.instance.loadTodaySessionsAndQueue();
   }
 
   Future<void> _loadHomeSchedules() => _scheduleStore.syncTodaySchedules();

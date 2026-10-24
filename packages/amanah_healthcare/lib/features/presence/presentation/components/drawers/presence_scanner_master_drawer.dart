@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/drawers/presence_manual_pin_drawer_view.dart';
-import 'package:amanah_healthcare/features/presence/presentation/components/drawers/presence_menu_drawer_view.dart';
-import 'package:amanah_healthcare/features/presence/presentation/components/drawers/presence_my_qr_drawer_view.dart';
 import 'package:amanah_healthcare/features/presence/presentation/state/presence_scanner_controller.dart';
 
 class PresenceScannerMasterDrawer extends StatelessWidget {
@@ -11,8 +9,6 @@ class PresenceScannerMasterDrawer extends StatelessWidget {
     required this.drawerAnimationController,
     required this.isDrawerOpen,
     required this.drawerView,
-    required this.userQrValue,
-    required this.copiedFeedback,
     required this.manualPin,
     required this.dark,
     required this.bottomPadding,
@@ -20,11 +16,15 @@ class PresenceScannerMasterDrawer extends StatelessWidget {
     required this.onOpenView,
     required this.onManualPinChanged,
     required this.onVerifyManualPin,
-    required this.onCopyQr,
-    required this.onDownloadQr,
+    required this.scanMode,
+    required this.onScanModeChanged,
     super.key,
     this.user,
     this.pinError,
+    this.userQrValue = '',
+    this.copiedFeedback = false,
+    this.onCopyQr,
+    this.onDownloadQr,
   });
 
   final AnimationController drawerAnimationController;
@@ -37,12 +37,14 @@ class PresenceScannerMasterDrawer extends StatelessWidget {
   final String? pinError;
   final bool dark;
   final double bottomPadding;
+  final AttendanceScanMode scanMode;
+  final ValueChanged<AttendanceScanMode> onScanModeChanged;
   final VoidCallback onClose;
   final ValueChanged<AmanahQrDrawerView> onOpenView;
   final ValueChanged<String> onManualPinChanged;
   final VoidCallback onVerifyManualPin;
-  final VoidCallback onCopyQr;
-  final VoidCallback onDownloadQr;
+  final VoidCallback? onCopyQr;
+  final VoidCallback? onDownloadQr;
 
   @override
   Widget build(BuildContext context) {
@@ -71,8 +73,7 @@ class PresenceScannerMasterDrawer extends StatelessWidget {
             opacity: progress.clamp(0.0, 1.0),
             child: GestureDetector(
               onVerticalDragEnd: (DragEndDetails details) {
-                if (details.primaryVelocity != null &&
-                    details.primaryVelocity! > 200) {
+                if (details.primaryVelocity != null && details.primaryVelocity! > 200) {
                   onClose();
                 }
               },
@@ -80,15 +81,11 @@ class PresenceScannerMasterDrawer extends StatelessWidget {
                 padding: EdgeInsets.fromLTRB(20, 10, 20, bottomPadding),
                 decoration: BoxDecoration(
                   color: drawerBg,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(32),
-                  ),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
                   border: Border(top: BorderSide(color: drawerBorder)),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
-                      color: AmanahColorTokens.pureBlack.withValues(
-                        alpha: 0.40 * progress,
-                      ),
+                      color: AmanahColorTokens.pureBlack.withValues(alpha: 0.40 * progress),
                       blurRadius: 32,
                       offset: const Offset(0, -8),
                     ),
@@ -124,17 +121,13 @@ class PresenceScannerMasterDrawer extends StatelessWidget {
                           GestureDetector(
                             onTap: onClose,
                             child: Padding(
-                              padding: const EdgeInsets.only(
-                                top: 2,
-                                bottom: 14,
-                              ),
+                              padding: const EdgeInsets.only(top: 2, bottom: 14),
                               child: Container(
                                 width: 48,
                                 height: 4.5,
                                 decoration: BoxDecoration(
                                   color: dark
-                                      ? AmanahColorTokens.surfaceLight
-                                          .withValues(alpha: 0.25)
+                                      ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.25)
                                       : AmanahColorTokens.neutral300,
                                   borderRadius: BorderRadius.circular(3),
                                 ),
@@ -142,38 +135,18 @@ class PresenceScannerMasterDrawer extends StatelessWidget {
                             ),
                           ),
 
-                          // Active View
-                          if (drawerView == AmanahQrDrawerView.menu)
-                            PresenceMenuDrawerView(
-                              user: user,
-                              activeView: drawerView,
-                              onSelectView: onOpenView,
-                              onClose: onClose,
-                              dark: dark,
-                            ),
-
-                          if (drawerView == AmanahQrDrawerView.manualPin)
-                            PresenceManualPinDrawerView(
-                              manualPin: manualPin,
-                              pinError: pinError,
-                              onChanged: onManualPinChanged,
-                              onBack: () => onOpenView(
-                                AmanahQrDrawerView.menu,
-                              ),
-                              onSubmit: onVerifyManualPin,
-                            ),
-
-                          if (drawerView == AmanahQrDrawerView.myQr)
-                            PresenceMyQrDrawerView(
-                              userQrValue: userQrValue,
-                              copiedFeedback: copiedFeedback,
-                              onBack: () => onOpenView(
-                                AmanahQrDrawerView.menu,
-                              ),
-                              onCopy: onCopyQr,
-                              onDownload: onDownloadQr,
-                              dark: dark,
-                            ),
+                          // Active View: Directly show manual PIN drawer (with active session check or empty state inside)
+                          PresenceManualPinDrawerView(
+                            user: user,
+                            manualPin: manualPin,
+                            pinError: pinError,
+                            onChanged: onManualPinChanged,
+                            onClose: onClose,
+                            onSubmit: onVerifyManualPin,
+                            dark: dark,
+                            scanMode: scanMode,
+                            onScanModeChanged: onScanModeChanged,
+                          ),
                         ],
                       ),
                     ),

@@ -4,12 +4,14 @@ import 'package:amanah_healthcare/features/presence/domain/entities/attendance_c
 abstract interface class AttendanceRepository {
   Future<AttendanceCheckInResult> recordScan({
     required String qrToken,
+    AttendanceMethod? method,
     String? shift,
     String? deviceInfo,
   });
 
   Future<AttendanceCheckInResult> recordCheckout({
     String? qrToken,
+    AttendanceMethod? method,
     String? checkoutTicket,
     String? notes,
   });

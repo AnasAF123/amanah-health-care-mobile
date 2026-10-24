@@ -22,6 +22,67 @@ enum AmanahNotificationCategory {
   final String label;
 }
 
+enum AmanahNotificationSourceType {
+  attendance('attendance'),
+  leave('leave'),
+  replacement('replacement'),
+  payroll('payroll'),
+  queue('queue'),
+  appointment('appointment'),
+  clinical('clinical'),
+  unknown('');
+
+  const AmanahNotificationSourceType(this.value);
+
+  final String value;
+
+  static AmanahNotificationSourceType fromString(String? raw) {
+    if (raw == null || raw.isEmpty) return AmanahNotificationSourceType.unknown;
+    final String normalized = raw.toLowerCase().trim();
+    for (final AmanahNotificationSourceType type in AmanahNotificationSourceType.values) {
+      if (type.value == normalized) return type;
+    }
+    return AmanahNotificationSourceType.unknown;
+  }
+
+  bool get isShiftRelated =>
+      this == attendance || this == leave || this == replacement || this == payroll;
+
+  AmanahNotificationCategory get defaultCategory {
+    switch (this) {
+      case attendance:
+      case leave:
+      case replacement:
+      case payroll:
+        return AmanahNotificationCategory.shift;
+      case queue:
+      case appointment:
+        return AmanahNotificationCategory.queue;
+      case clinical:
+        return AmanahNotificationCategory.clinical;
+      case unknown:
+        return AmanahNotificationCategory.all;
+    }
+  }
+
+  AmanahNotificationVisual get defaultVisual {
+    switch (this) {
+      case attendance:
+        return AmanahNotificationVisual.shiftReminder;
+      case leave:
+      case replacement:
+      case payroll:
+        return AmanahNotificationVisual.shiftSchedule;
+      case queue:
+      case appointment:
+        return AmanahNotificationVisual.queueVitals;
+      case clinical:
+      case unknown:
+        return AmanahNotificationVisual.clinicalConsult;
+    }
+  }
+}
+
 class AmanahNotificationItem {
   const AmanahNotificationItem({
     required this.id,
@@ -35,7 +96,7 @@ class AmanahNotificationItem {
     this.isUrgent = false,
     this.actionLabel,
     this.actionUrl,
-    this.sourceType,
+    this.sourceType = AmanahNotificationSourceType.unknown,
     this.sourceId,
   });
 
@@ -50,7 +111,7 @@ class AmanahNotificationItem {
   final String? actionLabel;
   final AmanahNotificationVisual visual;
   final String? actionUrl;
-  final String? sourceType;
+  final AmanahNotificationSourceType sourceType;
   final String? sourceId;
 
   AmanahNotificationItem copyWith({
@@ -65,7 +126,7 @@ class AmanahNotificationItem {
     String? actionLabel,
     AmanahNotificationVisual? visual,
     String? actionUrl,
-    String? sourceType,
+    AmanahNotificationSourceType? sourceType,
     String? sourceId,
   }) {
     return AmanahNotificationItem(
@@ -90,9 +151,7 @@ class AmanahNotificationStore extends ChangeNotifier {
   AmanahNotificationStore._() {
     _notifications = <AmanahNotificationItem>[];
     _apiClient = AuthorizedApiClient(
-      innerClient: HttpApiClient(
-        baseUrl: AmanahAuthEnvironment.authBaseUrl,
-      ),
+      innerClient: HttpApiClient(baseUrl: AmanahAuthEnvironment.authBaseUrl),
       tokenProvider: const AmanahAuthTokenStorage(),
     );
   }
@@ -108,32 +167,27 @@ class AmanahNotificationStore extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
-  int get unreadCount =>
-      _notifications.where((AmanahNotificationItem n) => n.isUnread).length;
+  int get unreadCount => _notifications.where((AmanahNotificationItem n) => n.isUnread).length;
 
   int countForCategory(AmanahNotificationCategory category) {
     if (category == AmanahNotificationCategory.all) {
       return _notifications.length;
     }
-    return _notifications
-        .where((AmanahNotificationItem n) => n.category == category)
-        .length;
+    return _notifications.where((AmanahNotificationItem n) => n.category == category).length;
   }
 
-  List<AmanahNotificationItem> getFiltered(
-    AmanahNotificationCategory category,
-  ) {
+  List<AmanahNotificationItem> getFiltered(AmanahNotificationCategory category) {
     if (category == AmanahNotificationCategory.all) {
       return notifications;
     }
-    return _notifications
-        .where((AmanahNotificationItem n) => n.category == category)
-        .toList();
+    return _notifications.where((AmanahNotificationItem n) => n.category == category).toList();
   }
 
-  static AmanahNotificationCategory _mapCategory(String? cat, [String? sourceType]) {
-    final String s = (sourceType ?? '').toLowerCase();
-    if (s == 'attendance' || s == 'leave' || s == 'replacement') {
+  static AmanahNotificationCategory _mapCategory(
+    String? cat, [
+    AmanahNotificationSourceType sourceType = AmanahNotificationSourceType.unknown,
+  ]) {
+    if (sourceType.isShiftRelated) {
       return AmanahNotificationCategory.shift;
     }
     if (cat == null) return AmanahNotificationCategory.all;
@@ -149,21 +203,27 @@ class AmanahNotificationStore extends ChangeNotifier {
       case 'attendance':
       case 'leave':
       case 'replacement':
+      case 'payroll':
         return AmanahNotificationCategory.shift;
       default:
         return AmanahNotificationCategory.all;
     }
   }
 
-  static AmanahNotificationVisual _mapVisual(String? cat, bool isUrgent, [String? sourceType]) {
+  static AmanahNotificationVisual _mapVisual(
+    String? cat,
+    bool isUrgent, [
+    AmanahNotificationSourceType sourceType = AmanahNotificationSourceType.unknown,
+  ]) {
     if (isUrgent) return AmanahNotificationVisual.clinicalCritical;
-    final String s = (sourceType ?? '').toLowerCase();
-    if (s == 'attendance') return AmanahNotificationVisual.shiftReminder;
-    if (s == 'leave' || s == 'replacement') return AmanahNotificationVisual.shiftSchedule;
+    if (sourceType != AmanahNotificationSourceType.unknown) {
+      return sourceType.defaultVisual;
+    }
 
     final String c = (cat ?? '').toLowerCase();
     if (c == 'queue' || c == 'appointment') return AmanahNotificationVisual.queueVitals;
-    if (c == 'shift' || c == 'schedule') return AmanahNotificationVisual.shiftSchedule;
+    if (c == 'shift' || c == 'schedule' || c == 'payroll')
+      return AmanahNotificationVisual.shiftSchedule;
     return AmanahNotificationVisual.clinicalConsult;
   }
 
@@ -202,13 +262,15 @@ class AmanahNotificationStore extends ChangeNotifier {
         _notifications = rawData.whereType<Map<String, dynamic>>().map((item) {
           final String id = item['id']?.toString() ?? '';
           final String title = item['title']?.toString() ?? 'Pemberitahuan';
-          final String desc =
-              item['body']?.toString() ?? item['desc']?.toString() ?? '';
+          final String desc = item['body']?.toString() ?? item['desc']?.toString() ?? '';
           final String createdAt = item['createdAt']?.toString() ?? '';
           final bool isRead = item['isRead'] as bool? ?? false;
           final bool isUrgent = item['isUrgent'] as bool? ?? false;
           final String categoryStr = item['category']?.toString() ?? '';
-          final String sourceType = item['sourceType']?.toString() ?? '';
+          final String rawSourceType = item['sourceType']?.toString() ?? '';
+          final AmanahNotificationSourceType sourceType = AmanahNotificationSourceType.fromString(
+            rawSourceType,
+          );
           final String sourceId = item['sourceId']?.toString() ?? '';
 
           String? actionUrl = item['actionUrl']?.toString();
@@ -234,7 +296,7 @@ class AmanahNotificationStore extends ChangeNotifier {
             visual: _mapVisual(categoryStr, isUrgent, sourceType),
             actionLabel: actionLabel,
             actionUrl: actionUrl,
-            sourceType: sourceType.isNotEmpty ? sourceType : null,
+            sourceType: sourceType,
             sourceId: sourceId.isNotEmpty ? sourceId : null,
           );
         }).toList();
@@ -261,21 +323,21 @@ class AmanahNotificationStore extends ChangeNotifier {
       notifyListeners();
       // Sync with backend asynchronously
       unawaited(
-        _apiClient.request(
-          ApiEndpoint(
-            path: '/api/v1/notifications/$id/read',
-            method: HttpMethod.patch,
-            requiresAuth: true,
-          ),
-        ).catchError((_) => const ApiResponse<dynamic>(statusCode: 500, data: null)),
+        _apiClient
+            .request(
+              ApiEndpoint(
+                path: '/api/v1/notifications/$id/read',
+                method: HttpMethod.patch,
+                requiresAuth: true,
+              ),
+            )
+            .catchError((_) => const ApiResponse<dynamic>(statusCode: 500, data: null)),
       );
     }
   }
 
   void markAllAsRead() {
-    final bool hasUnread = _notifications.any(
-      (AmanahNotificationItem n) => n.isUnread,
-    );
+    final bool hasUnread = _notifications.any((AmanahNotificationItem n) => n.isUnread);
     if (!hasUnread) {
       return;
     }
@@ -286,20 +348,20 @@ class AmanahNotificationStore extends ChangeNotifier {
 
     // Sync with backend asynchronously
     unawaited(
-      _apiClient.request(
-        const ApiEndpoint(
-          path: '/api/v1/notifications/read-all',
-          method: HttpMethod.patch,
-          requiresAuth: true,
-        ),
-      ).catchError((_) => const ApiResponse<dynamic>(statusCode: 500, data: null)),
+      _apiClient
+          .request(
+            const ApiEndpoint(
+              path: '/api/v1/notifications/read-all',
+              method: HttpMethod.patch,
+              requiresAuth: true,
+            ),
+          )
+          .catchError((_) => const ApiResponse<dynamic>(statusCode: 500, data: null)),
     );
   }
 
   void clearRead() {
-    _notifications = _notifications
-        .where((AmanahNotificationItem n) => n.isUnread)
-        .toList();
+    _notifications = _notifications.where((AmanahNotificationItem n) => n.isUnread).toList();
     notifyListeners();
   }
 

@@ -73,11 +73,11 @@ class PresenceScannerTopBar extends StatelessWidget {
                   const SizedBox(width: 8),
                   FloatingCircularButton(
                     onTap: onToggleDrawer,
-                    icon: Icons.grid_view_rounded,
-                    label: 'Buka Menu Presensi',
+                    icon: Icons.dialpad_rounded,
+                    label: 'Presensi Manual (Kode)',
                     dark: dark,
                     size: 40,
-                    isActive: isDrawerOpen && drawerView == AmanahQrDrawerView.menu,
+                    isActive: isDrawerOpen,
                   ),
                   if (hasCamera) ...<Widget>[
                     if (hardwareNotifier != null)

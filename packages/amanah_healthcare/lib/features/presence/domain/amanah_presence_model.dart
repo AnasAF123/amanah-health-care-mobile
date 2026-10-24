@@ -3,6 +3,25 @@ import 'package:amanah_healthcare/core/time/functions/format_localized_time.dart
 
 enum AttendanceStatus { hadir, telat, missed, cuti }
 
+/// Canonical database-driven attendance methods matching PostgreSQL `attendance_method` enum.
+enum AttendanceMethod {
+  qrScan('qr_scan'),
+  manualPin('manual_pin'),
+  qrUpload('qr_upload'),
+  system('system');
+
+  const AttendanceMethod(this.value);
+
+  final String value;
+
+  static AttendanceMethod fromValue(String? value) {
+    return AttendanceMethod.values.firstWhere(
+      (AttendanceMethod m) => m.value == value,
+      orElse: () => AttendanceMethod.qrScan,
+    );
+  }
+}
+
 class AttendanceRecord {
   const AttendanceRecord({
     required this.id,

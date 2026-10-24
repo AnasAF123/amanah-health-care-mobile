@@ -5,16 +5,19 @@ import 'package:amanah_healthcare/core/network/authorized_api_client.dart';
 import 'package:amanah_healthcare/core/network/http_api_client.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_token_storage.dart';
 import 'package:amanah_healthcare/features/presence/data/endpoints/attendance_endpoints.dart';
+import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model.dart';
 
 abstract interface class AttendanceRemoteDataSource {
   Future<Map<String, dynamic>> submitScan({
     required String qrToken,
+    AttendanceMethod? method,
     String? shift,
     String? deviceInfo,
   });
 
   Future<Map<String, dynamic>> submitCheckout({
     String? qrToken,
+    AttendanceMethod? method,
     String? checkoutTicket,
     String? notes,
   });
@@ -45,11 +48,13 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
   @override
   Future<Map<String, dynamic>> submitScan({
     required String qrToken,
+    AttendanceMethod? method,
     String? shift,
     String? deviceInfo,
   }) async {
     final Map<String, dynamic> body = <String, dynamic>{
       'qrToken': qrToken,
+      'method': ?method?.value,
       'shift': ?shift,
       'deviceInfo': ?deviceInfo,
     };
@@ -66,6 +71,7 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
   @override
   Future<Map<String, dynamic>> submitCheckout({
     String? qrToken,
+    AttendanceMethod? method,
     String? checkoutTicket,
     String? notes,
   }) async {
@@ -74,6 +80,9 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
       body['checkoutTicket'] = checkoutTicket;
     } else if (qrToken != null && qrToken.isNotEmpty) {
       body['qrToken'] = qrToken;
+    }
+    if (method != null) {
+      body['method'] = method.value;
     }
     if (notes != null && notes.trim().isNotEmpty) {
       body['notes'] = notes.trim();

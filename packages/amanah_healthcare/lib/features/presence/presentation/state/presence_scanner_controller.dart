@@ -35,7 +35,7 @@ class PresenceScannerController extends ChangeNotifier {
 
   AttendanceFlowState _flowState = AttendanceFlowState.idle;
   AttendanceScanMode _scanMode = AttendanceScanMode.checkIn;
-  AmanahQrDrawerView _drawerView = AmanahQrDrawerView.menu;
+  AmanahQrDrawerView _drawerView = AmanahQrDrawerView.manualPin;
   bool _isDrawerOpen = false;
   bool _isFlashOn = false;
   bool _isFrontCamera = false;
@@ -50,6 +50,7 @@ class PresenceScannerController extends ChangeNotifier {
   String? _pendingCheckoutToken;
   String? _pendingCheckoutTicket;
   bool _requiresEarlyDepartureNotes = false;
+  AttendanceMethod _lastSubmissionMethod = AttendanceMethod.qrScan;
 
   AttendanceFlowState get flowState => _flowState;
   AttendanceScanMode get scanMode => _scanMode;
@@ -67,6 +68,7 @@ class PresenceScannerController extends ChangeNotifier {
   String? get pendingCheckoutToken => _pendingCheckoutToken;
   String? get pendingCheckoutTicket => _pendingCheckoutTicket;
   bool get requiresEarlyDepartureNotes => _requiresEarlyDepartureNotes;
+  AttendanceMethod get lastSubmissionMethod => _lastSubmissionMethod;
 
   void clearPendingEarlyDeparture() {
     _requiresEarlyDepartureNotes = false;
@@ -162,7 +164,7 @@ class PresenceScannerController extends ChangeNotifier {
 
   void closeDrawer() {
     _isDrawerOpen = false;
-    _drawerView = AmanahQrDrawerView.menu;
+    _drawerView = AmanahQrDrawerView.manualPin;
     notifyListeners();
   }
 
@@ -170,7 +172,7 @@ class PresenceScannerController extends ChangeNotifier {
     if (_isDrawerOpen) {
       closeDrawer();
     } else {
-      openDrawer(AmanahQrDrawerView.menu);
+      openDrawer(AmanahQrDrawerView.manualPin);
     }
   }
 
@@ -198,7 +200,7 @@ class PresenceScannerController extends ChangeNotifier {
     _sessionGeneration++;
     _flowState = AttendanceFlowState.idle;
     _isDrawerOpen = false;
-    _drawerView = AmanahQrDrawerView.menu;
+    _drawerView = AmanahQrDrawerView.manualPin;
     _isFlashOn = false;
     _pinError = null;
     _manualPin = '';
@@ -240,42 +242,49 @@ class PresenceScannerController extends ChangeNotifier {
       return null;
     }
 
+    _lastSubmissionMethod = AttendanceMethod.qrScan;
     _flowState = AttendanceFlowState.processing;
     notifyListeners();
 
-    return _executeAttendanceSubmission(token, generation);
+    return _executeAttendanceSubmission(token, generation, method: AttendanceMethod.qrScan);
   }
 
   /// Direct submission entry point (used by manual PIN or programmatic triggers).
-  Future<AttendanceCheckInResult?> submitAttendance(String code) async {
+  Future<AttendanceCheckInResult?> submitAttendance(String code, {bool isManualPin = false}) async {
     if (isFlowActive) return null;
 
     final String? token = QrTokenParser.parse(code);
     if (token == null || token.isEmpty) return null;
 
     final int generation = ++_sessionGeneration;
+    final AttendanceMethod method = isManualPin
+        ? AttendanceMethod.manualPin
+        : AttendanceMethod.qrScan;
+    _lastSubmissionMethod = method;
     _flowState = AttendanceFlowState.processing;
     _isDrawerOpen = false;
     _errorMessage = null;
     _lastException = null;
     notifyListeners();
 
-    return _executeAttendanceSubmission(token, generation);
+    return _executeAttendanceSubmission(token, generation, method: method);
   }
 
   Future<AttendanceCheckInResult?> _executeAttendanceSubmission(
     String token,
-    int generation,
-  ) async {
+    int generation, {
+    AttendanceMethod method = AttendanceMethod.qrScan,
+  }) async {
     try {
       final AttendanceCheckInResult result;
       if (_scanMode == AttendanceScanMode.checkIn) {
         result = await _recordAttendanceUseCase(
           qrToken: token,
+          method: method,
           deviceInfo: 'Amanah Mobile (Android/iOS)',
         );
       } else {
-        result = await _checkoutAttendanceUseCase(qrToken: token);
+        result = await _checkoutAttendanceUseCase(qrToken: token, method: method);
       }
 
       if (_sessionGeneration != generation) {
@@ -346,12 +355,13 @@ class PresenceScannerController extends ChangeNotifier {
     }
 
     _pinError = null;
-    _drawerView = AmanahQrDrawerView.menu;
-    return submitAttendance(pin);
+    _drawerView = AmanahQrDrawerView.manualPin;
+    return submitAttendance(pin, isManualPin: true);
   }
 
   Future<AttendanceCheckInResult?> submitCheckout({
     String? qrToken,
+    AttendanceMethod? method,
     String? checkoutTicket,
     String? notes,
   }) async {
@@ -362,6 +372,7 @@ class PresenceScannerController extends ChangeNotifier {
     try {
       final AttendanceCheckInResult result = await _checkoutAttendanceUseCase(
         qrToken: qrToken ?? _pendingCheckoutToken,
+        method: method ?? _lastSubmissionMethod,
         checkoutTicket: checkoutTicket ?? _pendingCheckoutTicket,
         notes: notes,
       );

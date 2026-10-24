@@ -14,15 +14,16 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
   @override
   Future<AttendanceCheckInResult> recordScan({
     required String qrToken,
+    AttendanceMethod? method,
     String? shift,
     String? deviceInfo,
   }) async {
     final Map<String, dynamic> json = await _remoteDataSource.submitScan(
       qrToken: qrToken,
+      method: method,
       shift: shift,
       deviceInfo: deviceInfo,
     );
-
     final String checkInStr = json['checkInAt']?.toString() ?? '';
     final DateTime checkInAt = DateTime.tryParse(checkInStr) ?? DateTime.now();
 
@@ -49,11 +50,13 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
   @override
   Future<AttendanceCheckInResult> recordCheckout({
     String? qrToken,
+    AttendanceMethod? method,
     String? checkoutTicket,
     String? notes,
   }) async {
     final Map<String, dynamic> json = await _remoteDataSource.submitCheckout(
       qrToken: qrToken,
+      method: method,
       checkoutTicket: checkoutTicket,
       notes: notes,
     );

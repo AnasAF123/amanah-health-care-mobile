@@ -1,4 +1,5 @@
 import 'package:amanah_healthcare/core/network/api_exception.dart';
+import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model.dart';
 
 /// Categorical outcome types for the Presence Scanner flow.
 enum PresenceStatusType {
@@ -65,7 +66,7 @@ class PresenceStatusPayload {
   }
 
   /// Maps an exception directly from the backend machine-readable contract.
-  factory PresenceStatusPayload.fromException(Object error) {
+  factory PresenceStatusPayload.fromException(Object error, {AttendanceMethod? method}) {
     if (error is ApiException) {
       switch (error.code) {
         case 'ATTENDANCE_NOT_FOUND':
@@ -114,7 +115,25 @@ class PresenceStatusPayload {
             actionLabel: 'Saya Mengerti',
           );
 
+        case 'INVALID_MANUAL_CODE':
+          return const PresenceStatusPayload(
+            type: PresenceStatusType.invalidOrExpiredToken,
+            title: 'Kode Presensi Tidak Valid',
+            message:
+                'Kode presensi tidak dikenali atau sudah kedaluwarsa. Silakan periksa kode 6-karakter terbaru pada terminal kehadiran.',
+            actionLabel: 'Coba Lagi',
+          );
+
         case 'INVALID_QR_TOKEN':
+          if (method == AttendanceMethod.manualPin) {
+            return const PresenceStatusPayload(
+              type: PresenceStatusType.invalidOrExpiredToken,
+              title: 'Kode Presensi Tidak Valid',
+              message:
+                  'Kode presensi tidak dikenali atau sudah kedaluwarsa. Silakan periksa kode 6-karakter terbaru pada terminal kehadiran.',
+              actionLabel: 'Coba Lagi',
+            );
+          }
           return const PresenceStatusPayload(
             type: PresenceStatusType.invalidOrExpiredToken,
             title: 'Token QR Tidak Valid',
@@ -152,6 +171,17 @@ class PresenceStatusPayload {
     }
 
     final String str = error.toString();
+    if (str.contains('Kode presensi') ||
+        (method == AttendanceMethod.manualPin &&
+            (str.contains('Token QR') || str.contains('tidak valid') || str.contains('INVALID')))) {
+      return const PresenceStatusPayload(
+        type: PresenceStatusType.invalidOrExpiredToken,
+        title: 'Kode Presensi Tidak Valid',
+        message:
+            'Kode presensi tidak dikenali atau sudah kedaluwarsa. Silakan periksa kode 6-karakter terbaru pada terminal kehadiran.',
+        actionLabel: 'Coba Lagi',
+      );
+    }
     if (str.contains('sudah melakukan presensi masuk')) {
       return const PresenceStatusPayload(
         type: PresenceStatusType.conflictAlreadyCheckedIn,
@@ -182,6 +212,6 @@ class PresenceStatusPayload {
   }
 
   /// Backward-compatible bridge for legacy callers passing raw string error.
-  factory PresenceStatusPayload.fromError(String rawError) =>
-      PresenceStatusPayload.fromException(rawError);
+  factory PresenceStatusPayload.fromError(String rawError, {AttendanceMethod? method}) =>
+      PresenceStatusPayload.fromException(rawError, method: method);
 }

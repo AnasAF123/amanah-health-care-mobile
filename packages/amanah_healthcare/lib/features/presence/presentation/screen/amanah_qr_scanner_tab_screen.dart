@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/presence/data/repositories/attendance_repository_impl.dart';
+import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model.dart';
 import 'package:amanah_healthcare/features/presence/domain/entities/attendance_check_in_result.dart';
 import 'package:amanah_healthcare/features/presence/domain/repositories/attendance_repository.dart';
 import 'package:amanah_healthcare/features/presence/domain/usecases/checkout_attendance_usecase.dart';
@@ -23,6 +24,7 @@ import 'package:amanah_healthcare/core/logging/app_log.dart';
 import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_presence_history_screen.dart';
 import 'package:amanah_healthcare/features/presence/presentation/state/presence_scanner_controller.dart';
 import 'package:amanah_healthcare/features/presence/presentation/utils/scan_trace.dart';
+import 'package:amanah_healthcare/features/queue/presentation/state/amanah_queue_store.dart';
 
 export 'package:amanah_healthcare/features/presence/presentation/state/presence_scanner_controller.dart'
     show AmanahQrDrawerView, AttendanceFlowState, AttendanceScanMode;
@@ -86,6 +88,9 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
       if (mounted) {
         widget.onDrawerStateChanged?.call(false);
         _controller.initTodayStatus();
+        if (AmanahQueueStore.instance.sessions.isEmpty) {
+          AmanahQueueStore.instance.loadTodaySessionsAndQueue();
+        }
       }
     });
   }
@@ -120,7 +125,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     if (_controller.isDrawerOpen) {
       _closeDrawer();
     } else {
-      _openDrawer(AmanahQrDrawerView.menu);
+      _openDrawer(AmanahQrDrawerView.manualPin);
     }
   }
 
@@ -172,6 +177,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
       if (reason != null && reason.trim().isNotEmpty) {
         final AttendanceCheckInResult? earlyResult = await _controller.submitCheckout(
           qrToken: ticket == null ? token : null,
+          method: AttendanceMethod.qrScan,
           checkoutTicket: ticket,
           notes: reason,
         );
@@ -190,9 +196,16 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     }
 
     if (_controller.lastException != null) {
-      _showResultDrawer(PresenceStatusPayload.fromException(_controller.lastException!));
+      _showResultDrawer(
+        PresenceStatusPayload.fromException(
+          _controller.lastException!,
+          method: AttendanceMethod.qrScan,
+        ),
+      );
     } else if (_controller.errorMessage != null) {
-      _showResultDrawer(PresenceStatusPayload.fromError(_controller.errorMessage!));
+      _showResultDrawer(
+        PresenceStatusPayload.fromError(_controller.errorMessage!, method: AttendanceMethod.qrScan),
+      );
     }
   }
 
@@ -228,6 +241,7 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
       if (reason != null && reason.trim().isNotEmpty) {
         final AttendanceCheckInResult? earlyResult = await _controller.submitCheckout(
           qrToken: ticket == null ? token : null,
+          method: AttendanceMethod.manualPin,
           checkoutTicket: ticket,
           notes: reason,
         );
@@ -246,9 +260,19 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     }
 
     if (_controller.lastException != null) {
-      _showResultDrawer(PresenceStatusPayload.fromException(_controller.lastException!));
+      _showResultDrawer(
+        PresenceStatusPayload.fromException(
+          _controller.lastException!,
+          method: AttendanceMethod.manualPin,
+        ),
+      );
     } else if (_controller.errorMessage != null) {
-      _showResultDrawer(PresenceStatusPayload.fromError(_controller.errorMessage!));
+      _showResultDrawer(
+        PresenceStatusPayload.fromError(
+          _controller.errorMessage!,
+          method: AttendanceMethod.manualPin,
+        ),
+      );
     }
   }
 
@@ -430,6 +454,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
                   pinError: _controller.pinError,
                   dark: dark,
                   bottomPadding: _drawerBottomPadding(context),
+                  scanMode: _controller.scanMode,
+                  onScanModeChanged: _controller.setScanMode,
                   onClose: _closeDrawer,
                   onOpenView: _openDrawer,
                   onManualPinChanged: _controller.updateManualPin,

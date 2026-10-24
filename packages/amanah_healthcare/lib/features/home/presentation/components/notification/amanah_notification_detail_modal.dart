@@ -7,6 +7,7 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_c
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/permission/presentation/screen/amanah_leave_permission_tab_screen.dart';
+import 'package:amanah_healthcare/features/payroll/presentation/screen/amanah_payroll_history_screen.dart';
 import 'package:amanah_healthcare/features/presence/presentation/screen/amanah_presence_history_screen.dart';
 
 class AmanahNotificationDetailModal extends StatelessWidget {
@@ -49,34 +50,79 @@ class AmanahNotificationDetailModal extends StatelessWidget {
               height: 1.45,
             ),
           ),
-          if (item.sourceType == 'leave' ||
-              item.sourceType == 'replacement' ||
-              item.actionUrl == '/permission') ...<Widget>[
-            const SizedBox(height: 24),
-            AmanahButton(
-              text: 'Buka Modul Cuti & Pengganti',
-              leadingIcon: Icons.calendar_month_rounded,
-              isFullWidth: true,
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).push(AmanahLeavePermissionTabScreen.route());
-              },
-            ),
-          ] else if (item.sourceType == 'attendance') ...<Widget>[
-            const SizedBox(height: 24),
-            AmanahButton(
-              text: 'Buka Riwayat Presensi',
-              leadingIcon: Icons.history_rounded,
-              isFullWidth: true,
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).push(AmanahPresenceHistoryScreen.route());
-              },
-            ),
-          ],
+          () {
+            final AmanahNotificationActionDescriptor? action = item.sourceType.resolveAction(
+              item.actionUrl,
+            );
+            if (action == null) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: const EdgeInsets.only(top: 24),
+              child: AmanahButton(
+                text: action.buttonText,
+                leadingIcon: action.leadingIcon,
+                isFullWidth: true,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(action.routeBuilder(context));
+                },
+              ),
+            );
+          }(),
         ],
       ),
     );
+  }
+}
+
+class AmanahNotificationActionDescriptor {
+  const AmanahNotificationActionDescriptor({
+    required this.buttonText,
+    required this.leadingIcon,
+    required this.routeBuilder,
+  });
+
+  final String buttonText;
+  final IconData leadingIcon;
+  final Route<dynamic> Function(BuildContext context) routeBuilder;
+}
+
+extension AmanahNotificationSourceActionResolver on AmanahNotificationSourceType {
+  AmanahNotificationActionDescriptor? resolveAction(String? actionUrl) {
+    switch (this) {
+      case AmanahNotificationSourceType.leave:
+      case AmanahNotificationSourceType.replacement:
+        return AmanahNotificationActionDescriptor(
+          buttonText: 'Buka Modul Cuti & Pengganti',
+          leadingIcon: Icons.calendar_month_rounded,
+          routeBuilder: (_) => AmanahLeavePermissionTabScreen.route(),
+        );
+      case AmanahNotificationSourceType.attendance:
+        return AmanahNotificationActionDescriptor(
+          buttonText: 'Buka Riwayat Presensi',
+          leadingIcon: Icons.history_rounded,
+          routeBuilder: (_) => AmanahPresenceHistoryScreen.route(),
+        );
+      case AmanahNotificationSourceType.payroll:
+        return AmanahNotificationActionDescriptor(
+          buttonText: 'Buka Rekap Gaji',
+          leadingIcon: Icons.account_balance_wallet_outlined,
+          routeBuilder: (_) => AmanahPayrollHistoryScreen.route(),
+        );
+      case AmanahNotificationSourceType.queue:
+      case AmanahNotificationSourceType.appointment:
+      case AmanahNotificationSourceType.clinical:
+      case AmanahNotificationSourceType.unknown:
+        if (actionUrl == '/permission') {
+          return AmanahNotificationActionDescriptor(
+            buttonText: 'Buka Modul Cuti & Pengganti',
+            leadingIcon: Icons.calendar_month_rounded,
+            routeBuilder: (_) => AmanahLeavePermissionTabScreen.route(),
+          );
+        }
+        return null;
+    }
   }
 }
 

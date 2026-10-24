@@ -143,9 +143,7 @@ class AmanahQueueStore extends ChangeNotifier {
   /// Calls a patient to enter the consultation room.
   Future<void> callPatient(String appointmentId, {String? notes}) async {
     try {
-      await _callPatientUseCase(
-        CallPatientParams(appointmentId: appointmentId, notes: notes),
-      );
+      await _callPatientUseCase(CallPatientParams(appointmentId: appointmentId, notes: notes));
       await refreshQueue(silent: true);
     } catch (e) {
       _errorMessage = e is QueueFailure ? e.message : e.toString();
@@ -195,9 +193,7 @@ class AmanahQueueStore extends ChangeNotifier {
   /// Reports patient did not show up.
   Future<void> reportNoShow(String appointmentId, {String? notes}) async {
     try {
-      await _reportNoShowUseCase(
-        ReportNoShowParams(appointmentId: appointmentId, notes: notes),
-      );
+      await _reportNoShowUseCase(ReportNoShowParams(appointmentId: appointmentId, notes: notes));
       await refreshQueue(silent: true);
     } catch (e) {
       _errorMessage = e is QueueFailure ? e.message : e.toString();
@@ -233,8 +229,7 @@ class AmanahQueueStore extends ChangeNotifier {
   }
 
   /// Fetches dynamic reschedule options (available dates and active shifts) from backend.
-  Future<RescheduleOptionsEntity?> getRescheduleOptions(
-      String appointmentId) async {
+  Future<RescheduleOptionsEntity?> getRescheduleOptions(String appointmentId) async {
     try {
       return await _getRescheduleOptionsUseCase(appointmentId);
     } catch (e) {
@@ -273,7 +268,8 @@ class AmanahQueueStore extends ChangeNotifier {
       final startMin = _parseTimeToMinutes(s.startTime);
       final endMin = _parseTimeToMinutes(s.endTime);
       if (startMin != null && endMin != null) {
-        if (nowMinutes >= startMin && nowMinutes <= endMin) {
+        final effectiveEndMin = endMin <= startMin ? 1440 : endMin;
+        if (nowMinutes >= startMin && nowMinutes <= effectiveEndMin) {
           return s;
         }
       }
