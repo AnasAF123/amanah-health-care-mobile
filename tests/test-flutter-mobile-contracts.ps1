@@ -145,7 +145,10 @@ try {
 
 # 1.3 Submit Mobile Checkout (Self-Checkout)
 try {
-    $checkoutPayload = @{ notes = "Izin dinas luar / visit rujukan" } | ConvertTo-Json
+    $checkoutPayload = @{
+        qrToken = $activeQrToken
+        notes = "Izin dinas luar / visit rujukan"
+    } | ConvertTo-Json
     $checkoutRes = Invoke-RestMethod -Uri "$BaseUrl/api/v1/attendance/checkout" -Method Post -Headers $doctorHeaders -Body $checkoutPayload -ContentType "application/json"
     $hasCheckoutTime = $null -ne $checkoutRes.checkOutAt
     $hasValidatedDuration = ($null -ne $checkoutRes.validatedDurationHours) -and ([double]$checkoutRes.validatedDurationHours -ge 0)
@@ -164,12 +167,13 @@ try {
 # 1.4 Get My Attendance History
 try {
     $historyRes = Invoke-RestMethod -Uri "$BaseUrl/api/v1/attendance/my-history" -Method Get -Headers $doctorHeaders
-    $hasItems = ($null -ne $historyRes) -and ($historyRes.Count -gt 0)
-    $latest = if ($hasItems) { $historyRes[0] } else { $null }
+    $records = if ($historyRes.records) { $historyRes.records } else { $historyRes }
+    $hasItems = ($null -ne $records) -and ($records.Count -gt 0)
+    $latest = if ($hasItems) { $records[0] } else { $null }
 
     # Validate DTO fields expected by Flutter AttendanceRecord
     $validRecord = $latest -and ($null -ne $latest.id) -and ($null -ne $latest.attendanceDate) -and ($null -ne $latest.status)
-    Report-Result "GET /api/v1/attendance/my-history (Mobile Attendance History)" ($hasItems -and $validRecord) "Total Records: $($historyRes.Count), Latest: $($latest.attendanceDate) [$($latest.shift)] Status: $($latest.status)"
+    Report-Result "GET /api/v1/attendance/my-history (Mobile Attendance History)" ($hasItems -and $validRecord) "Total Records: $($records.Count), Latest: $($latest.attendanceDate) [$($latest.shift)] Status: $($latest.status)"
 } catch {
     Report-Result "GET /api/v1/attendance/my-history (Mobile Attendance History)" $false $_.Exception.Message
 }
