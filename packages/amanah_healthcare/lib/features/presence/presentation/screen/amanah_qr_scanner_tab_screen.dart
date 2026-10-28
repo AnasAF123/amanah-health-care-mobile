@@ -37,6 +37,8 @@ class AmanahQrScannerTabScreen extends StatefulWidget {
     this.onDrawerStateChanged,
     this.enableCameraScanner = true,
     this.bottomNavigationClearance = 0,
+    this.repository,
+    this.controller,
   });
 
   final AmanahAuthUser? user;
@@ -44,6 +46,8 @@ class AmanahQrScannerTabScreen extends StatefulWidget {
   final ValueChanged<bool>? onDrawerStateChanged;
   final bool enableCameraScanner;
   final double bottomNavigationClearance;
+  final AttendanceRepository? repository;
+  final PresenceScannerController? controller;
 
   @override
   State<AmanahQrScannerTabScreen> createState() => AmanahQrScannerTabScreenState();
@@ -68,13 +72,14 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     ScanTrace.start();
     AppLog.scanner('[QR SCANNER] 🚀 Initializing QR scanner screen');
 
-    final AttendanceRepository repository = AttendanceRepositoryImpl();
-    _controller = PresenceScannerController(
-      recordAttendanceUseCase: RecordAttendanceUseCase(repository),
-      checkoutAttendanceUseCase: CheckoutAttendanceUseCase(repository),
-      getAttendanceHistoryUseCase: GetAttendanceHistoryUseCase(repository),
-      feedbackService: ScannerFeedbackService(),
-    );
+    final AttendanceRepository repository = widget.repository ?? AttendanceRepositoryImpl();
+    _controller = widget.controller ??
+        PresenceScannerController(
+          recordAttendanceUseCase: RecordAttendanceUseCase(repository),
+          checkoutAttendanceUseCase: CheckoutAttendanceUseCase(repository),
+          getAttendanceHistoryUseCase: GetAttendanceHistoryUseCase(repository),
+          feedbackService: ScannerFeedbackService(),
+        );
 
     _drawerAnimationController = AnimationController(
       vsync: this,

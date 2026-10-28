@@ -96,13 +96,16 @@ class PresenceStatusPayload {
             actionLabel: 'Saya Mengerti',
           );
 
+        case 'NO_ACTIVE_SESSION':
+        case 'SESSION_EXPIRED':
         case 'STAFF_NOT_ROSTERED':
         case 'SESSION_MISMATCH':
-          return const PresenceStatusPayload(
+          return PresenceStatusPayload(
             type: PresenceStatusType.outOfSchedule,
-            title: 'Di Luar Jadwal Dinas',
-            message:
-                'Anda tidak memiliki jadwal dinas aktif pada sesi waktu saat ini. Hubungi koordinator staf jika terdapat kekeliruan.',
+            title: error.code == 'SESSION_EXPIRED' ? 'Sesi Telah Berakhir' : 'Di Luar Jadwal Dinas',
+            message: error.message.isNotEmpty
+                ? error.message
+                : 'Anda tidak memiliki jadwal dinas aktif pada sesi waktu saat ini. Hubungi koordinator staf jika terdapat kekeliruan.',
             actionLabel: 'Saya Mengerti',
           );
 
@@ -170,43 +173,16 @@ class PresenceStatusPayload {
       }
     }
 
-    final String str = error.toString();
-    if (str.contains('Kode presensi') ||
-        (method == AttendanceMethod.manualPin &&
-            (str.contains('Token QR') || str.contains('tidak valid') || str.contains('INVALID')))) {
-      return const PresenceStatusPayload(
-        type: PresenceStatusType.invalidOrExpiredToken,
-        title: 'Kode Presensi Tidak Valid',
-        message:
-            'Kode presensi tidak dikenali atau sudah kedaluwarsa. Silakan periksa kode 6-karakter terbaru pada terminal kehadiran.',
-        actionLabel: 'Coba Lagi',
-      );
-    }
-    if (str.contains('sudah melakukan presensi masuk')) {
-      return const PresenceStatusPayload(
-        type: PresenceStatusType.conflictAlreadyCheckedIn,
-        title: 'Sudah Presensi Masuk',
-        message:
-            'Anda sudah melakukan presensi masuk hari ini. Silakan gunakan mode Presensi Pulang jika dinas Anda telah selesai.',
-        actionLabel: 'Saya Mengerti',
-      );
-    }
-    if (str.contains('sudah tercatat sebelumnya')) {
-      return const PresenceStatusPayload(
-        type: PresenceStatusType.conflictAlreadyCheckedOut,
-        title: 'Sudah Presensi Pulang',
-        message:
-            'Presensi pulang sudah tercatat sebelumnya untuk hari ini. Tidak ada sesi dinas aktif yang perlu ditutup.',
-        actionLabel: 'Saya Mengerti',
-      );
-    }
+    final String cleanMessage = error is ApiException
+        ? error.message
+        : error.toString().replaceAll('Exception: ', '').replaceAll('FormatException: ', '');
 
     return PresenceStatusPayload(
       type: PresenceStatusType.genericError,
       title: 'Gagal Memproses Presensi',
-      message: error is ApiException
-          ? error.message
-          : str.replaceAll('Exception: ', '').replaceAll('FormatException: ', ''),
+      message: cleanMessage.isNotEmpty
+          ? cleanMessage
+          : 'Terjadi kendala saat memproses presensi dinas.',
       actionLabel: 'Saya Mengerti',
     );
   }

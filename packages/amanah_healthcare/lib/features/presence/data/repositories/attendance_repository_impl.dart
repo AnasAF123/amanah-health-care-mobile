@@ -1,3 +1,4 @@
+import 'package:amanah_healthcare/core/time/functions/format_localized_date.dart';
 import 'package:amanah_healthcare/core/time/functions/format_localized_time.dart';
 import 'package:amanah_healthcare/features/presence/data/datasources/attendance_remote_data_source.dart';
 import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model.dart';
@@ -34,8 +35,8 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
     return AttendanceCheckInResult(
       id: json['id']?.toString() ?? '',
       staffId: json['staffId']?.toString() ?? '',
-      shift: json['shift']?.toString() ?? 'morning',
-      status: json['status']?.toString() ?? 'present',
+      shift: json['shift']?.toString() ?? '',
+      status: json['status']?.toString() ?? '',
       checkInAt: checkInAt,
       timeFormatted: timeFormatted,
       isReplacement: json['isReplacement'] == true,
@@ -74,8 +75,8 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
     return AttendanceCheckInResult(
       id: json['id']?.toString() ?? '',
       staffId: json['staffId']?.toString() ?? '',
-      shift: json['shift']?.toString() ?? 'morning',
-      status: json['status']?.toString() ?? 'present',
+      shift: json['shift']?.toString() ?? '',
+      status: json['status']?.toString() ?? '',
       checkInAt: checkInAt,
       checkOutAt: checkOutAt,
       timeFormatted: timeFormatted,
@@ -138,14 +139,21 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       final dynamic item = list[i];
       if (item is! Map<String, dynamic>) continue;
 
-      final String statusStr = item['status']?.toString().toLowerCase() ?? '';
-      final AttendanceStatus status = statusStr == 'late' || statusStr == 'telat'
-          ? AttendanceStatus.telat
-          : statusStr == 'leave' || statusStr == 'cuti'
-          ? AttendanceStatus.cuti
-          : statusStr == 'absent' || statusStr == 'missed'
-          ? AttendanceStatus.missed
-          : AttendanceStatus.hadir;
+      final String rawStatus = item['status']?.toString().toLowerCase().trim() ?? '';
+      final AttendanceStatus status;
+      switch (rawStatus) {
+        case 'present':
+          status = AttendanceStatus.hadir;
+        case 'late':
+          status = AttendanceStatus.telat;
+        case 'leave':
+          status = AttendanceStatus.cuti;
+        case 'absent':
+        case 'missed':
+          status = AttendanceStatus.missed;
+        default:
+          status = AttendanceStatus.hadir;
+      }
 
       final String checkInStr = item['checkInAt']?.toString() ?? '';
       final DateTime? checkInAt = DateTime.tryParse(checkInStr)?.toLocal();
@@ -160,10 +168,10 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       final DateTime? parsedDate = DateTime.tryParse(rawDate) ?? checkInAt;
       final int dayNumber = parsedDate?.day ?? (checkInAt?.day ?? 1);
       final String dateFormatted = parsedDate != null
-          ? '${parsedDate.day} ${_monthName(parsedDate.month)}'
+          ? formatLocalizedDate(parsedDate, style: 'human_short')
           : rawDate;
 
-      final String shiftRaw = item['shift']?.toString() ?? 'morning';
+      final String shiftRaw = item['shift']?.toString() ?? '';
       final String shiftName = ClinicalSessionResolver.resolveShiftName(sessionShift: shiftRaw);
       final bool isReplacement = item['isReplacement'] == true;
       final String title = isReplacement ? 'Shift $shiftName (Pengganti)' : 'Shift $shiftName';
@@ -194,26 +202,5 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
     }
 
     return AttendanceHistoryResult(records: records, summary: summary);
-  }
-
-  static String _monthName(int month) {
-    const List<String> months = <String>[
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'Mei',
-      'Jun',
-      'Jul',
-      'Ags',
-      'Sep',
-      'Okt',
-      'Nov',
-      'Des',
-    ];
-    if (month >= 1 && month <= 12) {
-      return months[month - 1];
-    }
-    return '';
   }
 }

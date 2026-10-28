@@ -1,12 +1,13 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/presence/domain/entities/presence_status_payload.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/drawers/amanah_presence_result_drawer_style.dart';
-import 'package:amanah_healthcare/features/presence/presentation/components/drawers/amanah_presence_result_palette.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/drawers/amanah_presence_result_painters.dart';
+import 'package:amanah_healthcare/features/presence/presentation/components/drawers/amanah_presence_result_palette.dart';
+import 'package:amanah_healthcare/features/presence/presentation/components/drawers/molecules/amanah_result_actions.dart';
+import 'package:amanah_healthcare/features/presence/presentation/components/drawers/molecules/amanah_result_emblem.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/drawers/styles/amanah_badge_drawer_view.dart';
 
 export 'package:amanah_healthcare/features/presence/presentation/components/drawers/amanah_presence_result_drawer_style.dart';
@@ -261,7 +262,7 @@ class _AmanahPresenceResultDrawerState extends State<AmanahPresenceResultDrawer>
                             const SizedBox(height: 18),
 
                             // Top Animated Status Emblem
-                            _ResultEmblem(palette: palette, iconProgress: iconProgress),
+                            AmanahResultEmblem(palette: palette, iconProgress: iconProgress),
                             const SizedBox(height: 20),
 
                             // Content and Actions
@@ -365,7 +366,7 @@ class _AmanahPresenceResultDrawerState extends State<AmanahPresenceResultDrawer>
                                     const SizedBox(height: 24),
 
                                     // In-Flow Action Buttons (Never Covering Content)
-                                    _ResultActions(
+                                    AmanahResultActions(
                                       payload: widget.payload,
                                       palette: palette,
                                       onClose: widget.onClose,
@@ -388,118 +389,6 @@ class _AmanahPresenceResultDrawerState extends State<AmanahPresenceResultDrawer>
           ),
         ),
       ),
-    );
-  }
-}
-
-class _ResultEmblem extends StatelessWidget {
-  const _ResultEmblem({required this.palette, required this.iconProgress});
-
-  final PresenceResultPalette palette;
-  final double iconProgress;
-
-  @override
-  Widget build(BuildContext context) {
-    final double outlineProgress = (iconProgress / 0.50).clamp(0.0, 1.0);
-    final double fillProgress = ((iconProgress - 0.35) / 0.50).clamp(0.0, 1.0);
-    final double fillScale = Curves.easeOutBack.transform(fillProgress);
-    final double iconScale = ((iconProgress - 0.55) / 0.45).clamp(0.0, 1.0);
-
-    return Container(
-      width: 80,
-      height: 80,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: palette.primary.withValues(alpha: 0.28),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          CustomPaint(
-            painter: ResultEmblemPainter(
-              palette: palette,
-              outlineProgress: outlineProgress,
-              fillScale: fillScale,
-            ),
-          ),
-          if (iconScale > 0.05)
-            Center(
-              child: Transform.scale(
-                scale: Curves.easeOutBack.transform(iconScale),
-                child: Icon(palette.iconData, size: 38, color: palette.onPrimary),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ResultActions extends StatelessWidget {
-  const _ResultActions({
-    required this.payload,
-    required this.palette,
-    required this.onClose,
-    this.onGoHome,
-    this.onViewHistory,
-    this.onSwitchToCheckIn,
-  });
-
-  final PresenceStatusPayload payload;
-  final PresenceResultPalette palette;
-  final VoidCallback onClose;
-  final VoidCallback? onGoHome;
-  final VoidCallback? onViewHistory;
-  final VoidCallback? onSwitchToCheckIn;
-
-  @override
-  Widget build(BuildContext context) {
-    if (payload.isSuccess) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          AmanahButton.primary(
-            text: 'Lihat Riwayat Absensi',
-            isFullWidth: true,
-            size: AmanahButtonSize.medium,
-            onPressed: onViewHistory ?? onClose,
-          ),
-          const SizedBox(height: 8),
-          AmanahButton.text(
-            text: 'Selesai',
-            customForegroundColor: palette.subtitle,
-            onPressed: onGoHome ?? onClose,
-          ),
-        ],
-      );
-    }
-
-    final VoidCallback actionPressed =
-        (payload.type == PresenceStatusType.notCheckedIn && onSwitchToCheckIn != null)
-        ? () {
-            onClose();
-            onSwitchToCheckIn!();
-          }
-        : onClose;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        AmanahButton.primary(
-          text: payload.actionLabel,
-          isFullWidth: true,
-          size: AmanahButtonSize.medium,
-          onPressed: actionPressed,
-        ),
-      ],
     );
   }
 }

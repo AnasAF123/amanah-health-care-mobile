@@ -15,13 +15,24 @@ import 'package:amanah_healthcare/features/presence/presentation/components/hist
 import 'package:amanah_healthcare/features/presence/presentation/components/history/presence_timeline_item.dart';
 
 class AmanahPresenceHistoryScreen extends StatefulWidget {
-  const AmanahPresenceHistoryScreen({super.key, this.initialRecords});
+  const AmanahPresenceHistoryScreen({
+    super.key,
+    this.initialRecords,
+    this.getHistoryUseCase,
+  });
 
   final List<AttendanceRecord>? initialRecords;
+  final GetAttendanceHistoryUseCase? getHistoryUseCase;
 
-  static Route<void> route({List<AttendanceRecord>? records}) {
+  static Route<void> route({
+    List<AttendanceRecord>? records,
+    GetAttendanceHistoryUseCase? getHistoryUseCase,
+  }) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) => AmanahPresenceHistoryScreen(initialRecords: records),
+      builder: (BuildContext context) => AmanahPresenceHistoryScreen(
+        initialRecords: records,
+        getHistoryUseCase: getHistoryUseCase,
+      ),
     );
   }
 
@@ -78,7 +89,8 @@ class _AmanahPresenceHistoryScreenState extends State<AmanahPresenceHistoryScree
   @override
   void initState() {
     super.initState();
-    _getHistoryUseCase = GetAttendanceHistoryUseCase(AttendanceRepositoryImpl());
+    _getHistoryUseCase = widget.getHistoryUseCase ??
+        GetAttendanceHistoryUseCase(AttendanceRepositoryImpl());
 
     if (widget.initialRecords != null && widget.initialRecords!.isNotEmpty) {
       _records = widget.initialRecords!;
