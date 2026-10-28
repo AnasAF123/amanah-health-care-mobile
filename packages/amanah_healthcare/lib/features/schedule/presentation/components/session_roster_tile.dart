@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/doctor_roster.dart';
 
 class SessionRosterTile extends StatelessWidget {
-  const SessionRosterTile({
-    required this.session,
-    required this.isActive,
-    super.key,
-  });
+  const SessionRosterTile({required this.session, required this.isActive, super.key});
 
   final DoctorRosterSession session;
   final bool isActive;
@@ -20,19 +15,19 @@ class SessionRosterTile extends StatelessWidget {
 
     final Color bgColor = isActive
         ? (dark
-            ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.12)
-            : AmanahColorTokens.brand.withValues(alpha: 0.08))
+              ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.12)
+              : AmanahColorTokens.brand.withValues(alpha: 0.08))
         : (dark
-            ? AmanahColorTokens.surfaceSecondaryDark.withValues(alpha: 0.35)
-            : AmanahColorTokens.neutral100.withValues(alpha: 0.5));
+              ? AmanahColorTokens.surfaceSecondaryDark.withValues(alpha: 0.35)
+              : AmanahColorTokens.neutral100.withValues(alpha: 0.5));
 
     final Color borderColor = isActive
         ? (dark
-            ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.4)
-            : AmanahColorTokens.brand.withValues(alpha: 0.3))
+              ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.4)
+              : AmanahColorTokens.brand.withValues(alpha: 0.3))
         : (dark
-            ? AmanahColorTokens.neutral700.withValues(alpha: 0.3)
-            : AmanahColorTokens.neutral200);
+              ? AmanahColorTokens.neutral700.withValues(alpha: 0.3)
+              : AmanahColorTokens.neutral200);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -52,9 +47,7 @@ class SessionRosterTile extends StatelessWidget {
                 Text(
                   session.sessionLabel,
                   style: TextStyle(
-                    color: dark
-                        ? AmanahColorTokens.surfaceLight
-                        : AmanahColorTokens.neutral900,
+                    color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
                     fontSize: 13.5,
                     fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                   ),
@@ -63,9 +56,7 @@ class SessionRosterTile extends StatelessWidget {
                 Text(
                   session.timeRange,
                   style: TextStyle(
-                    color: dark
-                        ? AmanahColorTokens.neutral400
-                        : AmanahColorTokens.neutral500,
+                    color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
                     fontSize: 11.5,
                     fontWeight: FontWeight.w500,
                   ),
@@ -75,9 +66,7 @@ class SessionRosterTile extends StatelessWidget {
           ),
           AmanahStatusBadge(
             text: isActive ? 'Aktif' : 'Libur',
-            variant: isActive
-                ? AmanahBadgeVariant.success
-                : AmanahBadgeVariant.warning,
+            variant: isActive ? AmanahBadgeVariant.success : AmanahBadgeVariant.warning,
             fontSize: 10.5,
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           ),

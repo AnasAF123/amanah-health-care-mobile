@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/doctor_roster.dart';
@@ -19,8 +18,7 @@ class WeeklyScheduleAccordion extends StatefulWidget {
   final VoidCallback? onClearFocusedDate;
 
   @override
-  State<WeeklyScheduleAccordion> createState() =>
-      _WeeklyScheduleAccordionState();
+  State<WeeklyScheduleAccordion> createState() => _WeeklyScheduleAccordionState();
 }
 
 class _WeeklyScheduleAccordionState extends State<WeeklyScheduleAccordion> {
@@ -35,8 +33,7 @@ class _WeeklyScheduleAccordionState extends State<WeeklyScheduleAccordion> {
   @override
   void didUpdateWidget(covariant WeeklyScheduleAccordion oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.focusedDate != oldWidget.focusedDate &&
-        widget.focusedDate != null) {
+    if (widget.focusedDate != oldWidget.focusedDate && widget.focusedDate != null) {
       _syncExpandedState();
     }
   }
@@ -98,9 +95,7 @@ class _WeeklyScheduleAccordionState extends State<WeeklyScheduleAccordion> {
     }
 
     final bool dark = Theme.of(context).brightness == Brightness.dark;
-    final int? focusedDow = widget.focusedDate != null
-        ? widget.focusedDate!.weekday % 7
-        : null;
+    final int? focusedDow = widget.focusedDate != null ? widget.focusedDate!.weekday % 7 : null;
 
     final Widget? focusBanner = widget.focusedDate != null
         ? Container(
@@ -122,18 +117,14 @@ class _WeeklyScheduleAccordionState extends State<WeeklyScheduleAccordion> {
                 Icon(
                   Icons.event_available_rounded,
                   size: 18,
-                  color: dark
-                      ? AmanahColorTokens.tabActiveDark
-                      : AmanahColorTokens.brand,
+                  color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Menyesuaikan Sesi: ${_formatFocusedDate(widget.focusedDate!)}',
                     style: TextStyle(
-                      color: dark
-                          ? AmanahColorTokens.tabActiveDark
-                          : AmanahColorTokens.brand,
+                      color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
                     ),
@@ -148,9 +139,7 @@ class _WeeklyScheduleAccordionState extends State<WeeklyScheduleAccordion> {
                       child: Icon(
                         Icons.close_rounded,
                         size: 16,
-                        color: dark
-                            ? AmanahColorTokens.neutral400
-                            : AmanahColorTokens.neutral500,
+                        color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
                       ),
                     ),
                   ),
@@ -160,109 +149,89 @@ class _WeeklyScheduleAccordionState extends State<WeeklyScheduleAccordion> {
         : null;
 
     final Widget listView = ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: roster.days.length,
-          separatorBuilder: (BuildContext context, int index) =>
-              const SizedBox(height: 10),
-          itemBuilder: (BuildContext context, int index) {
-            final DoctorRosterDay day = roster.days[index];
-            final bool isFocused = day.dow == focusedDow;
-            final bool isExpanded = _expandedDays.contains(day.dow);
-            final bool isDayActive = widget.controller.isDayActive(day.dow);
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: roster.days.length,
+      separatorBuilder: (BuildContext context, int index) => const SizedBox(height: 10),
+      itemBuilder: (BuildContext context, int index) {
+        final DoctorRosterDay day = roster.days[index];
+        final bool isFocused = day.dow == focusedDow;
+        final bool isExpanded = _expandedDays.contains(day.dow);
+        final bool isDayActive = widget.controller.isDayActive(day.dow);
 
-            return Container(
-              decoration: BoxDecoration(
-                color: dark
-                    ? AmanahColorTokens.surfaceDark
-                    : AmanahColorTokens.surfaceLight,
+        return Container(
+          decoration: BoxDecoration(
+            color: dark ? AmanahColorTokens.surfaceDark : AmanahColorTokens.surfaceLight,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isFocused
+                  ? (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
+                  : isDayActive
+                  ? (dark
+                        ? AmanahColorTokens.tabActiveDark.withValues(alpha: 0.3)
+                        : AmanahColorTokens.brand.withValues(alpha: 0.25))
+                  : (dark
+                        ? AmanahColorTokens.neutral700.withValues(alpha: 0.4)
+                        : AmanahColorTokens.neutral200),
+              width: isFocused ? 1.8 : 1.0,
+            ),
+          ),
+          child: Column(
+            children: <Widget>[
+              // Day Accordion Header
+              InkWell(
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isFocused
-                      ? (dark
-                          ? AmanahColorTokens.tabActiveDark
-                          : AmanahColorTokens.brand)
-                      : isDayActive
-                          ? (dark
-                              ? AmanahColorTokens.tabActiveDark
-                                  .withValues(alpha: 0.3)
-                              : AmanahColorTokens.brand.withValues(alpha: 0.25))
-                          : (dark
-                              ? AmanahColorTokens.neutral700
-                                  .withValues(alpha: 0.4)
-                              : AmanahColorTokens.neutral200),
-                  width: isFocused ? 1.8 : 1.0,
-                ),
-              ),
-              child: Column(
-                children: <Widget>[
-                  // Day Accordion Header
-                  InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () => _toggleExpanded(day.dow),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
+                onTap: () => _toggleExpanded(day.dow),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  child: Row(
+                    children: <Widget>[
+                      // Day Name
+                      Text(
+                        day.dayName,
+                        style: TextStyle(
+                          color: dark
+                              ? AmanahColorTokens.surfaceLight
+                              : AmanahColorTokens.neutral900,
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
-                      child: Row(
-                        children: <Widget>[
-                          // Day Name
-                          Text(
-                            day.dayName,
-                            style: TextStyle(
-                              color: dark
-                                  ? AmanahColorTokens.surfaceLight
-                                  : AmanahColorTokens.neutral900,
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w800,
+                      const SizedBox(width: 8),
+
+                      if (isFocused) ...<Widget>[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color:
+                                (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
+                                    .withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color:
+                                  (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
+                                      .withValues(alpha: 0.35),
                             ),
                           ),
-                          const SizedBox(width: 8),
-
-                          if (isFocused) ...<Widget>[
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: (dark
-                                        ? AmanahColorTokens.tabActiveDark
-                                        : AmanahColorTokens.brand)
-                                    .withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: (dark
-                                          ? AmanahColorTokens.tabActiveDark
-                                          : AmanahColorTokens.brand)
-                                      .withValues(alpha: 0.35),
-                                ),
-                              ),
-                              child: Text(
-                                'Fokus Kalender',
-                                style: TextStyle(
-                                  color: dark
-                                      ? AmanahColorTokens.tabActiveDark
-                                      : AmanahColorTokens.brand,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
+                          child: Text(
+                            'Fokus Kalender',
+                            style: TextStyle(
+                              color: dark
+                                  ? AmanahColorTokens.tabActiveDark
+                                  : AmanahColorTokens.brand,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
                             ),
-                            const SizedBox(width: 8),
-                          ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
 
                       if (!day.isOperatingDay)
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AmanahColorTokens.warning.withValues(
-                              alpha: 0.12,
-                            ),
+                            color: AmanahColorTokens.warning.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: const Text(
@@ -284,10 +253,7 @@ class _WeeklyScheduleAccordionState extends State<WeeklyScheduleAccordion> {
                             ? AmanahBadgeVariant.success
                             : AmanahBadgeVariant.warning,
                         fontSize: 11,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       ),
                       const SizedBox(width: 8),
 
@@ -296,9 +262,7 @@ class _WeeklyScheduleAccordionState extends State<WeeklyScheduleAccordion> {
                         isExpanded
                             ? Icons.keyboard_arrow_up_rounded
                             : Icons.keyboard_arrow_down_rounded,
-                        color: dark
-                            ? AmanahColorTokens.neutral400
-                            : AmanahColorTokens.neutral500,
+                        color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
                         size: 20,
                       ),
                     ],
@@ -316,10 +280,7 @@ class _WeeklyScheduleAccordionState extends State<WeeklyScheduleAccordion> {
                         day.dow,
                         session.sessionId,
                       );
-                      return SessionRosterTile(
-                        session: session,
-                        isActive: active,
-                      );
+                      return SessionRosterTile(session: session, isActive: active);
                     }).toList(),
                   ),
                 ),
@@ -331,10 +292,7 @@ class _WeeklyScheduleAccordionState extends State<WeeklyScheduleAccordion> {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        ?focusBanner,
-        listView,
-      ],
+      children: <Widget>[?focusBanner, listView],
     );
   }
 }

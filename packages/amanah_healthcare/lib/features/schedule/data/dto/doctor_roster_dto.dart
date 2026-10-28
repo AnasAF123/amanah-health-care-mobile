@@ -13,11 +13,10 @@ class DoctorRosterSessionDto {
   });
 
   factory DoctorRosterSessionDto.fromJson(Map<String, dynamic> json) {
-    final String rawLabel = json['sessionLabel'] as String? ?? '';
     final String sessionCode = json['sessionCode'] as String? ?? '';
-    final String resolvedLabel = rawLabel.isNotEmpty
-        ? ClinicalSessionResolver.sanitize(rawLabel)
-        : ClinicalSessionResolver.resolveSessionName(sessionShift: sessionCode);
+    final String resolvedLabel = ClinicalSessionResolver.resolveSessionName(
+      sessionShift: sessionCode,
+    );
 
     return DoctorRosterSessionDto(
       sessionId: json['sessionId'] as String? ?? '',
@@ -44,7 +43,6 @@ class DoctorRosterSessionDto {
     return <String, dynamic>{
       'sessionId': sessionId,
       'sessionCode': sessionCode,
-      'sessionLabel': sessionLabel,
       'timeRange': timeRange,
       'isActive': isActive,
       if (isTemplateActive != null) 'isTemplateActive': isTemplateActive,
@@ -80,9 +78,9 @@ class DoctorRosterDayDto {
       hasOverride: json['hasOverride'] as bool? ?? false,
       sessions: rawSessions != null
           ? rawSessions
-              .whereType<Map<String, dynamic>>()
-              .map(DoctorRosterSessionDto.fromJson)
-              .toList()
+                .whereType<Map<String, dynamic>>()
+                .map(DoctorRosterSessionDto.fromJson)
+                .toList()
           : const <DoctorRosterSessionDto>[],
     );
   }
@@ -122,22 +120,16 @@ class DoctorRosterOverviewDto {
   });
 
   factory DoctorRosterOverviewDto.fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic>? doctorMap =
-        json['doctor'] as Map<String, dynamic>?;
+    final Map<String, dynamic>? doctorMap = json['doctor'] as Map<String, dynamic>?;
     final List<dynamic>? rawDays = json['days'] as List<dynamic>?;
     return DoctorRosterOverviewDto(
-      doctorId: (doctorMap?['id'] as String?) ??
-          (json['doctorId'] as String? ?? ''),
-      doctorName: (doctorMap?['fullName'] as String?) ??
-          (json['doctorName'] as String? ?? ''),
-      specialization: (doctorMap?['specialization'] as String?) ??
-          (json['specialization'] as String? ?? ''),
+      doctorId: (doctorMap?['id'] as String?) ?? (json['doctorId'] as String? ?? ''),
+      doctorName: (doctorMap?['fullName'] as String?) ?? (json['doctorName'] as String? ?? ''),
+      specialization:
+          (doctorMap?['specialization'] as String?) ?? (json['specialization'] as String? ?? ''),
       hasAnyOverride: json['hasAnyOverride'] as bool? ?? false,
       days: rawDays != null
-          ? rawDays
-              .whereType<Map<String, dynamic>>()
-              .map(DoctorRosterDayDto.fromJson)
-              .toList()
+          ? rawDays.whereType<Map<String, dynamic>>().map(DoctorRosterDayDto.fromJson).toList()
           : const <DoctorRosterDayDto>[],
     );
   }
