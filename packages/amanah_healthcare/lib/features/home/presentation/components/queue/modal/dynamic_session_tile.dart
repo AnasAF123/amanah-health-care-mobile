@@ -4,12 +4,7 @@ import 'package:amanah_healthcare/features/queue/domain/entities/reschedule_opti
 
 /// Presentation widget rendering a dynamic clinical session/shift card option.
 class DynamicSessionTile extends StatelessWidget {
-  const DynamicSessionTile({
-    required this.shift,
-    required this.isSelected,
-    this.onTap,
-    super.key,
-  });
+  const DynamicSessionTile({required this.shift, required this.isSelected, this.onTap, super.key});
 
   final RescheduleShiftOption shift;
   final bool isSelected;
@@ -24,21 +19,15 @@ class DynamicSessionTile extends StatelessWidget {
 
     final Color bgColor = !isEnabled
         ? (dark
-            ? AmanahColorTokens.surfaceSecondaryDark.withValues(alpha: 0.4)
-            : AmanahColorTokens.neutral100)
+              ? AmanahColorTokens.surfaceSecondaryDark.withValues(alpha: 0.4)
+              : AmanahColorTokens.neutral100)
         : (isSelected
-            ? (dark
-                ? AmanahColorTokens.brandNavyDark
-                : AmanahColorTokens.brandSurface)
-            : (dark
-                ? AmanahColorTokens.surfaceSecondaryDark
-                : AmanahColorTokens.neutral50));
+              ? (dark ? AmanahColorTokens.brandNavyDark : AmanahColorTokens.brandSurface)
+              : (dark ? AmanahColorTokens.surfaceSecondaryDark : AmanahColorTokens.neutral50));
 
     final Color borderColor = isSelected
         ? AmanahColorTokens.brandPrimary
-        : (dark
-            ? AmanahColorTokens.neutral700
-            : AmanahColorTokens.neutral200);
+        : (dark ? AmanahColorTokens.neutral700 : AmanahColorTokens.neutral200);
 
     return InkWell(
       onTap: onTap,
@@ -49,10 +38,7 @@ class DynamicSessionTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: borderColor,
-            width: isSelected ? 1.5 : 1.0,
-          ),
+          border: Border.all(color: borderColor, width: isSelected ? 1.5 : 1.0),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,20 +47,16 @@ class DynamicSessionTile extends StatelessWidget {
             Row(
               children: <Widget>[
                 Icon(
-                  isSelected
-                      ? Icons.radio_button_checked_rounded
-                      : Icons.radio_button_off_rounded,
+                  isSelected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
                   size: 16,
                   color: !isEnabled
                       ? subtextColor.withValues(alpha: 0.5)
-                      : (isSelected
-                          ? AmanahColorTokens.brandPrimary
-                          : subtextColor),
+                      : (isSelected ? AmanahColorTokens.brandPrimary : subtextColor),
                 ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    shift.shift.isNotEmpty ? shift.shift : shift.sessionCode,
+                    shift.sessionLabel.isNotEmpty ? shift.sessionLabel : shift.shift,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

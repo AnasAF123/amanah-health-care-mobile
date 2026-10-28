@@ -50,7 +50,7 @@ class AmanahReplacementDetailDrawer extends StatelessWidget {
         (currentUserName.isNotEmpty && item.claimedByName == currentUserName);
     final bool isOpen = item.isOpen;
 
-    final String sessionDisplay = item.sessionLabel ?? item.sessionCode ?? item.sessionId;
+    final String sessionDisplay = item.sessionLabel ?? '-';
 
     return AmanahBottomSheetScaffold(
       title: 'Detail Jadwal Pengganti',

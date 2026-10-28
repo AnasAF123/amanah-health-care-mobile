@@ -6,6 +6,7 @@ class RescheduleShiftOption {
     required this.endTime,
     required this.shift,
     required this.sessionCode,
+    this.sessionLabel = '',
     required this.loadStatus,
     required this.isAvailable,
   });
@@ -15,6 +16,7 @@ class RescheduleShiftOption {
   final String endTime;
   final String shift;
   final String sessionCode;
+  final String sessionLabel;
   final String loadStatus;
   final bool isAvailable;
 
@@ -23,8 +25,9 @@ class RescheduleShiftOption {
       sessionId: json['sessionId']?.toString() ?? '',
       startTime: json['startTime']?.toString() ?? '08:00',
       endTime: json['endTime']?.toString() ?? '12:00',
-      shift: json['shift']?.toString() ?? json['sessionLabel']?.toString() ?? 'Sesi Praktik',
+      shift: json['shift']?.toString() ?? 'Sesi Praktik',
       sessionCode: json['sessionCode']?.toString() ?? json['session']?.toString() ?? '',
+      sessionLabel: json['sessionLabel']?.toString() ?? json['label']?.toString() ?? '',
       loadStatus: json['loadStatus']?.toString() ?? 'NORMAL',
       isAvailable: json['isAvailable'] as bool? ?? true,
     );
@@ -32,10 +35,7 @@ class RescheduleShiftOption {
 }
 
 class RescheduleDateOption {
-  const RescheduleDateOption({
-    required this.date,
-    required this.shifts,
-  });
+  const RescheduleDateOption({required this.date, required this.shifts});
 
   final String date;
   final List<RescheduleShiftOption> shifts;
@@ -50,10 +50,7 @@ class RescheduleDateOption {
         }
       }
     }
-    return RescheduleDateOption(
-      date: json['date']?.toString() ?? '',
-      shifts: shifts,
-    );
+    return RescheduleDateOption(date: json['date']?.toString() ?? '', shifts: shifts);
   }
 }
 
@@ -86,16 +83,15 @@ class RescheduleOptionsEntity {
     }
 
     final dynamic patient = json['patient'];
-    final String patientName =
-        patient is Map ? patient['name']?.toString() ?? 'Pasien' : 'Pasien';
+    final String patientName = patient is Map ? patient['name']?.toString() ?? 'Pasien' : 'Pasien';
 
     final dynamic doctor = json['doctor'];
-    final String doctorName =
-        doctor is Map ? doctor['name']?.toString() ?? 'Dokter' : 'Dokter';
+    final String doctorName = doctor is Map ? doctor['name']?.toString() ?? 'Dokter' : 'Dokter';
 
     final dynamic service = json['service'];
-    final String serviceName =
-        service is Map ? service['name']?.toString() ?? 'Layanan' : 'Layanan';
+    final String serviceName = service is Map
+        ? service['name']?.toString() ?? 'Layanan'
+        : 'Layanan';
 
     return RescheduleOptionsEntity(
       appointmentId: json['appointmentId']?.toString() ?? '',
