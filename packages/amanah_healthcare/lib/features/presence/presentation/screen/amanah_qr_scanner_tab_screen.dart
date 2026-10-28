@@ -166,6 +166,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
           timeFormatted: result.timeFormatted,
           isCheckOut: _controller.isLastResultCheckout,
           validatedDurationHours: result.validatedDurationHours,
+          isReplacement: result.isReplacement,
+          replacedStaffName: result.replacedStaffName,
         ),
       );
       return;
@@ -230,6 +232,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
           timeFormatted: result.timeFormatted,
           isCheckOut: _controller.isLastResultCheckout,
           validatedDurationHours: result.validatedDurationHours,
+          isReplacement: result.isReplacement,
+          replacedStaffName: result.replacedStaffName,
         ),
       );
       return;

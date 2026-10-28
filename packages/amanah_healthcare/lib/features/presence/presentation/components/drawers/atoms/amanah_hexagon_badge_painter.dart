@@ -211,6 +211,7 @@ class AmanahHexagonBadgePainter extends CustomPainter {
     switch (statusType) {
       case PresenceStatusType.successCheckIn:
       case PresenceStatusType.successCheckOut:
+      case PresenceStatusType.successReplacement:
         final Path check = Path()
           ..moveTo(-15, -10)
           ..lineTo(-4, 2)

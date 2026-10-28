@@ -92,6 +92,25 @@ class PresenceResultPalette {
         );
         break;
 
+      case PresenceStatusType.successReplacement:
+        primary = dark ? const Color(0xFFA78BFA) : const Color(0xFF7C3AED);
+        primarySoft = dark ? primary.withValues(alpha: 0.16) : const Color(0xFFF3E8FF);
+        iconData = Icons.swap_horiz_rounded;
+        showConfetti = true;
+        badgeTheme = BadgeStageTheme(
+          auraMid: dark ? const Color(0xFF231638).withValues(alpha: 0.55) : const Color(0xFFF5EEFD),
+          auraEdge: dark ? const Color(0xFF170E25) : const Color(0xFFE9DCF8),
+          badgeShadow: const Color(0x5C7C3AED),
+          outerTop: dark ? const Color(0xFFC084FC) : const Color(0xFFA855F7),
+          outerBottom: dark ? const Color(0xFF7C3AED) : const Color(0xFF6D28D9),
+          innerRecess: dark ? const Color(0xFF5B21B6) : const Color(0xFF4C1D95),
+          innerRim: dark ? const Color(0xFFA855F7) : const Color(0xFFC084FC),
+          ribbonTop: dark ? const Color(0xFFF3E8FF) : const Color(0xFFFAF5FF),
+          ribbonBottom: dark ? const Color(0xFFC084FC) : const Color(0xFFDDD6FE),
+          glyphColor: dark ? const Color(0xFF3B0764) : const Color(0xFF2E1065),
+        );
+        break;
+
       case PresenceStatusType.conflictAlreadyCheckedIn:
       case PresenceStatusType.conflictAlreadyCheckedOut:
         primary = dark ? AmanahColorTokens.warningLight : AmanahColorTokens.warning;

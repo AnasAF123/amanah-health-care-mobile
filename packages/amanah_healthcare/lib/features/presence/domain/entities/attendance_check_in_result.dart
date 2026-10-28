@@ -10,6 +10,7 @@ class AttendanceCheckInResult {
     this.checkOutAt,
     this.validatedDurationHours,
     this.isReplacement = false,
+    this.replacedStaffName,
     this.isEarlyDeparture = false,
     this.notes,
   });
@@ -23,6 +24,7 @@ class AttendanceCheckInResult {
   final DateTime? checkOutAt;
   final double? validatedDurationHours;
   final bool isReplacement;
+  final String? replacedStaffName;
   final bool isEarlyDeparture;
   final String? notes;
 }

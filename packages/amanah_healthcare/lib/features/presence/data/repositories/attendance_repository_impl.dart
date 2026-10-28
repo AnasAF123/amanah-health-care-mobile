@@ -40,6 +40,7 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       checkInAt: checkInAt,
       timeFormatted: timeFormatted,
       isReplacement: json['isReplacement'] == true,
+      replacedStaffName: json['replacedStaffName']?.toString(),
       isEarlyDeparture: json['isEarlyDeparture'] == true,
       notes: json['notes']?.toString(),
       validatedDurationHours: json['validatedDurationHours'] != null
@@ -81,6 +82,7 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       checkOutAt: checkOutAt,
       timeFormatted: timeFormatted,
       isReplacement: json['isReplacement'] == true,
+      replacedStaffName: json['replacedStaffName']?.toString(),
       isEarlyDeparture: json['isEarlyDeparture'] == true,
       notes: json['notes']?.toString(),
       validatedDurationHours: json['validatedDurationHours'] != null

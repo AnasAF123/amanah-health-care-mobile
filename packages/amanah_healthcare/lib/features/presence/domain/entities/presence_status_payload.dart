@@ -5,6 +5,7 @@ import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model
 enum PresenceStatusType {
   successCheckIn,
   successCheckOut,
+  successReplacement,
   conflictAlreadyCheckedIn,
   conflictAlreadyCheckedOut,
   notCheckedIn,
@@ -33,7 +34,9 @@ class PresenceStatusPayload {
   final String actionLabel;
 
   bool get isSuccess =>
-      type == PresenceStatusType.successCheckIn || type == PresenceStatusType.successCheckOut;
+      type == PresenceStatusType.successCheckIn ||
+      type == PresenceStatusType.successCheckOut ||
+      type == PresenceStatusType.successReplacement;
 
   bool get isCheckOut =>
       type == PresenceStatusType.successCheckOut ||
@@ -44,12 +47,27 @@ class PresenceStatusPayload {
     required String timeFormatted,
     required bool isCheckOut,
     double? validatedDurationHours,
+    bool isReplacement = false,
+    String? replacedStaffName,
   }) {
     if (isCheckOut) {
       return PresenceStatusPayload(
         type: PresenceStatusType.successCheckOut,
         title: 'Presensi Pulang Berhasil',
         message: 'Presensi pulang dinas Anda telah berhasil diverifikasi dan tersimpan.',
+        timeFormatted: timeFormatted,
+        durationHours: validatedDurationHours,
+        actionLabel: 'Selesai',
+      );
+    }
+    if (isReplacement) {
+      final String doctorInfo = replacedStaffName != null && replacedStaffName.trim().isNotEmpty
+          ? ' sebagai dokter pengganti untuk $replacedStaffName'
+          : ' dinas shift pengganti';
+      return PresenceStatusPayload(
+        type: PresenceStatusType.successReplacement,
+        title: 'Presensi Pengganti Berhasil',
+        message: 'Presensi masuk$doctorInfo berhasil diverifikasi dan tersimpan.',
         timeFormatted: timeFormatted,
         durationHours: validatedDurationHours,
         actionLabel: 'Selesai',
