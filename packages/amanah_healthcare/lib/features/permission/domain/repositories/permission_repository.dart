@@ -1,3 +1,4 @@
+import 'package:amanah_healthcare/features/permission/domain/entities/amanah_permission_form_data.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/eligible_session.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/leave_request_entity.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/replacement_item.dart';
@@ -5,14 +6,7 @@ import 'package:amanah_healthcare/features/permission/domain/entities/replacemen
 abstract interface class PermissionRepository {
   Future<List<EligibleSession>> getEligibleSessions(String date);
 
-  Future<LeaveRequestEntity> requestLeave({
-    required String startDate,
-    required String endDate,
-    required String reason,
-    String? type,
-    String? scope,
-    List<String>? sessionIds,
-  });
+  Future<LeaveRequestEntity> requestLeave(AmanahPermissionFormData formData);
 
   Future<List<LeaveRequestEntity>> getMyLeaves();
 

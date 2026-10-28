@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/core/presentation/components/amanah_toaster.dart';
 import 'package:amanah_healthcare/core/time/time.dart';
 import 'package:amanah_healthcare/features/permission/data/repositories/permission_repository_impl.dart';
+import 'package:amanah_healthcare/features/permission/domain/entities/amanah_permission_form_data.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/eligible_session.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/leave_request_entity.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/replacement_item.dart';
@@ -22,19 +23,21 @@ class PermissionController extends ChangeNotifier {
     CancelLeaveUseCase? cancelLeaveUseCase,
     GetAvailableReplacementsUseCase? getAvailableReplacementsUseCase,
     ClaimReplacementUseCase? claimReplacementUseCase,
-  })  : _getMyLeavesUseCase = getMyLeavesUseCase ??
-            GetMyLeavesUseCase(repository ?? PermissionRepositoryImpl()),
-        _getEligibleSessionsUseCase = getEligibleSessionsUseCase ??
-            GetEligibleSessionsUseCase(repository ?? PermissionRepositoryImpl()),
-        _requestLeaveUseCase = requestLeaveUseCase ??
-            RequestLeaveUseCase(repository ?? PermissionRepositoryImpl()),
-        _cancelLeaveUseCase = cancelLeaveUseCase ??
-            CancelLeaveUseCase(repository ?? PermissionRepositoryImpl()),
-        _getAvailableReplacementsUseCase = getAvailableReplacementsUseCase ??
-            GetAvailableReplacementsUseCase(
-                repository ?? PermissionRepositoryImpl()),
-        _claimReplacementUseCase = claimReplacementUseCase ??
-            ClaimReplacementUseCase(repository ?? PermissionRepositoryImpl());
+  }) : _getMyLeavesUseCase =
+           getMyLeavesUseCase ?? GetMyLeavesUseCase(repository ?? PermissionRepositoryImpl()),
+       _getEligibleSessionsUseCase =
+           getEligibleSessionsUseCase ??
+           GetEligibleSessionsUseCase(repository ?? PermissionRepositoryImpl()),
+       _requestLeaveUseCase =
+           requestLeaveUseCase ?? RequestLeaveUseCase(repository ?? PermissionRepositoryImpl()),
+       _cancelLeaveUseCase =
+           cancelLeaveUseCase ?? CancelLeaveUseCase(repository ?? PermissionRepositoryImpl()),
+       _getAvailableReplacementsUseCase =
+           getAvailableReplacementsUseCase ??
+           GetAvailableReplacementsUseCase(repository ?? PermissionRepositoryImpl()),
+       _claimReplacementUseCase =
+           claimReplacementUseCase ??
+           ClaimReplacementUseCase(repository ?? PermissionRepositoryImpl());
 
   final GetMyLeavesUseCase _getMyLeavesUseCase;
   final GetEligibleSessionsUseCase _getEligibleSessionsUseCase;
@@ -70,10 +73,7 @@ class PermissionController extends ChangeNotifier {
     } catch (e) {
       _errorMessage = e.toString();
       if (context != null && context.mounted) {
-        AmanahToaster.error(
-          context,
-          message: _errorMessage ?? 'Gagal memuat daftar perizinan',
-        );
+        AmanahToaster.error(context, message: _errorMessage ?? 'Gagal memuat daftar perizinan');
       }
     } finally {
       _isLoading = false;
@@ -83,8 +83,7 @@ class PermissionController extends ChangeNotifier {
 
   Future<void> fetchAvailableReplacements() async {
     try {
-      _availableReplacements =
-          await _getAvailableReplacementsUseCase.execute();
+      _availableReplacements = await _getAvailableReplacementsUseCase.execute();
       notifyListeners();
     } catch (e) {
       // Non-blocking
@@ -109,12 +108,7 @@ class PermissionController extends ChangeNotifier {
   }
 
   Future<bool> submitLeave({
-    required DateTime startDate,
-    required DateTime endDate,
-    required String reason,
-    String? type,
-    String? scope,
-    List<String>? sessionIds,
+    required AmanahPermissionFormData formData,
     BuildContext? context,
   }) async {
     _isLoading = true;
@@ -122,29 +116,16 @@ class PermissionController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _requestLeaveUseCase.execute(
-        startDate: _formatDate(startDate),
-        endDate: _formatDate(endDate),
-        reason: reason,
-        type: type,
-        scope: scope,
-        sessionIds: sessionIds,
-      );
+      await _requestLeaveUseCase.execute(formData);
       if (context != null && context.mounted) {
-        AmanahToaster.success(
-          context,
-          message: 'Permohonan izin/cuti berhasil diajukan',
-        );
+        AmanahToaster.success(context, message: 'Permohonan izin/cuti berhasil diajukan');
       }
       await fetchMyLeaves();
       return true;
     } catch (e) {
       _errorMessage = e.toString();
       if (context != null && context.mounted) {
-        AmanahToaster.error(
-          context,
-          message: _errorMessage ?? 'Gagal mengajukan izin',
-        );
+        AmanahToaster.error(context, message: _errorMessage ?? 'Gagal mengajukan izin');
       }
       return false;
     } finally {
@@ -160,10 +141,7 @@ class PermissionController extends ChangeNotifier {
     try {
       await _cancelLeaveUseCase.execute(id);
       if (context != null && context.mounted) {
-        AmanahToaster.success(
-          context,
-          message: 'Pengajuan cuti berhasil dibatalkan',
-        );
+        AmanahToaster.success(context, message: 'Pengajuan cuti berhasil dibatalkan');
       }
       await fetchMyLeaves();
       return true;
@@ -187,8 +165,7 @@ class PermissionController extends ChangeNotifier {
       if (context != null && context.mounted) {
         AmanahToaster.success(
           context,
-          message:
-              'Jadwal dinas pengganti berhasil diklaim. Jadwal telah tercatat.',
+          message: 'Jadwal dinas pengganti berhasil diklaim. Jadwal telah tercatat.',
         );
       }
       await fetchAvailableReplacements();

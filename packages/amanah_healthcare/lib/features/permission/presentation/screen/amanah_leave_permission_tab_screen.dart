@@ -6,6 +6,7 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_b
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/features/permission/data/mappers/permission_mapper.dart';
 import 'package:amanah_healthcare/features/permission/domain/amanah_permission_model.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/leave_request_entity.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/replacement_item.dart';
@@ -99,21 +100,11 @@ class _AmanahLeavePermissionTabScreenState extends State<AmanahLeavePermissionTa
   }
 
   AmanahPermissionRecord _mapEntityToRecord(LeaveRequestEntity entity) {
-    return AmanahPermissionRecord(
-      id: entity.id,
-      userId: entity.staffId,
-      userName: widget.doctorName.isNotEmpty ? widget.doctorName : 'Staf Amanah',
-      userRole: widget.doctorRole.isNotEmpty ? widget.doctorRole : 'Staf Klinik',
-      userAvatarUrl: widget.avatarUrl ?? '',
-      startDate: entity.startDate,
-      endDate: entity.endDate,
-      durationDays: entity.durationDays,
-      type: AmanahPermissionType.fromString(entity.type),
-      reason: entity.reason,
-      status: AmanahPermissionStatus.fromString(entity.status),
-      createdAt: entity.createdAt.toIso8601String(),
-      reviewerNotes: entity.approvalNotes,
-      cancelledAt: entity.cancelledAt?.toIso8601String(),
+    return PermissionMapper.toPermissionRecord(
+      entity,
+      doctorName: widget.doctorName,
+      doctorRole: widget.doctorRole,
+      avatarUrl: widget.avatarUrl,
     );
   }
 
@@ -126,14 +117,7 @@ class _AmanahLeavePermissionTabScreenState extends State<AmanahLeavePermissionTa
     );
 
     if (result != null && mounted) {
-      await _controller.submitLeave(
-        startDate: DateTime.parse(result.startDate),
-        endDate: DateTime.parse(result.endDate),
-        reason: result.reason,
-        type: result.type.name,
-        scope: result.scope,
-        sessionIds: result.sessionIds,
-      );
+      await _controller.submitLeave(formData: result, context: context);
     }
   }
 

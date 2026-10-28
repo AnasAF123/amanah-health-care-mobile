@@ -4,6 +4,7 @@ import 'package:amanah_healthcare/features/permission/data/dto/eligible_session_
 import 'package:amanah_healthcare/features/permission/data/dto/leave_request_dto.dart';
 import 'package:amanah_healthcare/features/permission/data/dto/replacement_item_dto.dart';
 import 'package:amanah_healthcare/features/permission/data/mappers/permission_mapper.dart';
+import 'package:amanah_healthcare/features/permission/domain/entities/amanah_permission_form_data.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/eligible_session.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/leave_request_entity.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/replacement_item.dart';
@@ -11,14 +12,21 @@ import 'package:amanah_healthcare/features/permission/domain/failures/permission
 import 'package:amanah_healthcare/features/permission/domain/repositories/permission_repository.dart';
 
 class PermissionRepositoryImpl implements PermissionRepository {
-  PermissionRepositoryImpl({
-    PermissionRemoteDataSource? remoteDataSource,
-  }) : _remoteDataSource =
-            remoteDataSource ?? PermissionRemoteDataSourceImpl();
+  PermissionRepositoryImpl({PermissionRemoteDataSource? remoteDataSource})
+    : _remoteDataSource = remoteDataSource ?? PermissionRemoteDataSourceImpl();
 
   final PermissionRemoteDataSource _remoteDataSource;
 
   Never _handleError(Object error) {
+    if (error is BadRequestException) {
+      throw PermissionValidationFailure(error.message, code: error.code);
+    }
+    if (error is ForbiddenException) {
+      throw PermissionUnauthorizedFailure(error.message);
+    }
+    if (error is ConflictException) {
+      throw PermissionServerFailure(error.message, error.code);
+    }
     if (error is NetworkException) {
       throw PermissionNetworkFailure(error.message);
     }
@@ -40,8 +48,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
   @override
   Future<List<EligibleSession>> getEligibleSessions(String date) async {
     try {
-      final List<EligibleSessionDto> dtos =
-          await _remoteDataSource.getEligibleSessions(date);
+      final List<EligibleSessionDto> dtos = await _remoteDataSource.getEligibleSessions(date);
       return dtos.map(PermissionMapper.toEligibleSession).toList();
     } catch (e) {
       _handleError(e);
@@ -49,22 +56,15 @@ class PermissionRepositoryImpl implements PermissionRepository {
   }
 
   @override
-  Future<LeaveRequestEntity> requestLeave({
-    required String startDate,
-    required String endDate,
-    required String reason,
-    String? type,
-    String? scope,
-    List<String>? sessionIds,
-  }) async {
+  Future<LeaveRequestEntity> requestLeave(AmanahPermissionFormData formData) async {
     try {
       final LeaveRequestDto dto = await _remoteDataSource.requestLeave(
-        startDate: startDate,
-        endDate: endDate,
-        reason: reason,
-        type: type,
-        scope: scope,
-        sessionIds: sessionIds,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        reason: formData.reason,
+        type: PermissionMapper.mapPermissionTypeToApi(formData.type),
+        scope: formData.scope,
+        sessionIds: formData.sessionIds,
       );
       return PermissionMapper.toLeaveRequestEntity(dto);
     } catch (e) {
@@ -95,8 +95,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
   @override
   Future<List<ReplacementItem>> getAvailableReplacements() async {
     try {
-      final List<ReplacementItemDto> dtos =
-          await _remoteDataSource.getAvailableReplacements();
+      final List<ReplacementItemDto> dtos = await _remoteDataSource.getAvailableReplacements();
       return dtos.map(PermissionMapper.toReplacementItem).toList();
     } catch (e) {
       _handleError(e);
@@ -106,8 +105,7 @@ class PermissionRepositoryImpl implements PermissionRepository {
   @override
   Future<ReplacementItem> claimReplacement(String id) async {
     try {
-      final ReplacementItemDto dto =
-          await _remoteDataSource.claimReplacement(id);
+      final ReplacementItemDto dto = await _remoteDataSource.claimReplacement(id);
       return PermissionMapper.toReplacementItem(dto);
     } catch (e) {
       _handleError(e);

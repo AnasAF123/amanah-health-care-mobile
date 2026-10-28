@@ -7,11 +7,7 @@ class PermissionTypeStage extends StatelessWidget {
   final AmanahPermissionType selectedType;
   final ValueChanged<AmanahPermissionType> onTypeSelected;
 
-  const PermissionTypeStage({
-    super.key,
-    required this.selectedType,
-    required this.onTypeSelected,
-  });
+  const PermissionTypeStage({super.key, required this.selectedType, required this.onTypeSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +60,14 @@ class PermissionTypeStage extends StatelessWidget {
           icon: Icons.work_outline_rounded,
           isSelected: selectedType == AmanahPermissionType.tugasLuarRS,
           onTap: () => onTypeSelected(AmanahPermissionType.tugasLuarRS),
+        ),
+        const SizedBox(height: 10),
+        PermissionStageCard(
+          title: 'Lainnya',
+          subtitle: 'Keperluan perizinan di luar kategori di atas',
+          icon: Icons.more_horiz_rounded,
+          isSelected: selectedType == AmanahPermissionType.lainnya,
+          onTap: () => onTypeSelected(AmanahPermissionType.lainnya),
         ),
       ],
     );

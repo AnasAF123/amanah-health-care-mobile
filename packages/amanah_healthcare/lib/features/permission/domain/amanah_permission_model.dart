@@ -18,24 +18,6 @@ enum AmanahPermissionStatus {
         return 'Dibatalkan';
     }
   }
-
-  static AmanahPermissionStatus fromString(String value) {
-    switch (value.toLowerCase()) {
-      case 'disetujui':
-      case 'approved':
-        return AmanahPermissionStatus.disetujui;
-      case 'ditolak':
-      case 'rejected':
-        return AmanahPermissionStatus.ditolak;
-      case 'dibatalkan':
-      case 'cancelled':
-        return AmanahPermissionStatus.dibatalkan;
-      case 'menunggu':
-      case 'pending':
-      default:
-        return AmanahPermissionStatus.menunggu;
-    }
-  }
 }
 
 enum AmanahPermissionType {
@@ -43,7 +25,8 @@ enum AmanahPermissionType {
   izinSakit,
   seminarSimposium,
   urusanKeluarga,
-  tugasLuarRS;
+  tugasLuarRS,
+  lainnya;
 
   String get label {
     switch (this) {
@@ -57,22 +40,8 @@ enum AmanahPermissionType {
         return 'Urusan Keluarga';
       case AmanahPermissionType.tugasLuarRS:
         return 'Tugas Luar RS';
-    }
-  }
-
-  static AmanahPermissionType fromString(String value) {
-    switch (value) {
-      case 'Izin Sakit':
-        return AmanahPermissionType.izinSakit;
-      case 'Seminar / Simposium':
-        return AmanahPermissionType.seminarSimposium;
-      case 'Urusan Keluarga':
-        return AmanahPermissionType.urusanKeluarga;
-      case 'Tugas Luar RS':
-        return AmanahPermissionType.tugasLuarRS;
-      case 'Cuti Tahunan':
-      default:
-        return AmanahPermissionType.cutiTahunan;
+      case AmanahPermissionType.lainnya:
+        return 'Lainnya';
     }
   }
 }

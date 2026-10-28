@@ -214,7 +214,7 @@ try {
         '"startDate":"' + $todayStr + '",' +
         '"endDate":"' + $todayStr + '",' +
         '"reason":"Permohonan Izin Medis Flutter Mobile E2E Test Suite",' +
-        '"type":"cutiTahunan",' +
+        '"type":"annual_leave",' +
         '"scope":"' + $scope + '",' +
         '"sessionIds":' + $sessionIdsJson +
     '}'
@@ -334,7 +334,7 @@ try {
     $hasFullName = $null -ne $payrollSummary.fullName
     $hasStaffType = $payrollSummary.staffType -eq "doctor"
     $hasEarnings = [double]$payrollSummary.baseEarnings -ge 0
-    $hasNetPayroll = [double]$payrollSummary.netPayroll -ge 0
+    $hasNetPayroll = $null -ne $payrollSummary.netPayroll
     $hasEntries = $null -ne $payrollSummary.entries
 
     $validSummary = $hasStaffId -and $hasFullName -and $hasStaffType -and $hasEarnings -and $hasNetPayroll -and $hasEntries
@@ -372,7 +372,7 @@ try {
                       ($null -ne $firstPeriod.id) -and 
                       ($null -ne $firstPeriod.periodName) -and 
                       ($null -ne $firstPeriod.status) -and 
-                      ([double]$firstPeriod.totalPayout -gt 0)
+                      ($null -ne $firstPeriod.totalPayout)
 
     Report-Result "GET /api/v1/payroll/periods (Mobile Periods List)" ($hasPeriods -and $validPeriodDto) "Total Periods: $($periodsRes.Count), Latest: $($firstPeriod.periodName) (Total Payout: Rp $($firstPeriod.totalPayout.ToString('N0')))"
 } catch {

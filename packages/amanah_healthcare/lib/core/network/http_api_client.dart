@@ -175,10 +175,25 @@ class HttpApiClient implements ApiClient {
           (decoded['error'] is Map
               ? decoded['error']['message'] as String?
               : decoded['error'] as String?);
+
+      if (decoded['invalidParams'] is List && (decoded['invalidParams'] as List).isNotEmpty) {
+        final List<dynamic> params = decoded['invalidParams'] as List<dynamic>;
+        final String details = params
+            .whereType<Map<String, dynamic>>()
+            .map(
+              (Map<String, dynamic> p) =>
+                  '${p['name'] ?? 'bidang'}: ${p['reason'] ?? 'tidak valid'}',
+            )
+            .join(', ');
+        if (details.isNotEmpty) {
+          message = message != null && message.isNotEmpty ? '$message ($details)' : details;
+        }
+      }
     }
 
     switch (response.statusCode) {
       case 400:
+      case 422:
         throw BadRequestException(message ?? 'Permintaan tidak valid.', code, decoded);
       case 401:
         throw UnauthorizedException(
