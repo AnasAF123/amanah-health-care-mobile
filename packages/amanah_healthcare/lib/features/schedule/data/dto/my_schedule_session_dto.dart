@@ -1,10 +1,9 @@
-import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
 
 class MyScheduleSessionDto {
   const MyScheduleSessionDto({
     required this.id,
     required this.sessionId,
-    required this.sessionShift,
+    required this.sessionCode,
     required this.sessionLabel,
     required this.scheduleDate,
     this.startTime,
@@ -19,18 +18,16 @@ class MyScheduleSessionDto {
   });
 
   factory MyScheduleSessionDto.fromJson(Map<String, dynamic> json) {
-    final ClinicalSessionShift shift = ClinicalSessionResolver.resolveShift(
-      session: json['session']?.toString(),
-      sessionShift: json['sessionShift'] as String?,
-      sessionLabel: json['sessionLabel'] as String?,
-      fallback: json['title'] as String?,
-    );
+    final String resolvedCode =
+        json['sessionCode'] as String? ?? json['session']?.toString() ?? '';
+    final String resolvedLabel =
+        json['sessionLabel'] as String? ?? json['title'] as String? ?? (resolvedCode.isNotEmpty ? resolvedCode : 'Sesi Praktik');
 
     return MyScheduleSessionDto(
       id: json['id'] as String? ?? '',
       sessionId: json['sessionId'] as String? ?? json['id'] as String? ?? '',
-      sessionShift: shift.code,
-      sessionLabel: shift.displaySessionName,
+      sessionCode: resolvedCode,
+      sessionLabel: resolvedLabel,
       scheduleDate: json['scheduleDate'] as String? ??
           json['specificDate'] as String? ??
           '',
@@ -53,7 +50,7 @@ class MyScheduleSessionDto {
 
   final String id;
   final String sessionId;
-  final String sessionShift;
+  final String sessionCode;
   final String sessionLabel;
   final String scheduleDate;
   final String? startTime;

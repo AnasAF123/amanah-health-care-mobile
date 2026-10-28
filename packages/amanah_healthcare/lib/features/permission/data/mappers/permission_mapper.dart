@@ -5,7 +5,6 @@ import 'package:amanah_healthcare/features/permission/domain/amanah_permission_m
 import 'package:amanah_healthcare/features/permission/domain/entities/eligible_session.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/leave_request_entity.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/replacement_item.dart';
-import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
 
 abstract final class PermissionMapper {
   /// Maps pure domain permission type to canonical backend API enum string.
@@ -103,15 +102,12 @@ abstract final class PermissionMapper {
   /// into canonical Indonesian labels ("Sesi Pagi", "Sesi Siang", "Sesi Malam").
   static String _resolveSessionLabel({required String? rawLabel, String? sessionCode}) {
     if (rawLabel != null && rawLabel.trim().isNotEmpty) {
-      final String sanitized = ClinicalSessionResolver.sanitize(rawLabel);
-      if (sanitized != rawLabel) {
-        return sanitized;
-      }
+      return rawLabel.trim();
     }
-    return ClinicalSessionResolver.resolveSessionName(
-      sessionShift: sessionCode,
-      sessionLabel: rawLabel,
-    );
+    if (sessionCode != null && sessionCode.trim().isNotEmpty) {
+      return sessionCode.trim();
+    }
+    return 'Sesi Praktik';
   }
 
   /// Normalizes "06:00:00" to "06:00".

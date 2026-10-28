@@ -7,7 +7,7 @@ export 'contracts/time_service.dart';
 // Models & Value Objects
 export 'models/calendar_date_range.dart';
 export 'models/clinic_attendance_time_config.dart';
-export 'models/clinic_schedule_policy.dart';
+export 'models/clinic_consultation_policy.dart';
 export 'models/clinic_time_config.dart';
 export 'models/time_of_day_range.dart';
 

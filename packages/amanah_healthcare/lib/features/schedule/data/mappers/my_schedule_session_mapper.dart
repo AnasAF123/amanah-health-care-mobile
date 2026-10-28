@@ -6,7 +6,7 @@ abstract final class MyScheduleSessionMapper {
     return MyScheduleSession(
       id: dto.id,
       sessionId: dto.sessionId,
-      sessionShift: dto.sessionShift,
+      sessionCode: dto.sessionCode,
       sessionLabel: dto.sessionLabel,
       scheduleDate: dto.scheduleDate,
       startTime: dto.startTime,

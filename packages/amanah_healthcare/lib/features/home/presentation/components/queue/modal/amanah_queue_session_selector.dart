@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/queue/domain/entities/queue_session_info.dart';
-import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
 
 /// Modal bottom sheet allowing practitioner to switch clinical duty sessions.
 class AmanahQueueSessionSelector {
@@ -104,7 +103,7 @@ class AmanahQueueSessionSelector {
                           ),
                         ),
                         title: Text(
-                          ClinicalSessionResolver.sanitize(session.sessionLabel),
+                          session.sessionLabel,
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: isDark

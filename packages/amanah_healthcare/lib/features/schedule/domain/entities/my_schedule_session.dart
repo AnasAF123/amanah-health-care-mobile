@@ -2,7 +2,7 @@ class MyScheduleSession {
   const MyScheduleSession({
     required this.id,
     required this.sessionId,
-    required this.sessionShift,
+    required this.sessionCode,
     required this.sessionLabel,
     required this.scheduleDate,
     this.startTime,
@@ -18,7 +18,7 @@ class MyScheduleSession {
 
   final String id;
   final String sessionId;
-  final String sessionShift; // early_morning, morning, afternoon, night
+  final String sessionCode;
   final String sessionLabel;
   final String scheduleDate;
   final String? startTime;

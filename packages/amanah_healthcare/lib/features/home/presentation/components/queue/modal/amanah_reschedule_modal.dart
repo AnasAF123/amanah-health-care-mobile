@@ -222,7 +222,7 @@ class _AmanahRescheduleModalState extends State<AmanahRescheduleModal> {
     try {
       await widget.onConfirm(
         targetDate: targetDateStr,
-        session: _selectedShift!.sessionShift,
+        session: _selectedShift!.sessionCode,
         targetSessionId: _selectedShift!.sessionId,
         reason: reason,
       );

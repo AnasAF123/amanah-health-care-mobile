@@ -2,7 +2,7 @@
 class QueueSessionInfo {
   const QueueSessionInfo({
     required this.sessionId,
-    required this.sessionShift,
+    required this.sessionCode,
     required this.sessionLabel,
     required this.scheduleDate,
     required this.startTime,
@@ -14,7 +14,7 @@ class QueueSessionInfo {
   });
 
   final String sessionId;
-  final String sessionShift;
+  final String sessionCode;
   final String sessionLabel;
   final String scheduleDate;
   final String startTime;

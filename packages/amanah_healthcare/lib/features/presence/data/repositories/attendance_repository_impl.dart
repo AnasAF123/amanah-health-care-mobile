@@ -4,7 +4,6 @@ import 'package:amanah_healthcare/features/presence/data/datasources/attendance_
 import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model.dart';
 import 'package:amanah_healthcare/features/presence/domain/entities/attendance_check_in_result.dart';
 import 'package:amanah_healthcare/features/presence/domain/repositories/attendance_repository.dart';
-import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
 
 class AttendanceRepositoryImpl implements AttendanceRepository {
   AttendanceRepositoryImpl({AttendanceRemoteDataSource? remoteDataSource})
@@ -174,7 +173,7 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
           : rawDate;
 
       final String shiftRaw = item['shift']?.toString() ?? '';
-      final String shiftName = ClinicalSessionResolver.resolveShiftName(sessionShift: shiftRaw);
+      final String shiftName = item['shiftLabel']?.toString() ?? (shiftRaw.isNotEmpty ? shiftRaw : 'Kerja');
       final bool isReplacement = item['isReplacement'] == true;
       final String title = isReplacement ? 'Shift $shiftName (Pengganti)' : 'Shift $shiftName';
 

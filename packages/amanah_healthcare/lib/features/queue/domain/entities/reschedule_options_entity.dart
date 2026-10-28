@@ -5,7 +5,7 @@ class RescheduleShiftOption {
     required this.startTime,
     required this.endTime,
     required this.shift,
-    required this.sessionShift,
+    required this.sessionCode,
     required this.loadStatus,
     required this.isAvailable,
   });
@@ -14,7 +14,7 @@ class RescheduleShiftOption {
   final String startTime;
   final String endTime;
   final String shift;
-  final String sessionShift;
+  final String sessionCode;
   final String loadStatus;
   final bool isAvailable;
 
@@ -23,8 +23,8 @@ class RescheduleShiftOption {
       sessionId: json['sessionId']?.toString() ?? '',
       startTime: json['startTime']?.toString() ?? '08:00',
       endTime: json['endTime']?.toString() ?? '12:00',
-      shift: json['shift']?.toString() ?? 'Shift Pagi',
-      sessionShift: json['sessionShift']?.toString() ?? 'morning',
+      shift: json['shift']?.toString() ?? json['sessionLabel']?.toString() ?? 'Sesi Praktik',
+      sessionCode: json['sessionCode']?.toString() ?? json['session']?.toString() ?? '',
       loadStatus: json['loadStatus']?.toString() ?? 'NORMAL',
       isAvailable: json['isAvailable'] as bool? ?? true,
     );

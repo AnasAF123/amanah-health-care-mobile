@@ -4,7 +4,6 @@ import 'package:amanah_healthcare/features/schedule/data/repositories/schedule_r
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/my_schedule_session.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/session_patient.dart';
-import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
 import 'package:amanah_healthcare/features/schedule/domain/repositories/schedule_repository.dart';
 
 class AmanahScheduleStore extends ChangeNotifier {
@@ -62,10 +61,8 @@ class AmanahScheduleStore extends ChangeNotifier {
             .map((SessionPatient p) => p.toBookedPatient())
             .toList();
 
-        final String sessionType = ClinicalSessionResolver.resolveShiftName(
-          sessionShift: s.sessionShift,
-          sessionLabel: s.sessionLabel,
-        );
+        final String sessionType =
+            s.sessionLabel.isNotEmpty ? s.sessionLabel : (s.sessionCode.isNotEmpty ? s.sessionCode : 'Sesi Praktik');
 
         final int patientCount =
             booked.isNotEmpty ? booked.length : s.bookedCount;

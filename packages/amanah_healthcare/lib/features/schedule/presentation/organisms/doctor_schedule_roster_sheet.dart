@@ -1,19 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
+import 'package:amanah_healthcare/features/schedule/domain/entities/doctor_roster.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/weekly_schedule_accordion.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/state/schedule_roster_controller.dart';
 
 class DoctorScheduleRosterSheet extends StatefulWidget {
-  const DoctorScheduleRosterSheet({this.controller, super.key});
+  const DoctorScheduleRosterSheet({
+    this.controller,
+    this.isAdmin = false,
+    super.key,
+  });
 
   final ScheduleRosterController? controller;
+  final bool isAdmin;
 
-  static Future<void> show(BuildContext context, {ScheduleRosterController? controller}) {
+  static Future<void> show(
+    BuildContext context, {
+    ScheduleRosterController? controller,
+    bool isAdmin = false,
+  }) {
     return showAmanahBottomSheet<void>(
       context: context,
-      builder: (BuildContext ctx) => DoctorScheduleRosterSheet(controller: controller),
+      builder: (BuildContext ctx) => DoctorScheduleRosterSheet(
+        controller: controller,
+        isAdmin: isAdmin,
+      ),
     );
   }
 
@@ -54,6 +68,11 @@ class _DoctorScheduleRosterSheetState extends State<DoctorScheduleRosterSheet> {
     return ListenableBuilder(
       listenable: _controller,
       builder: (BuildContext context, _) {
+        final DoctorRoster? roster = _controller.roster;
+        final bool hasNoSessions = roster == null ||
+            roster.days.isEmpty ||
+            roster.days.every((DoctorRosterDay d) => d.sessions.isEmpty);
+
         return AmanahBottomSheetScaffold(
           title: 'Pengaturan Jadwal Shift',
           maxHeightFactor: 0.90,
@@ -146,6 +165,16 @@ class _DoctorScheduleRosterSheetState extends State<DoctorScheduleRosterSheet> {
                     ),
                   ),
                 )
+              : hasNoSessions
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                  child: AmanahEmptyState.box(
+                    title: 'Belum Ada Shift Operasional',
+                    message:
+                        'Klinik belum memiliki master shift atau jadwal operasional yang terdaftar.',
+                    variant: AmanahEmptyStateVariant.viewport,
+                  ),
+                )
               : SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.only(bottom: 24),
@@ -159,11 +188,13 @@ class _DoctorScheduleRosterSheetState extends State<DoctorScheduleRosterSheet> {
                     },
                   ),
                 ),
-          footer: _controller.isLoading || _controller.errorMessage != null
+          footer: _controller.isLoading ||
+                  _controller.errorMessage != null ||
+                  hasNoSessions
               ? null
               : Row(
                   children: <Widget>[
-                    if (_controller.isOverride) ...<Widget>[
+                    if (widget.isAdmin && _controller.isOverride) ...<Widget>[
                       Expanded(
                         child: AmanahButton.secondary(
                           text: 'Reset Template',

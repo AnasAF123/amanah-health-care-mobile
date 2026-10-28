@@ -1,5 +1,4 @@
 import 'package:amanah_healthcare/core/time/functions/format_localized_date.dart';
-import 'package:amanah_healthcare/core/time/models/clinic_schedule_policy.dart';
 
 class ReplacementItem {
   const ReplacementItem({
@@ -59,26 +58,14 @@ class ReplacementItem {
     if (startTime != null && startTime!.length >= 5) {
       return startTime!.substring(0, 5);
     }
-    return switch (sessionCode) {
-      'early_morning' => ClinicSchedulePolicy.defaultPolicy.earlyMorningStart,
-      'morning' => ClinicSchedulePolicy.defaultPolicy.morningStart,
-      'afternoon' => ClinicSchedulePolicy.defaultPolicy.afternoonStart,
-      'night' => ClinicSchedulePolicy.defaultPolicy.nightStart,
-      _ => '--:--',
-    };
+    return '--:--';
   }
 
   String get endTimeShort {
     if (endTime != null && endTime!.length >= 5) {
       return endTime!.substring(0, 5);
     }
-    return switch (sessionCode) {
-      'early_morning' => ClinicSchedulePolicy.defaultPolicy.earlyMorningEnd,
-      'morning' => ClinicSchedulePolicy.defaultPolicy.morningEnd,
-      'afternoon' => ClinicSchedulePolicy.defaultPolicy.afternoonEnd,
-      'night' => ClinicSchedulePolicy.defaultPolicy.nightEnd,
-      _ => '--:--',
-    };
+    return '--:--';
   }
 
   String statusBadgeText(String? currentStaffProfileId, String? currentUserName) {
@@ -111,17 +98,7 @@ class ReplacementItem {
           endTime!.length >= 5 ? endTime!.substring(0, 5) : endTime!;
       return '$s - $e WIB';
     }
-    return switch (sessionCode) {
-      'early_morning' =>
-        '${ClinicSchedulePolicy.defaultPolicy.earlyMorningStart} - ${ClinicSchedulePolicy.defaultPolicy.earlyMorningEnd} WIB',
-      'morning' =>
-        '${ClinicSchedulePolicy.defaultPolicy.morningStart} - ${ClinicSchedulePolicy.defaultPolicy.morningEnd} WIB',
-      'afternoon' =>
-        '${ClinicSchedulePolicy.defaultPolicy.afternoonStart} - ${ClinicSchedulePolicy.defaultPolicy.afternoonEnd} WIB',
-      'night' =>
-        '${ClinicSchedulePolicy.defaultPolicy.nightStart} - ${ClinicSchedulePolicy.defaultPolicy.nightEnd} WIB',
-      _ => 'Waktu dinas mengikuti roster',
-    };
+    return 'Waktu dinas mengikuti roster';
   }
 
   bool isClaimedByMe(String? currentStaffProfileId) =>

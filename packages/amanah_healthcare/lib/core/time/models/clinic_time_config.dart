@@ -1,5 +1,5 @@
 import 'package:amanah_healthcare/core/time/models/clinic_attendance_time_config.dart';
-import 'package:amanah_healthcare/core/time/models/clinic_schedule_policy.dart';
+import 'package:amanah_healthcare/core/time/models/clinic_consultation_policy.dart';
 
 /// Aggregated, service-agnostic configuration for all clinic time policies.
 ///
@@ -10,7 +10,7 @@ class ClinicTimeConfig {
   final String locale;
   final String dateFormatStyle;
   final String timeFormatStyle;
-  final ClinicSchedulePolicy schedulePolicy;
+  final ClinicConsultationPolicy consultationPolicy;
   final ClinicAttendanceTimeConfig attendanceConfig;
 
   const ClinicTimeConfig({
@@ -18,7 +18,7 @@ class ClinicTimeConfig {
     required this.locale,
     required this.dateFormatStyle,
     required this.timeFormatStyle,
-    required this.schedulePolicy,
+    required this.consultationPolicy,
     required this.attendanceConfig,
   });
 
@@ -28,7 +28,7 @@ class ClinicTimeConfig {
     locale: 'id-ID',
     dateFormatStyle: 'human_full',
     timeFormatStyle: '24h',
-    schedulePolicy: ClinicSchedulePolicy.defaultPolicy,
+    consultationPolicy: ClinicConsultationPolicy.defaultConsultationPolicy,
     attendanceConfig: ClinicAttendanceTimeConfig.defaultConfig,
   );
 
@@ -37,7 +37,7 @@ class ClinicTimeConfig {
     String? locale,
     String? dateFormatStyle,
     String? timeFormatStyle,
-    ClinicSchedulePolicy? schedulePolicy,
+    ClinicConsultationPolicy? consultationPolicy,
     ClinicAttendanceTimeConfig? attendanceConfig,
   }) {
     return ClinicTimeConfig(
@@ -45,12 +45,15 @@ class ClinicTimeConfig {
       locale: locale ?? this.locale,
       dateFormatStyle: dateFormatStyle ?? this.dateFormatStyle,
       timeFormatStyle: timeFormatStyle ?? this.timeFormatStyle,
-      schedulePolicy: schedulePolicy ?? this.schedulePolicy,
+      consultationPolicy: consultationPolicy ?? this.consultationPolicy,
       attendanceConfig: attendanceConfig ?? this.attendanceConfig,
     );
   }
 
   factory ClinicTimeConfig.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic>? policyJson =
+        (json['consultationPolicy'] ?? json['schedulePolicy']) as Map<String, dynamic>?;
+
     return ClinicTimeConfig(
       timezone: json['timezone'] as String? ?? defaultConfig.timezone,
       locale: json['locale'] as String? ?? defaultConfig.locale,
@@ -58,11 +61,9 @@ class ClinicTimeConfig {
           json['dateFormatStyle'] as String? ?? defaultConfig.dateFormatStyle,
       timeFormatStyle:
           json['timeFormatStyle'] as String? ?? defaultConfig.timeFormatStyle,
-      schedulePolicy: json['schedulePolicy'] != null
-          ? ClinicSchedulePolicy.fromJson(
-              json['schedulePolicy'] as Map<String, dynamic>,
-            )
-          : defaultConfig.schedulePolicy,
+      consultationPolicy: policyJson != null
+          ? ClinicConsultationPolicy.fromJson(policyJson)
+          : defaultConfig.consultationPolicy,
       attendanceConfig: json['attendanceConfig'] != null
           ? ClinicAttendanceTimeConfig.fromJson(
               json['attendanceConfig'] as Map<String, dynamic>,
@@ -77,7 +78,7 @@ class ClinicTimeConfig {
       'locale': locale,
       'dateFormatStyle': dateFormatStyle,
       'timeFormatStyle': timeFormatStyle,
-      'schedulePolicy': schedulePolicy.toJson(),
+      'consultationPolicy': consultationPolicy.toJson(),
       'attendanceConfig': attendanceConfig.toJson(),
     };
   }

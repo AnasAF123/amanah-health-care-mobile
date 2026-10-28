@@ -1,6 +1,5 @@
 import 'package:amanah_healthcare/features/queue/domain/entities/queue_patient_card.dart';
 import 'package:amanah_healthcare/features/queue/domain/entities/queue_session_info.dart';
-import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
 
 class QueuePatientMapper {
   QueuePatientMapper._();
@@ -128,17 +127,15 @@ class QueuePatientMapper {
             ? json['clinicRoom'] as Map<String, dynamic>
             : null;
 
-    final ClinicalSessionShift shift = ClinicalSessionResolver.resolveShift(
-      session: json['session']?.toString(),
-      sessionShift: json['sessionShift'] as String?,
-      sessionLabel: json['sessionLabel'] as String?,
-      fallback: json['title'] as String?,
-    );
+    final String resolvedCode =
+        json['sessionCode'] as String? ?? json['session']?.toString() ?? '';
+    final String resolvedLabel =
+        json['sessionLabel'] as String? ?? json['title'] as String? ?? (resolvedCode.isNotEmpty ? resolvedCode : 'Sesi Praktik');
 
     return QueueSessionInfo(
       sessionId: json['sessionId'] as String? ?? json['id'] as String? ?? '',
-      sessionShift: shift.code,
-      sessionLabel: shift.displaySessionName,
+      sessionCode: resolvedCode,
+      sessionLabel: resolvedLabel,
       scheduleDate: json['scheduleDate'] as String? ??
           json['specificDate'] as String? ??
           '',

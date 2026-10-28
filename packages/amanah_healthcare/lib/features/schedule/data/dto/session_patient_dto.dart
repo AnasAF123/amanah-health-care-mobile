@@ -1,5 +1,4 @@
 import 'package:amanah_healthcare/features/schedule/domain/constants/appointment_status_dictionary.dart';
-import 'package:amanah_healthcare/features/schedule/domain/helpers/clinical_session_resolver.dart';
 
 class SessionPatientDto {
   const SessionPatientDto({
@@ -70,7 +69,7 @@ class SessionPatientDto {
           '-',
       gender: patientMap?['gender'] as String? ?? json['gender'] as String? ?? 'L',
       queueNumber: json['queueNumber']?.toString() ?? '-',
-      sessionTitle: ClinicalSessionResolver.sanitize(rawSession),
+      sessionTitle: rawSession,
       room:
           json['room'] as String? ??
           json['roomName'] as String? ??
