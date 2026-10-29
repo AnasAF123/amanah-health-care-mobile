@@ -6,6 +6,7 @@ import 'package:amanah_healthcare/core/network/http_api_client.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_token_storage.dart';
 import 'package:amanah_healthcare/features/permission/data/dto/eligible_session_dto.dart';
 import 'package:amanah_healthcare/features/permission/data/dto/leave_request_dto.dart';
+import 'package:amanah_healthcare/features/permission/data/dto/replacement_facets_dto.dart';
 import 'package:amanah_healthcare/features/permission/data/dto/replacement_item_dto.dart';
 import 'package:amanah_healthcare/features/permission/data/endpoints/permission_endpoints.dart';
 
@@ -25,21 +26,24 @@ abstract interface class PermissionRemoteDataSource {
 
   Future<LeaveRequestDto> cancelLeave(String id);
 
-  Future<List<ReplacementItemDto>> getAvailableReplacements();
+  Future<List<ReplacementItemDto>> getAvailableReplacements({
+    String? exactDate,
+    String? staffProfileId,
+  });
+
+  Future<ReplacementFacetsDto> getReplacementFacets();
 
   Future<ReplacementItemDto> claimReplacement(String id);
 }
 
 class PermissionRemoteDataSourceImpl implements PermissionRemoteDataSource {
-  PermissionRemoteDataSourceImpl({
-    ApiClient? apiClient,
-  }) : _apiClient = apiClient ??
-            AuthorizedApiClient(
-              innerClient: HttpApiClient(
-                baseUrl: AmanahAuthEnvironment.authBaseUrl,
-              ),
-              tokenProvider: const AmanahAuthTokenStorage(),
-            );
+  PermissionRemoteDataSourceImpl({ApiClient? apiClient})
+    : _apiClient =
+          apiClient ??
+          AuthorizedApiClient(
+            innerClient: HttpApiClient(baseUrl: AmanahAuthEnvironment.authBaseUrl),
+            tokenProvider: const AmanahAuthTokenStorage(),
+          );
 
   final ApiClient _apiClient;
 
@@ -84,8 +88,7 @@ class PermissionRemoteDataSourceImpl implements PermissionRemoteDataSource {
       'reason': reason,
       'type': ?type,
       'scope': ?scope,
-      if (sessionIds != null && sessionIds.isNotEmpty)
-        'sessionIds': sessionIds,
+      if (sessionIds != null && sessionIds.isNotEmpty) 'sessionIds': sessionIds,
     };
 
     final ApiResponse<dynamic> res = await _apiClient.request(
@@ -94,16 +97,12 @@ class PermissionRemoteDataSourceImpl implements PermissionRemoteDataSource {
     );
 
     final dynamic data = _extractData(res.data);
-    return LeaveRequestDto.fromJson(
-      data is Map<String, dynamic> ? data : <String, dynamic>{},
-    );
+    return LeaveRequestDto.fromJson(data is Map<String, dynamic> ? data : <String, dynamic>{});
   }
 
   @override
   Future<List<LeaveRequestDto>> getMyLeaves() async {
-    final ApiResponse<dynamic> res = await _apiClient.request(
-      PermissionEndpoints.myLeavesEndpoint,
-    );
+    final ApiResponse<dynamic> res = await _apiClient.request(PermissionEndpoints.myLeavesEndpoint);
 
     final dynamic data = _extractData(res.data);
     if (data is List) {
@@ -122,16 +121,25 @@ class PermissionRemoteDataSourceImpl implements PermissionRemoteDataSource {
     );
 
     final dynamic data = _extractData(res.data);
-    return LeaveRequestDto.fromJson(
-      data is Map<String, dynamic> ? data : <String, dynamic>{},
-    );
+    return LeaveRequestDto.fromJson(data is Map<String, dynamic> ? data : <String, dynamic>{});
   }
 
   @override
-  Future<List<ReplacementItemDto>> getAvailableReplacements() async {
+  Future<List<ReplacementItemDto>> getAvailableReplacements({
+    String? exactDate,
+    String? staffProfileId,
+  }) async {
+    final Map<String, String> queryParameters = <String, String>{'status': 'open'};
+    if (exactDate != null && exactDate.isNotEmpty) {
+      queryParameters['exactDate'] = exactDate;
+    }
+    if (staffProfileId != null && staffProfileId.isNotEmpty) {
+      queryParameters['staffProfileId'] = staffProfileId;
+    }
+
     final ApiResponse<dynamic> res = await _apiClient.request(
       PermissionEndpoints.availableReplacementsEndpoint,
-      queryParameters: <String, String>{'status': 'open'},
+      queryParameters: queryParameters,
     );
 
     final dynamic data = _extractData(res.data);
@@ -145,14 +153,22 @@ class PermissionRemoteDataSourceImpl implements PermissionRemoteDataSource {
   }
 
   @override
+  Future<ReplacementFacetsDto> getReplacementFacets() async {
+    final ApiResponse<dynamic> res = await _apiClient.request(
+      PermissionEndpoints.replacementFacetsEndpoint,
+    );
+
+    final dynamic data = _extractData(res.data);
+    return ReplacementFacetsDto.fromJson(data is Map<String, dynamic> ? data : <String, dynamic>{});
+  }
+
+  @override
   Future<ReplacementItemDto> claimReplacement(String id) async {
     final ApiResponse<dynamic> res = await _apiClient.request(
       PermissionEndpoints.claimReplacementEndpoint(id),
     );
 
     final dynamic data = _extractData(res.data);
-    return ReplacementItemDto.fromJson(
-      data is Map<String, dynamic> ? data : <String, dynamic>{},
-    );
+    return ReplacementItemDto.fromJson(data is Map<String, dynamic> ? data : <String, dynamic>{});
   }
 }

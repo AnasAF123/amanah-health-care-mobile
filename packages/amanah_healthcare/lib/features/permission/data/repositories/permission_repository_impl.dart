@@ -2,11 +2,13 @@ import 'package:amanah_healthcare/core/network/api_exception.dart';
 import 'package:amanah_healthcare/features/permission/data/datasources/permission_remote_data_source.dart';
 import 'package:amanah_healthcare/features/permission/data/dto/eligible_session_dto.dart';
 import 'package:amanah_healthcare/features/permission/data/dto/leave_request_dto.dart';
+import 'package:amanah_healthcare/features/permission/data/dto/replacement_facets_dto.dart';
 import 'package:amanah_healthcare/features/permission/data/dto/replacement_item_dto.dart';
 import 'package:amanah_healthcare/features/permission/data/mappers/permission_mapper.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/amanah_permission_form_data.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/eligible_session.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/leave_request_entity.dart';
+import 'package:amanah_healthcare/features/permission/domain/entities/replacement_facets.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/replacement_item.dart';
 import 'package:amanah_healthcare/features/permission/domain/failures/permission_failure.dart';
 import 'package:amanah_healthcare/features/permission/domain/repositories/permission_repository.dart';
@@ -93,10 +95,26 @@ class PermissionRepositoryImpl implements PermissionRepository {
   }
 
   @override
-  Future<List<ReplacementItem>> getAvailableReplacements() async {
+  Future<List<ReplacementItem>> getAvailableReplacements({
+    String? exactDate,
+    String? staffProfileId,
+  }) async {
     try {
-      final List<ReplacementItemDto> dtos = await _remoteDataSource.getAvailableReplacements();
+      final List<ReplacementItemDto> dtos = await _remoteDataSource.getAvailableReplacements(
+        exactDate: exactDate,
+        staffProfileId: staffProfileId,
+      );
       return dtos.map(PermissionMapper.toReplacementItem).toList();
+    } catch (e) {
+      _handleError(e);
+    }
+  }
+
+  @override
+  Future<ReplacementFacets> getReplacementFacets() async {
+    try {
+      final ReplacementFacetsDto dto = await _remoteDataSource.getReplacementFacets();
+      return dto.toEntity();
     } catch (e) {
       _handleError(e);
     }

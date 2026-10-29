@@ -2,17 +2,15 @@ import 'package:amanah_healthcare/core/constants/api_prefix.dart';
 import 'package:amanah_healthcare/core/network/api_endpoint.dart';
 
 abstract final class PermissionEndpoints {
-  static const String pathEligibleSessions =
-      '${ApiPrefix.v1}/leaves/eligible-sessions';
+  static const String pathEligibleSessions = '${ApiPrefix.v1}/leaves/eligible-sessions';
   static const String pathLeaves = '${ApiPrefix.v1}/leaves';
   static const String pathMyLeaves = '${ApiPrefix.v1}/leaves/my-leaves';
   static const String pathReplacements = '${ApiPrefix.v1}/replacements';
+  static const String pathReplacementFacets = '${ApiPrefix.v1}/replacements/facets';
 
-  static String pathCancelLeave(String id) =>
-      '${ApiPrefix.v1}/leaves/$id/cancel';
+  static String pathCancelLeave(String id) => '${ApiPrefix.v1}/leaves/$id/cancel';
 
-  static String pathClaimReplacement(String id) =>
-      '${ApiPrefix.v1}/replacements/$id/claim';
+  static String pathClaimReplacement(String id) => '${ApiPrefix.v1}/replacements/$id/claim';
 
   static const ApiEndpoint eligibleSessionsEndpoint = ApiEndpoint(
     path: pathEligibleSessions,
@@ -38,15 +36,15 @@ abstract final class PermissionEndpoints {
     requiresAuth: true,
   );
 
-  static ApiEndpoint cancelLeaveEndpoint(String id) => ApiEndpoint(
-        path: pathCancelLeave(id),
-        method: HttpMethod.patch,
-        requiresAuth: true,
-      );
+  static const ApiEndpoint replacementFacetsEndpoint = ApiEndpoint(
+    path: pathReplacementFacets,
+    method: HttpMethod.get,
+    requiresAuth: true,
+  );
 
-  static ApiEndpoint claimReplacementEndpoint(String id) => ApiEndpoint(
-        path: pathClaimReplacement(id),
-        method: HttpMethod.post,
-        requiresAuth: true,
-      );
+  static ApiEndpoint cancelLeaveEndpoint(String id) =>
+      ApiEndpoint(path: pathCancelLeave(id), method: HttpMethod.patch, requiresAuth: true);
+
+  static ApiEndpoint claimReplacementEndpoint(String id) =>
+      ApiEndpoint(path: pathClaimReplacement(id), method: HttpMethod.post, requiresAuth: true);
 }

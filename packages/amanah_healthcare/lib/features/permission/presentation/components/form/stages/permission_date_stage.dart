@@ -17,11 +17,17 @@ class PermissionDateStage extends StatelessWidget {
   });
 
   Future<void> _pickStartDate(BuildContext context) async {
+    final DateTime today = normalizeToCalendarDate(DateTime.now());
+    final DateTime lastDate = DateTime(today.year + 2, today.month, today.day);
+    final DateTime initial = dateRange.startDate.isBefore(today)
+        ? today
+        : (dateRange.startDate.isAfter(lastDate) ? lastDate : dateRange.startDate);
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: dateRange.startDate,
-      firstDate: DateTime(2025),
-      lastDate: DateTime(2030),
+      initialDate: initial,
+      firstDate: today,
+      lastDate: lastDate,
       helpText: 'Pilih Tanggal Mulai Izin',
       cancelText: 'Batal',
       confirmText: 'Pilih',
@@ -37,15 +43,20 @@ class PermissionDateStage extends StatelessWidget {
   }
 
   Future<void> _pickEndDate(BuildContext context) async {
-    final DateTime initial = dateRange.endDate.isBefore(dateRange.startDate)
-        ? dateRange.startDate
-        : dateRange.endDate;
+    final DateTime today = normalizeToCalendarDate(DateTime.now());
+    final DateTime effectiveFirstDate = dateRange.startDate.isBefore(today)
+        ? today
+        : dateRange.startDate;
+    final DateTime lastDate = DateTime(today.year + 2, today.month, today.day);
+    final DateTime initial = dateRange.endDate.isBefore(effectiveFirstDate)
+        ? effectiveFirstDate
+        : (dateRange.endDate.isAfter(lastDate) ? lastDate : dateRange.endDate);
 
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: initial,
-      firstDate: dateRange.startDate,
-      lastDate: DateTime(2030),
+      firstDate: effectiveFirstDate,
+      lastDate: lastDate,
       helpText: 'Pilih Tanggal Selesai Izin',
       cancelText: 'Batal',
       confirmText: 'Pilih',
@@ -53,9 +64,7 @@ class PermissionDateStage extends StatelessWidget {
 
     if (picked != null) {
       final DateTime normalized = normalizeToCalendarDate(picked);
-      onDateRangeChanged(
-        CalendarDateRange(start: dateRange.startDate, end: normalized),
-      );
+      onDateRangeChanged(CalendarDateRange(start: dateRange.startDate, end: normalized));
     }
   }
 
@@ -88,17 +97,10 @@ class PermissionDateStage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Column(
                 children: <Widget>[
-                  Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 18,
-                    color: AmanahColorTokens.brand,
-                  ),
+                  Icon(Icons.arrow_forward_rounded, size: 18, color: AmanahColorTokens.brand),
                   const SizedBox(height: 4),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: AmanahColorTokens.brand.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(100),
@@ -137,19 +139,14 @@ class PermissionDateStage extends StatelessWidget {
               backgroundColor: AmanahColorTokens.brand,
               foregroundColor: Colors.white,
               elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             ),
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
                   'Lanjutkan ke Lingkup',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                 ),
                 SizedBox(width: 8),
                 Icon(Icons.arrow_forward_rounded, size: 18),

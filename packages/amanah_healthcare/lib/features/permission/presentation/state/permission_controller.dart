@@ -5,6 +5,7 @@ import 'package:amanah_healthcare/features/permission/data/repositories/permissi
 import 'package:amanah_healthcare/features/permission/domain/entities/amanah_permission_form_data.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/eligible_session.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/leave_request_entity.dart';
+import 'package:amanah_healthcare/features/permission/domain/entities/replacement_facets.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/replacement_item.dart';
 import 'package:amanah_healthcare/features/permission/domain/repositories/permission_repository.dart';
 import 'package:amanah_healthcare/features/permission/domain/usecases/cancel_leave_usecase.dart';
@@ -12,6 +13,7 @@ import 'package:amanah_healthcare/features/permission/domain/usecases/claim_repl
 import 'package:amanah_healthcare/features/permission/domain/usecases/get_available_replacements_usecase.dart';
 import 'package:amanah_healthcare/features/permission/domain/usecases/get_eligible_sessions_usecase.dart';
 import 'package:amanah_healthcare/features/permission/domain/usecases/get_my_leaves_usecase.dart';
+import 'package:amanah_healthcare/features/permission/domain/usecases/get_replacement_facets_usecase.dart';
 import 'package:amanah_healthcare/features/permission/domain/usecases/request_leave_usecase.dart';
 
 class PermissionController extends ChangeNotifier {
@@ -23,6 +25,7 @@ class PermissionController extends ChangeNotifier {
     CancelLeaveUseCase? cancelLeaveUseCase,
     GetAvailableReplacementsUseCase? getAvailableReplacementsUseCase,
     ClaimReplacementUseCase? claimReplacementUseCase,
+    GetReplacementFacetsUseCase? getReplacementFacetsUseCase,
   }) : _getMyLeavesUseCase =
            getMyLeavesUseCase ?? GetMyLeavesUseCase(repository ?? PermissionRepositoryImpl()),
        _getEligibleSessionsUseCase =
@@ -37,7 +40,10 @@ class PermissionController extends ChangeNotifier {
            GetAvailableReplacementsUseCase(repository ?? PermissionRepositoryImpl()),
        _claimReplacementUseCase =
            claimReplacementUseCase ??
-           ClaimReplacementUseCase(repository ?? PermissionRepositoryImpl());
+           ClaimReplacementUseCase(repository ?? PermissionRepositoryImpl()),
+       _getReplacementFacetsUseCase =
+           getReplacementFacetsUseCase ??
+           GetReplacementFacetsUseCase(repository ?? PermissionRepositoryImpl());
 
   final GetMyLeavesUseCase _getMyLeavesUseCase;
   final GetEligibleSessionsUseCase _getEligibleSessionsUseCase;
@@ -45,9 +51,11 @@ class PermissionController extends ChangeNotifier {
   final CancelLeaveUseCase _cancelLeaveUseCase;
   final GetAvailableReplacementsUseCase _getAvailableReplacementsUseCase;
   final ClaimReplacementUseCase _claimReplacementUseCase;
+  final GetReplacementFacetsUseCase _getReplacementFacetsUseCase;
 
   List<LeaveRequestEntity> _myLeaves = const <LeaveRequestEntity>[];
   List<ReplacementItem> _availableReplacements = const <ReplacementItem>[];
+  ReplacementFacets _replacementFacets = ReplacementFacets.empty;
   List<EligibleSession> _eligibleSessions = const <EligibleSession>[];
 
   bool _isLoading = false;
@@ -56,6 +64,7 @@ class PermissionController extends ChangeNotifier {
 
   List<LeaveRequestEntity> get myLeaves => _myLeaves;
   List<ReplacementItem> get availableReplacements => _availableReplacements;
+  ReplacementFacets get replacementFacets => _replacementFacets;
   List<EligibleSession> get eligibleSessions => _eligibleSessions;
   bool get isLoading => _isLoading;
   bool get isLoadingSessions => _isLoadingSessions;
@@ -81,9 +90,21 @@ class PermissionController extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchAvailableReplacements() async {
+  Future<void> fetchReplacementFacets() async {
     try {
-      _availableReplacements = await _getAvailableReplacementsUseCase.execute();
+      _replacementFacets = await _getReplacementFacetsUseCase.execute();
+      notifyListeners();
+    } catch (_) {
+      // Non-blocking
+    }
+  }
+
+  Future<void> fetchAvailableReplacements({String? exactDate, String? staffProfileId}) async {
+    try {
+      _availableReplacements = await _getAvailableReplacementsUseCase.execute(
+        exactDate: exactDate,
+        staffProfileId: staffProfileId,
+      );
       notifyListeners();
     } catch (e) {
       // Non-blocking

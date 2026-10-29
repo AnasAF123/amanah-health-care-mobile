@@ -6,7 +6,10 @@ class GetAvailableReplacementsUseCase {
 
   final PermissionRepository _repository;
 
-  Future<List<ReplacementItem>> execute() {
-    return _repository.getAvailableReplacements();
+  Future<List<ReplacementItem>> execute({String? exactDate, String? staffProfileId}) {
+    return _repository.getAvailableReplacements(
+      exactDate: exactDate,
+      staffProfileId: staffProfileId,
+    );
   }
 }

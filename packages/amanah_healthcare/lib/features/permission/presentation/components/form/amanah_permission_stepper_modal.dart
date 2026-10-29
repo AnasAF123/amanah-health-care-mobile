@@ -172,7 +172,14 @@ class _AmanahPermissionStepperModalState extends State<AmanahPermissionStepperMo
   }
 
   void _handleDateStageContinue() {
+    final DateTime today = normalizeToCalendarDate(DateTime.now());
+    if (_draft.dateRange.startDate.isBefore(today)) {
+      setState(() => _errorMessage = 'Tanggal permohonan izin tidak boleh di masa lalu');
+      return;
+    }
+
     setState(() {
+      _errorMessage = null;
       _draft = _draft.copyWith(stage: PermissionFormStage.scope);
     });
     if (_draft.isSessionScope && _eligibleSessions.isEmpty) {
@@ -190,8 +197,13 @@ class _AmanahPermissionStepperModalState extends State<AmanahPermissionStepperMo
         );
       });
     } else {
+      CalendarDateRange currentRange = _draft.dateRange;
+      if (!currentRange.isSingleDay) {
+        currentRange = CalendarDateRange.singleDay(currentRange.startDate);
+      }
+
       setState(() {
-        _draft = _draft.copyWith(scope: scope);
+        _draft = _draft.copyWith(scope: scope, dateRange: currentRange);
       });
       _loadEligibleSessions();
     }
