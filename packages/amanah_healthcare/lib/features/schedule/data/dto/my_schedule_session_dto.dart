@@ -1,4 +1,3 @@
-
 class MyScheduleSessionDto {
   const MyScheduleSessionDto({
     required this.id,
@@ -15,36 +14,37 @@ class MyScheduleSessionDto {
     required this.isAvailable,
     this.bookedCount = 0,
     this.maxQuota = 0,
+    this.isReplacement = false,
+    this.replacedStaffName,
+    this.notes,
   });
 
   factory MyScheduleSessionDto.fromJson(Map<String, dynamic> json) {
-    final String resolvedCode =
-        json['sessionCode'] as String? ?? json['session']?.toString() ?? '';
+    final String resolvedCode = json['sessionCode'] as String? ?? json['session']?.toString() ?? '';
     final String resolvedLabel =
-        json['sessionLabel'] as String? ?? json['title'] as String? ?? (resolvedCode.isNotEmpty ? resolvedCode : 'Sesi Praktik');
+        json['sessionLabel'] as String? ??
+        json['title'] as String? ??
+        (resolvedCode.isNotEmpty ? resolvedCode : 'Sesi Praktik');
 
     return MyScheduleSessionDto(
       id: json['id'] as String? ?? '',
       sessionId: json['sessionId'] as String? ?? json['id'] as String? ?? '',
       sessionCode: resolvedCode,
       sessionLabel: resolvedLabel,
-      scheduleDate: json['scheduleDate'] as String? ??
-          json['specificDate'] as String? ??
-          '',
+      scheduleDate: json['scheduleDate'] as String? ?? json['specificDate'] as String? ?? '',
       startTime: json['startTime'] as String?,
       endTime: json['endTime'] as String?,
-      timeRange: json['timeRange'] as String? ??
-          '${json['startTime'] ?? ''} - ${json['endTime'] ?? ''}',
+      timeRange:
+          json['timeRange'] as String? ?? '${json['startTime'] ?? ''} - ${json['endTime'] ?? ''}',
       roomName: json['roomName'] as String? ?? json['room'] as String?,
       poliklinikName: json['poliklinikName'] as String? ?? json['poli'] as String?,
-      status: json['status'] as String? ??
-          json['effectiveStatus'] as String? ??
-          'OPEN',
+      status: json['status'] as String? ?? json['effectiveStatus'] as String? ?? 'OPEN',
       isAvailable: json['isAvailable'] as bool? ?? true,
-      bookedCount: json['bookedCount'] as int? ??
-          json['totalBookedPatients'] as int? ??
-          0,
+      bookedCount: json['bookedCount'] as int? ?? json['totalBookedPatients'] as int? ?? 0,
       maxQuota: json['maxQuota'] as int? ?? 0,
+      isReplacement: json['isReplacement'] as bool? ?? false,
+      replacedStaffName: json['replacedStaffName'] as String?,
+      notes: json['notes'] as String?,
     );
   }
 
@@ -62,4 +62,7 @@ class MyScheduleSessionDto {
   final bool isAvailable;
   final int bookedCount;
   final int maxQuota;
+  final bool isReplacement;
+  final String? replacedStaffName;
+  final String? notes;
 }

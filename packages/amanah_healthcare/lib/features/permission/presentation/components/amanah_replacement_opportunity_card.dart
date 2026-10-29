@@ -121,13 +121,48 @@ class AmanahReplacementOpportunityCard extends StatelessWidget {
               // 3. Action Section: Agnostic Slide To Confirm / Status Banner
               if (isOpen) ...<Widget>[
                 const SizedBox(height: 14),
-                AmanahSlideToConfirm(
-                  height: 44,
-                  text: 'Geser untuk Ambil Jadwal',
-                  variant: AmanahSlideVariant.brandGradient,
-                  borderRadius: BorderRadius.circular(12),
-                  onConfirmed: onClaim,
-                ),
+                if (currentStaffProfileId.isNotEmpty &&
+                    item.originalStaffProfileId == currentStaffProfileId)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
+                          .withValues(alpha: dark ? 0.12 : 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
+                            .withValues(alpha: dark ? 0.28 : 0.18),
+                      ),
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.info_outline_rounded,
+                          size: 15,
+                          color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Jadwal cuti Anda sendiri (terbuka untuk digantikan rekan).',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: dark ? Colors.white : AmanahColorTokens.brandNavy,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  AmanahSlideToConfirm(
+                    height: 44,
+                    text: 'Geser untuk Ambil Jadwal',
+                    variant: AmanahSlideVariant.brandGradient,
+                    borderRadius: BorderRadius.circular(12),
+                    onConfirmed: onClaim,
+                  ),
               ] else if (claimedByMe) ...<Widget>[
                 const SizedBox(height: 12),
                 Container(

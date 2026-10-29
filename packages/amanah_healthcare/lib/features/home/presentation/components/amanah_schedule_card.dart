@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/core/time/time.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_schedule_card_widgets.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_ticket_card_shell.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_schedule_card_tokens.dart';
@@ -41,12 +42,16 @@ class AmanahScheduleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
     final TimeService ts = timeService ?? DefaultTimeService();
-    final String primaryTitle = schedule.title.startsWith('Jadwal')
-        ? schedule.title
-        : 'Jadwal Hari Ini';
-    final String sessionLabel = schedule.sessionType.isNotEmpty
-        ? 'Sesi ${schedule.sessionType}'
-        : (!schedule.title.startsWith('Jadwal') ? schedule.title : '');
+    final String primaryTitle = schedule.isReplacement
+        ? 'Dinas Pengganti'
+        : (schedule.title.startsWith('Jadwal') ? schedule.title : 'Jadwal Hari Ini');
+    final String sessionLabel = schedule.isReplacement
+        ? (schedule.replacedStaffName != null && schedule.replacedStaffName!.isNotEmpty
+              ? 'Menggantikan ${schedule.replacedStaffName}'
+              : (schedule.sessionType.isNotEmpty ? 'Sesi ${schedule.sessionType}' : ''))
+        : (schedule.sessionType.isNotEmpty
+              ? 'Sesi ${schedule.sessionType}'
+              : (!schedule.title.startsWith('Jadwal') ? schedule.title : ''));
 
     final String displayDate = _formatDate(ts);
 
@@ -166,8 +171,7 @@ class AmanahScheduleCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      if (schedule.poli != null &&
-                          schedule.poli!.trim().isNotEmpty)
+                      if (schedule.poli != null && schedule.poli!.trim().isNotEmpty)
                         Text(
                           schedule.poli!,
                           maxLines: 1,
@@ -181,10 +185,8 @@ class AmanahScheduleCard extends StatelessWidget {
                                 : AmanahScheduleCardTokens.poliColorLight,
                           ),
                         ),
-                      if (schedule.room != null &&
-                          schedule.room!.trim().isNotEmpty) ...<Widget>[
-                        if (schedule.poli != null &&
-                            schedule.poli!.trim().isNotEmpty)
+                      if (schedule.room != null && schedule.room!.trim().isNotEmpty) ...<Widget>[
+                        if (schedule.poli != null && schedule.poli!.trim().isNotEmpty)
                           const SizedBox(height: 2),
                         Text(
                           schedule.room!,
@@ -205,13 +207,18 @@ class AmanahScheduleCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
 
-                // Right: Clean Integrated Booking Pill
+                // Right: Clean Integrated Booking Pill / Replacement Badge
                 Flexible(
                   flex: 0,
-                  child: AmanahBookingPill(
-                    patientCount: _formatPatientCount(),
-                    statusText: 'Terdaftar',
-                  ),
+                  child: schedule.isReplacement
+                      ? const AmanahStatusBadge(
+                          text: 'Pengganti',
+                          variant: AmanahBadgeVariant.trend,
+                        )
+                      : AmanahBookingPill(
+                          patientCount: _formatPatientCount(),
+                          statusText: 'Terdaftar',
+                        ),
                 ),
               ],
             ),

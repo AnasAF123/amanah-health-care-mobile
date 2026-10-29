@@ -220,18 +220,53 @@ class AmanahReplacementDetailDrawer extends StatelessWidget {
 
           // 6. Action: Agnostic Slide To Confirm or Guidance Box
           if (isOpen) ...<Widget>[
-            AmanahSlideToConfirm(
-              text: 'Geser untuk Ambil Jadwal',
-              variant: AmanahSlideVariant.brandGradient,
-              borderRadius: BorderRadius.circular(AmanahRadius.md),
-              onConfirmed: () async {
-                final bool success = await onClaim();
-                if (success && context.mounted) {
-                  Navigator.of(context).pop();
-                }
-                return success;
-              },
-            ),
+            if (currentStaffProfileId.isNotEmpty &&
+                item.originalStaffProfileId == currentStaffProfileId)
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
+                      .withValues(alpha: dark ? 0.12 : 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
+                        .withValues(alpha: dark ? 0.28 : 0.18),
+                  ),
+                ),
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 16,
+                      color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Ini adalah jadwal cuti Anda sendiri. Rekan staf lain dapat mengambil jadwal dinas ini.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: dark ? Colors.white : AmanahColorTokens.brandNavy,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              AmanahSlideToConfirm(
+                text: 'Geser untuk Ambil Jadwal',
+                variant: AmanahSlideVariant.brandGradient,
+                borderRadius: BorderRadius.circular(AmanahRadius.md),
+                onConfirmed: () async {
+                  final bool success = await onClaim();
+                  if (success && context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                  return success;
+                },
+              ),
           ] else if (claimedByMe) ...<Widget>[
             Container(
               padding: const EdgeInsets.all(12),

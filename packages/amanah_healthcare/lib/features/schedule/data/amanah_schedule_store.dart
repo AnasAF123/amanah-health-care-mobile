@@ -8,7 +8,7 @@ import 'package:amanah_healthcare/features/schedule/domain/repositories/schedule
 
 class AmanahScheduleStore extends ChangeNotifier {
   AmanahScheduleStore._({TimeService? timeService})
-      : _timeService = timeService ?? DefaultTimeService() {
+    : _timeService = timeService ?? DefaultTimeService() {
     _schedulesMap = <String, List<DoctorSchedule>>{};
     _daySettingsMap = <String, DayScheduleSetting>{};
   }
@@ -46,13 +46,11 @@ class AmanahScheduleStore extends ChangeNotifier {
     final DateTime today = ts.today();
     final String dateStr = formatIsoDateString(today);
     final ScheduleRepository repo = repository ?? ScheduleRepositoryImpl();
-    final List<MyScheduleSession> sessions =
-        await repo.getMySchedules(date: dateStr);
+    final List<MyScheduleSession> sessions = await repo.getMySchedules(date: dateStr);
 
     final List<DoctorSchedule> mapped = await Future.wait(
       sessions.map((MyScheduleSession s) async {
-        final String targetSessionId =
-            s.sessionId.isNotEmpty ? s.sessionId : s.id;
+        final String targetSessionId = s.sessionId.isNotEmpty ? s.sessionId : s.id;
         final List<SessionPatient> sessionPatients = targetSessionId.isNotEmpty
             ? await repo.getSessionPatients(targetSessionId, date: dateStr)
             : const <SessionPatient>[];
@@ -61,25 +59,35 @@ class AmanahScheduleStore extends ChangeNotifier {
             .map((SessionPatient p) => p.toBookedPatient())
             .toList();
 
-        final String sessionType =
-            s.sessionLabel.isNotEmpty ? s.sessionLabel : (s.sessionCode.isNotEmpty ? s.sessionCode : 'Sesi Praktik');
+        final String sessionType = s.sessionLabel.isNotEmpty
+            ? s.sessionLabel
+            : (s.sessionCode.isNotEmpty ? s.sessionCode : 'Sesi Praktik');
 
-        final int patientCount =
-            booked.isNotEmpty ? booked.length : s.bookedCount;
+        final int patientCount = booked.isNotEmpty ? booked.length : s.bookedCount;
+
+        final bool isRep = s.isReplacement || s.status.toUpperCase() == 'REPLACEMENT';
+        final String badge = isRep
+            ? (s.replacedStaffName != null && s.replacedStaffName!.isNotEmpty
+                  ? 'Pengganti ${s.replacedStaffName}'
+                  : 'Pengganti')
+            : '$patientCount Pasien';
+        final AmanahBadgeVariant badgeVariant = isRep
+            ? AmanahBadgeVariant.trend
+            : (patientCount > 0 ? AmanahBadgeVariant.live : AmanahBadgeVariant.primary);
 
         return DoctorSchedule(
           id: s.id,
-          title: s.sessionLabel,
+          title: isRep ? 'Dinas Pengganti' : s.sessionLabel,
           date: dateStr,
           time: s.timeRange ?? '${s.startTime ?? ''} - ${s.endTime ?? ''}',
           poli: s.poliklinikName,
           room: s.roomName,
-          badge: '$patientCount Pasien',
-          badgeVariant: patientCount > 0
-              ? AmanahBadgeVariant.live
-              : AmanahBadgeVariant.primary,
+          badge: badge,
+          badgeVariant: badgeVariant,
           sessionType: sessionType,
           bookedPatients: booked,
+          isReplacement: isRep,
+          replacedStaffName: s.replacedStaffName,
         );
       }),
     );
@@ -89,14 +97,12 @@ class AmanahScheduleStore extends ChangeNotifier {
 
   DayScheduleSetting getDaySettingForDate(DateTime date) {
     final String key = formatDateKey(date);
-    return _daySettingsMap[key] ??
-        DayScheduleSetting(
-          isCuti: date.weekday == DateTime.sunday,
-        );
+    return _daySettingsMap[key] ?? DayScheduleSetting(isCuti: date.weekday == DateTime.sunday);
   }
 
-  List<({BookedPatient patient, DoctorSchedule schedule})>
-      getAllBookedPatientsForDate(DateTime date) {
+  List<({BookedPatient patient, DoctorSchedule schedule})> getAllBookedPatientsForDate(
+    DateTime date,
+  ) {
     final List<DoctorSchedule> schedules = getSchedulesForDate(date);
     final List<({BookedPatient patient, DoctorSchedule schedule})> list =
         <({BookedPatient patient, DoctorSchedule schedule})>[];
@@ -110,8 +116,9 @@ class AmanahScheduleStore extends ChangeNotifier {
 
   void addSchedule(DateTime date, DoctorSchedule schedule) {
     final String key = formatDateKey(date);
-    final List<DoctorSchedule> current =
-        List<DoctorSchedule>.from(_schedulesMap[key] ?? <DoctorSchedule>[]);
+    final List<DoctorSchedule> current = List<DoctorSchedule>.from(
+      _schedulesMap[key] ?? <DoctorSchedule>[],
+    );
     current.add(schedule);
     _schedulesMap[key] = current;
     notifyListeners();
@@ -119,8 +126,9 @@ class AmanahScheduleStore extends ChangeNotifier {
 
   void updateSchedule(DateTime date, DoctorSchedule schedule) {
     final String key = formatDateKey(date);
-    final List<DoctorSchedule> current =
-        List<DoctorSchedule>.from(_schedulesMap[key] ?? <DoctorSchedule>[]);
+    final List<DoctorSchedule> current = List<DoctorSchedule>.from(
+      _schedulesMap[key] ?? <DoctorSchedule>[],
+    );
     final int index = current.indexWhere((DoctorSchedule s) => s.id == schedule.id);
     if (index >= 0) {
       current[index] = schedule;
@@ -131,8 +139,9 @@ class AmanahScheduleStore extends ChangeNotifier {
 
   void deleteSchedule(DateTime date, String scheduleId) {
     final String key = formatDateKey(date);
-    final List<DoctorSchedule> current =
-        List<DoctorSchedule>.from(_schedulesMap[key] ?? <DoctorSchedule>[]);
+    final List<DoctorSchedule> current = List<DoctorSchedule>.from(
+      _schedulesMap[key] ?? <DoctorSchedule>[],
+    );
     current.removeWhere((DoctorSchedule s) => s.id == scheduleId);
     _schedulesMap[key] = current;
     notifyListeners();

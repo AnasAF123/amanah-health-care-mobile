@@ -10,6 +10,7 @@ class ReplacementItem {
     this.originalPractitionerId,
     this.originalStaffName,
     this.originalStaffRole,
+    this.originalStaffType,
     this.originalStaffAvatarUrl,
     this.leaveReason,
     this.claimedByStaffProfileId,
@@ -34,6 +35,7 @@ class ReplacementItem {
   final String? originalPractitionerId;
   final String? originalStaffName;
   final String? originalStaffRole;
+  final String? originalStaffType;
   final String? originalStaffAvatarUrl;
   final String? leaveReason;
   final String? claimedByStaffProfileId;
@@ -92,10 +94,8 @@ class ReplacementItem {
 
   String get formattedTimeRange {
     if (startTime != null && endTime != null) {
-      final String s =
-          startTime!.length >= 5 ? startTime!.substring(0, 5) : startTime!;
-      final String e =
-          endTime!.length >= 5 ? endTime!.substring(0, 5) : endTime!;
+      final String s = startTime!.length >= 5 ? startTime!.substring(0, 5) : startTime!;
+      final String e = endTime!.length >= 5 ? endTime!.substring(0, 5) : endTime!;
       return '$s - $e WIB';
     }
     return 'Waktu dinas mengikuti roster';
@@ -108,6 +108,5 @@ class ReplacementItem {
 
   bool isClaimedByOther(String? currentStaffProfileId) =>
       isClaimed &&
-      (currentStaffProfileId == null ||
-          claimedByStaffProfileId != currentStaffProfileId);
+      (currentStaffProfileId == null || claimedByStaffProfileId != currentStaffProfileId);
 }

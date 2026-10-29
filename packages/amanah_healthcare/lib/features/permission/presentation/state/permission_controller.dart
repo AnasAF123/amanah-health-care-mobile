@@ -15,6 +15,7 @@ import 'package:amanah_healthcare/features/permission/domain/usecases/get_eligib
 import 'package:amanah_healthcare/features/permission/domain/usecases/get_my_leaves_usecase.dart';
 import 'package:amanah_healthcare/features/permission/domain/usecases/get_replacement_facets_usecase.dart';
 import 'package:amanah_healthcare/features/permission/domain/usecases/request_leave_usecase.dart';
+import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 
 class PermissionController extends ChangeNotifier {
   PermissionController({
@@ -177,7 +178,12 @@ class PermissionController extends ChangeNotifier {
     }
   }
 
-  Future<bool> claimReplacement(String id, {BuildContext? context}) async {
+  Future<bool> claimReplacement(
+    String id, {
+    BuildContext? context,
+    String? exactDate,
+    String? staffProfileId,
+  }) async {
     _isLoading = true;
     notifyListeners();
 
@@ -189,7 +195,11 @@ class PermissionController extends ChangeNotifier {
           message: 'Jadwal dinas pengganti berhasil diklaim. Jadwal telah tercatat.',
         );
       }
-      await fetchAvailableReplacements();
+      await Future.wait(<Future<void>>[
+        fetchAvailableReplacements(exactDate: exactDate, staffProfileId: staffProfileId),
+        fetchReplacementFacets(),
+        AmanahScheduleStore.instance.syncTodaySchedules(),
+      ]);
       return true;
     } catch (e) {
       if (context != null && context.mounted) {

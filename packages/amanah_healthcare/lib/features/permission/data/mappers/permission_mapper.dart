@@ -172,6 +172,7 @@ abstract final class PermissionMapper {
       originalPractitionerId: dto.originalPractitionerId,
       originalStaffName: dto.originalStaffName,
       originalStaffRole: dto.originalStaffRole,
+      originalStaffType: dto.originalStaffType,
       originalStaffAvatarUrl: dto.originalStaffAvatarUrl,
       claimedByStaffProfileId: dto.claimedByStaffProfileId,
       claimedByPractitionerId: dto.claimedByPractitionerId,

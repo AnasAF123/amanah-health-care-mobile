@@ -14,6 +14,9 @@ class MyScheduleSession {
     required this.isAvailable,
     this.bookedCount = 0,
     this.maxQuota = 0,
+    this.isReplacement = false,
+    this.replacedStaffName,
+    this.notes,
   });
 
   final String id;
@@ -30,4 +33,7 @@ class MyScheduleSession {
   final bool isAvailable;
   final int bookedCount;
   final int maxQuota;
+  final bool isReplacement;
+  final String? replacedStaffName;
+  final String? notes;
 }

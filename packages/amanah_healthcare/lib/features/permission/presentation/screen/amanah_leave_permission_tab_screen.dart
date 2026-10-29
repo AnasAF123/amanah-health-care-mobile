@@ -19,6 +19,7 @@ import 'package:amanah_healthcare/features/permission/presentation/components/am
 import 'package:amanah_healthcare/features/permission/presentation/components/amanah_replacement_detail_drawer.dart';
 import 'package:amanah_healthcare/features/permission/presentation/components/replacement/amanah_replacement_schedule_viewport.dart';
 import 'package:amanah_healthcare/features/permission/presentation/state/permission_controller.dart';
+import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 
 /// Master Leave & Permission Screen (Orchestrator).
 /// Backed by real Feature-First Clean Architecture and backend endpoints.
@@ -123,6 +124,7 @@ class _AmanahLeavePermissionTabScreenState extends State<AmanahLeavePermissionTa
             ? formatIsoDateString(_selectedReplacementDate!)
             : null,
       );
+      AmanahScheduleStore.instance.syncTodaySchedules();
     }
   }
 
@@ -181,19 +183,25 @@ class _AmanahLeavePermissionTabScreenState extends State<AmanahLeavePermissionTa
   }
 
   void _handleOpenReplacementDetail(ReplacementItem item) {
+    final String? exactDate = _selectedReplacementDate != null
+        ? formatIsoDateString(_selectedReplacementDate!)
+        : null;
     AmanahReplacementDetailDrawer.show(
       context: context,
       item: item,
       currentStaffProfileId: widget.staffProfileId,
       currentUserName: widget.doctorName,
       onClaim: () async {
-        return await _controller.claimReplacement(item.id, context: context);
+        return await _controller.claimReplacement(item.id, context: context, exactDate: exactDate);
       },
     );
   }
 
   Future<bool> _handleClaimReplacement(ReplacementItem item) async {
-    return await _controller.claimReplacement(item.id, context: context);
+    final String? exactDate = _selectedReplacementDate != null
+        ? formatIsoDateString(_selectedReplacementDate!)
+        : null;
+    return await _controller.claimReplacement(item.id, context: context, exactDate: exactDate);
   }
 
   Future<void> _handlePickReplacementDate() async {

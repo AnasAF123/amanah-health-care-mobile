@@ -62,8 +62,7 @@ class BookedPatient {
   String get effectiveAppointmentId =>
       (appointmentId != null && appointmentId!.isNotEmpty) ? appointmentId! : id;
 
-  String get effectivePatientId =>
-      (patientId != null && patientId!.isNotEmpty) ? patientId! : id;
+  String get effectivePatientId => (patientId != null && patientId!.isNotEmpty) ? patientId! : id;
 
   BookedPatient copyWith({
     String? id,
@@ -129,6 +128,8 @@ class DoctorSchedule {
     this.endTime,
     this.sessionType = 'Pagi',
     this.bookedPatients = const <BookedPatient>[],
+    this.isReplacement = false,
+    this.replacedStaffName,
   });
 
   final String id;
@@ -143,6 +144,8 @@ class DoctorSchedule {
   final String? endTime;
   final String sessionType; // 'Pagi', 'Siang', 'Malam', 'Dini Hari'
   final List<BookedPatient> bookedPatients;
+  final bool isReplacement;
+  final String? replacedStaffName;
 
   DoctorSchedule copyWith({
     String? id,
@@ -157,6 +160,8 @@ class DoctorSchedule {
     String? endTime,
     String? sessionType,
     List<BookedPatient>? bookedPatients,
+    bool? isReplacement,
+    String? replacedStaffName,
   }) {
     return DoctorSchedule(
       id: id ?? this.id,
@@ -171,23 +176,19 @@ class DoctorSchedule {
       endTime: endTime ?? this.endTime,
       sessionType: sessionType ?? this.sessionType,
       bookedPatients: bookedPatients ?? this.bookedPatients,
+      isReplacement: isReplacement ?? this.isReplacement,
+      replacedStaffName: replacedStaffName ?? this.replacedStaffName,
     );
   }
 }
 
 class DayScheduleSetting {
-  const DayScheduleSetting({
-    required this.isCuti,
-    this.cutiReason,
-  });
+  const DayScheduleSetting({required this.isCuti, this.cutiReason});
 
   final bool isCuti;
   final String? cutiReason;
 
-  DayScheduleSetting copyWith({
-    bool? isCuti,
-    String? cutiReason,
-  }) {
+  DayScheduleSetting copyWith({bool? isCuti, String? cutiReason}) {
     return DayScheduleSetting(
       isCuti: isCuti ?? this.isCuti,
       cutiReason: cutiReason ?? this.cutiReason,

@@ -18,6 +18,9 @@ abstract final class MyScheduleSessionMapper {
       isAvailable: dto.isAvailable,
       bookedCount: dto.bookedCount,
       maxQuota: dto.maxQuota,
+      isReplacement: dto.isReplacement,
+      replacedStaffName: dto.replacedStaffName,
+      notes: dto.notes,
     );
   }
 }
