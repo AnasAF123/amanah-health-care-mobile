@@ -27,7 +27,8 @@ class AmanahShiftBookingTicket extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = AmanahThemeTokens.isDark(context);
-    final String resolvedEnd = endTime.endsWith('WIB') ? endTime : '$endTime WIB';
+    final String resolvedEnd =
+        endTime.contains(RegExp(r'[A-Za-z]')) ? endTime : '$endTime WIB';
 
     return Container(
       padding: padding,
