@@ -8,7 +8,11 @@ import 'package:amanah_healthcare/features/queue/data/endpoints/queue_endpoints.
 
 abstract interface class QueueRemoteDataSource {
   Future<dynamic> getMySchedules();
-  Future<dynamic> getSessionPatients(String sessionId, {String? status});
+  Future<dynamic> getSessionPatients(
+    String sessionId, {
+    String? status,
+    String? date,
+  });
   Future<dynamic> callPatient(String appointmentId, {String? notes});
   Future<dynamic> startService(String appointmentId);
   Future<dynamic> completeService(String appointmentId);
@@ -56,9 +60,13 @@ class QueueRemoteDataSourceImpl implements QueueRemoteDataSource {
   }
 
   @override
-  Future<dynamic> getSessionPatients(String sessionId, {String? status}) async {
+  Future<dynamic> getSessionPatients(
+    String sessionId, {
+    String? status,
+    String? date,
+  }) async {
     final ApiResponse<dynamic> res = await _apiClient.request(
-      QueueEndpoints.sessionPatients(sessionId, status: status),
+      QueueEndpoints.sessionPatients(sessionId, status: status, date: date),
     );
     return _extractData(res.data);
   }

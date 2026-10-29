@@ -10,8 +10,16 @@ class QueueEndpoints {
     requiresAuth: true,
   );
 
-  static ApiEndpoint sessionPatients(String sessionId, {String? status}) {
-    final String query = status != null ? '?status=$status' : '';
+  static ApiEndpoint sessionPatients(
+    String sessionId, {
+    String? status,
+    String? date,
+  }) {
+    final List<String> queryParts = <String>[];
+    if (status != null) queryParts.add('status=$status');
+    if (date != null) queryParts.add('date=$date');
+    final String query =
+        queryParts.isNotEmpty ? '?${queryParts.join('&')}' : '';
     return ApiEndpoint(
       path: '/api/v1/schedules/sessions/$sessionId/patients$query',
       method: HttpMethod.get,

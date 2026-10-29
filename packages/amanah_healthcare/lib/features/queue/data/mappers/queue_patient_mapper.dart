@@ -99,6 +99,12 @@ class QueuePatientMapper {
         json['patientId'] as String? ??
         '';
 
+    final String? patientAvatar =
+        patientMap?['avatarUrl'] as String? ??
+        patientMap?['patientAvatar'] as String? ??
+        json['patientAvatar'] as String? ??
+        json['avatarUrl'] as String?;
+
     return QueuePatientCard(
       id: aptId,
       appointmentId: aptId,
@@ -117,6 +123,7 @@ class QueuePatientMapper {
       status: status,
       patientRm: patientRm,
       guardian: guardian,
+      avatarUrl: patientAvatar,
       allowedActions: allowedActions,
     );
   }

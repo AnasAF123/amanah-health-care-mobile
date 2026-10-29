@@ -24,39 +24,42 @@ class RescheduleDatePickerField extends StatelessWidget {
         ? AmanahColorTokens.neutral700
         : AmanahColorTokens.neutral200;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: borderColor),
-        ),
-        child: Row(
-          children: <Widget>[
-            const Icon(
-              Icons.calendar_today_rounded,
-              size: 20,
-              color: AmanahColorTokens.brandPrimary,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                formattedDate,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: borderColor),
+          ),
+          child: Row(
+            children: <Widget>[
+              const Icon(
+                Icons.calendar_today_rounded,
+                size: 20,
+                color: AmanahColorTokens.brandPrimary,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  formattedDate,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
                 ),
               ),
-            ),
-            Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: subtextColor,
-            ),
-          ],
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: subtextColor,
+              ),
+            ],
+          ),
         ),
       ),
     );

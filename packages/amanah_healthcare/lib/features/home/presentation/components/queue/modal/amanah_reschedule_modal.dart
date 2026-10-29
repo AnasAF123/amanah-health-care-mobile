@@ -18,6 +18,7 @@ class AmanahRescheduleModal extends StatefulWidget {
     required this.patientName,
     required this.queueNumber,
     required this.onConfirm,
+    this.avatarUrl,
     this.currentDate,
     super.key,
   });
@@ -25,6 +26,7 @@ class AmanahRescheduleModal extends StatefulWidget {
   final String appointmentId;
   final String patientName;
   final String queueNumber;
+  final String? avatarUrl;
   final String? currentDate;
   final Future<void> Function({
     required String targetDate,
@@ -38,6 +40,7 @@ class AmanahRescheduleModal extends StatefulWidget {
     required String appointmentId,
     required String patientName,
     required String queueNumber,
+    String? avatarUrl,
     String? currentDate,
     required Future<void> Function({
       required String targetDate,
@@ -52,6 +55,7 @@ class AmanahRescheduleModal extends StatefulWidget {
         appointmentId: appointmentId,
         patientName: patientName,
         queueNumber: queueNumber,
+        avatarUrl: avatarUrl,
         currentDate: currentDate,
         onConfirm: onConfirm,
       ),
@@ -162,18 +166,64 @@ class _AmanahRescheduleModalState extends State<AmanahRescheduleModal> {
 
   Future<void> _pickDate() async {
     final DateTime now = DateTime.now();
+    final DateTime todayMidnight = DateTime(now.year, now.month, now.day);
+
+    DateTime firstAllowed = todayMidnight;
+    DateTime lastAllowed = todayMidnight;
+
+    if (_options != null && _options!.availableDates.isNotEmpty) {
+      final DateTime? parsedFirst =
+          DateTime.tryParse(_options!.availableDates.first.date);
+      final DateTime? parsedLast =
+          DateTime.tryParse(_options!.availableDates.last.date);
+      if (parsedFirst != null) firstAllowed = parsedFirst;
+      if (parsedLast != null && !parsedLast.isBefore(firstAllowed)) {
+        lastAllowed = parsedLast;
+      }
+    }
+
+    final DateTime initial = (_selectedDate.isBefore(firstAllowed) ||
+            _selectedDate.isAfter(lastAllowed))
+        ? firstAllowed
+        : _selectedDate;
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 30)),
+      initialDate: initial,
+      firstDate: firstAllowed,
+      lastDate: lastAllowed,
+      selectableDayPredicate: (DateTime day) {
+        if (_options == null || _options!.availableDates.isEmpty) return true;
+        final String dayStr = _toIsoDate(day);
+        return _options!.availableDates
+            .any((d) => d.date == dayStr && d.shifts.isNotEmpty);
+      },
       builder: (BuildContext ctx, Widget? child) {
         final bool dark = AmanahThemeTokens.isDark(ctx);
         return Theme(
           data: Theme.of(ctx).copyWith(
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: AmanahColorTokens.brandPrimary,
-              brightness: dark ? Brightness.dark : Brightness.light,
+            colorScheme: dark
+                ? const ColorScheme.dark(
+                    primary: AmanahColorTokens.tabActiveDark,
+                    onPrimary: AmanahColorTokens.neutral900,
+                    surface: AmanahColorTokens.surfaceSecondaryDark,
+                    onSurface: AmanahColorTokens.neutral100,
+                  )
+                : const ColorScheme.light(
+                    primary: AmanahColorTokens.brandPrimary,
+                    onPrimary: Colors.white,
+                    surface: Colors.white,
+                    onSurface: AmanahColorTokens.neutral900,
+                  ),
+            datePickerTheme: DatePickerThemeData(
+              headerBackgroundColor: dark
+                  ? AmanahColorTokens.surfaceSecondaryDark
+                  : AmanahColorTokens.brandPrimary,
+              headerForegroundColor:
+                  dark ? AmanahColorTokens.neutral100 : Colors.white,
+              backgroundColor: dark
+                  ? AmanahColorTokens.surfaceSecondaryDark
+                  : Colors.white,
             ),
           ),
           child: child!,
@@ -262,7 +312,7 @@ class _AmanahRescheduleModalState extends State<AmanahRescheduleModal> {
 
     return AmanahBottomSheetScaffold(
       title: 'Jadwalkan Ulang',
-      subtitle: '${widget.patientName} (${widget.queueNumber})',
+      subtitle: 'Tiket Antrean: ${widget.queueNumber}',
       footer: AmanahButton.primary(
         text: 'Simpan Perubahan Jadwal',
         isLoading: _isSubmitting,
@@ -280,9 +330,9 @@ class _AmanahRescheduleModalState extends State<AmanahRescheduleModal> {
           children: <Widget>[
             // 1. Patient & Doctor Info Header Card
             PatientRescheduleHeaderCard(
-              queueNumber: widget.queueNumber,
               patientName: widget.patientName,
               doctorAndServiceText: doctorAndServiceText,
+              avatarUrl: widget.avatarUrl,
             ),
             const SizedBox(height: 20),
 

@@ -84,7 +84,12 @@ class AmanahQueueStore extends ChangeNotifier {
       if (_sessions.isNotEmpty) {
         _activeSession = _resolveOptimalActiveSession(_sessions);
         if (_activeSession != null) {
-          _waitingPatients = await _getQueueUseCase(_activeSession!.sessionId);
+          _waitingPatients = await _getQueueUseCase(
+            GetSessionQueueParams(
+              sessionId: _activeSession!.sessionId,
+              date: _activeSession!.scheduleDate,
+            ),
+          );
         } else {
           _waitingPatients = <QueuePatientCard>[];
         }
@@ -110,7 +115,12 @@ class AmanahQueueStore extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _waitingPatients = await _getQueueUseCase(session.sessionId);
+      _waitingPatients = await _getQueueUseCase(
+        GetSessionQueueParams(
+          sessionId: session.sessionId,
+          date: session.scheduleDate,
+        ),
+      );
     } catch (e) {
       _errorMessage = e is QueueFailure ? e.message : e.toString();
       AppLog.error('[AmanahQueueStore] Error selecting session: $_errorMessage');
@@ -129,7 +139,12 @@ class AmanahQueueStore extends ChangeNotifier {
     }
 
     try {
-      _waitingPatients = await _getQueueUseCase(_activeSession!.sessionId);
+      _waitingPatients = await _getQueueUseCase(
+        GetSessionQueueParams(
+          sessionId: _activeSession!.sessionId,
+          date: _activeSession!.scheduleDate,
+        ),
+      );
       _errorMessage = null;
     } catch (e) {
       _errorMessage = e is QueueFailure ? e.message : e.toString();
@@ -239,9 +254,14 @@ class AmanahQueueStore extends ChangeNotifier {
   }
 
   /// Fetches completed queue patients for a specific session from backend.
-  Future<List<QueuePatientCard>> loadCompletedPatients(String sessionId) async {
+  Future<List<QueuePatientCard>> loadCompletedPatients(String sessionId, {String? date}) async {
     try {
-      return await _getCompletedQueueUseCase(sessionId);
+      return await _getCompletedQueueUseCase(
+        GetSessionQueueParams(
+          sessionId: sessionId,
+          date: date ?? _activeSession?.scheduleDate,
+        ),
+      );
     } catch (e) {
       AppLog.error('[AmanahQueueStore] Error loading completed patients: $e');
       return <QueuePatientCard>[];

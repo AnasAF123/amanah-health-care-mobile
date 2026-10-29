@@ -20,6 +20,7 @@ class QueuePatientCard {
     required this.status,
     required this.patientRm,
     this.guardian,
+    this.avatarUrl,
     this.allowedActions = const <String>[],
   });
 
@@ -40,6 +41,7 @@ class QueuePatientCard {
   final String status;
   final String patientRm;
   final String? guardian;
+  final String? avatarUrl;
   final List<String> allowedActions;
 
   String get effectiveAppointmentId =>
@@ -88,6 +90,7 @@ class QueuePatientCard {
       room: room,
       status: _mapStatusToLabel(status),
       guardian: guardian,
+      avatarUrl: avatarUrl,
       allowedActions: allowedActions,
     );
   }

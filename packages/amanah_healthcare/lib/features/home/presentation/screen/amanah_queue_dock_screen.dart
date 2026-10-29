@@ -263,6 +263,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
       appointmentId: card.id,
       patientName: card.patientName,
       queueNumber: card.queueNumber,
+      avatarUrl: card.avatarUrl,
       onConfirm:
           ({
             required String targetDate,

@@ -35,9 +35,13 @@ class QueueRepositoryImpl implements QueueRepository {
   }
 
   @override
-  Future<List<QueuePatientCard>> getWaitingQueue(String sessionId) async {
+  Future<List<QueuePatientCard>> getWaitingQueue(String sessionId, {String? date}) async {
     try {
-      final dynamic raw = await _remoteDataSource.getSessionPatients(sessionId, status: 'waiting');
+      final dynamic raw = await _remoteDataSource.getSessionPatients(
+        sessionId,
+        status: 'waiting',
+        date: date,
+      );
 
       String? sessionRoom;
       String? sessionPoly;
@@ -177,11 +181,12 @@ class QueueRepositoryImpl implements QueueRepository {
   }
 
   @override
-  Future<List<QueuePatientCard>> getCompletedQueue(String sessionId) async {
+  Future<List<QueuePatientCard>> getCompletedQueue(String sessionId, {String? date}) async {
     try {
       final dynamic raw = await _remoteDataSource.getSessionPatients(
         sessionId,
         status: 'completed',
+        date: date,
       );
 
       String? sessionRoom;

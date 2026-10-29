@@ -8,7 +8,7 @@ abstract interface class QueueRepository {
   Future<List<QueueSessionInfo>> getDoctorTodaySessions();
 
   /// Fetches waiting queue patients scoped to a session definition.
-  Future<List<QueuePatientCard>> getWaitingQueue(String sessionId);
+  Future<List<QueuePatientCard>> getWaitingQueue(String sessionId, {String? date});
 
   /// Calls a patient to enter the consultation room.
   Future<void> callPatient(String appointmentId, {String? notes});
@@ -38,7 +38,7 @@ abstract interface class QueueRepository {
   Future<RescheduleOptionsEntity> getRescheduleOptions(String appointmentId);
 
   /// Fetches completed patients for a session.
-  Future<List<QueuePatientCard>> getCompletedQueue(String sessionId);
+  Future<List<QueuePatientCard>> getCompletedQueue(String sessionId, {String? date});
 
   /// Fetches appointments processed by the authenticated doctor for a given date (defaults to today).
   Future<List<QueuePatientCard>> getDoctorProcessedQueue({String? date});

@@ -17,6 +17,7 @@ class AmanahQueueCardData {
     this.status = 'Menunggu',
     this.watermarkAsset = 'assets/amanah/id_card/images/wm.svg',
     this.guardian,
+    this.avatarUrl,
     this.allowedActions = const <String>[],
   });
 
@@ -37,6 +38,7 @@ class AmanahQueueCardData {
   final String status;
   final String watermarkAsset;
   final String? guardian;
+  final String? avatarUrl;
   final List<String> allowedActions;
 
   String get effectiveAppointmentId =>
