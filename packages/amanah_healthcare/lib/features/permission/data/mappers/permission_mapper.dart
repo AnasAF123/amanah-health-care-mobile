@@ -95,6 +95,8 @@ abstract final class PermissionMapper {
       createdAt: entity.createdAt.toIso8601String(),
       reviewerNotes: entity.approvalNotes,
       cancelledAt: entity.cancelledAt?.toIso8601String(),
+      substituteStaffProfileId: entity.substituteStaffProfileId,
+      substituteStaffName: entity.substituteStaffName,
     );
   }
 
@@ -156,6 +158,8 @@ abstract final class PermissionMapper {
       approvedBy: dto.approvedBy,
       approvalNotes: dto.approvalNotes,
       cancelledAt: dto.cancelledAt != null ? DateTime.tryParse(dto.cancelledAt!) : null,
+      substituteStaffProfileId: dto.substituteStaffProfileId,
+      substituteStaffName: dto.substituteStaffName,
       sessions: dto.sessions.map(toLeaveSessionRef).toList(),
       createdAt: DateTime.tryParse(dto.createdAt) ?? DateTime.now(),
       updatedAt: DateTime.tryParse(dto.updatedAt) ?? DateTime.now(),
@@ -172,7 +176,6 @@ abstract final class PermissionMapper {
       originalPractitionerId: dto.originalPractitionerId,
       originalStaffName: dto.originalStaffName,
       originalStaffRole: dto.originalStaffRole,
-      originalStaffType: dto.originalStaffType,
       originalStaffAvatarUrl: dto.originalStaffAvatarUrl,
       claimedByStaffProfileId: dto.claimedByStaffProfileId,
       claimedByPractitionerId: dto.claimedByPractitionerId,

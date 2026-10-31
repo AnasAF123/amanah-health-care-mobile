@@ -11,9 +11,9 @@ class AccountIdentityController extends ChangeNotifier {
     StaffProfileStore? store,
     RegionApiService? regionApi,
     TimeService? timeService,
-  })  : _store = store ?? StaffProfileStore.instance,
-        _regionApi = regionApi ?? RegionApiService(),
-        _timeService = timeService ?? DefaultTimeService() {
+  }) : _store = store ?? StaffProfileStore.instance,
+       _regionApi = regionApi ?? RegionApiService(),
+       _timeService = timeService ?? DefaultTimeService() {
     _initFromUser();
     _store.addListener(_onStoreUpdated);
   }
@@ -43,7 +43,7 @@ class AccountIdentityController extends ChangeNotifier {
   String get name => _name;
   String get phone => _phone;
   String get email => _email;
-  String get profession => _profession ?? user.displayRole;
+  String get profession => _profession ?? user.roleName;
   String? get staffCode => _staffCode;
   String? get nik => _nik;
   String? get birthPlace => _birthPlace;
@@ -59,9 +59,7 @@ class AccountIdentityController extends ChangeNotifier {
     if (_poliklinikName != null && _poliklinikName!.isNotEmpty) {
       return _poliklinikName!;
     }
-    return (user.isDoctor || user.isMidwife)
-        ? 'Poliklinik Penugasan'
-        : 'Tidak ada penugasan';
+    return user.isClinical ? 'Belum ditentukan' : 'Tidak ada penugasan';
   }
 
   RegionItem? get province => _province;
@@ -116,7 +114,7 @@ class AccountIdentityController extends ChangeNotifier {
     _name = user.fullName;
     _phone = user.staff?.phoneNumber ?? user.phone;
     _email = user.email;
-    _profession = user.staff?.profession ?? user.displayRole;
+    _profession = user.staff?.profession ?? user.roleName;
     _staffCode = user.staff?.staffCode;
     _poliklinikName = user.staff?.poliklinikName;
 

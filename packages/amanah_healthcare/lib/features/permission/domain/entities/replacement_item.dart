@@ -10,7 +10,6 @@ class ReplacementItem {
     this.originalPractitionerId,
     this.originalStaffName,
     this.originalStaffRole,
-    this.originalStaffType,
     this.originalStaffAvatarUrl,
     this.leaveReason,
     this.claimedByStaffProfileId,
@@ -35,7 +34,6 @@ class ReplacementItem {
   final String? originalPractitionerId;
   final String? originalStaffName;
   final String? originalStaffRole;
-  final String? originalStaffType;
   final String? originalStaffAvatarUrl;
   final String? leaveReason;
   final String? claimedByStaffProfileId;

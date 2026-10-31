@@ -8,26 +8,20 @@ import 'package:amanah_healthcare/features/schedule/presentation/components/week
 import 'package:amanah_healthcare/features/schedule/presentation/state/schedule_roster_controller.dart';
 
 class DoctorScheduleRosterSheet extends StatefulWidget {
-  const DoctorScheduleRosterSheet({
-    this.controller,
-    this.isAdmin = false,
-    super.key,
-  });
+  const DoctorScheduleRosterSheet({this.controller, this.canManage = false, super.key});
 
   final ScheduleRosterController? controller;
-  final bool isAdmin;
+  final bool canManage;
 
   static Future<void> show(
     BuildContext context, {
     ScheduleRosterController? controller,
-    bool isAdmin = false,
+    bool canManage = false,
   }) {
     return showAmanahBottomSheet<void>(
       context: context,
-      builder: (BuildContext ctx) => DoctorScheduleRosterSheet(
-        controller: controller,
-        isAdmin: isAdmin,
-      ),
+      builder: (BuildContext ctx) =>
+          DoctorScheduleRosterSheet(controller: controller, canManage: canManage),
     );
   }
 
@@ -69,7 +63,8 @@ class _DoctorScheduleRosterSheetState extends State<DoctorScheduleRosterSheet> {
       listenable: _controller,
       builder: (BuildContext context, _) {
         final DoctorRoster? roster = _controller.roster;
-        final bool hasNoSessions = roster == null ||
+        final bool hasNoSessions =
+            roster == null ||
             roster.days.isEmpty ||
             roster.days.every((DoctorRosterDay d) => d.sessions.isEmpty);
 
@@ -188,13 +183,11 @@ class _DoctorScheduleRosterSheetState extends State<DoctorScheduleRosterSheet> {
                     },
                   ),
                 ),
-          footer: _controller.isLoading ||
-                  _controller.errorMessage != null ||
-                  hasNoSessions
+          footer: _controller.isLoading || _controller.errorMessage != null || hasNoSessions
               ? null
               : Row(
                   children: <Widget>[
-                    if (widget.isAdmin && _controller.isOverride) ...<Widget>[
+                    if (widget.canManage && _controller.isOverride) ...<Widget>[
                       Expanded(
                         child: AmanahButton.secondary(
                           text: 'Reset Template',

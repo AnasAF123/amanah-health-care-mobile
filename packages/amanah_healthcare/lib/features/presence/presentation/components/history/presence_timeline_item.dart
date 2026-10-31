@@ -36,14 +36,14 @@ class PresenceTimelineItem extends StatelessWidget {
 
     if (item.isLatest) {
       switch (item.status) {
-        case AttendanceStatus.hadir:
+        case AttendanceStatus.present:
           iconBorderColor = AmanahColorTokens.successDark;
           iconBgColor = AmanahColorTokens.successSurface;
           iconColor = AmanahColorTokens.successDark;
           titleColor = AmanahColorTokens.successDark;
           iconData = Icons.login_rounded;
           lineColor = AmanahColorTokens.success;
-        case AttendanceStatus.telat:
+        case AttendanceStatus.late:
           iconBorderColor = AmanahColorTokens.warningDark;
           iconBgColor = AmanahColorTokens.warningSurface;
           iconColor = AmanahColorTokens.warningDark;
@@ -57,24 +57,33 @@ class PresenceTimelineItem extends StatelessWidget {
           titleColor = AmanahColorTokens.dangerDark;
           iconData = Icons.close_rounded;
           lineColor = AmanahColorTokens.danger;
-        case AttendanceStatus.cuti:
+        case AttendanceStatus.leave:
           iconBorderColor = AmanahColorTokens.violetDark;
           iconBgColor = AmanahColorTokens.violetSurface;
           iconColor = AmanahColorTokens.violetDark;
           titleColor = AmanahColorTokens.violetDark;
           iconData = Icons.event_note_rounded;
           lineColor = AmanahColorTokens.violet;
+        case AttendanceStatus.absent:
+          iconBorderColor = AmanahColorTokens.dangerDark;
+          iconBgColor = AmanahColorTokens.dangerSurface;
+          iconColor = AmanahColorTokens.dangerDark;
+          titleColor = AmanahColorTokens.dangerDark;
+          iconData = Icons.person_off_rounded;
+          lineColor = AmanahColorTokens.danger;
       }
     } else {
       switch (item.status) {
-        case AttendanceStatus.hadir:
+        case AttendanceStatus.present:
           iconData = Icons.login_rounded;
-        case AttendanceStatus.telat:
+        case AttendanceStatus.late:
           iconData = Icons.schedule_rounded;
         case AttendanceStatus.missed:
           iconData = Icons.close_rounded;
-        case AttendanceStatus.cuti:
+        case AttendanceStatus.leave:
           iconData = Icons.event_note_rounded;
+        case AttendanceStatus.absent:
+          iconData = Icons.person_off_rounded;
       }
     }
 
@@ -199,7 +208,7 @@ class PresenceTimelineItem extends StatelessWidget {
                   // 4. Missing / Cuti details
                   if (item.checkInTimeFormatted == null &&
                       item.checkOutTimeFormatted == null &&
-                      item.status != AttendanceStatus.cuti) ...<Widget>[
+                      item.status != AttendanceStatus.leave) ...<Widget>[
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -214,7 +223,9 @@ class PresenceTimelineItem extends StatelessWidget {
                         Text(
                           item.status == AttendanceStatus.missed
                               ? 'Tidak Tercatat Presensi'
-                              : (item.notes?.isNotEmpty == true ? item.notes! : '-'),
+                              : (item.status == AttendanceStatus.absent
+                                    ? 'Alpa'
+                                    : (item.notes?.isNotEmpty == true ? item.notes! : '-')),
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
@@ -225,7 +236,7 @@ class PresenceTimelineItem extends StatelessWidget {
                     ),
                   ],
 
-                  if (item.status == AttendanceStatus.cuti) ...<Widget>[
+                  if (item.status == AttendanceStatus.leave) ...<Widget>[
                     const SizedBox(height: 4),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

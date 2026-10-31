@@ -4,7 +4,6 @@ import 'package:amanah_healthcare/core/presentation/components/amanah_toaster.da
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_logger.dart';
 import 'package:amanah_healthcare/features/authentication/data/amanah_auth_repository.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
-import 'package:amanah_healthcare/features/authentication/domain/failures/auth_failure.dart';
 import 'package:amanah_healthcare/features/authentication/domain/usecases/request_password_reset.dart';
 import 'package:amanah_healthcare/features/authentication/domain/usecases/reset_password.dart';
 import 'package:amanah_healthcare/features/authentication/domain/usecases/sign_in_with_email.dart';
@@ -33,11 +32,11 @@ class AuthModalSheet extends StatefulWidget {
     ResetPasswordUseCase? resetPasswordUseCase,
     this.initialMode = AuthSheetMode.signIn,
     super.key,
-  })  : _signInWithEmailUseCase = signInWithEmailUseCase,
-        _signInWithGoogleUseCase = signInWithGoogleUseCase,
-        _requestPasswordResetUseCase = requestPasswordResetUseCase,
-        _verifyOtpUseCase = verifyOtpUseCase,
-        _resetPasswordUseCase = resetPasswordUseCase;
+  }) : _signInWithEmailUseCase = signInWithEmailUseCase,
+       _signInWithGoogleUseCase = signInWithGoogleUseCase,
+       _requestPasswordResetUseCase = requestPasswordResetUseCase,
+       _verifyOtpUseCase = verifyOtpUseCase,
+       _resetPasswordUseCase = resetPasswordUseCase;
 
   final AuthRepository repository;
   final ValueChanged<AmanahAuthUser> onAuthenticated;
@@ -57,8 +56,7 @@ class AuthModalSheet extends StatefulWidget {
   RequestPasswordResetUseCase get requestPasswordResetUseCase =>
       _requestPasswordResetUseCase ?? RequestPasswordResetUseCase(repository);
 
-  VerifyOtpUseCase get verifyOtpUseCase =>
-      _verifyOtpUseCase ?? VerifyOtpUseCase(repository);
+  VerifyOtpUseCase get verifyOtpUseCase => _verifyOtpUseCase ?? VerifyOtpUseCase(repository);
 
   ResetPasswordUseCase get resetPasswordUseCase =>
       _resetPasswordUseCase ?? ResetPasswordUseCase(repository);
@@ -107,12 +105,12 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
   final TextEditingController _identifierController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _resetEmailController = TextEditingController();
-  final TextEditingController _resetPasswordController =
-      TextEditingController();
-  final TextEditingController _resetConfirmPasswordController =
-      TextEditingController();
-  final List<TextEditingController> _otpControllers =
-      List<TextEditingController>.generate(6, (_) => TextEditingController());
+  final TextEditingController _resetPasswordController = TextEditingController();
+  final TextEditingController _resetConfirmPasswordController = TextEditingController();
+  final List<TextEditingController> _otpControllers = List<TextEditingController>.generate(
+    6,
+    (_) => TextEditingController(),
+  );
 
   late AuthSheetMode _mode;
   AuthProviderType? _loadingProvider;
@@ -179,75 +177,72 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
   Widget _buildContent() {
     return switch (_mode) {
       AuthSheetMode.signIn => SignInContent(
-          formKey: _signInFormKey,
-          identifierController: _identifierController,
-          passwordController: _passwordController,
-          loadingProvider: _loadingProvider,
-          hasCredentialError: _hasCredentialError,
-          credentialErrorMessage: _credentialErrorMessage,
-          onCredentialChanged: () {
-            if (_hasCredentialError) {
-              setState(() {
-                _hasCredentialError = false;
-                _credentialErrorMessage = null;
-              });
-            }
-          },
-          onForgotPassword: () {
-            final String id = _identifierController.text.trim();
-            if (id.contains('@')) _resetEmailController.text = id;
-            _switchMode(AuthSheetMode.forgotPassword);
-          },
-          onEmailAuth: _handleCredentialSignIn,
-          onGoogleAuth: () => _handleProviderAuth(AuthProviderType.google),
-        ),
+        formKey: _signInFormKey,
+        identifierController: _identifierController,
+        passwordController: _passwordController,
+        loadingProvider: _loadingProvider,
+        hasCredentialError: _hasCredentialError,
+        credentialErrorMessage: _credentialErrorMessage,
+        onCredentialChanged: () {
+          if (_hasCredentialError) {
+            setState(() {
+              _hasCredentialError = false;
+              _credentialErrorMessage = null;
+            });
+          }
+        },
+        onForgotPassword: () {
+          final String id = _identifierController.text.trim();
+          if (id.contains('@')) _resetEmailController.text = id;
+          _switchMode(AuthSheetMode.forgotPassword);
+        },
+        onEmailAuth: _handleCredentialSignIn,
+        onGoogleAuth: () => _handleProviderAuth(AuthProviderType.google),
+      ),
       AuthSheetMode.forgotPassword => ForgotPasswordContent(
-          formKey: _forgotPasswordFormKey,
-          emailController: _resetEmailController,
-          loadingProvider: _loadingProvider,
-          onSubmit: _handleRequestPasswordOtp,
-        ),
+        formKey: _forgotPasswordFormKey,
+        emailController: _resetEmailController,
+        loadingProvider: _loadingProvider,
+        onSubmit: _handleRequestPasswordOtp,
+      ),
       AuthSheetMode.otpVerification => OtpVerificationContent(
-          controllers: _otpControllers,
-          loadingProvider: _loadingProvider,
-          statusMessage: _statusMessage,
-          statusIsError: _statusIsError,
-          onVerify: _handleVerifyOtp,
-        ),
+        controllers: _otpControllers,
+        loadingProvider: _loadingProvider,
+        statusMessage: _statusMessage,
+        statusIsError: _statusIsError,
+        onVerify: _handleVerifyOtp,
+      ),
       AuthSheetMode.changePassword => ChangePasswordContent(
-          formKey: _changePasswordFormKey,
-          passwordController: _resetPasswordController,
-          confirmPasswordController: _resetConfirmPasswordController,
-          loadingProvider: _loadingProvider,
-          statusMessage: _statusMessage,
-          statusIsError: _statusIsError,
-          onSubmit: _handleChangePassword,
-        ),
+        formKey: _changePasswordFormKey,
+        passwordController: _resetPasswordController,
+        confirmPasswordController: _resetConfirmPasswordController,
+        loadingProvider: _loadingProvider,
+        statusMessage: _statusMessage,
+        statusIsError: _statusIsError,
+        onSubmit: _handleChangePassword,
+      ),
       AuthSheetMode.passwordChangedSuccess => PasswordChangedSuccessContent(
-          onSignIn: () => _switchMode(AuthSheetMode.signIn),
-        ),
+        onSignIn: () => _switchMode(AuthSheetMode.signIn),
+      ),
     };
   }
 
   String get _headerTitle => switch (_mode) {
-        AuthSheetMode.signIn => 'Selamat Datang Kembali',
-        AuthSheetMode.forgotPassword => 'Lupa password',
-        AuthSheetMode.otpVerification => 'Masukkan kode OTP',
-        AuthSheetMode.changePassword => 'Ganti password',
-        AuthSheetMode.passwordChangedSuccess => '',
-      };
+    AuthSheetMode.signIn => 'Selamat Datang Kembali',
+    AuthSheetMode.forgotPassword => 'Lupa password',
+    AuthSheetMode.otpVerification => 'Masukkan kode OTP',
+    AuthSheetMode.changePassword => 'Ganti password',
+    AuthSheetMode.passwordChangedSuccess => '',
+  };
 
   String get _headerDescription {
     final String target = _resetEmailController.text.trim();
     return switch (_mode) {
-      AuthSheetMode.signIn =>
-        'Masuk untuk mengakses portal staf dan tenaga medis',
-      AuthSheetMode.forgotPassword =>
-        'Masukkan email Anda untuk menerima OTP verifikasi',
+      AuthSheetMode.signIn => 'Masuk untuk mengakses portal staf dan tenaga medis',
+      AuthSheetMode.forgotPassword => 'Masukkan email Anda untuk menerima OTP verifikasi',
       AuthSheetMode.otpVerification =>
         'Kode OTP telah dikirimkan ke ${target.isEmpty ? 'email Anda' : target}',
-      AuthSheetMode.changePassword =>
-        'Silakan masukkan password baru Anda di bawah ini.',
+      AuthSheetMode.changePassword => 'Silakan masukkan password baru Anda di bawah ini.',
       AuthSheetMode.passwordChangedSuccess => '',
     };
   }
@@ -267,10 +262,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
 
     try {
       final AmanahAuthUser? user = await widget.signInWithEmailUseCase(
-        SignInWithEmailParams(
-          email: identifier,
-          password: _passwordController.text,
-        ),
+        SignInWithEmailParams(email: identifier, password: _passwordController.text),
       );
 
       if (!mounted) return;
@@ -285,7 +277,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
         widget.onAuthenticated(user);
         Navigator.of(context).pop();
       }
-    } on AmanahAuthPatientRestrictedException catch (e) {
+    } on AmanahAuthClientNotAllowedException catch (e) {
       if (!mounted) return;
       setState(() {
         _loadingProvider = null;
@@ -330,10 +322,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
       } catch (_) {
         if (!mounted) return;
         setState(() => _loadingProvider = null);
-        AmanahToaster.error(
-          context,
-          message: 'Terjadi kendala saat menghubungkan ke akun Google.',
-        );
+        AmanahToaster.error(context, message: 'Terjadi kendala saat menghubungkan ke akun Google.');
       }
     }
   }
@@ -379,8 +368,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
 
   Future<void> _handleVerifyOtp() async {
     FocusManager.instance.primaryFocus?.unfocus();
-    final String code =
-        _otpControllers.map((TextEditingController c) => c.text.trim()).join();
+    final String code = _otpControllers.map((TextEditingController c) => c.text.trim()).join();
     if (code.length != 6) {
       setState(() {
         _statusMessage = 'Masukkan 6 digit kode OTP.';
@@ -397,10 +385,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
 
     try {
       final bool valid = await widget.verifyOtpUseCase(
-        VerifyOtpParams(
-          email: _resetEmailController.text.trim(),
-          otp: code,
-        ),
+        VerifyOtpParams(email: _resetEmailController.text.trim(), otp: code),
       );
       if (!mounted) return;
       setState(() => _loadingProvider = null);
@@ -428,13 +413,11 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
   Future<void> _handleChangePassword() async {
     FocusManager.instance.primaryFocus?.unfocus();
     if (!(_changePasswordFormKey.currentState?.validate() ?? false)) return;
-    if (!AmanahPasswordRequirements.evaluate(_resetPasswordController.text)
-        .isComplete) {
+    if (!AmanahPasswordRequirements.evaluate(_resetPasswordController.text).isComplete) {
       return;
     }
 
-    if (_resetPasswordController.text !=
-        _resetConfirmPasswordController.text) {
+    if (_resetPasswordController.text != _resetConfirmPasswordController.text) {
       setState(() {
         _statusMessage = 'Konfirmasi password tidak cocok.';
         _statusIsError = true;
@@ -442,8 +425,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
       return;
     }
 
-    final String code =
-        _otpControllers.map((TextEditingController c) => c.text.trim()).join();
+    final String code = _otpControllers.map((TextEditingController c) => c.text.trim()).join();
     final String email = _resetEmailController.text.trim();
 
     setState(() {
@@ -454,11 +436,7 @@ class _AuthModalSheetState extends State<AuthModalSheet> {
 
     try {
       final bool success = await widget.resetPasswordUseCase(
-        ResetPasswordParams(
-          email: email,
-          otp: code,
-          newPassword: _resetPasswordController.text,
-        ),
+        ResetPasswordParams(email: email, otp: code, newPassword: _resetPasswordController.text),
       );
       if (!mounted) return;
       setState(() => _loadingProvider = null);

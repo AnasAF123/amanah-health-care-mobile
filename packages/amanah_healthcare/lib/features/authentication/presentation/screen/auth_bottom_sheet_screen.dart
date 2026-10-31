@@ -31,8 +31,8 @@ class AuthBottomSheetScreen extends StatefulWidget {
     RestoreSessionUseCase? restoreSessionUseCase,
     SignOutUseCase? signOutUseCase,
     this.onAuthenticated,
-  })  : _restoreSessionUseCase = restoreSessionUseCase,
-        _signOutUseCase = signOutUseCase;
+  }) : _restoreSessionUseCase = restoreSessionUseCase,
+       _signOutUseCase = signOutUseCase;
 
   final String backgroundAsset;
   final AuthRepository repository;
@@ -43,15 +43,13 @@ class AuthBottomSheetScreen extends StatefulWidget {
   RestoreSessionUseCase get restoreSessionUseCase =>
       _restoreSessionUseCase ?? RestoreSessionUseCase(repository);
 
-  SignOutUseCase get signOutUseCase =>
-      _signOutUseCase ?? SignOutUseCase(repository);
+  SignOutUseCase get signOutUseCase => _signOutUseCase ?? SignOutUseCase(repository);
 
   @override
   State<AuthBottomSheetScreen> createState() => _AuthBottomSheetScreenState();
 }
 
-class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen>
-    with WidgetsBindingObserver {
+class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> with WidgetsBindingObserver {
   AmanahAuthUser? _authenticatedUser;
   bool _showOnboardingScreen = true;
   bool _isRestoringSession = true;
@@ -73,8 +71,9 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen>
   }
 
   void _listenToSessionEvents() {
-    _sessionSubscription = AmanahAuthSessionManager.instance.eventStream
-        .listen((AuthSessionEvent event) {
+    _sessionSubscription = AmanahAuthSessionManager.instance.eventStream.listen((
+      AuthSessionEvent event,
+    ) {
       if (event == AuthSessionEvent.expired && mounted) {
         _handleSessionExpired();
       }
@@ -86,21 +85,16 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen>
     if (state == AppLifecycleState.resumed && _authenticatedUser != null) {
       AmanahAuthLogger.logLifecycle('App resumed: verifying session validity');
       unawaited(
-        AmanahAuthSessionManager.instance.verifySessionValidity(
-          authRepository: widget.repository,
-        ),
+        AmanahAuthSessionManager.instance.verifySessionValidity(authRepository: widget.repository),
       );
     }
   }
 
   Future<void> _handleSessionExpired() async {
-    AmanahAuthLogger.logLifecycle(
-      'Session expired event received: redirecting to auth screen',
-    );
+    AmanahAuthLogger.logLifecycle('Session expired event received: redirecting to auth screen');
 
     // Pop any child screens on top of navigator back to root
-    GlobalVars.navigatorKey.currentState
-        ?.popUntil((Route<dynamic> r) => r.isFirst);
+    GlobalVars.navigatorKey.currentState?.popUntil((Route<dynamic> r) => r.isFirst);
 
     await _handleLogout();
 
@@ -115,15 +109,14 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen>
   Future<void> _restoreSession() async {
     AmanahAuthLogger.logLifecycle('Initiating cold startup session check');
     try {
-      final AmanahAuthUser? user =
-          await widget.restoreSessionUseCase(const NoParams());
+      final AmanahAuthUser? user = await widget.restoreSessionUseCase(const NoParams());
       if (user != null && mounted) {
         AmanahAuthLogger.logLifecycle(
           'Active session restored successfully',
           details: <String, dynamic>{
             'userId': user.id,
             'name': user.fullName,
-            'role': user.role.name,
+            'role': user.roleName,
             'needsOnboarding': user.needsOnboarding,
           },
         );
@@ -179,10 +172,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen>
   @override
   Widget build(BuildContext context) {
     if (_isRestoringSession) {
-      return const Scaffold(
-        backgroundColor: AmanahColorTokens.canvasDark,
-        body: SizedBox.expand(),
-      );
+      return const Scaffold(backgroundColor: AmanahColorTokens.canvasDark, body: SizedBox.expand());
     }
 
     final AmanahAuthUser? user = _authenticatedUser;
@@ -204,10 +194,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen>
       }
 
       if (!user.needsOnboarding) {
-        return AmanahHomeShell(
-          user: user,
-          onLogout: _handleLogout,
-        );
+        return AmanahHomeShell(user: user, onLogout: _handleLogout);
       }
     }
 
@@ -222,8 +209,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen>
           const AuthBackgroundScrim(),
           AuthClosedActions(
             hasPendingOnboarding: hasPendingOnboarding,
-            onResumeOnboarding: () =>
-                setState(() => _showOnboardingScreen = true),
+            onResumeOnboarding: () => setState(() => _showOnboardingScreen = true),
             onSignIn: () => AuthModalSheet.show(
               context,
               repository: widget.repository,

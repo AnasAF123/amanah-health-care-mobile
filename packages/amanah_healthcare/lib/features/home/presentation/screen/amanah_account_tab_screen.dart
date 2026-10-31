@@ -75,7 +75,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   AmanahStaffProfile? get _activeStaff => _profileStore.profile ?? widget.user.staff;
   String get _fullName => _activeStaff?.fullName ?? widget.user.fullName;
   String get _phone => _activeStaff?.phoneNumber ?? widget.user.phone;
-  String get _roleText => _activeStaff?.profession ?? widget.user.displayRole;
+  String get _roleText => _activeStaff?.profession ?? widget.user.roleName;
 
   AmanahDoctorProfile get _doctorProfile {
     final AmanahAuthUser effectiveUser = widget.user.copyWith(
@@ -184,7 +184,9 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
         children: <Widget>[
           // Pinned App Header (100% consistent with Home, Schedule, Permissions)
           AmanahScreenHeader(
-            title: 'Profil ${widget.user.roleLabel}',
+            title: widget.user.roleName.isNotEmpty
+                ? 'Profil ${widget.user.roleName}'
+                : 'Profil Akun',
             onBack: widget.onBack,
             titleAlignment: AmanahScreenHeaderTitleAlignment.start,
           ),
@@ -258,7 +260,9 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
                         child: _LogoutButton(
                           onTap: widget.onLogout,
                           dark: dark,
-                          roleLabel: widget.user.roleLabel,
+                          roleLabel: widget.user.roleName.isNotEmpty
+                              ? widget.user.roleName
+                              : 'Akun',
                         ),
                       ),
                     ),

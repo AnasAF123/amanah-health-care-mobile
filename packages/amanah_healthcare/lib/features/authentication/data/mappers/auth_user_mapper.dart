@@ -4,8 +4,17 @@ abstract final class AuthUserMapper {
   static AmanahAuthUser fromJson(Map<String, dynamic> json) {
     final String roleStr = json['role'] is Map
         ? (json['role']['code'] as String? ?? '')
-        : (json['role'] as String? ?? '');
-    final AmanahUserRole mappedRole = AmanahAuthUser.parseRole(roleStr);
+        : (json['role'] as String? ?? json['roleCode'] as String? ?? '');
+
+    final AmanahRoleInfo? roleInfo = json['role'] is Map<String, dynamic>
+        ? AmanahRoleInfo.fromJson(json['role'] as Map<String, dynamic>)
+        : null;
+
+    final List<dynamic>? rawPerms = json['permissions'] as List<dynamic>?;
+    final List<String> permissions = rawPerms != null
+        ? rawPerms.map((dynamic e) => e.toString()).toList(growable: false)
+        : const <String>[];
+
     final bool needsOnboarding = json['needsOnboarding'] as bool? ?? false;
     final String systemRole = json['systemRole'] as String? ?? roleStr;
     final Map<String, dynamic>? staffJson = json['staff'] as Map<String, dynamic>?;
@@ -28,7 +37,9 @@ abstract final class AuthUserMapper {
 
     return AmanahAuthUser(
       id: id,
-      role: mappedRole,
+      roleCode: roleStr,
+      roleInfo: roleInfo,
+      permissions: permissions,
       fullName: fullName,
       email: json['email'] as String? ?? '',
       phone: json['phone'] as String? ?? json['phoneNumber'] as String? ?? '',

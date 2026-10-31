@@ -11,11 +11,7 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 
 /// Screen presenting the user's personal identity, contact, and administrative address.
 class AmanahAccountIdentitySettingsScreen extends StatefulWidget {
-  const AmanahAccountIdentitySettingsScreen({
-    required this.user,
-    this.onBack,
-    super.key,
-  });
+  const AmanahAccountIdentitySettingsScreen({required this.user, this.onBack, super.key});
 
   final AmanahAuthUser user;
   final VoidCallback? onBack;
@@ -25,8 +21,7 @@ class AmanahAccountIdentitySettingsScreen extends StatefulWidget {
       _AmanahAccountIdentitySettingsScreenState();
 }
 
-class _AmanahAccountIdentitySettingsScreenState
-    extends State<AmanahAccountIdentitySettingsScreen>
+class _AmanahAccountIdentitySettingsScreenState extends State<AmanahAccountIdentitySettingsScreen>
     with IdentityEditActions {
   late final AccountIdentityController _controller;
 
@@ -57,7 +52,9 @@ class _AmanahAccountIdentitySettingsScreenState
         child: Column(
           children: <Widget>[
             AmanahScreenHeader(
-              title: 'Akun & Identitas ${widget.user.roleLabel}',
+              title: widget.user.roleName.isNotEmpty
+                  ? 'Akun & Identitas ${widget.user.roleName}'
+                  : 'Akun & Identitas',
               onBack: widget.onBack,
             ),
             ListenableBuilder(

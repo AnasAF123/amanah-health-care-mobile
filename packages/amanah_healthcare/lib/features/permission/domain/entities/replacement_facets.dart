@@ -2,7 +2,8 @@ class ReplacementStaffFacet {
   const ReplacementStaffFacet({
     required this.staffProfileId,
     required this.fullName,
-    required this.staffType,
+    this.roleCode,
+    this.roleName,
     this.avatarUrl,
     required this.opportunityCount,
     required this.earliestDate,
@@ -11,7 +12,8 @@ class ReplacementStaffFacet {
 
   final String staffProfileId;
   final String fullName;
-  final String staffType;
+  final String? roleCode;
+  final String? roleName;
   final String? avatarUrl;
   final int opportunityCount;
   final String earliestDate;

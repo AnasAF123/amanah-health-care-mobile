@@ -4,11 +4,7 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 import 'package:amanah_healthcare/features/permission/domain/amanah_permission_model.dart';
 
 class AmanahPermissionDetailDrawer extends StatelessWidget {
-  const AmanahPermissionDetailDrawer({
-    required this.item,
-    required this.onCancel,
-    super.key,
-  });
+  const AmanahPermissionDetailDrawer({required this.item, required this.onCancel, super.key});
 
   final AmanahPermissionRecord item;
   final VoidCallback onCancel;
@@ -20,10 +16,7 @@ class AmanahPermissionDetailDrawer extends StatelessWidget {
   }) {
     return showAmanahBottomSheet<void>(
       context: context,
-      builder: (BuildContext ctx) => AmanahPermissionDetailDrawer(
-        item: item,
-        onCancel: onCancel,
-      ),
+      builder: (BuildContext ctx) => AmanahPermissionDetailDrawer(item: item, onCancel: onCancel),
     );
   }
 
@@ -32,14 +25,10 @@ class AmanahPermissionDetailDrawer extends StatelessWidget {
       SnackBar(
         content: Text(
           'Membuka dokumen perizinan (${item.id.toUpperCase()})...',
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AmanahRadius.pill),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AmanahRadius.pill)),
         backgroundColor: AmanahColorTokens.neutral900,
         duration: const Duration(seconds: 2),
       ),
@@ -86,39 +75,27 @@ class AmanahPermissionDetailDrawer extends StatelessWidget {
           ),
           const SizedBox(height: AmanahSpacing.lg),
           const _PermissionDivider(),
-          _PermissionInfoRow(
-            label: 'Mulai Izin',
-            value: item.formattedStartDate,
-          ),
-          _PermissionInfoRow(
-            label: 'Selesai Izin',
-            value: item.formattedEndDate,
-          ),
+          _PermissionInfoRow(label: 'Mulai Izin', value: item.formattedStartDate),
+          _PermissionInfoRow(label: 'Selesai Izin', value: item.formattedEndDate),
           _PermissionInfoRow(
             label: 'Durasi',
             value: '${item.durationDays} Hari Kerja',
             semanticValue: 'Durasi: ${item.durationDays} Hari Kerja',
           ),
           const _PermissionDivider(),
-          _PermissionTextSection(
-            title: 'Pesan / Alasan Perizinan',
-            body: item.reason,
-          ),
-          if (item.substituteDoctor != null &&
-              item.substituteDoctor!.isNotEmpty &&
-              item.substituteDoctor != '-') ...<Widget>[
+          _PermissionTextSection(title: 'Pesan / Alasan Perizinan', body: item.reason),
+          if (item.substituteStaffName != null &&
+              item.substituteStaffName!.isNotEmpty &&
+              item.substituteStaffName != '-') ...<Widget>[
             const _PermissionDivider(),
-            _SubstituteDoctorSection(name: item.substituteDoctor!),
+            _SubstituteStaffSection(name: item.substituteStaffName!),
           ],
-          if (item.reviewerNotes != null &&
-              item.reviewerNotes!.isNotEmpty) ...<Widget>[
+          if (item.reviewerNotes != null && item.reviewerNotes!.isNotEmpty) ...<Widget>[
             const _PermissionDivider(),
             _PermissionTextSection(
               title: 'Catatan Verifikasi',
               body: item.reviewerNotes!,
-              footer: item.reviewerName == null
-                  ? null
-                  : 'Oleh: ${item.reviewerName}',
+              footer: item.reviewerName == null ? null : 'Oleh: ${item.reviewerName}',
             ),
           ],
         ],
@@ -144,14 +121,9 @@ class _PermissionDetailOverflow extends StatelessWidget {
 
     return PopupMenuButton<String>(
       tooltip: 'Aksi perizinan',
-      icon: Icon(
-        Icons.more_vert_rounded,
-        color: AmanahThemeTokens.textSecondary(context),
-      ),
+      icon: Icon(Icons.more_vert_rounded, color: AmanahThemeTokens.textSecondary(context)),
       constraints: const BoxConstraints(minWidth: 190, maxWidth: 240),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AmanahRadius.lg),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AmanahRadius.lg)),
       color: AmanahThemeTokens.elevatedSurface(context),
       elevation: 12,
       onSelected: (String value) {
@@ -190,11 +162,7 @@ class _PermissionDetailOverflow extends StatelessWidget {
 }
 
 class _MenuItemLabel extends StatelessWidget {
-  const _MenuItemLabel({
-    required this.icon,
-    required this.label,
-    required this.tone,
-  });
+  const _MenuItemLabel({required this.icon, required this.label, required this.tone});
 
   final IconData icon;
   final String label;
@@ -237,18 +205,14 @@ class _PermissionStatusPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool dark = AmanahThemeTokens.isDark(context);
     final AmanahTone tone = _toneFor(status);
-    final Color background = dark
-        ? tone.dark.withValues(alpha: 0.30)
-        : tone.surface;
+    final Color background = dark ? tone.dark.withValues(alpha: 0.30) : tone.surface;
     final Color foreground = dark ? tone.light : tone.onSurface;
 
     return DecoratedBox(
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(AmanahRadius.pill),
-        border: Border.all(
-          color: dark ? tone.primary.withValues(alpha: 0.32) : tone.border,
-        ),
+        border: Border.all(color: dark ? tone.primary.withValues(alpha: 0.32) : tone.border),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -256,20 +220,13 @@ class _PermissionStatusPill extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             DecoratedBox(
-              decoration: BoxDecoration(
-                color: tone.primary,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: tone.primary, shape: BoxShape.circle),
               child: const SizedBox(width: 7, height: 7),
             ),
             const SizedBox(width: AmanahSpacing.xs),
             Text(
               status.label,
-              style: TextStyle(
-                fontSize: 11.5,
-                fontWeight: FontWeight.w800,
-                color: foreground,
-              ),
+              style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: foreground),
             ),
           ],
         ),
@@ -292,11 +249,7 @@ class _PermissionStatusPill extends StatelessWidget {
 }
 
 class _PermissionInfoRow extends StatelessWidget {
-  const _PermissionInfoRow({
-    required this.label,
-    required this.value,
-    this.semanticValue,
-  });
+  const _PermissionInfoRow({required this.label, required this.value, this.semanticValue});
 
   final String label;
   final String value;
@@ -340,11 +293,7 @@ class _PermissionInfoRow extends StatelessWidget {
 }
 
 class _PermissionTextSection extends StatelessWidget {
-  const _PermissionTextSection({
-    required this.title,
-    required this.body,
-    this.footer,
-  });
+  const _PermissionTextSection({required this.title, required this.body, this.footer});
 
   final String title;
   final String body;
@@ -409,8 +358,8 @@ class _PermissionTextSection extends StatelessWidget {
   }
 }
 
-class _SubstituteDoctorSection extends StatelessWidget {
-  const _SubstituteDoctorSection({required this.name});
+class _SubstituteStaffSection extends StatelessWidget {
+  const _SubstituteStaffSection({required this.name});
 
   final String name;
 
@@ -425,11 +374,7 @@ class _SubstituteDoctorSection extends StatelessWidget {
             backgroundColor: AmanahThemeTokens.status(
               AmanahStatusTone.brand,
             ).primary.withValues(alpha: 0.14),
-            child: const Icon(
-              Icons.person,
-              size: 20,
-              color: AmanahColorTokens.brand,
-            ),
+            child: const Icon(Icons.person, size: 20, color: AmanahColorTokens.brand),
           ),
           const SizedBox(width: AmanahSpacing.md),
           Expanded(
@@ -437,7 +382,7 @@ class _SubstituteDoctorSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Dokter Pengganti',
+                  'Staf Pengganti',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -455,16 +400,6 @@ class _SubstituteDoctorSection extends StatelessWidget {
                     color: AmanahThemeTokens.textPrimary(context),
                   ),
                 ),
-                Text(
-                  'Dokter Spesialis Anak / Dokter Pengganti',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w500,
-                    color: AmanahThemeTokens.textSecondary(context),
-                  ),
-                ),
               ],
             ),
           ),
@@ -479,10 +414,6 @@ class _PermissionDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Divider(
-      height: 1,
-      thickness: 1,
-      color: AmanahThemeTokens.outline(context),
-    );
+    return Divider(height: 1, thickness: 1, color: AmanahThemeTokens.outline(context));
   }
 }

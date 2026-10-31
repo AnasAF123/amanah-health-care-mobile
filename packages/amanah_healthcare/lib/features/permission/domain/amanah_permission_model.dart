@@ -60,12 +60,14 @@ class AmanahPermissionRecord {
     required this.reason,
     required this.status,
     required this.createdAt,
-    this.substituteDoctor,
+    this.substituteStaffProfileId,
+    this.substituteStaffName,
+    String? substituteDoctor,
     this.reviewedAt,
     this.reviewerName,
     this.reviewerNotes,
     this.cancelledAt,
-  });
+  }) : _substituteDoctor = substituteStaffName ?? substituteDoctor;
 
   final String id;
   final String userId;
@@ -77,7 +79,10 @@ class AmanahPermissionRecord {
   final int durationDays;
   final AmanahPermissionType type;
   final String reason;
-  final String? substituteDoctor;
+  final String? substituteStaffProfileId;
+  final String? substituteStaffName;
+  final String? _substituteDoctor;
+  String? get substituteDoctor => substituteStaffName ?? _substituteDoctor;
   final AmanahPermissionStatus status;
   final String createdAt;
   final String? reviewedAt;
@@ -108,6 +113,8 @@ class AmanahPermissionRecord {
     int? durationDays,
     AmanahPermissionType? type,
     String? reason,
+    String? substituteStaffProfileId,
+    String? substituteStaffName,
     String? substituteDoctor,
     AmanahPermissionStatus? status,
     String? createdAt,
@@ -127,7 +134,8 @@ class AmanahPermissionRecord {
       durationDays: durationDays ?? this.durationDays,
       type: type ?? this.type,
       reason: reason ?? this.reason,
-      substituteDoctor: substituteDoctor ?? this.substituteDoctor,
+      substituteStaffProfileId: substituteStaffProfileId ?? this.substituteStaffProfileId,
+      substituteStaffName: substituteStaffName ?? substituteDoctor ?? this.substituteStaffName,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       reviewedAt: reviewedAt ?? this.reviewedAt,

@@ -21,23 +21,17 @@ class StaffOnboardingController extends ChangeNotifier {
     UploadAvatarUseCase? uploadAvatarUseCase,
     DeleteAvatarUseCase? deleteAvatarUseCase,
     RegionApiService? regionService,
-  })  : _fetchPolikliniksUseCase = fetchPolikliniksUseCase ??
-            FetchStaffOnboardingPolikliniksUseCase(
-              repository ?? const AmanahAuthRepository(),
-            ),
-        _submitUseCase = submitUseCase ??
-            SubmitStaffOnboardingUseCase(
-              repository ?? const AmanahAuthRepository(),
-            ),
-        _uploadAvatarUseCase = uploadAvatarUseCase ??
-            UploadAvatarUseCase(
-              repository ?? const AmanahAuthRepository(),
-            ),
-        _deleteAvatarUseCase = deleteAvatarUseCase ??
-            DeleteAvatarUseCase(
-              repository ?? const AmanahAuthRepository(),
-            ),
-        _regionService = regionService ?? RegionApiService() {
+  }) : _fetchPolikliniksUseCase =
+           fetchPolikliniksUseCase ??
+           FetchStaffOnboardingPolikliniksUseCase(repository ?? const AmanahAuthRepository()),
+       _submitUseCase =
+           submitUseCase ??
+           SubmitStaffOnboardingUseCase(repository ?? const AmanahAuthRepository()),
+       _uploadAvatarUseCase =
+           uploadAvatarUseCase ?? UploadAvatarUseCase(repository ?? const AmanahAuthRepository()),
+       _deleteAvatarUseCase =
+           deleteAvatarUseCase ?? DeleteAvatarUseCase(repository ?? const AmanahAuthRepository()),
+       _regionService = regionService ?? RegionApiService() {
     _initFields();
   }
 
@@ -79,8 +73,7 @@ class StaffOnboardingController extends ChangeNotifier {
   String? regionErrorMessage;
 
   // Clinical Poliklinik State
-  List<StaffOnboardingPoliOption> poliklinikOptions =
-      const <StaffOnboardingPoliOption>[];
+  List<StaffOnboardingPoliOption> poliklinikOptions = const <StaffOnboardingPoliOption>[];
   StaffOnboardingPoliOption? selectedPoliklinik;
   bool isLoadingPolikliniks = false;
   String? poliklinikErrorMessage;
@@ -91,22 +84,18 @@ class StaffOnboardingController extends ChangeNotifier {
   bool isSubmitting = false;
   String? submitErrorMessage;
 
-  bool get isClinical => user.isDoctor || user.isMidwife;
+  bool get isClinical => user.isClinical;
 
   void _initFields() {
     fullNameController = TextEditingController(text: user.fullName);
-    nikController =
-        TextEditingController(text: user.staff?.nationalId ?? '');
+    nikController = TextEditingController(text: user.staff?.nationalId ?? '');
     birthPlaceController = TextEditingController();
     phoneController = TextEditingController(text: user.phone);
 
-    // Fixed profession based on admin invitation role
-    final String assignedProfession =
-        user.staff?.profession?.trim().isNotEmpty == true
-            ? user.staff!.profession!.trim()
-            : (user.isDoctor
-                ? 'Dokter'
-                : (user.isMidwife ? 'Bidan' : 'Staf Operasional'));
+    // Profession based on admin invitation role or existing staff profile
+    final String assignedProfession = user.staff?.profession?.trim().isNotEmpty == true
+        ? user.staff!.profession!.trim()
+        : user.roleName.trim();
     professionController = TextEditingController(text: assignedProfession);
 
     addressController = TextEditingController();
@@ -159,10 +148,7 @@ class StaffOnboardingController extends ChangeNotifier {
     notifyListeners();
     try {
       await _deleteAvatarUseCase(const NoParams());
-      avatar = UserAvatar.fromFallback(
-        userId: user.id,
-        name: user.fullName,
-      );
+      avatar = UserAvatar.fromFallback(userId: user.id, name: user.fullName);
     } finally {
       isAvatarUploading = false;
       notifyListeners();
@@ -297,8 +283,9 @@ class StaffOnboardingController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final List<StaffOnboardingPoliOption> options =
-          await _fetchPolikliniksUseCase(const NoParams());
+      final List<StaffOnboardingPoliOption> options = await _fetchPolikliniksUseCase(
+        const NoParams(),
+      );
       poliklinikOptions = options;
       if (options.isNotEmpty) {
         final String? assignedPoliId = user.staff?.poliklinikId;
@@ -385,8 +372,7 @@ class StaffOnboardingController extends ChangeNotifier {
     );
 
     try {
-      final AmanahAuthUser? updatedUser =
-          await _submitUseCase(dto);
+      final AmanahAuthUser? updatedUser = await _submitUseCase(dto);
 
       isSubmitting = false;
       notifyListeners();

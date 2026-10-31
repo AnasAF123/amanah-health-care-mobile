@@ -40,6 +40,8 @@ class LeaveRequestDto {
     this.approvedBy,
     this.approvalNotes,
     this.cancelledAt,
+    this.substituteStaffProfileId,
+    this.substituteStaffName,
     this.sessions = const <LeaveSessionRefDto>[],
     required this.createdAt,
     required this.updatedAt,
@@ -59,6 +61,8 @@ class LeaveRequestDto {
   final String? approvedBy;
   final String? approvalNotes;
   final String? cancelledAt;
+  final String? substituteStaffProfileId;
+  final String? substituteStaffName;
   final List<LeaveSessionRefDto> sessions;
   final String createdAt;
   final String updatedAt;
@@ -67,9 +71,9 @@ class LeaveRequestDto {
     final List<dynamic>? rawSessions = json['sessions'] as List<dynamic>?;
     final List<LeaveSessionRefDto> parsedSessions = rawSessions != null
         ? rawSessions
-            .whereType<Map<String, dynamic>>()
-            .map((Map<String, dynamic> e) => LeaveSessionRefDto.fromJson(e))
-            .toList()
+              .whereType<Map<String, dynamic>>()
+              .map((Map<String, dynamic> e) => LeaveSessionRefDto.fromJson(e))
+              .toList()
         : <LeaveSessionRefDto>[];
 
     return LeaveRequestDto(
@@ -87,6 +91,11 @@ class LeaveRequestDto {
       approvedBy: json['approvedBy']?.toString() ?? json['reviewedBy']?.toString(),
       approvalNotes: json['approvalNotes']?.toString() ?? json['reviewerNotes']?.toString(),
       cancelledAt: json['cancelledAt']?.toString(),
+      substituteStaffProfileId:
+          json['substituteStaffProfileId']?.toString() ??
+          json['substitute_staff_profile_id']?.toString(),
+      substituteStaffName:
+          json['substituteStaffName']?.toString() ?? json['substituteDoctor']?.toString(),
       sessions: parsedSessions,
       createdAt: json['createdAt']?.toString() ?? '',
       updatedAt: json['updatedAt']?.toString() ?? '',

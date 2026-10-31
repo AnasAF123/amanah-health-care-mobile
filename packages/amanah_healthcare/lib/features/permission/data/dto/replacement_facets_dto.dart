@@ -15,7 +15,8 @@ class ReplacementFacetsDto {
       return ReplacementStaffFacet(
         staffProfileId: map['staffProfileId']?.toString() ?? '',
         fullName: map['fullName']?.toString() ?? '',
-        staffType: map['staffType']?.toString() ?? '',
+        roleCode: map['roleCode']?.toString(),
+        roleName: map['roleName']?.toString(),
         avatarUrl: map['avatarUrl']?.toString(),
         opportunityCount: (map['opportunityCount'] as num?)?.toInt() ?? 0,
         earliestDate: map['earliestDate']?.toString() ?? '',

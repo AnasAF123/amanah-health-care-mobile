@@ -21,7 +21,7 @@ class OnboardingClinicalSection extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
     final Color activeBrand = isDark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand;
-    final bool isDoctor = controller.user.isDoctor;
+    final String roleName = controller.user.roleName.trim();
     final bool isPoliAssignedByAdmin =
         controller.user.staff?.poliklinikId != null &&
         controller.user.staff!.poliklinikId!.isNotEmpty;
@@ -161,7 +161,7 @@ class OnboardingClinicalSection extends StatelessWidget {
 
         // 2. Nomor SIP / STR
         AuthInputField(
-          label: isDoctor ? 'Nomor SIP / STR Dokter' : 'Nomor SIP / STR Bidan',
+          label: roleName.isNotEmpty ? 'Nomor SIP / STR ($roleName)' : 'Nomor SIP / STR',
           hintText: 'Contoh: SIP.446/123/DISKES/2026',
           controller: controller.licenseController,
           leadingIcon: Icons.verified_outlined,

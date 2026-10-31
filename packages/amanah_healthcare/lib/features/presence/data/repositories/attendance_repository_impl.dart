@@ -141,20 +141,7 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       if (item is! Map<String, dynamic>) continue;
 
       final String rawStatus = item['status']?.toString().toLowerCase().trim() ?? '';
-      final AttendanceStatus status;
-      switch (rawStatus) {
-        case 'present':
-          status = AttendanceStatus.hadir;
-        case 'late':
-          status = AttendanceStatus.telat;
-        case 'leave':
-          status = AttendanceStatus.cuti;
-        case 'absent':
-        case 'missed':
-          status = AttendanceStatus.missed;
-        default:
-          status = AttendanceStatus.hadir;
-      }
+      final AttendanceStatus status = AttendanceStatus.fromValue(rawStatus);
 
       final String checkInStr = item['checkInAt']?.toString() ?? '';
       final DateTime? checkInAt = DateTime.tryParse(checkInStr)?.toLocal();
@@ -173,7 +160,8 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
           : rawDate;
 
       final String shiftRaw = item['shift']?.toString() ?? '';
-      final String shiftName = item['shiftLabel']?.toString() ?? (shiftRaw.isNotEmpty ? shiftRaw : 'Kerja');
+      final String shiftName =
+          item['shiftLabel']?.toString() ?? (shiftRaw.isNotEmpty ? shiftRaw : 'Kerja');
       final bool isReplacement = item['isReplacement'] == true;
       final String title = isReplacement ? 'Shift $shiftName (Pengganti)' : 'Shift $shiftName';
 

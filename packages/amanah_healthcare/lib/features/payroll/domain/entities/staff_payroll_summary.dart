@@ -5,7 +5,9 @@ class StaffPayrollSummary {
     required this.staffId,
     this.staffCode,
     required this.fullName,
-    required this.staffType,
+    this.roleId,
+    this.roleCode,
+    this.roleName,
     this.positionTitle,
     this.departmentName,
     this.practitionerId,
@@ -30,7 +32,9 @@ class StaffPayrollSummary {
   final String staffId;
   final String? staffCode;
   final String fullName;
-  final String staffType;
+  final String? roleId;
+  final String? roleCode;
+  final String? roleName;
   final String? positionTitle;
   final String? departmentName;
   final String? practitionerId;

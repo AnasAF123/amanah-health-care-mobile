@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/presence/data/repositories/attendance_repository_impl.dart';
 import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model.dart';
@@ -73,7 +74,8 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
     AppLog.scanner('[QR SCANNER] 🚀 Initializing QR scanner screen');
 
     final AttendanceRepository repository = widget.repository ?? AttendanceRepositoryImpl();
-    _controller = widget.controller ??
+    _controller =
+        widget.controller ??
         PresenceScannerController(
           recordAttendanceUseCase: RecordAttendanceUseCase(repository),
           checkoutAttendanceUseCase: CheckoutAttendanceUseCase(repository),
@@ -348,6 +350,29 @@ class AmanahQrScannerTabScreenState extends State<AmanahQrScannerTabScreen>
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool dark = theme.brightness == Brightness.dark;
+
+    if (widget.user != null && !widget.user!.canSubmitAttendance) {
+      return Scaffold(
+        backgroundColor: dark ? AmanahColorTokens.canvasDark : AmanahColorTokens.canvasLight,
+        appBar: AppBar(
+          title: const Text('Presensi Kehadiran'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: widget.onBack),
+        ),
+        body: const Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: AmanahEmptyState.box(
+              title: 'Akses Dibatasi',
+              message:
+                  'Akun Anda tidak memiliki izin untuk melakukan presensi mandiri (attendance:submit).',
+              variant: AmanahEmptyStateVariant.viewport,
+            ),
+          ),
+        ),
+      );
+    }
 
     return ListenableBuilder(
       listenable: _controller,

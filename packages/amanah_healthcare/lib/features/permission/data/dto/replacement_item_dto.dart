@@ -8,7 +8,6 @@ class ReplacementItemDto {
     this.originalPractitionerId,
     this.originalStaffName,
     this.originalStaffRole,
-    this.originalStaffType,
     this.originalStaffAvatarUrl,
     this.claimedByStaffProfileId,
     this.claimedByPractitionerId,
@@ -33,7 +32,6 @@ class ReplacementItemDto {
   final String? originalPractitionerId;
   final String? originalStaffName;
   final String? originalStaffRole;
-  final String? originalStaffType;
   final String? originalStaffAvatarUrl;
   final String? leaveReason;
   final String? claimedByStaffProfileId;
@@ -59,7 +57,6 @@ class ReplacementItemDto {
       originalPractitionerId: json['originalPractitionerId']?.toString(),
       originalStaffName: json['originalStaffName']?.toString(),
       originalStaffRole: json['originalStaffRole']?.toString(),
-      originalStaffType: json['originalStaffType']?.toString(),
       originalStaffAvatarUrl: json['originalStaffAvatarUrl']?.toString(),
       leaveReason: json['leaveReason']?.toString(),
       claimedByStaffProfileId: json['claimedByStaffProfileId']?.toString(),

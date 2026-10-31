@@ -1,7 +1,46 @@
 import 'package:amanah_healthcare/core/time/functions/format_localized_date.dart';
 import 'package:amanah_healthcare/core/time/functions/format_localized_time.dart';
 
-enum AttendanceStatus { hadir, telat, missed, cuti }
+enum AttendanceStatus {
+  present('present', 'Hadir'),
+  late('late', 'Terlambat'),
+  missed('missed', 'Tidak Hadir'),
+  leave('leave', 'Cuti / Izin'),
+  absent('absent', 'Alpa');
+
+  const AttendanceStatus(this.value, this.label);
+
+  final String value;
+  final String label;
+
+  static AttendanceStatus fromValue(String? value) {
+    switch (value?.toLowerCase()) {
+      case 'present':
+      case 'hadir':
+        return AttendanceStatus.present;
+      case 'late':
+      case 'telat':
+        return AttendanceStatus.late;
+      case 'missed':
+        return AttendanceStatus.missed;
+      case 'leave':
+      case 'cuti':
+        return AttendanceStatus.leave;
+      case 'absent':
+      case 'alpa':
+        return AttendanceStatus.absent;
+      default:
+        return AttendanceStatus.present;
+    }
+  }
+
+  @Deprecated('Use AttendanceStatus.present')
+  static AttendanceStatus get hadir => AttendanceStatus.present;
+  @Deprecated('Use AttendanceStatus.late')
+  static AttendanceStatus get telat => AttendanceStatus.late;
+  @Deprecated('Use AttendanceStatus.leave')
+  static AttendanceStatus get cuti => AttendanceStatus.leave;
+}
 
 /// Canonical database-driven attendance methods matching PostgreSQL `attendance_method` enum.
 enum AttendanceMethod {

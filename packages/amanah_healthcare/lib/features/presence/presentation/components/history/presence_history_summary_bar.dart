@@ -24,21 +24,28 @@ class PresenceHistorySummaryBar extends StatelessWidget {
     int telatCount = 0;
     int missedCount = 0;
     int cutiCount = 0;
+    int absentCount = 0;
 
     if (summary != null && summary!.facets.isNotEmpty) {
       for (final AttendanceStatusFacet f in summary!.facets) {
-        if (f.status == 'hadir') hadirCount = f.count;
-        if (f.status == 'telat') telatCount = f.count;
+        if (f.status == 'hadir' || f.status == 'present') hadirCount = f.count;
+        if (f.status == 'telat' || f.status == 'late') telatCount = f.count;
         if (f.status == 'missed') missedCount = f.count;
-        if (f.status == 'cuti') cutiCount = f.count;
+        if (f.status == 'cuti' || f.status == 'leave') cutiCount = f.count;
+        if (f.status == 'absent') absentCount = f.count;
       }
     } else {
-      hadirCount = records.where((AttendanceRecord r) => r.status == AttendanceStatus.hadir).length;
-      telatCount = records.where((AttendanceRecord r) => r.status == AttendanceStatus.telat).length;
+      hadirCount = records
+          .where((AttendanceRecord r) => r.status == AttendanceStatus.present)
+          .length;
+      telatCount = records.where((AttendanceRecord r) => r.status == AttendanceStatus.late).length;
       missedCount = records
           .where((AttendanceRecord r) => r.status == AttendanceStatus.missed)
           .length;
-      cutiCount = records.where((AttendanceRecord r) => r.status == AttendanceStatus.cuti).length;
+      cutiCount = records.where((AttendanceRecord r) => r.status == AttendanceStatus.leave).length;
+      absentCount = records
+          .where((AttendanceRecord r) => r.status == AttendanceStatus.absent)
+          .length;
     }
 
     final int totalDays = summary?.totalDays ?? records.length;
@@ -112,6 +119,16 @@ class PresenceHistorySummaryBar extends StatelessWidget {
                     ),
                   ),
                 ),
+              if (absentCount > 0)
+                Expanded(
+                  flex: absentCount,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AmanahColorTokens.dangerDark,
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -165,10 +182,11 @@ class PresenceHistorySummaryBar extends StatelessWidget {
                   ? summary!.facets
                         .map((AttendanceStatusFacet f) {
                           final Color col = switch (f.status) {
-                            'hadir' => AmanahColorTokens.success,
-                            'telat' => AmanahColorTokens.amberLight,
+                            'hadir' || 'present' => AmanahColorTokens.success,
+                            'telat' || 'late' => AmanahColorTokens.amberLight,
                             'missed' => AmanahColorTokens.danger,
-                            'cuti' => AmanahColorTokens.violet,
+                            'cuti' || 'leave' => AmanahColorTokens.violet,
+                            'absent' => AmanahColorTokens.dangerDark,
                             _ => AmanahColorTokens.neutral400,
                           };
                           return _LegendIndicator(color: col, label: f.label);
@@ -179,6 +197,7 @@ class PresenceHistorySummaryBar extends StatelessWidget {
                       _LegendIndicator(color: AmanahColorTokens.amberLight, label: 'Telat'),
                       _LegendIndicator(color: AmanahColorTokens.danger, label: 'Missed'),
                       _LegendIndicator(color: AmanahColorTokens.violet, label: 'Cuti'),
+                      _LegendIndicator(color: AmanahColorTokens.dangerDark, label: 'Alpa'),
                     ],
             ),
           ],

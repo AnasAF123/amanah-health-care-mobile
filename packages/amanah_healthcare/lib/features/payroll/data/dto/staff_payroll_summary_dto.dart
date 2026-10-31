@@ -56,7 +56,9 @@ class StaffPayrollSummaryDto {
     required this.staffId,
     this.staffCode,
     required this.fullName,
-    required this.staffType,
+    this.roleId,
+    this.roleCode,
+    this.roleName,
     this.positionTitle,
     this.departmentName,
     this.practitionerId,
@@ -81,7 +83,9 @@ class StaffPayrollSummaryDto {
   final String staffId;
   final String? staffCode;
   final String fullName;
-  final String staffType;
+  final String? roleId;
+  final String? roleCode;
+  final String? roleName;
   final String? positionTitle;
   final String? departmentName;
   final String? practitionerId;
@@ -125,7 +129,9 @@ class StaffPayrollSummaryDto {
       staffId: json['staffId']?.toString() ?? '',
       staffCode: json['staffCode']?.toString(),
       fullName: json['fullName']?.toString() ?? '',
-      staffType: json['staffType']?.toString() ?? '',
+      roleId: json['roleId']?.toString(),
+      roleCode: json['roleCode']?.toString(),
+      roleName: json['roleName']?.toString(),
       positionTitle: json['positionTitle']?.toString(),
       departmentName: json['departmentName']?.toString(),
       practitionerId: json['practitionerId']?.toString(),

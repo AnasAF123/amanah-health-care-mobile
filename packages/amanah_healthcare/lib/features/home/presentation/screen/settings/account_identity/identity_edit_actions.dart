@@ -102,7 +102,7 @@ mixin IdentityEditActions on State<AmanahAccountIdentitySettingsScreen> {
       title: 'Ubah Nama Lengkap',
       label: 'Nama lengkap resmi beserta gelar profesional',
       initialValue: controller.name,
-      placeholder: widget.user.isDoctor ? 'dr. Nama Dokter, Sp.A' : 'Nama Lengkap',
+      placeholder: 'Nama Lengkap',
       validator: (String v) => v.trim().isEmpty ? 'Nama lengkap tidak boleh kosong.' : null,
       onSave: (String val) => controller.updateField(fullName: val),
     );

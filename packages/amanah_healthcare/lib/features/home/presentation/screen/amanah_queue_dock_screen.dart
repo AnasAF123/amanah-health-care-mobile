@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/core/constants/doctor_queue_status.dart';
 import 'package:amanah_healthcare/core/presentation/components/amanah_bottom_banner.dart';
+import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_queue_data.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/queue/amanah_queue_active_session_sheet.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/queue/amanah_queue_dock_animator.dart';
@@ -19,13 +20,17 @@ import 'package:amanah_healthcare/features/queue/presentation/state/amanah_queue
 
 /// Master 3D Queue Deck Stack Screen (Pilih Antrean Pasien)
 class AmanahQueueDockScreen extends StatefulWidget {
-  const AmanahQueueDockScreen({super.key, this.cards = const <AmanahQueueCardData>[]});
+  const AmanahQueueDockScreen({super.key, this.cards = const <AmanahQueueCardData>[], this.user});
 
   final List<AmanahQueueCardData> cards;
+  final AmanahAuthUser? user;
 
-  static Route<void> route({List<AmanahQueueCardData> cards = const <AmanahQueueCardData>[]}) {
+  static Route<void> route({
+    List<AmanahQueueCardData> cards = const <AmanahQueueCardData>[],
+    AmanahAuthUser? user,
+  }) {
     return PageRouteBuilder<void>(
-      pageBuilder: (_, _, _) => AmanahQueueDockScreen(cards: cards),
+      pageBuilder: (_, _, _) => AmanahQueueDockScreen(cards: cards, user: user),
       transitionsBuilder:
           (
             BuildContext context,
@@ -55,6 +60,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
 
   int _dotCount = 0;
   bool _isActionLoading = false;
+  bool get _canServe => widget.user?.canServeQueue ?? true;
 
   @override
   void initState() {
@@ -409,15 +415,27 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                 onCardSelect: _bringCardToFront,
                 onCardTap: _openPatientIntake,
                 onResetQueue: _queueStore.loadTodaySessionsAndQueue,
-                onCallPatient: _cards.isNotEmpty ? _handleCallPatientAction : null,
-                onPanDown: (details) =>
-                    _gesture.onPanDown(details, isIdle: _animator.activationStage == 'idle'),
-                onPanCancel: () =>
-                    _gesture.onPanCancel(isIdle: _animator.activationStage == 'idle'),
-                onPanUpdate: (details) =>
-                    _gesture.onPanUpdate(details, isIdle: _animator.activationStage == 'idle'),
-                onPanEnd: (details) =>
-                    _gesture.onPanEnd(details, isIdle: _animator.activationStage == 'idle'),
+                onCallPatient: (_cards.isNotEmpty && _canServe) ? _handleCallPatientAction : null,
+                onPanDown: (details) {
+                  if (_canServe) {
+                    _gesture.onPanDown(details, isIdle: _animator.activationStage == 'idle');
+                  }
+                },
+                onPanCancel: () {
+                  if (_canServe) {
+                    _gesture.onPanCancel(isIdle: _animator.activationStage == 'idle');
+                  }
+                },
+                onPanUpdate: (details) {
+                  if (_canServe) {
+                    _gesture.onPanUpdate(details, isIdle: _animator.activationStage == 'idle');
+                  }
+                },
+                onPanEnd: (details) {
+                  if (_canServe) {
+                    _gesture.onPanEnd(details, isIdle: _animator.activationStage == 'idle');
+                  }
+                },
               ),
               if (_animator.showSuccess && _animator.selectedActiveCard != null)
                 ListenableBuilder(

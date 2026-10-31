@@ -37,7 +37,7 @@ class AmanahHomeShell extends StatefulWidget {
 
   static const AmanahAuthUser _emptyUser = AmanahAuthUser(
     id: '',
-    role: AmanahUserRole.doctor,
+    roleCode: '',
     fullName: '',
     email: '',
     phone: '',
@@ -130,9 +130,10 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
           _selectedTab = AmanahHomeTab.schedule;
         });
       case 'pilih-antrean':
+      case 'lihat-antrean':
       case 'queue':
       case 'cari-visit':
-        Navigator.of(context).push(AmanahQueueDockScreen.route());
+        Navigator.of(context).push(AmanahQueueDockScreen.route(user: _currentUser));
       case 'kartu-id':
         Navigator.of(context).push(
           AmanahDoctorIdCardScreen.route(
@@ -226,7 +227,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                     key: const ValueKey<String>('home_content'),
                     user: _currentUser,
                     todaySchedules: todaySchedules,
-                    quickActions: kDefaultQuickActions,
+                    quickActions: AmanahQuickAction.buildActionsForUser(_currentUser),
                     activities: const <AmanahActivityMetric>[],
                     unreadNotifications: _notificationStore.unreadCount,
                     onRefresh: _loadHomeSchedules,
@@ -240,7 +241,10 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                       _handleQuickAction(action.id);
                     },
                     onScheduleCardTap: _navigateToScheduleWithSession,
-                    onCreateScheduleTap: () => DoctorScheduleRosterSheet.show(context),
+                    onCreateScheduleTap: () => DoctorScheduleRosterSheet.show(
+                      context,
+                      canManage: _currentUser.canManageSchedule,
+                    ),
                     onDetailActivityTap: () {
                       _handleQuickAction('queue');
                     },
@@ -284,7 +288,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   AmanahHomeTab.notifications => AmanahLeavePermissionTabScreen(
                     key: const ValueKey<String>('permissions_content'),
                     doctorName: _currentUser.fullName,
-                    doctorRole: _currentUser.isDoctor ? 'Dokter Spesialis' : 'Tenaga Medis',
+                    doctorRole: _currentUser.roleName,
                     avatarUrl: _currentUser.staff?.avatarUrl,
                     staffProfileId: _currentUser.staff?.id ?? '',
                     onBack: () {

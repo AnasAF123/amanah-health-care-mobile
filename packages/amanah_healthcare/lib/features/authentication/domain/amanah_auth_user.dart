@@ -2,7 +2,45 @@ import 'package:amanah_healthcare/features/authentication/domain/user_avatar.dar
 export 'package:amanah_healthcare/features/authentication/domain/user_avatar.dart';
 export 'package:amanah_healthcare/features/authentication/domain/staff_credential_model.dart';
 
-enum AmanahUserRole { doctor, midwife, staff }
+class AmanahRoleInfo {
+  const AmanahRoleInfo({
+    required this.id,
+    required this.code,
+    required this.name,
+    this.tier = 'macro',
+    this.audience = 'internal',
+    this.isClinical = false,
+  });
+
+  final String id;
+  final String code;
+  final String name;
+  final String tier;
+  final String audience;
+  final bool isClinical;
+
+  factory AmanahRoleInfo.fromJson(Map<String, dynamic> json) {
+    return AmanahRoleInfo(
+      id: json['id']?.toString() ?? '',
+      code: json['code']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      tier: json['tier']?.toString() ?? 'macro',
+      audience: json['audience']?.toString() ?? 'internal',
+      isClinical: json['isClinical'] as bool? ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'code': code,
+      'name': name,
+      'tier': tier,
+      'audience': audience,
+      'isClinical': isClinical,
+    };
+  }
+}
 
 class AmanahStaffAddress {
   const AmanahStaffAddress({
@@ -100,6 +138,10 @@ class AmanahStaffProfile {
   const AmanahStaffProfile({
     required this.id,
     required this.userId,
+    this.roleId,
+    this.roleCode,
+    this.roleName,
+    this.isClinical = false,
     this.practitionerId,
     this.poliklinikId,
     this.poliklinikName,
@@ -145,6 +187,10 @@ class AmanahStaffProfile {
     return AmanahStaffProfile(
       id: json['id'] as String? ?? '',
       userId: json['userId'] as String? ?? '',
+      roleId: json['roleId'] as String? ?? json['role_id'] as String?,
+      roleCode: json['roleCode'] as String? ?? json['role_code'] as String?,
+      roleName: json['roleName'] as String? ?? json['role_name'] as String?,
+      isClinical: json['isClinical'] as bool? ?? false,
       practitionerId: json['practitionerId'] as String?,
       poliklinikId: json['poliklinikId'] as String?,
       poliklinikName: json['poliklinikName'] as String? ?? json['poliklinik_name'] as String?,
@@ -171,6 +217,10 @@ class AmanahStaffProfile {
 
   final String id;
   final String userId;
+  final String? roleId;
+  final String? roleCode;
+  final String? roleName;
+  final bool isClinical;
   final String? practitionerId;
   final String? poliklinikId;
   final String? poliklinikName;
@@ -196,7 +246,9 @@ class AmanahStaffProfile {
 class AmanahAuthUser {
   const AmanahAuthUser({
     required this.id,
-    required this.role,
+    this.roleCode = '',
+    this.roleInfo,
+    this.permissions = const <String>[],
     required this.fullName,
     required this.email,
     required this.phone,
@@ -211,7 +263,16 @@ class AmanahAuthUser {
   factory AmanahAuthUser.fromJson(Map<String, dynamic> json) {
     final String roleStr = json['role'] is Map
         ? (json['role']['code'] as String? ?? '')
-        : (json['role'] as String? ?? '');
+        : (json['role'] as String? ?? json['roleCode'] as String? ?? '');
+
+    final AmanahRoleInfo? roleInfo = json['role'] is Map<String, dynamic>
+        ? AmanahRoleInfo.fromJson(json['role'] as Map<String, dynamic>)
+        : null;
+
+    final List<dynamic>? rawPerms = json['permissions'] as List<dynamic>?;
+    final List<String> permissions = rawPerms != null
+        ? rawPerms.map((dynamic e) => e.toString()).toList(growable: false)
+        : const <String>[];
 
     final String id = json['id'] as String? ?? '';
     final String fullName = json['fullName'] as String? ?? json['name'] as String? ?? '';
@@ -231,7 +292,9 @@ class AmanahAuthUser {
 
     return AmanahAuthUser(
       id: id,
-      role: parseRole(roleStr),
+      roleCode: roleStr,
+      roleInfo: roleInfo,
+      permissions: permissions,
       fullName: fullName,
       email: json['email'] as String? ?? '',
       phone: json['phone'] as String? ?? json['phoneNumber'] as String? ?? '',
@@ -251,7 +314,9 @@ class AmanahAuthUser {
       AmanahAuthUser.fromJson(json);
 
   final String id;
-  final AmanahUserRole role;
+  final String roleCode;
+  final AmanahRoleInfo? roleInfo;
+  final List<String> permissions;
   final String fullName;
   final String email;
   final String phone;
@@ -265,41 +330,34 @@ class AmanahAuthUser {
   String? get avatarUrl =>
       staff?.avatarUrl ?? (avatar.displayUrl.isNotEmpty ? avatar.displayUrl : null);
 
-  String get roleLabel => switch (role) {
-    AmanahUserRole.doctor => 'Dokter',
-    AmanahUserRole.midwife => 'Bidan',
-    AmanahUserRole.staff => 'Staff',
-  };
+  /// Checks if the authenticated principal has a granular permission.
+  bool hasPermission(String perm) => permissions.contains(perm) || permissions.contains('*');
 
-  bool get isDoctor => role == AmanahUserRole.doctor;
-  bool get isMidwife => role == AmanahUserRole.midwife;
-  bool get isStaff => role == AmanahUserRole.staff;
+  /// Authoritative check if this staff is a clinical practitioner (doctor, midwife, nurse, tabib, etc.)
+  bool get isClinical => staff?.isClinical ?? roleInfo?.isClinical ?? false;
 
-  String get displayRole => switch (role) {
-    AmanahUserRole.doctor => 'Dokter Spesialis',
-    AmanahUserRole.midwife => 'Bidan Pelaksana',
-    AmanahUserRole.staff => 'Staf Medis / Pegawai',
-  };
+  /// Queue access levels
+  bool get canServeQueue => hasPermission('queue:serve') || hasPermission('queue:call');
+  bool get canReadQueue => hasPermission('queue:read');
 
-  static AmanahUserRole parseRole(String? roleStr) {
-    final String normalized = (roleStr ?? '').toLowerCase().replaceAll('_', '').replaceAll(' ', '');
-    if (normalized == 'staffdoctor' || normalized == 'doctor') {
-      return AmanahUserRole.doctor;
-    }
-    if (normalized == 'staffmidwife' || normalized == 'midwife') {
-      return AmanahUserRole.midwife;
-    }
-    return AmanahUserRole.staff;
-  }
+  /// Schedule management access
+  bool get canManageSchedule => hasPermission('schedules:manage');
 
-  static bool isPatientRole(String? roleStr) {
-    final String normalized = (roleStr ?? '').toLowerCase();
-    return normalized == 'patient';
-  }
+  /// Attendance permissions
+  bool get canSubmitAttendance => hasPermission('attendance:submit');
+  bool get canReadAttendance => hasPermission('attendance:read');
+
+  /// Payroll permissions
+  bool get canReadPayroll => hasPermission('payroll:read_self') || hasPermission('payroll:read');
+
+  /// Canonical role name (e.g. 'Dokter Spesialis', 'Bidan', 'Tabib', 'Staf IT', etc.)
+  String get roleName => staff?.roleName ?? roleInfo?.name ?? roleCode;
 
   AmanahAuthUser copyWith({
     String? id,
-    AmanahUserRole? role,
+    String? roleCode,
+    AmanahRoleInfo? roleInfo,
+    List<String>? permissions,
     String? fullName,
     String? email,
     String? phone,
@@ -312,7 +370,9 @@ class AmanahAuthUser {
   }) {
     return AmanahAuthUser(
       id: id ?? this.id,
-      role: role ?? this.role,
+      roleCode: roleCode ?? this.roleCode,
+      roleInfo: roleInfo ?? this.roleInfo,
+      permissions: permissions ?? this.permissions,
       fullName: fullName ?? this.fullName,
       email: email ?? this.email,
       phone: phone ?? this.phone,

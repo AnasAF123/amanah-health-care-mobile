@@ -112,7 +112,7 @@ class _StaffOnboardingScreenState extends State<StaffOnboardingScreen> {
       context,
       title: 'Profil Berhasil Dilengkapi!',
       subtitle:
-          'Data staf ${updatedUser.fullName} (${widget.user.roleLabel}) telah tersimpan dan terverifikasi.',
+          'Data staf ${updatedUser.fullName} (${widget.user.roleName}) telah tersimpan dan terverifikasi.',
       primaryButtonText: 'Mulai Bertugas',
       onPrimaryAction: completeAndNavigate,
       onSecondaryAction: completeAndNavigate,

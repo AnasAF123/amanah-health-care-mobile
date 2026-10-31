@@ -30,6 +30,8 @@ class LeaveRequestEntity {
     this.approvedBy,
     this.approvalNotes,
     this.cancelledAt,
+    this.substituteStaffProfileId,
+    this.substituteStaffName,
     this.sessions = const <LeaveSessionRef>[],
     required this.createdAt,
     required this.updatedAt,
@@ -48,6 +50,8 @@ class LeaveRequestEntity {
   final String status; // 'pending' | 'approved' | 'rejected' | 'cancelled'
   final String? approvedBy;
   final String? approvalNotes;
+  final String? substituteStaffProfileId;
+  final String? substituteStaffName;
   final DateTime? cancelledAt;
   final List<LeaveSessionRef> sessions;
   final DateTime createdAt;

@@ -35,35 +35,43 @@ class AmanahDoctorProfile {
     String? customGreeting,
   }) {
     final int hour = DateTime.now().hour;
-    final String greeting = customGreeting ??
+    final String greeting =
+        customGreeting ??
         (hour < 11
             ? 'Selamat Pagi'
             : hour < 15
-                ? 'Selamat Siang'
-                : hour < 18
-                    ? 'Selamat Sore'
-                    : 'Selamat Malam');
+            ? 'Selamat Siang'
+            : hour < 18
+            ? 'Selamat Sore'
+            : 'Selamat Malam');
 
     final String doctorName = user.staff?.fullName?.trim().isNotEmpty == true
-        ? user.staff!.fullName!
-        : user.fullName.trim().isNotEmpty
-            ? user.fullName
-            : (user.isDoctor ? 'dr. Tenaga Medis' : 'Tenaga Medis');
+        ? user.staff!.fullName!.trim()
+        : user.fullName.trim();
 
     final String role = user.staff?.profession?.trim().isNotEmpty == true
-        ? user.staff!.profession!
-        : user.displayRole;
+        ? user.staff!.profession!.trim()
+        : user.roleName;
 
-    final String sip = user.staff?.practitionerId?.trim().isNotEmpty == true
-        ? user.staff!.practitionerId!
-        : (user.staff?.idCardNumber?.trim().isNotEmpty == true
-            ? user.staff!.idCardNumber!
-            : 'ID-${user.id.isNotEmpty ? user.id.substring(0, user.id.length < 8 ? user.id.length : 8).toUpperCase() : "MEDIS"}');
+    final String sip = user.staff?.licenseNumber?.trim().isNotEmpty == true
+        ? user.staff!.licenseNumber!.trim()
+        : (user.staff?.practitionerId?.trim().isNotEmpty == true
+              ? user.staff!.practitionerId!.trim()
+              : (user.staff?.idCardNumber?.trim().isNotEmpty == true
+                    ? user.staff!.idCardNumber!.trim()
+                    : ''));
 
     final String nik = user.staff?.nationalId ?? '';
     final String email = user.email;
     final String phone = user.staff?.phoneNumber ?? user.phone;
-    final String? avatarUrl = user.avatar.directUrl ?? (user.avatar.url.isNotEmpty ? user.avatar.url : null);
+    final String? avatarUrl =
+        user.avatar.directUrl ?? (user.avatar.url.isNotEmpty ? user.avatar.url : null);
+
+    final String department = user.staff?.poliklinikName?.trim().isNotEmpty == true
+        ? user.staff!.poliklinikName!.trim()
+        : (user.staff?.profession?.trim().isNotEmpty == true
+              ? user.staff!.profession!.trim()
+              : user.roleName);
 
     return AmanahDoctorProfile(
       name: doctorName,
@@ -77,11 +85,7 @@ class AmanahDoctorProfile {
       email: email,
       phone: phone,
       hospital: 'RS Amanah Sehat',
-      department: user.isDoctor
-          ? 'Pelayanan Medis'
-          : user.isMidwife
-              ? 'Kebidanan & Kandungan'
-              : 'Administrasi Medis',
+      department: department,
       avatarAsset: 'assets/amanah/id_card/images/woman-doctor-4.png',
       avatarUrl: avatarUrl,
     );
@@ -104,38 +108,61 @@ class AmanahDoctorProfile {
 }
 
 class AmanahQuickAction {
-  const AmanahQuickAction({
-    required this.id,
-    required this.label,
-    required this.icon,
-  });
+  const AmanahQuickAction({required this.id, required this.label, required this.icon});
 
   final String id;
   final String label;
   final AmanahQuickActionIcon icon;
+
+  static List<AmanahQuickAction> buildActionsForUser(AmanahAuthUser user) {
+    final List<AmanahQuickAction> actions = <AmanahQuickAction>[
+      const AmanahQuickAction(id: 'history', label: 'History', icon: AmanahQuickActionIcon.history),
+      const AmanahQuickAction(
+        id: 'jadwal-saya',
+        label: 'Jadwal Saya',
+        icon: AmanahQuickActionIcon.schedule,
+      ),
+    ];
+
+    if (user.canServeQueue) {
+      actions.add(
+        const AmanahQuickAction(
+          id: 'pilih-antrean',
+          label: 'Pilih Antrean',
+          icon: AmanahQuickActionIcon.search,
+        ),
+      );
+    } else if (user.canReadQueue) {
+      actions.add(
+        const AmanahQuickAction(
+          id: 'lihat-antrean',
+          label: 'Lihat Antrean',
+          icon: AmanahQuickActionIcon.search,
+        ),
+      );
+    }
+
+    actions.add(
+      const AmanahQuickAction(
+        id: 'kartu-id',
+        label: 'Kartu ID',
+        icon: AmanahQuickActionIcon.idCard,
+      ),
+    );
+
+    return actions;
+  }
 }
 
 const List<AmanahQuickAction> kDefaultQuickActions = <AmanahQuickAction>[
-  AmanahQuickAction(
-    id: 'history',
-    label: 'History',
-    icon: AmanahQuickActionIcon.history,
-  ),
-  AmanahQuickAction(
-    id: 'jadwal-saya',
-    label: 'Jadwal Saya',
-    icon: AmanahQuickActionIcon.schedule,
-  ),
+  AmanahQuickAction(id: 'history', label: 'History', icon: AmanahQuickActionIcon.history),
+  AmanahQuickAction(id: 'jadwal-saya', label: 'Jadwal Saya', icon: AmanahQuickActionIcon.schedule),
   AmanahQuickAction(
     id: 'pilih-antrean',
     label: 'Pilih Antrean',
     icon: AmanahQuickActionIcon.search,
   ),
-  AmanahQuickAction(
-    id: 'kartu-id',
-    label: 'Kartu ID',
-    icon: AmanahQuickActionIcon.idCard,
-  ),
+  AmanahQuickAction(id: 'kartu-id', label: 'Kartu ID', icon: AmanahQuickActionIcon.idCard),
 ];
 
 class AmanahActivityMetric {

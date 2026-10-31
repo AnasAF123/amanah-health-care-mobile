@@ -2,10 +2,13 @@ import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model
 
 enum CanonicalAppointmentStatus {
   booked,
+  checkedIn,
   waiting,
   inService,
   completed,
   cancelled,
+  noDoctor,
+  noShow,
   late,
 }
 
@@ -41,6 +44,13 @@ class AppointmentStatusDescriptor {
       badgeVariant: AmanahBadgeVariant.primary,
       isBooked: true,
     ),
+    CanonicalAppointmentStatus.checkedIn: AppointmentStatusDescriptor(
+      code: CanonicalAppointmentStatus.checkedIn,
+      label: 'Check-in',
+      badge: 'Check-in',
+      description: 'Pasien telah tiba di klinik dan mengonfirmasi kehadiran',
+      badgeVariant: AmanahBadgeVariant.primary,
+    ),
     CanonicalAppointmentStatus.waiting: AppointmentStatusDescriptor(
       code: CanonicalAppointmentStatus.waiting,
       label: 'Menunggu',
@@ -53,7 +63,7 @@ class AppointmentStatusDescriptor {
       code: CanonicalAppointmentStatus.inService,
       label: 'Sedang Diperiksa',
       badge: 'Sedang Diperiksa',
-      description: 'Pasien sedang dalam ruang konsultasi dengan dokter',
+      description: 'Pasien sedang dalam ruang konsultasi dengan praktisi',
       badgeVariant: AmanahBadgeVariant.trend,
       isInService: true,
     ),
@@ -73,6 +83,22 @@ class AppointmentStatusDescriptor {
       badgeVariant: AmanahBadgeVariant.warning,
       isTerminal: true,
     ),
+    CanonicalAppointmentStatus.noDoctor: AppointmentStatusDescriptor(
+      code: CanonicalAppointmentStatus.noDoctor,
+      label: 'Praktisi Berhalangan',
+      badge: 'Praktisi Berhalangan',
+      description: 'Praktisi berhalangan hadir dan sesi tidak dapat dilanjutkan',
+      badgeVariant: AmanahBadgeVariant.warning,
+      isTerminal: true,
+    ),
+    CanonicalAppointmentStatus.noShow: AppointmentStatusDescriptor(
+      code: CanonicalAppointmentStatus.noShow,
+      label: 'Tidak Hadir',
+      badge: 'Tidak Hadir',
+      description: 'Pasien tidak hadir saat giliran antrean dipanggil',
+      badgeVariant: AmanahBadgeVariant.warning,
+      isTerminal: true,
+    ),
     CanonicalAppointmentStatus.late: AppointmentStatusDescriptor(
       code: CanonicalAppointmentStatus.late,
       label: 'Terlambat',
@@ -87,9 +113,10 @@ class AppointmentStatusDescriptor {
     'BOOK': CanonicalAppointmentStatus.booked,
     'BOOKED': CanonicalAppointmentStatus.booked,
     'SUDAH_BUAT_JANJI': CanonicalAppointmentStatus.booked,
+    'CHECKED_IN': CanonicalAppointmentStatus.checkedIn,
+    'CHECKIN': CanonicalAppointmentStatus.checkedIn,
     'WAITING': CanonicalAppointmentStatus.waiting,
     'MENUNGGU': CanonicalAppointmentStatus.waiting,
-    'CHECKED_IN': CanonicalAppointmentStatus.waiting,
     'IN_SERVICE': CanonicalAppointmentStatus.inService,
     'SEDANG_DIPERIKSA': CanonicalAppointmentStatus.inService,
     'SEDANG_PERIKSA': CanonicalAppointmentStatus.inService,
@@ -100,11 +127,12 @@ class AppointmentStatusDescriptor {
     'CANCELLED': CanonicalAppointmentStatus.cancelled,
     'BATAL': CanonicalAppointmentStatus.cancelled,
     'DIBATALKAN': CanonicalAppointmentStatus.cancelled,
-    'TIDAK_ADA_DOKTER': CanonicalAppointmentStatus.cancelled,
+    'NO_DOCTOR': CanonicalAppointmentStatus.noDoctor,
+    'TIDAK_ADA_DOKTER': CanonicalAppointmentStatus.noDoctor,
+    'NO_SHOW': CanonicalAppointmentStatus.noShow,
+    'TIDAK_HADIR': CanonicalAppointmentStatus.noShow,
     'LATE': CanonicalAppointmentStatus.late,
     'TERLAMBAT': CanonicalAppointmentStatus.late,
-    'NO_SHOW': CanonicalAppointmentStatus.late,
-    'TIDAK_HADIR': CanonicalAppointmentStatus.late,
   };
 
   static AppointmentStatusDescriptor resolve(String? rawStatus) {
