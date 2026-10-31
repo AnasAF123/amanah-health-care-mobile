@@ -31,10 +31,9 @@ class AmanahClinicSlide {
 const List<AmanahClinicSlide> kClinicSlides = <AmanahClinicSlide>[
   AmanahClinicSlide(
     id: 'slide-1',
-    eyebrow: 'Poli Anak',
+    eyebrow: 'Layanan Anak',
     title: 'Konsultasi Spesialis Anak',
-    description:
-        'Jadwalkan temu dokter spesialis anak responsif dan terpadu RS Amanah.',
+    description: 'Jadwalkan temu dokter spesialis anak responsif dan terpadu RS Amanah.',
     ctaText: 'Jadwalkan',
     ctaIcon: Icons.auto_awesome_rounded,
     iconType: 'briefcase',
@@ -44,8 +43,7 @@ const List<AmanahClinicSlide> kClinicSlides = <AmanahClinicSlide>[
     id: 'slide-2',
     eyebrow: 'Imunisasi',
     title: 'Vaksinasi & Booster Anak',
-    description:
-        'Paket imunisasi balita primer lengkap dengan sertifikat medis resmi.',
+    description: 'Paket imunisasi balita primer lengkap dengan sertifikat medis resmi.',
     ctaText: 'Lihat Paket',
     ctaIcon: Icons.verified_user_rounded,
     iconType: 'syringe',
@@ -55,8 +53,7 @@ const List<AmanahClinicSlide> kClinicSlides = <AmanahClinicSlide>[
     id: 'slide-3',
     eyebrow: 'Layanan USG',
     title: 'Pemeriksaan USG Spesialis',
-    description:
-        'Layanan ultrasonografi diagnostik akurat dengan dokter spesialis terpadu.',
+    description: 'Layanan ultrasonografi diagnostik akurat dengan dokter spesialis terpadu.',
     ctaText: 'Reservasi',
     ctaIcon: Icons.event_available_rounded,
     iconType: 'dna',
@@ -66,8 +63,7 @@ const List<AmanahClinicSlide> kClinicSlides = <AmanahClinicSlide>[
     id: 'slide-4',
     eyebrow: 'Ibu & Anak',
     title: 'Persalinan & Rawat Inap',
-    description:
-        'Fasilitas persalinan terpadu dan rawat inap ibu & buah hati siaga 24 jam.',
+    description: 'Fasilitas persalinan terpadu dan rawat inap ibu & buah hati siaga 24 jam.',
     ctaText: 'Lihat Fasilitas',
     ctaIcon: Icons.favorite_rounded,
     iconType: 'shield',
@@ -98,9 +94,7 @@ double _getXPercent(double offset) {
     final double t = (absOffset - 1.0).clamp(0.0, 1.0);
     return sign *
         (AmanahCarouselTokens.sideXPercent +
-            t *
-                (AmanahCarouselTokens.hiddenXPercent -
-                    AmanahCarouselTokens.sideXPercent));
+            t * (AmanahCarouselTokens.hiddenXPercent - AmanahCarouselTokens.sideXPercent));
   }
 }
 
@@ -114,11 +108,7 @@ double _getScale(double offset) {
     )!;
   } else {
     final double t = (absOffset - 1.0).clamp(0.0, 1.0);
-    return ui.lerpDouble(
-      AmanahCarouselTokens.sideScale,
-      AmanahCarouselTokens.hiddenScale,
-      t,
-    )!;
+    return ui.lerpDouble(AmanahCarouselTokens.sideScale, AmanahCarouselTokens.hiddenScale, t)!;
   }
 }
 
@@ -128,11 +118,7 @@ double _getZ(double offset) {
     return ui.lerpDouble(0.0, AmanahCarouselTokens.sideZ, absOffset)!;
   } else {
     final double t = (absOffset - 1.0).clamp(0.0, 1.0);
-    return ui.lerpDouble(
-      AmanahCarouselTokens.sideZ,
-      AmanahCarouselTokens.hiddenZ,
-      t,
-    )!;
+    return ui.lerpDouble(AmanahCarouselTokens.sideZ, AmanahCarouselTokens.hiddenZ, t)!;
   }
 }
 
@@ -149,22 +135,16 @@ double _getOpacity(double offset) {
 /// Master 3D Deck Carousel Section in Flutter matching MasterCarouselSection.tsx (.web)
 /// Highly optimized for mobile hardware and Android EGL raster threads.
 class AmanahMasterCarouselSection extends StatefulWidget {
-  const AmanahMasterCarouselSection({
-    super.key,
-    this.slides = kClinicSlides,
-    this.onSlideAction,
-  });
+  const AmanahMasterCarouselSection({super.key, this.slides = kClinicSlides, this.onSlideAction});
 
   final List<AmanahClinicSlide> slides;
   final ValueChanged<String>? onSlideAction;
 
   @override
-  State<AmanahMasterCarouselSection> createState() =>
-      _AmanahMasterCarouselSectionState();
+  State<AmanahMasterCarouselSection> createState() => _AmanahMasterCarouselSectionState();
 }
 
-class _AmanahMasterCarouselSectionState
-    extends State<AmanahMasterCarouselSection>
+class _AmanahMasterCarouselSectionState extends State<AmanahMasterCarouselSection>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _animController;
   Animation<double>? _posAnimation;
@@ -181,8 +161,7 @@ class _AmanahMasterCarouselSectionState
       return 0;
     }
     final int rounded = _pagePosition.round();
-    return ((rounded % widget.slides.length) + widget.slides.length) %
-        widget.slides.length;
+    return ((rounded % widget.slides.length) + widget.slides.length) % widget.slides.length;
   }
 
   void _snapToInteger() {
@@ -190,8 +169,7 @@ class _AmanahMasterCarouselSectionState
       return;
     }
     final int total = widget.slides.length;
-    final double snapped =
-        (_pagePosition.roundToDouble() % total + total) % total;
+    final double snapped = (_pagePosition.roundToDouble() % total + total) % total;
     if ((_pagePosition - snapped).abs() > 0.001) {
       if (mounted) {
         setState(() {
@@ -212,10 +190,7 @@ class _AmanahMasterCarouselSectionState
     final int total = widget.slides.isEmpty ? 1 : widget.slides.length;
     _pagePosition = (_savedPagePosition.roundToDouble() % total + total) % total;
 
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
+    _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
 
     _animController.addListener(() {
       if (_posAnimation != null && mounted) {
@@ -299,9 +274,10 @@ class _AmanahMasterCarouselSectionState
     // Always target an exact integer card index to prevent fractional drift
     final double target = (_pagePosition + delta).roundToDouble();
 
-    _posAnimation = Tween<double>(begin: start, end: target).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
-    );
+    _posAnimation = Tween<double>(
+      begin: start,
+      end: target,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
 
     _animController
         .forward(from: 0.0)
@@ -317,8 +293,7 @@ class _AmanahMasterCarouselSectionState
         .catchError((_) {
           if (mounted && !_isDragging) {
             setState(() {
-              _pagePosition =
-                  (_pagePosition.roundToDouble() % total + total) % total;
+              _pagePosition = (_pagePosition.roundToDouble() % total + total) % total;
               _savedPagePosition = _pagePosition;
             });
           }
@@ -330,8 +305,7 @@ class _AmanahMasterCarouselSectionState
       return;
     }
     final int total = widget.slides.length;
-    final double currentMod =
-        ((_pagePosition.roundToDouble() % total) + total) % total;
+    final double currentMod = ((_pagePosition.roundToDouble() % total) + total) % total;
     double delta = targetIndex - currentMod;
 
     if (delta > total / 2.0) {
@@ -381,9 +355,10 @@ class _AmanahMasterCarouselSectionState
     }
 
     final double start = _pagePosition;
-    _posAnimation = Tween<double>(begin: start, end: target).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
-    );
+    _posAnimation = Tween<double>(
+      begin: start,
+      end: target,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
 
     _animController
         .forward(from: 0.0)
@@ -399,8 +374,7 @@ class _AmanahMasterCarouselSectionState
         .catchError((_) {
           if (mounted && !_isDragging) {
             setState(() {
-              _pagePosition =
-                  (_pagePosition.roundToDouble() % total + total) % total;
+              _pagePosition = (_pagePosition.roundToDouble() % total + total) % total;
               _savedPagePosition = _pagePosition;
             });
           }
@@ -418,8 +392,7 @@ class _AmanahMasterCarouselSectionState
     // Safety guard: if resting and not actively dragging or animating, guarantee snapped integer
     if (!_isDragging && !_animController.isAnimating) {
       final int total = widget.slides.length;
-      final double snapped =
-          (_pagePosition.roundToDouble() % total + total) % total;
+      final double snapped = (_pagePosition.roundToDouble() % total + total) % total;
       if ((_pagePosition - snapped).abs() > 0.001) {
         _pagePosition = snapped;
       }
@@ -432,16 +405,8 @@ class _AmanahMasterCarouselSectionState
     // Sort cards by z-index: cards further from center (higher abs offset) are painted first (beneath)
     final List<int> sortedIndices = List<int>.generate(total, (int i) => i);
     sortedIndices.sort((int a, int b) {
-      final double offsetA = _getContinuousOffset(
-        a,
-        _pagePosition,
-        total,
-      ).abs();
-      final double offsetB = _getContinuousOffset(
-        b,
-        _pagePosition,
-        total,
-      ).abs();
+      final double offsetA = _getContinuousOffset(a, _pagePosition, total).abs();
+      final double offsetB = _getContinuousOffset(b, _pagePosition, total).abs();
       return offsetB.compareTo(offsetA);
     });
 
@@ -464,11 +429,7 @@ class _AmanahMasterCarouselSectionState
               children: <Widget>[
                 // Continuous 3D Transformed Card Stack
                 ...sortedIndices.map((int index) {
-                  final double offset = _getContinuousOffset(
-                    index,
-                    _pagePosition,
-                    total,
-                  );
+                  final double offset = _getContinuousOffset(index, _pagePosition, total);
                   final AmanahClinicSlide slide = widget.slides[index];
 
                   final double xPercent = _getXPercent(offset);
@@ -493,10 +454,7 @@ class _AmanahMasterCarouselSectionState
                   );
 
                   if (opacity < 0.99) {
-                    cardWidget = Opacity(
-                      opacity: opacity.clamp(0.0, 1.0),
-                      child: cardWidget,
-                    );
+                    cardWidget = Opacity(opacity: opacity.clamp(0.0, 1.0), child: cardWidget);
                   }
 
                   return Positioned(
@@ -509,8 +467,7 @@ class _AmanahMasterCarouselSectionState
                       transform: Matrix4.identity()
                         ..setEntry(3, 2, 0.001) // perspective depth
                         ..setTranslationRaw(
-                          (MediaQuery.sizeOf(context).width - 40) *
-                              (xPercent / 100.0),
+                          (MediaQuery.sizeOf(context).width - 40) * (xPercent / 100.0),
                           0.0,
                           z,
                         )
@@ -566,8 +523,7 @@ class AmanahDeckCard extends StatefulWidget {
   State<AmanahDeckCard> createState() => _AmanahDeckCardState();
 }
 
-class _AmanahDeckCardState extends State<AmanahDeckCard>
-    with SingleTickerProviderStateMixin {
+class _AmanahDeckCardState extends State<AmanahDeckCard> with SingleTickerProviderStateMixin {
   late final AnimationController _animController;
   late final Animation<double> _titleSlideAnim;
   late final Animation<double> _titleOpacityAnim;
@@ -577,10 +533,7 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
+    _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
 
     final CurvedAnimation titleCurve = CurvedAnimation(
       parent: _animController,
@@ -650,11 +603,7 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
                     widget.slide.imagePath,
                     fit: BoxFit.cover,
                     alignment: Alignment.centerRight,
-                    errorBuilder: (
-                      BuildContext context,
-                      Object error,
-                      StackTrace? stackTrace,
-                    ) {
+                    errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
                       return const SizedBox.shrink();
                     },
                   ),
@@ -697,16 +646,12 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
                         child: AnimatedBuilder(
                           animation: _animController,
                           builder: (BuildContext context, Widget? child) {
-                            final double tSlide = widget.isActive
-                                ? _titleSlideAnim.value
-                                : 0.0;
+                            final double tSlide = widget.isActive ? _titleSlideAnim.value : 0.0;
                             final double tOpacity = widget.isActive
                                 ? _titleOpacityAnim.value
                                 : (widget.isSideCard ? 0.70 : 1.0);
 
-                            final double dSlide = widget.isActive
-                                ? _descSlideAnim.value
-                                : 0.0;
+                            final double dSlide = widget.isActive ? _descSlideAnim.value : 0.0;
                             final double dOpacity = widget.isActive
                                 ? _descOpacityAnim.value
                                 : (widget.isSideCard ? 0.65 : 1.0);
@@ -769,9 +714,7 @@ class _AmanahDeckCardState extends State<AmanahDeckCard>
 
                 // Layer 5: Inward Notched Rim Stroke Overlay
                 Positioned.fill(
-                  child: CustomPaint(
-                    painter: _InwardNotchRimPainter(isDark: widget.isDark),
-                  ),
+                  child: CustomPaint(painter: _InwardNotchRimPainter(isDark: widget.isDark)),
                 ),
 
                 // Layer 6: Frosted Soft Depth Shade on Side Background Cards (Hardware-Accelerated)
@@ -871,10 +814,8 @@ class AmanahCarouselNotchedIndicator extends StatelessWidget {
                     ? <BoxShadow>[
                         BoxShadow(
                           color: (isDark
-                                  ? AmanahColorTokens.brandSoft.withValues(alpha: 0.40)
-                                  : AmanahCarouselTokens
-                                        .indicatorActiveColor
-                                        .withValues(alpha: 0.35)),
+                              ? AmanahColorTokens.brandSoft.withValues(alpha: 0.40)
+                              : AmanahCarouselTokens.indicatorActiveColor.withValues(alpha: 0.35)),
                           blurRadius: isDark ? 8 : 4,
                           offset: isDark ? Offset.zero : const Offset(0, 1),
                         ),
@@ -888,8 +829,6 @@ class AmanahCarouselNotchedIndicator extends StatelessWidget {
     );
   }
 }
-
-
 
 /// Custom Clipper for Inward Notched Deck Card Material Silhouette.
 /// Exact formula from SVG ClipPath:
@@ -947,8 +886,7 @@ class AmanahCarouselInwardNotchClipper extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(covariant AmanahCarouselInwardNotchClipper oldClipper) =>
-      false;
+  bool shouldReclip(covariant AmanahCarouselInwardNotchClipper oldClipper) => false;
 }
 
 /// Custom Painter for the Inward Notched Rim Stroke Overlay
@@ -972,8 +910,5 @@ class _InwardNotchRimPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _InwardNotchRimPainter oldDelegate) =>
-      oldDelegate.isDark != isDark;
+  bool shouldRepaint(covariant _InwardNotchRimPainter oldDelegate) => oldDelegate.isDark != isDark;
 }
-
-
