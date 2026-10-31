@@ -94,7 +94,7 @@ class ReplacementItem {
     if (startTime != null && endTime != null) {
       final String s = startTime!.length >= 5 ? startTime!.substring(0, 5) : startTime!;
       final String e = endTime!.length >= 5 ? endTime!.substring(0, 5) : endTime!;
-      return '$s - $e WIB';
+      return '$s - $e';
     }
     return 'Waktu dinas mengikuti roster';
   }

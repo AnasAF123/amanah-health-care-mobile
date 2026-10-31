@@ -27,18 +27,20 @@ class AmanahShiftBookingTicket extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool dark = AmanahThemeTokens.isDark(context);
-    final String resolvedEnd = endTime.endsWith('WIB') ? endTime : '$endTime WIB';
+    final String resolvedEnd = endTime.contains(RegExp(r'[A-Za-z]')) ? endTime : '$endTime WIB';
 
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: backgroundColor ??
+        color:
+            backgroundColor ??
             (dark
                 ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.04)
                 : AmanahColorTokens.neutral100.withValues(alpha: 0.60)),
         borderRadius: BorderRadius.circular(AmanahRadius.md),
         border: Border.all(
-          color: borderColor ??
+          color:
+              borderColor ??
               (dark
                   ? AmanahColorTokens.surfaceLight.withValues(alpha: 0.08)
                   : AmanahColorTokens.neutral200),
@@ -101,10 +103,7 @@ class AmanahShiftBookingTicket extends StatelessWidget {
                         ),
                       ),
                       Expanded(
-                        child: Container(
-                          height: 1,
-                          color: AmanahThemeTokens.outline(context),
-                        ),
+                        child: Container(height: 1, color: AmanahThemeTokens.outline(context)),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 3),
@@ -115,10 +114,7 @@ class AmanahShiftBookingTicket extends StatelessWidget {
                         ),
                       ),
                       Expanded(
-                        child: Container(
-                          height: 1,
-                          color: AmanahThemeTokens.outline(context),
-                        ),
+                        child: Container(height: 1, color: AmanahThemeTokens.outline(context)),
                       ),
                       Container(
                         width: 5,

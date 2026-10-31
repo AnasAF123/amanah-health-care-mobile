@@ -5,6 +5,7 @@ class ClinicAttendanceTimeConfig {
   final int checkInWindowMinutesBefore;
   final int checkInWindowMinutesAfter;
   final int lateToleranceMinutes;
+  final int checkOutWindowMinutesBefore;
   final int qrRotationSeconds;
   final bool overtimeEnabled;
 
@@ -12,16 +13,21 @@ class ClinicAttendanceTimeConfig {
     required this.checkInWindowMinutesBefore,
     required this.checkInWindowMinutesAfter,
     required this.lateToleranceMinutes,
+    this.checkOutWindowMinutesBefore = 30,
     required this.qrRotationSeconds,
     required this.overtimeEnabled,
   });
 
-  /// Canonical defaults matching backend PostgreSQL `clinic_setting` defaults.
-  static const ClinicAttendanceTimeConfig defaultConfig =
-      ClinicAttendanceTimeConfig(
-    checkInWindowMinutesBefore: 60,
-    checkInWindowMinutesAfter: 30,
+  /// Canonical defaults matching backend PostgreSQL `clinic_setting` defaults:
+  /// attendance.check_in_window_minutes_before = 30
+  /// attendance.check_in_window_minutes_after = 60
+  /// attendance.check_out_window_minutes_before = 30
+  /// attendance.late_tolerance_minutes = 15
+  static const ClinicAttendanceTimeConfig defaultConfig = ClinicAttendanceTimeConfig(
+    checkInWindowMinutesBefore: 30,
+    checkInWindowMinutesAfter: 60,
     lateToleranceMinutes: 15,
+    checkOutWindowMinutesBefore: 30,
     qrRotationSeconds: 30,
     overtimeEnabled: true,
   );
@@ -30,18 +36,18 @@ class ClinicAttendanceTimeConfig {
     return ClinicAttendanceTimeConfig(
       checkInWindowMinutesBefore:
           (json['checkInWindowMinutesBefore'] as num?)?.toInt() ??
-              defaultConfig.checkInWindowMinutesBefore,
+          defaultConfig.checkInWindowMinutesBefore,
       checkInWindowMinutesAfter:
           (json['checkInWindowMinutesAfter'] as num?)?.toInt() ??
-              defaultConfig.checkInWindowMinutesAfter,
+          defaultConfig.checkInWindowMinutesAfter,
       lateToleranceMinutes:
-          (json['lateToleranceMinutes'] as num?)?.toInt() ??
-              defaultConfig.lateToleranceMinutes,
+          (json['lateToleranceMinutes'] as num?)?.toInt() ?? defaultConfig.lateToleranceMinutes,
+      checkOutWindowMinutesBefore:
+          (json['checkOutWindowMinutesBefore'] as num?)?.toInt() ??
+          defaultConfig.checkOutWindowMinutesBefore,
       qrRotationSeconds:
-          (json['qrRotationSeconds'] as num?)?.toInt() ??
-              defaultConfig.qrRotationSeconds,
-      overtimeEnabled:
-          json['overtimeEnabled'] as bool? ?? defaultConfig.overtimeEnabled,
+          (json['qrRotationSeconds'] as num?)?.toInt() ?? defaultConfig.qrRotationSeconds,
+      overtimeEnabled: json['overtimeEnabled'] as bool? ?? defaultConfig.overtimeEnabled,
     );
   }
 
@@ -50,6 +56,7 @@ class ClinicAttendanceTimeConfig {
       'checkInWindowMinutesBefore': checkInWindowMinutesBefore,
       'checkInWindowMinutesAfter': checkInWindowMinutesAfter,
       'lateToleranceMinutes': lateToleranceMinutes,
+      'checkOutWindowMinutesBefore': checkOutWindowMinutesBefore,
       'qrRotationSeconds': qrRotationSeconds,
       'overtimeEnabled': overtimeEnabled,
     };
