@@ -141,6 +141,14 @@ extension AmanahNotificationVisualResolver on AmanahNotificationVisual {
         return AmanahIconTone.documents;
       case AmanahNotificationVisual.shiftReminder:
         return AmanahIconTone.success;
+      case AmanahNotificationVisual.systemNotice:
+        return AmanahIconTone.info;
+      case AmanahNotificationVisual.supportTicket:
+        return AmanahIconTone.help;
+      case AmanahNotificationVisual.pharmacyAlert:
+        return AmanahIconTone.practice;
+      case AmanahNotificationVisual.appointmentSchedule:
+        return AmanahIconTone.notifications;
     }
   }
 
@@ -158,6 +166,14 @@ extension AmanahNotificationVisualResolver on AmanahNotificationVisual {
         return Icons.description_outlined;
       case AmanahNotificationVisual.shiftReminder:
         return Icons.access_time_rounded;
+      case AmanahNotificationVisual.systemNotice:
+        return Icons.campaign_outlined;
+      case AmanahNotificationVisual.supportTicket:
+        return Icons.support_agent_rounded;
+      case AmanahNotificationVisual.pharmacyAlert:
+        return Icons.medication_outlined;
+      case AmanahNotificationVisual.appointmentSchedule:
+        return Icons.event_available_rounded;
     }
   }
 }

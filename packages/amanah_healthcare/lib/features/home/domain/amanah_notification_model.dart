@@ -13,13 +13,29 @@ import 'package:amanah_healthcare/features/home/domain/amanah_visual_role.dart';
 enum AmanahNotificationCategory {
   all('all', 'Semua'),
   queue('queue', 'Antrean'),
-  clinical('clinical', 'Klinis & Lab'),
-  shift('shift', 'Shift & Poli');
+  appointment('appointment', 'Janji Temu'),
+  clinical('clinical', 'Klinis'),
+  labResult('lab_result', 'Hasil Lab'),
+  shift('shift', 'Shift & Roster'),
+  pharmacy('pharmacy', 'Farmasi & Resep'),
+  telemedicine('telemedicine', 'Telemedisin'),
+  support('support', 'Bantuan & IT'),
+  system('system', 'Sistem & Pengumuman'),
+  promotion('promotion', 'Informasi & Edukasi');
 
   const AmanahNotificationCategory(this.id, this.label);
 
   final String id;
   final String label;
+
+  static AmanahNotificationCategory fromString(String? raw) {
+    if (raw == null || raw.isEmpty) return AmanahNotificationCategory.all;
+    final String normalized = raw.toLowerCase().trim();
+    for (final AmanahNotificationCategory cat in AmanahNotificationCategory.values) {
+      if (cat.id == normalized) return cat;
+    }
+    return AmanahNotificationCategory.all;
+  }
 }
 
 enum AmanahNotificationSourceType {
@@ -94,6 +110,8 @@ class AmanahNotificationItem {
     required this.visual,
     this.isUnread = true,
     this.isUrgent = false,
+    this.audience = 'internal',
+    this.targetRoleId,
     this.actionLabel,
     this.actionUrl,
     this.sourceType = AmanahNotificationSourceType.unknown,
@@ -108,6 +126,8 @@ class AmanahNotificationItem {
   final AmanahNotificationCategory category;
   final bool isUnread;
   final bool isUrgent;
+  final String audience;
+  final String? targetRoleId;
   final String? actionLabel;
   final AmanahNotificationVisual visual;
   final String? actionUrl;
@@ -123,6 +143,8 @@ class AmanahNotificationItem {
     AmanahNotificationCategory? category,
     bool? isUnread,
     bool? isUrgent,
+    String? audience,
+    String? targetRoleId,
     String? actionLabel,
     AmanahNotificationVisual? visual,
     String? actionUrl,
@@ -138,6 +160,8 @@ class AmanahNotificationItem {
       category: category ?? this.category,
       isUnread: isUnread ?? this.isUnread,
       isUrgent: isUrgent ?? this.isUrgent,
+      audience: audience ?? this.audience,
+      targetRoleId: targetRoleId ?? this.targetRoleId,
       actionLabel: actionLabel ?? this.actionLabel,
       visual: visual ?? this.visual,
       actionUrl: actionUrl ?? this.actionUrl,
@@ -190,14 +214,18 @@ class AmanahNotificationStore extends ChangeNotifier {
     if (sourceType.isShiftRelated) {
       return AmanahNotificationCategory.shift;
     }
-    if (cat == null) return AmanahNotificationCategory.all;
-    switch (cat.toLowerCase()) {
+    if (cat == null || cat.isEmpty) return AmanahNotificationCategory.all;
+    final String c = cat.toLowerCase().trim();
+    switch (c) {
       case 'queue':
-      case 'appointment':
         return AmanahNotificationCategory.queue;
+      case 'appointment':
+        return AmanahNotificationCategory.appointment;
       case 'clinical':
-      case 'lab':
         return AmanahNotificationCategory.clinical;
+      case 'lab_result':
+      case 'lab':
+        return AmanahNotificationCategory.labResult;
       case 'shift':
       case 'schedule':
       case 'attendance':
@@ -205,6 +233,16 @@ class AmanahNotificationStore extends ChangeNotifier {
       case 'replacement':
       case 'payroll':
         return AmanahNotificationCategory.shift;
+      case 'pharmacy':
+        return AmanahNotificationCategory.pharmacy;
+      case 'telemedicine':
+        return AmanahNotificationCategory.telemedicine;
+      case 'support':
+        return AmanahNotificationCategory.support;
+      case 'system':
+        return AmanahNotificationCategory.system;
+      case 'promotion':
+        return AmanahNotificationCategory.promotion;
       default:
         return AmanahNotificationCategory.all;
     }
@@ -220,11 +258,28 @@ class AmanahNotificationStore extends ChangeNotifier {
       return sourceType.defaultVisual;
     }
 
-    final String c = (cat ?? '').toLowerCase();
-    if (c == 'queue' || c == 'appointment') return AmanahNotificationVisual.queueVitals;
-    if (c == 'shift' || c == 'schedule' || c == 'payroll')
-      return AmanahNotificationVisual.shiftSchedule;
-    return AmanahNotificationVisual.clinicalConsult;
+    final String c = (cat ?? '').toLowerCase().trim();
+    switch (c) {
+      case 'queue':
+        return AmanahNotificationVisual.queueVitals;
+      case 'appointment':
+        return AmanahNotificationVisual.appointmentSchedule;
+      case 'shift':
+      case 'schedule':
+      case 'payroll':
+        return AmanahNotificationVisual.shiftSchedule;
+      case 'lab_result':
+      case 'clinical_report':
+        return AmanahNotificationVisual.clinicalReport;
+      case 'pharmacy':
+        return AmanahNotificationVisual.pharmacyAlert;
+      case 'support':
+        return AmanahNotificationVisual.supportTicket;
+      case 'system':
+        return AmanahNotificationVisual.systemNotice;
+      default:
+        return AmanahNotificationVisual.clinicalConsult;
+    }
   }
 
   static String _formatTime(String? dateStr) {
@@ -272,6 +327,8 @@ class AmanahNotificationStore extends ChangeNotifier {
             rawSourceType,
           );
           final String sourceId = item['sourceId']?.toString() ?? '';
+          final String audience = item['audience']?.toString() ?? 'internal';
+          final String? targetRoleId = item['targetRoleId']?.toString();
 
           String? actionUrl = item['actionUrl']?.toString();
           String? actionLabel;
@@ -293,6 +350,8 @@ class AmanahNotificationStore extends ChangeNotifier {
             category: _mapCategory(categoryStr, sourceType),
             isUnread: !isRead,
             isUrgent: isUrgent,
+            audience: audience,
+            targetRoleId: targetRoleId,
             visual: _mapVisual(categoryStr, isUrgent, sourceType),
             actionLabel: actionLabel,
             actionUrl: actionUrl,

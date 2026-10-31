@@ -26,4 +26,8 @@ enum AmanahNotificationVisual {
   shiftSchedule,
   clinicalReport,
   shiftReminder,
+  systemNotice,
+  supportTicket,
+  pharmacyAlert,
+  appointmentSchedule,
 }
