@@ -259,6 +259,136 @@ class AmanahAuthRepository implements AuthRepository {
     }
   }
 
+  String _parseErrorMessage(http.Response response, {required String fallback}) {
+    try {
+      final dynamic decoded = jsonDecode(response.body);
+      if (decoded is! Map<String, dynamic>) return fallback;
+
+      final dynamic invalidParams = decoded['invalidParams'];
+      if (invalidParams is List && invalidParams.isNotEmpty) {
+        final dynamic first = invalidParams.first;
+        if (first is Map && first['reason'] != null && first['reason'].toString().trim().isNotEmpty) {
+          return first['reason'].toString().trim();
+        }
+      }
+
+      final dynamic errors = decoded['errors'];
+      if (errors is Map && errors.isNotEmpty) {
+        final dynamic firstVal = errors.values.first;
+        if (firstVal is String && firstVal.trim().isNotEmpty) {
+          return firstVal.trim();
+        }
+      }
+
+      final String? message = decoded['detail'] as String? ??
+          decoded['message'] as String? ??
+          (decoded['error'] is Map ? decoded['error']['message'] as String? : null);
+      if (message != null && message.trim().isNotEmpty) {
+        return message.trim();
+      }
+
+      return fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  @override
+  Future<bool> requestEmailChange({
+    required String newEmail,
+    String? currentPassword,
+  }) async {
+    final String? token = await _localDataSource.getToken();
+    if (token == null || token.isEmpty) {
+      throw const ServerFailure('Sesi Anda telah kedaluwarsa. Silakan masuk kembali.');
+    }
+
+    final http.Response response = await _remoteDataSource.requestEmailChange(
+      newEmail: newEmail,
+      currentPassword: currentPassword,
+      token: token,
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return true;
+    }
+
+    try {
+      final String msg = _parseErrorMessage(
+        response,
+        fallback: 'Gagal meminta perubahan email.',
+      );
+      throw ServerFailure(msg);
+    } catch (e) {
+      if (e is AuthFailure) rethrow;
+      throw const ServerFailure('Terjadi kesalahan saat meminta perubahan email.');
+    }
+  }
+
+  @override
+  Future<bool> verifyEmailChange({
+    required String newEmail,
+    required String otp,
+  }) async {
+    final String? token = await _localDataSource.getToken();
+    if (token == null || token.isEmpty) {
+      throw const ServerFailure('Sesi Anda telah kedaluwarsa. Silakan masuk kembali.');
+    }
+
+    final http.Response response = await _remoteDataSource.verifyEmailChange(
+      newEmail: newEmail,
+      otp: otp,
+      token: token,
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      await _localDataSource.deleteAllTokens();
+      return true;
+    }
+
+    try {
+      final String msg = _parseErrorMessage(
+        response,
+        fallback: 'Verifikasi kode OTP gagal.',
+      );
+      throw ServerFailure(msg);
+    } catch (e) {
+      if (e is AuthFailure) rethrow;
+      throw const ServerFailure('Terjadi kesalahan saat memverifikasi kode OTP.');
+    }
+  }
+
+  @override
+  Future<bool> changeEmailWithGoogle({
+    required String idToken,
+  }) async {
+    final String? token = await _localDataSource.getToken();
+    if (token == null || token.isEmpty) {
+      throw const ServerFailure('Sesi Anda telah kedaluwarsa. Silakan masuk kembali.');
+    }
+
+    final http.Response response = await _remoteDataSource.changeEmailWithGoogle(
+      idToken: idToken,
+      token: token,
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      await _localDataSource.deleteAllTokens();
+      return true;
+    }
+
+    try {
+      final String msg = _parseErrorMessage(
+        response,
+        fallback: 'Gagal mengalihkan akun Google dan email.',
+      );
+      throw ServerFailure(msg);
+    } catch (e) {
+      if (e is AuthFailure) rethrow;
+      throw const ServerFailure('Terjadi kesalahan saat mengalihkan akun Google.');
+    }
+  }
+
   @override
   Future<List<StaffOnboardingPoliOption>> fetchStaffOnboardingPolikliniks() async {
     final http.Response response = await _remoteDataSource.fetchClinics();

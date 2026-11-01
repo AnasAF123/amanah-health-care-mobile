@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
+import 'package:amanah_healthcare/features/authentication/presentation/screen/auth_bottom_sheet_screen.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_notification_model.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_aurora_background.dart';
@@ -70,11 +71,12 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     _scheduleStore.addListener(_onStoreUpdated);
     _notificationStore.addListener(_onStoreUpdated);
     _permissionStore.addListener(_onStoreUpdated);
-    _scheduleStore.syncTodaySchedules();
+    _scheduleStore.syncTodaySchedules().catchError((Object _) {});
     AmanahQueueStore.instance.loadTodaySessionsAndQueue();
   }
 
-  Future<void> _loadHomeSchedules() => _scheduleStore.syncTodaySchedules();
+  Future<void> _loadHomeSchedules() =>
+      _scheduleStore.syncTodaySchedules().catchError((Object _) {});
 
   void _onStoreUpdated() {
     if (mounted) {
@@ -114,6 +116,17 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
       widget.onLogout?.call();
     } else if (Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
+    }
+  }
+
+  void _forceLogout() {
+    if (widget.onLogout != null) {
+      widget.onLogout?.call();
+    } else {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute<void>(builder: (_) => const AuthBottomSheetScreen()),
+        (Route<dynamic> r) => false,
+      );
     }
   }
 
@@ -305,6 +318,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                       _showToast('Membuka menu $id');
                     },
                     onLogout: _handleLogout,
+                    onForceLogout: _forceLogout,
                   ),
                 },
               ),

@@ -183,7 +183,7 @@ class StaffCredentialRepository {
   Future<AmanahStaffProfile> updateMyProfile({
     String? fullName,
     String? phoneNumber,
-    String? email,
+
     String? birthPlace,
     String? birthDate,
     String? gender,
@@ -207,7 +207,7 @@ class StaffCredentialRepository {
       body: jsonEncode(<String, dynamic>{
         if (fullName != null && fullName.trim().isNotEmpty) 'fullName': fullName.trim(),
         if (phoneNumber != null && phoneNumber.trim().isNotEmpty) 'phoneNumber': phoneNumber.trim(),
-        if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
+
         if (birthPlace != null && birthPlace.trim().isNotEmpty) 'birthPlace': birthPlace.trim(),
         if (birthDate != null && birthDate.trim().isNotEmpty) 'birthDate': birthDate.trim(),
         if (gender != null && gender.trim().isNotEmpty) 'gender': gender.trim().toLowerCase(),

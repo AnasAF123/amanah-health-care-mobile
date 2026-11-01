@@ -179,7 +179,7 @@ class AccountIdentityController extends ChangeNotifier {
   Future<bool> updateField({
     String? fullName,
     String? phoneNumber,
-    String? email,
+
     String? birthPlace,
     String? birthDate,
     String? gender,
@@ -188,7 +188,7 @@ class AccountIdentityController extends ChangeNotifier {
     return _store.updateProfile(
       fullName: fullName,
       phoneNumber: phoneNumber,
-      email: email,
+
       birthPlace: birthPlace,
       birthDate: birthDate,
       gender: gender,

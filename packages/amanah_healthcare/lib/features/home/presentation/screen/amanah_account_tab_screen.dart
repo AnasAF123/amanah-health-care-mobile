@@ -22,6 +22,7 @@ class AmanahAccountTabScreen extends StatefulWidget {
     required this.user,
     required this.onMenuItemTap,
     required this.onLogout,
+    this.onForceLogout,
     this.onBack,
     super.key,
   });
@@ -29,6 +30,7 @@ class AmanahAccountTabScreen extends StatefulWidget {
   final AmanahAuthUser user;
   final ValueChanged<String> onMenuItemTap;
   final VoidCallback onLogout;
+  final VoidCallback? onForceLogout;
   final VoidCallback? onBack;
 
   @override
@@ -107,6 +109,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
         builder: (BuildContext ctx) => AmanahAccountIdentitySettingsScreen(
           user: widget.user,
           onBack: () => Navigator.of(ctx).pop(),
+          onLogout: widget.onForceLogout ?? widget.onLogout,
         ),
       ),
     );
@@ -132,6 +135,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
             builder: (BuildContext ctx) => AmanahAccountIdentitySettingsScreen(
               user: widget.user,
               onBack: () => Navigator.of(ctx).pop(),
+              onLogout: widget.onForceLogout ?? widget.onLogout,
             ),
           ),
         );

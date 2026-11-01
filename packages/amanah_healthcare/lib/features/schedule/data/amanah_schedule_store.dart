@@ -1,4 +1,6 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/notifications/amanah_push_service.dart';
 import 'package:amanah_healthcare/core/time/time.dart';
 import 'package:amanah_healthcare/features/schedule/data/repositories/schedule_repository_impl.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
@@ -11,6 +13,16 @@ class AmanahScheduleStore extends ChangeNotifier {
     : _timeService = timeService ?? DefaultTimeService() {
     _schedulesMap = <String, List<DoctorSchedule>>{};
     _daySettingsMap = <String, DayScheduleSetting>{};
+
+    // Auto-sync schedules when an incoming push notification arrives
+    AmanahPushService.instance.addMessageListener((RemoteMessage message) {
+      final dynamic category = message.data['category'];
+      if (category == 'schedule_updated' ||
+          category == 'shift' ||
+          category == null) {
+        syncTodaySchedules().catchError((_) {});
+      }
+    });
   }
 
   static final AmanahScheduleStore instance = AmanahScheduleStore._();
@@ -51,9 +63,15 @@ class AmanahScheduleStore extends ChangeNotifier {
     final List<DoctorSchedule> mapped = await Future.wait(
       sessions.map((MyScheduleSession s) async {
         final String targetSessionId = s.sessionId.isNotEmpty ? s.sessionId : s.id;
-        final List<SessionPatient> sessionPatients = targetSessionId.isNotEmpty
-            ? await repo.getSessionPatients(targetSessionId, date: dateStr)
-            : const <SessionPatient>[];
+        List<SessionPatient> sessionPatients = const <SessionPatient>[];
+        try {
+          if (targetSessionId.isNotEmpty) {
+            sessionPatients =
+                await repo.getSessionPatients(targetSessionId, date: dateStr);
+          }
+        } catch (_) {
+          sessionPatients = const <SessionPatient>[];
+        }
 
         final List<BookedPatient> booked = sessionPatients
             .map((SessionPatient p) => p.toBookedPatient())

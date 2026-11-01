@@ -258,6 +258,9 @@ class AmanahAuthUser {
     this.needsOnboarding = false,
     this.systemRole = '',
     this.staff,
+    this.hasPassword = true,
+    this.hasGoogle = false,
+    this.linkedProviders = const <String>[],
   });
 
   factory AmanahAuthUser.fromJson(Map<String, dynamic> json) {
@@ -306,6 +309,12 @@ class AmanahAuthUser {
       staff: json['staff'] != null
           ? AmanahStaffProfile.fromJson(json['staff'] as Map<String, dynamic>)
           : null,
+      hasPassword: json['hasPassword'] as bool? ?? true,
+      hasGoogle: json['hasGoogle'] as bool? ?? false,
+      linkedProviders: (json['linkedProviders'] as List<dynamic>?)
+              ?.map((dynamic e) => e.toString())
+              .toList(growable: false) ??
+          const <String>[],
     );
   }
 
@@ -326,6 +335,9 @@ class AmanahAuthUser {
   final bool needsOnboarding;
   final String systemRole;
   final AmanahStaffProfile? staff;
+  final bool hasPassword;
+  final bool hasGoogle;
+  final List<String> linkedProviders;
 
   String? get avatarUrl =>
       staff?.avatarUrl ?? (avatar.displayUrl.isNotEmpty ? avatar.displayUrl : null);
@@ -367,6 +379,9 @@ class AmanahAuthUser {
     bool? needsOnboarding,
     String? systemRole,
     AmanahStaffProfile? staff,
+    bool? hasPassword,
+    bool? hasGoogle,
+    List<String>? linkedProviders,
   }) {
     return AmanahAuthUser(
       id: id ?? this.id,
@@ -382,6 +397,9 @@ class AmanahAuthUser {
       needsOnboarding: needsOnboarding ?? this.needsOnboarding,
       systemRole: systemRole ?? this.systemRole,
       staff: staff ?? this.staff,
+      hasPassword: hasPassword ?? this.hasPassword,
+      hasGoogle: hasGoogle ?? this.hasGoogle,
+      linkedProviders: linkedProviders ?? this.linkedProviders,
     );
   }
 }

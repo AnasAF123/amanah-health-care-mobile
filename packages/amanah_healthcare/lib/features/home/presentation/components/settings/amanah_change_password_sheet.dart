@@ -4,6 +4,7 @@ import 'package:amanah_healthcare/features/authentication/domain/usecases/reques
 import 'package:amanah_healthcare/features/authentication/domain/usecases/reset_password.dart';
 import 'package:amanah_healthcare/features/authentication/domain/usecases/verify_otp.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/components/password_input_field.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 enum ChangePasswordViewMode { standard, otpReset }
@@ -199,7 +200,6 @@ class _AmanahChangePasswordSheetState extends State<AmanahChangePasswordSheet> {
     final Color bgColor = AmanahThemeTokens.surface(context);
     final Color textColor = AmanahThemeTokens.textPrimary(context);
     final Color secondaryTextColor = AmanahThemeTokens.textSecondary(context);
-    final Color primaryColor = AmanahThemeTokens.accent(context);
 
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -331,38 +331,18 @@ class _AmanahChangePasswordSheetState extends State<AmanahChangePasswordSheet> {
                 },
               ),
               const SizedBox(height: 24),
-              FilledButton(
+              AmanahButton.primary(
+                text: _mode == ChangePasswordViewMode.standard
+                    ? 'Simpan Kata Sandi'
+                    : 'Verifikasi & Simpan Sandi',
+                isLoading: _isLoading,
+                isFullWidth: true,
+                size: AmanahButtonSize.large,
                 onPressed: _isLoading
                     ? null
                     : (_mode == ChangePasswordViewMode.standard
                         ? _handleSubmitStandard
                         : _handleSubmitOtpReset),
-                style: FilledButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text(
-                        _mode == ChangePasswordViewMode.standard
-                            ? 'Simpan Kata Sandi'
-                            : 'Verifikasi & Simpan Sandi',
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
               ),
               const SizedBox(height: 12),
               if (_mode == ChangePasswordViewMode.standard)
@@ -373,7 +353,7 @@ class _AmanahChangePasswordSheetState extends State<AmanahChangePasswordSheet> {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: primaryColor,
+                      color: AmanahColorTokens.brand,
                     ),
                   ),
                 )

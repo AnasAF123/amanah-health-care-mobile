@@ -28,6 +28,20 @@ abstract interface class AuthRepository {
     required String newPassword,
   });
 
+  Future<bool> requestEmailChange({
+    required String newEmail,
+    String? currentPassword,
+  });
+
+  Future<bool> verifyEmailChange({
+    required String newEmail,
+    required String otp,
+  });
+
+  Future<bool> changeEmailWithGoogle({
+    required String idToken,
+  });
+
   Future<List<StaffOnboardingPoliOption>> fetchStaffOnboardingPolikliniks();
 
   Future<AmanahAuthUser?> submitStaffOnboarding(StaffOnboardingDto dto);

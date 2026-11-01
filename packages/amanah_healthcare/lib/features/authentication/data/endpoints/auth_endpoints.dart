@@ -17,6 +17,12 @@ abstract final class AuthEndpoints {
   static const String pathResetPassword =
       '${ApiPrefix.betterAuth}/auth/email-otp/reset-password';
   static const String pathChangePassword = '${ApiPrefix.v1}/auth/me';
+  static const String pathRequestEmailChange =
+      '${ApiPrefix.v1}/auth/me/request-email-change';
+  static const String pathVerifyEmailChange =
+      '${ApiPrefix.v1}/auth/me/verify-email-change';
+  static const String pathChangeEmailGoogle =
+      '${ApiPrefix.v1}/auth/me/change-email-google';
   static const String pathClinics = '${ApiPrefix.v1}/clinics';
   static const String pathStaffOnboarding =
       '${ApiPrefix.v1}/auth/onboarding/staff';
@@ -44,6 +50,8 @@ abstract final class AuthEndpoints {
   static const String checkVerificationOtp = pathCheckVerificationOtp;
   static const String resetPassword = pathResetPassword;
   static const String changePassword = pathChangePassword;
+  static const String requestEmailChange = pathRequestEmailChange;
+  static const String verifyEmailChange = pathVerifyEmailChange;
   static const String clinics = pathClinics;
   static const String staffOnboarding = pathStaffOnboarding;
   static const String avatar = pathAvatar;
@@ -94,6 +102,21 @@ abstract final class AuthEndpoints {
   static const ApiEndpoint changePasswordEndpoint = ApiEndpoint(
     path: pathChangePassword,
     method: HttpMethod.patch,
+    requiresAuth: true,
+  );
+  static const ApiEndpoint requestEmailChangeEndpoint = ApiEndpoint(
+    path: pathRequestEmailChange,
+    method: HttpMethod.post,
+    requiresAuth: true,
+  );
+  static const ApiEndpoint verifyEmailChangeEndpoint = ApiEndpoint(
+    path: pathVerifyEmailChange,
+    method: HttpMethod.post,
+    requiresAuth: true,
+  );
+  static const ApiEndpoint changeEmailGoogleEndpoint = ApiEndpoint(
+    path: pathChangeEmailGoogle,
+    method: HttpMethod.post,
     requiresAuth: true,
   );
   static const ApiEndpoint clinicsEndpoint = ApiEndpoint(

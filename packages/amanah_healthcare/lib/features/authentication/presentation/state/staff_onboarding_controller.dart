@@ -294,8 +294,8 @@ class StaffOnboardingController extends ChangeNotifier {
             (StaffOnboardingPoliOption p) => p.id == assignedPoliId,
             orElse: () => options.first,
           );
-        } else if (selectedPoliklinik == null) {
-          selectedPoliklinik = options.first;
+        } else {
+          selectedPoliklinik ??= options.first;
         }
       }
       isLoadingPolikliniks = false;

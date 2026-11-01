@@ -27,6 +27,20 @@ abstract interface class AuthRemoteDataSource {
     required String newPassword,
     required String token,
   });
+  Future<http.Response> requestEmailChange({
+    required String newEmail,
+    String? currentPassword,
+    required String token,
+  });
+  Future<http.Response> verifyEmailChange({
+    required String newEmail,
+    required String otp,
+    required String token,
+  });
+  Future<http.Response> changeEmailWithGoogle({
+    required String idToken,
+    required String token,
+  });
   Future<http.Response> fetchClinics();
   Future<http.Response> submitStaffOnboarding(
     Map<String, dynamic> dto,
@@ -177,6 +191,58 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       body: jsonEncode(<String, dynamic>{
         'oldPassword': oldPassword,
         'password': newPassword,
+      }),
+    );
+  }
+
+  @override
+  Future<http.Response> requestEmailChange({
+    required String newEmail,
+    String? currentPassword,
+    required String token,
+  }) {
+    final Uri uri = Uri.parse('$_baseUrl${AuthEndpoints.requestEmailChange}');
+    final Map<String, dynamic> body = <String, dynamic>{
+      'newEmail': newEmail.trim(),
+    };
+    if (currentPassword != null && currentPassword.isNotEmpty) {
+      body['currentPassword'] = currentPassword;
+    }
+    return _httpClient.post(
+      uri,
+      headers: _headers(token: token),
+      body: jsonEncode(body),
+    );
+  }
+
+  @override
+  Future<http.Response> verifyEmailChange({
+    required String newEmail,
+    required String otp,
+    required String token,
+  }) {
+    final Uri uri = Uri.parse('$_baseUrl${AuthEndpoints.verifyEmailChange}');
+    return _httpClient.post(
+      uri,
+      headers: _headers(token: token),
+      body: jsonEncode(<String, dynamic>{
+        'newEmail': newEmail.trim(),
+        'otp': otp.trim(),
+      }),
+    );
+  }
+
+  @override
+  Future<http.Response> changeEmailWithGoogle({
+    required String idToken,
+    required String token,
+  }) {
+    final Uri uri = Uri.parse('$_baseUrl${AuthEndpoints.pathChangeEmailGoogle}');
+    return _httpClient.post(
+      uri,
+      headers: _headers(token: token),
+      body: jsonEncode(<String, dynamic>{
+        'idToken': idToken.trim(),
       }),
     );
   }

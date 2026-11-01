@@ -10,7 +10,9 @@ export 'domain/repositories/auth_repository.dart';
 export 'domain/staff_credential_model.dart';
 export 'domain/staff_onboarding_poli_option.dart';
 export 'domain/user_avatar.dart';
+export 'domain/usecases/change_email_with_google.dart';
 export 'domain/usecases/change_password.dart';
+export 'domain/usecases/request_email_change.dart';
 export 'domain/usecases/request_password_reset.dart';
 export 'domain/usecases/reset_password.dart';
 export 'domain/usecases/restore_session.dart';
@@ -18,6 +20,7 @@ export 'domain/usecases/sign_in_with_email.dart';
 export 'domain/usecases/sign_in_with_google.dart';
 export 'domain/usecases/sign_out.dart';
 export 'domain/usecases/submit_staff_onboarding.dart';
+export 'domain/usecases/verify_email_change.dart';
 export 'domain/usecases/verify_otp.dart';
 
 // Data

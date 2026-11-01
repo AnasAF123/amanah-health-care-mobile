@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/authentication/domain/region_item.dart';
+import 'package:amanah_healthcare/features/authentication/authentication.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/settings/amanah_change_email_sheet.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_settings_components.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/settings/amanah_gender_picker_sheet.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/settings/amanah_region_picker_sheet.dart';
@@ -176,17 +177,50 @@ mixin IdentityEditActions on State<AmanahAccountIdentitySettingsScreen> {
     );
   }
 
-  void editEmail() {
-    editText(
-      title: 'Ubah Email Akun',
-      label: 'Alamat email institusi atau email resmi staf',
-      initialValue: controller.email,
-      keyboardType: TextInputType.emailAddress,
-      placeholder: 'email@rsamanah.co.id',
-      validator: IdentityValidators.email,
-      onSave: (String val) => controller.updateField(email: val),
+  Future<void> editEmail() async {
+    const AuthRepository repository = AmanahAuthRepository();
+    const RequestEmailChangeUseCase requestUseCase = RequestEmailChangeUseCase(repository);
+    const VerifyEmailChangeUseCase verifyUseCase = VerifyEmailChangeUseCase(repository);
+    const ChangeEmailWithGoogleUseCase googleUseCase = ChangeEmailWithGoogleUseCase(repository);
+
+    final bool isGoogleIndicated = controller.user.hasGoogle ||
+        controller.user.linkedProviders.contains('google') ||
+        controller.email.trim().toLowerCase().endsWith('@gmail.com');
+
+    final bool? result = await AmanahChangeEmailSheet.show(
+      context: context,
+      requestEmailChangeUseCase: requestUseCase,
+      verifyEmailChangeUseCase: verifyUseCase,
+      changeEmailWithGoogleUseCase: googleUseCase,
+      currentEmail: controller.email,
+      hasPassword: controller.user.hasPassword,
+      hasGoogle: isGoogleIndicated,
     );
+
+    if (result == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Email akun berhasil diperbarui. Sesi ditutup demi keamanan, silakan masuk kembali.'),
+          backgroundColor: AmanahColorTokens.brand,
+          duration: Duration(seconds: 4),
+        ),
+      );
+
+      if (widget.onLogout != null) {
+        Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
+        widget.onLogout!();
+      } else {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute<void>(
+            builder: (_) => const AuthBottomSheetScreen(),
+          ),
+          (Route<dynamic> route) => false,
+        );
+      }
+    }
   }
+
+
 
   Future<void> editProvince() => pickRegion(
     title: 'Pilih Provinsi',

@@ -64,7 +64,7 @@ class StaffProfileStore extends ChangeNotifier {
   Future<bool> updateProfile({
     String? fullName,
     String? phoneNumber,
-    String? email,
+
     String? birthPlace,
     String? birthDate,
     String? gender,
@@ -80,7 +80,7 @@ class StaffProfileStore extends ChangeNotifier {
       _profile = await _repository.updateMyProfile(
         fullName: fullName,
         phoneNumber: phoneNumber,
-        email: email,
+
         birthPlace: birthPlace,
         birthDate: birthDate,
         gender: gender,

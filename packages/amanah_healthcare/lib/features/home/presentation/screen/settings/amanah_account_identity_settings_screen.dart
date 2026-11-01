@@ -11,10 +11,16 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 
 /// Screen presenting the user's personal identity, contact, and administrative address.
 class AmanahAccountIdentitySettingsScreen extends StatefulWidget {
-  const AmanahAccountIdentitySettingsScreen({required this.user, this.onBack, super.key});
+  const AmanahAccountIdentitySettingsScreen({
+    required this.user,
+    this.onBack,
+    this.onLogout,
+    super.key,
+  });
 
   final AmanahAuthUser user;
   final VoidCallback? onBack;
+  final VoidCallback? onLogout;
 
   @override
   State<AmanahAccountIdentitySettingsScreen> createState() =>

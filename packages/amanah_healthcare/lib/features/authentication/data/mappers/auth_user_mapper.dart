@@ -18,6 +18,12 @@ abstract final class AuthUserMapper {
     final bool needsOnboarding = json['needsOnboarding'] as bool? ?? false;
     final String systemRole = json['systemRole'] as String? ?? roleStr;
     final Map<String, dynamic>? staffJson = json['staff'] as Map<String, dynamic>?;
+    final bool hasGoogle = json['hasGoogle'] as bool? ?? false;
+    final bool hasPassword = json['hasPassword'] as bool? ?? true;
+    final List<String> linkedProviders = (json['linkedProviders'] as List<dynamic>?)
+            ?.map((dynamic e) => e.toString())
+            .toList(growable: false) ??
+        const <String>[];
 
     final String id = json['id'] as String? ?? '';
     final String fullName = json['name'] as String? ?? json['fullName'] as String? ?? '';
@@ -49,6 +55,9 @@ abstract final class AuthUserMapper {
       needsOnboarding: needsOnboarding,
       systemRole: systemRole,
       staff: staffJson != null ? AmanahStaffProfile.fromJson(staffJson) : null,
+      hasPassword: hasPassword,
+      hasGoogle: hasGoogle,
+      linkedProviders: linkedProviders,
     );
   }
 }

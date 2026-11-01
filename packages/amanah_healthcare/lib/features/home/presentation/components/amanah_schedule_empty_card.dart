@@ -4,7 +4,6 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_s
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_schedule_card_tokens.dart';
-import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 
 class AmanahScheduleEmptyCard extends StatelessWidget {
   const AmanahScheduleEmptyCard({this.onCreateSchedule, super.key});

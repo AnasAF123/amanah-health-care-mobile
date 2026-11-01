@@ -1,6 +1,5 @@
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/config/amanah_auth_environment.dart';
 import 'package:amanah_healthcare/core/constants/amanah_asset_paths.dart';
 import 'package:amanah_healthcare/features/authentication/domain/user_avatar.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
@@ -73,10 +72,7 @@ class AmanahAvatar extends StatelessWidget {
   final BorderRadius? borderRadius;
 
   static String resolveDefaultBaseUrl() {
-    if (!kIsWeb && Platform.isAndroid) {
-      return 'http://10.0.2.2:3001';
-    }
-    return 'http://localhost:3001';
+    return AmanahAuthEnvironment.authBaseUrl;
   }
 
   String get _resolvedFullUrl {
