@@ -4,6 +4,7 @@ import 'package:amanah_healthcare/core/logging/app_log.dart';
 import 'package:amanah_healthcare/core/notifications/amanah_push_service.dart';
 import 'package:amanah_healthcare/core/usecase/use_case.dart';
 import 'package:amanah_healthcare/features/queue/data/repositories/queue_repository_impl.dart';
+import 'package:amanah_healthcare/features/queue/domain/entities/queue_no_show_result.dart';
 import 'package:amanah_healthcare/features/queue/domain/entities/queue_patient_card.dart';
 import 'package:amanah_healthcare/features/queue/domain/entities/queue_session_info.dart';
 import 'package:amanah_healthcare/features/queue/domain/entities/reschedule_options_entity.dart';
@@ -205,11 +206,14 @@ class AmanahQueueStore extends ChangeNotifier {
     }
   }
 
-  /// Reports patient did not show up.
-  Future<void> reportNoShow(String appointmentId, {String? notes}) async {
+  /// Reports patient did not show up. Returns the result with requeued or terminal status.
+  Future<QueueNoShowResult> reportNoShow(String appointmentId, {String? notes}) async {
     try {
-      await _reportNoShowUseCase(ReportNoShowParams(appointmentId: appointmentId, notes: notes));
+      final QueueNoShowResult result = await _reportNoShowUseCase(
+        ReportNoShowParams(appointmentId: appointmentId, notes: notes),
+      );
       await refreshQueue(silent: true);
+      return result;
     } catch (e) {
       _errorMessage = e is QueueFailure ? e.message : e.toString();
       notifyListeners();

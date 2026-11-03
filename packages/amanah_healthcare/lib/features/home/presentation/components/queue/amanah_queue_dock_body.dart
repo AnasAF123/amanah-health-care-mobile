@@ -40,6 +40,7 @@ class AmanahQueueDockBody extends StatelessWidget {
     this.onCardTap,
     this.onResetQueue,
     this.onCallPatient,
+    this.onNoShowPatient,
     super.key,
   });
 
@@ -70,6 +71,7 @@ class AmanahQueueDockBody extends StatelessWidget {
   final ValueChanged<DragUpdateDetails> onPanUpdate;
   final ValueChanged<DragEndDetails> onPanEnd;
   final VoidCallback? onCallPatient;
+  final VoidCallback? onNoShowPatient;
 
   @override
   Widget build(BuildContext context) {
@@ -236,6 +238,7 @@ class AmanahQueueDockBody extends StatelessWidget {
                     isLongPressing: false,
                     label: DoctorQueueCopywriting.pullCardToCall,
                     onCallPatient: onCallPatient,
+                    onNoShowPatient: onNoShowPatient,
                   ),
                 ),
               ),

@@ -15,6 +15,7 @@ import 'package:amanah_healthcare/features/home/presentation/components/queue/mo
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_queue_history_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/patient_record/patient_record.dart';
+import 'package:amanah_healthcare/features/queue/domain/entities/queue_no_show_result.dart';
 import 'package:amanah_healthcare/features/queue/domain/failures/queue_failure.dart';
 import 'package:amanah_healthcare/features/queue/presentation/state/amanah_queue_store.dart';
 
@@ -161,15 +162,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
         });
         _showSnack('Janji temu ${card.queueNumber} (${card.patientName}) berhasil dibatalkan.');
       } else if (action == AmanahQueueDismissAction.noShow) {
-        await _queueStore.reportNoShow(card.id, notes: 'Pasien tidak hadir saat giliran antrean');
-        if (!mounted) return;
-        setState(() {
-          _cards.removeWhere((c) => c.id == card.id);
-          _gesture.resetPositions();
-        });
-        _showSnack(
-          'Antrean ${card.queueNumber} (${card.patientName}) ditandai tidak hadir (No-Show).',
-        );
+        await _executeNoShowPatient(card);
       }
     } catch (e) {
       if (!mounted) return;
@@ -177,6 +170,56 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
           ? e.message
           : e.toString().replaceFirst('Exception: ', '');
       _showSnack('Gagal memproses aksi antrean: $msg', isError: true);
+      setState(() {
+        _gesture.resetPositions();
+      });
+    } finally {
+      if (mounted) setState(() => _isActionLoading = false);
+    }
+  }
+
+  Future<void> _executeNoShowPatient(AmanahQueueCardData card) async {
+    final QueueNoShowResult result = await _queueStore.reportNoShow(
+      card.id,
+      notes: 'Pasien tidak hadir saat giliran antrean',
+    );
+    if (!mounted) return;
+
+    if (result.requeued) {
+      setState(() {
+        if (_cards.isNotEmpty && _cards.first.id == card.id) {
+          final chosen = _cards.removeAt(0);
+          final int targetPos = _cards.length > 3 ? 3 : _cards.length;
+          _cards.insert(targetPos, chosen);
+        }
+        _gesture.resetPositions();
+      });
+      _showSnack(
+        'Nomor antrean ${card.queueNumber} (${card.patientName}) digeser ke belakang (Panggilan ke-${result.attemptNumber}). Sisa kesempatan: ${result.remainingAttempts} kali.',
+      );
+    } else {
+      setState(() {
+        _cards.removeWhere((c) => c.id == card.id);
+        _gesture.resetPositions();
+      });
+      _showSnack(
+        'Antrean ${card.queueNumber} (${card.patientName}) ditandai tidak hadir (No-Show). Status antrean ditutup.',
+      );
+    }
+  }
+
+  Future<void> _handleNoShowPatientAction() async {
+    if (_cards.isEmpty || _isActionLoading) return;
+    final AmanahQueueCardData current = _cards.first;
+    setState(() => _isActionLoading = true);
+    try {
+      await _executeNoShowPatient(current);
+    } catch (e) {
+      if (!mounted) return;
+      final String msg = e is QueueFailure
+          ? e.message
+          : e.toString().replaceFirst('Exception: ', '');
+      _showSnack('Gagal memproses lewati antrean: $msg', isError: true);
       setState(() {
         _gesture.resetPositions();
       });
@@ -416,6 +459,7 @@ class _AmanahQueueDockScreenState extends State<AmanahQueueDockScreen>
                 onCardTap: _openPatientIntake,
                 onResetQueue: _queueStore.loadTodaySessionsAndQueue,
                 onCallPatient: (_cards.isNotEmpty && _canServe) ? _handleCallPatientAction : null,
+                onNoShowPatient: (_cards.isNotEmpty && _canServe) ? _handleNoShowPatientAction : null,
                 onPanDown: (details) {
                   if (_canServe) {
                     _gesture.onPanDown(details, isIdle: _animator.activationStage == 'idle');

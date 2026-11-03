@@ -11,6 +11,7 @@ class AmanahBottomNotchedDock extends StatelessWidget {
     required this.isLongPressing,
     required this.label,
     this.onCallPatient,
+    this.onNoShowPatient,
   });
 
   final bool isActivating;
@@ -18,6 +19,7 @@ class AmanahBottomNotchedDock extends StatelessWidget {
   final bool isLongPressing;
   final String label;
   final VoidCallback? onCallPatient;
+  final VoidCallback? onNoShowPatient;
 
   @override
   Widget build(BuildContext context) {
@@ -79,52 +81,102 @@ class AmanahBottomNotchedDock extends StatelessWidget {
                 ),
               ),
 
-              if (onCallPatient != null)
+              if (onCallPatient != null || onNoShowPatient != null)
                 Positioned(
                   top: 80,
                   child: AnimatedOpacity(
                     duration: const Duration(milliseconds: 300),
                     opacity: isActivating ? 0.0 : 1.0,
-                    child: InkWell(
-                      onTap: onCallPatient,
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? AmanahColorTokens.surfaceDark.withValues(alpha: 0.8)
-                              : AmanahColorTokens.surfaceLight.withValues(alpha: 0.9),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: AmanahColorTokens.brandLight.withValues(alpha: 0.35),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            const Icon(
-                              Icons.phone_rounded,
-                              size: 14,
-                              color: AmanahColorTokens.brandLight,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              DoctorQueueCopywriting.callPatientThis,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        if (onCallPatient != null)
+                          InkWell(
+                            onTap: onCallPatient,
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
                                 color: isDark
-                                    ? AmanahColorTokens.neutral200
-                                    : AmanahColorTokens.neutral800,
+                                    ? AmanahColorTokens.surfaceDark.withValues(alpha: 0.8)
+                                    : AmanahColorTokens.surfaceLight.withValues(alpha: 0.9),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: AmanahColorTokens.brandLight.withValues(alpha: 0.35),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  const Icon(
+                                    Icons.phone_rounded,
+                                    size: 14,
+                                    color: AmanahColorTokens.brandLight,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    DoctorQueueCopywriting.callPatientThis,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: isDark
+                                          ? AmanahColorTokens.neutral200
+                                          : AmanahColorTokens.neutral800,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
+                        if (onCallPatient != null && onNoShowPatient != null)
+                          const SizedBox(width: 8),
+                        if (onNoShowPatient != null)
+                          InkWell(
+                            onTap: onNoShowPatient,
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AmanahColorTokens.warningSurface.withValues(alpha: 0.4)
+                                    : AmanahColorTokens.warningSurface,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: AmanahColorTokens.warning.withValues(alpha: 0.4),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  const Icon(
+                                    Icons.person_off_rounded,
+                                    size: 14,
+                                    color: AmanahColorTokens.warning,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    'Lewati Antrean',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: isDark
+                                          ? AmanahColorTokens.warning
+                                          : AmanahColorTokens.warning,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),

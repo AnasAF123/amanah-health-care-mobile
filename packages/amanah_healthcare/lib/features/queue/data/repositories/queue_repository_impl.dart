@@ -2,6 +2,7 @@ import 'package:amanah_healthcare/core/logging/app_log.dart';
 import 'package:amanah_healthcare/core/network/api_exception.dart';
 import 'package:amanah_healthcare/features/queue/data/datasources/queue_remote_data_source.dart';
 import 'package:amanah_healthcare/features/queue/data/mappers/queue_patient_mapper.dart';
+import 'package:amanah_healthcare/features/queue/domain/entities/queue_no_show_result.dart';
 import 'package:amanah_healthcare/features/queue/domain/entities/queue_patient_card.dart';
 import 'package:amanah_healthcare/features/queue/domain/entities/queue_session_info.dart';
 import 'package:amanah_healthcare/features/queue/domain/entities/reschedule_options_entity.dart';
@@ -130,9 +131,13 @@ class QueueRepositoryImpl implements QueueRepository {
   }
 
   @override
-  Future<void> reportNoShow(String appointmentId, {String? notes}) async {
+  Future<QueueNoShowResult> reportNoShow(String appointmentId, {String? notes}) async {
     try {
-      await _remoteDataSource.reportNoShow(appointmentId, notes: notes);
+      final dynamic raw = await _remoteDataSource.reportNoShow(appointmentId, notes: notes);
+      if (raw is Map<String, dynamic>) {
+        return QueueNoShowResult.fromJson(raw);
+      }
+      return const QueueNoShowResult();
     } on ApiException catch (e) {
       throw QueueFailure(e.message, code: e.code);
     } catch (e) {

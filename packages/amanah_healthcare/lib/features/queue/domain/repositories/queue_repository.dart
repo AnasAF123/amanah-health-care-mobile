@@ -1,3 +1,4 @@
+import 'package:amanah_healthcare/features/queue/domain/entities/queue_no_show_result.dart';
 import 'package:amanah_healthcare/features/queue/domain/entities/queue_patient_card.dart';
 import 'package:amanah_healthcare/features/queue/domain/entities/queue_session_info.dart';
 import 'package:amanah_healthcare/features/queue/domain/entities/reschedule_options_entity.dart';
@@ -23,7 +24,7 @@ abstract interface class QueueRepository {
   Future<void> cancelAppointment(String appointmentId, {String? reason});
 
   /// Reports patient did not respond to call.
-  Future<void> reportNoShow(String appointmentId, {String? notes});
+  Future<QueueNoShowResult> reportNoShow(String appointmentId, {String? notes});
 
   /// Reschedules an appointment to a target date and session.
   Future<void> rescheduleAppointment(
