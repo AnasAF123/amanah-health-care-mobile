@@ -21,6 +21,41 @@ class PermissionRepositoryImpl implements PermissionRepository {
 
   Never _handleError(Object error) {
     if (error is BadRequestException) {
+      final String? code = error.code;
+      final Map<String, dynamic>? details = error.data is Map<String, dynamic>
+          ? (error.data as Map<String, dynamic>)['details'] as Map<String, dynamic>?
+          : null;
+
+      if (code != null && code.startsWith('LEAVE_')) {
+        String title = 'Ketentuan Izin';
+        switch (code) {
+          case 'LEAVE_QUOTA_EXCEEDED':
+            title = 'Batas Kuota Bulanan';
+            break;
+          case 'LEAVE_NOTICE_DAYS_REQUIRED':
+            title = 'Batas Waktu Pengajuan';
+            break;
+          case 'LEAVE_PREVIOUS_PERIOD_ACTIVE':
+            title = 'Periode Izin Aktif';
+            break;
+          case 'LEAVE_OVERLAPPING_CONFLICT':
+            title = 'Jadwal Izin Bentrok';
+            break;
+          case 'LEAVE_SCHEDULE_UNAVAILABLE':
+            title = 'Jadwal Tidak Tersedia';
+            break;
+          case 'LEAVE_CLINIC_CLOSED':
+            title = 'Klinik Libur';
+            break;
+        }
+        throw PermissionPolicyFailure(
+          error.message,
+          title: title,
+          code: code,
+          details: details,
+        );
+      }
+
       throw PermissionValidationFailure(error.message, code: error.code);
     }
     if (error is ForbiddenException) {

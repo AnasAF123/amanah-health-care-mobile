@@ -143,11 +143,13 @@ class OnboardingClinicalSection extends StatelessWidget {
             children: <Widget>[
               Icon(Icons.lock_rounded, size: 14, color: activeBrand),
               const SizedBox(width: 6),
-              Text(
-                'Unit poliklinik dikunci sesuai penugasan Administrator Klinik',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: activeBrand,
-                  fontWeight: FontWeight.w600,
+              Expanded(
+                child: Text(
+                  'Unit poliklinik dikunci sesuai penugasan Administrator Klinik',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: activeBrand,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],

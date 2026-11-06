@@ -43,3 +43,15 @@ final class PermissionValidationFailure extends AmanahPermissionException {
     super.code = 'VALIDATION_ERROR',
   });
 }
+
+final class PermissionPolicyFailure extends AmanahPermissionException {
+  final String title;
+  final Map<String, dynamic>? details;
+
+  const PermissionPolicyFailure(
+    super.message, {
+    required this.title,
+    super.code,
+    this.details,
+  });
+}

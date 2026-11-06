@@ -8,9 +8,9 @@ enum ExportFormat {
   String get label {
     switch (this) {
       case ExportFormat.pdf:
-        return 'Dokumen PDF (.pdf)';
+        return 'Pdf';
       case ExportFormat.xlsx:
-        return 'Spreadsheet Excel (.xlsx)';
+        return 'Excel';
       case ExportFormat.csv:
         return 'Berkas Tabel CSV (.csv)';
     }

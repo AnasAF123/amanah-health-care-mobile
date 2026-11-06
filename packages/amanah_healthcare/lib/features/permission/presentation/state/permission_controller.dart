@@ -7,6 +7,7 @@ import 'package:amanah_healthcare/features/permission/domain/entities/eligible_s
 import 'package:amanah_healthcare/features/permission/domain/entities/leave_request_entity.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/replacement_facets.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/replacement_item.dart';
+import 'package:amanah_healthcare/features/permission/domain/failures/permission_failure.dart';
 import 'package:amanah_healthcare/features/permission/domain/repositories/permission_repository.dart';
 import 'package:amanah_healthcare/features/permission/domain/usecases/cancel_leave_usecase.dart';
 import 'package:amanah_healthcare/features/permission/domain/usecases/claim_replacement_usecase.dart';
@@ -15,6 +16,7 @@ import 'package:amanah_healthcare/features/permission/domain/usecases/get_eligib
 import 'package:amanah_healthcare/features/permission/domain/usecases/get_my_leaves_usecase.dart';
 import 'package:amanah_healthcare/features/permission/domain/usecases/get_replacement_facets_usecase.dart';
 import 'package:amanah_healthcare/features/permission/domain/usecases/request_leave_usecase.dart';
+import 'package:amanah_healthcare/features/permission/presentation/components/modal/amanah_leave_policy_exception_modal.dart';
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 
 class PermissionController extends ChangeNotifier {
@@ -147,7 +149,14 @@ class PermissionController extends ChangeNotifier {
     } catch (e) {
       _errorMessage = e.toString();
       if (context != null && context.mounted) {
-        AmanahToaster.error(context, message: _errorMessage ?? 'Gagal mengajukan izin');
+        if (e is PermissionPolicyFailure) {
+          await AmanahLeavePolicyExceptionModal.show(
+            context: context,
+            failure: e,
+          );
+        } else {
+          AmanahToaster.error(context, message: _errorMessage ?? 'Gagal mengajukan izin');
+        }
       }
       return false;
     } finally {
