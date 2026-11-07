@@ -3,6 +3,7 @@ import 'package:amanah_healthcare/core/time/contracts/time_service.dart';
 import 'package:amanah_healthcare/core/time/services/default_time_service.dart';
 import 'package:amanah_healthcare/features/patient_record/domain/entities/patient_intake_record.dart';
 import 'package:amanah_healthcare/features/patient_record/presentation/components/patient_detail_grouped_card.dart';
+import 'package:amanah_healthcare/features/patient_record/presentation/components/patient_detail_masked_nik_tile.dart';
 import 'package:amanah_healthcare/features/patient_record/presentation/components/sub_sheets/vaccine_history_sheet.dart';
 
 /// Clinical presentation view for Child Immunization & Development Intake Form.
@@ -51,10 +52,9 @@ class ImmunizationIntakeView extends StatelessWidget {
               value: immunization.childName,
               isDark: isDark,
             ),
-            PatientDetailTile(
-              icon: Icons.badge_outlined,
+            PatientDetailMaskedNikTile(
               label: 'NIK Anak (Tersensor)',
-              value: PatientDataMasker.maskNik(immunization.childNik),
+              nik: immunization.childNik,
               isDark: isDark,
             ),
             PatientDetailTile(

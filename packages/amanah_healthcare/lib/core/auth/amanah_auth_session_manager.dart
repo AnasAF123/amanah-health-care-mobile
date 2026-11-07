@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:amanah_healthcare/core/logging/app_log.dart';
+import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/authentication/domain/repositories/auth_repository.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_notification_model.dart';
 import 'package:amanah_healthcare/features/permission/data/amanah_permission_store.dart';
@@ -22,6 +24,17 @@ class AmanahAuthSessionManager {
       StreamController<AuthSessionEvent>.broadcast();
 
   Stream<AuthSessionEvent> get eventStream => _eventController.stream;
+
+  final ValueNotifier<AmanahAuthUser?> currentUserNotifier =
+      ValueNotifier<AmanahAuthUser?>(null);
+
+  AmanahAuthUser? get currentUser => currentUserNotifier.value;
+
+  void updateCurrentUser(AmanahAuthUser user) {
+    if (currentUserNotifier.value != user) {
+      currentUserNotifier.value = user;
+    }
+  }
 
   DateTime? _lastExpirationNotification;
   DateTime? _lastLifecycleCheck;
@@ -48,6 +61,7 @@ class AmanahAuthSessionManager {
   /// Resets all local clinical stores to guarantee zero data leakage between user sessions.
   void resetAllStores() {
     AppLog.info('[AmanahAuthSessionManager] Resetting all clinical stores');
+    currentUserNotifier.value = null;
     AmanahScheduleStore.instance.reset();
     AmanahNotificationStore.instance.reset();
     AmanahPermissionStore.instance.reset();
@@ -77,8 +91,13 @@ class AmanahAuthSessionManager {
           notifySessionExpired(reason: 'Session invalid upon app resumption check');
           return false;
         }
+        final freshUser = await authRepository.getSession();
+        if (freshUser != null) {
+          updateCurrentUser(freshUser);
+        }
         return true;
       }
+      updateCurrentUser(user);
       return true;
     } catch (_) {
       // In case of transient network failure, do not aggressively terminate the session
@@ -88,5 +107,6 @@ class AmanahAuthSessionManager {
 
   void dispose() {
     _eventController.close();
+    currentUserNotifier.dispose();
   }
 }

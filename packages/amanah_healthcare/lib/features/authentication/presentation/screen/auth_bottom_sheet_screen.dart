@@ -59,6 +59,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> with Widg
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    AmanahAuthSessionManager.instance.currentUserNotifier.addListener(_onCurrentUserUpdated);
     _listenToSessionEvents();
     _restoreSession();
   }
@@ -66,8 +67,18 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> with Widg
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    AmanahAuthSessionManager.instance.currentUserNotifier.removeListener(_onCurrentUserUpdated);
     _sessionSubscription?.cancel();
     super.dispose();
+  }
+
+  void _onCurrentUserUpdated() {
+    final AmanahAuthUser? user = AmanahAuthSessionManager.instance.currentUser;
+    if (user != null && mounted && _authenticatedUser != user) {
+      setState(() {
+        _authenticatedUser = user;
+      });
+    }
   }
 
   void _listenToSessionEvents() {
@@ -125,6 +136,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> with Widg
           _showOnboardingScreen = true;
           _isRestoringSession = false;
         });
+        AmanahAuthSessionManager.instance.updateCurrentUser(user);
         widget.onAuthenticated?.call(user);
         unawaited(AmanahPushService.instance.registerDeviceWithBackend());
       } else if (mounted) {
@@ -163,6 +175,7 @@ class _AuthBottomSheetScreenState extends State<AuthBottomSheetScreen> with Widg
 
   void _onAuthenticated(AmanahAuthUser user) {
     widget.onAuthenticated?.call(user);
+    AmanahAuthSessionManager.instance.updateCurrentUser(user);
     setState(() {
       _authenticatedUser = user;
       _showOnboardingScreen = true;

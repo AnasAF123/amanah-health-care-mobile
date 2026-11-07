@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/auth/amanah_auth_session_manager.dart';
+import 'package:amanah_healthcare/features/authentication/data/amanah_auth_repository.dart';
 import 'package:amanah_healthcare/features/authentication/data/staff_profile_store.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
@@ -75,7 +77,7 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
   }
 
   AmanahStaffProfile? get _activeStaff => _profileStore.profile ?? widget.user.staff;
-  String get _fullName => _activeStaff?.fullName ?? widget.user.fullName;
+  String get _fullName => _activeStaff?.fullName ?? widget.user.displayName;
   String get _phone => _activeStaff?.phoneNumber ?? widget.user.phone;
   String get _roleText => _activeStaff?.profession ?? widget.user.roleName;
 
@@ -199,7 +201,17 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
           Expanded(
             child: AmanahPullToRefresh(
               onRefresh: () async {
-                await _profileStore.fetchProfile(force: true);
+                await Future.wait(<Future<void>>[
+                  _profileStore.fetchProfile(force: true),
+                  (() async {
+                    try {
+                      final fresh = await const AmanahAuthRepository().getSession();
+                      if (fresh != null) {
+                        AmanahAuthSessionManager.instance.updateCurrentUser(fresh);
+                      }
+                    } catch (_) {}
+                  })(),
+                ]);
               },
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),

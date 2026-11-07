@@ -3,6 +3,7 @@ import 'package:amanah_healthcare/core/time/contracts/time_service.dart';
 import 'package:amanah_healthcare/core/time/services/default_time_service.dart';
 import 'package:amanah_healthcare/features/patient_record/domain/entities/patient_intake_record.dart';
 import 'package:amanah_healthcare/features/patient_record/presentation/components/patient_detail_grouped_card.dart';
+import 'package:amanah_healthcare/features/patient_record/presentation/components/patient_detail_masked_nik_tile.dart';
 import 'package:amanah_healthcare/features/patient_record/presentation/components/sub_sheets/contraceptive_history_sheet.dart';
 import 'package:amanah_healthcare/features/patient_record/presentation/components/sub_sheets/disease_history_sheet.dart';
 import 'package:amanah_healthcare/features/patient_record/presentation/components/sub_sheets/maternal_timeline_sheet.dart';
@@ -48,10 +49,9 @@ class MaternalIntakeView extends StatelessWidget {
     if (husband != null) {
       if (husband.nik != null && husband.nik!.trim().isNotEmpty) {
         list.add(
-          PatientDetailTile(
-            icon: Icons.badge_outlined,
+          PatientDetailMaskedNikTile(
             label: 'NIK Suami (Tersensor)',
-            value: PatientDataMasker.maskNik(husband.nik),
+            nik: husband.nik,
             isDark: isDark,
           ),
         );

@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/auth/amanah_auth_session_manager.dart';
+import 'package:amanah_healthcare/features/authentication/data/amanah_auth_repository.dart';
+import 'package:amanah_healthcare/features/authentication/data/staff_profile_store.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/screen/auth_bottom_sheet_screen.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
@@ -51,10 +54,11 @@ class AmanahHomeShell extends StatefulWidget {
 }
 
 class _AmanahHomeShellState extends State<AmanahHomeShell> {
-  AmanahAuthUser get _currentUser => widget.user ?? AmanahHomeShell._emptyUser;
+  late AmanahAuthUser _currentUser;
   final AmanahScheduleStore _scheduleStore = AmanahScheduleStore.instance;
   final AmanahNotificationStore _notificationStore = AmanahNotificationStore.instance;
   final AmanahPermissionStore _permissionStore = AmanahPermissionStore.instance;
+  final StaffProfileStore _profileStore = StaffProfileStore.instance;
   AmanahHomeTab _selectedTab = AmanahHomeTab.home;
   String? _toastMessage;
   Timer? _toastTimer;
@@ -68,6 +72,9 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
   @override
   void initState() {
     super.initState();
+    _currentUser = widget.user ?? AmanahHomeShell._emptyUser;
+    AmanahAuthSessionManager.instance.currentUserNotifier.addListener(_onSessionUserUpdated);
+    _profileStore.addListener(_onProfileStoreUpdated);
     _scheduleStore.addListener(_onStoreUpdated);
     _notificationStore.addListener(_onStoreUpdated);
     _permissionStore.addListener(_onStoreUpdated);
@@ -75,8 +82,68 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     AmanahQueueStore.instance.loadTodaySessionsAndQueue();
   }
 
-  Future<void> _loadHomeSchedules() =>
-      _scheduleStore.syncTodaySchedules().catchError((Object _) {});
+  void _onSessionUserUpdated() {
+    final AmanahAuthUser? user = AmanahAuthSessionManager.instance.currentUser;
+    if (user != null && mounted) {
+      setState(() {
+        _currentUser = user;
+      });
+    }
+  }
+
+  void _onProfileStoreUpdated() {
+    final staff = _profileStore.profile;
+    if (staff != null && mounted) {
+      setState(() {
+        _currentUser = _currentUser.copyWith(
+          fullName: staff.fullName,
+          phone: staff.phoneNumber,
+          staff: staff,
+        );
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(AmanahHomeShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.user != null && widget.user != oldWidget.user) {
+      _currentUser = widget.user!;
+    }
+  }
+
+  Future<void> _refreshCurrentUser() async {
+    try {
+      final AmanahAuthUser? freshUser = await const AmanahAuthRepository().getSession();
+      if (freshUser != null && mounted) {
+        setState(() {
+          _currentUser = freshUser;
+        });
+        AmanahAuthSessionManager.instance.updateCurrentUser(freshUser);
+        if (freshUser.staff != null) {
+          _profileStore.seed(freshUser.staff!);
+        }
+      }
+    } catch (_) {
+      // Non-fatal, preserve current user state on network error
+    }
+  }
+
+  Future<void> _loadHomeData() async {
+    try {
+      await Future.wait(<Future<void>>[
+        _refreshCurrentUser(),
+        _scheduleStore.syncTodaySchedules(),
+        _notificationStore.fetchMyNotifications(),
+        _profileStore.fetchProfile(force: true),
+        AmanahQueueStore.instance.loadTodaySessionsAndQueue(),
+      ]);
+    } catch (_) {
+      // Non-blocking on network failure
+    }
+  }
+
+  Future<void> _loadHomeSchedules() => _loadHomeData();
 
   void _onStoreUpdated() {
     if (mounted) {
@@ -173,6 +240,8 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
 
   @override
   void dispose() {
+    AmanahAuthSessionManager.instance.currentUserNotifier.removeListener(_onSessionUserUpdated);
+    _profileStore.removeListener(_onProfileStoreUpdated);
     _scheduleStore.removeListener(_onStoreUpdated);
     _notificationStore.removeListener(_onStoreUpdated);
     _permissionStore.removeListener(_onStoreUpdated);
@@ -300,7 +369,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                   ),
                   AmanahHomeTab.notifications => AmanahLeavePermissionTabScreen(
                     key: const ValueKey<String>('permissions_content'),
-                    doctorName: _currentUser.fullName,
+                    doctorName: _currentUser.displayName,
                     doctorRole: _currentUser.roleName,
                     avatarUrl: _currentUser.staff?.avatarUrl,
                     staffProfileId: _currentUser.staff?.id ?? '',

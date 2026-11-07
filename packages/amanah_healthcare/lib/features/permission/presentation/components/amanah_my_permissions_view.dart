@@ -4,6 +4,7 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_p
 import 'package:amanah_healthcare/features/permission/domain/amanah_permission_model.dart';
 import 'package:amanah_healthcare/features/permission/presentation/components/amanah_empty_permission_view.dart';
 import 'package:amanah_healthcare/features/permission/presentation/components/amanah_permission_card.dart';
+import 'package:amanah_healthcare/features/permission/presentation/components/amanah_permission_card_skeleton.dart';
 
 /// Tab Viewport: "Izin Saya"
 /// Encapsulates filter bar, pull-to-refresh, empty states, and permission cards list.
@@ -72,8 +73,14 @@ class AmanahMyPermissionsView extends StatelessWidget {
           child: AmanahPullToRefresh(
             onRefresh: onRefresh,
             child: isLoading && records.isEmpty
-                ? const Center(
-                    child: CircularProgressIndicator(),
+                ? ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: 3,
+                    separatorBuilder: (BuildContext context, int index) =>
+                        const SizedBox(height: 14),
+                    itemBuilder: (BuildContext context, int index) =>
+                        const AmanahPermissionCardSkeleton(),
                   )
                 : filteredList.isEmpty
                     ? AmanahEmptyPermissionView(

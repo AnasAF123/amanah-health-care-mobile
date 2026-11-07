@@ -117,12 +117,17 @@ class AmanahQuickAction {
   static List<AmanahQuickAction> buildActionsForUser(AmanahAuthUser user) {
     final List<AmanahQuickAction> actions = <AmanahQuickAction>[
       const AmanahQuickAction(id: 'history', label: 'History', icon: AmanahQuickActionIcon.history),
-      const AmanahQuickAction(
-        id: 'jadwal-saya',
-        label: 'Jadwal Saya',
-        icon: AmanahQuickActionIcon.schedule,
-      ),
     ];
+
+    if (user.isClinical) {
+      actions.add(
+        const AmanahQuickAction(
+          id: 'jadwal-saya',
+          label: 'Jadwal Saya',
+          icon: AmanahQuickActionIcon.schedule,
+        ),
+      );
+    }
 
     if (user.canServeQueue) {
       actions.add(

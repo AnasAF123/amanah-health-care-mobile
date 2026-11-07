@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/core/constants/gender_constants.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/account/amanah_masked_nik_setting_row.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_settings_components.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/settings/account_identity/identity_display_extensions.dart';
 import 'package:amanah_healthcare/features/home/presentation/state/account_identity_controller.dart';
@@ -33,9 +34,9 @@ class IdentityPersonalSection extends StatelessWidget {
           value: controller.name.orFallback(),
           onEdit: onEditName,
         ),
-        AmanahSettingEditableRow(
+        AmanahMaskedNikSettingRow(
           label: 'NIK (Nomor Induk Kependudukan)',
-          value: controller.nik.orFallback(),
+          nik: controller.nik,
           onEdit: onEditNik,
         ),
         AmanahSettingEditableRow(

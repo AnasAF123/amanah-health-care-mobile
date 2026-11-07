@@ -339,6 +339,15 @@ class AmanahAuthUser {
   final bool hasGoogle;
   final List<String> linkedProviders;
 
+  /// Canonical user display name prioritizing staff full name over OAuth username.
+  String get displayName {
+    final String? staffName = staff?.fullName?.trim();
+    if (staffName != null && staffName.isNotEmpty) {
+      return staffName;
+    }
+    return fullName.isNotEmpty ? fullName : email;
+  }
+
   String? get avatarUrl =>
       staff?.avatarUrl ?? (avatar.displayUrl.isNotEmpty ? avatar.displayUrl : null);
 

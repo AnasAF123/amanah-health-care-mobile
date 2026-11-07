@@ -5,6 +5,7 @@ import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_date_carousel_strip.dart';
 import 'package:amanah_healthcare/features/patient_record/patient_record.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_booked_patient_card.dart';
+import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_booked_patient_card_skeleton.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_doctor_session_card.dart';
 
 class AmanahScheduleOverviewView extends StatelessWidget {
@@ -16,6 +17,7 @@ class AmanahScheduleOverviewView extends StatelessWidget {
     required this.isCuti,
     required this.schedules,
     required this.bookedPatients,
+    this.isLoading = false,
     required this.dark,
     required this.dateSubtitle,
     required this.onSelectDate,
@@ -32,6 +34,7 @@ class AmanahScheduleOverviewView extends StatelessWidget {
   final bool isCuti;
   final List<DoctorSchedule> schedules;
   final List<({BookedPatient patient, DoctorSchedule schedule})> bookedPatients;
+  final bool isLoading;
   final bool dark;
   final String dateSubtitle;
   final ValueChanged<DateTime> onSelectDate;
@@ -70,7 +73,9 @@ class AmanahScheduleOverviewView extends StatelessWidget {
               ),
             ),
             Text(
-              '${bookedPatients.length} Pasien',
+              isLoading && bookedPatients.isEmpty
+                  ? 'Memuat...'
+                  : '${bookedPatients.length} Pasien',
               style: TextStyle(
                 color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
                 fontSize: 12,
@@ -82,7 +87,15 @@ class AmanahScheduleOverviewView extends StatelessWidget {
         const SizedBox(height: 12),
 
         // Showcase Pasien Booking Cards
-        if (bookedPatients.isNotEmpty)
+        if (isLoading && bookedPatients.isEmpty)
+          Column(
+            children: const <Widget>[
+              AmanahBookedPatientCardSkeleton(),
+              SizedBox(height: 14),
+              AmanahBookedPatientCardSkeleton(),
+            ],
+          )
+        else if (bookedPatients.isNotEmpty)
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -132,6 +145,7 @@ class AmanahScheduleSessionsView extends StatelessWidget {
   const AmanahScheduleSessionsView({
     super.key,
     required this.schedules,
+    this.isLoading = false,
     required this.isCuti,
     required this.dark,
     required this.onTapDetail,
@@ -141,6 +155,7 @@ class AmanahScheduleSessionsView extends StatelessWidget {
   });
 
   final List<DoctorSchedule> schedules;
+  final bool isLoading;
   final bool isCuti;
   final bool dark;
   final ValueChanged<DoctorSchedule> onTapDetail;
@@ -171,7 +186,7 @@ class AmanahScheduleSessionsView extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              '${schedules.length} Sesi Aktif',
+              isLoading && schedules.isEmpty ? 'Memuat...' : '${schedules.length} Sesi Aktif',
               style: TextStyle(
                 color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
                 fontSize: 11.5,
@@ -182,7 +197,15 @@ class AmanahScheduleSessionsView extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        if (schedules.isNotEmpty)
+        if (isLoading && schedules.isEmpty)
+          Column(
+            children: const <Widget>[
+              AmanahBookedPatientCardSkeleton(),
+              SizedBox(height: 14),
+              AmanahBookedPatientCardSkeleton(),
+            ],
+          )
+        else if (schedules.isNotEmpty)
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

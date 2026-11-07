@@ -31,9 +31,18 @@ class ScheduleOverviewController extends ChangeNotifier {
     if (_globalSummaryCache.isNotEmpty) {
       _calendarSummaries.addAll(_globalSummaryCache);
     }
+    final String initialDateKey = _formatDateString(_selectedDate);
+    if (_globalBookedPatientsCache.containsKey(initialDateKey)) {
+      _bookedPatients = _globalBookedPatientsCache[initialDateKey]!;
+      _isLoadingPatients = false;
+    } else {
+      _isLoadingPatients = true;
+    }
   }
 
   static final Map<String, CalendarDaySummary> _globalSummaryCache = <String, CalendarDaySummary>{};
+  static final Map<String, List<SessionPatient>> _globalBookedPatientsCache =
+      <String, List<SessionPatient>>{};
 
   final GetBookedPatientsUseCase _getBookedPatientsUseCase;
   final GetCalendarSummaryUseCase _getCalendarSummaryUseCase;
@@ -100,16 +109,24 @@ class ScheduleOverviewController extends ChangeNotifier {
   }
 
   Future<void> loadBookedPatientsForDate(DateTime date) async {
-    _isLoadingPatients = true;
-    _errorMessage = null;
-    notifyListeners();
+    final String dateStr = _formatDateString(date);
+    final bool hasCached = _globalBookedPatientsCache.containsKey(dateStr);
+    if (hasCached) {
+      // Stale-while-revalidate: display instantly from memory cache without clearing or flickering
+      _bookedPatients = _globalBookedPatientsCache[dateStr]!;
+    } else {
+      _isLoadingPatients = true;
+      _errorMessage = null;
+      notifyListeners();
+    }
 
     try {
-      final String dateStr = _formatDateString(date);
       final List<SessionPatient> list = await _getBookedPatientsUseCase(
         GetBookedPatientsParams(date: dateStr),
       );
       _bookedPatients = list;
+      _globalBookedPatientsCache[dateStr] = list;
+      _errorMessage = null;
     } catch (e) {
       _errorMessage = e is ScheduleFailure ? e.message : e.toString();
     } finally {

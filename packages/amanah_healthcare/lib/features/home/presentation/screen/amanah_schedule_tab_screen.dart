@@ -181,6 +181,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
           isCuti: isCuti,
           schedules: const <DoctorSchedule>[],
           bookedPatients: bookedPatients,
+          isLoading: _controller.isLoadingPatients,
           dark: dark,
           dateSubtitle: _formatDateSubtitle(selectedDate),
           onSelectDate: _controller.selectDate,
@@ -201,6 +202,7 @@ class _AmanahScheduleTabScreenState extends State<AmanahScheduleTabScreen> {
       case AmanahScheduleViewMode.sessions:
         return AmanahScheduleSessionsView(
           schedules: const <DoctorSchedule>[],
+          isLoading: _controller.isLoading,
           isCuti: isCuti,
           dark: dark,
           onTapDetail: (DoctorSchedule sch) {

@@ -3,20 +3,12 @@ import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_
 
 /// Reusable utility for clinical data masking.
 abstract final class PatientDataMasker {
-  /// Standard Indonesian NIK masking (e.g. 2322323232232323 -> 232232******2323).
+  /// Full Indonesian NIK masking (16 bullet characters: ••••••••••••••••).
   static String maskNik(String? nik) {
     if (nik == null || nik.trim().isEmpty) return '-';
     final String clean = nik.trim();
-    if (clean.length == 16) {
-      return '${clean.substring(0, 6)}******${clean.substring(12)}';
-    }
-    if (clean.length >= 8) {
-      final int prefixLen = clean.length > 10 ? 4 : 2;
-      final int suffixLen = clean.length > 10 ? 3 : 2;
-      final int maskLen = clean.length - prefixLen - suffixLen;
-      return '${clean.substring(0, prefixLen)}${'*' * maskLen}${clean.substring(clean.length - suffixLen)}';
-    }
-    return clean;
+    final int len = clean.isNotEmpty ? clean.length : 16;
+    return '•' * len;
   }
 }
 

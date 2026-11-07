@@ -40,7 +40,7 @@ class AmanahHomeAppBar extends StatelessWidget {
               children: <Widget>[
                 _DoctorAvatar(
                   avatar: user.avatar,
-                  name: user.fullName,
+                  name: user.displayName,
                 ),
                 const SizedBox(width: AmanahSpacing.md),
                 Expanded(
@@ -49,7 +49,7 @@ class AmanahHomeAppBar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        user.fullName,
+                        user.displayName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(

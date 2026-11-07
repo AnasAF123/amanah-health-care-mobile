@@ -20,6 +20,7 @@ import 'package:amanah_healthcare/features/permission/presentation/components/mo
 import 'package:amanah_healthcare/features/schedule/data/amanah_schedule_store.dart';
 
 class PermissionController extends ChangeNotifier {
+  static List<LeaveRequestEntity>? _globalMyLeavesCache;
   PermissionController({
     PermissionRepository? repository,
     GetMyLeavesUseCase? getMyLeavesUseCase,
@@ -46,7 +47,11 @@ class PermissionController extends ChangeNotifier {
            ClaimReplacementUseCase(repository ?? PermissionRepositoryImpl()),
        _getReplacementFacetsUseCase =
            getReplacementFacetsUseCase ??
-           GetReplacementFacetsUseCase(repository ?? PermissionRepositoryImpl());
+           GetReplacementFacetsUseCase(repository ?? PermissionRepositoryImpl()) {
+    if (_globalMyLeavesCache != null && _globalMyLeavesCache!.isNotEmpty) {
+      _myLeaves = _globalMyLeavesCache!;
+    }
+  }
 
   final GetMyLeavesUseCase _getMyLeavesUseCase;
   final GetEligibleSessionsUseCase _getEligibleSessionsUseCase;
@@ -76,12 +81,20 @@ class PermissionController extends ChangeNotifier {
   String _formatDate(DateTime d) => formatIsoDateString(d);
 
   Future<void> fetchMyLeaves({BuildContext? context}) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    final bool hasCached = _globalMyLeavesCache != null && _globalMyLeavesCache!.isNotEmpty;
+    if (hasCached) {
+      _myLeaves = _globalMyLeavesCache!;
+    } else {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+    }
 
     try {
-      _myLeaves = await _getMyLeavesUseCase.execute();
+      final List<LeaveRequestEntity> list = await _getMyLeavesUseCase.execute();
+      _myLeaves = list;
+      _globalMyLeavesCache = list;
+      _errorMessage = null;
     } catch (e) {
       _errorMessage = e.toString();
       if (context != null && context.mounted) {

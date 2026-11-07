@@ -3,6 +3,7 @@ import 'package:amanah_healthcare/core/time/contracts/time_service.dart';
 import 'package:amanah_healthcare/core/time/services/default_time_service.dart';
 import 'package:amanah_healthcare/features/patient_record/domain/entities/patient_intake_record.dart';
 import 'package:amanah_healthcare/features/patient_record/presentation/components/patient_detail_grouped_card.dart';
+import 'package:amanah_healthcare/features/patient_record/presentation/components/patient_detail_masked_nik_tile.dart';
 
 /// Minimalist presentation view for General / Regular Consultation Intake Form.
 /// Built with grouped inset card design matching modern minimalist styling.
@@ -78,10 +79,8 @@ class RegularIntakeView extends StatelessWidget {
               value: regular?.medicalRecordNumber ?? '-',
               isDark: isDark,
             ),
-            PatientDetailTile(
-              icon: Icons.badge_outlined,
-              label: 'Nomor Induk Kependudukan (NIK)',
-              value: PatientDataMasker.maskNik(regular?.nik),
+            PatientDetailMaskedNikTile(
+              nik: regular?.nik,
               isDark: isDark,
             ),
             PatientDetailTile(
