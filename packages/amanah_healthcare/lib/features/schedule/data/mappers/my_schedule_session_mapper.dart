@@ -21,6 +21,8 @@ abstract final class MyScheduleSessionMapper {
       isReplacement: dto.isReplacement,
       replacedStaffName: dto.replacedStaffName,
       notes: dto.notes,
+      attendanceStatus: dto.attendanceStatus,
+      attendanceStatusLabel: dto.attendanceStatusLabel,
     );
   }
 }

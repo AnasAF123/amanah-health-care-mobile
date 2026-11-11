@@ -31,6 +31,7 @@ abstract final class AmanahPillStyleService {
       AmanahBadgeVariant.primary || AmanahBadgeVariant.live => AmanahStatusTone.brand,
       AmanahBadgeVariant.warning => AmanahStatusTone.warning,
       AmanahBadgeVariant.trend => AmanahStatusTone.violet,
+      AmanahBadgeVariant.danger => AmanahStatusTone.danger,
     };
 
     return AmanahThemeTokens.status(tone, context: context, isDark: isDark).primary;
@@ -51,6 +52,7 @@ abstract final class AmanahPillStyleService {
       AmanahBadgeVariant.primary || AmanahBadgeVariant.live => AmanahStatusTone.brand,
       AmanahBadgeVariant.warning => AmanahStatusTone.warning,
       AmanahBadgeVariant.trend => AmanahStatusTone.violet,
+      AmanahBadgeVariant.danger => AmanahStatusTone.danger,
     };
 
     final AmanahTone resolvedTone = AmanahThemeTokens.status(tone, context: context, isDark: dark);

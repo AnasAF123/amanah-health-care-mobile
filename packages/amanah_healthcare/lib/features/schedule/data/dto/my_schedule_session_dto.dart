@@ -17,6 +17,8 @@ class MyScheduleSessionDto {
     this.isReplacement = false,
     this.replacedStaffName,
     this.notes,
+    this.attendanceStatus,
+    this.attendanceStatusLabel,
   });
 
   factory MyScheduleSessionDto.fromJson(Map<String, dynamic> json) {
@@ -43,6 +45,8 @@ class MyScheduleSessionDto {
       isReplacement: json['isReplacement'] as bool? ?? false,
       replacedStaffName: json['replacedStaffName'] as String?,
       notes: json['notes'] as String?,
+      attendanceStatus: json['attendanceStatus'] as String?,
+      attendanceStatusLabel: json['attendanceStatusLabel'] as String?,
     );
   }
 
@@ -63,4 +67,6 @@ class MyScheduleSessionDto {
   final bool isReplacement;
   final String? replacedStaffName;
   final String? notes;
+  final String? attendanceStatus;
+  final String? attendanceStatusLabel;
 }

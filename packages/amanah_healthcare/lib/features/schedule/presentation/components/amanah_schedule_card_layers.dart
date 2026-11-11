@@ -23,6 +23,11 @@ AmanahTone amanahBadgeTone(AmanahBadgeVariant variant, [BuildContext? context]) 
         AmanahStatusTone.violet,
         context: context,
       );
+    case AmanahBadgeVariant.danger:
+      return AmanahThemeTokens.status(
+        AmanahStatusTone.danger,
+        context: context,
+      );
   }
 }
 

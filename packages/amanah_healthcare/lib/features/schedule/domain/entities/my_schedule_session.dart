@@ -17,6 +17,8 @@ class MyScheduleSession {
     this.isReplacement = false,
     this.replacedStaffName,
     this.notes,
+    this.attendanceStatus,
+    this.attendanceStatusLabel,
   });
 
   final String id;
@@ -36,4 +38,6 @@ class MyScheduleSession {
   final bool isReplacement;
   final String? replacedStaffName;
   final String? notes;
+  final String? attendanceStatus;
+  final String? attendanceStatusLabel;
 }

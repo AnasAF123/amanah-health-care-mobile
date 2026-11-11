@@ -102,6 +102,8 @@ class AmanahScheduleStore extends ChangeNotifier {
           bookedPatients: booked,
           isReplacement: isRep,
           replacedStaffName: s.replacedStaffName,
+          attendanceStatus: s.attendanceStatus,
+          attendanceStatusLabel: s.attendanceStatusLabel,
         );
       }),
     );

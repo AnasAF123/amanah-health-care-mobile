@@ -1,4 +1,4 @@
-enum AmanahBadgeVariant { success, primary, warning, live, trend }
+enum AmanahBadgeVariant { success, primary, warning, live, trend, danger }
 
 class BookedPatient {
   const BookedPatient({
@@ -130,6 +130,8 @@ class DoctorSchedule {
     this.bookedPatients = const <BookedPatient>[],
     this.isReplacement = false,
     this.replacedStaffName,
+    this.attendanceStatus,
+    this.attendanceStatusLabel,
   });
 
   final String id;
@@ -146,6 +148,8 @@ class DoctorSchedule {
   final List<BookedPatient> bookedPatients;
   final bool isReplacement;
   final String? replacedStaffName;
+  final String? attendanceStatus;
+  final String? attendanceStatusLabel;
 
   DoctorSchedule copyWith({
     String? id,
@@ -162,6 +166,8 @@ class DoctorSchedule {
     List<BookedPatient>? bookedPatients,
     bool? isReplacement,
     String? replacedStaffName,
+    String? attendanceStatus,
+    String? attendanceStatusLabel,
   }) {
     return DoctorSchedule(
       id: id ?? this.id,
@@ -178,6 +184,8 @@ class DoctorSchedule {
       bookedPatients: bookedPatients ?? this.bookedPatients,
       isReplacement: isReplacement ?? this.isReplacement,
       replacedStaffName: replacedStaffName ?? this.replacedStaffName,
+      attendanceStatus: attendanceStatus ?? this.attendanceStatus,
+      attendanceStatusLabel: attendanceStatusLabel ?? this.attendanceStatusLabel,
     );
   }
 }

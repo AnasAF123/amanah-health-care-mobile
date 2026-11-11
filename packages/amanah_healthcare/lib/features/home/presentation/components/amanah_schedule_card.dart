@@ -38,6 +38,17 @@ class AmanahScheduleCard extends StatelessWidget {
     return schedule.date;
   }
 
+  static AmanahBadgeVariant _resolveAttendanceVariant(String? status) {
+    return switch (status?.toLowerCase()) {
+      'present' => AmanahBadgeVariant.success,
+      'late' => AmanahBadgeVariant.warning,
+      'absent' || 'missed' => AmanahBadgeVariant.danger,
+      'leave' => AmanahBadgeVariant.trend,
+      'ongoing' => AmanahBadgeVariant.primary,
+      _ => AmanahBadgeVariant.primary,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool dark = Theme.of(context).brightness == Brightness.dark;
@@ -134,6 +145,16 @@ class AmanahScheduleCard extends StatelessWidget {
                               : AmanahScheduleCardTokens.dateColorLight,
                         ),
                       ),
+                      if (schedule.attendanceStatusLabel != null &&
+                          schedule.attendanceStatusLabel!.isNotEmpty) ...<Widget>[
+                        const SizedBox(height: 3),
+                        AmanahStatusBadge(
+                          text: schedule.attendanceStatusLabel!,
+                          variant: _resolveAttendanceVariant(schedule.attendanceStatus),
+                          fontSize: 10.0,
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.0),
+                        ),
+                      ],
                     ],
                   ),
                 ),

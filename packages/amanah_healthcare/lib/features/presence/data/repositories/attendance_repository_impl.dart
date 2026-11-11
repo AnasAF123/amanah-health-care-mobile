@@ -161,9 +161,14 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
 
       final String shiftRaw = item['shift']?.toString() ?? '';
       final String shiftName =
-          item['shiftLabel']?.toString() ?? (shiftRaw.isNotEmpty ? shiftRaw : 'Kerja');
+          item['shiftLabel']?.toString() ??
+          (shiftRaw.isNotEmpty ? shiftRaw.replaceAll('_', ' ') : 'Kerja');
+      final String displayShift =
+          (shiftName.startsWith('Sesi ') || shiftName.startsWith('Shift '))
+              ? shiftName
+              : 'Shift $shiftName';
       final bool isReplacement = item['isReplacement'] == true;
-      final String title = isReplacement ? 'Shift $shiftName (Pengganti)' : 'Shift $shiftName';
+      final String title = isReplacement ? '$displayShift (Pengganti)' : displayShift;
 
       final String? locationLabel = item['locationLabel']?.toString();
       final double? validatedHours = item['validatedDurationHours'] != null
