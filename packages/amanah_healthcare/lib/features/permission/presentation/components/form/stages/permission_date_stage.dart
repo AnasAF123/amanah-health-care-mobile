@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/core/time/time.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/permission/presentation/components/form/widgets/permission_date_panel.dart';
 
@@ -130,29 +131,12 @@ class PermissionDateStage extends StatelessWidget {
         const SizedBox(height: 28),
 
         // Continue Button
-        SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: ElevatedButton(
-            onPressed: onContinue,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AmanahColorTokens.brand,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  'Lanjutkan ke Lingkup',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-                ),
-                SizedBox(width: 8),
-                Icon(Icons.arrow_forward_rounded, size: 18),
-              ],
-            ),
-          ),
+        AmanahButton.primary(
+          text: 'Lanjutkan ke Lingkup',
+          size: AmanahButtonSize.medium,
+          isFullWidth: true,
+          trailingIcon: Icons.arrow_forward_rounded,
+          onPressed: onContinue,
         ),
       ],
     );

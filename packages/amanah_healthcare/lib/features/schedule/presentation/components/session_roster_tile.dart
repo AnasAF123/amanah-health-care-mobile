@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/doctor_roster.dart';
 
@@ -64,11 +63,13 @@ class SessionRosterTile extends StatelessWidget {
               ],
             ),
           ),
-          AmanahStatusBadge(
-            text: isActive ? 'Aktif' : 'Libur',
-            variant: isActive ? AmanahBadgeVariant.success : AmanahBadgeVariant.warning,
-            fontSize: 10.5,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          Text(
+            isActive ? 'Aktif' : 'Libur',
+            style: TextStyle(
+              color: isActive ? AmanahColorTokens.success : AmanahColorTokens.warning,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),

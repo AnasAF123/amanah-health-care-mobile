@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/time/functions/format_practice_hours.dart';
 import 'package:amanah_healthcare/features/presence/domain/entities/presence_status_payload.dart';
 import 'package:amanah_healthcare/features/presence/presentation/components/drawers/amanah_presence_result_palette.dart';
 
@@ -84,7 +85,7 @@ class AmanahResultTypographySection extends StatelessWidget {
             start: 0.35,
             duration: 0.35,
             child: Text(
-              '${payload.durationHours!.toStringAsFixed(1)} Jam Durasi Dinas',
+              'Durasi Dinas: ${formatPracticeHours(payload.durationHours)}',
               style: TextStyle(
                 fontSize: 12.0,
                 fontWeight: FontWeight.w700,

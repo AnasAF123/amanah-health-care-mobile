@@ -129,27 +129,15 @@ class CalendarSessionAccordion extends StatelessWidget {
                         ),
                       ),
 
-                      // Patient count badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
+                      // Patient count text (Minimalist Text-Based)
+                      Text(
+                        '${session.bookedCount} Pasien',
+                        style: TextStyle(
                           color: dark
-                              ? AmanahColorTokens.surfaceSecondaryDark
-                              : AmanahColorTokens.neutral100,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '${session.bookedCount} Pasien',
-                          style: TextStyle(
-                            color: dark
-                                ? AmanahColorTokens.neutral300
-                                : AmanahColorTokens.neutral700,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                          ),
+                              ? AmanahColorTokens.neutral400
+                              : AmanahColorTokens.neutral500,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(width: 8),

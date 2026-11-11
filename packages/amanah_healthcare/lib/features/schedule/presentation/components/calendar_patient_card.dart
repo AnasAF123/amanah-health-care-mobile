@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/session_patient.dart';
 
@@ -37,25 +36,15 @@ class CalendarPatientCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // Queue Number Badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: (dark
-                        ? AmanahColorTokens.tabActiveDark
-                        : AmanahColorTokens.brand)
-                    .withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                patient.queueNumber,
-                style: TextStyle(
-                  color: dark
-                      ? AmanahColorTokens.tabActiveDark
-                      : AmanahColorTokens.brand,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 13,
-                ),
+            // Queue Number
+            Text(
+              patient.queueNumber,
+              style: TextStyle(
+                color: dark
+                    ? AmanahColorTokens.tabActiveDark
+                    : AmanahColorTokens.brand,
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
               ),
             ),
             const SizedBox(width: 12),
@@ -109,10 +98,14 @@ class CalendarPatientCard extends StatelessWidget {
             ),
             const SizedBox(width: 8),
 
-            // Status Badge
-            AmanahStatusBadge(
-              variant: patient.badgeVariant,
-              text: patient.statusBadge,
+            // Status Text (Minimalist Text-Based)
+            Text(
+              patient.statusBadge,
+              style: TextStyle(
+                color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),

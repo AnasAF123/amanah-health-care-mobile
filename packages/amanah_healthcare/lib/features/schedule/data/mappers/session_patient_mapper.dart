@@ -20,7 +20,7 @@ abstract final class SessionPatientMapper {
       guardian: dto.guardian,
       complaint: dto.complaint,
       status: dto.status,
-      statusBadge: dto.statusBadge.isNotEmpty ? dto.statusBadge : descriptor.badge,
+      statusBadge: dto.statusBadge.isNotEmpty ? dto.statusBadge : descriptor.label,
       avatarUrl: dto.avatarUrl,
       estimatedStartAt: dto.estimatedStartAt,
       estimatedEndAt: dto.estimatedEndAt,

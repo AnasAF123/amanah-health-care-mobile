@@ -119,11 +119,13 @@ class _AmanahPayrollHistoryScreenState extends State<AmanahPayrollHistoryScreen>
                           summary.baseHours == 0);
 
                   if (hasNoTransactions) {
-                    return const Center(
-                      child: AmanahEmptyState(
+                    return Center(
+                      child: AmanahEmptyState.box(
                         title: 'Data belum tersedia',
                         message: 'Belum ada slip gaji yang diproses untuk akun Anda.',
-                        tone: AmanahEmptyStateTone.neutral,
+                        variant: AmanahEmptyStateVariant.viewport,
+                        actionText: 'Segarkan',
+                        onAction: _controller.loadInitialData,
                       ),
                     );
                   }

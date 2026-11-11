@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/permission/presentation/components/form/widgets/permission_summary_card.dart';
 import 'package:amanah_healthcare/features/permission/presentation/state/permission_draft_state.dart';
@@ -28,15 +29,8 @@ class PermissionReasonStage extends StatelessWidget {
         dark ? AmanahPermissionTokens.textTitleDark : AmanahPermissionTokens.textTitleLight;
     final Color subtextColor =
         dark ? AmanahPermissionTokens.textMutedDark : AmanahPermissionTokens.textMutedLight;
-    final Color borderColor = errorMessage != null
-        ? AmanahColorTokens.danger
-        : (dark
-            ? AmanahPermissionTokens.cardBorderDark
-            : AmanahPermissionTokens.cardBorderLight);
 
-    final Color inputBg = dark
-        ? AmanahColorTokens.surfaceDark
-        : AmanahColorTokens.surfaceLight;
+    final Color inputBg = AmanahThemeTokens.elevatedSurface(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,7 +64,9 @@ class PermissionReasonStage extends StatelessWidget {
           decoration: BoxDecoration(
             color: inputBg,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor),
+            border: errorMessage != null
+                ? Border.all(color: AmanahColorTokens.danger, width: 1.5)
+                : null,
           ),
           child: TextField(
             controller: reasonController,
@@ -111,64 +107,23 @@ class PermissionReasonStage extends StatelessWidget {
           children: <Widget>[
             Expanded(
               flex: 1,
-              child: SizedBox(
-                height: 48,
-                child: OutlinedButton(
-                  onPressed: draft.isSubmitting ? null : onCancel,
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: dark
-                          ? AmanahPermissionTokens.cardBorderDark
-                          : AmanahPermissionTokens.cardBorderLight,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: Text(
-                    'Batal',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: textColor,
-                    ),
-                  ),
-                ),
+              child: AmanahButton.outline(
+                text: 'Batal',
+                size: AmanahButtonSize.medium,
+                isFullWidth: true,
+                isDisabled: draft.isSubmitting,
+                onPressed: onCancel,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               flex: 2,
-              child: SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: draft.isSubmitting ? null : onSubmit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AmanahColorTokens.brand,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: draft.isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : const Text(
-                          'Kirim Pengajuan Izin',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                ),
+              child: AmanahButton.primary(
+                text: 'Kirim Pengajuan Izin',
+                size: AmanahButtonSize.medium,
+                isFullWidth: true,
+                isLoading: draft.isSubmitting,
+                onPressed: onSubmit,
               ),
             ),
           ],

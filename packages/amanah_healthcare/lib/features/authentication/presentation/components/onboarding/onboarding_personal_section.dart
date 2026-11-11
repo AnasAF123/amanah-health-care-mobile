@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:amanah_healthcare/features/authentication/presentation/components/auth_input_field.dart';
-import 'package:amanah_healthcare/features/authentication/presentation/state/staff_onboarding_controller.dart';
-import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/core/constants/gender_constants.dart';
-import 'package:amanah_healthcare/generic_lib/design_constants.dart';
+import 'package:amanah_healthcare/features/authentication/presentation/state/staff_onboarding_controller.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_settings_components.dart';
+import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 class OnboardingPersonalSection extends StatelessWidget {
   const OnboardingPersonalSection({required this.controller, super.key});
@@ -30,36 +29,17 @@ class OnboardingPersonalSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
-
     final String birthDateDisplay = controller.birthDate != null
         ? '${controller.birthDate!.day.toString().padLeft(2, '0')}/${controller.birthDate!.month.toString().padLeft(2, '0')}/${controller.birthDate!.year}'
         : 'Pilih tanggal lahir';
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return AmanahSettingSection(
+      title: 'Data Pribadi & Kependudukan',
       children: <Widget>[
-        Text(
-          'Data Pribadi Staf',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: AmanahThemeTokens.textPrimary(context),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Informasi identitas kependudukan resmi sesuai KTP.',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: AmanahThemeTokens.textSecondary(context),
-          ),
-        ),
-        const SizedBox(height: MEDIUM_SPACE),
-        AuthInputField(
-          label: 'Nama Lengkap (sesuai KTP / Gelar)',
+        AmanahSettingFormInputRow(
+          label: 'Nama Lengkap (sesuai KTP / Gelar) *',
           hintText: 'Contoh: dr. Budi Santoso, Sp.A',
           controller: controller.fullNameController,
-          leadingIcon: Icons.badge_outlined,
           textInputAction: TextInputAction.next,
           validator: (String? val) {
             final String input = val?.trim() ?? '';
@@ -68,12 +48,10 @@ class OnboardingPersonalSection extends StatelessWidget {
             return null;
           },
         ),
-        const SizedBox(height: LARGE_SPACE),
-        AuthInputField(
-          label: 'NIK (Nomor Induk Kependudukan)',
+        AmanahSettingFormInputRow(
+          label: 'NIK (Nomor Induk Kependudukan) *',
           hintText: '16 digit angka NIK KTP',
           controller: controller.nikController,
-          leadingIcon: Icons.credit_card_outlined,
           keyboardType: TextInputType.number,
           textInputAction: TextInputAction.next,
           maxLength: 16,
@@ -90,12 +68,10 @@ class OnboardingPersonalSection extends StatelessWidget {
             return null;
           },
         ),
-        const SizedBox(height: LARGE_SPACE),
-        AuthInputField(
-          label: 'Tempat Lahir',
+        AmanahSettingFormInputRow(
+          label: 'Tempat Lahir *',
           hintText: 'Contoh: Jakarta',
           controller: controller.birthPlaceController,
-          leadingIcon: Icons.location_city_outlined,
           textInputAction: TextInputAction.next,
           validator: (String? val) {
             final String input = val?.trim() ?? '';
@@ -103,89 +79,48 @@ class OnboardingPersonalSection extends StatelessWidget {
             return null;
           },
         ),
-        const SizedBox(height: LARGE_SPACE),
-        // Tanggal Lahir Picker
-        Text(
-          'Tanggal Lahir',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: AmanahThemeTokens.textPrimary(context),
-          ),
+        AmanahSettingEditableRow(
+          label: 'Tanggal Lahir *',
+          value: birthDateDisplay,
+          onEdit: () => _pickBirthDate(context),
         ),
-        const SizedBox(height: 6),
-        InkWell(
-          onTap: () => _pickBirthDate(context),
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? AmanahThemeTokens.surfaceSecondary(context)
-                  : AmanahColorTokens.neutral50.withValues(alpha: 0.72),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isDark
-                    ? AmanahThemeTokens.outline(context)
-                    : theme.colorScheme.outline.withValues(alpha: 0.34),
-              ),
-            ),
-            child: Row(
-              children: <Widget>[
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 20,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.42),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Jenis Kelamin *',
+                style: TextStyle(
+                  color: AmanahThemeTokens.textTertiary(context),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    birthDateDisplay,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: controller.birthDate != null
-                          ? AmanahThemeTokens.textPrimary(context)
-                          : AmanahThemeTokens.textSecondary(context),
-                      fontWeight: controller.birthDate != null ? FontWeight.w600 : FontWeight.w400,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: _GenderChip(
+                      label: GenderConstants.maleLabel,
+                      icon: Icons.male_rounded,
+                      isSelected: controller.gender == GenderConstants.male,
+                      onTap: () => controller.setGender(GenderConstants.male),
                     ),
                   ),
-                ),
-                Icon(Icons.arrow_drop_down, color: AmanahThemeTokens.textSecondary(context)),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: LARGE_SPACE),
-        // Jenis Kelamin Selector
-        Text(
-          'Jenis Kelamin',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: AmanahThemeTokens.textPrimary(context),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: _GenderChip(
-                label: GenderConstants.maleLabel,
-                icon: Icons.male_rounded,
-                isSelected: controller.gender == GenderConstants.male,
-                onTap: () => controller.setGender(GenderConstants.male),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _GenderChip(
+                      label: GenderConstants.femaleLabel,
+                      icon: Icons.female_rounded,
+                      isSelected: controller.gender == GenderConstants.female,
+                      onTap: () => controller.setGender(GenderConstants.female),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _GenderChip(
-                label: GenderConstants.femaleLabel,
-                icon: Icons.female_rounded,
-                isSelected: controller.gender == GenderConstants.female,
-                onTap: () => controller.setGender(GenderConstants.female),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -213,21 +148,21 @@ class _GenderChip extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
         decoration: BoxDecoration(
           color: isSelected
               ? activeBrand.withValues(alpha: isDark ? 0.20 : 0.08)
-              : (isDark ? AmanahThemeTokens.surfaceSecondary(context) : Colors.white),
-          borderRadius: BorderRadius.circular(14),
+              : (isDark ? AmanahThemeTokens.surfaceSecondary(context) : AmanahColorTokens.neutral50),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
                 ? activeBrand
                 : (isDark
                       ? AmanahThemeTokens.outline(context)
-                      : theme.colorScheme.outline.withValues(alpha: 0.25)),
-            width: isSelected ? 2 : 1,
+                      : theme.colorScheme.outline.withValues(alpha: 0.20)),
+            width: isSelected ? 1.5 : 1,
           ),
         ),
         child: Row(
@@ -235,15 +170,15 @@ class _GenderChip extends StatelessWidget {
           children: <Widget>[
             Icon(
               icon,
-              size: 20,
+              size: 18,
               color: isSelected ? activeBrand : AmanahThemeTokens.textSecondary(context),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                fontSize: 12.5,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected ? activeBrand : AmanahThemeTokens.textPrimary(context),
               ),
             ),

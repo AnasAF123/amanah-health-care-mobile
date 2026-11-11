@@ -27,11 +27,8 @@ class PermissionDatePanel extends StatelessWidget {
     final Color subtextColor = dark
         ? AmanahPermissionTokens.textMutedDark
         : AmanahPermissionTokens.textMutedLight;
-    final Color borderColor = hasError
-        ? AmanahColorTokens.danger
-        : (dark ? AmanahPermissionTokens.cardBorderDark : AmanahPermissionTokens.cardBorderLight);
 
-    final Color panelBg = dark ? AmanahColorTokens.surfaceDark : AmanahColorTokens.surfaceLight;
+    final Color panelBg = AmanahThemeTokens.elevatedSurface(context);
 
     final String dayName = formatLocalizedDate(date, style: 'day_name');
     final String formattedDate = formatLocalizedDate(date, style: 'human_short');
@@ -44,7 +41,9 @@ class PermissionDatePanel extends StatelessWidget {
         decoration: BoxDecoration(
           color: panelBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: borderColor, width: hasError ? 1.5 : 1.0),
+          border: hasError
+              ? Border.all(color: AmanahColorTokens.danger, width: 1.5)
+              : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

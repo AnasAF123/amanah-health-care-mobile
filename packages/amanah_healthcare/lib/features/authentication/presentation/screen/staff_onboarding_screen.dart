@@ -13,7 +13,6 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_b
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_screen_header.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_success_drawer.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
-import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 
 class StaffOnboardingScreen extends StatefulWidget {
   const StaffOnboardingScreen({
@@ -129,7 +128,7 @@ class _StaffOnboardingScreenState extends State<StaffOnboardingScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           OnboardingPersonalSection(controller: _controller),
-          const SizedBox(height: VERY_LARGE_SPACE),
+          const SizedBox(height: 20),
           OnboardingContactSection(controller: _controller),
         ],
       ),

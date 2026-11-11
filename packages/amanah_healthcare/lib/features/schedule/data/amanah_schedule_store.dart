@@ -77,13 +77,9 @@ class AmanahScheduleStore extends ChangeNotifier {
             .map((SessionPatient p) => p.toBookedPatient())
             .toList();
 
-        final String sessionType = s.sessionLabel.isNotEmpty
-            ? s.sessionLabel
-            : (s.sessionCode.isNotEmpty ? s.sessionCode : 'Sesi Praktik');
-
+        final String sessionType = s.sessionLabel.isNotEmpty ? s.sessionLabel : 'Sesi Praktik';
         final int patientCount = booked.isNotEmpty ? booked.length : s.bookedCount;
-
-        final bool isRep = s.isReplacement || s.status.toUpperCase() == 'REPLACEMENT';
+        final bool isRep = s.isReplacement;
         final String badge = isRep
             ? (s.replacedStaffName != null && s.replacedStaffName!.isNotEmpty
                   ? 'Pengganti ${s.replacedStaffName}'

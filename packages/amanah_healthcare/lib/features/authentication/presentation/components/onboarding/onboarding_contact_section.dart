@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:amanah_healthcare/features/authentication/presentation/components/auth_input_field.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/state/staff_onboarding_controller.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_settings_components.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
-import 'package:amanah_healthcare/generic_lib/design_constants.dart';
 
 class OnboardingContactSection extends StatelessWidget {
   const OnboardingContactSection({
@@ -15,31 +14,13 @@ class OnboardingContactSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return AmanahSettingSection(
+      title: 'Kontak & Profesi',
       children: <Widget>[
-        Text(
-          'Kontak & Profesi',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: AmanahThemeTokens.textPrimary(context),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Nomor kontak operasional dan deskripsi profesi staf.',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: AmanahThemeTokens.textSecondary(context),
-          ),
-        ),
-        const SizedBox(height: MEDIUM_SPACE),
-        AuthInputField(
-          label: 'Nomor WhatsApp / Handphone',
+        AmanahSettingFormInputRow(
+          label: 'Nomor WhatsApp / Handphone *',
           hintText: 'Contoh: 081234567890',
           controller: controller.phoneController,
-          leadingIcon: Icons.phone_android_outlined,
           keyboardType: TextInputType.phone,
           textInputAction: TextInputAction.next,
           maxLength: 15,
@@ -54,20 +35,16 @@ class OnboardingContactSection extends StatelessWidget {
             return null;
           },
         ),
-        const SizedBox(height: LARGE_SPACE),
-        AuthInputField(
-          label: 'Profesi / Jabatan',
-          hintText: 'Profesi Staf',
-          controller: controller.professionController,
-          leadingIcon: Icons.badge_outlined,
-          readOnly: true,
-          helperText: 'Ditetapkan resmi oleh Administrator Klinik',
-          textInputAction: TextInputAction.next,
-          validator: (String? val) {
-            final String input = val?.trim() ?? '';
-            if (input.isEmpty) return 'Profesi wajib diisi.';
-            return null;
-          },
+        AmanahSettingInfoRow(
+          label: 'Profesi / Jabatan (Ditetapkan Admin)',
+          value: controller.professionController.text.isNotEmpty
+              ? controller.professionController.text
+              : controller.user.roleName,
+          trailing: Icon(
+            Icons.lock_rounded,
+            size: 16,
+            color: AmanahThemeTokens.textTertiary(context),
+          ),
         ),
       ],
     );

@@ -100,8 +100,7 @@ abstract final class PermissionMapper {
     );
   }
 
-  /// Resolves raw backend session keys (e.g. "session.morning", "session.afternoon")
-  /// into canonical Indonesian labels ("Sesi Pagi", "Sesi Siang", "Sesi Malam").
+  /// Resolves session label directly from canonical database value provided by upstream.
   static String _resolveSessionLabel({required String? rawLabel, String? sessionCode}) {
     if (rawLabel != null && rawLabel.trim().isNotEmpty) {
       return rawLabel.trim();

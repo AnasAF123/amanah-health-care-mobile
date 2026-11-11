@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
@@ -117,6 +118,110 @@ class AmanahSettingInfoRow extends StatelessWidget {
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (trailing != null) ...<Widget>[
+            const SizedBox(width: 8),
+            trailing!,
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Direct form input row designed to live seamlessly inside [AmanahSettingSection].
+class AmanahSettingFormInputRow extends StatelessWidget {
+  const AmanahSettingFormInputRow({
+    required this.label,
+    required this.controller,
+    this.hintText,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+    this.maxLength,
+    this.maxLines = 1,
+    this.textInputAction = TextInputAction.next,
+    this.readOnly = false,
+    this.trailing,
+    super.key,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final String? hintText;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+  final int? maxLength;
+  final int maxLines;
+  final TextInputAction textInputAction;
+  final bool readOnly;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color labelColor = AmanahThemeTokens.textTertiary(context);
+    final Color valueColor = AmanahThemeTokens.textPrimary(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        crossAxisAlignment: maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: labelColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                TextFormField(
+                  controller: controller,
+                  readOnly: readOnly,
+                  keyboardType: keyboardType,
+                  inputFormatters: inputFormatters,
+                  textInputAction: textInputAction,
+                  validator: validator,
+                  maxLength: maxLength,
+                  maxLines: maxLines,
+                  buildCounter: (
+                    BuildContext context, {
+                    required int currentLength,
+                    required bool isFocused,
+                    required int? maxLength,
+                  }) =>
+                      null,
+                  style: TextStyle(
+                    color: valueColor,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0,
+                  ),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    focusedErrorBorder: InputBorder.none,
+                    hintText: hintText,
+                    hintStyle: TextStyle(
+                      color: labelColor.withValues(alpha: 0.6),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                 ),
               ],

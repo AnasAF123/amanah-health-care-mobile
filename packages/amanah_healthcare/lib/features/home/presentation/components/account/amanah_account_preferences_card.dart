@@ -82,6 +82,9 @@ class AmanahAccountPreferencesCard extends StatelessWidget {
                   icon: Icons.support_agent_rounded,
                   title: 'Bantuan teknisi IT RS',
                   dark: dark,
+                  isLocked: true,
+                  badgeText: 'Segera Hadir',
+                  badgeColor: AmanahColorTokens.neutral500,
                   onTap: () => onItemTap('help'),
                 ),
               ],
@@ -107,6 +110,7 @@ class AmanahPreferenceRowItem extends StatelessWidget {
     required this.onTap,
     this.badgeText,
     this.badgeColor,
+    this.isLocked = false,
     super.key,
   });
 
@@ -115,6 +119,7 @@ class AmanahPreferenceRowItem extends StatelessWidget {
   final String? badgeText;
   final Color? badgeColor;
   final bool dark;
+  final bool isLocked;
   final VoidCallback onTap;
 
   @override
@@ -171,9 +176,11 @@ class AmanahPreferenceRowItem extends StatelessWidget {
                 ),
               ),
               Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: dark ? AmanahColorTokens.neutral500 : AmanahColorTokens.neutral400,
+                isLocked ? Icons.lock_outline_rounded : Icons.chevron_right_rounded,
+                size: 18,
+                color: isLocked
+                    ? (dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500)
+                    : (dark ? AmanahColorTokens.neutral500 : AmanahColorTokens.neutral400),
               ),
             ],
           ),

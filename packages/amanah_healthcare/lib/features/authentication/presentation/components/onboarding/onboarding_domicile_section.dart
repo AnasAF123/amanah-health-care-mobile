@@ -91,10 +91,6 @@ class OnboardingDomicileSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
-    final Color activeBrand = isDark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -146,53 +142,22 @@ class OnboardingDomicileSection extends StatelessWidget {
         const SizedBox(height: LARGE_SPACE),
 
         // Detail Alamat Lengkap
-        Text(
-          'Alamat Lengkap (Jalan, RT/RW, No. Rumah) *',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: AmanahThemeTokens.textPrimary(context),
-          ),
-        ),
-        const SizedBox(height: 6),
-        TextFormField(
-          controller: controller.addressController,
-          maxLines: 3,
-          style: TextStyle(fontSize: 14, color: AmanahThemeTokens.textPrimary(context)),
-          decoration: InputDecoration(
-            hintText: 'Contoh: Jl. Merdeka No. 10, RT 01/RW 02',
-            hintStyle: TextStyle(fontSize: 14, color: AmanahThemeTokens.textSecondary(context)),
-            filled: true,
-            fillColor: isDark
-                ? AmanahThemeTokens.surfaceSecondary(context)
-                : AmanahColorTokens.neutral50.withValues(alpha: 0.72),
-            contentPadding: const EdgeInsets.all(16),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(
-                color: isDark
-                    ? AmanahThemeTokens.outline(context)
-                    : theme.colorScheme.outline.withValues(alpha: 0.34),
-              ),
+        AmanahSettingSection(
+          title: 'Alamat Lengkap Sesuai KTP',
+          children: <Widget>[
+            AmanahSettingFormInputRow(
+              label: 'Jalan, RT/RW, No. Rumah *',
+              hintText: 'Contoh: Jl. Merdeka No. 10, RT 01/RW 02',
+              controller: controller.addressController,
+              maxLines: 3,
+              textInputAction: TextInputAction.done,
+              validator: (String? val) {
+                final String input = val?.trim() ?? '';
+                if (input.isEmpty) return 'Alamat lengkap wajib diisi.';
+                return null;
+              },
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(
-                color: isDark
-                    ? AmanahThemeTokens.outline(context)
-                    : theme.colorScheme.outline.withValues(alpha: 0.34),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: activeBrand, width: 1.5),
-            ),
-          ),
-          validator: (String? val) {
-            final String input = val?.trim() ?? '';
-            if (input.isEmpty) return 'Alamat lengkap wajib diisi.';
-            return null;
-          },
+          ],
         ),
       ],
     );

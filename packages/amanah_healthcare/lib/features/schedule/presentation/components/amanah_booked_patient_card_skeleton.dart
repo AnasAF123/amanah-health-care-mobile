@@ -26,12 +26,12 @@ class AmanahBookedPatientCardSkeleton extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // Top Row: Status badge on left, 3D Queue Medal silhouette on right
+            // Top Row: Status text on left, Queue number on right (Minimalist Text-Based)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const <Widget>[
-                AmanahSkeleton.box(width: 88, height: 26, borderRadius: 8),
-                AmanahSkeleton.box(width: 36, height: 36, borderRadius: 12),
+                AmanahSkeleton.line(width: 80, height: 14, borderRadius: 4),
+                AmanahSkeleton.line(width: 32, height: 16, borderRadius: 4),
               ],
             ),
             const SizedBox(height: 18),

@@ -14,7 +14,6 @@ import 'package:amanah_healthcare/features/home/presentation/components/amanah_s
 import 'package:amanah_healthcare/features/home/presentation/screen/amanah_doctor_id_card_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/settings/amanah_account_identity_settings_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/settings/amanah_data_storage_settings_screen.dart';
-import 'package:amanah_healthcare/features/home/presentation/screen/settings/amanah_it_support_settings_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/screen/settings/amanah_privacy_security_settings_screen.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/payroll/payroll.dart';
@@ -164,12 +163,13 @@ class _AmanahAccountTabScreenState extends State<AmanahAccountTabScreen> {
         );
         break;
       case 'help':
-        Navigator.of(context).push<void>(
-          MaterialPageRoute<void>(
-            builder: (BuildContext ctx) => AmanahItSupportSettingsScreen(
-              user: widget.user,
-              onBack: () => Navigator.of(ctx).pop(),
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Fitur Bantuan Teknisi IT RS sedang dalam pengembangan dan akan segera hadir.',
             ),
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 2),
           ),
         );
         break;

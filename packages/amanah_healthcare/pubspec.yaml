@@ -92,7 +92,6 @@ flutter:
     - assets/amanah/images/
     - assets/amanah/images/quick_access/
     - assets/amanah/images/doctors/
-    - assets/amanah/images/carousel/
     - assets/amanah/auth/
     - assets/amanah/id_card/
     - assets/amanah/id_card/3d/

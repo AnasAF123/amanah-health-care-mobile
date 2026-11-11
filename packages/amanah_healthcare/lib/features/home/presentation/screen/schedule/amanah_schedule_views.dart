@@ -287,20 +287,12 @@ class AmanahScheduleSessionPatientsView extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: (dark ? AmanahColorTokens.brandAccent : AmanahColorTokens.brand)
-                      .withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '${patients.length} Pasien',
-                  style: TextStyle(
-                    color: dark ? AmanahColorTokens.brandAccent : AmanahColorTokens.brand,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                  ),
+              Text(
+                '${patients.length} Pasien',
+                style: TextStyle(
+                  color: dark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral500,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],

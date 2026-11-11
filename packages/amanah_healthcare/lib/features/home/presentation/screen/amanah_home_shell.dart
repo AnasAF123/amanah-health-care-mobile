@@ -7,6 +7,7 @@ import 'package:amanah_healthcare/features/authentication/data/amanah_auth_repos
 import 'package:amanah_healthcare/features/authentication/data/staff_profile_store.dart';
 import 'package:amanah_healthcare/features/authentication/domain/amanah_auth_user.dart';
 import 'package:amanah_healthcare/features/authentication/presentation/screen/auth_bottom_sheet_screen.dart';
+import 'package:amanah_healthcare/features/home/data/amanah_clinic_services_store.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_home_data.dart';
 import 'package:amanah_healthcare/features/home/domain/amanah_notification_model.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_aurora_background.dart';
@@ -59,6 +60,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
   final AmanahNotificationStore _notificationStore = AmanahNotificationStore.instance;
   final AmanahPermissionStore _permissionStore = AmanahPermissionStore.instance;
   final StaffProfileStore _profileStore = StaffProfileStore.instance;
+  final AmanahClinicServicesStore _clinicServicesStore = AmanahClinicServicesStore.instance;
   AmanahHomeTab _selectedTab = AmanahHomeTab.home;
   String? _toastMessage;
   Timer? _toastTimer;
@@ -78,7 +80,9 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     _scheduleStore.addListener(_onStoreUpdated);
     _notificationStore.addListener(_onStoreUpdated);
     _permissionStore.addListener(_onStoreUpdated);
+    _clinicServicesStore.addListener(_onStoreUpdated);
     _scheduleStore.syncTodaySchedules().catchError((Object _) {});
+    _clinicServicesStore.fetchServiceCatalog().catchError((Object _) {});
     AmanahQueueStore.instance.loadTodaySessionsAndQueue();
   }
 
@@ -136,6 +140,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
         _scheduleStore.syncTodaySchedules(),
         _notificationStore.fetchMyNotifications(),
         _profileStore.fetchProfile(force: true),
+        _clinicServicesStore.fetchServiceCatalog(force: true),
         AmanahQueueStore.instance.loadTodaySessionsAndQueue(),
       ]);
     } catch (_) {
@@ -245,6 +250,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
     _scheduleStore.removeListener(_onStoreUpdated);
     _notificationStore.removeListener(_onStoreUpdated);
     _permissionStore.removeListener(_onStoreUpdated);
+    _clinicServicesStore.removeListener(_onStoreUpdated);
     _toastTimer?.cancel();
     super.dispose();
   }
@@ -311,6 +317,7 @@ class _AmanahHomeShellState extends State<AmanahHomeShell> {
                     todaySchedules: todaySchedules,
                     quickActions: AmanahQuickAction.buildActionsForUser(_currentUser),
                     activities: const <AmanahActivityMetric>[],
+                    clinicSlides: _clinicServicesStore.slides,
                     unreadNotifications: _notificationStore.unreadCount,
                     onRefresh: _loadHomeSchedules,
                     onNotificationTap: () {
@@ -435,6 +442,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
     required this.onQuickActionTap,
     required this.onDetailActivityTap,
     required this.onActivityTap,
+    this.clinicSlides = const <AmanahClinicSlide>[],
     this.unreadNotifications = 0,
     this.onScheduleCardTap,
     this.onCreateScheduleTap,
@@ -447,6 +455,7 @@ class _AmanahHomeScreenContent extends StatelessWidget {
   final List<DoctorSchedule> todaySchedules;
   final List<AmanahQuickAction> quickActions;
   final List<AmanahActivityMetric> activities;
+  final List<AmanahClinicSlide> clinicSlides;
   final VoidCallback onNotificationTap;
   final VoidCallback onProfileTap;
   final ValueChanged<AmanahQuickAction> onQuickActionTap;
@@ -498,7 +507,10 @@ class _AmanahHomeScreenContent extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // 4. Master 3D Deck Carousel (Promotions & Clinical Programs) - Preserved exception
-                AmanahMasterCarouselSection(onSlideAction: onSlideAction),
+                AmanahMasterCarouselSection(
+                  slides: clinicSlides,
+                  onSlideAction: onSlideAction,
+                ),
                 const SizedBox(height: 20),
 
                 // 5. Today's Activity Stat Cards (Shows empty state when activities are empty)

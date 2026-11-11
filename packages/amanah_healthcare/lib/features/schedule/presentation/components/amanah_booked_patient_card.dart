@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
-import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_queue_badge.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_card_layers.dart';
 
 class AmanahBookedPatientCard extends StatelessWidget {
@@ -107,18 +105,32 @@ class AmanahBookedPatientCard extends StatelessWidget {
               // Layer 3: Smooth High-Contrast Ambient Gradient (Masking Putih / Obsidian)
               AmbientCardGradientLayer(dark: dark),
 
-              // Layer 4: Top Badges (Status on Left, 3D Queue Medal on Right)
+              // Layer 4: Top Labels (Status on Left, Queue Number on Right - Minimalist Text-Based)
               Positioned(
-                top: 14,
-                left: 14,
-                child: AmanahStatusBadge(text: patient.badge, variant: patient.badgeVariant),
+                top: 18,
+                left: 20,
+                child: Text(
+                  patient.badge,
+                  style: TextStyle(
+                    color: dark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
 
-              // Top-Right: 3D Crystal Queue Badge Medal
+              // Top-Right: Queue Number
               Positioned(
-                top: 8,
-                right: 8,
-                child: AmanahQueueBadge(queueNumber: patient.queueNumber, size: 68),
+                top: 16,
+                right: 20,
+                child: Text(
+                  patient.queueNumber,
+                  style: TextStyle(
+                    color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
               ),
 
               // Layer 5: Text Content Overlay at Bottom
@@ -151,28 +163,16 @@ class AmanahBookedPatientCard extends StatelessWidget {
                               ],
                             ),
                             child: ClipOval(
-                              child: Image.network(
-                                patient.avatarUrl ??
-                                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
-                                fit: BoxFit.cover,
-                                errorBuilder:
-                                    (BuildContext context, Object error, StackTrace? stack) =>
-                                        ColoredBox(
-                                          color: AmanahColorTokens.neutral700,
-                                          child: Center(
-                                            child: Text(
-                                              patient.patientName.isNotEmpty
-                                                  ? patient.patientName.substring(0, 1)
-                                                  : 'P',
-                                              style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w700,
-                                                color: AmanahColorTokens.surfaceLight,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                              ),
+                              child: (patient.avatarUrl != null &&
+                                      patient.avatarUrl!.trim().isNotEmpty)
+                                  ? Image.network(
+                                      patient.avatarUrl!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (BuildContext context, Object error, StackTrace? stack) =>
+                                              _buildAvatarFallback(patient.patientName),
+                                    )
+                                  : _buildAvatarFallback(patient.patientName),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -436,6 +436,22 @@ class AmanahBookedPatientCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatarFallback(String name) {
+    return ColoredBox(
+      color: AmanahColorTokens.neutral700,
+      child: Center(
+        child: Text(
+          name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'P',
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AmanahColorTokens.surfaceLight,
           ),
         ),
       ),

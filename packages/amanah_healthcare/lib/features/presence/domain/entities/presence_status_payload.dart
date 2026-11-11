@@ -193,7 +193,7 @@ class PresenceStatusPayload {
 
     final String cleanMessage = error is ApiException
         ? error.message
-        : error.toString().replaceAll('Exception: ', '').replaceAll('FormatException: ', '');
+        : error.toString();
 
     return PresenceStatusPayload(
       type: PresenceStatusType.genericError,

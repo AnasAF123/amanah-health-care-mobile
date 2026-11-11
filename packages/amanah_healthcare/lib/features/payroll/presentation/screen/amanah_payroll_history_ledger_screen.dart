@@ -111,11 +111,13 @@ class _AmanahPayrollHistoryLedgerScreenState extends State<AmanahPayrollHistoryL
 
                   final List<MonthlyPayrollGroup> groups = _controller.historyGroups;
                   if (groups.isEmpty) {
-                    return const Center(
-                      child: AmanahEmptyState(
+                    return Center(
+                      child: AmanahEmptyState.box(
                         title: 'Riwayat Kosong',
                         message: 'Belum ada riwayat buku besar penggajian yang tercatat.',
-                        tone: AmanahEmptyStateTone.neutral,
+                        variant: AmanahEmptyStateVariant.viewport,
+                        actionText: 'Segarkan',
+                        onAction: () => _controller.loadHistoryLedger(context: context),
                       ),
                     );
                   }

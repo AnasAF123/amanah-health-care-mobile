@@ -20,28 +20,26 @@ class MyScheduleSessionDto {
   });
 
   factory MyScheduleSessionDto.fromJson(Map<String, dynamic> json) {
-    final String resolvedCode = json['sessionCode'] as String? ?? json['session']?.toString() ?? '';
-    final String resolvedLabel =
-        json['sessionLabel'] as String? ??
-        json['title'] as String? ??
-        (resolvedCode.isNotEmpty ? resolvedCode : 'Sesi Praktik');
+    final String sessionShift = (json['sessionShift'] ?? json['sessionCode'] ?? '') as String;
+    final String sessionLabel =
+        (json['sessionLabel'] ?? (sessionShift.isNotEmpty ? sessionShift : 'Sesi Praktik'))
+            as String;
 
     return MyScheduleSessionDto(
-      id: json['id'] as String? ?? '',
-      sessionId: json['sessionId'] as String? ?? json['id'] as String? ?? '',
-      sessionCode: resolvedCode,
-      sessionLabel: resolvedLabel,
-      scheduleDate: json['scheduleDate'] as String? ?? json['specificDate'] as String? ?? '',
+      id: (json['id'] ?? '') as String,
+      sessionId: (json['sessionId'] ?? json['id'] ?? '') as String,
+      sessionCode: sessionShift,
+      sessionLabel: sessionLabel,
+      scheduleDate: (json['scheduleDate'] ?? json['specificDate'] ?? '') as String,
       startTime: json['startTime'] as String?,
       endTime: json['endTime'] as String?,
-      timeRange:
-          json['timeRange'] as String? ?? '${json['startTime'] ?? ''} - ${json['endTime'] ?? ''}',
-      roomName: json['roomName'] as String? ?? json['room'] as String?,
-      poliklinikName: json['poliklinikName'] as String? ?? json['poli'] as String?,
-      status: json['status'] as String? ?? json['effectiveStatus'] as String? ?? 'OPEN',
+      timeRange: json['timeRange'] as String?,
+      roomName: (json['roomName'] ?? json['room']) as String?,
+      poliklinikName: (json['poliklinikName'] ?? json['poli']) as String?,
+      status: (json['status'] ?? json['effectiveStatus'] ?? '') as String,
       isAvailable: json['isAvailable'] as bool? ?? true,
-      bookedCount: json['bookedCount'] as int? ?? json['totalBookedPatients'] as int? ?? 0,
-      maxQuota: json['maxQuota'] as int? ?? 0,
+      bookedCount: (json['bookedCount'] ?? 0) as int,
+      maxQuota: (json['maxQuota'] ?? 0) as int,
       isReplacement: json['isReplacement'] as bool? ?? false,
       replacedStaffName: json['replacedStaffName'] as String?,
       notes: json['notes'] as String?,

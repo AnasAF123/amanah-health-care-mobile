@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/time/functions/format_practice_hours.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/presence/domain/amanah_presence_model.dart';
 
@@ -58,9 +59,7 @@ class PresenceHistorySummaryBar extends StatelessWidget {
     }
 
     final double totalHours = summary != null ? summary!.totalWorkHours : validatedSum;
-    final String formattedHours = totalHours % 1 == 0
-        ? '${totalHours.toInt()} hr'
-        : '${totalHours.toStringAsFixed(1)} hr';
+    final String formattedHours = formatPracticeHours(totalHours);
 
     final String periodLabel = summary?.periodLabel ?? 'Periode ini';
 

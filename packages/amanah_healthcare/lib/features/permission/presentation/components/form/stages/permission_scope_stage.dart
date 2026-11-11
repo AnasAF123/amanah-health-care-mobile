@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/permission/domain/entities/eligible_session.dart';
 import 'package:amanah_healthcare/features/permission/presentation/theme/amanah_permission_tokens.dart';
@@ -33,9 +34,6 @@ class PermissionScopeStage extends StatelessWidget {
     final Color subtextColor = dark
         ? AmanahPermissionTokens.textMutedDark
         : AmanahPermissionTokens.textMutedLight;
-    final Color borderColor = dark
-        ? AmanahPermissionTokens.cardBorderDark
-        : AmanahPermissionTokens.cardBorderLight;
 
     final bool isFullDay = scope == 'full_day';
     final bool isSession = scope == 'session';
@@ -62,7 +60,6 @@ class PermissionScopeStage extends StatelessWidget {
                 isSelected: isFullDay,
                 onTap: () => onScopeSelected('full_day'),
                 dark: dark,
-                borderColor: borderColor,
               ),
             ),
             const SizedBox(width: 12),
@@ -76,7 +73,6 @@ class PermissionScopeStage extends StatelessWidget {
                 isSelected: isSession,
                 onTap: () => onScopeSelected('session'),
                 dark: dark,
-                borderColor: borderColor,
               ),
             ),
           ],
@@ -102,9 +98,9 @@ class PermissionScopeStage extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: dark ? AmanahColorTokens.surfaceDark : AmanahColorTokens.neutral50,
+                color: AmanahThemeTokens.elevatedSurface(context),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: borderColor),
+                border: null,
               ),
               child: Column(
                 children: <Widget>[
@@ -141,13 +137,10 @@ class PermissionScopeStage extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? activeBrand.withValues(alpha: dark ? 0.15 : 0.08)
-                          : (dark ? AmanahColorTokens.surfaceDark : AmanahColorTokens.surfaceLight),
+                          ? activeBrand.withValues(alpha: dark ? 0.16 : 0.08)
+                          : AmanahThemeTokens.elevatedSurface(context),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isSelected ? activeBrand : borderColor,
-                        width: isSelected ? 1.6 : 1.0,
-                      ),
+                      border: null,
                     ),
                     child: Row(
                       children: <Widget>[
@@ -189,22 +182,12 @@ class PermissionScopeStage extends StatelessWidget {
               );
             }),
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: selectedSessions.isNotEmpty ? onContinue : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
-                  foregroundColor: dark ? AmanahColorTokens.neutral950 : Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-                child: const Text(
-                  'Lanjutkan ke Alasan',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-                ),
-              ),
+            AmanahButton.primary(
+              text: 'Lanjutkan ke Alasan',
+              size: AmanahButtonSize.medium,
+              isFullWidth: true,
+              isDisabled: selectedSessions.isEmpty,
+              onPressed: onContinue,
             ),
           ],
         ],
@@ -220,7 +203,6 @@ class PermissionScopeStage extends StatelessWidget {
     required bool isSelected,
     required VoidCallback onTap,
     required bool dark,
-    required Color borderColor,
   }) {
     final Color textColor = dark
         ? AmanahPermissionTokens.textTitleDark
@@ -238,13 +220,10 @@ class PermissionScopeStage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? activeBrand.withValues(alpha: dark ? 0.15 : 0.08)
-              : (dark ? AmanahColorTokens.surfaceDark : AmanahColorTokens.surfaceLight),
+              ? activeBrand.withValues(alpha: dark ? 0.16 : 0.08)
+              : AmanahThemeTokens.elevatedSurface(context),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? activeBrand : borderColor,
-            width: isSelected ? 1.8 : 1.0,
-          ),
+          border: null,
           boxShadow: isSelected
               ? <BoxShadow>[
                   BoxShadow(

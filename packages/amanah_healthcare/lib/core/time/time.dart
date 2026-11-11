@@ -17,6 +17,7 @@ export 'functions/calculate_overtime_minutes.dart';
 export 'functions/format_iso_date_string.dart';
 export 'functions/format_localized_date.dart';
 export 'functions/format_localized_time.dart';
+export 'functions/format_practice_hours.dart';
 export 'functions/is_same_calendar_day.dart';
 export 'functions/is_within_tolerance_window.dart';
 export 'functions/normalize_to_calendar_date.dart';

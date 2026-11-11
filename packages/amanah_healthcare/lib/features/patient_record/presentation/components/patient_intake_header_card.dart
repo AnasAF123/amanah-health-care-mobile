@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
 /// Top minimalist header card displaying patient identity and medical record number.
@@ -23,7 +22,7 @@ class PatientIntakeHeaderCard extends StatelessWidget {
   final String flow;
   final bool isDark;
   final String? statusText;
-  final AmanahBadgeVariant? statusVariant;
+  final dynamic statusVariant;
 
   @override
   Widget build(BuildContext context) {
@@ -52,22 +51,35 @@ class PatientIntakeHeaderCard extends StatelessWidget {
           ),
           const SizedBox(width: 14),
           Expanded(
-            child: Text(
-              patientName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: isDark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
-                fontSize: 16.5,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.2,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  patientName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: isDark ? AmanahColorTokens.surfaceLight : AmanahColorTokens.neutral900,
+                    fontSize: 16.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                if (statusText != null && statusText!.isNotEmpty) ...<Widget>[
+                  const SizedBox(height: 2),
+                  Text(
+                    statusText!,
+                    style: TextStyle(
+                      color: isDark ? AmanahColorTokens.neutral400 : AmanahColorTokens.neutral600,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-          if (statusText != null && statusText!.isNotEmpty) ...<Widget>[
-            const SizedBox(width: 8),
-            AmanahStatusBadge(variant: statusVariant ?? AmanahBadgeVariant.live, text: statusText!),
-          ],
         ],
       ),
     );

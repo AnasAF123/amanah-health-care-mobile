@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_patient_detail_painters.dart';
@@ -111,16 +110,35 @@ class _PatientProfileHeader extends StatelessWidget {
                   ],
                 ),
                 child: ClipOval(
-                  child: Image.network(
-                    patient.avatarUrl ??
-                        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=300&auto=format&fit=crop',
-                    fit: BoxFit.cover,
-                    errorBuilder:
-                        (
-                          BuildContext context,
-                          Object error,
-                          StackTrace? stack,
-                        ) => ColoredBox(
+                  child: (patient.avatarUrl != null && patient.avatarUrl!.trim().isNotEmpty)
+                      ? Image.network(
+                          patient.avatarUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (
+                            BuildContext context,
+                            Object error,
+                            StackTrace? stack,
+                          ) => ColoredBox(
+                            color: dark
+                                ? AmanahColorTokens.neutral700
+                                : AmanahColorTokens.neutral300,
+                            child: Center(
+                              child: Text(
+                                patient.patientName.isNotEmpty
+                                    ? patient.patientName.substring(0, 1)
+                                    : 'P',
+                                style: TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w800,
+                                  color: dark
+                                      ? AmanahColorTokens.surfaceLight
+                                      : AmanahColorTokens.neutral800,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      : ColoredBox(
                           color: dark
                               ? AmanahColorTokens.neutral700
                               : AmanahColorTokens.neutral300,
@@ -139,15 +157,18 @@ class _PatientProfileHeader extends StatelessWidget {
                             ),
                           ),
                         ),
-                  ),
                 ),
               ),
               Positioned(
-                right: 8,
-                bottom: 3,
-                child: CustomPaint(
-                  size: const Size(38, 45),
-                  painter: QueueBadgePainter(patient.queueNumber),
+                right: 0,
+                bottom: 0,
+                child: Text(
+                  patient.queueNumber,
+                  style: TextStyle(
+                    color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
             ],
@@ -190,11 +211,13 @@ class _PatientMetaInline extends StatelessWidget {
           _PatientMetaDivider(dark: dark),
           Text('Usia ${patient.patientAge}', style: _style),
           _PatientMetaDivider(dark: dark),
-          AmanahStatusBadge(
-            text: patient.badge,
-            variant: patient.badgeVariant,
-            fontSize: 10,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          Text(
+            patient.badge,
+            style: TextStyle(
+              color: dark ? AmanahColorTokens.neutral300 : AmanahColorTokens.neutral700,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),

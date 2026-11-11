@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/entities/doctor_roster.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/session_roster_tile.dart';
@@ -200,60 +199,39 @@ class _WeeklyScheduleAccordionState extends State<WeeklyScheduleAccordion> {
                       const SizedBox(width: 8),
 
                       if (isFocused) ...<Widget>[
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color:
-                                (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
-                                    .withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(
-                              color:
-                                  (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand)
-                                      .withValues(alpha: 0.35),
-                            ),
-                          ),
-                          child: Text(
-                            'Fokus Kalender',
-                            style: TextStyle(
-                              color: dark
-                                  ? AmanahColorTokens.tabActiveDark
-                                  : AmanahColorTokens.brand,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                            ),
+                        Text(
+                          '• Fokus',
+                          style: TextStyle(
+                            color: dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(width: 8),
                       ],
 
-                      if (!day.isOperatingDay)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AmanahColorTokens.warning.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Text(
-                            'Klinik Tutup',
-                            style: TextStyle(
-                              color: AmanahColorTokens.warning,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                            ),
+                      if (!day.isOperatingDay) ...<Widget>[
+                        const Text(
+                          '• Klinik Tutup',
+                          style: TextStyle(
+                            color: AmanahColorTokens.warning,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
+                        const SizedBox(width: 8),
+                      ],
 
                       const Spacer(),
 
-                      // Day Active / Libur Status Badge
-                      AmanahStatusBadge(
-                        text: isDayActive ? 'Aktif' : 'Libur',
-                        variant: isDayActive
-                            ? AmanahBadgeVariant.success
-                            : AmanahBadgeVariant.warning,
-                        fontSize: 11,
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      // Day Active / Libur Status (Minimalist Text-Based)
+                      Text(
+                        isDayActive ? 'Aktif' : 'Libur',
+                        style: TextStyle(
+                          color: isDayActive ? AmanahColorTokens.success : AmanahColorTokens.warning,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       const SizedBox(width: 8),
 

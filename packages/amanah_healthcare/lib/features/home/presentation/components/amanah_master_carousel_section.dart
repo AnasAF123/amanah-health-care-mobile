@@ -1,75 +1,13 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
+import 'package:amanah_healthcare/core/config/amanah_auth_environment.dart';
+import 'package:amanah_healthcare/features/home/domain/entities/amanah_clinic_slide.dart';
+import 'package:amanah_healthcare/features/home/presentation/components/amanah_empty_state.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_carousel_tokens.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 
-/// Clinic Promotional Slide Model matching ClinicSlide in MasterCarouselSection.tsx (.web)
-class AmanahClinicSlide {
-  const AmanahClinicSlide({
-    required this.id,
-    required this.eyebrow,
-    required this.title,
-    required this.description,
-    required this.ctaText,
-    required this.ctaIcon,
-    required this.iconType,
-    required this.imagePath,
-  });
-
-  final String id;
-  final String eyebrow;
-  final String title;
-  final String description;
-  final String ctaText;
-  final IconData ctaIcon;
-  final String iconType;
-  final String imagePath;
-}
-
-const List<AmanahClinicSlide> kClinicSlides = <AmanahClinicSlide>[
-  AmanahClinicSlide(
-    id: 'slide-1',
-    eyebrow: 'Layanan Anak',
-    title: 'Konsultasi Spesialis Anak',
-    description: 'Jadwalkan temu dokter spesialis anak responsif dan terpadu RS Amanah.',
-    ctaText: 'Jadwalkan',
-    ctaIcon: Icons.auto_awesome_rounded,
-    iconType: 'briefcase',
-    imagePath: 'assets/amanah/images/carousel/konsultasi-anak.png',
-  ),
-  AmanahClinicSlide(
-    id: 'slide-2',
-    eyebrow: 'Imunisasi',
-    title: 'Vaksinasi & Booster Anak',
-    description: 'Paket imunisasi balita primer lengkap dengan sertifikat medis resmi.',
-    ctaText: 'Lihat Paket',
-    ctaIcon: Icons.verified_user_rounded,
-    iconType: 'syringe',
-    imagePath: 'assets/amanah/images/carousel/imunasi-anak.jpg',
-  ),
-  AmanahClinicSlide(
-    id: 'slide-3',
-    eyebrow: 'Layanan USG',
-    title: 'Pemeriksaan USG Spesialis',
-    description: 'Layanan ultrasonografi diagnostik akurat dengan dokter spesialis terpadu.',
-    ctaText: 'Reservasi',
-    ctaIcon: Icons.event_available_rounded,
-    iconType: 'dna',
-    imagePath: 'assets/amanah/images/carousel/usg.jpg',
-  ),
-  AmanahClinicSlide(
-    id: 'slide-4',
-    eyebrow: 'Ibu & Anak',
-    title: 'Persalinan & Rawat Inap',
-    description: 'Fasilitas persalinan terpadu dan rawat inap ibu & buah hati siaga 24 jam.',
-    ctaText: 'Lihat Fasilitas',
-    ctaIcon: Icons.favorite_rounded,
-    iconType: 'shield',
-    imagePath: 'assets/amanah/images/carousel/persalinan-ibu-anak.png',
-  ),
-];
+export 'package:amanah_healthcare/features/home/domain/entities/amanah_clinic_slide.dart';
 
 // Continuous 3D deck slot interpolation with deterministic algebraic math (no while loops)
 double _getContinuousOffset(int cardIndex, double pagePos, int total) {
@@ -135,7 +73,11 @@ double _getOpacity(double offset) {
 /// Master 3D Deck Carousel Section in Flutter matching MasterCarouselSection.tsx (.web)
 /// Highly optimized for mobile hardware and Android EGL raster threads.
 class AmanahMasterCarouselSection extends StatefulWidget {
-  const AmanahMasterCarouselSection({super.key, this.slides = kClinicSlides, this.onSlideAction});
+  const AmanahMasterCarouselSection({
+    super.key,
+    this.slides = const <AmanahClinicSlide>[],
+    this.onSlideAction,
+  });
 
   final List<AmanahClinicSlide> slides;
   final ValueChanged<String>? onSlideAction;
@@ -208,7 +150,7 @@ class _AmanahMasterCarouselSectionState extends State<AmanahMasterCarouselSectio
     super.didChangeDependencies();
     final ModalRoute<dynamic>? route = ModalRoute.of(context);
     final bool isVisible = route?.isCurrent ?? true;
-    final bool tickerActive = TickerMode.of(context);
+    final bool tickerActive = TickerMode.valuesOf(context).enabled;
 
     if (!isVisible || !tickerActive) {
       _stopAutoplay();
@@ -238,7 +180,7 @@ class _AmanahMasterCarouselSectionState extends State<AmanahMasterCarouselSectio
         if (!mounted || _isDragging || widget.slides.isEmpty) {
           return;
         }
-        if (!TickerMode.of(context)) {
+        if (!TickerMode.valuesOf(context).enabled) {
           return;
         }
         final ModalRoute<dynamic>? route = ModalRoute.of(context);
@@ -386,7 +328,13 @@ class _AmanahMasterCarouselSectionState extends State<AmanahMasterCarouselSectio
   @override
   Widget build(BuildContext context) {
     if (widget.slides.isEmpty) {
-      return const SizedBox.shrink();
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        child: AmanahEmptyState.card(
+          title: 'Belum Ada Layanan',
+          message: 'Daftar katalog layanan klinik belum tersedia saat ini.',
+        ),
+      );
     }
 
     // Safety guard: if resting and not actively dragging or animating, guarantee snapped integer
@@ -599,12 +547,31 @@ class _AmanahDeckCardState extends State<AmanahDeckCard> with SingleTickerProvid
 
                 // Layer 2: Full Photographic Background Artwork
                 Positioned.fill(
-                  child: Image.asset(
-                    widget.slide.imagePath,
-                    fit: BoxFit.cover,
-                    alignment: Alignment.centerRight,
-                    errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
-                      return const SizedBox.shrink();
+                  child: Builder(
+                    builder: (BuildContext context) {
+                      final String? raw = widget.slide.imageUrl;
+                      if (raw == null || raw.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      final String resolvedUrl;
+                      if (raw.startsWith('http://') || raw.startsWith('https://')) {
+                        resolvedUrl = raw;
+                      } else {
+                        final String base = AmanahAuthEnvironment.authBaseUrl;
+                        resolvedUrl = raw.startsWith('/') ? '$base$raw' : '$base/$raw';
+                      }
+                      return Image.network(
+                        resolvedUrl,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.centerRight,
+                        errorBuilder: (
+                          BuildContext context,
+                          Object error,
+                          StackTrace? stackTrace,
+                        ) {
+                          return const SizedBox.shrink();
+                        },
+                      );
                     },
                   ),
                 ),
@@ -638,11 +605,25 @@ class _AmanahDeckCardState extends State<AmanahDeckCard> with SingleTickerProvid
                   padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      // Top Left: Title and Description with Morph Animation
+                      if (widget.slide.eyebrow.trim().isNotEmpty) ...<Widget>[
+                        Text(
+                          widget.slide.eyebrow.toUpperCase(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                            color: AmanahColorTokens.cyanAccent,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                      ],
+                      // Title and Description with Morph Animation
                       SizedBox(
-                        width: cardWidth * 0.52,
+                        width: cardWidth * 0.55,
                         child: AnimatedBuilder(
                           animation: _animController,
                           builder: (BuildContext context, Widget? child) {
@@ -665,7 +646,7 @@ class _AmanahDeckCardState extends State<AmanahDeckCard> with SingleTickerProvid
                                     opacity: tOpacity.clamp(0.0, 1.0),
                                     child: Text(
                                       widget.slide.title,
-                                      maxLines: 1,
+                                      maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
                                         fontSize: 15.0,
@@ -677,7 +658,7 @@ class _AmanahDeckCardState extends State<AmanahDeckCard> with SingleTickerProvid
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 6),
                                 Transform.translate(
                                   offset: Offset(0, dSlide),
                                   child: Opacity(
@@ -699,14 +680,6 @@ class _AmanahDeckCardState extends State<AmanahDeckCard> with SingleTickerProvid
                             );
                           },
                         ),
-                      ),
-
-                      // Bottom Row: Theme-Respecting Crisp Blue Action Button (.btn-crisp-blue)
-                      AmanahCrispActionButton(
-                        text: widget.slide.ctaText,
-                        icon: widget.slide.ctaIcon,
-                        isDark: widget.isDark,
-                        onTap: widget.onActionClick,
                       ),
                     ],
                   ),
@@ -737,35 +710,9 @@ class _AmanahDeckCardState extends State<AmanahDeckCard> with SingleTickerProvid
   }
 }
 
-/// Atom: Crisp Blue Action Button (.btn-crisp-blue) inheriting directly from AmanahButton
-class AmanahCrispActionButton extends StatelessWidget {
-  const AmanahCrispActionButton({
-    required this.text,
-    required this.icon,
-    required this.isDark,
-    required this.onTap,
-    super.key,
-  });
-
-  final String text;
-  final IconData icon;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return AmanahButton.primary(
-      text: text,
-      leadingIcon: icon,
-      size: AmanahButtonSize.small,
-      customHeight: 32,
-      borderRadius: BorderRadius.circular(AmanahCarouselTokens.btnRadius),
-      onPressed: onTap,
-    );
-  }
-}
-
 /// Atom: Docked Notch Indicator Toolbar sitting inside the Inward Cavity Notch
+/// Windowed dynamic pagination (max 5 dots) so it fits neatly inside the notch cavity
+/// without overflowing past the inward curves, even with 10+ slides.
 class AmanahCarouselNotchedIndicator extends StatelessWidget {
   const AmanahCarouselNotchedIndicator({
     required this.currentIndex,
@@ -780,35 +727,79 @@ class AmanahCarouselNotchedIndicator extends StatelessWidget {
   final bool isDark;
   final ValueChanged<int> onSelectSlide;
 
+  static const int maxVisible = 5;
+
   @override
   Widget build(BuildContext context) {
+    if (totalSlides <= 1) {
+      return const SizedBox.shrink();
+    }
+
+    final List<int> visibleIndices;
+    if (totalSlides <= maxVisible) {
+      visibleIndices = List<int>.generate(totalSlides, (int i) => i);
+    } else {
+      int start = currentIndex - 2;
+      if (start < 0) {
+        start = 0;
+      } else if (start + maxVisible > totalSlides) {
+        start = totalSlides - maxVisible;
+      }
+      visibleIndices = List<int>.generate(maxVisible, (int i) => start + i);
+    }
+
     return Container(
       height: 22,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: List<Widget>.generate(totalSlides, (int index) {
+        children: visibleIndices.map((int index) {
           final bool isActive = index == currentIndex;
+          final bool isEdge = totalSlides > maxVisible &&
+              (index == visibleIndices.first && index > 0 ||
+                  index == visibleIndices.last && index < totalSlides - 1);
+
+          final double dotWidth;
+          final double dotHeight;
+          if (isActive) {
+            dotWidth = 18.0;
+            dotHeight = 5.5;
+          } else if (isEdge) {
+            dotWidth = 4.0;
+            dotHeight = 4.0;
+          } else {
+            dotWidth = 5.5;
+            dotHeight = 5.5;
+          }
+
+          final Color dotColor;
+          if (isActive) {
+            dotColor = isDark
+                ? AmanahCarouselTokens.indicatorActiveDarkColor
+                : AmanahCarouselTokens.indicatorActiveColor;
+          } else if (isEdge) {
+            dotColor = (isDark
+                    ? AmanahCarouselTokens.indicatorInactiveDarkColor
+                    : AmanahCarouselTokens.indicatorInactiveColor)
+                .withValues(alpha: 0.50);
+          } else {
+            dotColor = isDark
+                ? AmanahCarouselTokens.indicatorInactiveDarkColor
+                : AmanahCarouselTokens.indicatorInactiveColor;
+          }
+
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => onSelectSlide(index),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 250),
               curve: Curves.easeOutCubic,
-              margin: const EdgeInsets.symmetric(horizontal: 3),
-              height: AmanahCarouselTokens.indicatorHeight,
-              width: isActive
-                  ? AmanahCarouselTokens.indicatorActiveWidth
-                  : AmanahCarouselTokens.indicatorInactiveWidth,
+              margin: const EdgeInsets.symmetric(horizontal: 2.5),
+              height: dotHeight,
+              width: dotWidth,
               decoration: BoxDecoration(
-                color: isActive
-                    ? (isDark
-                          ? AmanahCarouselTokens.indicatorActiveDarkColor
-                          : AmanahCarouselTokens.indicatorActiveColor)
-                    : (isDark
-                          ? AmanahCarouselTokens.indicatorInactiveDarkColor
-                          : AmanahCarouselTokens.indicatorInactiveColor),
+                color: dotColor,
                 borderRadius: BorderRadius.circular(999),
                 boxShadow: isActive
                     ? <BoxShadow>[
@@ -824,7 +815,7 @@ class AmanahCarouselNotchedIndicator extends StatelessWidget {
               ),
             ),
           );
-        }),
+        }).toList(),
       ),
     );
   }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_button.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
-import 'package:amanah_healthcare/features/home/presentation/components/amanah_status_badge.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/schedule/domain/amanah_schedule_model.dart';
 import 'package:amanah_healthcare/features/schedule/presentation/components/amanah_schedule_card_layers.dart';
@@ -11,24 +9,24 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
     required this.schedule,
     required this.isDayCuti,
     required this.onViewPatients,
-    required this.onTapEdit,
-    required this.onTapDelete,
+    this.onTapEdit,
+    this.onTapDelete,
     super.key,
   });
 
   final DoctorSchedule schedule;
   final bool isDayCuti;
   final VoidCallback onViewPatients;
-  final VoidCallback onTapEdit;
-  final VoidCallback onTapDelete;
+  final VoidCallback? onTapEdit;
+  final VoidCallback? onTapDelete;
 
   static void show(
     BuildContext context, {
     required DoctorSchedule schedule,
     required bool isDayCuti,
     required VoidCallback onViewPatients,
-    required VoidCallback onTapEdit,
-    required VoidCallback onTapDelete,
+    VoidCallback? onTapEdit,
+    VoidCallback? onTapDelete,
   }) {
     showAmanahBottomSheet<void>(
       context: context,
@@ -49,26 +47,18 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
 
     return AmanahBottomSheetScaffold(
       title: 'Detail Sesi Praktik',
-      fixedHeightFactor: 0.85,
+      fixedHeightFactor: 0.82,
       bodyPadding: const EdgeInsets.fromLTRB(
         AmanahSpacing.xxl,
         AmanahSpacing.xl,
         AmanahSpacing.xxl,
         AmanahSpacing.xxl,
       ),
-      footer: AmanahButton.primary(
-        text: 'Edit Jadwal',
-        isFullWidth: true,
-        size: AmanahButtonSize.medium,
-        onPressed: () {
-          Navigator.of(context).pop();
-          onTapEdit();
-        },
-      ),
+      footer: null,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // Title & Date Heading + Status Badge
+          // Title & Date Heading + Status Text (Minimalist Text-Based)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,11 +89,15 @@ class AmanahScheduleDetailDrawer extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              AmanahStatusBadge(
-                text: isDayCuti ? 'Cuti' : schedule.badge,
-                variant: isDayCuti ? AmanahBadgeVariant.warning : schedule.badgeVariant,
-                fontSize: 11,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              Text(
+                isDayCuti ? 'Cuti' : schedule.badge,
+                style: TextStyle(
+                  color: isDayCuti
+                      ? AmanahColorTokens.warning
+                      : (dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ],
           ),
@@ -318,16 +312,41 @@ class _StackedPatientAvatars extends StatelessWidget {
                 ),
               ),
               child: ClipOval(
-                child: Image.network(
-                  p.avatarUrl ??
-                      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
-                  fit: BoxFit.cover,
-                  errorBuilder: (BuildContext context, Object error, StackTrace? stack) =>
-                      ColoredBox(
-                        color: dark ? AmanahColorTokens.neutral700 : AmanahColorTokens.neutral300,
+                child: (p.avatarUrl != null && p.avatarUrl!.trim().isNotEmpty)
+                    ? Image.network(
+                        p.avatarUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (BuildContext context, Object error, StackTrace? stack) =>
+                                ColoredBox(
+                                  color: dark
+                                      ? AmanahColorTokens.neutral700
+                                      : AmanahColorTokens.neutral300,
+                                  child: Center(
+                                    child: Text(
+                                      p.patientName.isNotEmpty
+                                          ? p.patientName.substring(0, 1)
+                                          : 'P',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w700,
+                                        color: dark
+                                            ? AmanahColorTokens.surfaceLight
+                                            : AmanahColorTokens.neutral800,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                      )
+                    : ColoredBox(
+                        color: dark
+                            ? AmanahColorTokens.neutral700
+                            : AmanahColorTokens.neutral300,
                         child: Center(
                           child: Text(
-                            p.patientName.isNotEmpty ? p.patientName.substring(0, 1) : 'P',
+                            p.patientName.isNotEmpty
+                                ? p.patientName.substring(0, 1)
+                                : 'P',
                             style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w700,
@@ -338,7 +357,6 @@ class _StackedPatientAvatars extends StatelessWidget {
                           ),
                         ),
                       ),
-                ),
               ),
             ),
           );

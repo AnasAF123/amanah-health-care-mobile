@@ -31,13 +31,10 @@ class PermissionStageCard extends StatelessWidget {
     final Color subtextColor = dark
         ? AmanahPermissionTokens.textMutedDark
         : AmanahPermissionTokens.textMutedLight;
-    final Color borderColor = isSelected
-        ? activeBrand
-        : (dark ? AmanahPermissionTokens.cardBorderDark : AmanahPermissionTokens.cardBorderLight);
 
     final Color cardBg = isSelected
-        ? activeBrand.withValues(alpha: dark ? 0.15 : 0.08)
-        : (dark ? AmanahColorTokens.surfaceDark : AmanahColorTokens.surfaceLight);
+        ? activeBrand.withValues(alpha: dark ? 0.16 : 0.08)
+        : AmanahThemeTokens.elevatedSurface(context);
 
     return InkWell(
       onTap: onTap,
@@ -48,7 +45,7 @@ class PermissionStageCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: cardBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: borderColor, width: isSelected ? 1.8 : 1.0),
+          border: null,
           boxShadow: isSelected
               ? <BoxShadow>[
                   BoxShadow(

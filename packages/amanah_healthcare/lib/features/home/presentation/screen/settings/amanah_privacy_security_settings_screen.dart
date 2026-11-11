@@ -31,7 +31,6 @@ class AmanahPrivacySecuritySettingsScreen extends StatefulWidget {
 class _AmanahPrivacySecuritySettingsScreenState
     extends State<AmanahPrivacySecuritySettingsScreen> {
   String _passwordStatus = 'Terakhir diubah 30 hari yang lalu';
-  bool _biometricEnabled = true;
 
   late final AuthRepository _repository = const AmanahAuthRepository();
   late final ChangePasswordUseCase _changePasswordUseCase =
@@ -101,24 +100,6 @@ class _AmanahPrivacySecuritySettingsScreenState
                           label: 'Kata sandi akun',
                           value: _passwordStatus,
                           onEdit: _editPassword,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-
-                    // 2. Keamanan perangkat
-                    AmanahSettingSection(
-                      title: 'Keamanan perangkat',
-                      children: <Widget>[
-                        AmanahSettingToggleRow(
-                          title: 'Login biometrik',
-                          subtitle: 'Gunakan sidik jari atau pemindai wajah',
-                          checked: _biometricEnabled,
-                          onToggle: () {
-                            setState(
-                              () => _biometricEnabled = !_biometricEnabled,
-                            );
-                          },
                         ),
                       ],
                     ),

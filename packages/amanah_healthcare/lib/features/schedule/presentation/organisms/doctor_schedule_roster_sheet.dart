@@ -183,42 +183,7 @@ class _DoctorScheduleRosterSheetState extends State<DoctorScheduleRosterSheet> {
                     },
                   ),
                 ),
-          footer: _controller.isLoading || _controller.errorMessage != null || hasNoSessions
-              ? null
-              : Row(
-                  children: <Widget>[
-                    if (widget.canManage && _controller.isOverride) ...<Widget>[
-                      Expanded(
-                        child: AmanahButton.secondary(
-                          text: 'Reset Template',
-                          isLoading: _controller.isResetting,
-                          size: AmanahButtonSize.medium,
-                          onPressed: () async {
-                            final bool ok = await _controller.resetAllToTemplate(context);
-                            if (ok && context.mounted) {
-                              Navigator.of(context).pop();
-                            }
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                    ],
-                    Expanded(
-                      child: AmanahButton.primary(
-                        text: 'Simpan',
-                        isLoading: _controller.isSaving,
-                        isDisabled: !_controller.hasUnsavedChanges,
-                        size: AmanahButtonSize.medium,
-                        onPressed: () async {
-                          final bool ok = await _controller.saveOverrides(context);
-                          if (ok && context.mounted) {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+          footer: null,
         );
       },
     );

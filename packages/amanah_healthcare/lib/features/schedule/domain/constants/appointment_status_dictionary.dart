@@ -109,38 +109,25 @@ class AppointmentStatusDescriptor {
     ),
   };
 
-  static const Map<String, CanonicalAppointmentStatus> aliases = {
-    'BOOK': CanonicalAppointmentStatus.booked,
-    'BOOKED': CanonicalAppointmentStatus.booked,
-    'SUDAH_BUAT_JANJI': CanonicalAppointmentStatus.booked,
-    'CHECKED_IN': CanonicalAppointmentStatus.checkedIn,
-    'CHECKIN': CanonicalAppointmentStatus.checkedIn,
-    'WAITING': CanonicalAppointmentStatus.waiting,
-    'MENUNGGU': CanonicalAppointmentStatus.waiting,
-    'IN_SERVICE': CanonicalAppointmentStatus.inService,
-    'SEDANG_DIPERIKSA': CanonicalAppointmentStatus.inService,
-    'SEDANG_PERIKSA': CanonicalAppointmentStatus.inService,
-    'DI_SESI': CanonicalAppointmentStatus.inService,
-    'SERVING': CanonicalAppointmentStatus.inService,
-    'COMPLETED': CanonicalAppointmentStatus.completed,
-    'SELESAI': CanonicalAppointmentStatus.completed,
-    'CANCELLED': CanonicalAppointmentStatus.cancelled,
-    'BATAL': CanonicalAppointmentStatus.cancelled,
-    'DIBATALKAN': CanonicalAppointmentStatus.cancelled,
-    'NO_DOCTOR': CanonicalAppointmentStatus.noDoctor,
-    'TIDAK_ADA_DOKTER': CanonicalAppointmentStatus.noDoctor,
-    'NO_SHOW': CanonicalAppointmentStatus.noShow,
-    'TIDAK_HADIR': CanonicalAppointmentStatus.noShow,
-    'LATE': CanonicalAppointmentStatus.late,
-    'TERLAMBAT': CanonicalAppointmentStatus.late,
+  static const Map<String, CanonicalAppointmentStatus> canonicalMap = {
+    'booked': CanonicalAppointmentStatus.booked,
+    'checked_in': CanonicalAppointmentStatus.checkedIn,
+    'waiting': CanonicalAppointmentStatus.waiting,
+    'in_service': CanonicalAppointmentStatus.inService,
+    'completed': CanonicalAppointmentStatus.completed,
+    'cancelled': CanonicalAppointmentStatus.cancelled,
+    'no_doctor': CanonicalAppointmentStatus.noDoctor,
+    'no_show': CanonicalAppointmentStatus.noShow,
+    'late': CanonicalAppointmentStatus.late,
   };
 
   static AppointmentStatusDescriptor resolve(String? rawStatus) {
     if (rawStatus == null || rawStatus.trim().isEmpty) {
       return registry[CanonicalAppointmentStatus.waiting]!;
     }
-    final String key = rawStatus.trim().toUpperCase().replaceAll(' ', '_');
-    final CanonicalAppointmentStatus canonical = aliases[key] ?? CanonicalAppointmentStatus.waiting;
+    final String key = rawStatus.trim().toLowerCase();
+    final CanonicalAppointmentStatus canonical =
+        canonicalMap[key] ?? CanonicalAppointmentStatus.waiting;
     return registry[canonical]!;
   }
 }

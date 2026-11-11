@@ -31,9 +31,6 @@ class PermissionDateModeStage extends StatelessWidget {
     final Color subtextColor = dark
         ? AmanahPermissionTokens.textMutedDark
         : AmanahPermissionTokens.textMutedLight;
-    final Color borderColor = dark
-        ? AmanahPermissionTokens.cardBorderDark
-        : AmanahPermissionTokens.cardBorderLight;
 
     final DateTime now = DateTime.now();
     final String dayName = formatLocalizedDate(now, style: 'day_name');
@@ -85,7 +82,6 @@ class PermissionDateModeStage extends StatelessWidget {
                   dark: dark,
                   textColor: textColor,
                   subtextColor: subtextColor,
-                  borderColor: borderColor,
                 ),
               ),
               const SizedBox(width: 12),
@@ -103,7 +99,6 @@ class PermissionDateModeStage extends StatelessWidget {
                   dark: dark,
                   textColor: textColor,
                   subtextColor: subtextColor,
-                  borderColor: borderColor,
                 ),
               ),
             ],
@@ -124,14 +119,12 @@ class PermissionDateModeStage extends StatelessWidget {
     required bool dark,
     required Color textColor,
     required Color subtextColor,
-    required Color borderColor,
     bool isEnabled = true,
   }) {
     final Color activeBrand = dark ? AmanahColorTokens.tabActiveDark : AmanahColorTokens.brand;
-    final Color activeBorder = isSelected ? activeBrand : borderColor;
     final Color activeBg = isSelected
-        ? activeBrand.withValues(alpha: dark ? 0.15 : 0.08)
-        : (dark ? AmanahColorTokens.surfaceDark : AmanahColorTokens.surfaceLight);
+        ? activeBrand.withValues(alpha: dark ? 0.16 : 0.08)
+        : AmanahThemeTokens.elevatedSurface(context);
 
     final Widget card = InkWell(
       onTap: onTap,
@@ -142,7 +135,7 @@ class PermissionDateModeStage extends StatelessWidget {
         decoration: BoxDecoration(
           color: activeBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: activeBorder, width: isSelected ? 1.8 : 1.0),
+          border: null,
           boxShadow: isSelected
               ? <BoxShadow>[
                   BoxShadow(

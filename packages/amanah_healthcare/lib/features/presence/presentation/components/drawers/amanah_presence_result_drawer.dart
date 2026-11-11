@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:amanah_healthcare/core/time/functions/format_practice_hours.dart';
 import 'package:amanah_healthcare/features/home/presentation/components/amanah_modal_scaffold.dart';
 import 'package:amanah_healthcare/features/home/presentation/theme/amanah_color_tokens.dart';
 import 'package:amanah_healthcare/features/presence/domain/entities/presence_status_payload.dart';
@@ -350,7 +351,7 @@ class _AmanahPresenceResultDrawerState extends State<AmanahPresenceResultDrawer>
                                               ),
                                               const SizedBox(width: 6),
                                               Text(
-                                                '${widget.payload.durationHours!.toStringAsFixed(1)} Jam',
+                                                formatPracticeHours(widget.payload.durationHours),
                                                 style: TextStyle(
                                                   fontSize: 12.5,
                                                   fontWeight: FontWeight.w700,
